@@ -97,7 +97,10 @@
       "easy": "Facil",
       "medium": "Medio",
       "hard": "Dificil"
-    }
+    },
+    "selectionReadyHint": "Alternativa seleccionada. Presiona Confirmar para revisar tu respuesta.",
+    "tapNextHint": "Respuesta registrada. Presiona Siguiente para continuar.",
+    "tapResultsHint": "Respuesta registrada. Presiona Ver resultados para finalizar."
   },
   "results": {
     "gameOver": "Partida terminada!",

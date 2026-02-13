@@ -97,7 +97,10 @@
       "easy": "Easy",
       "medium": "Medium",
       "hard": "Hard"
-    }
+    },
+    "selectionReadyHint": "Option selected. Press Submit to check your answer.",
+    "tapNextHint": "Answer saved. Press Next to continue.",
+    "tapResultsHint": "Answer saved. Press See Results to finish."
   },
   "results": {
     "gameOver": "Game Over!",
