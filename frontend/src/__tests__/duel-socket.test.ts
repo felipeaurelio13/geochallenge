@@ -16,6 +16,21 @@ describe('SocketService duel payload', () => {
       questionId: 'q-1',
       answer: 'Chile',
       timeRemaining: 17,
+      coordinates: undefined,
+    });
+  });
+
+  it('envía coordenadas cuando la respuesta del duelo es de mapa', () => {
+    const emit = vi.fn();
+    (socketService as any).socket = { emit };
+
+    socketService.submitDuelAnswer('q-map', '-34.6,-58.3', 12, { lat: -34.6, lng: -58.3 });
+
+    expect(emit).toHaveBeenCalledWith('duel:answer', {
+      questionId: 'q-map',
+      answer: '-34.6,-58.3',
+      timeRemaining: 12,
+      coordinates: { lat: -34.6, lng: -58.3 },
     });
   });
 });

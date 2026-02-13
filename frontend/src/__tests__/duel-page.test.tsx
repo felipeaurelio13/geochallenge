@@ -97,4 +97,33 @@ describe('DuelPage socket flow', () => {
 
     expect(await screen.findByText('rival')).toBeInTheDocument();
   });
+
+  it('mantiene una sola suscripción de sockets aunque cambie el score', async () => {
+    render(<DuelPage />);
+
+    expect(mocks.socketMock.on).toHaveBeenCalledTimes(6);
+
+    act(() => {
+      mocks.handlers.get('duel:questionResult')?.forEach((cb) =>
+        cb({
+          results: [
+            {
+              userId: 'u1',
+              username: 'player1',
+              totalScore: 300,
+              answer: { isCorrect: true },
+            },
+            {
+              userId: 'u2',
+              username: 'rival',
+              totalScore: 100,
+              answer: { isCorrect: false },
+            },
+          ],
+        })
+      );
+    });
+
+    expect(mocks.socketMock.on).toHaveBeenCalledTimes(6);
+  });
 });
