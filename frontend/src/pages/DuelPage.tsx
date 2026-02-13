@@ -51,9 +51,6 @@ export function DuelPage() {
   useEffect(() => {
     socketService.connect();
 
-    // Join matchmaking queue
-    socketService.joinDuelQueue();
-
     // Search timer
     const searchTimer = setInterval(() => {
       setSearchTime((prev) => prev + 1);
@@ -61,11 +58,17 @@ export function DuelPage() {
 
     // Event handlers
     const handleMatched = (data: any) => {
-      setOpponent(data.opponent);
+      if (data.opponent) {
+        setOpponent(data.opponent);
+      }
       setDuelState('matched');
       clearInterval(searchTimer);
 
       // Espera a que el backend emita countdown/start/question.
+    };
+
+    const handleOpponent = (data: any) => {
+      setOpponent(data);
     };
 
     const handleQuestion = (data: any) => {
@@ -114,15 +117,20 @@ export function DuelPage() {
 
     // Register event listeners
     socketService.socket?.on('duel:matched', handleMatched);
+    socketService.socket?.on('duel:opponent', handleOpponent);
     socketService.socket?.on('duel:question', handleQuestion);
     socketService.socket?.on('duel:questionResult', handleAnswerResult);
     socketService.socket?.on('duel:finished', handleDuelFinished);
     socketService.socket?.on('duel:opponent-disconnected', handleOpponentDisconnected);
 
+    // Join matchmaking queue after listeners are active
+    socketService.joinDuelQueue();
+
     return () => {
       clearInterval(searchTimer);
       socketService.cancelDuelQueue();
       socketService.socket?.off('duel:matched', handleMatched);
+      socketService.socket?.off('duel:opponent', handleOpponent);
       socketService.socket?.off('duel:question', handleQuestion);
       socketService.socket?.off('duel:questionResult', handleAnswerResult);
       socketService.socket?.off('duel:finished', handleDuelFinished);
