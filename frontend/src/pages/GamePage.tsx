@@ -12,6 +12,7 @@ import {
 } from '../components';
 import { Question } from '../types';
 import { GAME_CONSTANTS } from '../constants/game';
+import { getPostAnswerHintKey } from '../utils/gameFlow';
 
 const MapInteractive = lazy(() =>
   import('../components/MapInteractive').then((m) => ({ default: m.MapInteractive }))
@@ -48,6 +49,7 @@ export function GamePage() {
   const isMapQuestion = currentQuestion?.category === 'MAP';
   const correctAnswers = results.filter(r => r.isCorrect).length;
   const isLoading = status === 'loading';
+  const isLastQuestion = currentIndex >= questions.length - 1;
 
   // Prevent accidental navigation during game
   useEffect(() => {
@@ -287,17 +289,26 @@ export function GamePage() {
           </div>
 
           {/* Action Buttons */}
-          <div className="mt-6 flex justify-center">
+          <div className="mt-6 sticky bottom-3 z-10">
             {!showResult ? (
-              <button
-                onClick={handleSubmitAnswer}
-                disabled={!selectedAnswer && !mapLocation}
-                className="px-8 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {t('game.submit')}
-              </button>
+              <div className="rounded-xl border border-gray-700 bg-gray-800/95 p-3 backdrop-blur-sm sm:bg-transparent sm:p-0 sm:border-0 sm:backdrop-blur-none">
+                {(selectedAnswer || mapLocation) && (
+                  <p className="mb-2 text-center text-sm text-primary font-medium">
+                    {t('game.selectionReadyHint')}
+                  </p>
+                )}
+                <div className="flex justify-center">
+                  <button
+                    onClick={handleSubmitAnswer}
+                    disabled={!selectedAnswer && !mapLocation}
+                    className="w-full sm:w-auto px-8 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {t('game.submit')}
+                  </button>
+                </div>
+              </div>
             ) : (
-              <div className="text-center">
+              <div className="text-center rounded-xl border border-gray-700 bg-gray-800/95 p-4 backdrop-blur-sm">
                 {/* Result feedback */}
                 <div
                   className={`mb-4 text-xl font-bold ${
@@ -307,13 +318,13 @@ export function GamePage() {
                   {lastAnswerCorrect ? t('game.correct') : t('game.incorrect')}
                 </div>
 
+                <p className="mb-3 text-sm text-gray-300">{t(getPostAnswerHintKey(isLastQuestion))}</p>
+
                 <button
                   onClick={handleNextQuestion}
-                  className="px-8 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary/80 transition-colors"
+                  className="w-full sm:w-auto px-8 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary/80 transition-colors animate-pulse"
                 >
-                  {currentIndex >= questions.length - 1
-                    ? t('game.seeResults')
-                    : t('game.next')}
+                  {isLastQuestion ? t('game.seeResults') : t('game.next')}
                 </button>
               </div>
             )}
