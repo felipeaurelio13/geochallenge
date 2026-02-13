@@ -5,15 +5,16 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.0.6**
+- Frontend: **v1.0.7**
 
 
-## Novedades de la versión 1.0.6
+## Novedades de la versión 1.0.7
 
+- Corregido el flujo de fin de partida en modo individual: ahora `Ver resultado` mantiene el estado de la sesión y muestra la pantalla de resultados en lugar de redirigir al home/menu.
 - Rediseño de la vista principal con enfoque **mobile-first**, mejor jerarquía visual y CTA más claros para mejorar la usabilidad inicial.
 - Feedback visual mejorado al seleccionar alternativas (estado activo más claro con realce y etiqueta de selección), manteniendo un enfoque mobile-first y accesible.
 - En preguntas de mapa, al mostrar un resultado incorrecto la vista ahora ajusta automáticamente el encuadre para mostrar tanto tu selección como la ubicación correcta, evitando que tengas que desplazar el mapa manualmente.
-- Footer de la app actualizado a **v1.0.6** para mantener trazabilidad con el despliegue en GitHub Pages.
+- Footer de la app actualizado a **v1.0.7** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Requisitos Previos
 

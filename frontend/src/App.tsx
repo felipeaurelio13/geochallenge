@@ -1,5 +1,5 @@
 import React from 'react';
-import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Navigate, Outlet } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { GameProvider } from './context/GameContext';
 import {
@@ -79,9 +79,16 @@ function AppWrapper({ children }: { children: React.ReactNode }) {
   return <ErrorBoundary><AuthProvider>{children}</AuthProvider></ErrorBoundary>;
 }
 
+export function SinglePlayerGameLayout() {
+  return (
+    <GameProvider>
+      <Outlet />
+    </GameProvider>
+  );
+}
+
 // Create router with future flags to avoid warnings
-const router = createBrowserRouter(
-  [
+export const appRoutes = [
     {
       path: '/',
       element: <AppWrapper><HomePage /></AppWrapper>,
@@ -100,12 +107,17 @@ const router = createBrowserRouter(
       element: <AppWrapper><ProtectedRoute><MenuPage /></ProtectedRoute></AppWrapper>,
     },
     {
-      path: '/game/single',
-      element: <AppWrapper><ProtectedRoute><GameProvider><GamePage /></GameProvider></ProtectedRoute></AppWrapper>,
-    },
-    {
-      path: '/results',
-      element: <AppWrapper><ProtectedRoute><GameProvider><ResultsPage /></GameProvider></ProtectedRoute></AppWrapper>,
+      element: <AppWrapper><ProtectedRoute><SinglePlayerGameLayout /></ProtectedRoute></AppWrapper>,
+      children: [
+        {
+          path: '/game/single',
+          element: <GamePage />,
+        },
+        {
+          path: '/results',
+          element: <ResultsPage />,
+        },
+      ],
     },
     {
       path: '/rankings',
@@ -131,7 +143,10 @@ const router = createBrowserRouter(
       path: '*',
       element: <AppWrapper><Navigate to="/" replace /></AppWrapper>,
     },
-  ],
+];
+
+const router = createBrowserRouter(
+  appRoutes,
   {
     future: {
       v7_fetcherPersist: true,
