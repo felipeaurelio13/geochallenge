@@ -1,6 +1,6 @@
-import { useCallback } from 'react';
-import { MapContainer, TileLayer, Marker, useMapEvents, Circle } from 'react-leaflet';
-import { Icon } from 'leaflet';
+import { useCallback, useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, useMapEvents, Circle, useMap } from 'react-leaflet';
+import { Icon, latLngBounds } from 'leaflet';
 import { useTranslation } from 'react-i18next';
 import 'leaflet/dist/leaflet.css';
 
@@ -26,6 +26,45 @@ interface MapInteractiveProps {
   correctLocation?: { lat: number; lng: number } | null;
   showResult: boolean;
   disabled: boolean;
+}
+
+export function shouldFitResultBounds(
+  showResult: boolean,
+  selectedLocation: { lat: number; lng: number } | null,
+  correctLocation?: { lat: number; lng: number } | null
+) {
+  return Boolean(showResult && selectedLocation && correctLocation);
+}
+
+function ResultViewportController({
+  showResult,
+  selectedLocation,
+  correctLocation,
+}: {
+  showResult: boolean;
+  selectedLocation: { lat: number; lng: number } | null;
+  correctLocation?: { lat: number; lng: number } | null;
+}) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!shouldFitResultBounds(showResult, selectedLocation, correctLocation) || !correctLocation) {
+      return;
+    }
+
+    const bounds = latLngBounds(
+      [selectedLocation!.lat, selectedLocation!.lng],
+      [correctLocation.lat, correctLocation.lng]
+    );
+
+    map.fitBounds(bounds, {
+      padding: [40, 40],
+      maxZoom: 5,
+      animate: true,
+    });
+  }, [showResult, selectedLocation, correctLocation, map]);
+
+  return null;
 }
 
 function LocationMarker({
@@ -86,6 +125,11 @@ export function MapInteractive({
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
           <LocationMarker onLocationSelect={onLocationSelect} disabled={disabled} />
+          <ResultViewportController
+            showResult={showResult}
+            selectedLocation={selectedLocation}
+            correctLocation={correctLocation}
+          />
 
           {/* User's selected location */}
           {selectedLocation && (
