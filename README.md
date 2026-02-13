@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.0.4**
+- Frontend: **v1.0.5**
 
 ## Requisitos Previos
 
