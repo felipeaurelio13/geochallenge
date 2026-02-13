@@ -5,7 +5,13 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.0.3**
+- Frontend: **v1.0.4**
+
+
+## Novedades de la versión 1.0.4
+
+- Rediseño de la vista principal con enfoque **mobile-first**, mejor jerarquía visual y CTA más claros para mejorar la usabilidad inicial.
+- Footer de la app actualizado a **v1.0.4** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Requisitos Previos
 

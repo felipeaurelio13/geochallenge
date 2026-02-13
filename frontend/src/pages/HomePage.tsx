@@ -2,80 +2,85 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 
-const APP_VERSION = '1.0.3';
+const APP_VERSION = '1.0.4';
 
 export function HomePage() {
   const { t } = useTranslation();
   const { user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gray-900 flex flex-col">
-      {/* Hero Section */}
-      <div className="flex-1 flex flex-col items-center justify-center px-4 py-12">
-        <div className="text-center max-w-2xl">
-          {/* Logo/Icon */}
-          <div className="text-8xl mb-6">🌍</div>
+    <div className="min-h-screen bg-gray-950 text-white flex flex-col">
+      <div className="relative flex-1 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(34,197,94,0.2),_transparent_55%)]" />
 
-          {/* Title */}
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-4">
-            <span className="text-primary">Geo</span>Challenge
-          </h1>
+        <main className="relative mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
+          <section className="mx-auto w-full max-w-2xl text-center">
+            <p className="mb-5 inline-flex items-center rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+              Trivia geográfica competitiva
+            </p>
 
-          {/* Subtitle */}
-          <p className="text-xl text-gray-400 mb-8">
-            {t('home.subtitle')}
-          </p>
+            <div className="mb-4 text-6xl" aria-hidden>
+              🌍
+            </div>
 
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            {user ? (
-              <Link
-                to="/menu"
-                className="px-8 py-4 bg-primary text-white font-bold rounded-lg hover:bg-primary/80 transition-colors text-lg"
-              >
-                {t('home.play')}
-              </Link>
-            ) : (
-              <>
+            <h1 className="text-4xl font-bold leading-tight tracking-tight sm:text-5xl md:text-6xl">
+              <span className="text-primary">Geo</span>Challenge
+            </h1>
+
+            <p className="mx-auto mt-5 max-w-xl text-base text-gray-300 sm:text-lg">
+              {t('home.subtitle')}
+            </p>
+
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
+              {user ? (
                 <Link
-                  to="/login"
-                  className="px-8 py-4 bg-primary text-white font-bold rounded-lg hover:bg-primary/80 transition-colors text-lg"
+                  to="/menu"
+                  className="rounded-xl bg-primary px-6 py-3 text-base font-semibold text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/70"
                 >
-                  {t('home.login')}
+                  {t('home.play')}
                 </Link>
-                <Link
-                  to="/register"
-                  className="px-8 py-4 bg-gray-700 text-white font-bold rounded-lg hover:bg-gray-600 transition-colors text-lg"
-                >
-                  {t('home.register')}
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    className="rounded-xl bg-primary px-6 py-3 text-base font-semibold text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/70"
+                  >
+                    {t('home.login')}
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="rounded-xl border border-gray-700 bg-gray-900 px-6 py-3 text-base font-semibold text-gray-100 transition-colors hover:border-gray-500 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  >
+                    {t('home.register')}
+                  </Link>
+                </>
+              )}
+            </div>
+          </section>
 
-        {/* Features */}
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl">
-          <div className="text-center p-6 bg-gray-800 rounded-xl">
-            <div className="text-4xl mb-4">🏳️</div>
-            <h3 className="text-lg font-semibold text-white mb-2">{t('home.features.flags')}</h3>
-            <p className="text-gray-400 text-sm">{t('home.features.flagsDesc')}</p>
-          </div>
-          <div className="text-center p-6 bg-gray-800 rounded-xl">
-            <div className="text-4xl mb-4">🗺️</div>
-            <h3 className="text-lg font-semibold text-white mb-2">{t('home.features.maps')}</h3>
-            <p className="text-gray-400 text-sm">{t('home.features.mapsDesc')}</p>
-          </div>
-          <div className="text-center p-6 bg-gray-800 rounded-xl">
-            <div className="text-4xl mb-4">⚔️</div>
-            <h3 className="text-lg font-semibold text-white mb-2">{t('home.features.multiplayer')}</h3>
-            <p className="text-gray-400 text-sm">{t('home.features.multiplayerDesc')}</p>
-          </div>
-        </div>
+          <section className="mx-auto mt-10 grid w-full max-w-5xl grid-cols-1 gap-4 sm:grid-cols-2 lg:mt-12 lg:grid-cols-3">
+            <article className="rounded-2xl border border-gray-800 bg-gray-900/80 p-5 backdrop-blur">
+              <div className="mb-3 text-3xl" aria-hidden>🏳️</div>
+              <h2 className="text-base font-semibold">{t('home.features.flags')}</h2>
+              <p className="mt-2 text-sm text-gray-400">{t('home.features.flagsDesc')}</p>
+            </article>
+
+            <article className="rounded-2xl border border-gray-800 bg-gray-900/80 p-5 backdrop-blur">
+              <div className="mb-3 text-3xl" aria-hidden>🗺️</div>
+              <h2 className="text-base font-semibold">{t('home.features.maps')}</h2>
+              <p className="mt-2 text-sm text-gray-400">{t('home.features.mapsDesc')}</p>
+            </article>
+
+            <article className="rounded-2xl border border-gray-800 bg-gray-900/80 p-5 backdrop-blur sm:col-span-2 lg:col-span-1">
+              <div className="mb-3 text-3xl" aria-hidden>⚔️</div>
+              <h2 className="text-base font-semibold">{t('home.features.multiplayer')}</h2>
+              <p className="mt-2 text-sm text-gray-400">{t('home.features.multiplayerDesc')}</p>
+            </article>
+          </section>
+        </main>
       </div>
 
-      {/* Footer */}
-      <footer className="py-6 text-center text-gray-500 text-sm">
+      <footer className="border-t border-gray-800 py-5 text-center text-xs text-gray-500">
         <p>GeoChallenge &copy; {new Date().getFullYear()}</p>
         <p className="mt-1">v{APP_VERSION}</p>
       </footer>
