@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 export function HomePage() {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const APP_VERSION = '1.0.1';
 
   return (
     <div className="min-h-screen bg-gray-900 flex flex-col">
@@ -74,7 +75,7 @@ export function HomePage() {
 
       {/* Footer */}
       <footer className="py-6 text-center text-gray-500 text-sm">
-        <p>GeoChallenge &copy; {new Date().getFullYear()}</p>
+        <p>GeoChallenge v{APP_VERSION} &copy; {new Date().getFullYear()}</p>
       </footer>
     </div>
   );
