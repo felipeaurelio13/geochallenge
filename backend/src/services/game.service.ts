@@ -51,14 +51,11 @@ export async function getQuestionsForGame(
       ...(category && category !== Category.MIXED && { category }),
       id: { notIn: excludeIds },
     },
-    take: count * 3, // Tomar más para randomizar
   });
 
   // Si hay categoría MIXED, mezclar de todas las categorías
   if (category === Category.MIXED || !category) {
     const categories = [Category.FLAG, Category.CAPITAL, Category.MAP, Category.SILHOUETTE];
-    const questionsPerCategory = Math.ceil(count / categories.length);
-
     const mixedQuestions = [];
     for (const cat of categories) {
       const catQuestions = await prisma.question.findMany({
@@ -66,7 +63,6 @@ export async function getQuestionsForGame(
           category: cat,
           id: { notIn: excludeIds },
         },
-        take: questionsPerCategory + 2,
       });
       mixedQuestions.push(...catQuestions);
     }
