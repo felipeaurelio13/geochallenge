@@ -200,11 +200,11 @@ class SocketService {
     this.socket?.emit('duel:answer', data);
   }
 
-  submitDuelAnswer(questionId: string, answer: string, timeSpent: number): void {
+  submitDuelAnswer(questionId: string, answer: string, timeRemaining: number): void {
     this.socket?.emit('duel:answer', {
       questionId,
       answer,
-      timeSpent,
+      timeRemaining,
     });
   }
 }
