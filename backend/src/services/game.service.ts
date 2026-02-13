@@ -100,6 +100,7 @@ export async function getQuestionsForGame(
       })
     : [];
 
+  // Preserve the randomized order from selectedIds by mapping them back
   const questionsById = new Map(questions.map((question) => [question.id, question]));
   const selectedQuestions = selectedIds
     .map((id) => questionsById.get(id))
