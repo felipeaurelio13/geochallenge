@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, lazy, Suspense } from 'react';
+import { useEffect, useState, useCallback, lazy, Suspense, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
@@ -46,6 +46,16 @@ export function DuelPage() {
   const [lastAnswerCorrect, setLastAnswerCorrect] = useState(false);
   const [duelResult, setDuelResult] = useState<DuelResult | null>(null);
   const [searchTime, setSearchTime] = useState(0);
+  const scoreRef = useRef(0);
+  const opponentRef = useRef<{ id: string; username: string } | null>(null);
+
+  useEffect(() => {
+    scoreRef.current = myScore;
+  }, [myScore]);
+
+  useEffect(() => {
+    opponentRef.current = opponent;
+  }, [opponent]);
 
   // Connect to socket and join queue
   useEffect(() => {
@@ -108,9 +118,9 @@ export function DuelPage() {
     const handleOpponentDisconnected = () => {
       setDuelResult({
         winner: user?.id || null,
-        myScore,
+        myScore: scoreRef.current,
         opponentScore: 0,
-        opponentName: opponent?.username || 'Opponent',
+        opponentName: opponentRef.current?.username || 'Opponent',
       });
       setDuelState('finished');
     };
@@ -136,7 +146,7 @@ export function DuelPage() {
       socketService.socket?.off('duel:finished', handleDuelFinished);
       socketService.socket?.off('duel:opponent-disconnected', handleOpponentDisconnected);
     };
-  }, [user?.id, myScore, opponent?.username]);
+  }, [user?.id]);
 
   useEffect(() => {
     if (duelState === 'matched') {
@@ -157,14 +167,16 @@ export function DuelPage() {
 
     const isMapQuestion = currentQuestion.category === 'MAP';
     let answer: string;
+    let coordinates: { lat: number; lng: number } | undefined;
 
     if (isMapQuestion) {
+      coordinates = mapLocation || undefined;
       answer = mapLocation ? `${mapLocation.lat},${mapLocation.lng}` : '0,0';
     } else {
       answer = selectedAnswer || '';
     }
 
-    socketService.submitDuelAnswer(currentQuestion.id, answer, timeRemaining);
+    socketService.submitDuelAnswer(currentQuestion.id, answer, timeRemaining, coordinates);
     setDuelState('waiting');
   };
 
