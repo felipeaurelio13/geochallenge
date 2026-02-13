@@ -21,7 +21,7 @@ export function OptionButton({
 }: OptionButtonProps) {
   const getButtonClasses = () => {
     const baseClasses =
-      'w-full p-4 min-h-[52px] rounded-lg text-left transition-all duration-200 flex items-center gap-4 border-2';
+      'relative w-full p-4 min-h-[52px] rounded-lg text-left transition-all duration-200 flex items-center gap-4 border-2 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60';
 
     if (showResult) {
       if (isCorrect) {
@@ -34,7 +34,7 @@ export function OptionButton({
     }
 
     if (selected) {
-      return `${baseClasses} bg-primary border-primary text-white`;
+      return `${baseClasses} bg-primary border-primary text-white ring-2 ring-primary/40 shadow-lg shadow-primary/25`;
     }
 
     if (disabled) {
@@ -49,6 +49,7 @@ export function OptionButton({
       onClick={onClick}
       disabled={disabled}
       className={getButtonClasses()}
+      aria-pressed={selected}
     >
       <span
         className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
@@ -64,6 +65,14 @@ export function OptionButton({
         {optionLetters[index]}
       </span>
       <span className="flex-1 font-medium">{option}</span>
+      {!showResult && selected && (
+        <span
+          className="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-white/20 px-2 text-xs font-semibold text-white"
+          aria-label="Opción seleccionada"
+        >
+          ✓
+        </span>
+      )}
       {showResult && isCorrect && (
         <span className="text-green-400">✓</span>
       )}
