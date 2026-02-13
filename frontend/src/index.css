@@ -1,0 +1,136 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Leaflet CSS import */
+@import 'leaflet/dist/leaflet.css';
+
+/* Custom base styles */
+@layer base {
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply bg-gray-900 text-white min-h-screen;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  /* Remove tap highlight on mobile */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Custom component styles */
+@layer components {
+  .btn {
+    @apply px-6 py-3 rounded-lg font-semibold transition-all duration-200
+           active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply btn bg-primary-600 hover:bg-primary-700 text-white;
+  }
+
+  .btn-secondary {
+    @apply btn bg-gray-700 hover:bg-gray-600 text-white;
+  }
+
+  .btn-success {
+    @apply btn bg-success-600 hover:bg-success-500 text-white;
+  }
+
+  .btn-error {
+    @apply btn bg-error-600 hover:bg-error-500 text-white;
+  }
+
+  .input {
+    @apply w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg
+           focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent
+           placeholder-gray-500 transition-all;
+  }
+
+  .card {
+    @apply bg-gray-800 rounded-xl p-6 shadow-lg;
+  }
+
+  .option-button {
+    @apply w-full p-4 bg-gray-700 hover:bg-gray-600 rounded-lg text-left
+           transition-all duration-200 border-2 border-transparent
+           active:scale-98;
+  }
+
+  .option-button.selected {
+    @apply border-primary-500 bg-primary-900/30;
+  }
+
+  .option-button.correct {
+    @apply border-success-500 bg-success-500/20;
+  }
+
+  .option-button.incorrect {
+    @apply border-error-500 bg-error-500/20;
+  }
+}
+
+/* Custom utilities */
+@layer utilities {
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  }
+
+  .active\:scale-98:active {
+    transform: scale(0.98);
+  }
+}
+
+/* Timer animation */
+@keyframes countdown {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: 283;
+  }
+}
+
+.timer-circle {
+  animation: countdown linear forwards;
+}
+
+/* Score popup animation */
+@keyframes scorePopup {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-10px) scale(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-30px) scale(1);
+  }
+}
+
+.score-popup {
+  animation: scorePopup 1s ease-out forwards;
+}
+
+/* Confetti animation */
+@keyframes confetti {
+  0% {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(100vh) rotate(720deg);
+  }
+}
+
+.confetti {
+  animation: confetti 3s ease-out forwards;
+}

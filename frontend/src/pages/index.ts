@@ -1,0 +1,11 @@
+export { HomePage } from './HomePage';
+export { LoginPage } from './LoginPage';
+export { RegisterPage } from './RegisterPage';
+export { MenuPage } from './MenuPage';
+export { GamePage } from './GamePage';
+export { ResultsPage } from './ResultsPage';
+export { RankingsPage } from './RankingsPage';
+export { ProfilePage } from './ProfilePage';
+export { DuelPage } from './DuelPage';
+export { ChallengesPage } from './ChallengesPage';
+export { ChallengeGamePage } from './ChallengeGamePage';
