@@ -2,10 +2,12 @@
 
 Juego de trivia geográfica con modos individual, duelos en tiempo real y desafíos entre amigos.
 
-
 ## Versión actual
 
-- Frontend: **v1.0.1**
+- **App version:** `1.0.1`
+- Mejoramos la aleatoriedad de selección de preguntas para evitar que se repitan con frecuencia las mismas combinaciones, especialmente en categoría mixta.
+
+---
 
 ## Requisitos Previos
 

@@ -37,6 +37,20 @@ export interface GameSession {
 // Cache de preguntas en memoria para mejor performance
 let questionsCache: Map<string, any> = new Map();
 
+
+export function pickMixedQuestionIds(questionIdsByCategory: string[][], count: number): string[] {
+  if (count <= 0) return [];
+
+  const questionsPerCategory = Math.ceil(count / questionIdsByCategory.length);
+  const preselected = questionIdsByCategory.flatMap((ids) => selectRandom(ids, questionsPerCategory));
+  return selectRandom(Array.from(new Set(preselected)), count);
+}
+
+export function pickCategoryQuestionIds(questionIds: string[], count: number): string[] {
+  if (count <= 0) return [];
+  return selectRandom(questionIds, count);
+}
+
 /**
  * Obtiene preguntas para una nueva partida
  */
@@ -45,36 +59,53 @@ export async function getQuestionsForGame(
   count: number = config.game.questionsPerGame,
   excludeIds: string[] = []
 ): Promise<GameQuestion[]> {
-  // Buscar preguntas en la base de datos
-  let questions = await prisma.question.findMany({
-    where: {
-      ...(category && category !== Category.MIXED && { category }),
-      id: { notIn: excludeIds },
-    },
-    take: count * 3, // Tomar más para randomizar
-  });
+  const isMixedCategory = category === Category.MIXED || !category;
+  let selectedIds: string[] = [];
 
-  // Si hay categoría MIXED, mezclar de todas las categorías
-  if (category === Category.MIXED || !category) {
+  if (isMixedCategory) {
     const categories = [Category.FLAG, Category.CAPITAL, Category.MAP, Category.SILHOUETTE];
-    const questionsPerCategory = Math.ceil(count / categories.length);
+    const questionIdsByCategory: string[][] = [];
 
-    const mixedQuestions = [];
-    for (const cat of categories) {
-      const catQuestions = await prisma.question.findMany({
+    for (const currentCategory of categories) {
+      const categoryIds = await prisma.question.findMany({
         where: {
-          category: cat,
+          category: currentCategory,
           id: { notIn: excludeIds },
         },
-        take: questionsPerCategory + 2,
+        select: { id: true },
       });
-      mixedQuestions.push(...catQuestions);
+
+      questionIdsByCategory.push(categoryIds.map((question) => question.id));
     }
-    questions = mixedQuestions;
+
+    selectedIds = pickMixedQuestionIds(questionIdsByCategory, count);
+  } else {
+    const questionIds = await prisma.question.findMany({
+      where: {
+        category,
+        id: { notIn: excludeIds },
+      },
+      select: { id: true },
+    });
+
+    selectedIds = pickCategoryQuestionIds(
+      questionIds.map((question) => question.id),
+      count
+    );
   }
 
-  // Seleccionar aleatoriamente
-  const selectedQuestions = selectRandom(questions, count);
+  const questions = selectedIds.length
+    ? await prisma.question.findMany({
+        where: { id: { in: selectedIds } },
+      })
+    : [];
+
+  // Preserve the randomized order from selectedIds by mapping them back
+  const questionsById = new Map(questions.map((question) => [question.id, question]));
+  const selectedQuestions = selectedIds
+    .map((id) => questionsById.get(id))
+    .filter((question): question is NonNullable<typeof question> => Boolean(question));
+
 
   // Formatear para el cliente
   return selectedQuestions.map((q) => ({
