@@ -2,6 +2,11 @@
 
 Juego de trivia geográfica con modos individual, duelos en tiempo real y desafíos entre amigos.
 
+
+## Versión actual
+
+- Frontend: **v1.0.1**
+
 ## Requisitos Previos
 
 - **Node.js** v18 o superior
@@ -201,6 +206,12 @@ npm test             # Ejecutar tests
 ### Las preguntas no aparecen
 - Ejecutar `npm run seed` en el backend
 - Verificar en Prisma Studio: `npx prisma studio` y revisar la tabla `Question`
+
+
+### En duelos se hace match pero no cargan preguntas
+- Verificar que el frontend escuche eventos `duel:question`, `duel:questionResult` y `duel:finished` (no `game:*`).
+- Verificar que al enviar respuesta se envíe `timeRemaining` en `duel:answer`.
+- Verificar que ambos clientes emitan `duel:ready` tras el match para iniciar countdown.
 
 ---
 

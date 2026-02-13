@@ -65,15 +65,12 @@ export function DuelPage() {
       setDuelState('matched');
       clearInterval(searchTimer);
 
-      // Start game after brief delay
-      setTimeout(() => {
-        setDuelState('playing');
-      }, 2000);
+      // Espera a que el backend emita countdown/start/question.
     };
 
     const handleQuestion = (data: any) => {
       setCurrentQuestion(data.question);
-      setQuestionNumber(data.questionNumber);
+      setQuestionNumber((data.questionIndex ?? 0) + 1);
       setTotalQuestions(data.totalQuestions);
       setTimeRemaining(TIME_PER_QUESTION);
       setSelectedAnswer(null);
@@ -83,18 +80,24 @@ export function DuelPage() {
     };
 
     const handleAnswerResult = (data: any) => {
+      const myResult = data.results?.find((result: any) => result.userId === user?.id);
+      const rivalResult = data.results?.find((result: any) => result.userId !== user?.id);
+
       setShowResult(true);
-      setLastAnswerCorrect(data.correct);
-      setMyScore(data.myScore);
-      setOpponentScore(data.opponentScore);
+      setLastAnswerCorrect(Boolean(myResult?.answer?.isCorrect));
+      setMyScore(myResult?.totalScore ?? 0);
+      setOpponentScore(rivalResult?.totalScore ?? 0);
     };
 
     const handleDuelFinished = (data: any) => {
+      const myResult = data.results?.find((result: any) => result.userId === user?.id);
+      const rivalResult = data.results?.find((result: any) => result.userId !== user?.id);
+
       setDuelResult({
         winner: data.winnerId,
-        myScore: data.myScore,
-        opponentScore: data.opponentScore,
-        opponentName: opponent?.username || 'Opponent',
+        myScore: myResult?.score ?? 0,
+        opponentScore: rivalResult?.score ?? 0,
+        opponentName: rivalResult?.username || opponent?.username || 'Opponent',
       });
       setDuelState('finished');
     };
@@ -111,21 +114,27 @@ export function DuelPage() {
 
     // Register event listeners
     socketService.socket?.on('duel:matched', handleMatched);
-    socketService.socket?.on('game:question', handleQuestion);
-    socketService.socket?.on('game:answer-result', handleAnswerResult);
-    socketService.socket?.on('game:finished', handleDuelFinished);
+    socketService.socket?.on('duel:question', handleQuestion);
+    socketService.socket?.on('duel:questionResult', handleAnswerResult);
+    socketService.socket?.on('duel:finished', handleDuelFinished);
     socketService.socket?.on('duel:opponent-disconnected', handleOpponentDisconnected);
 
     return () => {
       clearInterval(searchTimer);
       socketService.cancelDuelQueue();
       socketService.socket?.off('duel:matched', handleMatched);
-      socketService.socket?.off('game:question', handleQuestion);
-      socketService.socket?.off('game:answer-result', handleAnswerResult);
-      socketService.socket?.off('game:finished', handleDuelFinished);
+      socketService.socket?.off('duel:question', handleQuestion);
+      socketService.socket?.off('duel:questionResult', handleAnswerResult);
+      socketService.socket?.off('duel:finished', handleDuelFinished);
       socketService.socket?.off('duel:opponent-disconnected', handleOpponentDisconnected);
     };
   }, [user?.id, myScore, opponent?.username]);
+
+  useEffect(() => {
+    if (duelState === 'matched') {
+      socketService.ready();
+    }
+  }, [duelState]);
 
   // Handle time complete
   const handleTimeComplete = useCallback(() => {
@@ -147,7 +156,7 @@ export function DuelPage() {
       answer = selectedAnswer || '';
     }
 
-    socketService.submitDuelAnswer(currentQuestion.id, answer, TIME_PER_QUESTION - timeRemaining);
+    socketService.submitDuelAnswer(currentQuestion.id, answer, timeRemaining);
     setDuelState('waiting');
   };
 

@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 
+const APP_VERSION = '1.0.1';
+
 export function HomePage() {
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -75,6 +77,7 @@ export function HomePage() {
       {/* Footer */}
       <footer className="py-6 text-center text-gray-500 text-sm">
         <p>GeoChallenge &copy; {new Date().getFullYear()}</p>
+        <p className="mt-1">v{APP_VERSION}</p>
       </footer>
     </div>
   );
