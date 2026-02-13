@@ -9,6 +9,7 @@ class ApiService {
   constructor() {
     this.client = axios.create({
       baseURL: API_URL,
+      timeout: 15000,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -28,8 +29,17 @@ class ApiService {
       (response) => response,
       (error: AxiosError) => {
         if (error.response?.status === 401) {
-          localStorage.removeItem('token');
-          window.location.href = '/login';
+          const isAuthPage = window.location.pathname === '/login' || window.location.pathname === '/register';
+          if (!isAuthPage) {
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+          }
+        }
+        if (error.code === 'ECONNABORTED') {
+          return Promise.reject(new Error('La solicitud tardó demasiado. Verifica tu conexión.'));
+        }
+        if (!error.response) {
+          return Promise.reject(new Error('Sin conexión a internet. Verifica tu red.'));
         }
         return Promise.reject(error);
       }
@@ -155,6 +165,16 @@ class ApiService {
       neighbors: LeaderboardEntry[];
     }>('/leaderboard/me');
     return response.data;
+  }
+
+  // Health check for cold start detection
+  async healthCheck(): Promise<boolean> {
+    try {
+      await this.client.get('/health', { baseURL: API_URL.replace('/api', ''), timeout: 30000 });
+      return true;
+    } catch {
+      return false;
+    }
   }
 }
 

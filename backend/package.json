@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
+    "postinstall": "prisma generate",
     "start": "node dist/index.js",
+    "start:prod": "npx prisma migrate deploy && node dist/index.js",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
@@ -15,7 +17,12 @@
     "test": "vitest run",
     "test:watch": "vitest"
   },
-  "keywords": ["geochallenge", "quiz", "geography", "game"],
+  "keywords": [
+    "geochallenge",
+    "quiz",
+    "geography",
+    "game"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
@@ -24,6 +31,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.18.3",
+    "express-rate-limit": "^8.2.1",
     "helmet": "^7.1.0",
     "ioredis": "^5.3.2",
     "jsonwebtoken": "^9.0.2",

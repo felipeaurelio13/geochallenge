@@ -25,7 +25,7 @@ router.post('/', authenticateJWT, async (req: AuthRequest, res: Response) => {
     const data = createChallengeSchema.parse(req.body);
 
     const challenge = await challengeService.createChallenge(
-      req.user!.id,
+      req.user!.userId,
       data.challengedUsername,
       data.category as Category | undefined
     );
@@ -48,7 +48,7 @@ router.post('/', authenticateJWT, async (req: AuthRequest, res: Response) => {
 router.get('/', authenticateJWT, async (req: AuthRequest, res: Response) => {
   try {
     const type = (req.query.type as 'sent' | 'received' | 'all') || 'all';
-    const challenges = await challengeService.getChallenges(req.user!.id, type);
+    const challenges = await challengeService.getChallenges(req.user!.userId, type);
 
     res.json({ challenges });
   } catch (error: any) {
@@ -61,7 +61,7 @@ router.get('/', authenticateJWT, async (req: AuthRequest, res: Response) => {
  */
 router.get('/:id', authenticateJWT, async (req: AuthRequest, res: Response) => {
   try {
-    const challenge = await challengeService.getChallenge(req.params.id, req.user!.id);
+    const challenge = await challengeService.getChallenge(req.params.id, req.user!.userId);
     res.json({ challenge });
   } catch (error: any) {
     res.status(404).json({ error: error.message || 'Desafio no encontrado' });
@@ -73,7 +73,7 @@ router.get('/:id', authenticateJWT, async (req: AuthRequest, res: Response) => {
  */
 router.get('/:id/questions', authenticateJWT, async (req: AuthRequest, res: Response) => {
   try {
-    const data = await challengeService.getChallengeQuestions(req.params.id, req.user!.id);
+    const data = await challengeService.getChallengeQuestions(req.params.id, req.user!.userId);
     res.json(data);
   } catch (error: any) {
     res.status(400).json({ error: error.message || 'Error al obtener preguntas' });
@@ -85,7 +85,7 @@ router.get('/:id/questions', authenticateJWT, async (req: AuthRequest, res: Resp
  */
 router.post('/:id/accept', authenticateJWT, async (req: AuthRequest, res: Response) => {
   try {
-    const challenge = await challengeService.acceptChallenge(req.params.id, req.user!.id);
+    const challenge = await challengeService.acceptChallenge(req.params.id, req.user!.userId);
 
     res.json({
       message: 'Desafio aceptado',
@@ -101,7 +101,7 @@ router.post('/:id/accept', authenticateJWT, async (req: AuthRequest, res: Respon
  */
 router.post('/:id/decline', authenticateJWT, async (req: AuthRequest, res: Response) => {
   try {
-    const challenge = await challengeService.declineChallenge(req.params.id, req.user!.id);
+    const challenge = await challengeService.declineChallenge(req.params.id, req.user!.userId);
 
     res.json({
       message: 'Desafio rechazado',
@@ -121,7 +121,7 @@ router.post('/:id/submit', authenticateJWT, async (req: AuthRequest, res: Respon
 
     const challenge = await challengeService.submitChallengeResult(
       req.params.id,
-      req.user!.id,
+      req.user!.userId,
       data.score,
       data.correctCount
     );

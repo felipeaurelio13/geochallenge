@@ -120,7 +120,7 @@ export interface DuelState {
 }
 
 export interface DuelResult {
-  oderId: string;
+  userId: string;
   username: string;
   score: number;
   correctCount: number;

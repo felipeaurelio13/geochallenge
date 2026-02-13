@@ -1,11 +1,12 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import { createServer } from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 
 import { config } from './config/env.js';
-import { connectDatabase, disconnectDatabase } from './config/database.js';
+import { connectDatabase, disconnectDatabase, prisma } from './config/database.js';
 import { getRedis, disconnectRedis } from './config/redis.js';
 
 // Controllers
@@ -29,6 +30,23 @@ const io = new SocketIOServer(httpServer, {
   },
 });
 
+// Rate limiters
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiadas solicitudes, intenta de nuevo más tarde' },
+});
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiados intentos de autenticación, intenta de nuevo más tarde' },
+});
+
 // Middleware
 app.use(helmet());
 app.use(
@@ -37,26 +55,34 @@ app.use(
     credentials: true,
   })
 );
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
+app.use(globalLimiter);
 
-// Health check
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+// Health check (with dependency verification)
+app.get('/health', async (_req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    const redis = getRedis();
+    await redis.ping();
+    res.json({ status: 'ok', db: 'ok', redis: 'ok', timestamp: new Date().toISOString() });
+  } catch (error: any) {
+    res.status(503).json({ status: 'degraded', error: error.message, timestamp: new Date().toISOString() });
+  }
 });
 
 // API Routes
-app.use('/api/auth', authController);
+app.use('/api/auth', authLimiter, authController);
 app.use('/api/game', gameController);
 app.use('/api/leaderboard', leaderboardController);
 app.use('/api/challenges', challengeController);
 
 // 404 handler
-app.use((req, res) => {
+app.use((_req, res) => {
   res.status(404).json({ error: 'Endpoint no encontrado' });
 });
 
 // Error handler
-app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error('Error:', err);
   res.status(500).json({ error: 'Error interno del servidor' });
 });

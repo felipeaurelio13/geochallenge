@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
@@ -7,10 +7,14 @@ import {
   Timer,
   QuestionCard,
   OptionButton,
-  MapInteractive,
   LoadingSpinner,
 } from '../components';
 import { Question } from '../types';
+import { GAME_CONSTANTS } from '../constants/game';
+
+const MapInteractive = lazy(() =>
+  import('../components/MapInteractive').then((m) => ({ default: m.MapInteractive }))
+);
 
 type DuelState = 'searching' | 'matched' | 'playing' | 'waiting' | 'finished';
 
@@ -21,7 +25,7 @@ interface DuelResult {
   opponentName: string;
 }
 
-const TIME_PER_QUESTION = 10;
+const { TIME_PER_QUESTION } = GAME_CONSTANTS;
 
 export function DuelPage() {
   const { t } = useTranslation();
@@ -330,17 +334,19 @@ export function DuelPage() {
 
           <div className="mt-6">
             {isMapQuestion ? (
-              <MapInteractive
-                onLocationSelect={(lat, lng) => setMapLocation({ lat, lng })}
-                selectedLocation={mapLocation}
-                correctLocation={
-                  showResult && currentQuestion.latitude && currentQuestion.longitude
-                    ? { lat: currentQuestion.latitude, lng: currentQuestion.longitude }
-                    : null
-                }
-                showResult={showResult}
-                disabled={showResult || duelState === 'waiting'}
-              />
+              <Suspense fallback={<LoadingSpinner size="lg" />}>
+                <MapInteractive
+                  onLocationSelect={(lat, lng) => setMapLocation({ lat, lng })}
+                  selectedLocation={mapLocation}
+                  correctLocation={
+                    showResult && currentQuestion.latitude && currentQuestion.longitude
+                      ? { lat: currentQuestion.latitude, lng: currentQuestion.longitude }
+                      : null
+                  }
+                  showResult={showResult}
+                  disabled={showResult || duelState === 'waiting'}
+                />
+              </Suspense>
             ) : (
               <div className="space-y-3">
                 {currentQuestion.options.map((option, index) => (

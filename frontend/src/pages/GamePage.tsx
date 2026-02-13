@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useCallback, useState, lazy, Suspense } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useGame } from '../context/GameContext';
@@ -6,14 +6,18 @@ import {
   Timer,
   QuestionCard,
   OptionButton,
-  MapInteractive,
   ScoreDisplay,
   ProgressBar,
   LoadingSpinner,
 } from '../components';
 import { Question } from '../types';
+import { GAME_CONSTANTS } from '../constants/game';
 
-const TIME_PER_QUESTION = 10;
+const MapInteractive = lazy(() =>
+  import('../components/MapInteractive').then((m) => ({ default: m.MapInteractive }))
+);
+
+const { TIME_PER_QUESTION } = GAME_CONSTANTS;
 
 export function GamePage() {
   const { t } = useTranslation();
@@ -45,6 +49,17 @@ export function GamePage() {
   const correctAnswers = results.filter(r => r.isCorrect).length;
   const isLoading = status === 'loading';
 
+  // Prevent accidental navigation during game
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (status === 'playing' || status === 'reviewing') {
+        e.preventDefault();
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [status]);
+
   // Start game on mount
   useEffect(() => {
     const initGame = async () => {
@@ -60,6 +75,32 @@ export function GamePage() {
       resetGame();
     };
   }, [category]);
+
+  // Keyboard shortcuts: A/B/C/D to select, Enter to submit/next
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (!currentQuestion || isMapQuestion) return;
+
+      if (!showResult) {
+        const keyMap: Record<string, number> = { a: 0, b: 1, c: 2, d: 3 };
+        const idx = keyMap[e.key.toLowerCase()];
+        if (idx !== undefined && idx < currentQuestion.options.length) {
+          setSelectedAnswer(currentQuestion.options[idx]);
+        }
+        if (e.key === 'Enter' && selectedAnswer) {
+          handleSubmitAnswer();
+        }
+      } else if (e.key === 'Enter' || e.key.toLowerCase() === 'n') {
+        handleNextQuestion();
+      }
+    },
+    [currentQuestion, isMapQuestion, showResult, selectedAnswer]
+  );
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleKeyDown]);
 
   // Handle time running out
   const handleTimeComplete = () => {
@@ -173,6 +214,7 @@ export function GamePage() {
               }
             }}
             className="text-gray-400 hover:text-white transition-colors"
+            aria-label={t('game.exit')}
           >
             ✕ {t('game.exit')}
           </button>
@@ -213,17 +255,19 @@ export function GamePage() {
           {/* Answer Options or Map */}
           <div className="mt-6">
             {isMapQuestion ? (
-              <MapInteractive
-                onLocationSelect={handleMapSelect}
-                selectedLocation={mapLocation}
-                correctLocation={
-                  showResult && currentQuestion.latitude && currentQuestion.longitude
-                    ? { lat: currentQuestion.latitude, lng: currentQuestion.longitude }
-                    : null
-                }
-                showResult={showResult}
-                disabled={showResult}
-              />
+              <Suspense fallback={<LoadingSpinner size="lg" text={t('game.loading')} />}>
+                <MapInteractive
+                  onLocationSelect={handleMapSelect}
+                  selectedLocation={mapLocation}
+                  correctLocation={
+                    showResult && currentQuestion.latitude && currentQuestion.longitude
+                      ? { lat: currentQuestion.latitude, lng: currentQuestion.longitude }
+                      : null
+                  }
+                  showResult={showResult}
+                  disabled={showResult}
+                />
+              </Suspense>
             ) : (
               <div className="space-y-3">
                 {currentQuestion.options.map((option, index) => (

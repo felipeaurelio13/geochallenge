@@ -51,7 +51,7 @@ export function setupSocketHandlers(io: SocketIOServer) {
     userSockets.set(user.userId, socket.id);
 
     // Setup duel handlers
-    setupDuelHandlers(io, socket);
+    setupDuelHandlers(io, socket, matchmakingQueue);
 
     // Handler de desconexión
     socket.on('disconnect', (reason) => {

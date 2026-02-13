@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../services/api';
@@ -6,16 +6,18 @@ import {
   Timer,
   QuestionCard,
   OptionButton,
-  MapInteractive,
   ScoreDisplay,
   ProgressBar,
   LoadingSpinner,
 } from '../components';
 import { Question } from '../types';
+import { GAME_CONSTANTS } from '../constants/game';
 
-const TIME_PER_QUESTION = 10;
-const BASE_POINTS = 100;
-const MAX_TIME_BONUS = 50;
+const MapInteractive = lazy(() =>
+  import('../components/MapInteractive').then((m) => ({ default: m.MapInteractive }))
+);
+
+const { TIME_PER_QUESTION, BASE_POINTS, MAX_TIME_BONUS } = GAME_CONSTANTS;
 
 export function ChallengeGamePage() {
   const { t } = useTranslation();
@@ -235,17 +237,19 @@ export function ChallengeGamePage() {
 
           <div className="mt-6">
             {isMapQuestion ? (
-              <MapInteractive
-                onLocationSelect={(lat, lng) => setMapLocation({ lat, lng })}
-                selectedLocation={mapLocation}
-                correctLocation={
-                  showResult && currentQuestion.latitude && currentQuestion.longitude
-                    ? { lat: currentQuestion.latitude, lng: currentQuestion.longitude }
-                    : null
-                }
-                showResult={showResult}
-                disabled={showResult}
-              />
+              <Suspense fallback={<LoadingSpinner size="lg" />}>
+                <MapInteractive
+                  onLocationSelect={(lat, lng) => setMapLocation({ lat, lng })}
+                  selectedLocation={mapLocation}
+                  correctLocation={
+                    showResult && currentQuestion.latitude && currentQuestion.longitude
+                      ? { lat: currentQuestion.latitude, lng: currentQuestion.longitude }
+                      : null
+                  }
+                  showResult={showResult}
+                  disabled={showResult}
+                />
+              </Suspense>
             ) : (
               <div className="space-y-3">
                 {currentQuestion.options.map((option, index) => (

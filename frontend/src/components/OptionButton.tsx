@@ -21,7 +21,7 @@ export function OptionButton({
 }: OptionButtonProps) {
   const getButtonClasses = () => {
     const baseClasses =
-      'w-full p-4 rounded-lg text-left transition-all duration-200 flex items-center gap-4 border-2';
+      'w-full p-4 min-h-[52px] rounded-lg text-left transition-all duration-200 flex items-center gap-4 border-2';
 
     if (showResult) {
       if (isCorrect) {

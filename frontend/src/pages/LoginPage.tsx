@@ -7,7 +7,7 @@ import { LoadingSpinner } from '../components';
 export function LoginPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { login, isLoading, devLogin } = useAuth();
+  const { login, isLoading } = useAuth();
 
   const [formData, setFormData] = useState({
     email: '',
@@ -114,22 +114,6 @@ export function LoginPage() {
             </p>
           </div>
 
-          {/* Dev Mode Button */}
-          <div className="mt-6 pt-6 border-t border-gray-700">
-            <button
-              type="button"
-              onClick={() => {
-                devLogin();
-                navigate('/menu');
-              }}
-              className="w-full py-3 bg-yellow-600 text-black font-bold rounded-lg hover:bg-yellow-500 transition-colors flex items-center justify-center gap-2"
-            >
-              🔧 Modo Desarrollo (Sin Backend)
-            </button>
-            <p className="text-xs text-gray-500 mt-2 text-center">
-              Usa este modo para probar la UI sin necesidad de backend
-            </p>
-          </div>
         </div>
 
         {/* Back link */}

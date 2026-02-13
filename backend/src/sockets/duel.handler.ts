@@ -85,12 +85,11 @@ function generateDuelId(): string {
 /**
  * Configura los handlers de duelos
  */
-export function setupDuelHandlers(io: SocketIOServer, socket: Socket) {
+export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: MatchmakingQueue) {
   const user = socket.user!;
 
   // Unirse a la cola de matchmaking
   socket.on('duel:queue', async (data?: { category?: Category }) => {
-    const queue = (global as any).matchmakingQueue as MatchmakingQueue;
 
     // Verificar si ya está en un duelo
     if (playerDuels.has(user.userId)) {
@@ -121,7 +120,6 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket) {
 
   // Cancelar búsqueda
   socket.on('duel:cancel', () => {
-    const queue = (global as any).matchmakingQueue as MatchmakingQueue;
     queue.removePlayer(user.userId);
     socket.emit('duel:cancelled', { message: 'Búsqueda cancelada' });
   });

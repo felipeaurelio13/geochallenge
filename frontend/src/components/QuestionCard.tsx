@@ -96,6 +96,9 @@ export function QuestionCard({ question, questionNumber, totalQuestions }: Quest
             <img
               src={question.imageUrl}
               alt="Question image"
+              loading="lazy"
+              width={question.category === 'FLAG' ? 320 : 160}
+              height={question.category === 'FLAG' ? 128 : 160}
               className={`mx-auto ${
                 question.category === 'FLAG'
                   ? 'h-32 w-auto rounded shadow-lg border border-gray-700'

@@ -78,8 +78,8 @@ export function MapInteractive({
         <MapContainer
           center={[20, 0]}
           zoom={2}
-          style={{ height: '400px', width: '100%' }}
-          className="z-0"
+          style={{ height: 'clamp(250px, 50vh, 400px)', width: '100%' }}
+          className="z-0 touch-manipulation"
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'

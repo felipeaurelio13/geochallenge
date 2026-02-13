@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <circle cx="256" cy="256" r="240" fill="#3B82F6"/>
+  <circle cx="256" cy="256" r="240" stroke="#1E3A8A" stroke-width="8"/>
+  <!-- Meridians -->
+  <ellipse cx="256" cy="256" rx="120" ry="240" stroke="#60A5FA" stroke-width="4" fill="none"/>
+  <ellipse cx="256" cy="256" rx="200" ry="240" stroke="#60A5FA" stroke-width="4" fill="none"/>
+  <line x1="256" y1="16" x2="256" y2="496" stroke="#60A5FA" stroke-width="4"/>
+  <!-- Parallels -->
+  <ellipse cx="256" cy="256" rx="240" ry="60" stroke="#60A5FA" stroke-width="4" fill="none"/>
+  <ellipse cx="256" cy="160" rx="200" ry="40" stroke="#60A5FA" stroke-width="3" fill="none"/>
+  <ellipse cx="256" cy="352" rx="200" ry="40" stroke="#60A5FA" stroke-width="3" fill="none"/>
+  <line x1="16" y1="256" x2="496" y2="256" stroke="#60A5FA" stroke-width="4"/>
+  <!-- Pin marker -->
+  <g transform="translate(320, 120)">
+    <circle cx="0" cy="0" r="24" fill="#EF4444" stroke="#FFF" stroke-width="4"/>
+    <circle cx="0" cy="0" r="8" fill="#FFF"/>
+    <path d="M0 24 L-10 50 L10 50 Z" fill="#EF4444"/>
+  </g>
+</svg>

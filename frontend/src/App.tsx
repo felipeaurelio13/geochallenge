@@ -15,7 +15,7 @@ import {
   ChallengesPage,
   ChallengeGamePage,
 } from './pages';
-import { LoadingSpinner } from './components';
+import { LoadingSpinner, ErrorBoundary, ServerWakeUp } from './components';
 
 // Protected route wrapper
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -55,12 +55,12 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-// Error Boundary component
-function ErrorBoundary() {
+// Router error fallback
+function RouteErrorFallback() {
   return (
     <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
       <div className="text-center">
-        <div className="text-6xl mb-4">😢</div>
+        <div className="text-6xl mb-4">:(</div>
         <h2 className="text-2xl font-bold text-white mb-2">Algo salio mal</h2>
         <p className="text-gray-400 mb-6">Ha ocurrido un error inesperado</p>
         <a
@@ -74,9 +74,9 @@ function ErrorBoundary() {
   );
 }
 
-// App wrapper that provides Auth context
+// App wrapper that provides Auth context with error boundary
 function AppWrapper({ children }: { children: React.ReactNode }) {
-  return <AuthProvider>{children}</AuthProvider>;
+  return <ErrorBoundary><AuthProvider>{children}</AuthProvider></ErrorBoundary>;
 }
 
 // Create router with future flags to avoid warnings
@@ -85,7 +85,7 @@ const router = createBrowserRouter(
     {
       path: '/',
       element: <AppWrapper><HomePage /></AppWrapper>,
-      errorElement: <ErrorBoundary />,
+      errorElement: <RouteErrorFallback />,
     },
     {
       path: '/login',
@@ -143,7 +143,11 @@ const router = createBrowserRouter(
 );
 
 export function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <ServerWakeUp>
+      <RouterProvider router={router} />
+    </ServerWakeUp>
+  );
 }
 
 export default App;

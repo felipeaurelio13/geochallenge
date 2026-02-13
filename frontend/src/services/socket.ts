@@ -22,21 +22,16 @@ type DuelEventHandlers = {
     question: Question;
     timeLimit: number;
   }) => void;
-  onPlayerAnswered?: (data: { oderId: string; questionIndex: number }) => void;
+  onPlayerAnswered?: (data: { userId: string; questionIndex: number }) => void;
   onQuestionResult?: (data: {
     questionIndex: number;
     correctAnswer: string;
     results: {
-      oderId: string;
+      userId: string;
       username: string;
       answer: AnswerResult;
       totalScore: number;
     }[];
-  }) => void;
-  onAnswerResult?: (data: {
-    correct: boolean;
-    myScore: number;
-    opponentScore: number;
   }) => void;
   onFinished?: (data: {
     reason: 'completed' | 'opponent_disconnected' | 'cancelled';
@@ -55,7 +50,6 @@ class SocketService {
   private handlers: DuelEventHandlers = {};
 
   connect(token?: string): void {
-    // Use provided token or get from localStorage
     const authToken = token || localStorage.getItem('token');
 
     if (!authToken) {
@@ -71,7 +65,7 @@ class SocketService {
       auth: { token: authToken },
       transports: ['websocket', 'polling'],
       reconnection: true,
-      reconnectionAttempts: 5,
+      reconnectionAttempts: 10,
       reconnectionDelay: 1000,
     });
 
@@ -80,8 +74,14 @@ class SocketService {
       this.setupListeners();
     });
 
+    // Re-register listeners on reconnection
+    this.socket.io.on('reconnect', () => {
+      console.log('Socket reconnected');
+      this.setupListeners();
+    });
+
     this.socket.on('connect_error', (error) => {
-      console.error('Socket connection error:', error);
+      console.error('Socket connection error:', error.message);
     });
 
     this.socket.on('disconnect', (reason) => {
@@ -107,7 +107,20 @@ class SocketService {
   private setupListeners(): void {
     if (!this.socket) return;
 
-    // Duel events
+    // Remove all existing listeners before re-registering to avoid duplicates
+    this.socket.removeAllListeners();
+
+    // Re-register connection events
+    this.socket.on('connect', () => {
+      console.log('Socket connected');
+      this.setupListeners();
+    });
+
+    this.socket.on('disconnect', (reason) => {
+      console.log('Socket disconnected:', reason);
+    });
+
+    // Duel events — backend emits duel:* prefix for all duel events
     this.socket.on('duel:queued', (data) => {
       this.handlers.onQueued?.(data);
     });
@@ -132,10 +145,6 @@ class SocketService {
       this.handlers.onStart?.(data);
     });
 
-    this.socket.on('game:question', (data) => {
-      this.handlers.onQuestion?.(data);
-    });
-
     this.socket.on('duel:question', (data) => {
       this.handlers.onQuestion?.(data);
     });
@@ -146,14 +155,6 @@ class SocketService {
 
     this.socket.on('duel:questionResult', (data) => {
       this.handlers.onQuestionResult?.(data);
-    });
-
-    this.socket.on('game:answer-result', (data) => {
-      this.handlers.onAnswerResult?.(data);
-    });
-
-    this.socket.on('game:finished', (data) => {
-      this.handlers.onFinished?.(data);
     });
 
     this.socket.on('duel:finished', (data) => {
@@ -169,7 +170,7 @@ class SocketService {
     });
   }
 
-  // Duel actions - support both naming conventions
+  // Duel actions
   joinQueue(category?: Category): void {
     this.socket?.emit('duel:queue', { category });
   }

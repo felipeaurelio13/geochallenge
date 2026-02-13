@@ -96,6 +96,7 @@ export function MenuPage() {
               onClick={logout}
               className="text-gray-400 hover:text-red-400 transition-colors"
               title={t('auth.logout')}
+              aria-label={t('auth.logout')}
             >
               🚪
             </button>

@@ -117,8 +117,9 @@ export async function getUserLeaderboardContext(
   const redis = getRedis();
 
   // Calcular rango de vecinos
-  const start = Math.max(0, userRankInfo.rank - 1 - surrounding);
-  const end = userRankInfo.rank - 1 + surrounding;
+  const rank = userRankInfo.rank!;
+  const start = Math.max(0, rank - 1 - surrounding);
+  const end = rank - 1 + surrounding;
 
   const results = await redis.zrevrange(LEADERBOARD_KEY, start, end, 'WITHSCORES');
 
