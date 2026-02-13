@@ -34,7 +34,7 @@ export function OptionButton({
     }
 
     if (selected) {
-      return `${baseClasses} bg-primary border-primary text-white`;
+      return `${baseClasses} bg-primary border-primary text-white ring-2 ring-primary/50 shadow-lg shadow-primary/30 scale-[1.01]`;
     }
 
     if (disabled) {
@@ -49,6 +49,7 @@ export function OptionButton({
       onClick={onClick}
       disabled={disabled}
       className={getButtonClasses()}
+      aria-pressed={selected}
     >
       <span
         className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
@@ -64,6 +65,11 @@ export function OptionButton({
         {optionLetters[index]}
       </span>
       <span className="flex-1 font-medium">{option}</span>
+      {selected && !showResult && (
+        <span className="inline-flex items-center rounded-full border border-white/40 bg-white/15 px-2.5 py-1 text-xs font-semibold text-white">
+          ✓ Seleccionada
+        </span>
+      )}
       {showResult && isCorrect && (
         <span className="text-green-400">✓</span>
       )}
