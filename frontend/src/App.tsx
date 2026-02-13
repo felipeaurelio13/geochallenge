@@ -76,7 +76,13 @@ function RouteErrorFallback() {
 
 // App wrapper that provides Auth context with error boundary
 function AppWrapper({ children }: { children: React.ReactNode }) {
-  return <ErrorBoundary><AuthProvider>{children}</AuthProvider></ErrorBoundary>;
+  return (
+    <ErrorBoundary>
+      <AuthProvider>
+        <GameProvider>{children}</GameProvider>
+      </AuthProvider>
+    </ErrorBoundary>
+  );
 }
 
 // Create router with future flags to avoid warnings
@@ -101,11 +107,11 @@ const router = createBrowserRouter(
     },
     {
       path: '/game/single',
-      element: <AppWrapper><ProtectedRoute><GameProvider><GamePage /></GameProvider></ProtectedRoute></AppWrapper>,
+      element: <AppWrapper><ProtectedRoute><GamePage /></ProtectedRoute></AppWrapper>,
     },
     {
       path: '/results',
-      element: <AppWrapper><ProtectedRoute><GameProvider><ResultsPage /></GameProvider></ProtectedRoute></AppWrapper>,
+      element: <AppWrapper><ProtectedRoute><ResultsPage /></ProtectedRoute></AppWrapper>,
     },
     {
       path: '/rankings',
