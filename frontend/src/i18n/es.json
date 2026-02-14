@@ -91,6 +91,8 @@
     "submit": "Confirmar",
     "correct": "Correcto!",
     "incorrect": "Incorrecto",
+    "correctLabel": "Correcta",
+    "incorrectLabel": "Incorrecta",
     "next": "Siguiente",
     "seeResults": "Ver resultados",
     "difficulty": {
@@ -99,6 +101,7 @@
       "hard": "Dificil"
     },
     "selectionReadyHint": "Alternativa seleccionada. Presiona Confirmar para revisar tu respuesta.",
+    "selectedOption": "Seleccionada",
     "tapNextHint": "Respuesta registrada. Presiona Siguiente para continuar.",
     "tapResultsHint": "Respuesta registrada. Presiona Ver resultados para finalizar."
   },

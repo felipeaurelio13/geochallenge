@@ -9,6 +9,7 @@ import {
   ScoreDisplay,
   ProgressBar,
   LoadingSpinner,
+  AnswerStatusBadge,
 } from '../components';
 import { Question } from '../types';
 import { GAME_CONSTANTS } from '../constants/game';
@@ -306,13 +307,11 @@ export function GamePage() {
             ) : (
               <div className="text-center rounded-xl border border-gray-700 bg-gray-800/95 p-4 backdrop-blur-sm">
                 {/* Result feedback */}
-                <div
-                  className={`mb-4 text-xl font-bold ${
-                    lastAnswerCorrect ? 'text-green-400' : 'text-red-400'
-                  }`}
-                >
-                  {lastAnswerCorrect ? t('game.correct') : t('game.incorrect')}
-                </div>
+                <AnswerStatusBadge
+                  status={lastAnswerCorrect ? 'correct' : 'incorrect'}
+                  label={lastAnswerCorrect ? t('game.correct') : t('game.incorrect')}
+                  className="mb-4 text-base"
+                />
 
                 <p className="mb-3 text-sm text-gray-300">{t(getPostAnswerHintKey(isLastQuestion))}</p>
 

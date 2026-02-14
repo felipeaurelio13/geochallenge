@@ -5,13 +5,21 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.1.5**
+- Frontend: **v1.1.6**
 
 
 
 
 
 
+
+## Novedades de la versión 1.1.6
+
+- Estandarizados los indicadores de respuesta correcta/incorrecta en juego individual, duelo y resumen final usando un mismo componente visual reutilizable.
+- Se alineó el feedback de selección y resultado entre botones de alternativas y paneles de resultado para mantener coherencia total en mobile y desktop.
+- Se agregaron nuevas claves de i18n para etiquetas consistentes de estado de respuesta (correcta/incorrecta y opción seleccionada).
+- Se incorporó una prueba automatizada para el nuevo badge de estado y se actualizaron pruebas existentes de botón/versión.
+- Footer actualizado a **v1.1.6** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 
 ## Novedades de la versión 1.1.5

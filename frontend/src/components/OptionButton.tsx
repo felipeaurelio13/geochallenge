@@ -1,3 +1,6 @@
+import { useTranslation } from 'react-i18next';
+import { AnswerStatusBadge } from './AnswerStatusBadge';
+
 interface OptionButtonProps {
   option: string;
   index: number;
@@ -19,6 +22,8 @@ export function OptionButton({
   isCorrect,
   showResult,
 }: OptionButtonProps) {
+  const { t } = useTranslation();
+
   const getButtonClasses = () => {
     const baseClasses =
       'w-full p-4 min-h-[56px] rounded-xl text-left transition-all duration-200 flex items-center gap-4 border-2';
@@ -67,14 +72,22 @@ export function OptionButton({
       <span className="flex-1 font-medium">{option}</span>
       {selected && !showResult && (
         <span className="inline-flex items-center rounded-full border border-white/50 bg-white/20 px-2.5 py-1 text-xs font-semibold text-white shadow-sm shadow-black/20">
-          ✓ Seleccionada
+          ✓ {t('game.selectedOption')}
         </span>
       )}
       {showResult && isCorrect && (
-        <span className="text-green-400">✓</span>
+        <AnswerStatusBadge
+          status="correct"
+          label={t('game.correctLabel')}
+          className="text-xs"
+        />
       )}
       {showResult && selected && !isCorrect && (
-        <span className="text-red-400">✗</span>
+        <AnswerStatusBadge
+          status="incorrect"
+          label={t('game.incorrectLabel')}
+          className="text-xs"
+        />
       )}
     </button>
   );

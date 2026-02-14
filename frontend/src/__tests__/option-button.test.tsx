@@ -2,6 +2,20 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { OptionButton } from '../components/OptionButton';
 
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string) => {
+      const dictionary: Record<string, string> = {
+        'game.selectedOption': 'Seleccionada',
+        'game.correctLabel': 'Correcta',
+        'game.incorrectLabel': 'Incorrecta',
+      };
+
+      return dictionary[key] ?? key;
+    },
+  }),
+}));
+
 describe('OptionButton', () => {
   it('muestra feedback visual y accesible cuando la alternativa está seleccionada', () => {
     const onClick = vi.fn();
@@ -41,6 +55,6 @@ describe('OptionButton', () => {
     );
 
     expect(screen.queryByText('✓ Seleccionada')).not.toBeInTheDocument();
-    expect(screen.getByText('✗')).toBeInTheDocument();
+    expect(screen.getByText('Incorrecta')).toBeInTheDocument();
   });
 });

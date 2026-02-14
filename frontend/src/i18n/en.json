@@ -91,6 +91,8 @@
     "submit": "Submit",
     "correct": "Correct!",
     "incorrect": "Incorrect",
+    "correctLabel": "Correct",
+    "incorrectLabel": "Incorrect",
     "next": "Next",
     "seeResults": "See Results",
     "difficulty": {
@@ -99,6 +101,7 @@
       "hard": "Hard"
     },
     "selectionReadyHint": "Option selected. Press Submit to check your answer.",
+    "selectedOption": "Selected",
     "tapNextHint": "Answer saved. Press Next to continue.",
     "tapResultsHint": "Answer saved. Press See Results to finish."
   },
