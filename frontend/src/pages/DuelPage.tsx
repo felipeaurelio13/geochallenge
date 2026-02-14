@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, lazy, Suspense, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { socketService } from '../services/socket';
@@ -10,7 +10,7 @@ import {
   LoadingSpinner,
   AnswerStatusBadge,
 } from '../components';
-import { Question } from '../types';
+import { Category, Question } from '../types';
 import { GAME_CONSTANTS } from '../constants/game';
 
 const MapInteractive = lazy(() =>
@@ -27,10 +27,20 @@ interface DuelResult {
 }
 
 const { TIME_PER_QUESTION } = GAME_CONSTANTS;
+const DUEL_CATEGORIES: Category[] = ['FLAG', 'CAPITAL', 'MAP', 'SILHOUETTE', 'MIXED'];
+
+function parseDuelCategory(value: string | null): Category {
+  if (!value) {
+    return 'MIXED';
+  }
+
+  return DUEL_CATEGORIES.includes(value as Category) ? (value as Category) : 'MIXED';
+}
 
 export function DuelPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
 
   const [duelState, setDuelState] = useState<DuelState>('searching');
@@ -49,6 +59,7 @@ export function DuelPage() {
   const [searchTime, setSearchTime] = useState(0);
   const scoreRef = useRef(0);
   const opponentRef = useRef<{ id: string; username: string } | null>(null);
+  const duelCategory = parseDuelCategory(searchParams.get('category'));
 
   useEffect(() => {
     scoreRef.current = myScore;
@@ -135,7 +146,7 @@ export function DuelPage() {
     socketService.socket?.on('duel:opponent-disconnected', handleOpponentDisconnected);
 
     // Join matchmaking queue after listeners are active
-    socketService.joinDuelQueue();
+    socketService.joinDuelQueue(duelCategory);
 
     return () => {
       clearInterval(searchTimer);
@@ -147,7 +158,7 @@ export function DuelPage() {
       socketService.socket?.off('duel:finished', handleDuelFinished);
       socketService.socket?.off('duel:opponent-disconnected', handleOpponentDisconnected);
     };
-  }, [user?.id]);
+  }, [duelCategory, user?.id]);
 
   useEffect(() => {
     if (duelState === 'matched') {
@@ -288,7 +299,7 @@ export function DuelPage() {
               onClick={() => {
                 setDuelState('searching');
                 setSearchTime(0);
-                socketService.joinDuelQueue();
+                socketService.joinDuelQueue(duelCategory);
               }}
               className="w-full py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary/80 transition-colors"
             >

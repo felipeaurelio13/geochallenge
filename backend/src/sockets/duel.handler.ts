@@ -14,6 +14,20 @@ interface QueuedPlayer {
   category?: Category;
 }
 
+const DUEL_CATEGORIES: Category[] = ['MAP', 'FLAG', 'CAPITAL', 'SILHOUETTE', 'MIXED'];
+
+function isCompatibleCategory(categoryA: Category, categoryB: Category): boolean {
+  return categoryA === categoryB;
+}
+
+function normalizeCategory(category?: Category): Category {
+  if (!category) {
+    return 'MIXED';
+  }
+
+  return DUEL_CATEGORIES.includes(category) ? category : 'MIXED';
+}
+
 interface ActiveDuel {
   id: string;
   players: {
@@ -42,7 +56,10 @@ export class MatchmakingQueue {
   addPlayer(player: QueuedPlayer): void {
     // Remove if already in queue
     this.removePlayer(player.userId);
-    this.queue.push(player);
+    this.queue.push({
+      ...player,
+      category: normalizeCategory(player.category),
+    });
   }
 
   removePlayer(userId: string): QueuedPlayer | null {
@@ -53,14 +70,27 @@ export class MatchmakingQueue {
     return null;
   }
 
-  findMatch(category?: Category): [QueuedPlayer, QueuedPlayer] | null {
+  findMatch(): [QueuedPlayer, QueuedPlayer] | null {
     if (this.queue.length < 2) return null;
 
-    // Simple FIFO matching - could be improved with skill-based matching
-    const player1 = this.queue.shift()!;
-    const player2 = this.queue.shift()!;
+    for (let i = 0; i < this.queue.length - 1; i++) {
+      for (let j = i + 1; j < this.queue.length; j++) {
+        const player1 = this.queue[i];
+        const player2 = this.queue[j];
+        const player1Category = normalizeCategory(player1.category);
+        const player2Category = normalizeCategory(player2.category);
 
-    return [player1, player2];
+        if (!isCompatibleCategory(player1Category, player2Category)) {
+          continue;
+        }
+
+        this.queue.splice(j, 1);
+        this.queue.splice(i, 1);
+        return [player1, player2];
+      }
+    }
+
+    return null;
   }
 
   getQueueSize(): number {
@@ -93,6 +123,7 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
 
   // Unirse a la cola de matchmaking
   socket.on('duel:queue', async (data?: { category?: Category }) => {
+    const selectedCategory = normalizeCategory(data?.category);
 
     // Verificar si ya está en un duelo
     if (playerDuels.has(user.userId)) {
@@ -106,7 +137,7 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
       username: user.username,
       socketId: socket.id,
       joinedAt: new Date(),
-      category: data?.category,
+      category: selectedCategory,
     });
 
     socket.emit('duel:queued', {
@@ -115,9 +146,9 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
     });
 
     // Intentar encontrar match
-    const match = queue.findMatch(data?.category);
+    const match = queue.findMatch();
     if (match) {
-      await createDuel(io, match[0], match[1], data?.category);
+      await createDuel(io, match[0], match[1], normalizeCategory(match[0].category));
     }
   });
 
