@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.1.17**
+- Frontend: **v1.1.18**
 
 
 
@@ -16,6 +16,12 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 
 
+
+## Novedades de la versión 1.1.18
+- Mejora mobile-first de navegación en menú: se aumentó el área táctil mínima de acciones clave (rankings, perfil, cerrar sesión y categorías) para facilitar interacción con pulgar y reducir toques erróneos.
+- Se añadió una pista contextual en móvil para el carrusel de categorías ("Desliza para ver más categorías"), mejorando descubribilidad y usabilidad sin recargar la interfaz.
+- Se actualizaron traducciones i18n (ES/EN) y pruebas automatizadas para validar la nueva pista mobile y mantener cobertura funcional.
+- Footer actualizado a **v1.1.18** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.1.17
 - Mejora mobile-first en el menú principal: selección de categoría convertida en carrusel horizontal con `snap`, reduciendo saturación visual y facilitando el alcance con pulgar en pantallas pequeñas.
