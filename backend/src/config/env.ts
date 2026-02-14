@@ -43,4 +43,12 @@ export const config = {
     basePoints: 100,
     maxTimeBonus: 50,
   },
+
+  testAuthBypass: {
+    enabled: process.env.NODE_ENV === 'test' || process.env.ENABLE_TEST_AUTH_BYPASS === 'true',
+    secret:
+      process.env.TEST_AUTH_BYPASS_SECRET ||
+      (process.env.NODE_ENV === 'test' ? 'local-test-auth-bypass' : ''),
+    defaultEmail: process.env.TEST_AUTH_BYPASS_EMAIL || 'test-runner@geochallenge.local',
+  },
 };

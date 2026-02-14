@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import type { User, Question, GameResult, LeaderboardEntry, Category } from '../types';
+import { testAuthBypass } from '../utils/testAuthBypass';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -17,6 +18,10 @@ class ApiService {
 
     // Request interceptor to add auth token
     this.client.interceptors.request.use((config) => {
+      if (testAuthBypass.isEnabled && testAuthBypass.isConfigured && testAuthBypass.secret) {
+        config.headers['x-test-auth-bypass'] = testAuthBypass.secret;
+      }
+
       const token = localStorage.getItem('token');
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
@@ -30,7 +35,8 @@ class ApiService {
       (error: AxiosError) => {
         if (error.response?.status === 401) {
           const isAuthPage = window.location.pathname === '/login' || window.location.pathname === '/register';
-          if (!isAuthPage) {
+          const hasBypass = testAuthBypass.isEnabled && testAuthBypass.isConfigured;
+          if (!isAuthPage && !hasBypass) {
             localStorage.removeItem('token');
             window.location.href = '/login';
           }

@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { config } from '../config/env.js';
+import { prisma } from '../config/database.js';
 
 export interface JwtPayload {
   userId: string;
@@ -12,14 +13,57 @@ export interface AuthRequest extends Request {
   user?: JwtPayload;
 }
 
+async function resolveBypassUser(req: AuthRequest): Promise<JwtPayload | null> {
+  if (!config.testAuthBypass.enabled || !config.testAuthBypass.secret) {
+    return null;
+  }
+
+  const bypassHeader = req.headers['x-test-auth-bypass'];
+  if (bypassHeader !== config.testAuthBypass.secret) {
+    return null;
+  }
+
+  const email = config.testAuthBypass.defaultEmail;
+  const username = email.split('@')[0].slice(0, 20);
+
+  const user = await prisma.user.upsert({
+    where: { email },
+    update: {},
+    create: {
+      email,
+      username,
+      passwordHash: 'test-auth-bypass-no-login',
+      preferredLanguage: 'es',
+    },
+    select: {
+      id: true,
+      email: true,
+      username: true,
+    },
+  });
+
+  return {
+    userId: user.id,
+    email: user.email,
+    username: user.username,
+  };
+}
+
 /**
  * Middleware para verificar JWT token
  */
-export function authenticateJWT(
+export async function authenticateJWT(
   req: AuthRequest,
   res: Response,
   next: NextFunction
-): void {
+): Promise<void> {
+  const bypassUser = await resolveBypassUser(req);
+  if (bypassUser) {
+    req.user = bypassUser;
+    next();
+    return;
+  }
+
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -45,11 +89,18 @@ export function authenticateJWT(
 /**
  * Middleware opcional - no falla si no hay token
  */
-export function optionalAuth(
+export async function optionalAuth(
   req: AuthRequest,
-  res: Response,
+  _res: Response,
   next: NextFunction
-): void {
+): Promise<void> {
+  const bypassUser = await resolveBypassUser(req);
+  if (bypassUser) {
+    req.user = bypassUser;
+    next();
+    return;
+  }
+
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
