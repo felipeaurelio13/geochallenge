@@ -1,20 +1,20 @@
 {
   "app": {
     "name": "GeoChallenge",
-    "tagline": "Pon a prueba tus conocimientos geograficos"
+    "tagline": "Pon a prueba tus conocimientos geográficos"
   },
   "home": {
-    "subtitle": "Pon a prueba tus conocimientos geograficos",
+    "subtitle": "Pon a prueba tus conocimientos geográficos",
     "play": "Jugar",
-    "login": "Iniciar sesion",
+    "login": "Iniciar sesión",
     "register": "Registrarse",
     "features": {
       "flags": "Banderas",
-      "flagsDesc": "Identifica banderas de paises de todo el mundo",
+      "flagsDesc": "Identifica banderas de países de todo el mundo",
       "maps": "Mapas",
       "mapsDesc": "Ubica ciudades y capitales en el mapa",
       "multiplayer": "Multijugador",
-      "multiplayerDesc": "Desafia a tus amigos en tiempo real"
+      "multiplayerDesc": "Desafía a tus amigos en tiempo real"
     }
   },
   "nav": {
@@ -23,16 +23,16 @@
     "duel": "Duelo",
     "rankings": "Rankings",
     "profile": "Perfil",
-    "logout": "Cerrar sesion"
+    "logout": "Cerrar sesión"
   },
   "auth": {
-    "login": "Iniciar sesion",
+    "login": "Iniciar sesión",
     "register": "Registrarse",
-    "email": "Correo electronico",
-    "password": "Contrasena",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
     "username": "Nombre de usuario",
-    "confirmPassword": "Confirmar contrasena",
-    "forgotPassword": "Olvidaste tu contrasena?",
+    "confirmPassword": "Confirmar contraseña",
+    "forgotPassword": "Olvidaste tu contraseña?",
     "noAccount": "No tienes cuenta?",
     "hasAccount": "Ya tienes cuenta?",
     "loginSuccess": "Bienvenido de vuelta!",
@@ -40,27 +40,27 @@
     "guest": "Continuar como invitado",
     "loginButton": "Entrar",
     "registerButton": "Crear cuenta",
-    "loginHere": "Inicia sesion aqui",
-    "registerHere": "Registrate aqui",
-    "loginError": "Error al iniciar sesion",
+    "loginHere": "Inicia sesión aquí",
+    "registerHere": "Regístrate aquí",
+    "loginError": "Error al iniciar sesión",
     "registerError": "Error al registrarse",
-    "passwordMismatch": "Las contrasenas no coinciden",
-    "passwordTooShort": "La contrasena debe tener al menos 6 caracteres",
-    "passwordHint": "Minimo 6 caracteres",
-    "logout": "Cerrar sesion"
+    "passwordMismatch": "Las contraseñas no coinciden",
+    "passwordTooShort": "La contraseña debe tener al menos 6 caracteres",
+    "passwordHint": "Mínimo 6 caracteres",
+    "logout": "Cerrar sesión"
   },
   "menu": {
     "welcome": "Hola, {{name}}!",
     "chooseMode": "Elige un modo de juego",
     "singlePlayer": "Un Jugador",
-    "singlePlayerDesc": "Juega solo y mejora tu puntuacion",
+    "singlePlayerDesc": "Juega solo y mejora tu puntuación",
     "duel": "Duelo",
     "duelDesc": "Compite en tiempo real contra otro jugador",
-    "challenge": "Desafios",
-    "challengeDesc": "Envia desafios a tus amigos",
+    "challenge": "Desafíos",
+    "challengeDesc": "Envía desafíos a tus amigos",
     "rankings": "Rankings",
-    "yourStats": "Tus estadisticas",
-    "selectCategory": "Selecciona una categoria"
+    "yourStats": "Tus estadísticas",
+    "selectCategory": "Selecciona una categoría"
   },
   "categories": {
     "mixed": "Mixto",
