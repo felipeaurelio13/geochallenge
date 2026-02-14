@@ -46,7 +46,7 @@ describe('HomePage', () => {
 
     expect(screen.getByRole('link', { name: 'Iniciar sesión' })).toHaveAttribute('href', '/login');
     expect(screen.getByRole('link', { name: 'Crear cuenta' })).toHaveAttribute('href', '/register');
-    expect(screen.getByText('v1.1.4')).toBeInTheDocument();
+    expect(screen.getByText('v1.1.5')).toBeInTheDocument();
   });
 
   it('muestra acción principal de juego cuando hay un usuario autenticado', () => {
