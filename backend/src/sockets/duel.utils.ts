@@ -24,6 +24,21 @@ export function shouldResolveQuestion(
   );
 }
 
+export function shouldForceStartDuel(
+  duelStatus: 'waiting' | 'countdown' | 'playing' | 'finished',
+  readyPlayersCount: number,
+  totalPlayers: number,
+  elapsedMs: number,
+  readyTimeoutMs: number
+): boolean {
+  return (
+    duelStatus === 'waiting' &&
+    readyPlayersCount < totalPlayers &&
+    totalPlayers > 1 &&
+    elapsedMs >= readyTimeoutMs
+  );
+}
+
 interface DuelPlayerSummary {
   userId: string;
   score: number;
