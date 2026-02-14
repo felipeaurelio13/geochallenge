@@ -6,3 +6,4 @@ export { ProgressBar } from './ProgressBar';
 export { LoadingSpinner } from './LoadingSpinner';
 export { ErrorBoundary } from './ErrorBoundary';
 export { ServerWakeUp } from './ServerWakeUp';
+export { AnswerStatusBadge } from './AnswerStatusBadge';

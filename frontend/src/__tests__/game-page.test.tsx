@@ -56,6 +56,7 @@ vi.mock('../components', () => ({
   ScoreDisplay: () => <div>score</div>,
   ProgressBar: () => <div>progress</div>,
   LoadingSpinner: ({ text }: { text?: string }) => <div>{text || 'loading'}</div>,
+  AnswerStatusBadge: ({ label }: { label: string }) => <div>{label}</div>,
 }));
 
 describe('GamePage ending flow', () => {

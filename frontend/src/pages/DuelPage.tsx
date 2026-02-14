@@ -8,6 +8,7 @@ import {
   QuestionCard,
   OptionButton,
   LoadingSpinner,
+  AnswerStatusBadge,
 } from '../components';
 import { Question } from '../types';
 import { GAME_CONSTANTS } from '../constants/game';
@@ -395,15 +396,24 @@ export function DuelPage() {
           </div>
 
           {/* Submit Button */}
-          <div className="mt-6 flex justify-center">
+          <div className="mt-6 sticky bottom-2 z-20">
             {duelState === 'playing' && !showResult && (
-              <button
-                onClick={handleSubmitAnswer}
-                disabled={!selectedAnswer && !mapLocation}
-                className="px-8 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {t('game.submit')}
-              </button>
+              <div className="rounded-xl border border-gray-700 bg-gray-800/95 p-3 backdrop-blur-sm sm:bg-transparent sm:p-0 sm:border-0 sm:backdrop-blur-none">
+                {(selectedAnswer || mapLocation) && (
+                  <p className="mb-2 text-center text-sm text-primary font-medium">
+                    {t('game.selectionReadyHint')}
+                  </p>
+                )}
+                <div className="flex justify-center">
+                  <button
+                    onClick={handleSubmitAnswer}
+                    disabled={!selectedAnswer && !mapLocation}
+                    className="w-full sm:w-auto px-8 py-3.5 bg-primary text-white font-bold rounded-xl shadow-md shadow-primary/30 hover:bg-primary/85 active:scale-[0.99] transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/70 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {t('game.submit')}
+                  </button>
+                </div>
+              </div>
             )}
             {duelState === 'waiting' && (
               <div className="text-center">
@@ -412,12 +422,12 @@ export function DuelPage() {
               </div>
             )}
             {showResult && (
-              <div
-                className={`text-xl font-bold ${
-                  lastAnswerCorrect ? 'text-green-400' : 'text-red-400'
-                }`}
-              >
-                {lastAnswerCorrect ? t('game.correct') : t('game.incorrect')}
+              <div className="text-center rounded-xl border border-gray-700 bg-gray-800/95 p-4 backdrop-blur-sm">
+                <AnswerStatusBadge
+                  status={lastAnswerCorrect ? 'correct' : 'incorrect'}
+                  label={lastAnswerCorrect ? t('game.correct') : t('game.incorrect')}
+                  className="text-base"
+                />
               </div>
             )}
           </div>

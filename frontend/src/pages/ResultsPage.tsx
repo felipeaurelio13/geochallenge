@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useGame } from '../context/GameContext';
 import { api } from '../services/api';
 import { LoadingSpinner } from '../components';
+import { AnswerStatusBadge } from '../components/AnswerStatusBadge';
 
 export function ResultsPage() {
   const { t } = useTranslation();
@@ -91,13 +92,17 @@ export function ResultsPage() {
               <div className="text-2xl font-bold text-green-400">
                 {correctAnswers}
               </div>
-              <div className="text-xs text-gray-400">{t('results.correct')}</div>
+              <div className="mt-1 flex justify-center">
+                <AnswerStatusBadge status="correct" label={t('results.correct')} className="text-xs" />
+              </div>
             </div>
             <div className="bg-gray-900 rounded-lg p-4">
               <div className="text-2xl font-bold text-red-400">
                 {totalQuestions - correctAnswers}
               </div>
-              <div className="text-xs text-gray-400">{t('results.incorrect')}</div>
+              <div className="mt-1 flex justify-center">
+                <AnswerStatusBadge status="incorrect" label={t('results.incorrect')} className="text-xs" />
+              </div>
             </div>
             <div className="bg-gray-900 rounded-lg p-4">
               <div className="text-2xl font-bold text-white">{percentage}%</div>

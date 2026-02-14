@@ -51,6 +51,7 @@ vi.mock('../components', () => ({
   QuestionCard: () => <div>question</div>,
   OptionButton: () => <button>option</button>,
   LoadingSpinner: ({ text }: { text?: string }) => <div>{text || 'loading'}</div>,
+  AnswerStatusBadge: ({ label }: { label: string }) => <div>{label}</div>,
 }));
 
 vi.mock('../services/socket', () => ({
