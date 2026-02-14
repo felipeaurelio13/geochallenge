@@ -1,86 +1,57 @@
 import { describe, it, expect } from 'vitest';
+import { calculateScore, calculateMapScore, calculateTimeBonus } from '../utils/scoring.js';
+import { haversineDistance } from '../utils/haversine.js';
 
-// Scoring utilities tests
 describe('Scoring Utils', () => {
-  const BASE_POINTS = 100;
-  const MAX_TIME_BONUS = 50;
-  const TIME_PER_QUESTION = 10;
-
-  const calculateMultipleChoiceScore = (correct: boolean, timeRemaining: number): number => {
-    if (!correct) return 0;
-    const timeBonus = Math.round((timeRemaining / TIME_PER_QUESTION) * MAX_TIME_BONUS);
-    return BASE_POINTS + timeBonus;
-  };
-
-  const calculateMapScore = (distanceKm: number, maxDistance: number = 500): number => {
-    if (distanceKm >= maxDistance) return 0;
-    const accuracy = 1 - distanceKm / maxDistance;
-    return Math.round(BASE_POINTS * accuracy + MAX_TIME_BONUS * accuracy);
-  };
-
-  describe('calculateMultipleChoiceScore', () => {
+  describe('calculateScore (multiple choice)', () => {
     it('should return 0 for incorrect answers', () => {
-      expect(calculateMultipleChoiceScore(false, 10)).toBe(0);
-      expect(calculateMultipleChoiceScore(false, 5)).toBe(0);
-      expect(calculateMultipleChoiceScore(false, 0)).toBe(0);
+      expect(calculateScore(false, 10)).toBe(0);
+      expect(calculateScore(false, 5)).toBe(0);
+      expect(calculateScore(false, 0)).toBe(0);
     });
 
-    it('should return max points for correct answer with full time', () => {
-      const score = calculateMultipleChoiceScore(true, 10);
-      expect(score).toBe(BASE_POINTS + MAX_TIME_BONUS);
-    });
+    it('should reward faster correct answers with more points', () => {
+      const slow = calculateScore(true, 2);
+      const fast = calculateScore(true, 8);
 
-    it('should return base points for correct answer with no time left', () => {
-      const score = calculateMultipleChoiceScore(true, 0);
-      expect(score).toBe(BASE_POINTS);
-    });
-
-    it('should return proportional bonus for partial time', () => {
-      const score = calculateMultipleChoiceScore(true, 5);
-      expect(score).toBe(BASE_POINTS + Math.round(MAX_TIME_BONUS / 2));
+      expect(fast).toBeGreaterThan(slow);
+      expect(slow).toBeGreaterThanOrEqual(100);
+      expect(fast).toBeLessThanOrEqual(150);
     });
   });
 
-  describe('calculateMapScore', () => {
-    it('should return 0 for distance >= maxDistance', () => {
-      expect(calculateMapScore(500)).toBe(0);
-      expect(calculateMapScore(1000)).toBe(0);
+  describe('calculateMapScore (accuracy + speed)', () => {
+    it('should return 0 for distances out of range', () => {
+      expect(calculateMapScore(2000, 10)).toBe(0);
+      expect(calculateMapScore(3500, 10)).toBe(0);
     });
 
-    it('should return max points for exact location (0 km)', () => {
-      const score = calculateMapScore(0);
-      expect(score).toBe(BASE_POINTS + MAX_TIME_BONUS);
+    it('should return max points for exact location and full time', () => {
+      expect(calculateMapScore(0, 10)).toBe(150);
     });
 
-    it('should return partial points for partial distance', () => {
-      const score = calculateMapScore(250); // 50% accuracy
-      expect(score).toBeGreaterThan(0);
-      expect(score).toBeLessThan(BASE_POINTS + MAX_TIME_BONUS);
+    it('should reward a faster answer when distance is the same', () => {
+      const slow = calculateMapScore(250, 2);
+      const fast = calculateMapScore(250, 8);
+      expect(fast).toBeGreaterThan(slow);
+    });
+
+    it('should reward better accuracy when time is the same', () => {
+      const far = calculateMapScore(1200, 6);
+      const near = calculateMapScore(200, 6);
+      expect(near).toBeGreaterThan(far);
+    });
+  });
+
+  describe('calculateTimeBonus', () => {
+    it('should clamp at 0 when no time remains', () => {
+      expect(calculateTimeBonus(0)).toBe(0);
+      expect(calculateTimeBonus(-1)).toBe(0);
     });
   });
 });
 
-// Haversine distance tests
 describe('Haversine Distance', () => {
-  const haversineDistance = (
-    lat1: number,
-    lon1: number,
-    lat2: number,
-    lon2: number
-  ): number => {
-    const R = 6371; // Earth's radius in km
-    const dLat = ((lat2 - lat1) * Math.PI) / 180;
-    const dLon = ((lon2 - lon1) * Math.PI) / 180;
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos((lat1 * Math.PI) / 180) *
-        Math.cos((lat2 * Math.PI) / 180) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
-  };
-
   it('should return 0 for same coordinates', () => {
     expect(haversineDistance(0, 0, 0, 0)).toBe(0);
     expect(haversineDistance(40.7128, -74.006, 40.7128, -74.006)).toBe(0);
@@ -104,50 +75,5 @@ describe('Haversine Distance', () => {
     const distance = haversineDistance(londonLat, londonLon, parisLat, parisLon);
     expect(distance).toBeGreaterThan(340);
     expect(distance).toBeLessThan(350);
-  });
-});
-
-// Question generation tests
-describe('Question Generation', () => {
-  const shuffleArray = <T>(array: T[]): T[] => {
-    const shuffled = [...array];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-    return shuffled;
-  };
-
-  const getDistractors = (
-    correctAnswer: string,
-    allOptions: string[],
-    count: number
-  ): string[] => {
-    const filtered = allOptions.filter((opt) => opt !== correctAnswer);
-    return shuffleArray(filtered).slice(0, count);
-  };
-
-  it('should shuffle array without losing elements', () => {
-    const original = [1, 2, 3, 4, 5];
-    const shuffled = shuffleArray(original);
-    expect(shuffled).toHaveLength(original.length);
-    expect(shuffled.sort()).toEqual(original.sort());
-  });
-
-  it('should get correct number of distractors', () => {
-    const correct = 'France';
-    const all = ['France', 'Germany', 'Italy', 'Spain', 'UK'];
-    const distractors = getDistractors(correct, all, 3);
-    expect(distractors).toHaveLength(3);
-    expect(distractors).not.toContain(correct);
-  });
-
-  it('should not include correct answer in distractors', () => {
-    const correct = 'France';
-    const all = ['France', 'Germany', 'Italy', 'Spain', 'UK'];
-    for (let i = 0; i < 10; i++) {
-      const distractors = getDistractors(correct, all, 3);
-      expect(distractors).not.toContain(correct);
-    }
   });
 });

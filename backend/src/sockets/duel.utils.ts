@@ -23,3 +23,26 @@ export function shouldResolveQuestion(
     resolvingQuestionIndex !== questionIndex
   );
 }
+
+interface DuelPlayerSummary {
+  userId: string;
+  score: number;
+  answers: Array<{ timeRemaining?: number }>;
+}
+
+export function determineDuelWinner(players: [DuelPlayerSummary, DuelPlayerSummary]): string | null {
+  const [a, b] = players;
+
+  if (a.score !== b.score) {
+    return a.score > b.score ? a.userId : b.userId;
+  }
+
+  const aTimeBank = a.answers.reduce((acc, ans) => acc + (ans.timeRemaining ?? 0), 0);
+  const bTimeBank = b.answers.reduce((acc, ans) => acc + (ans.timeRemaining ?? 0), 0);
+
+  if (aTimeBank !== bTimeBank) {
+    return aTimeBank > bTimeBank ? a.userId : b.userId;
+  }
+
+  return null;
+}

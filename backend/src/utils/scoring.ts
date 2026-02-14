@@ -1,5 +1,11 @@
 import { config } from '../config/env.js';
 
+const MAP_MAX_DISTANCE_KM = 2000;
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
+}
+
 /**
  * Calcula el bonus de tiempo basado en cuánto tiempo quedaba
  * @param timeRemaining Tiempo restante en segundos
@@ -24,6 +30,25 @@ export function calculateTimeBonus(
 export function calculateScore(isCorrect: boolean, timeRemaining: number): number {
   if (!isCorrect) return 0;
   return config.game.basePoints + calculateTimeBonus(timeRemaining);
+}
+
+/**
+ * Puntaje para preguntas de mapa, combinando precisión + velocidad
+ */
+export function calculateMapScore(
+  distanceKm: number,
+  timeRemaining: number,
+  maxDistanceKm: number = MAP_MAX_DISTANCE_KM
+): number {
+  if (distanceKm >= maxDistanceKm) return 0;
+
+  const clampedDistance = clamp(distanceKm, 0, maxDistanceKm);
+  const accuracyFactor = 1 - clampedDistance / maxDistanceKm;
+
+  const accuracyPoints = Math.round(config.game.basePoints * accuracyFactor);
+  const timePoints = Math.round(calculateTimeBonus(timeRemaining) * accuracyFactor);
+
+  return accuracyPoints + timePoints;
 }
 
 /**

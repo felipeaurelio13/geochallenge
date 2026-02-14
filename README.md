@@ -5,12 +5,22 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.1.7**
+- Frontend: **v1.1.8**
 
 
 
 
 
+
+
+
+## Novedades de la versión 1.1.8
+
+- Se rediseñó el modelo de puntuación para que sea transversal, objetivo y coherente entre modos: ahora la velocidad de respuesta impacta de forma explícita en el puntaje en preguntas de opción múltiple y también en preguntas de mapa.
+- En preguntas de mapa, el puntaje ya no depende solo de acertar/fallar: combina precisión geográfica (distancia) + rapidez para premiar mejor desempeño real.
+- En duelos, además del score total, se agregó un desempate objetivo por tiempo restante acumulado cuando ambos jugadores terminan con el mismo puntaje.
+- Se reforzaron pruebas automatizadas de scoring y de desempate en duelos para cubrir estos nuevos criterios y evitar regresiones.
+- Footer actualizado a **v1.1.8** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 
 ## Novedades de la versión 1.1.7

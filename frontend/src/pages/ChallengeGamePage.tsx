@@ -17,7 +17,7 @@ const MapInteractive = lazy(() =>
   import('../components/MapInteractive').then((m) => ({ default: m.MapInteractive }))
 );
 
-const { TIME_PER_QUESTION, BASE_POINTS, MAX_TIME_BONUS } = GAME_CONSTANTS;
+const { TIME_PER_QUESTION, BASE_POINTS, MAX_TIME_BONUS, MAP_CORRECT_THRESHOLD_KM, MAP_MAX_DISTANCE_KM } = GAME_CONSTANTS;
 
 export function ChallengeGamePage() {
   const { t } = useTranslation();
@@ -65,8 +65,16 @@ export function ChallengeGamePage() {
     }
   }, [id]);
 
-  const calculatePoints = (correct: boolean, _timeSpent?: number) => {
+  const calculatePoints = (correct: boolean, mapDistanceKm?: number) => {
     if (!correct) return 0;
+
+    if (typeof mapDistanceKm === 'number') {
+      const accuracyFactor = Math.max(0, 1 - mapDistanceKm / MAP_MAX_DISTANCE_KM);
+      const accuracyPoints = Math.round(BASE_POINTS * accuracyFactor);
+      const timePoints = Math.round((timeRemaining / TIME_PER_QUESTION) * MAX_TIME_BONUS * accuracyFactor);
+      return accuracyPoints + timePoints;
+    }
+
     const timeBonus = Math.round((timeRemaining / TIME_PER_QUESTION) * MAX_TIME_BONUS);
     return BASE_POINTS + timeBonus;
   };
@@ -80,8 +88,8 @@ export function ChallengeGamePage() {
   const handleSubmitAnswer = () => {
     if (!currentQuestion || showResult) return;
 
-    const timeSpent = TIME_PER_QUESTION - timeRemaining;
     let isCorrect = false;
+    let mapDistance: number | undefined;
 
     if (isMapQuestion) {
       if (mapLocation && currentQuestion.latitude && currentQuestion.longitude) {
@@ -96,14 +104,14 @@ export function ChallengeGamePage() {
             Math.sin(dLon / 2) *
             Math.sin(dLon / 2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        const distance = R * c;
-        isCorrect = distance < 300; // Within 300km is correct
+        mapDistance = R * c;
+        isCorrect = mapDistance < MAP_CORRECT_THRESHOLD_KM;
       }
     } else {
       isCorrect = selectedAnswer === currentQuestion.correctAnswer;
     }
 
-    const points = calculatePoints(isCorrect, timeSpent);
+    const points = calculatePoints(isCorrect, mapDistance);
 
     setPreviousScore(score);
     if (isCorrect) {
