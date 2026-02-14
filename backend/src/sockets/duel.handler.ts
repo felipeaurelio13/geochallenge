@@ -4,7 +4,7 @@ import { getQuestionsForGame, validateAnswer, saveGameResult, AnswerResult, Game
 import { updateLeaderboardScore } from '../services/leaderboard.service.js';
 import { config } from '../config/env.js';
 import { prisma } from '../config/database.js';
-import { shouldAutoCloseQuestion } from './duel.utils.js';
+import { shouldAutoCloseQuestion, shouldResolveQuestion } from './duel.utils.js';
 
 interface QueuedPlayer {
   userId: string;
@@ -23,6 +23,7 @@ interface ActiveDuel {
     answers: AnswerResult[];
     score: number;
     ready: boolean;
+    pendingQuestionIndex?: number;
   }[];
   questions: GameQuestion[];
   questionsData: any[]; // Full questions with answers for validation
@@ -31,6 +32,7 @@ interface ActiveDuel {
   category?: Category;
   startedAt?: Date;
   questionStartedAt?: Date;
+  resolvingQuestionIndex?: number;
 }
 
 // Matchmaking queue
@@ -159,19 +161,44 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
     const currentQuestion = duel.questions[duel.currentQuestionIndex];
     if (data.questionId !== currentQuestion.id) return;
 
-    // Verificar que no haya respondido ya esta pregunta
-    if (player.answers.length > duel.currentQuestionIndex) return;
+    // Verificar que no haya respondido ni esté respondiendo ya esta pregunta
+    if (
+      player.answers.length >= duel.currentQuestionIndex + 1 ||
+      player.pendingQuestionIndex === duel.currentQuestionIndex
+    ) {
+      return;
+    }
 
-    // Validar respuesta
-    const result = await validateAnswer(
-      data.questionId,
-      data.answer,
-      data.timeRemaining,
-      data.coordinates
-    );
+    player.pendingQuestionIndex = duel.currentQuestionIndex;
+
+    let result: AnswerResult;
+    try {
+      // Validar respuesta
+      result = await validateAnswer(
+        data.questionId,
+        data.answer,
+        data.timeRemaining,
+        data.coordinates
+      );
+    } catch (error) {
+      player.pendingQuestionIndex = undefined;
+      console.error('Error validando respuesta en duelo:', error);
+      return;
+    }
+
+    // Revalidar por si el duelo avanzó/cerró mientras validábamos
+    if (
+      duel.status !== 'playing' ||
+      duel.currentQuestionIndex !== player.pendingQuestionIndex ||
+      player.answers.length >= duel.currentQuestionIndex + 1
+    ) {
+      player.pendingQuestionIndex = undefined;
+      return;
+    }
 
     player.answers.push(result);
     player.score += result.points;
+    player.pendingQuestionIndex = undefined;
 
     // Notificar a ambos jugadores que este jugador respondió
     io.to(duel.id).emit('duel:playerAnswered', {
@@ -180,8 +207,16 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
     });
 
     // Si ambos respondieron, mostrar resultado y pasar a siguiente pregunta
-    if (duel.players.every((p) => p.answers.length > duel.currentQuestionIndex)) {
-      await showQuestionResult(io, duel);
+    if (
+      duel.players.every((p) => p.answers.length > duel.currentQuestionIndex) &&
+      shouldResolveQuestion(
+        duel.status,
+        duel.currentQuestionIndex,
+        duel.currentQuestionIndex,
+        duel.resolvingQuestionIndex
+      )
+    ) {
+      await showQuestionResult(io, duel, duel.currentQuestionIndex);
     }
   });
 
@@ -321,7 +356,7 @@ function sendQuestion(io: SocketIOServer, duel: ActiveDuel) {
   duel.questionStartedAt = new Date();
 
   io.to(duel.id).emit('duel:question', {
-    questionIndex: duel.currentQuestionIndex,
+    questionIndex,
     totalQuestions: duel.questions.length,
     question,
     timeLimit: config.game.timePerQuestion,
@@ -335,12 +370,14 @@ function sendQuestion(io: SocketIOServer, duel: ActiveDuel) {
       shouldAutoCloseQuestion(
         currentDuel.status,
         questionIndex,
-        currentDuel.currentQuestionIndex
+        currentDuel.currentQuestionIndex,
+        currentDuel.resolvingQuestionIndex
       )
     ) {
       // Agregar respuestas vacías para quienes no respondieron
       for (const player of currentDuel.players) {
         if (player.answers.length <= questionIndex) {
+          player.pendingQuestionIndex = undefined;
           player.answers.push({
             questionId: question.id,
             isCorrect: false,
@@ -350,7 +387,7 @@ function sendQuestion(io: SocketIOServer, duel: ActiveDuel) {
           });
         }
       }
-      showQuestionResult(io, currentDuel);
+      showQuestionResult(io, currentDuel, questionIndex);
     }
   }, (config.game.timePerQuestion + 2) * 1000); // +2 segundos de buffer
 }
@@ -358,27 +395,43 @@ function sendQuestion(io: SocketIOServer, duel: ActiveDuel) {
 /**
  * Muestra el resultado de la pregunta y avanza a la siguiente
  */
-async function showQuestionResult(io: SocketIOServer, duel: ActiveDuel) {
+async function showQuestionResult(io: SocketIOServer, duel: ActiveDuel, questionIndex: number) {
+  if (!shouldResolveQuestion(duel.status, questionIndex, duel.currentQuestionIndex, duel.resolvingQuestionIndex)) {
+    return;
+  }
+
+  duel.resolvingQuestionIndex = questionIndex;
+
   const questionData = duel.questionsData.find(
-    (q) => q.id === duel.questions[duel.currentQuestionIndex].id
+    (q) => q.id === duel.questions[questionIndex].id
   );
 
   const results = duel.players.map((p) => ({
     userId: p.userId,
     username: p.username,
-    answer: p.answers[duel.currentQuestionIndex],
+    answer: p.answers[questionIndex],
     totalScore: p.score,
   }));
 
   io.to(duel.id).emit('duel:questionResult', {
-    questionIndex: duel.currentQuestionIndex,
+    questionIndex,
     correctAnswer: questionData?.correctAnswer,
     results,
   });
 
   // Esperar 3 segundos y pasar a siguiente pregunta
   setTimeout(() => {
+    if (duel.currentQuestionIndex !== questionIndex || duel.status !== 'playing') {
+      if (duel.resolvingQuestionIndex === questionIndex) {
+        duel.resolvingQuestionIndex = undefined;
+      }
+      return;
+    }
+
     duel.currentQuestionIndex++;
+    if (duel.resolvingQuestionIndex === questionIndex) {
+      duel.resolvingQuestionIndex = undefined;
+    }
 
     if (duel.currentQuestionIndex >= duel.questions.length) {
       // Fin del duelo
@@ -402,6 +455,9 @@ async function endDuel(
   reason: 'completed' | 'opponent_disconnected' | 'cancelled'
 ) {
   duel.status = 'finished';
+  for (const player of duel.players) {
+    player.pendingQuestionIndex = undefined;
+  }
 
   const finalResults = duel.players.map((p) => ({
     userId: p.userId,
