@@ -3,6 +3,7 @@ import {
   determineDuelWinner,
   shouldAutoCloseQuestion,
   shouldResolveQuestion,
+  shouldForceStartDuel,
 } from '../sockets/duel.utils.js';
 
 describe('duel timeout guard', () => {
@@ -30,6 +31,21 @@ describe('duel timeout guard', () => {
   });
 });
 
+
+describe('duel ready timeout guard', () => {
+  it('fuerza inicio cuando se supera timeout y falta un jugador por confirmar', () => {
+    expect(shouldForceStartDuel('waiting', 1, 2, 7000, 7000)).toBe(true);
+  });
+
+  it('no fuerza inicio si ambos ya estaban listos', () => {
+    expect(shouldForceStartDuel('waiting', 2, 2, 8000, 7000)).toBe(false);
+  });
+
+  it('no fuerza inicio antes del timeout o fuera de estado waiting', () => {
+    expect(shouldForceStartDuel('waiting', 1, 2, 6000, 7000)).toBe(false);
+    expect(shouldForceStartDuel('playing', 1, 2, 9000, 7000)).toBe(false);
+  });
+});
 describe('duel winner tiebreak', () => {
   it('gana el jugador con mayor score', () => {
     const winner = determineDuelWinner([

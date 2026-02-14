@@ -4,7 +4,7 @@ import { getQuestionsForGame, validateAnswer, saveGameResult, AnswerResult, Game
 import { updateLeaderboardScore } from '../services/leaderboard.service.js';
 import { config } from '../config/env.js';
 import { prisma } from '../config/database.js';
-import { determineDuelWinner, shouldAutoCloseQuestion, shouldResolveQuestion } from './duel.utils.js';
+import { determineDuelWinner, shouldAutoCloseQuestion, shouldForceStartDuel, shouldResolveQuestion } from './duel.utils.js';
 
 interface QueuedPlayer {
   userId: string;
@@ -107,6 +107,8 @@ const activeDuels = new Map<string, ActiveDuel>();
 
 // Player to duel mapping
 const playerDuels = new Map<string, string>();
+
+const READY_TIMEOUT_MS = 7000;
 
 /**
  * Genera un ID único para el duelo
@@ -341,6 +343,34 @@ async function createDuel(
     userId: player1.userId,
     username: player1.username,
   });
+
+  const waitingStartedAt = Date.now();
+  setTimeout(() => {
+    const currentDuel = activeDuels.get(duelId);
+    if (!currentDuel) {
+      return;
+    }
+
+    const readyPlayersCount = currentDuel.players.filter((p) => p.ready).length;
+    if (
+      shouldForceStartDuel(
+        currentDuel.status,
+        readyPlayersCount,
+        currentDuel.players.length,
+        Date.now() - waitingStartedAt,
+        READY_TIMEOUT_MS
+      )
+    ) {
+      for (const player of currentDuel.players) {
+        player.ready = true;
+      }
+
+      io.to(currentDuel.id).emit('duel:ready-timeout', {
+        timeoutMs: READY_TIMEOUT_MS,
+      });
+      startDuelCountdown(io, currentDuel);
+    }
+  }, READY_TIMEOUT_MS);
 }
 
 /**

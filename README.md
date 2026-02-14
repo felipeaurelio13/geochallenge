@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.1.14**
+- Frontend: **v1.1.15**
 
 
 
@@ -14,6 +14,15 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 
 
+
+
+
+## Novedades de la versión 1.1.15
+
+- Se reforzó la estabilidad del inicio de duelos agregando un timeout de seguridad de "ready": si ambos jugadores quedan emparejados pero uno no confirma, el backend fuerza el arranque para evitar bloqueos en estado de espera.
+- Se añadió un evento explícito (`duel:ready-timeout`) para dejar trazabilidad del arranque forzado y facilitar monitoreo/diagnóstico del matchmaking en producción.
+- Nuevas pruebas automatizadas para blindar la lógica de timeout del estado `waiting` y prevenir regresiones en el flujo de inicio.
+- Footer actualizado a **v1.1.15** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 
 ## Novedades de la versión 1.1.14
