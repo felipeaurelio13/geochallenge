@@ -21,7 +21,7 @@ export function OptionButton({
 }: OptionButtonProps) {
   const getButtonClasses = () => {
     const baseClasses =
-      'w-full p-4 min-h-[52px] rounded-lg text-left transition-all duration-200 flex items-center gap-4 border-2';
+      'w-full p-4 min-h-[56px] rounded-xl text-left transition-all duration-200 flex items-center gap-4 border-2';
 
     if (showResult) {
       if (isCorrect) {
@@ -34,14 +34,14 @@ export function OptionButton({
     }
 
     if (selected) {
-      return `${baseClasses} bg-primary border-primary text-white ring-2 ring-primary/50 shadow-lg shadow-primary/30 scale-[1.01]`;
+      return `${baseClasses} bg-primary border-primary text-white ring-4 ring-primary/30 shadow-lg shadow-primary/30 scale-[1.01]`;
     }
 
     if (disabled) {
       return `${baseClasses} bg-gray-800 border-gray-700 text-gray-400 cursor-not-allowed`;
     }
 
-    return `${baseClasses} bg-gray-800 border-gray-700 text-white hover:border-primary hover:bg-gray-700 cursor-pointer`;
+    return `${baseClasses} bg-gray-800 border-gray-700 text-white hover:border-primary/80 hover:bg-gray-700 cursor-pointer`;
   };
 
   return (
@@ -52,12 +52,12 @@ export function OptionButton({
       aria-pressed={selected}
     >
       <span
-        className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
+        className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm transition-colors ${
           showResult && isCorrect
             ? 'bg-green-500 text-white'
-            : showResult && selected && !isCorrect
+          : showResult && selected && !isCorrect
             ? 'bg-red-500 text-white'
-            : selected
+          : selected
             ? 'bg-white text-primary'
             : 'bg-gray-700 text-gray-300'
         }`}
@@ -66,7 +66,7 @@ export function OptionButton({
       </span>
       <span className="flex-1 font-medium">{option}</span>
       {selected && !showResult && (
-        <span className="inline-flex items-center rounded-full border border-white/40 bg-white/15 px-2.5 py-1 text-xs font-semibold text-white">
+        <span className="inline-flex items-center rounded-full border border-white/50 bg-white/20 px-2.5 py-1 text-xs font-semibold text-white shadow-sm shadow-black/20">
           ✓ Seleccionada
         </span>
       )}
