@@ -5,10 +5,20 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.1.3**
+- Frontend: **v1.1.4**
 
 
 
+
+
+
+## Novedades de la versión 1.1.4
+
+- Corregida una condición de carrera en duelos que podía resolver la misma pregunta más de una vez bajo latencia/reintentos, provocando auto-respuestas aparentes en ambos jugadores.
+- Se agregó un candado de resolución por índice de pregunta (`resolvingQuestionIndex`) para garantizar idempotencia del cierre por pregunta.
+- Se añadió protección de respuesta en vuelo por jugador (`pendingQuestionIndex`) para evitar duplicados mientras se valida en backend.
+- Se reforzó la suite de pruebas en backend para cubrir escenarios de auto-cierre y resolución única.
+- Footer actualizado a **v1.1.4** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 
 ## Novedades de la versión 1.1.3
