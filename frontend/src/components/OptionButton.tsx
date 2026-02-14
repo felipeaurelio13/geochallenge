@@ -26,7 +26,7 @@ export function OptionButton({
 
   const getButtonClasses = () => {
     const baseClasses =
-      'w-full p-4 min-h-[56px] rounded-xl text-left transition-all duration-200 flex items-center gap-4 border-2';
+      'w-full rounded-xl text-left transition-all duration-200 flex items-center gap-2.5 border-2 px-3 py-2.5 min-h-[48px] sm:gap-4 sm:p-4 sm:min-h-[56px]';
 
     if (showResult) {
       if (isCorrect) {
@@ -57,7 +57,7 @@ export function OptionButton({
       aria-pressed={selected}
     >
       <span
-        className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm transition-colors ${
+        className={`h-8 w-8 shrink-0 rounded-full flex items-center justify-center font-bold text-xs transition-colors sm:h-9 sm:w-9 sm:text-sm ${
           showResult && isCorrect
             ? 'bg-green-500 text-white'
           : showResult && selected && !isCorrect
@@ -69,9 +69,14 @@ export function OptionButton({
       >
         {optionLetters[index]}
       </span>
-      <span className="flex-1 font-medium">{option}</span>
+      <span className="flex-1 text-sm font-medium leading-tight sm:text-base">{option}</span>
       {selected && !showResult && (
-        <span className="inline-flex items-center rounded-full border border-white/50 bg-white/20 px-2.5 py-1 text-xs font-semibold text-white shadow-sm shadow-black/20">
+        <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/50 bg-white/20 text-xs font-semibold text-white shadow-sm shadow-black/20 sm:hidden">
+          ✓
+        </span>
+      )}
+      {selected && !showResult && (
+        <span className="hidden sm:inline-flex items-center rounded-full border border-white/50 bg-white/20 px-2.5 py-1 text-xs font-semibold text-white shadow-sm shadow-black/20">
           ✓ {t('game.selectedOption')}
         </span>
       )}
