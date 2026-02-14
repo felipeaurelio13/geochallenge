@@ -5,8 +5,16 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.1.0**
+- Frontend: **v1.1.1**
 
+
+
+
+## Novedades de la versión 1.1.1
+
+- Corregido el flujo final de partida en modo individual: la pantalla de resultados ya no desaparece al instante y permanece visible para revisar puntaje, aciertos y acciones posteriores.
+- Se agregó prueba automatizada del flujo de fin de partida para asegurar que no se resetee el estado al navegar a resultados.
+- Footer actualizado a **v1.1.1** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.1.0
 
