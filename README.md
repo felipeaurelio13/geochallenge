@@ -5,13 +5,23 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.1.8**
+- Frontend: **v1.1.9**
 
 
 
 
 
 
+
+
+
+## Novedades de la versión 1.1.9
+
+- Se incorporó selección integral de categoría en duelos: ahora puedes buscar partidas de **solo banderas, solo capitales, solo mapas, solo siluetas o mixto** desde el menú principal.
+- Matchmaking de duelos ajustado para respetar la categoría elegida por ambos jugadores, evitando cruces inconsistentes entre modos.
+- El reintento de duelo conserva la categoría activa para mantener una experiencia coherente y predecible.
+- Se agregaron pruebas automatizadas en frontend y backend para blindar el ruteo por categoría y el emparejamiento por tipo de duelo.
+- Footer actualizado a **v1.1.9** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 
 ## Novedades de la versión 1.1.8

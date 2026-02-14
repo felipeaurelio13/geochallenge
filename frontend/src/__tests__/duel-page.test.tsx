@@ -32,6 +32,7 @@ const mocks = vi.hoisted(() => {
 
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigateMock,
+  useSearchParams: () => [new URLSearchParams('category=FLAG')],
 }));
 
 vi.mock('react-i18next', () => ({
@@ -81,6 +82,7 @@ describe('DuelPage socket flow', () => {
     const joinCallOrder = mocks.joinDuelQueueMock.mock.invocationCallOrder[0];
 
     expect(registerCallOrder).toBeLessThan(joinCallOrder);
+    expect(mocks.joinDuelQueueMock).toHaveBeenCalledWith('FLAG');
 
     act(() => {
       mocks.handlers.get('duel:matched')?.forEach((cb) => cb({ duelId: 'd1' }));

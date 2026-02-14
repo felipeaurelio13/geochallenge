@@ -59,7 +59,13 @@ export function MenuPage() {
   const handleStartGame = (mode: string) => {
     if (mode === 'single') {
       navigate(`/game/single?category=${selectedCategory}`);
+      return;
     } else {
+      if (mode === 'duel') {
+        navigate(`/duel?category=${selectedCategory}`);
+        return;
+      }
+
       navigate(`/${mode}`);
     }
   };

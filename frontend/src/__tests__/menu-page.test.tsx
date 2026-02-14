@@ -59,6 +59,22 @@ vi.mock('react-i18next', () => ({
 }));
 
 describe('MenuPage', () => {
+  it('envía la categoría seleccionada al iniciar un duelo', () => {
+    render(
+      <MemoryRouter>
+        <MenuPage />
+      </MemoryRouter>
+    );
+
+    const banderasButton = screen.getByRole('button', { name: /banderas/i });
+    fireEvent.click(banderasButton);
+
+    const duelModeButton = screen.getByRole('button', { name: /duelo/i });
+    fireEvent.click(duelModeButton);
+
+    expect(mockNavigate).toHaveBeenCalledWith('/duel?category=FLAG');
+  });
+
   it('permite cambiar categoría y navegar a partida individual con categoría seleccionada', () => {
     render(
       <MemoryRouter>
