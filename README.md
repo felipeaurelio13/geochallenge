@@ -5,10 +5,19 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.1.2**
+- Frontend: **v1.1.3**
 
 
 
+
+
+## Novedades de la versión 1.1.3
+
+- En preguntas de mapa, cada nueva pregunta ahora inicia desde una vista neutral global para evitar perder tiempo reubicando el mapa entre intentos consecutivos.
+- Se corrigió el estado visual del resumen de progreso: cada burbuja ahora refleja el resultado real de su pregunta (verde/roja) en lugar de depender del total acumulado de aciertos.
+- Se dejó explícito en backend el umbral de acierto para mapa (`< 500 km`) para mantener consistencia entre puntaje y estado correcto/incorrecto.
+- Se agregaron pruebas automatizadas para cubrir el reset de viewport en mapa y la lógica de estado por pregunta en la barra de progreso.
+- Footer actualizado a **v1.1.3** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 
 ## Novedades de la versión 1.1.2

@@ -26,7 +26,13 @@ interface MapInteractiveProps {
   correctLocation?: { lat: number; lng: number } | null;
   showResult: boolean;
   disabled: boolean;
+  questionId?: string;
 }
+
+const MAP_DEFAULT_VIEW = {
+  center: [20, 0] as [number, number],
+  zoom: 2,
+};
 
 export function shouldFitResultBounds(
   showResult: boolean,
@@ -34,6 +40,10 @@ export function shouldFitResultBounds(
   correctLocation?: { lat: number; lng: number } | null
 ) {
   return Boolean(showResult && selectedLocation && correctLocation);
+}
+
+export function shouldResetMapView(showResult: boolean) {
+  return !showResult;
 }
 
 function ResultViewportController({
@@ -67,6 +77,26 @@ function ResultViewportController({
   return null;
 }
 
+function QuestionViewportController({
+  questionId,
+  showResult,
+}: {
+  questionId?: string;
+  showResult: boolean;
+}) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!questionId || !shouldResetMapView(showResult)) {
+      return;
+    }
+
+    map.setView(MAP_DEFAULT_VIEW.center, MAP_DEFAULT_VIEW.zoom, { animate: false });
+  }, [questionId, showResult, map]);
+
+  return null;
+}
+
 function LocationMarker({
   onLocationSelect,
   disabled,
@@ -90,6 +120,7 @@ export function MapInteractive({
   correctLocation,
   showResult,
   disabled,
+  questionId,
 }: MapInteractiveProps) {
   const { t } = useTranslation();
 
@@ -115,8 +146,8 @@ export function MapInteractive({
     <div className="relative">
       <div className="rounded-xl overflow-hidden border-2 border-gray-700">
         <MapContainer
-          center={[20, 0]}
-          zoom={2}
+          center={MAP_DEFAULT_VIEW.center}
+          zoom={MAP_DEFAULT_VIEW.zoom}
           style={{ height: 'clamp(250px, 50vh, 400px)', width: '100%' }}
           className="z-0 touch-manipulation"
         >
@@ -125,6 +156,7 @@ export function MapInteractive({
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
           <LocationMarker onLocationSelect={onLocationSelect} disabled={disabled} />
+          <QuestionViewportController questionId={questionId} showResult={showResult} />
           <ResultViewportController
             showResult={showResult}
             selectedLocation={selectedLocation}

@@ -122,6 +122,7 @@ class ApiService {
       correctAnswer: string;
       points: number;
       timeBonus: number;
+      distance?: number;
     }>('/game/answer', data);
     return response.data;
   }
