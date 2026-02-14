@@ -4,6 +4,7 @@ import { getQuestionsForGame, validateAnswer, saveGameResult, AnswerResult, Game
 import { updateLeaderboardScore } from '../services/leaderboard.service.js';
 import { config } from '../config/env.js';
 import { prisma } from '../config/database.js';
+import { shouldAutoCloseQuestion } from './duel.utils.js';
 
 interface QueuedPlayer {
   userId: string;
@@ -315,7 +316,8 @@ function startDuel(io: SocketIOServer, duel: ActiveDuel) {
  * Envía la pregunta actual a los jugadores
  */
 function sendQuestion(io: SocketIOServer, duel: ActiveDuel) {
-  const question = duel.questions[duel.currentQuestionIndex];
+  const questionIndex = duel.currentQuestionIndex;
+  const question = duel.questions[questionIndex];
   duel.questionStartedAt = new Date();
 
   io.to(duel.id).emit('duel:question', {
@@ -328,10 +330,17 @@ function sendQuestion(io: SocketIOServer, duel: ActiveDuel) {
   // Timer para forzar fin de pregunta si no responden
   setTimeout(() => {
     const currentDuel = activeDuels.get(duel.id);
-    if (currentDuel && currentDuel.status === 'playing' && currentDuel.currentQuestionIndex === duel.currentQuestionIndex) {
+    if (
+      currentDuel &&
+      shouldAutoCloseQuestion(
+        currentDuel.status,
+        questionIndex,
+        currentDuel.currentQuestionIndex
+      )
+    ) {
       // Agregar respuestas vacías para quienes no respondieron
       for (const player of currentDuel.players) {
-        if (player.answers.length <= duel.currentQuestionIndex) {
+        if (player.answers.length <= questionIndex) {
           player.answers.push({
             questionId: question.id,
             isCorrect: false,
