@@ -61,7 +61,8 @@
     "challengeDesc": "Envía desafíos a tus amigos",
     "rankings": "Rankings",
     "yourStats": "Tus estadísticas",
-    "selectCategory": "Selecciona una categoría"
+    "selectCategory": "Selecciona una categoría",
+    "selectedCategory": "Categoría activa"
   },
   "categories": {
     "mixed": "Mixto",
