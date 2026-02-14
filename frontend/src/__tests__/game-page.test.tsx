@@ -64,6 +64,16 @@ describe('GamePage ending flow', () => {
     vi.clearAllMocks();
   });
 
+  it('renderiza alternativas en grilla de dos columnas para reducir scroll en mobile', () => {
+    render(<GamePage />);
+
+    const firstOption = screen.getByRole('button', { name: 'Santiago' });
+    const optionsGrid = firstOption.parentElement;
+
+    expect(optionsGrid).toHaveClass('grid');
+    expect(optionsGrid).toHaveClass('grid-cols-2');
+  });
+
   it('mantiene el estado hasta resultados sin resetear el juego al desmontar', async () => {
     const { unmount } = render(<GamePage />);
 

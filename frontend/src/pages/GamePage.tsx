@@ -268,7 +268,7 @@ export function GamePage() {
                 />
               </Suspense>
             ) : (
-              <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
                 {currentQuestion.options.map((option, index) => (
                   <OptionButton
                     key={option}
