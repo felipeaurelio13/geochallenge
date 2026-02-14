@@ -72,10 +72,6 @@ export function GamePage() {
       }
     };
     initGame();
-
-    return () => {
-      resetGame();
-    };
   }, [category]);
 
   // Keyboard shortcuts: A/B/C/D to select, Enter to submit/next
