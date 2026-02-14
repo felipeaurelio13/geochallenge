@@ -9,7 +9,7 @@ export function HomePage() {
   const { user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex flex-col">
+    <div className="flex min-h-screen flex-col overflow-x-clip bg-gray-950 text-white">
       <div className="relative flex-1 overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(34,197,94,0.22),_transparent_52%)]" />
 
@@ -59,22 +59,22 @@ export function HomePage() {
           </section>
 
           <section className="mx-auto mt-8 grid w-full max-w-5xl grid-cols-1 gap-3 sm:mt-10 sm:grid-cols-2 lg:grid-cols-3">
-            <article className="rounded-2xl border border-gray-800 bg-gray-900/80 p-4 backdrop-blur sm:p-5">
+            <article className="min-w-0 rounded-2xl border border-gray-800 bg-gray-900/80 p-4 backdrop-blur sm:p-5">
               <div className="mb-2 text-3xl" aria-hidden>🏳️</div>
               <h2 className="text-sm font-semibold sm:text-base">{t('home.features.flags')}</h2>
-              <p className="mt-1.5 text-xs text-gray-400 sm:text-sm">{t('home.features.flagsDesc')}</p>
+              <p className="mt-1.5 break-words text-xs text-gray-400 sm:text-sm">{t('home.features.flagsDesc')}</p>
             </article>
 
-            <article className="rounded-2xl border border-gray-800 bg-gray-900/80 p-4 backdrop-blur sm:p-5">
+            <article className="min-w-0 rounded-2xl border border-gray-800 bg-gray-900/80 p-4 backdrop-blur sm:p-5">
               <div className="mb-2 text-3xl" aria-hidden>🗺️</div>
               <h2 className="text-sm font-semibold sm:text-base">{t('home.features.maps')}</h2>
-              <p className="mt-1.5 text-xs text-gray-400 sm:text-sm">{t('home.features.mapsDesc')}</p>
+              <p className="mt-1.5 break-words text-xs text-gray-400 sm:text-sm">{t('home.features.mapsDesc')}</p>
             </article>
 
-            <article className="rounded-2xl border border-gray-800 bg-gray-900/80 p-4 backdrop-blur sm:col-span-2 sm:p-5 lg:col-span-1">
+            <article className="min-w-0 rounded-2xl border border-gray-800 bg-gray-900/80 p-4 backdrop-blur sm:col-span-2 sm:p-5 lg:col-span-1">
               <div className="mb-2 text-3xl" aria-hidden>⚔️</div>
               <h2 className="text-sm font-semibold sm:text-base">{t('home.features.multiplayer')}</h2>
-              <p className="mt-1.5 text-xs text-gray-400 sm:text-sm">{t('home.features.multiplayerDesc')}</p>
+              <p className="mt-1.5 break-words text-xs text-gray-400 sm:text-sm">{t('home.features.multiplayerDesc')}</p>
             </article>
           </section>
         </main>

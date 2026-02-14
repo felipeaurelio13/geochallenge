@@ -46,9 +46,10 @@ describe('HomePage', () => {
     );
 
     expect(screen.getByText('Trivia geográfica competitiva')).toBeInTheDocument();
+    expect(document.querySelector('div.overflow-x-clip')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Iniciar sesión' })).toHaveAttribute('href', '/login');
     expect(screen.getByRole('link', { name: 'Crear cuenta' })).toHaveAttribute('href', '/register');
-    expect(screen.getByText('v1.1.19')).toBeInTheDocument();
+    expect(screen.getByText('v1.1.20')).toBeInTheDocument();
   });
 
   it('muestra acción principal de juego cuando hay un usuario autenticado', () => {

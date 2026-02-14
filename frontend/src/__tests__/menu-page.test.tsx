@@ -96,6 +96,21 @@ describe('MenuPage', () => {
     expect(screen.getByText(/v\d+\.\d+\.\d+/i)).toBeInTheDocument();
   });
 
+
+
+  it('aplica contención visual mobile-first para evitar desbordes horizontales', () => {
+    const { container } = render(
+      <MemoryRouter>
+        <MenuPage />
+      </MemoryRouter>
+    );
+
+    expect(container.firstChild).toHaveClass('overflow-x-clip');
+
+    const modeCardTitle = container.querySelector('h3.break-words');
+    expect(modeCardTitle).toHaveClass('break-words');
+  });
+
   it('permite cambiar categoría y navegar a partida individual con categoría seleccionada', () => {
     render(
       <MemoryRouter>

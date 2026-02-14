@@ -73,8 +73,8 @@ export function MenuPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex flex-col">
-      <header className="sticky top-0 z-20 border-b border-gray-800/80 bg-gray-950/95 backdrop-blur">
+    <div className="flex min-h-screen flex-col overflow-x-clip bg-gray-950 text-white">
+      <header className="sticky top-0 z-20 border-b border-gray-800/80 bg-gray-950/95 backdrop-blur supports-[padding:max(0px)]:pt-[env(safe-area-inset-top)]">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-2 px-4 py-3 sm:px-6">
           <Link to="/" className="flex items-center gap-2 min-w-0">
             <span className="text-2xl">🌍</span>
@@ -111,7 +111,7 @@ export function MenuPage() {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 pb-24 sm:px-6 sm:py-8 sm:pb-10">
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 pb-28 sm:px-6 sm:py-8 sm:pb-10">
         <section className="rounded-2xl border border-gray-800 bg-gradient-to-b from-gray-900 to-gray-950 p-5 shadow-lg shadow-black/15 sm:p-6">
           <h1 className="text-2xl font-bold text-white sm:text-3xl">
             {t('menu.welcome', { name: user?.username })}
@@ -151,13 +151,13 @@ export function MenuPage() {
             <button
               key={mode.id}
               onClick={() => handleStartGame(mode.id)}
-              className={`group rounded-2xl bg-gradient-to-br ${mode.color} p-5 text-left shadow-lg shadow-black/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-primary/70`}
+              className={`group min-w-0 rounded-2xl bg-gradient-to-br ${mode.color} p-5 text-left shadow-lg shadow-black/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-primary/70`}
             >
               <div className="text-4xl mb-3">{mode.icon}</div>
-              <h3 className="text-xl font-bold text-white mb-1.5">
+              <h3 className="mb-1.5 break-words text-xl font-bold text-white">
                 {t(mode.titleKey)}
               </h3>
-              <p className="text-white/85 text-sm leading-relaxed">{t(mode.descKey)}</p>
+              <p className="break-words text-sm leading-relaxed text-white/85">{t(mode.descKey)}</p>
               <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-white/90">
                 Empezar <span className="transition-transform group-hover:translate-x-1">→</span>
               </span>
@@ -198,7 +198,7 @@ export function MenuPage() {
         </section>
       </main>
 
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-gray-800/90 bg-gray-950/95 p-3 backdrop-blur supports-[padding:max(0px)]:pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-gray-800/90 bg-gray-950/95 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur sm:hidden">
         <button
           onClick={() => handleStartGame('single')}
           className="w-full rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-primary/70"
@@ -207,7 +207,7 @@ export function MenuPage() {
         </button>
       </div>
 
-      <footer className="border-t border-gray-800 py-4 text-center text-xs text-gray-500">
+      <footer className="border-t border-gray-800 py-4 text-center text-xs text-gray-500 sm:pb-4">
         <p>GeoChallenge &copy; {new Date().getFullYear()}</p>
         <p className="mt-1">v{APP_VERSION}</p>
       </footer>
