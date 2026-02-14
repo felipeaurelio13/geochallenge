@@ -50,7 +50,7 @@ vi.mock('../context/AuthContext', () => ({
 vi.mock('../components', () => ({
   Timer: () => <div>timer</div>,
   QuestionCard: () => <div>question</div>,
-  OptionButton: () => <button>option</button>,
+  OptionButton: ({ option }: { option: string }) => <button>{option}</button>,
   LoadingSpinner: ({ text }: { text?: string }) => <div>{text || 'loading'}</div>,
   AnswerStatusBadge: ({ label }: { label: string }) => <div>{label}</div>,
 }));
@@ -99,6 +99,33 @@ describe('DuelPage socket flow', () => {
     });
 
     expect(await screen.findByText('rival')).toBeInTheDocument();
+  });
+
+
+  it('renderiza alternativas en grilla de dos columnas en mobile durante el duelo', async () => {
+    render(<DuelPage />);
+
+    act(() => {
+      mocks.handlers.get('duel:question')?.forEach((cb) =>
+        cb({
+          questionIndex: 0,
+          totalQuestions: 10,
+          question: {
+            id: 'dq1',
+            questionText: 'Capital de Chile',
+            options: ['Santiago', 'Lima', 'Bogotá', 'Quito'],
+            correctAnswer: 'Santiago',
+            category: 'CAPITAL',
+          },
+        })
+      );
+    });
+
+    const firstOption = await screen.findByRole('button', { name: 'Santiago' });
+    const optionsGrid = firstOption.parentElement;
+
+    expect(optionsGrid).toHaveClass('grid');
+    expect(optionsGrid).toHaveClass('grid-cols-2');
   });
 
   it('mantiene una sola suscripción de sockets aunque cambie el score', async () => {
