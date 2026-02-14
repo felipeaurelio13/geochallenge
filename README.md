@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.1.18**
+- Frontend: **v1.1.19**
 
 
 
@@ -16,6 +16,12 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 
 
+
+## Novedades de la versión 1.1.19
+- Mejora mobile-first en partida individual para categoría **Banderas**: las alternativas ahora se muestran en una sola columna en pantallas pequeñas, priorizando legibilidad y evitando toques accidentales cuando hay imagen de bandera en pantalla.
+- En pantallas medianas o mayores se conserva la grilla de dos columnas para mantener densidad visual sin perder claridad.
+- Se actualizó la suite de pruebas de `GamePage` incorporando un caso específico para categoría `FLAG` que valida este comportamiento responsive y previene regresiones.
+- Footer actualizado a **v1.1.19** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.1.18
 - Mejora mobile-first de navegación en menú: se aumentó el área táctil mínima de acciones clave (rankings, perfil, cerrar sesión y categorías) para facilitar interacción con pulgar y reducir toques erróneos.

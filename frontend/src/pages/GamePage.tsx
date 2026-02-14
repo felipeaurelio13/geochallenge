@@ -48,6 +48,7 @@ export function GamePage() {
 
   const currentQuestion: Question | null = questions[currentIndex] || null;
   const isMapQuestion = currentQuestion?.category === 'MAP';
+  const isFlagQuestion = currentQuestion?.category === 'FLAG';
   const isLoading = status === 'loading';
   const isLastQuestion = currentIndex >= questions.length - 1;
 
@@ -268,7 +269,11 @@ export function GamePage() {
                 />
               </Suspense>
             ) : (
-              <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
+              <div
+                className={`grid gap-2.5 sm:gap-3 ${
+                  isFlagQuestion ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-2'
+                }`}
+              >
                 {currentQuestion.options.map((option, index) => (
                   <OptionButton
                     key={option}
