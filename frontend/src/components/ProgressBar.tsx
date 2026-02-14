@@ -9,11 +9,15 @@ export function getQuestionIndicatorStatus(
   current: number,
   results: Array<{ isCorrect: boolean }>
 ) {
-  if (index < current) {
+  const answeredCount = results.length;
+
+  if (index < answeredCount) {
     return results[index]?.isCorrect ? 'correct' : 'incorrect';
   }
 
-  if (index === current) {
+  const currentIndex = Math.max(0, current - 1);
+
+  if (index === currentIndex) {
     return 'current';
   }
 

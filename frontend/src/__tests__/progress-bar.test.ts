@@ -5,14 +5,19 @@ describe('ProgressBar question status mapping', () => {
   it('marks each answered question according to its own result', () => {
     const results = [{ isCorrect: false }, { isCorrect: true }];
 
-    expect(getQuestionIndicatorStatus(0, 2, results)).toBe('incorrect');
-    expect(getQuestionIndicatorStatus(1, 2, results)).toBe('correct');
+    expect(getQuestionIndicatorStatus(0, 3, results)).toBe('incorrect');
+    expect(getQuestionIndicatorStatus(1, 3, results)).toBe('correct');
   });
 
-  it('marks current and pending questions correctly', () => {
+  it('keeps the current unanswered question active when there are fewer results than progress', () => {
+    const results = [{ isCorrect: true }, { isCorrect: false }];
+
+    expect(getQuestionIndicatorStatus(2, 3, results)).toBe('current');
+  });
+
+  it('marks pending questions correctly', () => {
     const results = [{ isCorrect: true }];
 
-    expect(getQuestionIndicatorStatus(1, 1, results)).toBe('current');
     expect(getQuestionIndicatorStatus(2, 1, results)).toBe('pending');
   });
 });

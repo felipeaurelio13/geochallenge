@@ -5,12 +5,20 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.1.6**
+- Frontend: **v1.1.7**
 
 
 
 
 
+
+
+## Novedades de la versión 1.1.7
+
+- Corregido el resumen de progreso en partida individual: ahora cada indicador solo se pinta verde/rojo si esa pregunta ya fue respondida, evitando que preguntas no respondidas aparezcan en rojo.
+- Ajustada la lógica para que la pregunta activa se marque correctamente como actual incluso cuando el avance y los resultados llegan desfasados temporalmente.
+- Se reforzó la suite de pruebas con un caso que reproduce este desajuste y previene regresiones en el indicador superior.
+- Footer actualizado a **v1.1.7** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 
 ## Novedades de la versión 1.1.6
