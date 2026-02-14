@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 
-const APP_VERSION = '1.1.4';
+const APP_VERSION = __APP_VERSION__ || '0.0.0';
 
 export function HomePage() {
   const { t } = useTranslation();

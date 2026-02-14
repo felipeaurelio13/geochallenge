@@ -5,12 +5,21 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.1.4**
+- Frontend: **v1.1.5**
 
 
 
 
 
+
+
+
+## Novedades de la versión 1.1.5
+
+- Auditoría de buenas prácticas aplicada al manejo de versión en frontend: el footer ahora consume automáticamente la versión real del paquete en build para evitar desalineación entre app y despliegue en GitHub Pages.
+- Se tipó la constante global de versión (`__APP_VERSION__`) para mantener seguridad de tipos y evitar accesos implícitos.
+- Se reforzó la prueba de Home para validar que el footer renderiza la versión activa esperada.
+- Footer actualizado a **v1.1.5** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.1.4
 
