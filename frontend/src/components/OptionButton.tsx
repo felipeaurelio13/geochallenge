@@ -26,7 +26,7 @@ export function OptionButton({
 
   const getButtonClasses = () => {
     const baseClasses =
-      'w-full rounded-xl text-left transition-all duration-200 flex items-center gap-2.5 border-2 px-3 py-2.5 min-h-[48px] sm:gap-4 sm:p-4 sm:min-h-[56px]';
+      'w-full rounded-xl text-left transition-all duration-200 flex items-start gap-2 border-2 px-2.5 py-2 min-h-[44px] sm:items-center sm:gap-3 sm:px-3 sm:py-2.5 sm:min-h-[52px]';
 
     if (showResult) {
       if (isCorrect) {
@@ -57,7 +57,7 @@ export function OptionButton({
       aria-pressed={selected}
     >
       <span
-        className={`h-8 w-8 shrink-0 rounded-full flex items-center justify-center font-bold text-xs transition-colors sm:h-9 sm:w-9 sm:text-sm ${
+        className={`mt-0.5 h-7 w-7 shrink-0 rounded-full flex items-center justify-center font-bold text-[11px] transition-colors sm:mt-0 sm:h-8 sm:w-8 sm:text-xs ${
           showResult && isCorrect
             ? 'bg-green-500 text-white'
           : showResult && selected && !isCorrect
@@ -69,14 +69,14 @@ export function OptionButton({
       >
         {optionLetters[index]}
       </span>
-      <span className="flex-1 text-sm font-medium leading-tight sm:text-base">{option}</span>
+      <span className="flex-1 text-xs font-medium leading-snug sm:text-sm">{option}</span>
       {selected && !showResult && (
-        <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/50 bg-white/20 text-xs font-semibold text-white shadow-sm shadow-black/20 sm:hidden">
+        <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-white/50 bg-white/20 text-[10px] font-semibold text-white shadow-sm shadow-black/20 sm:hidden">
           ✓
         </span>
       )}
       {selected && !showResult && (
-        <span className="hidden sm:inline-flex items-center rounded-full border border-white/50 bg-white/20 px-2.5 py-1 text-xs font-semibold text-white shadow-sm shadow-black/20">
+        <span className="hidden md:inline-flex items-center rounded-full border border-white/50 bg-white/20 px-2 py-1 text-[11px] font-semibold text-white shadow-sm shadow-black/20">
           ✓ {t('game.selectedOption')}
         </span>
       )}
