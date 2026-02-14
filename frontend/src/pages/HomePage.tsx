@@ -16,7 +16,7 @@ export function HomePage() {
         <main className="relative mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
           <section className="mx-auto w-full max-w-xl text-center">
             <p className="mb-4 inline-flex items-center rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-              Trivia geográfica competitiva
+              {t('home.badge')}
             </p>
 
             <div className="mb-3 text-5xl" aria-hidden>
