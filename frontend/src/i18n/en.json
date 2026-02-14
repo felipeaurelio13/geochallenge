@@ -62,7 +62,8 @@
     "rankings": "Rankings",
     "yourStats": "Your statistics",
     "selectCategory": "Select a category",
-    "selectedCategory": "Active category"
+    "selectedCategory": "Active category",
+    "mobileCategoriesHint": "Swipe to see more categories"
   },
   "categories": {
     "mixed": "Mixed",

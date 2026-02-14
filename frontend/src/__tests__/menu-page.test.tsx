@@ -43,6 +43,7 @@ vi.mock('react-i18next', () => ({
         'menu.challengeDesc': 'Envía desafíos a tus amigos',
         'menu.yourStats': 'Tus estadísticas',
         'menu.selectedCategory': 'Categoría activa',
+        'menu.mobileCategoriesHint': 'Desliza para ver más categorías',
         'categories.flags': 'Banderas',
         'categories.capitals': 'Capitales',
         'categories.maps': 'Mapas',
@@ -91,6 +92,7 @@ describe('MenuPage', () => {
     fireEvent.click(screen.getByRole('button', { name: /un jugador · capitales/i }));
 
     expect(mockNavigate).toHaveBeenCalledWith('/game/single?category=CAPITAL');
+    expect(screen.getByText('Desliza para ver más categorías')).toBeInTheDocument();
     expect(screen.getByText(/v\d+\.\d+\.\d+/i)).toBeInTheDocument();
   });
 

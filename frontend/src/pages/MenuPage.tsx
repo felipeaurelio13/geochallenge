@@ -86,13 +86,13 @@ export function MenuPage() {
           <nav className="flex items-center gap-2 sm:gap-3">
             <Link
               to="/rankings"
-              className="rounded-lg border border-gray-800 bg-gray-900 px-3 py-2 text-xs font-medium text-gray-200 transition-colors hover:border-gray-600 hover:text-white sm:text-sm"
+              className="min-h-11 rounded-lg border border-gray-800 bg-gray-900 px-3 py-2 text-xs font-medium text-gray-200 transition-colors hover:border-gray-600 hover:text-white sm:text-sm"
             >
               🏆 <span className="hidden sm:inline">{t('menu.rankings')}</span>
             </Link>
             <Link
               to="/profile"
-              className="flex items-center gap-2 rounded-lg border border-gray-800 bg-gray-900 px-2.5 py-1.5 text-gray-200 transition-colors hover:border-gray-600 hover:text-white"
+              className="flex min-h-11 items-center gap-2 rounded-lg border border-gray-800 bg-gray-900 px-2.5 py-1.5 text-gray-200 transition-colors hover:border-gray-600 hover:text-white"
             >
               <span className="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-white text-sm font-bold">
                 {user?.username?.charAt(0).toUpperCase()}
@@ -101,7 +101,7 @@ export function MenuPage() {
             </Link>
             <button
               onClick={logout}
-              className="rounded-lg border border-gray-800 bg-gray-900 px-2.5 py-2 text-gray-300 transition-colors hover:border-red-500/60 hover:text-red-300"
+              className="min-h-11 rounded-lg border border-gray-800 bg-gray-900 px-2.5 py-2 text-gray-300 transition-colors hover:border-red-500/60 hover:text-red-300"
               title={t('auth.logout')}
               aria-label={t('auth.logout')}
             >
@@ -128,7 +128,7 @@ export function MenuPage() {
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`min-w-[8.2rem] snap-start rounded-xl border px-3 py-3 text-left transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/60 sm:min-w-0 ${
+                className={`min-h-11 min-w-[8.2rem] snap-start rounded-xl border px-3 py-3 text-left transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/60 sm:min-w-0 ${
                   selectedCategory === cat.id
                     ? 'border-primary/70 bg-primary/15 text-white shadow-md shadow-primary/15'
                     : 'border-gray-800 bg-gray-950 text-gray-300 hover:border-gray-600 hover:text-white'
@@ -140,6 +140,7 @@ export function MenuPage() {
               </button>
             ))}
           </div>
+          <p className="mt-2 text-xs text-gray-500 sm:hidden">{t('menu.mobileCategoriesHint')}</p>
           <p className="mt-3 text-xs text-gray-400 sm:text-sm">
             {t('menu.selectedCategory')}: <span className="font-semibold text-primary">{t(categories.find((cat) => cat.id === selectedCategory)?.labelKey ?? 'categories.mixed')}</span>
           </p>
