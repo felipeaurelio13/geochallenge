@@ -1,10 +1,26 @@
 interface ProgressBarProps {
   current: number;
   total: number;
-  correctAnswers: number;
+  results: Array<{ isCorrect: boolean }>;
 }
 
-export function ProgressBar({ current, total, correctAnswers }: ProgressBarProps) {
+export function getQuestionIndicatorStatus(
+  index: number,
+  current: number,
+  results: Array<{ isCorrect: boolean }>
+) {
+  if (index < current) {
+    return results[index]?.isCorrect ? 'correct' : 'incorrect';
+  }
+
+  if (index === current) {
+    return 'current';
+  }
+
+  return 'pending';
+}
+
+export function ProgressBar({ current, total, results }: ProgressBarProps) {
   const percentage = (current / total) * 100;
 
   return (
@@ -19,22 +35,26 @@ export function ProgressBar({ current, total, correctAnswers }: ProgressBarProps
 
       {/* Question indicators */}
       <div className="flex justify-between mt-2">
-        {Array.from({ length: total }, (_, i) => (
-          <div
-            key={i}
-            className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold transition-all duration-300 ${
-              i < current
-                ? i < correctAnswers
+        {Array.from({ length: total }, (_, i) => {
+          const status = getQuestionIndicatorStatus(i, current, results);
+
+          return (
+            <div
+              key={i}
+              className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold transition-all duration-300 ${
+                status === 'correct'
                   ? 'bg-green-500 text-white'
-                  : 'bg-red-500 text-white'
-                : i === current
-                ? 'bg-primary text-white ring-2 ring-primary ring-offset-2 ring-offset-gray-900'
-                : 'bg-gray-700 text-gray-500'
-            }`}
-          >
-            {i + 1}
-          </div>
-        ))}
+                  : status === 'incorrect'
+                  ? 'bg-red-500 text-white'
+                  : status === 'current'
+                  ? 'bg-primary text-white ring-2 ring-primary ring-offset-2 ring-offset-gray-900'
+                  : 'bg-gray-700 text-gray-500'
+              }`}
+            >
+              {i + 1}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

@@ -35,6 +35,8 @@ export interface GameSession {
 }
 
 // Cache de preguntas en memoria para mejor performance
+const MAP_CORRECT_DISTANCE_KM = 500;
+
 let questionsCache: Map<string, any> = new Map();
 
 /**
@@ -139,7 +141,7 @@ export async function validateAnswer(
       question.longitude
     );
     points = calculateMapScore(distance);
-    isCorrect = distance < 500; // Considerar correcto si está a menos de 500km
+    isCorrect = distance < MAP_CORRECT_DISTANCE_KM; // Consistente con el umbral de acierto visual
   } else {
     // Para preguntas de opción múltiple
     isCorrect = userAnswer.toLowerCase().trim() === question.correctAnswer.toLowerCase().trim();

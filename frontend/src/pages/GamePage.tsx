@@ -47,7 +47,6 @@ export function GamePage() {
 
   const currentQuestion: Question | null = questions[currentIndex] || null;
   const isMapQuestion = currentQuestion?.category === 'MAP';
-  const correctAnswers = results.filter(r => r.isCorrect).length;
   const isLoading = status === 'loading';
   const isLastQuestion = currentIndex >= questions.length - 1;
 
@@ -235,7 +234,7 @@ export function GamePage() {
           <ProgressBar
             current={currentIndex + 1}
             total={questions.length}
-            correctAnswers={correctAnswers}
+            results={results}
           />
         </div>
       </div>
@@ -255,6 +254,7 @@ export function GamePage() {
             {isMapQuestion ? (
               <Suspense fallback={<LoadingSpinner size="lg" text={t('game.loading')} />}>
                 <MapInteractive
+                  questionId={currentQuestion.id}
                   onLocationSelect={handleMapSelect}
                   selectedLocation={mapLocation}
                   correctLocation={

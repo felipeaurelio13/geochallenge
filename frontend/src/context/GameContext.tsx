@@ -82,6 +82,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         correctAnswer: result.correctAnswer,
         userAnswer: answer,
         points: result.points,
+        distance: result.distance,
       };
 
       setState((prev) => ({

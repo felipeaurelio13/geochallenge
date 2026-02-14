@@ -28,6 +28,7 @@ export function ChallengeGamePage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [correctAnswers, setCorrectAnswers] = useState(0);
+  const [results, setResults] = useState<Array<{ isCorrect: boolean }>>([]);
   const [timeRemaining, setTimeRemaining] = useState(TIME_PER_QUESTION);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [mapLocation, setMapLocation] = useState<{ lat: number; lng: number } | null>(null);
@@ -111,6 +112,12 @@ export function ChallengeGamePage() {
     }
 
     setLastAnswerCorrect(isCorrect);
+    setResults((prev) => {
+      if (prev.length > currentIndex) {
+        return prev;
+      }
+      return [...prev, { isCorrect }];
+    });
     setShowResult(true);
   };
 
@@ -221,7 +228,7 @@ export function ChallengeGamePage() {
           <ProgressBar
             current={currentIndex + 1}
             total={questions.length}
-            correctAnswers={correctAnswers}
+            results={results}
           />
         </div>
       </div>
@@ -239,6 +246,7 @@ export function ChallengeGamePage() {
             {isMapQuestion ? (
               <Suspense fallback={<LoadingSpinner size="lg" />}>
                 <MapInteractive
+                  questionId={currentQuestion.id}
                   onLocationSelect={(lat, lng) => setMapLocation({ lat, lng })}
                   selectedLocation={mapLocation}
                   correctLocation={
