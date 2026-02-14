@@ -4,7 +4,7 @@ import { getQuestionsForGame, validateAnswer, saveGameResult, AnswerResult, Game
 import { updateLeaderboardScore } from '../services/leaderboard.service.js';
 import { config } from '../config/env.js';
 import { prisma } from '../config/database.js';
-import { shouldAutoCloseQuestion, shouldResolveQuestion } from './duel.utils.js';
+import { determineDuelWinner, shouldAutoCloseQuestion, shouldResolveQuestion } from './duel.utils.js';
 
 interface QueuedPlayer {
   userId: string;
@@ -435,8 +435,7 @@ async function showQuestionResult(io: SocketIOServer, duel: ActiveDuel, question
 
     if (duel.currentQuestionIndex >= duel.questions.length) {
       // Fin del duelo
-      const winner = duel.players.reduce((a, b) => (a.score > b.score ? a : b));
-      const winnerId = duel.players[0].score === duel.players[1].score ? null : winner.userId;
+      const winnerId = determineDuelWinner([duel.players[0], duel.players[1]]);
       endDuel(io, duel, winnerId, 'completed');
     } else {
       // Siguiente pregunta

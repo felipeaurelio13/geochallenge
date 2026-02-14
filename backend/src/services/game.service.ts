@@ -1,8 +1,8 @@
 import { prisma } from '../config/database.js';
 import { config } from '../config/env.js';
 import { Category, Difficulty, GameMode } from '@prisma/client';
-import { haversineDistance, calculateMapScore } from '../utils/haversine.js';
-import { calculateScore, shuffleArray, selectRandom } from '../utils/scoring.js';
+import { haversineDistance } from '../utils/haversine.js';
+import { calculateScore, calculateMapScore, shuffleArray, selectRandom } from '../utils/scoring.js';
 
 export interface GameQuestion {
   id: string;
@@ -24,6 +24,7 @@ export interface AnswerResult {
   userAnswer: string;
   points: number;
   distance?: number; // Para preguntas de mapa
+  timeRemaining: number;
 }
 
 export interface GameSession {
@@ -140,7 +141,7 @@ export async function validateAnswer(
       question.latitude,
       question.longitude
     );
-    points = calculateMapScore(distance);
+    points = calculateMapScore(distance, timeRemaining);
     isCorrect = distance < MAP_CORRECT_DISTANCE_KM; // Consistente con el umbral de acierto visual
   } else {
     // Para preguntas de opción múltiple
@@ -155,6 +156,7 @@ export async function validateAnswer(
     userAnswer,
     points,
     distance,
+    timeRemaining: Math.max(0, timeRemaining),
   };
 }
 
