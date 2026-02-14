@@ -143,10 +143,13 @@ export function RegisterPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full py-3.5 bg-primary text-white font-bold rounded-xl shadow-md shadow-primary/30 hover:bg-primary/85 active:scale-[0.99] transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/70 disabled:opacity-50 disabled:cursor-wait disabled:scale-100 flex items-center justify-center gap-2"
             >
               {isLoading ? (
-                <LoadingSpinner size="sm" />
+                <>
+                  <LoadingSpinner size="sm" />
+                  <span className="text-sm">Procesando...</span>
+                </>
               ) : (
                 t('auth.registerButton')
               )}

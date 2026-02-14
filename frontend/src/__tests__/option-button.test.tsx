@@ -20,7 +20,7 @@ describe('OptionButton', () => {
     const button = screen.getByRole('button');
 
     expect(button).toHaveAttribute('aria-pressed', 'true');
-    expect(button.className).toContain('ring-2');
+    expect(button.className).toContain('ring-4');
     expect(screen.getByText('✓ Seleccionada')).toBeInTheDocument();
 
     fireEvent.click(button);

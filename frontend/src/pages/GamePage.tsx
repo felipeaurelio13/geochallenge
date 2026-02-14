@@ -206,8 +206,8 @@ export function GamePage() {
   return (
     <div className="min-h-screen bg-gray-900 flex flex-col">
       {/* Header */}
-      <header className="bg-gray-800 border-b border-gray-700 px-4 py-3">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
+      <header className="sticky top-0 z-30 bg-gray-800/95 border-b border-gray-700 px-3 py-3 backdrop-blur sm:px-4">
+        <div className="max-w-4xl mx-auto grid grid-cols-[auto_1fr_auto] items-center gap-2 sm:gap-4">
           <button
             onClick={() => {
               if (window.confirm(t('game.confirmExit'))) {
@@ -215,7 +215,7 @@ export function GamePage() {
                 navigate('/menu');
               }
             }}
-            className="text-gray-400 hover:text-white transition-colors"
+            className="rounded-lg border border-gray-600 px-2.5 py-1.5 text-xs sm:text-sm text-gray-200 hover:text-white hover:border-gray-400 transition-colors"
             aria-label={t('game.exit')}
           >
             ✕ {t('game.exit')}
@@ -234,7 +234,7 @@ export function GamePage() {
       </header>
 
       {/* Progress */}
-      <div className="bg-gray-800/50 px-4 py-3">
+      <div className="bg-gray-800/70 px-3 py-3 sm:px-4">
         <div className="max-w-4xl mx-auto">
           <ProgressBar
             current={currentIndex + 1}
@@ -245,7 +245,7 @@ export function GamePage() {
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 px-4 py-6">
+      <main className="flex-1 px-3 py-5 sm:px-4 sm:py-6">
         <div className="max-w-4xl mx-auto">
           {/* Question Card */}
           <QuestionCard
@@ -289,7 +289,7 @@ export function GamePage() {
           </div>
 
           {/* Action Buttons */}
-          <div className="mt-6 sticky bottom-3 z-10">
+          <div className="mt-6 sticky bottom-2 z-20">
             {!showResult ? (
               <div className="rounded-xl border border-gray-700 bg-gray-800/95 p-3 backdrop-blur-sm sm:bg-transparent sm:p-0 sm:border-0 sm:backdrop-blur-none">
                 {(selectedAnswer || mapLocation) && (
@@ -301,7 +301,7 @@ export function GamePage() {
                   <button
                     onClick={handleSubmitAnswer}
                     disabled={!selectedAnswer && !mapLocation}
-                    className="w-full sm:w-auto px-8 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full sm:w-auto px-8 py-3.5 bg-primary text-white font-bold rounded-xl shadow-md shadow-primary/30 hover:bg-primary/85 active:scale-[0.99] transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/70 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {t('game.submit')}
                   </button>
@@ -322,7 +322,7 @@ export function GamePage() {
 
                 <button
                   onClick={handleNextQuestion}
-                  className="w-full sm:w-auto px-8 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary/80 transition-colors animate-pulse"
+                  className="w-full sm:w-auto px-8 py-3.5 bg-primary text-white font-bold rounded-xl shadow-md shadow-primary/30 hover:bg-primary/85 active:scale-[0.99] transition-all duration-150 animate-pulse focus:outline-none focus:ring-2 focus:ring-primary/70"
                 >
                   {isLastQuestion ? t('game.seeResults') : t('game.next')}
                 </button>
