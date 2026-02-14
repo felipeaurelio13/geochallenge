@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 
+const APP_VERSION = __APP_VERSION__ || '0.0.0';
+
 type Category = 'FLAG' | 'CAPITAL' | 'MAP' | 'SILHOUETTE' | 'MIXED';
 
 interface GameModeCard {
@@ -71,7 +73,7 @@ export function MenuPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950">
+    <div className="min-h-screen bg-gray-950 text-white flex flex-col">
       <header className="sticky top-0 z-20 border-b border-gray-800/80 bg-gray-950/95 backdrop-blur">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-2 px-4 py-3 sm:px-6">
           <Link to="/" className="flex items-center gap-2 min-w-0">
@@ -109,7 +111,7 @@ export function MenuPage() {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 pb-24 sm:px-6 sm:py-8 sm:pb-10">
         <section className="rounded-2xl border border-gray-800 bg-gradient-to-b from-gray-900 to-gray-950 p-5 shadow-lg shadow-black/15 sm:p-6">
           <h1 className="text-2xl font-bold text-white sm:text-3xl">
             {t('menu.welcome', { name: user?.username })}
@@ -121,12 +123,12 @@ export function MenuPage() {
           <h2 className="text-base font-semibold text-white mb-3 sm:text-lg">
             {t('menu.selectCategory')}
           </h2>
-          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-5">
+          <div className="-mx-1 flex snap-x snap-mandatory gap-2 overflow-x-auto px-1 pb-1 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-2.5 sm:overflow-visible sm:px-0 lg:grid-cols-5">
             {categories.map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`rounded-xl border px-3 py-3 text-left transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/60 ${
+                className={`min-w-[8.2rem] snap-start rounded-xl border px-3 py-3 text-left transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/60 sm:min-w-0 ${
                   selectedCategory === cat.id
                     ? 'border-primary/70 bg-primary/15 text-white shadow-md shadow-primary/15'
                     : 'border-gray-800 bg-gray-950 text-gray-300 hover:border-gray-600 hover:text-white'
@@ -138,6 +140,9 @@ export function MenuPage() {
               </button>
             ))}
           </div>
+          <p className="mt-3 text-xs text-gray-400 sm:text-sm">
+            {t('menu.selectedCategory')}: <span className="font-semibold text-primary">{t(categories.find((cat) => cat.id === selectedCategory)?.labelKey ?? 'categories.mixed')}</span>
+          </p>
         </section>
 
         <section className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -191,6 +196,20 @@ export function MenuPage() {
           </div>
         </section>
       </main>
+
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-gray-800/90 bg-gray-950/95 p-3 backdrop-blur supports-[padding:max(0px)]:pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:hidden">
+        <button
+          onClick={() => handleStartGame('single')}
+          className="w-full rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-primary/70"
+        >
+          {t('menu.singlePlayer')} · {t(categories.find((cat) => cat.id === selectedCategory)?.labelKey ?? 'categories.mixed')}
+        </button>
+      </div>
+
+      <footer className="border-t border-gray-800 py-4 text-center text-xs text-gray-500">
+        <p>GeoChallenge &copy; {new Date().getFullYear()}</p>
+        <p className="mt-1">v{APP_VERSION}</p>
+      </footer>
     </div>
   );
 }

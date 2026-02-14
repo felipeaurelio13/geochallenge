@@ -42,6 +42,7 @@ vi.mock('react-i18next', () => ({
         'menu.challenge': 'Desafíos',
         'menu.challengeDesc': 'Envía desafíos a tus amigos',
         'menu.yourStats': 'Tus estadísticas',
+        'menu.selectedCategory': 'Categoría activa',
         'categories.flags': 'Banderas',
         'categories.capitals': 'Capitales',
         'categories.maps': 'Mapas',
@@ -75,6 +76,24 @@ describe('MenuPage', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/duel?category=FLAG');
   });
 
+
+  it('muestra CTA mobile con categoría activa y footer con versión', () => {
+    render(
+      <MemoryRouter>
+        <MenuPage />
+      </MemoryRouter>
+    );
+
+    const ctaButton = screen.getByRole('button', { name: /un jugador · mixto/i });
+    expect(ctaButton).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /capitales/i }));
+    fireEvent.click(screen.getByRole('button', { name: /un jugador · capitales/i }));
+
+    expect(mockNavigate).toHaveBeenCalledWith('/game/single?category=CAPITAL');
+    expect(screen.getByText(/v\d+\.\d+\.\d+/i)).toBeInTheDocument();
+  });
+
   it('permite cambiar categoría y navegar a partida individual con categoría seleccionada', () => {
     render(
       <MemoryRouter>
@@ -87,7 +106,7 @@ describe('MenuPage', () => {
 
     expect(capitalesButton).toHaveAttribute('aria-pressed', 'true');
 
-    const singleModeButton = screen.getByRole('button', { name: /un jugador/i });
+    const singleModeButton = screen.getByRole('button', { name: /un jugador[\s\S]*juega solo/i });
     fireEvent.click(singleModeButton);
 
     expect(mockNavigate).toHaveBeenCalledWith('/game/single?category=CAPITAL');
