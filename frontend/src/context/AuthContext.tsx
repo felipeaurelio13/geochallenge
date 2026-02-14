@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { api } from '../services/api';
 import { socketService } from '../services/socket';
+import { testAuthBypass, buildTestBypassUser } from '../utils/testAuthBypass';
 import type { User, AuthState } from '../types';
 
 interface AuthContextType extends AuthState {
@@ -24,7 +25,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem('token');
-      if (!token) {
+      const shouldUseBypass = testAuthBypass.isEnabled && testAuthBypass.isConfigured;
+
+      if (!token && !shouldUseBypass) {
         setState((prev) => ({ ...prev, isLoading: false }));
         return;
       }
@@ -39,8 +42,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
 
         // Connect socket
-        await socketService.connect(token);
+        if (token) {
+          await socketService.connect(token);
+        }
       } catch (error) {
+        if (shouldUseBypass) {
+          setState({
+            user: buildTestBypassUser(),
+            token: null,
+            isLoading: false,
+            isAuthenticated: true,
+          });
+          return;
+        }
+
         localStorage.removeItem('token');
         setState({
           user: null,

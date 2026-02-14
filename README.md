@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.1.12**
+- Frontend: **v1.1.13**
 
 
 
@@ -13,6 +13,16 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 
 
+
+
+
+## Novedades de la versión 1.1.13
+
+- Se incorporó un bypass de autenticación **seguro y explícito para tests** que evita bloquear la ejecución automática cuando no hay sesión iniciada.
+- El bypass requiere cabecera secreta (`x-test-auth-bypass`) y sólo se activa en entorno de testing o cuando se habilita por variables de entorno, manteniendo protección en producción.
+- Se añadió utilitario de frontend para inyectar el bypass en pruebas y fallback de autenticación en `AuthContext` para mejorar estabilidad de tests E2E/integración.
+- Nuevas pruebas automatizadas para validar la configuración del bypass en frontend y backend.
+- Footer actualizado a **v1.1.13** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 
 ## Novedades de la versión 1.1.12
