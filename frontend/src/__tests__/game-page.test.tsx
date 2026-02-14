@@ -9,6 +9,21 @@ const mocks = vi.hoisted(() => ({
   nextQuestionMock: vi.fn(),
   finishGameMock: vi.fn().mockResolvedValue(undefined),
   resetGameMock: vi.fn(),
+  gameState: {
+    questions: [
+      {
+        id: 'q1',
+        questionText: 'Capital de Chile',
+        options: ['Santiago', 'Lima', 'Bogotá', 'Quito'],
+        correctAnswer: 'Santiago',
+        category: 'CAPITAL',
+      },
+    ],
+    currentIndex: 0,
+    score: 100,
+    results: [{ isCorrect: true }],
+    status: 'playing',
+  },
 }));
 
 vi.mock('react-router-dom', () => ({
@@ -24,21 +39,7 @@ vi.mock('react-i18next', () => ({
 
 vi.mock('../context/GameContext', () => ({
   useGame: () => ({
-    state: {
-      questions: [
-        {
-          id: 'q1',
-          questionText: 'Capital de Chile',
-          options: ['Santiago', 'Lima', 'Bogotá', 'Quito'],
-          correctAnswer: 'Santiago',
-          category: 'CAPITAL',
-        },
-      ],
-      currentIndex: 0,
-      score: 100,
-      results: [{ isCorrect: true }],
-      status: 'playing',
-    },
+    state: mocks.gameState,
     startGame: mocks.startGameMock,
     submitAnswer: mocks.submitAnswerMock,
     nextQuestion: mocks.nextQuestionMock,
@@ -62,6 +63,15 @@ vi.mock('../components', () => ({
 describe('GamePage ending flow', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.gameState.questions = [
+      {
+        id: 'q1',
+        questionText: 'Capital de Chile',
+        options: ['Santiago', 'Lima', 'Bogotá', 'Quito'],
+        correctAnswer: 'Santiago',
+        category: 'CAPITAL',
+      },
+    ];
   });
 
   it('renderiza alternativas en grilla de dos columnas para reducir scroll en mobile', () => {
@@ -74,8 +84,29 @@ describe('GamePage ending flow', () => {
     expect(optionsGrid).toHaveClass('grid-cols-2');
   });
 
+  it('prioriza una columna en mobile para categoría banderas y mejora legibilidad', () => {
+    mocks.gameState.questions = [
+      {
+        id: 'q2',
+        questionText: 'Bandera de Japón',
+        options: ['Japón', 'Corea del Sur', 'China', 'Vietnam'],
+        correctAnswer: 'Japón',
+        category: 'FLAG',
+      },
+    ];
+
+    render(<GamePage />);
+
+    const firstOption = screen.getByRole('button', { name: 'Japón' });
+    const optionsGrid = firstOption.parentElement;
+
+    expect(optionsGrid).toHaveClass('grid');
+    expect(optionsGrid).toHaveClass('grid-cols-1');
+    expect(optionsGrid).toHaveClass('sm:grid-cols-2');
+  });
+
   it('mantiene el estado hasta resultados sin resetear el juego al desmontar', async () => {
-    const { unmount } = render(<GamePage />);
+    render(<GamePage />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Santiago' }));
     fireEvent.click(screen.getByRole('button', { name: 'game.submit' }));
@@ -87,8 +118,6 @@ describe('GamePage ending flow', () => {
       expect(mocks.finishGameMock).toHaveBeenCalledTimes(1);
       expect(mocks.navigateMock).toHaveBeenCalledWith('/results');
     });
-
-    unmount();
 
     expect(mocks.resetGameMock).not.toHaveBeenCalled();
   });
