@@ -35,33 +35,31 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4 py-8">
       <div className="max-w-md w-full">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-block">
+        <div className="text-center mb-6">
+          <Link to="/" className="inline-flex flex-col items-center gap-2">
             <span className="text-4xl">🌍</span>
-            <h1 className="text-2xl font-bold text-white mt-2">
+            <h1 className="text-2xl font-bold text-white">
               <span className="text-primary">Geo</span>Challenge
             </h1>
           </Link>
         </div>
 
-        {/* Form Card */}
-        <div className="bg-gray-800 rounded-xl p-8 shadow-lg">
+        <div className="rounded-2xl border border-gray-800 bg-gray-900/95 p-6 shadow-xl shadow-black/20 sm:p-8">
           <h2 className="text-2xl font-bold text-white mb-6 text-center">
             {t('auth.login')}
           </h2>
 
           {error && (
-            <div className="bg-red-900/50 border border-red-500 text-red-300 px-4 py-3 rounded-lg mb-6">
+            <div className="bg-red-900/40 border border-red-500/60 text-red-200 px-4 py-3 rounded-lg mb-6 text-sm">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-200 mb-2">
                 {t('auth.email')}
               </label>
               <input
@@ -71,13 +69,13 @@ export function LoginPage() {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary transition-colors"
+                className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/70 focus:border-primary transition-colors"
                 placeholder="tu@email.com"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-200 mb-2">
                 {t('auth.password')}
               </label>
               <input
@@ -87,7 +85,7 @@ export function LoginPage() {
                 value={formData.password}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary transition-colors"
+                className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/70 focus:border-primary transition-colors"
                 placeholder="********"
               />
             </div>
@@ -95,7 +93,7 @@ export function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3.5 bg-primary text-white font-bold rounded-xl shadow-md shadow-primary/30 hover:bg-primary/85 active:scale-[0.99] transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/70 disabled:opacity-50 disabled:cursor-wait disabled:scale-100 flex items-center justify-center gap-2"
+              className="w-full py-3.5 rounded-xl bg-primary text-white font-semibold border border-primary/80 shadow-lg shadow-primary/30 hover:bg-primary/90 active:scale-[0.99] transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/70 disabled:opacity-60 disabled:cursor-wait disabled:scale-100 flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <>
@@ -109,19 +107,17 @@ export function LoginPage() {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-gray-400">
+            <p className="text-gray-400 text-sm">
               {t('auth.noAccount')}{' '}
-              <Link to="/register" className="text-primary hover:underline">
+              <Link to="/register" className="text-primary hover:underline font-medium">
                 {t('auth.registerHere')}
               </Link>
             </p>
           </div>
-
         </div>
 
-        {/* Back link */}
         <div className="mt-6 text-center">
-          <Link to="/" className="text-gray-400 hover:text-white transition-colors">
+          <Link to="/" className="text-gray-400 hover:text-white transition-colors text-sm">
             ← {t('common.back')}
           </Link>
         </div>

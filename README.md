@@ -5,11 +5,15 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.0.9**
+- Frontend: **v1.1.0**
 
 
-## Novedades de la versión 1.0.9
+## Novedades de la versión 1.1.0
 
+- Correcciones de ortografía y acentuación en español (incluye “Iniciar sesión”) para una experiencia más cuidada.
+- Vista de login refinada para modo oscuro con CTA de “Entrar” más claro y apariencia inequívoca de botón en móvil.
+- Pantalla de selección de modo de juego rediseñada (header y cuerpo) con enfoque mobile-first, mayor jerarquía visual y mejor legibilidad.
+- Footer actualizado a **v1.1.0** para mantener trazabilidad con el despliegue en GitHub Pages.
 - Mejorado el estado visual de alternativas en preguntas: selección más evidente (anillo, contraste y badge) para reducir dudas en móvil.
 - Header de juego fijado arriba (sticky) para mantener el temporizador siempre visible mientras haces scroll en preguntas largas o mapas.
 - Botones de login, registro y acciones de juego actualizados con apariencia de CTA clara y feedback de carga/press para mejor percepción de respuesta.
