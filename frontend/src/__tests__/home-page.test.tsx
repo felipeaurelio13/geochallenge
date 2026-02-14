@@ -13,6 +13,7 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => {
       const translations: Record<string, string> = {
+        'home.badge': 'Trivia geográfica competitiva',
         'home.subtitle': 'Pon a prueba tus conocimientos de geografía.',
         'home.play': 'Jugar ahora',
         'home.login': 'Iniciar sesión',
@@ -44,9 +45,10 @@ describe('HomePage', () => {
       </MemoryRouter>
     );
 
+    expect(screen.getByText('Trivia geográfica competitiva')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Iniciar sesión' })).toHaveAttribute('href', '/login');
     expect(screen.getByRole('link', { name: 'Crear cuenta' })).toHaveAttribute('href', '/register');
-    expect(screen.getByText('v1.1.15')).toBeInTheDocument();
+    expect(screen.getByText('v1.1.16')).toBeInTheDocument();
   });
 
   it('muestra acción principal de juego cuando hay un usuario autenticado', () => {

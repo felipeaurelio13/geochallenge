@@ -4,6 +4,7 @@
     "tagline": "Test your geography knowledge"
   },
   "home": {
+    "badge": "Competitive geography trivia",
     "subtitle": "Test your geography knowledge",
     "play": "Play",
     "login": "Login",
