@@ -55,6 +55,13 @@ vi.mock('../components', () => ({
   AnswerStatusBadge: ({ label }: { label: string }) => <div>{label}</div>,
 }));
 
+
+vi.mock('../components/MapInteractive', () => ({
+  MapInteractive: ({ questionId }: { questionId?: string }) => (
+    <div data-testid="map-interactive" data-question-id={questionId}>map</div>
+  ),
+}));
+
 vi.mock('../services/socket', () => ({
   socketService: {
     socket: mocks.socketMock,
@@ -126,6 +133,30 @@ describe('DuelPage socket flow', () => {
 
     expect(optionsGrid).toHaveClass('grid');
     expect(optionsGrid).toHaveClass('grid-cols-2');
+  });
+
+
+  it('envía el questionId al mapa para resetear viewport entre preguntas de mapa consecutivas', async () => {
+    render(<DuelPage />);
+
+    act(() => {
+      mocks.handlers.get('duel:question')?.forEach((cb) =>
+        cb({
+          questionIndex: 0,
+          totalQuestions: 10,
+          question: {
+            id: 'map-1',
+            questionText: 'Ubica París',
+            options: [],
+            correctAnswer: '',
+            category: 'MAP',
+          },
+        })
+      );
+    });
+
+    const map = await screen.findByTestId('map-interactive');
+    expect(map).toHaveAttribute('data-question-id', 'map-1');
   });
 
   it('mantiene una sola suscripción de sockets aunque cambie el score', async () => {
