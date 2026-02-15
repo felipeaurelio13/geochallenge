@@ -105,7 +105,7 @@ export function MenuPage() {
           </button>
 
           <button
-            onClick={() => navigate('/challenges')}
+            onClick={() => navigate(`/challenges?category=${selectedCategory}&openCreate=1`)}
             className="rounded-2xl border border-gray-800 bg-gray-900 p-5 text-left transition-colors hover:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary/70"
           >
             <h3 className="text-xl font-bold text-white">{t('menu.challenge')}</h3>

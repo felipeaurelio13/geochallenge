@@ -6,11 +6,13 @@ const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
   apiGet: vi.fn(),
   apiPost: vi.fn(),
+  searchParams: new URLSearchParams(),
 }));
 
 vi.mock('react-router-dom', () => ({
   Link: ({ children }: { children: any }) => <a>{children}</a>,
   useNavigate: () => mocks.navigate,
+  useSearchParams: () => [mocks.searchParams, vi.fn()],
 }));
 
 vi.mock('react-i18next', () => ({
@@ -31,6 +33,7 @@ vi.mock('../services/api', () => ({
 describe('ChallengesPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.searchParams = new URLSearchParams();
     mocks.apiGet.mockResolvedValue({ challenges: [] });
   });
 
@@ -123,6 +126,24 @@ describe('ChallengesPage', () => {
 
     await waitFor(() => {
       expect(mocks.apiPost).toHaveBeenCalledWith('/challenges/c1/join');
+    });
+  });
+
+  it('respeta la categoría inicial enviada desde menú para parametrizar al crear', async () => {
+    mocks.searchParams = new URLSearchParams('category=CAPITAL&openCreate=1');
+
+    render(<ChallengesPage />);
+
+    expect(await screen.findByText('challenges.createTitle')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'challenges.send' }));
+
+    await waitFor(() => {
+      expect(mocks.apiPost).toHaveBeenCalledWith('/challenges', {
+        categories: ['CAPITAL'],
+        maxPlayers: 2,
+        answerTimeSeconds: 20,
+      });
     });
   });
 });

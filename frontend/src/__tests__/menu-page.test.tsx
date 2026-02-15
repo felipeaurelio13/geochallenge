@@ -77,6 +77,19 @@ describe('MenuPage', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/duel?category=FLAG');
   });
 
+  it('abre desafíos con categoría preseleccionada para parametrizar rápido', () => {
+    render(
+      <MemoryRouter>
+        <MenuPage />
+      </MemoryRouter>
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /capitales/i }));
+    fireEvent.click(screen.getByRole('button', { name: /desafíos/i }));
+
+    expect(mockNavigate).toHaveBeenCalledWith('/challenges?category=CAPITAL&openCreate=1');
+  });
+
 
   it('muestra CTA mobile con categoría activa y footer con versión', () => {
     render(

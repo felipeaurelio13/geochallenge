@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.4**
+- Frontend: **v1.2.5**
 
 
 
@@ -18,6 +18,13 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 
 
+
+## Novedades de la versión 1.2.5
+- Se corrigió la navegación de **Desafíos** para despliegues en GitHub Pages: el router ahora respeta `BASE_URL`, evitando redirecciones a rutas inservibles fuera del prefijo de la app.
+- El acceso a **Desafíos** desde el menú ahora conserva la categoría elegida y abre la configuración directamente para parametrizar más rápido (flujo mobile-first con menor fricción).
+- Se reforzó el manejo de redirecciones de autenticación para usar rutas internas de la app, evitando saltos rotos a `/login` fuera del contexto del despliegue.
+- Se añadieron pruebas automatizadas para validar la preparametrización de desafíos desde menú y la creación con categoría inicial.
+- Footer actualizado a **v1.2.5** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.4
 - Se corrigió el flujo de cierre de partida en **Desafíos**: ahora existe una pantalla de resultados dedicada para `/challenges/:id/results`, evitando la navegación a una página inservible al terminar.

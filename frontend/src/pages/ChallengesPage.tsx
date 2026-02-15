@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
@@ -41,6 +41,7 @@ const categoryKeyByValue: Record<string, string> = {
 export function ChallengesPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
 
   const [challenges, setChallenges] = useState<Challenge[]>([]);
@@ -52,6 +53,19 @@ export function ChallengesPage() {
   const [createTime, setCreateTime] = useState<10 | 20 | 30>(20);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    const requestedCategory = searchParams.get('category');
+    const shouldOpenCreate = searchParams.get('openCreate') === '1';
+
+    if (requestedCategory && categories.includes(requestedCategory)) {
+      setCreateCategories([requestedCategory]);
+    }
+
+    if (shouldOpenCreate) {
+      setShowCreateModal(true);
+    }
+  }, [searchParams]);
 
   const fetchChallenges = async () => {
     try {
