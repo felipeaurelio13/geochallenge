@@ -1,6 +1,7 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import type { User, Question, GameResult, LeaderboardEntry, Category } from '../types';
 import { testAuthBypass } from '../utils/testAuthBypass';
+import { toAppPath } from '../utils/routing';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -34,11 +35,11 @@ class ApiService {
       (response) => response,
       (error: AxiosError) => {
         if (error.response?.status === 401) {
-          const isAuthPage = window.location.pathname === '/login' || window.location.pathname === '/register';
+          const isAuthPage = [toAppPath('/login'), toAppPath('/register')].includes(window.location.pathname);
           const hasBypass = testAuthBypass.isEnabled && testAuthBypass.isConfigured;
           if (!isAuthPage && !hasBypass) {
             localStorage.removeItem('token');
-            window.location.href = '/login';
+            window.location.href = toAppPath('/login');
           }
         }
         if (error.code === 'ECONNABORTED') {

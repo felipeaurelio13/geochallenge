@@ -17,6 +17,7 @@ import {
   ChallengeResultsPage,
 } from './pages';
 import { LoadingSpinner, ErrorBoundary, ServerWakeUp } from './components';
+import { getRouterBasename, toAppPath } from './utils/routing';
 
 // Protected route wrapper
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -65,7 +66,7 @@ function RouteErrorFallback() {
         <h2 className="text-2xl font-bold text-white mb-2">Algo salio mal</h2>
         <p className="text-gray-400 mb-6">Ha ocurrido un error inesperado</p>
         <a
-          href="/menu"
+          href={toAppPath('/menu')}
           className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/80 transition-colors inline-block"
         >
           Volver al menu
@@ -154,6 +155,7 @@ export const appRoutes = [
 const router = createBrowserRouter(
   appRoutes,
   {
+    basename: getRouterBasename(),
     future: {
       v7_fetcherPersist: true,
       v7_normalizeFormMethod: true,
