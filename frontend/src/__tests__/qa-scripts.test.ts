@@ -12,6 +12,6 @@ describe('qa scripts', () => {
     );
     expect(typedPackageJson.scripts?.['test:e2e']).toContain('test:e2e:install');
     expect(typedPackageJson.scripts?.['test:e2e:ci']).toContain('install --with-deps chromium');
-    expect(typedPackageJson.scripts?.['test:e2e:ci']).toContain('playwright@1.51.1 test');
+    expect(typedPackageJson.scripts?.['test:e2e:ci']).toContain('playwright test');
   });
 });
