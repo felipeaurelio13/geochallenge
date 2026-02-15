@@ -9,7 +9,7 @@ export function HomePage() {
   const { user } = useAuth();
 
   return (
-    <div className="flex min-h-screen flex-col overflow-x-clip bg-gray-950 text-white">
+    <div className="app-shell">
       <div className="relative flex-1 overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(34,197,94,0.2),_transparent_45%)]" />
 
@@ -64,9 +64,9 @@ export function HomePage() {
         </main>
       </div>
 
-      <footer className="border-t border-gray-800 py-5 text-center text-xs text-gray-500">
+      <footer className="app-footer">
         <p>GeoChallenge &copy; {new Date().getFullYear()}</p>
-        <p className="mt-1">v{APP_VERSION}</p>
+        <p className="app-footer__version">v{APP_VERSION}</p>
       </footer>
     </div>
   );

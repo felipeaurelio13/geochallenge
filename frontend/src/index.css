@@ -29,6 +29,31 @@
 
 /* Custom component styles */
 @layer components {
+  .app-shell {
+    @apply flex min-h-screen flex-col overflow-x-clip bg-gray-950 text-white;
+  }
+
+  .surface-panel {
+    @apply rounded-2xl border border-gray-800 bg-gray-900/90 shadow-sm shadow-black/20;
+  }
+
+  .app-footer {
+    @apply border-t border-gray-800 px-4 py-4 text-center text-xs text-gray-500;
+  }
+
+  .app-footer__version {
+    @apply mt-1 inline-flex rounded-full border border-gray-700 bg-gray-900 px-2 py-0.5 text-[11px] text-gray-400;
+  }
+
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
   .btn {
     @apply px-6 py-3 rounded-lg font-semibold transition-all duration-200
            active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
@@ -76,6 +101,17 @@
 
   .option-button.incorrect {
     @apply border-error-500 bg-error-500/20;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
   }
 }
 

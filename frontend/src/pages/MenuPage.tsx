@@ -26,7 +26,7 @@ export function MenuPage() {
   );
 
   return (
-    <div className="flex min-h-screen flex-col overflow-x-clip bg-gray-950 text-white">
+    <div className="app-shell">
       <header className="sticky top-0 z-20 border-b border-gray-800/80 bg-gray-950/95 backdrop-blur supports-[padding:max(0px)]:pt-[env(safe-area-inset-top)]">
         <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-2 px-4 py-3 sm:px-6">
           <Link to="/" className="flex items-center gap-2 min-w-0">
@@ -59,14 +59,14 @@ export function MenuPage() {
       </header>
 
       <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-4 py-6 pb-28 sm:px-6 sm:py-8 sm:pb-10">
-        <section className="rounded-2xl border border-gray-800 bg-gray-900/90 p-5 sm:p-6">
+        <section className="surface-panel p-5 sm:p-6">
           <h1 className="text-2xl font-bold text-white sm:text-3xl">{t('menu.welcome', { name: user?.username })}</h1>
           <p className="mt-1 text-sm text-gray-300 sm:text-base">{t('menu.chooseMode')}</p>
         </section>
 
-        <section className="mt-5 rounded-2xl border border-gray-800 bg-gray-900/90 p-4 sm:p-5">
+        <section className="surface-panel mt-5 p-4 sm:p-5">
           <h2 className="mb-3 text-base font-semibold text-white">{t('menu.selectCategory')}</h2>
-          <div className="-mx-1 flex snap-x snap-mandatory gap-2 overflow-x-auto px-1 pb-1 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-2.5 sm:overflow-visible sm:px-0 lg:grid-cols-5">
+          <div className="scrollbar-none -mx-1 flex snap-x snap-mandatory gap-2 overflow-x-auto px-1 pb-1 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-2.5 sm:overflow-visible sm:px-0 lg:grid-cols-5">
             {categories.map((cat) => (
               <button
                 key={cat.id}
@@ -123,9 +123,9 @@ export function MenuPage() {
         </button>
       </div>
 
-      <footer className="border-t border-gray-800 py-4 text-center text-xs text-gray-500 sm:pb-4">
+      <footer className="app-footer sm:pb-4">
         <p>GeoChallenge &copy; {new Date().getFullYear()}</p>
-        <p className="mt-1">v{APP_VERSION}</p>
+        <p className="app-footer__version">v{APP_VERSION}</p>
       </footer>
     </div>
   );
