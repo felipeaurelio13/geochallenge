@@ -29,6 +29,7 @@ export function ChallengeGamePage() {
   const [score, setScore] = useState(0);
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [results, setResults] = useState<Array<{ isCorrect: boolean }>>([]);
+  const [timePerQuestion, setTimePerQuestion] = useState(TIME_PER_QUESTION);
   const [timeRemaining, setTimeRemaining] = useState(TIME_PER_QUESTION);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [mapLocation, setMapLocation] = useState<{ lat: number; lng: number } | null>(null);
@@ -45,9 +46,14 @@ export function ChallengeGamePage() {
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const response = await api.get<{ alreadyPlayed?: boolean; questions?: Question[] }>(
+        const response = await api.get<{ alreadyPlayed?: boolean; questions?: Question[]; answerTimeSeconds?: number }>(
           `/challenges/${id}/questions`
         );
+        if (response.answerTimeSeconds) {
+          setTimePerQuestion(response.answerTimeSeconds);
+          setTimeRemaining(response.answerTimeSeconds);
+        }
+
         if (response.alreadyPlayed) {
           setAlreadyPlayed(true);
         } else if (response.questions) {
@@ -71,11 +77,11 @@ export function ChallengeGamePage() {
     if (typeof mapDistanceKm === 'number') {
       const accuracyFactor = Math.max(0, 1 - mapDistanceKm / MAP_MAX_DISTANCE_KM);
       const accuracyPoints = Math.round(BASE_POINTS * accuracyFactor);
-      const timePoints = Math.round((timeRemaining / TIME_PER_QUESTION) * MAX_TIME_BONUS * accuracyFactor);
+      const timePoints = Math.round((timeRemaining / timePerQuestion) * MAX_TIME_BONUS * accuracyFactor);
       return accuracyPoints + timePoints;
     }
 
-    const timeBonus = Math.round((timeRemaining / TIME_PER_QUESTION) * MAX_TIME_BONUS);
+    const timeBonus = Math.round((timeRemaining / timePerQuestion) * MAX_TIME_BONUS);
     return BASE_POINTS + timeBonus;
   };
 
@@ -134,8 +140,8 @@ export function ChallengeGamePage() {
       // Game finished - submit result
       try {
         await api.post<{ success: boolean }>(`/challenges/${id}/submit`, {
-          score: score + (lastAnswerCorrect ? calculatePoints(true) : 0),
-          correctCount: correctAnswers + (lastAnswerCorrect ? 1 : 0),
+          score,
+          correctCount: correctAnswers,
         });
         navigate(`/challenges/${id}/results`, {
           state: {
@@ -153,7 +159,7 @@ export function ChallengeGamePage() {
       setSelectedAnswer(null);
       setMapLocation(null);
       setShowResult(false);
-      setTimeRemaining(TIME_PER_QUESTION);
+      setTimeRemaining(timePerQuestion);
     }
   };
 
@@ -221,7 +227,7 @@ export function ChallengeGamePage() {
           <ScoreDisplay score={score} previousScore={previousScore} showAnimation={showResult} />
 
           <Timer
-            duration={TIME_PER_QUESTION}
+            duration={timePerQuestion}
             timeRemaining={timeRemaining}
             onTick={setTimeRemaining}
             onComplete={handleTimeComplete}

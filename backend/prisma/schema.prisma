@@ -22,8 +22,8 @@ model User {
 
   // Relaciones
   games              GameResult[]
-  challengesSent     Challenge[]  @relation("ChallengeSent")
-  challengesReceived Challenge[]  @relation("ChallengeReceived")
+  challengesCreated  Challenge[]            @relation("ChallengeCreator")
+  challengeParticipations ChallengeParticipant[]
 
   @@map("users")
 }
@@ -62,22 +62,37 @@ model GameResult {
 
 model Challenge {
   id              String          @id @default(cuid())
-  challengerId    String
-  challengedId    String
+  creatorId       String
   status          ChallengeStatus @default(PENDING)
-  category        Category?
+  categories      Category[]
+  maxPlayers      Int
+  answerTimeSeconds Int          @default(20)
   questionIds     String[]        // IDs de preguntas para reproducibilidad
-  challengerScore Int?
-  challengedScore Int?
   winnerId        String?
   createdAt       DateTime        @default(now())
   expiresAt       DateTime
   completedAt     DateTime?
 
-  challenger User @relation("ChallengeSent", fields: [challengerId], references: [id], onDelete: Cascade)
-  challenged User @relation("ChallengeReceived", fields: [challengedId], references: [id], onDelete: Cascade)
+  creator User @relation("ChallengeCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  participants ChallengeParticipant[]
 
   @@map("challenges")
+}
+
+model ChallengeParticipant {
+  id          String   @id @default(cuid())
+  challengeId String
+  userId      String
+  score       Int?
+  correctCount Int?
+  joinedAt    DateTime @default(now())
+  completedAt DateTime?
+
+  challenge Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([challengeId, userId])
+  @@map("challenge_participants")
 }
 
 enum Category {

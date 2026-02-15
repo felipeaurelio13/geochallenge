@@ -151,7 +151,9 @@
     "tabs": {
       "received": "Recibidos",
       "sent": "Enviados",
-      "completed": "Completados"
+      "completed": "Completados",
+      "mine": "Mis desafíos",
+      "joinable": "Para unirme"
     },
     "empty": "No hay desafíos",
     "from": "De",
@@ -175,7 +177,12 @@
     "alreadyPlayed": "Ya jugaste este desafío",
     "alreadyPlayedDesc": "Espera a que tu oponente complete el desafío",
     "backToList": "Volver a desafíos",
-    "challengeMode": "Modo desafío"
+    "challengeMode": "Modo desafío",
+    "join": "Unirme",
+    "waitingReady": "Listo para jugar",
+    "categories": "Categorías",
+    "maxPlayers": "Cupo de jugadores",
+    "answerTime": "Tiempo por pregunta"
   },
   "rankings": {
     "title": "Rankings Globales",

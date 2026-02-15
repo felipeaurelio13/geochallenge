@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.1.24**
+- Frontend: **v1.2.0**
 
 
 
@@ -17,6 +17,14 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 
 
+
+## Novedades de la versión 1.2.0
+- La funcionalidad de **Desafíos** ahora soporta partidas multijugador (más de 2 personas) con cupo configurable de 2 a 8 jugadores.
+- Al crear una convocatoria puedes definir categorías incluidas (multi-selección), tiempo por pregunta (10/20/30 segundos) y cantidad máxima de participantes.
+- Nuevo flujo para unirse a convocatorias abiertas desde la pestaña “Para unirme”, con estado de cupos visibles y experiencia mobile-first.
+- El modo de juego del desafío respeta el tiempo configurado por convocatoria para mantener consistencia entre creación y partida.
+- Se añadieron pruebas automatizadas para validar la creación de desafíos multijugador con configuración completa.
+- Footer actualizado a **v1.2.0** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.1.24
 - Se reforzó la ejecución de calidad para que ESLint y Playwright se lancen siempre con comandos consistentes desde `package.json`, tanto en local como en CI.
