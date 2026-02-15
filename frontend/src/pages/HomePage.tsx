@@ -11,9 +11,9 @@ export function HomePage() {
   return (
     <div className="flex min-h-screen flex-col overflow-x-clip bg-gray-950 text-white">
       <div className="relative flex-1 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(34,197,94,0.22),_transparent_52%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(34,197,94,0.2),_transparent_45%)]" />
 
-        <main className="relative mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+        <main className="relative mx-auto flex w-full max-w-6xl flex-1 flex-col justify-center px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
           <section className="mx-auto w-full max-w-xl text-center">
             <p className="mb-4 inline-flex items-center rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
               {t('home.badge')}
@@ -31,7 +31,7 @@ export function HomePage() {
               {t('home.subtitle')}
             </p>
 
-            <div className="mt-6 grid grid-cols-1 gap-3">
+            <div className="mt-7 grid grid-cols-1 gap-3">
               {user ? (
                 <Link
                   to="/menu"
@@ -56,26 +56,10 @@ export function HomePage() {
                 </>
               )}
             </div>
-          </section>
 
-          <section className="mx-auto mt-8 grid w-full max-w-5xl grid-cols-1 gap-3 sm:mt-10 sm:grid-cols-2 lg:grid-cols-3">
-            <article className="min-w-0 rounded-2xl border border-gray-800 bg-gray-900/80 p-4 backdrop-blur sm:p-5">
-              <div className="mb-2 text-3xl" aria-hidden>🏳️</div>
-              <h2 className="text-sm font-semibold sm:text-base">{t('home.features.flags')}</h2>
-              <p className="mt-1.5 break-words text-xs text-gray-400 sm:text-sm">{t('home.features.flagsDesc')}</p>
-            </article>
-
-            <article className="min-w-0 rounded-2xl border border-gray-800 bg-gray-900/80 p-4 backdrop-blur sm:p-5">
-              <div className="mb-2 text-3xl" aria-hidden>🗺️</div>
-              <h2 className="text-sm font-semibold sm:text-base">{t('home.features.maps')}</h2>
-              <p className="mt-1.5 break-words text-xs text-gray-400 sm:text-sm">{t('home.features.mapsDesc')}</p>
-            </article>
-
-            <article className="min-w-0 rounded-2xl border border-gray-800 bg-gray-900/80 p-4 backdrop-blur sm:col-span-2 sm:p-5 lg:col-span-1">
-              <div className="mb-2 text-3xl" aria-hidden>⚔️</div>
-              <h2 className="text-sm font-semibold sm:text-base">{t('home.features.multiplayer')}</h2>
-              <p className="mt-1.5 break-words text-xs text-gray-400 sm:text-sm">{t('home.features.multiplayerDesc')}</p>
-            </article>
+            <p className="mt-5 text-xs text-gray-400 sm:text-sm">
+              {t('home.features.flags')} · {t('home.features.maps')} · {t('home.features.multiplayer')}
+            </p>
           </section>
         </main>
       </div>
