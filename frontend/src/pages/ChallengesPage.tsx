@@ -1,24 +1,33 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import { LoadingSpinner } from '../components';
 
+interface ChallengeParticipant {
+  userId: string;
+  score: number | null;
+  user: { id: string; username: string };
+}
+
 interface Challenge {
   id: string;
   status: 'PENDING' | 'ACCEPTED' | 'COMPLETED' | 'EXPIRED' | 'DECLINED';
-  category: string | null;
-  challengerScore: number | null;
-  challengedScore: number | null;
+  categories: string[];
+  maxPlayers: number;
+  answerTimeSeconds: 10 | 20 | 30;
+  participantsCount: number;
+  isJoinable: boolean;
+  isUserParticipant: boolean;
   winnerId: string | null;
   createdAt: string;
-  expiresAt: string;
-  challenger: { id: string; username: string };
-  challenged: { id: string; username: string };
+  creator: { id: string; username: string };
+  participants: ChallengeParticipant[];
 }
 
-type TabType = 'received' | 'sent' | 'completed';
+type TabType = 'mine' | 'joinable' | 'completed';
+const categories = ['MIXED', 'FLAG', 'CAPITAL', 'MAP', 'SILHOUETTE'];
 
 export function ChallengesPage() {
   const { t } = useTranslation();
@@ -27,10 +36,11 @@ export function ChallengesPage() {
 
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<TabType>('received');
+  const [activeTab, setActiveTab] = useState<TabType>('mine');
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [createUsername, setCreateUsername] = useState('');
-  const [createCategory, setCreateCategory] = useState<string>('MIXED');
+  const [createCategories, setCreateCategories] = useState<string[]>(['MIXED']);
+  const [createMaxPlayers, setCreateMaxPlayers] = useState(2);
+  const [createTime, setCreateTime] = useState<10 | 20 | 30>(20);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState('');
 
@@ -50,41 +60,38 @@ export function ChallengesPage() {
     fetchChallenges();
   }, []);
 
-  const filteredChallenges = challenges.filter((c) => {
-    if (activeTab === 'received') {
-      return c.challenged.id === user?.id && (c.status === 'PENDING' || c.status === 'ACCEPTED');
-    }
-    if (activeTab === 'sent') {
-      return c.challenger.id === user?.id && (c.status === 'PENDING' || c.status === 'ACCEPTED');
-    }
-    if (activeTab === 'completed') {
-      return c.status === 'COMPLETED' || c.status === 'EXPIRED' || c.status === 'DECLINED';
-    }
-    return false;
-  });
+  const filteredChallenges = useMemo(() => challenges.filter((c) => {
+    if (activeTab === 'mine') return c.isUserParticipant && c.status !== 'COMPLETED' && c.status !== 'EXPIRED';
+    if (activeTab === 'joinable') return c.isJoinable;
+    return c.status === 'COMPLETED' || c.status === 'EXPIRED';
+  }), [activeTab, challenges]);
 
-  const handleAccept = async (challengeId: string) => {
+  const toggleCategory = (value: string) => {
+    setCreateCategories((prev) => {
+      if (value === 'MIXED') {
+        return ['MIXED'];
+      }
+
+      const withoutMixed = prev.filter((c) => c !== 'MIXED');
+      if (withoutMixed.includes(value)) {
+        const next = withoutMixed.filter((c) => c !== value);
+        return next.length ? next : ['MIXED'];
+      }
+
+      return [...withoutMixed, value];
+    });
+  };
+
+  const handleJoin = async (challengeId: string) => {
     try {
-      await api.post<{ success: boolean }>(`/challenges/${challengeId}/accept`);
+      await api.post(`/challenges/${challengeId}/join`);
       fetchChallenges();
     } catch (err: any) {
-      alert(err.response?.data?.error || 'Error al aceptar');
+      alert(err.response?.data?.error || 'Error al unirse');
     }
   };
 
-  const handleDecline = async (challengeId: string) => {
-    if (!window.confirm(t('challenges.confirmDecline'))) return;
-    try {
-      await api.post<{ success: boolean }>(`/challenges/${challengeId}/decline`);
-      fetchChallenges();
-    } catch (err: any) {
-      alert(err.response?.data?.error || 'Error al rechazar');
-    }
-  };
-
-  const handlePlay = (challengeId: string) => {
-    navigate(`/challenges/${challengeId}/play`);
-  };
+  const handlePlay = (challengeId: string) => navigate(`/challenges/${challengeId}/play`);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,266 +99,136 @@ export function ChallengesPage() {
     setCreating(true);
 
     try {
-      await api.post<{ challenge: Challenge }>('/challenges', {
-        challengedUsername: createUsername,
-        category: createCategory,
+      await api.post('/challenges', {
+        categories: createCategories,
+        maxPlayers: createMaxPlayers,
+        answerTimeSeconds: createTime,
       });
       setShowCreateModal(false);
-      setCreateUsername('');
       fetchChallenges();
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Error al crear desafio');
+      setError(err.response?.data?.error || 'Error al crear desafío');
     } finally {
       setCreating(false);
     }
   };
 
-  const getStatusBadge = (challenge: Challenge) => {
-    const statusConfig: Record<string, { color: string; text: string }> = {
-      PENDING: { color: 'bg-yellow-900 text-yellow-300', text: t('challenges.status.pending') },
-      ACCEPTED: { color: 'bg-blue-900 text-blue-300', text: t('challenges.status.accepted') },
-      COMPLETED: { color: 'bg-green-900 text-green-300', text: t('challenges.status.completed') },
-      EXPIRED: { color: 'bg-gray-700 text-gray-400', text: t('challenges.status.expired') },
-      DECLINED: { color: 'bg-red-900 text-red-300', text: t('challenges.status.declined') },
-    };
-
-    const config = statusConfig[challenge.status];
-    return (
-      <span className={`px-2 py-1 rounded text-xs font-semibold ${config.color}`}>
-        {config.text}
-      </span>
-    );
-  };
-
-  const getResultText = (challenge: Challenge) => {
-    if (challenge.status !== 'COMPLETED') return null;
-
-    if (challenge.winnerId === user?.id) {
-      return <span className="text-green-400 font-bold">{t('challenges.won')}</span>;
-    }
-    if (challenge.winnerId === null) {
-      return <span className="text-yellow-400 font-bold">{t('challenges.tie')}</span>;
-    }
-    return <span className="text-red-400 font-bold">{t('challenges.lost')}</span>;
-  };
-
   const canPlay = (challenge: Challenge) => {
-    if (challenge.status !== 'ACCEPTED') return false;
-    const isChallenger = challenge.challenger.id === user?.id;
-    return isChallenger ? challenge.challengerScore === null : challenge.challengedScore === null;
+    if (challenge.status !== 'ACCEPTED' && challenge.status !== 'PENDING') return false;
+    if (!challenge.isUserParticipant) return false;
+    const me = challenge.participants.find((p) => p.userId === user?.id);
+    return me?.score === null;
   };
 
   return (
     <div className="min-h-screen bg-gray-900">
-      {/* Header */}
-      <header className="bg-gray-800 border-b border-gray-700">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/menu" className="text-gray-400 hover:text-white transition-colors">
-            ← {t('common.back')}
-          </Link>
-          <h1 className="text-xl font-bold text-white">
-            📨 {t('challenges.title')}
-          </h1>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/80 transition-colors text-sm"
-          >
+      <header className="bg-gray-800 border-b border-gray-700 sticky top-0 z-10">
+        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
+          <Link to="/menu" className="text-gray-400 hover:text-white">← {t('common.back')}</Link>
+          <h1 className="text-base sm:text-xl font-bold text-white">📨 {t('challenges.title')}</h1>
+          <button onClick={() => setShowCreateModal(true)} className="px-3 py-2 bg-primary text-white rounded-lg text-sm">
             + {t('challenges.create')}
           </button>
         </div>
       </header>
 
-      {/* Tabs */}
-      <div className="bg-gray-800/50 border-b border-gray-700">
-        <div className="max-w-4xl mx-auto px-4">
-          <div className="flex gap-1">
-            {(['received', 'sent', 'completed'] as TabType[]).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-4 py-3 font-medium transition-colors border-b-2 ${
-                  activeTab === tab
-                    ? 'text-primary border-primary'
-                    : 'text-gray-400 border-transparent hover:text-white'
-                }`}
-              >
-                {t(`challenges.tabs.${tab}`)}
-              </button>
-            ))}
-          </div>
+      <div className="bg-gray-800/50 border-b border-gray-700 px-4">
+        <div className="max-w-4xl mx-auto grid grid-cols-3 gap-2 py-2 text-sm">
+          {(['mine', 'joinable', 'completed'] as TabType[]).map((tab) => (
+            <button key={tab} onClick={() => setActiveTab(tab)} className={`py-2 rounded-lg ${activeTab === tab ? 'bg-primary text-white' : 'text-gray-400 bg-gray-800'}`}>
+              {t(`challenges.tabs.${tab}`)}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 py-6">
-        {loading ? (
-          <div className="flex justify-center py-12">
-            <LoadingSpinner size="lg" />
-          </div>
-        ) : filteredChallenges.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-4xl mb-4">📭</div>
-            <p className="text-gray-400">{t('challenges.empty')}</p>
-          </div>
+      <main className="max-w-4xl mx-auto px-4 py-4">
+        {loading ? <LoadingSpinner size="lg" /> : filteredChallenges.length === 0 ? (
+          <div className="text-center text-gray-400 py-16">{t('challenges.empty')}</div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {filteredChallenges.map((challenge) => {
-              const opponent =
-                challenge.challenger.id === user?.id
-                  ? challenge.challenged
-                  : challenge.challenger;
-              const isReceived = challenge.challenged.id === user?.id;
+              const hasStarted = challenge.status === 'ACCEPTED';
+              const creatorLabel = `${t('challenges.from')} ${challenge.creator.username}`;
 
               return (
-                <div
-                  key={challenge.id}
-                  className="bg-gray-800 rounded-xl p-4 border border-gray-700"
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center text-lg font-bold">
-                        {opponent.username.charAt(0).toUpperCase()}
-                      </div>
-                      <div>
-                        <div className="font-semibold text-white">
-                          {isReceived ? t('challenges.from') : t('challenges.to')}{' '}
-                          {opponent.username}
-                        </div>
-                        <div className="text-sm text-gray-400">
-                          {challenge.category || 'MIXED'} •{' '}
-                          {new Date(challenge.createdAt).toLocaleDateString()}
-                        </div>
-                      </div>
+                <article key={challenge.id} className="bg-gray-800 rounded-xl p-4 border border-gray-700">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <h3 className="font-semibold text-white">{creatorLabel}</h3>
+                      <p className="text-xs text-gray-400 mt-1">
+                        {challenge.categories.join(', ')} · {challenge.participantsCount}/{challenge.maxPlayers} · {challenge.answerTimeSeconds}s
+                      </p>
                     </div>
-                    <div className="flex items-center gap-2">
-                      {getStatusBadge(challenge)}
-                      {getResultText(challenge)}
-                    </div>
+                    <span className="text-xs px-2 py-1 rounded bg-gray-700 text-gray-200">{challenge.status}</span>
                   </div>
 
-                  {/* Scores (if completed) */}
-                  {challenge.status === 'COMPLETED' && (
-                    <div className="flex justify-center gap-8 py-3 bg-gray-900 rounded-lg mb-3">
-                      <div className="text-center">
-                        <div className="text-xl font-bold text-primary">
-                          {challenge.challenger.id === user?.id
-                            ? challenge.challengerScore
-                            : challenge.challengedScore}
-                        </div>
-                        <div className="text-xs text-gray-400">{t('challenges.yourScore')}</div>
-                      </div>
-                      <div className="text-gray-500">vs</div>
-                      <div className="text-center">
-                        <div className="text-xl font-bold text-white">
-                          {challenge.challenger.id === user?.id
-                            ? challenge.challengedScore
-                            : challenge.challengerScore}
-                        </div>
-                        <div className="text-xs text-gray-400">{opponent.username}</div>
-                      </div>
-                    </div>
-                  )}
+                  <div className="mt-3 flex flex-wrap gap-2 text-xs">
+                    {challenge.participants.map((p) => (
+                      <span key={p.userId} className="px-2 py-1 rounded bg-gray-700 text-gray-200">
+                        {p.user.username}: {p.score ?? '-'}
+                      </span>
+                    ))}
+                  </div>
 
-                  {/* Actions */}
-                  <div className="flex gap-2">
-                    {challenge.status === 'PENDING' && isReceived && (
-                      <>
-                        <button
-                          onClick={() => handleAccept(challenge.id)}
-                          className="flex-1 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                        >
-                          {t('challenges.accept')}
-                        </button>
-                        <button
-                          onClick={() => handleDecline(challenge.id)}
-                          className="flex-1 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                        >
-                          {t('challenges.decline')}
-                        </button>
-                      </>
+                  <div className="mt-4 flex gap-2">
+                    {challenge.isJoinable && (
+                      <button onClick={() => handleJoin(challenge.id)} className="flex-1 py-2 rounded-lg bg-blue-600 text-white">{t('challenges.join')}</button>
                     )}
                     {canPlay(challenge) && (
-                      <button
-                        onClick={() => handlePlay(challenge.id)}
-                        className="flex-1 py-2 bg-primary text-white rounded-lg hover:bg-primary/80 transition-colors"
-                      >
-                        {t('challenges.play')}
+                      <button onClick={() => handlePlay(challenge.id)} className="flex-1 py-2 rounded-lg bg-primary text-white">
+                        {hasStarted ? t('challenges.play') : t('challenges.waitingReady')}
                       </button>
                     )}
-                    {challenge.status === 'ACCEPTED' && !canPlay(challenge) && (
-                      <div className="flex-1 py-2 text-center text-gray-400">
-                        {t('challenges.waitingOpponent')}
-                      </div>
-                    )}
                   </div>
-                </div>
+                </article>
               );
             })}
           </div>
         )}
       </main>
 
-      {/* Create Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center px-4 z-50">
-          <div className="bg-gray-800 rounded-xl p-6 max-w-md w-full">
-            <h2 className="text-xl font-bold text-white mb-4">
-              {t('challenges.createTitle')}
-            </h2>
-
-            {error && (
-              <div className="mb-4 p-3 bg-red-900/50 border border-red-500 text-red-300 rounded-lg text-sm">
-                {error}
-              </div>
-            )}
-
+        <div className="fixed inset-0 bg-black/70 flex items-end sm:items-center justify-center px-3 z-50">
+          <div className="bg-gray-800 rounded-t-2xl sm:rounded-xl p-5 w-full max-w-md space-y-4">
+            <h2 className="text-lg font-bold text-white">{t('challenges.createTitle')}</h2>
+            {error && <p className="text-sm text-red-300 bg-red-900/40 p-2 rounded">{error}</p>}
             <form onSubmit={handleCreate} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  {t('challenges.opponentUsername')}
-                </label>
-                <input
-                  type="text"
-                  value={createUsername}
-                  onChange={(e) => setCreateUsername(e.target.value)}
-                  required
-                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-primary"
-                  placeholder={t('challenges.usernamePlaceholder')}
-                />
+                <label className="text-sm text-gray-300 block mb-2">{t('challenges.categories')}</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {categories.map((category) => (
+                    <button
+                      key={category}
+                      type="button"
+                      onClick={() => toggleCategory(category)}
+                      className={`px-2 py-2 rounded-lg text-sm border ${createCategories.includes(category) ? 'bg-primary/20 border-primary text-white' : 'border-gray-600 text-gray-300'}`}
+                    >
+                      {t(`categories.${category.toLowerCase() === 'flag' ? 'flags' : category.toLowerCase() === 'capital' ? 'capitals' : category.toLowerCase() === 'map' ? 'maps' : category.toLowerCase() === 'silhouette' ? 'silhouettes' : 'mixed'}`)}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  {t('challenges.category')}
-                </label>
-                <select
-                  value={createCategory}
-                  onChange={(e) => setCreateCategory(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-primary"
-                >
-                  <option value="MIXED">{t('categories.mixed')}</option>
-                  <option value="FLAG">{t('categories.flags')}</option>
-                  <option value="CAPITAL">{t('categories.capitals')}</option>
-                  <option value="MAP">{t('categories.maps')}</option>
-                  <option value="SILHOUETTE">{t('categories.silhouettes')}</option>
-                </select>
+                <label className="text-sm text-gray-300 block mb-2">{t('challenges.maxPlayers')}</label>
+                <input type="number" min={2} max={8} value={createMaxPlayers} onChange={(e) => setCreateMaxPlayers(Number(e.target.value))} className="w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600" />
               </div>
 
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="submit"
-                  disabled={creating}
-                  className="flex-1 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary/80 transition-colors disabled:opacity-50"
-                >
-                  {creating ? <LoadingSpinner size="sm" /> : t('challenges.send')}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowCreateModal(false)}
-                  className="flex-1 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
-                >
-                  {t('common.cancel')}
-                </button>
+              <div>
+                <label className="text-sm text-gray-300 block mb-2">{t('challenges.answerTime')}</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[10, 20, 30].map((time) => (
+                    <button key={time} type="button" onClick={() => setCreateTime(time as 10 | 20 | 30)} className={`py-2 rounded-lg ${createTime === time ? 'bg-primary text-white' : 'bg-gray-700 text-gray-300'}`}>
+                      {time}s
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <button type="submit" disabled={creating} className="flex-1 py-3 rounded-lg bg-primary text-white">{creating ? t('common.loading') : t('challenges.send')}</button>
+                <button type="button" onClick={() => setShowCreateModal(false)} className="flex-1 py-3 rounded-lg bg-gray-700 text-white">{t('common.cancel')}</button>
               </div>
             </form>
           </div>

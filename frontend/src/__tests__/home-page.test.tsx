@@ -49,7 +49,7 @@ describe('HomePage', () => {
     expect(document.querySelector('div.overflow-x-clip')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Iniciar sesión' })).toHaveAttribute('href', '/login');
     expect(screen.getByRole('link', { name: 'Crear cuenta' })).toHaveAttribute('href', '/register');
-    expect(screen.getByText('v1.1.24')).toBeInTheDocument();
+    expect(screen.getByText('v1.2.0')).toBeInTheDocument();
   });
 
   it('muestra acción principal de juego cuando hay un usuario autenticado', () => {

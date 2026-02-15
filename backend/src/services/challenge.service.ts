@@ -1,263 +1,233 @@
 import { prisma } from '../config/database.js';
-import { Category, ChallengeStatus } from '@prisma/client';
+import { Category } from '@prisma/client';
 
 const CHALLENGE_EXPIRY_DAYS = 7;
 const QUESTIONS_PER_CHALLENGE = 10;
+const ALLOWED_TIME_SECONDS = [10, 20, 30] as const;
+
+interface ChallengeListItem {
+  id: string;
+  status: string;
+  categories: Category[];
+  maxPlayers: number;
+  answerTimeSeconds: number;
+  winnerId: string | null;
+  createdAt: Date;
+  expiresAt: Date;
+  completedAt: Date | null;
+  creator: {
+    id: string;
+    username: string;
+  };
+  participants: Array<{
+    userId: string;
+    score: number | null;
+    joinedAt: Date;
+    completedAt: Date | null;
+    user: {
+      id: string;
+      username: string;
+    };
+  }>;
+}
 
 export class ChallengeService {
-  /**
-   * Create a new challenge
-   */
   async createChallenge(
-    challengerId: string,
-    challengedUsername: string,
-    category?: Category
+    creatorId: string,
+    categories: Category[] | undefined,
+    maxPlayers: number,
+    answerTimeSeconds: number
   ) {
-    // Find challenged user
-    const challengedUser = await prisma.user.findUnique({
-      where: { username: challengedUsername },
-    });
-
-    if (!challengedUser) {
-      throw new Error('Usuario no encontrado');
+    if (maxPlayers < 2 || maxPlayers > 8) {
+      throw new Error('El desafío debe ser para entre 2 y 8 personas');
     }
 
-    if (challengedUser.id === challengerId) {
-      throw new Error('No puedes desafiarte a ti mismo');
+    if (!ALLOWED_TIME_SECONDS.includes(answerTimeSeconds as (typeof ALLOWED_TIME_SECONDS)[number])) {
+      throw new Error('El tiempo por pregunta debe ser 10, 20 o 30 segundos');
     }
 
-    // Get questions for the challenge
-    const whereClause = category && category !== 'MIXED' ? { category } : {};
-    const questions = await prisma.question.findMany({
-      where: whereClause,
-      take: 100,
-    });
+    const selectedCategories: Category[] = categories?.length ? categories : ['MIXED'];
+    const whereClause = selectedCategories.includes('MIXED')
+      ? {}
+      : { category: { in: selectedCategories } };
 
-    // Shuffle and select questions
+    const questions = await prisma.question.findMany({ where: whereClause, take: 200 });
+
+    if (questions.length < QUESTIONS_PER_CHALLENGE) {
+      throw new Error('No hay suficientes preguntas para las categorías seleccionadas');
+    }
+
     const shuffled = questions.sort(() => Math.random() - 0.5);
     const selectedQuestions = shuffled.slice(0, QUESTIONS_PER_CHALLENGE);
     const questionIds = selectedQuestions.map((q) => q.id);
 
-    // Calculate expiry date
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + CHALLENGE_EXPIRY_DAYS);
 
-    // Create challenge
     const challenge = await prisma.challenge.create({
       data: {
-        challengerId,
-        challengedId: challengedUser.id,
-        category,
+        creatorId,
+        categories: selectedCategories,
+        maxPlayers,
+        answerTimeSeconds,
         questionIds,
         expiresAt,
-      },
-      include: {
-        challenger: {
-          select: { id: true, username: true },
-        },
-        challenged: {
-          select: { id: true, username: true },
+        participants: {
+          create: {
+            userId: creatorId,
+          },
         },
       },
+      include: this.challengeInclude,
     });
 
     return challenge;
   }
 
-  /**
-   * Get challenges for a user
-   */
-  async getChallenges(userId: string, type: 'sent' | 'received' | 'all' = 'all') {
-    const whereClause: any = {};
-
-    if (type === 'sent') {
-      whereClause.challengerId = userId;
-    } else if (type === 'received') {
-      whereClause.challengedId = userId;
-    } else {
-      whereClause.OR = [{ challengerId: userId }, { challengedId: userId }];
-    }
+  async getChallenges(userId: string, type: 'mine' | 'joinable' | 'all' = 'all') {
+    const now = new Date();
+    await prisma.challenge.updateMany({
+      where: {
+        status: 'PENDING',
+        expiresAt: { lt: now },
+      },
+      data: { status: 'EXPIRED' },
+    });
 
     const challenges = await prisma.challenge.findMany({
-      where: whereClause,
-      include: {
-        challenger: {
-          select: { id: true, username: true },
-        },
-        challenged: {
-          select: { id: true, username: true },
-        },
-      },
+      where: type === 'mine'
+        ? { participants: { some: { userId } } }
+        : type === 'joinable'
+          ? {
+            status: 'PENDING',
+            expiresAt: { gt: now },
+            participants: { none: { userId } },
+          }
+          : {
+            OR: [
+              { participants: { some: { userId } } },
+              {
+                status: 'PENDING',
+                expiresAt: { gt: now },
+                participants: { none: { userId } },
+              },
+            ],
+          },
+      include: this.challengeInclude,
       orderBy: { createdAt: 'desc' },
     });
 
-    // Update expired challenges
-    const now = new Date();
-    const expiredIds = challenges
-      .filter((c) => c.status === 'PENDING' && c.expiresAt < now)
-      .map((c) => c.id);
-
-    if (expiredIds.length > 0) {
-      await prisma.challenge.updateMany({
-        where: { id: { in: expiredIds } },
-        data: { status: 'EXPIRED' },
-      });
-    }
-
-    return challenges.map((c) => ({
-      ...c,
-      status: expiredIds.includes(c.id) ? 'EXPIRED' : c.status,
-    }));
+    return challenges.map((challenge) => this.toChallengeView(challenge, userId));
   }
 
-  /**
-   * Get a specific challenge with questions
-   */
   async getChallenge(challengeId: string, userId: string) {
     const challenge = await prisma.challenge.findUnique({
       where: { id: challengeId },
-      include: {
-        challenger: {
-          select: { id: true, username: true },
-        },
-        challenged: {
-          select: { id: true, username: true },
-        },
-      },
+      include: this.challengeInclude,
     });
 
     if (!challenge) {
-      throw new Error('Desafio no encontrado');
+      throw new Error('Desafío no encontrado');
     }
 
-    // Verify user is part of challenge
-    if (challenge.challengerId !== userId && challenge.challengedId !== userId) {
-      throw new Error('No tienes acceso a este desafio');
+    const isParticipant = challenge.participants.some((p) => p.userId === userId);
+    const isJoinable =
+      challenge.status === 'PENDING' &&
+      challenge.expiresAt > new Date() &&
+      challenge.participants.length < challenge.maxPlayers;
+
+    if (!isParticipant && !isJoinable) {
+      throw new Error('No tienes acceso a este desafío');
     }
 
-    return challenge;
+    return this.toChallengeView(challenge, userId);
   }
 
-  /**
-   * Accept a challenge
-   */
-  async acceptChallenge(challengeId: string, userId: string) {
+  async joinChallenge(challengeId: string, userId: string) {
     const challenge = await prisma.challenge.findUnique({
       where: { id: challengeId },
+      include: { participants: true },
     });
 
     if (!challenge) {
-      throw new Error('Desafio no encontrado');
-    }
-
-    if (challenge.challengedId !== userId) {
-      throw new Error('No puedes aceptar este desafio');
+      throw new Error('Desafío no encontrado');
     }
 
     if (challenge.status !== 'PENDING') {
-      throw new Error('Este desafio ya no esta pendiente');
+      throw new Error('Este desafío ya no está disponible para unirse');
     }
 
     if (challenge.expiresAt < new Date()) {
-      await prisma.challenge.update({
-        where: { id: challengeId },
-        data: { status: 'EXPIRED' },
-      });
-      throw new Error('Este desafio ha expirado');
+      await prisma.challenge.update({ where: { id: challengeId }, data: { status: 'EXPIRED' } });
+      throw new Error('Este desafío ha expirado');
     }
 
-    const updated = await prisma.challenge.update({
+    if (challenge.participants.some((p) => p.userId === userId)) {
+      throw new Error('Ya estás dentro de este desafío');
+    }
+
+    if (challenge.participants.length >= challenge.maxPlayers) {
+      throw new Error('El desafío ya completó el cupo de jugadores');
+    }
+
+    const joined = await prisma.challenge.update({
       where: { id: challengeId },
-      data: { status: 'ACCEPTED' },
-      include: {
-        challenger: {
-          select: { id: true, username: true },
-        },
-        challenged: {
-          select: { id: true, username: true },
+      data: {
+        participants: {
+          create: { userId },
         },
       },
+      include: this.challengeInclude,
     });
 
-    return updated;
+    return this.toChallengeView(joined, userId);
   }
 
-  /**
-   * Decline a challenge
-   */
-  async declineChallenge(challengeId: string, userId: string) {
-    const challenge = await prisma.challenge.findUnique({
-      where: { id: challengeId },
-    });
-
-    if (!challenge) {
-      throw new Error('Desafio no encontrado');
-    }
-
-    if (challenge.challengedId !== userId) {
-      throw new Error('No puedes rechazar este desafio');
-    }
-
-    if (challenge.status !== 'PENDING') {
-      throw new Error('Este desafio ya no esta pendiente');
-    }
-
-    const updated = await prisma.challenge.update({
-      where: { id: challengeId },
-      data: { status: 'DECLINED' },
-    });
-
-    return updated;
-  }
-
-  /**
-   * Get questions for playing a challenge
-   */
   async getChallengeQuestions(challengeId: string, userId: string) {
     const challenge = await prisma.challenge.findUnique({
       where: { id: challengeId },
+      include: { participants: true },
     });
 
     if (!challenge) {
-      throw new Error('Desafio no encontrado');
+      throw new Error('Desafío no encontrado');
     }
 
-    // Verify user is part of challenge
-    if (challenge.challengerId !== userId && challenge.challengedId !== userId) {
-      throw new Error('No tienes acceso a este desafio');
+    if (!challenge.participants.some((p) => p.userId === userId)) {
+      throw new Error('Debes unirte al desafío para jugar');
     }
 
-    // Challenge must be accepted or completed (for reviewing)
+    if (challenge.status === 'PENDING') {
+      if (challenge.participants.length < challenge.maxPlayers) {
+        throw new Error('El desafío aún no completó el cupo de jugadores');
+      }
+
+      await prisma.challenge.update({
+        where: { id: challengeId },
+        data: { status: 'ACCEPTED' },
+      });
+    }
+
     if (challenge.status !== 'ACCEPTED' && challenge.status !== 'COMPLETED') {
-      throw new Error('El desafio debe estar aceptado para jugar');
+      throw new Error('El desafío no está en estado jugable');
     }
 
-    // Check if user already played (for challenger, check challengerScore)
-    const isChallenger = challenge.challengerId === userId;
-    const alreadyPlayed = isChallenger
-      ? challenge.challengerScore !== null
-      : challenge.challengedScore !== null;
+    const participant = challenge.participants.find((p) => p.userId === userId);
+    const alreadyPlayed = participant?.score !== null && participant?.score !== undefined;
 
-    // Get questions
-    const questions = await prisma.question.findMany({
-      where: { id: { in: challenge.questionIds } },
-    });
-
-    // Sort questions to match the original order
-    const orderedQuestions = challenge.questionIds.map((id) =>
-      questions.find((q) => q.id === id)
-    ).filter(Boolean);
+    const questions = await prisma.question.findMany({ where: { id: { in: challenge.questionIds } } });
+    const orderedQuestions = challenge.questionIds
+      .map((id) => questions.find((q) => q.id === id))
+      .filter(Boolean);
 
     return {
       questions: orderedQuestions,
       alreadyPlayed,
+      answerTimeSeconds: challenge.answerTimeSeconds,
       challenge,
     };
   }
 
-  /**
-   * Submit challenge result
-   */
   async submitChallengeResult(
     challengeId: string,
     userId: string,
@@ -266,100 +236,122 @@ export class ChallengeService {
   ) {
     const challenge = await prisma.challenge.findUnique({
       where: { id: challengeId },
+      include: { participants: true },
     });
 
     if (!challenge) {
-      throw new Error('Desafio no encontrado');
-    }
-
-    if (challenge.challengerId !== userId && challenge.challengedId !== userId) {
-      throw new Error('No tienes acceso a este desafio');
+      throw new Error('Desafío no encontrado');
     }
 
     if (challenge.status !== 'ACCEPTED') {
-      throw new Error('El desafio no esta en estado jugable');
+      throw new Error('El desafío no está en estado jugable');
     }
 
-    const isChallenger = challenge.challengerId === userId;
-    const updateData: any = {};
+    const participant = challenge.participants.find((p) => p.userId === userId);
 
-    if (isChallenger) {
-      if (challenge.challengerScore !== null) {
-        throw new Error('Ya has jugado este desafio');
-      }
-      updateData.challengerScore = score;
-    } else {
-      if (challenge.challengedScore !== null) {
-        throw new Error('Ya has jugado este desafio');
-      }
-      updateData.challengedScore = score;
+    if (!participant) {
+      throw new Error('No participas en este desafío');
     }
 
-    // Check if both players have played
-    const newChallengerScore = isChallenger ? score : challenge.challengerScore;
-    const newChallengedScore = isChallenger ? challenge.challengedScore : score;
-
-    if (newChallengerScore !== null && newChallengedScore !== null) {
-      // Challenge is complete - determine winner
-      updateData.status = 'COMPLETED';
-      updateData.completedAt = new Date();
-
-      if (newChallengerScore > newChallengedScore) {
-        updateData.winnerId = challenge.challengerId;
-      } else if (newChallengedScore > newChallengerScore) {
-        updateData.winnerId = challenge.challengedId;
-      }
-      // If equal, winnerId stays null (tie)
-
-      // Update user stats
-      await prisma.$transaction([
-        prisma.user.update({
-          where: { id: challenge.challengerId },
-          data: {
-            gamesPlayed: { increment: 1 },
-            wins: updateData.winnerId === challenge.challengerId ? { increment: 1 } : undefined,
-            losses: updateData.winnerId === challenge.challengedId ? { increment: 1 } : undefined,
-            highScore: newChallengerScore > (await this.getUserHighScore(challenge.challengerId))
-              ? newChallengerScore
-              : undefined,
-          },
-        }),
-        prisma.user.update({
-          where: { id: challenge.challengedId },
-          data: {
-            gamesPlayed: { increment: 1 },
-            wins: updateData.winnerId === challenge.challengedId ? { increment: 1 } : undefined,
-            losses: updateData.winnerId === challenge.challengerId ? { increment: 1 } : undefined,
-            highScore: newChallengedScore > (await this.getUserHighScore(challenge.challengedId))
-              ? newChallengedScore
-              : undefined,
-          },
-        }),
-      ]);
+    if (participant.score !== null) {
+      throw new Error('Ya has jugado este desafío');
     }
 
-    const updated = await prisma.challenge.update({
-      where: { id: challengeId },
-      data: updateData,
-      include: {
-        challenger: {
-          select: { id: true, username: true },
-        },
-        challenged: {
-          select: { id: true, username: true },
-        },
+    await prisma.challengeParticipant.update({
+      where: { id: participant.id },
+      data: {
+        score,
+        correctCount,
+        completedAt: new Date(),
       },
     });
 
-    return updated;
+    const updatedChallenge = await prisma.challenge.findUnique({
+      where: { id: challengeId },
+      include: this.challengeInclude,
+    });
+
+    if (!updatedChallenge) {
+      throw new Error('Desafío no encontrado');
+    }
+
+    const everyonePlayed = updatedChallenge.participants.every((p) => p.score !== null);
+    if (everyonePlayed) {
+      const sorted = [...updatedChallenge.participants].sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+      const topScore = sorted[0]?.score ?? 0;
+      const tied = sorted.filter((p) => p.score === topScore);
+      const winnerId = tied.length === 1 ? tied[0].userId : null;
+
+      await prisma.challenge.update({
+        where: { id: challengeId },
+        data: {
+          status: 'COMPLETED',
+          completedAt: new Date(),
+          winnerId,
+        },
+      });
+
+      await Promise.all(
+        updatedChallenge.participants.map(async (p) => {
+          const isWinner = winnerId === p.userId;
+          const isLoss = winnerId !== null && winnerId !== p.userId;
+          const userHighScore = await this.getUserHighScore(p.userId);
+          await prisma.user.update({
+            where: { id: p.userId },
+            data: {
+              gamesPlayed: { increment: 1 },
+              wins: isWinner ? { increment: 1 } : undefined,
+              losses: isLoss ? { increment: 1 } : undefined,
+              highScore: (p.score ?? 0) > userHighScore ? (p.score ?? 0) : undefined,
+            },
+          });
+        })
+      );
+    }
+
+    const finalChallenge = await prisma.challenge.findUnique({
+      where: { id: challengeId },
+      include: this.challengeInclude,
+    });
+
+    return this.toChallengeView(finalChallenge!, userId);
   }
 
   private async getUserHighScore(userId: string): Promise<number> {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { highScore: true },
-    });
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { highScore: true } });
     return user?.highScore || 0;
+  }
+
+  private readonly challengeInclude = {
+    creator: { select: { id: true, username: true } },
+    participants: {
+      orderBy: { joinedAt: 'asc' as const },
+      select: {
+        id: true,
+        userId: true,
+        score: true,
+        joinedAt: true,
+        completedAt: true,
+        user: { select: { id: true, username: true } },
+      },
+    },
+  };
+
+  private toChallengeView(challenge: ChallengeListItem, userId: string) {
+    const participantsCount = challenge.participants.length;
+    const isUserParticipant = challenge.participants.some((p) => p.userId === userId);
+
+    return {
+      ...challenge,
+      participantsCount,
+      isFull: participantsCount >= challenge.maxPlayers,
+      isUserParticipant,
+      isJoinable:
+        challenge.status === 'PENDING' &&
+        !isUserParticipant &&
+        challenge.expiresAt > new Date() &&
+        participantsCount < challenge.maxPlayers,
+    };
   }
 }
 

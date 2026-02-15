@@ -151,7 +151,9 @@
     "tabs": {
       "received": "Received",
       "sent": "Sent",
-      "completed": "Completed"
+      "completed": "Completed",
+      "mine": "My challenges",
+      "joinable": "Joinable"
     },
     "empty": "No challenges",
     "from": "From",
@@ -175,7 +177,12 @@
     "alreadyPlayed": "Already played",
     "alreadyPlayedDesc": "Wait for your opponent to complete the challenge",
     "backToList": "Back to challenges",
-    "challengeMode": "Challenge mode"
+    "challengeMode": "Challenge mode",
+    "join": "Join",
+    "waitingReady": "Ready to play",
+    "categories": "Categories",
+    "maxPlayers": "Player limit",
+    "answerTime": "Answer time"
   },
   "rankings": {
     "title": "Global Rankings",

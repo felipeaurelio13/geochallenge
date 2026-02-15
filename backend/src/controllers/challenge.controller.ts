@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import { Router, Response } from 'express';
 import { z } from 'zod';
 import { authenticateJWT, AuthRequest } from '../middleware/auth.js';
 import { challengeService } from '../services/challenge.service.js';
@@ -6,10 +6,10 @@ import { Category } from '@prisma/client';
 
 const router = Router();
 
-// Validation schemas
 const createChallengeSchema = z.object({
-  challengedUsername: z.string().min(1),
-  category: z.enum(['MAP', 'FLAG', 'CAPITAL', 'SILHOUETTE', 'MIXED']).optional(),
+  categories: z.array(z.enum(['MAP', 'FLAG', 'CAPITAL', 'SILHOUETTE', 'MIXED'])).min(1),
+  maxPlayers: z.number().int().min(2).max(8),
+  answerTimeSeconds: z.number().int().refine((v) => [10, 20, 30].includes(v)),
 });
 
 const submitResultSchema = z.object({
@@ -17,60 +17,45 @@ const submitResultSchema = z.object({
   correctCount: z.number().min(0),
 });
 
-/**
- * POST /api/challenges - Create a new challenge
- */
 router.post('/', authenticateJWT, async (req: AuthRequest, res: Response) => {
   try {
     const data = createChallengeSchema.parse(req.body);
 
     const challenge = await challengeService.createChallenge(
       req.user!.userId,
-      data.challengedUsername,
-      data.category as Category | undefined
+      data.categories as Category[],
+      data.maxPlayers,
+      data.answerTimeSeconds
     );
 
-    res.status(201).json({
-      message: 'Desafio creado exitosamente',
-      challenge,
-    });
+    res.status(201).json({ message: 'Desafío creado exitosamente', challenge });
   } catch (error: any) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: 'Datos invalidos', details: error.errors });
+      return res.status(400).json({ error: 'Datos inválidos', details: error.errors });
     }
-    res.status(400).json({ error: error.message || 'Error al crear el desafio' });
+    res.status(400).json({ error: error.message || 'Error al crear el desafío' });
   }
 });
 
-/**
- * GET /api/challenges - Get user's challenges
- */
 router.get('/', authenticateJWT, async (req: AuthRequest, res: Response) => {
   try {
-    const type = (req.query.type as 'sent' | 'received' | 'all') || 'all';
+    const type = (req.query.type as 'mine' | 'joinable' | 'all') || 'all';
     const challenges = await challengeService.getChallenges(req.user!.userId, type);
-
     res.json({ challenges });
   } catch (error: any) {
-    res.status(500).json({ error: error.message || 'Error al obtener desafios' });
+    res.status(500).json({ error: error.message || 'Error al obtener desafíos' });
   }
 });
 
-/**
- * GET /api/challenges/:id - Get specific challenge
- */
 router.get('/:id', authenticateJWT, async (req: AuthRequest, res: Response) => {
   try {
     const challenge = await challengeService.getChallenge(req.params.id, req.user!.userId);
     res.json({ challenge });
   } catch (error: any) {
-    res.status(404).json({ error: error.message || 'Desafio no encontrado' });
+    res.status(404).json({ error: error.message || 'Desafío no encontrado' });
   }
 });
 
-/**
- * GET /api/challenges/:id/questions - Get questions for a challenge
- */
 router.get('/:id/questions', authenticateJWT, async (req: AuthRequest, res: Response) => {
   try {
     const data = await challengeService.getChallengeQuestions(req.params.id, req.user!.userId);
@@ -80,45 +65,27 @@ router.get('/:id/questions', authenticateJWT, async (req: AuthRequest, res: Resp
   }
 });
 
-/**
- * POST /api/challenges/:id/accept - Accept a challenge
- */
+router.post('/:id/join', authenticateJWT, async (req: AuthRequest, res: Response) => {
+  try {
+    const challenge = await challengeService.joinChallenge(req.params.id, req.user!.userId);
+    res.json({ message: 'Te uniste al desafío', challenge });
+  } catch (error: any) {
+    res.status(400).json({ error: error.message || 'Error al unirse al desafío' });
+  }
+});
+
 router.post('/:id/accept', authenticateJWT, async (req: AuthRequest, res: Response) => {
   try {
-    const challenge = await challengeService.acceptChallenge(req.params.id, req.user!.userId);
-
-    res.json({
-      message: 'Desafio aceptado',
-      challenge,
-    });
+    const challenge = await challengeService.joinChallenge(req.params.id, req.user!.userId);
+    res.json({ message: 'Desafío aceptado', challenge });
   } catch (error: any) {
-    res.status(400).json({ error: error.message || 'Error al aceptar el desafio' });
+    res.status(400).json({ error: error.message || 'Error al aceptar el desafío' });
   }
 });
 
-/**
- * POST /api/challenges/:id/decline - Decline a challenge
- */
-router.post('/:id/decline', authenticateJWT, async (req: AuthRequest, res: Response) => {
-  try {
-    const challenge = await challengeService.declineChallenge(req.params.id, req.user!.userId);
-
-    res.json({
-      message: 'Desafio rechazado',
-      challenge,
-    });
-  } catch (error: any) {
-    res.status(400).json({ error: error.message || 'Error al rechazar el desafio' });
-  }
-});
-
-/**
- * POST /api/challenges/:id/submit - Submit challenge result
- */
 router.post('/:id/submit', authenticateJWT, async (req: AuthRequest, res: Response) => {
   try {
     const data = submitResultSchema.parse(req.body);
-
     const challenge = await challengeService.submitChallengeResult(
       req.params.id,
       req.user!.userId,
@@ -126,13 +93,10 @@ router.post('/:id/submit', authenticateJWT, async (req: AuthRequest, res: Respon
       data.correctCount
     );
 
-    res.json({
-      message: 'Resultado guardado',
-      challenge,
-    });
+    res.json({ message: 'Resultado guardado', challenge });
   } catch (error: any) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: 'Datos invalidos', details: error.errors });
+      return res.status(400).json({ error: 'Datos inválidos', details: error.errors });
     }
     res.status(400).json({ error: error.message || 'Error al guardar resultado' });
   }
