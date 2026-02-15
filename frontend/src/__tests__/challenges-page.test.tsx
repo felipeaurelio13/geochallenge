@@ -34,6 +34,14 @@ describe('ChallengesPage', () => {
     mocks.apiGet.mockResolvedValue({ challenges: [] });
   });
 
+
+  it('muestra una llamada clara para crear desafío multijugador', async () => {
+    render(<ChallengesPage />);
+
+    expect(await screen.findByText('challenges.createMultiplayerTitle')).toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: 'challenges.createMultiplayerCta' }).length).toBeGreaterThan(0);
+  });
+
   it('crea desafíos multijugador con categorías, cupo y tiempo', async () => {
     render(<ChallengesPage />);
 

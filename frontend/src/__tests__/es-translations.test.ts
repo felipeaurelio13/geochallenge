@@ -9,6 +9,7 @@ describe('traducciones en español', () => {
     expect(es.game.questionCapital).toBe('¿Cuál es la capital de {{country}}?');
     expect(es.results.newHighScore).toBe('¡Nuevo récord!');
     expect(es.challenges.title).toBe('Desafíos');
+    expect(es.challenges.createMultiplayerCta).toBe('Crear desafío multijugador');
     expect(es.rankings.empty).toBe('Aún no hay jugadores en el ranking');
     expect(es.common.success).toBe('Éxito');
   });
