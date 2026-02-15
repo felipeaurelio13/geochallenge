@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.10**
+- Frontend: **v1.2.12**
 
 
 
@@ -19,6 +19,16 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 
 
+
+## Novedades de la versión 1.2.12
+- Se corrigió el test E2E mobile de Home que fallaba en CI por depender de una versión fija (`v1.2.7`): ahora valida la versión real leyendo `frontend/package.json`, evitando obsolescencia en cada release.
+- Con este ajuste, el check de footer sigue verificando trazabilidad de versión sin romper despliegues en GitHub Pages cuando subimos versión.
+- Footer actualizado a **v1.2.12** para mantener trazabilidad con el despliegue en GitHub Pages.
+
+## Novedades de la versión 1.2.11
+- Se actualizaron los tests de páginas que usan `MemoryRouter` para adoptar los future flags de React Router v7 (`v7_startTransition` y `v7_relativeSplatPath`), eliminando advertencias deprecadas y dejando la suite alineada al comportamiento actual del enrutador.
+- Se mantuvo la cobertura funcional existente sin datos mock adicionales, asegurando que los flujos clave de Home, Login y Menú sigan verificados con un enfoque mobile-first y minimalista.
+- Footer actualizado a **v1.2.11** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.10
 - Se rediseñó la arquitectura de enrutamiento para usar un único `AuthProvider` global, eliminando montajes repetidos por ruta que reiniciaban el estado de autenticación y podían disparar validaciones innecesarias de sesión durante el login.
