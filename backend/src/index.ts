@@ -1,7 +1,6 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
 import { createServer } from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 
@@ -14,11 +13,13 @@ import authController from './controllers/auth.controller.js';
 import gameController from './controllers/game.controller.js';
 import leaderboardController from './controllers/leaderboard.controller.js';
 import challengeController from './controllers/challenge.controller.js';
+import { globalLimiter } from './middleware/rateLimit.js';
 
 // Socket handlers
 import { setupSocketHandlers } from './sockets/index.js';
 
 const app = express();
+app.set('trust proxy', 1);
 const httpServer = createServer(app);
 
 // Socket.IO setup
@@ -28,23 +29,6 @@ const io = new SocketIOServer(httpServer, {
     methods: ['GET', 'POST'],
     credentials: true,
   },
-});
-
-// Rate limiters
-const globalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'Demasiadas solicitudes, intenta de nuevo más tarde' },
-});
-
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 10,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'Demasiados intentos de autenticación, intenta de nuevo más tarde' },
 });
 
 // Middleware
@@ -71,7 +55,7 @@ app.get('/health', async (_req, res) => {
 });
 
 // API Routes
-app.use('/api/auth', authLimiter, authController);
+app.use('/api/auth', authController);
 app.use('/api/game', gameController);
 app.use('/api/leaderboard', leaderboardController);
 app.use('/api/challenges', challengeController);

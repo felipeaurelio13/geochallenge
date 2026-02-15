@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.6**
+- Frontend: **v1.2.7**
 
 
 
@@ -18,6 +18,13 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 
 
+
+## Novedades de la versión 1.2.7
+- Se ajustó la protección de autenticación para evitar bloqueos injustos: el límite de intentos ahora se aplica solo a **login/registro**, sin impactar endpoints autenticados como `me` o `profile`.
+- Se mejoró la experiencia ante límite excedido con un mensaje más claro y un campo `retryAfterSeconds` para guiar al usuario sobre cuándo reintentar.
+- El backend ahora confía en proxy (`trust proxy`) para identificar correctamente la IP real en despliegues detrás de infraestructura intermedia.
+- Se añadieron pruebas automatizadas para validar el cálculo de reintento del rate limit (sin mock data).
+- Footer actualizado a **v1.2.7** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.6
 - Se corrigió el build de frontend en CI/CD y GitHub Pages eliminando dependencias de APIs de Node en una prueba de QA (`node:fs`, `node:path`, `__dirname`) que no estaban disponibles en el entorno de compilación.
