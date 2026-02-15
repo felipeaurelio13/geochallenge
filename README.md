@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.5**
+- Frontend: **v1.2.6**
 
 
 
@@ -18,6 +18,12 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 
 
+
+## Novedades de la versión 1.2.6
+- Se corrigió el build de frontend en CI/CD y GitHub Pages eliminando dependencias de APIs de Node en una prueba de QA (`node:fs`, `node:path`, `__dirname`) que no estaban disponibles en el entorno de compilación.
+- La prueba de scripts QA ahora usa importación JSON tipada desde `package.json`, compatible con la configuración TypeScript del proyecto y con enfoque de mantenimiento simple.
+- Se mantuvo cobertura automatizada de la funcionalidad QA existente, actualizando la implementación del test sin usar mock data.
+- Footer actualizado a **v1.2.6** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.5
 - Se corrigió la navegación de **Desafíos** para despliegues en GitHub Pages: el router ahora respeta `BASE_URL`, evitando redirecciones a rutas inservibles fuera del prefijo de la app.
