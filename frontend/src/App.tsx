@@ -76,9 +76,14 @@ function RouteErrorFallback() {
   );
 }
 
-// App wrapper that provides Auth context with error boundary
-function AppWrapper({ children }: { children: React.ReactNode }) {
-  return <ErrorBoundary><AuthProvider>{children}</AuthProvider></ErrorBoundary>;
+function RootProviders() {
+  return (
+    <ErrorBoundary>
+      <AuthProvider>
+        <Outlet />
+      </AuthProvider>
+    </ErrorBoundary>
+  );
 }
 
 export function SinglePlayerGameLayout() {
@@ -91,65 +96,69 @@ export function SinglePlayerGameLayout() {
 
 // Create router with future flags to avoid warnings
 export const appRoutes = [
-    {
-      path: '/',
-      element: <AppWrapper><HomePage /></AppWrapper>,
-      errorElement: <RouteErrorFallback />,
-    },
-    {
-      path: '/login',
-      element: <AppWrapper><PublicRoute><LoginPage /></PublicRoute></AppWrapper>,
-    },
-    {
-      path: '/register',
-      element: <AppWrapper><PublicRoute><RegisterPage /></PublicRoute></AppWrapper>,
-    },
-    {
-      path: '/menu',
-      element: <AppWrapper><ProtectedRoute><MenuPage /></ProtectedRoute></AppWrapper>,
-    },
-    {
-      element: <AppWrapper><ProtectedRoute><SinglePlayerGameLayout /></ProtectedRoute></AppWrapper>,
-      children: [
-        {
-          path: '/game/single',
-          element: <GamePage />,
-        },
-        {
-          path: '/results',
-          element: <ResultsPage />,
-        },
-      ],
-    },
-    {
-      path: '/rankings',
-      element: <AppWrapper><ProtectedRoute><RankingsPage /></ProtectedRoute></AppWrapper>,
-    },
-    {
-      path: '/profile',
-      element: <AppWrapper><ProtectedRoute><ProfilePage /></ProtectedRoute></AppWrapper>,
-    },
-    {
-      path: '/duel',
-      element: <AppWrapper><ProtectedRoute><DuelPage /></ProtectedRoute></AppWrapper>,
-    },
-    {
-      path: '/challenges',
-      element: <AppWrapper><ProtectedRoute><ChallengesPage /></ProtectedRoute></AppWrapper>,
-    },
-    {
-      path: '/challenges/:id/play',
-      element: <AppWrapper><ProtectedRoute><ChallengeGamePage /></ProtectedRoute></AppWrapper>,
-    },
-
-    {
-      path: '/challenges/:id/results',
-      element: <AppWrapper><ProtectedRoute><ChallengeResultsPage /></ProtectedRoute></AppWrapper>,
-    },
-    {
-      path: '*',
-      element: <AppWrapper><Navigate to="/" replace /></AppWrapper>,
-    },
+  {
+    element: <RootProviders />,
+    errorElement: <RouteErrorFallback />,
+    children: [
+      {
+        path: '/',
+        element: <HomePage />,
+      },
+      {
+        path: '/login',
+        element: <PublicRoute><LoginPage /></PublicRoute>,
+      },
+      {
+        path: '/register',
+        element: <PublicRoute><RegisterPage /></PublicRoute>,
+      },
+      {
+        path: '/menu',
+        element: <ProtectedRoute><MenuPage /></ProtectedRoute>,
+      },
+      {
+        element: <ProtectedRoute><SinglePlayerGameLayout /></ProtectedRoute>,
+        children: [
+          {
+            path: '/game/single',
+            element: <GamePage />,
+          },
+          {
+            path: '/results',
+            element: <ResultsPage />,
+          },
+        ],
+      },
+      {
+        path: '/rankings',
+        element: <ProtectedRoute><RankingsPage /></ProtectedRoute>,
+      },
+      {
+        path: '/profile',
+        element: <ProtectedRoute><ProfilePage /></ProtectedRoute>,
+      },
+      {
+        path: '/duel',
+        element: <ProtectedRoute><DuelPage /></ProtectedRoute>,
+      },
+      {
+        path: '/challenges',
+        element: <ProtectedRoute><ChallengesPage /></ProtectedRoute>,
+      },
+      {
+        path: '/challenges/:id/play',
+        element: <ProtectedRoute><ChallengeGamePage /></ProtectedRoute>,
+      },
+      {
+        path: '/challenges/:id/results',
+        element: <ProtectedRoute><ChallengeResultsPage /></ProtectedRoute>,
+      },
+      {
+        path: '*',
+        element: <Navigate to="/" replace />,
+      },
+    ],
+  },
 ];
 
 const router = createBrowserRouter(

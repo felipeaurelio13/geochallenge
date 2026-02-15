@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.9**
+- Frontend: **v1.2.10**
 
 
 
@@ -19,6 +19,13 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 
 
+
+## Novedades de la versión 1.2.10
+- Se rediseñó la arquitectura de enrutamiento para usar un único `AuthProvider` global, eliminando montajes repetidos por ruta que reiniciaban el estado de autenticación y podían disparar validaciones innecesarias de sesión durante el login.
+- Se corrigió la latencia percibida al iniciar sesión: la conexión de socket ahora se ejecuta en segundo plano, evitando bloquear la navegación al menú cuando las credenciales son correctas.
+- Se mejoró el feedback UX del login con estado local de envío y mensajes accionables ante rate limit (`retryAfterSeconds`), para que el usuario sepa exactamente cuándo reintentar.
+- Se actualizaron pruebas automatizadas de routing y login para blindar la nueva estructura y el manejo de errores de autenticación.
+- Footer actualizado a **v1.2.10** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.9
 - Se corrigió un error crítico de compilación en backend que rompía deploys: las respuestas automáticas por timeout en duelos ahora incluyen `timeRemaining`, cumpliendo el contrato tipado de `AnswerResult`.

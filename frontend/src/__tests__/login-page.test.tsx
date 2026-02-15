@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 import { LoginPage } from '../pages/LoginPage';
@@ -37,5 +37,31 @@ describe('LoginPage', () => {
     );
 
     expect(screen.getByRole('button', { name: /Procesando.../i })).toBeDisabled();
+  });
+
+  it('muestra el tiempo de espera cuando backend responde rate limit en login', async () => {
+    const loginMock = vi.fn().mockRejectedValue({
+      response: {
+        data: {
+          retryAfterSeconds: 90,
+        },
+      },
+    });
+
+    mockUseAuth.mockReturnValue({ login: loginMock, isLoading: false });
+
+    render(
+      <MemoryRouter>
+        <LoginPage />
+      </MemoryRouter>
+    );
+
+    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'test@example.com' } });
+    fireEvent.change(screen.getByLabelText('Contraseña'), { target: { value: 'secret123' } });
+    fireEvent.click(screen.getByRole('button', { name: /Ingresar/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Demasiados intentos. Intenta de nuevo en 2 min.')).toBeInTheDocument();
+    });
   });
 });
