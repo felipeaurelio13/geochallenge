@@ -182,7 +182,13 @@
     "waitingReady": "Listo para jugar",
     "categories": "Categorías",
     "maxPlayers": "Cupo de jugadores",
-    "answerTime": "Tiempo por pregunta"
+    "answerTime": "Tiempo por pregunta",
+    "categoriesHint": "Elige una o más categorías para este duelo grupal.",
+    "maxPlayersHint": "Selecciona cuántas personas podrán participar (incluyéndote).",
+    "answerTimeHint": "Define el tiempo máximo para responder cada pregunta.",
+    "summary": "Configuración: {{categories}} · {{maxPlayers}} jugadores · {{answerTimeSeconds}}s por pregunta",
+    "availableSlots": "Quedan {{count}} cupos disponibles",
+    "fullLobby": "Convocatoria cerrada para nuevos ingresos"
   },
   "rankings": {
     "title": "Rankings Globales",

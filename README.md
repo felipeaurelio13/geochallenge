@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.0**
+- Frontend: **v1.2.1**
 
 
 
@@ -17,6 +17,13 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 
 
+
+## Novedades de la versión 1.2.1
+- Se completó el flujo de **Desafíos** para duelos grupales con enfoque mobile-first: creación guiada por categorías, cupo de jugadores (2-8) y tiempo por pregunta (10/20/30s) con resumen claro antes de publicar.
+- Se mejoró la experiencia de quienes se quieren unir a una convocatoria: estado localizado, categorías legibles y visibilidad de cupos disponibles en cada desafío.
+- Se añadieron nuevos textos i18n (ES/EN) para mantener consistencia entre creación y unión de desafíos multijugador.
+- Se actualizaron pruebas automatizadas para cubrir la nueva selección de cupo y el flujo de unión desde la pestaña “Para unirme”.
+- Footer actualizado a **v1.2.1** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.0
 - La funcionalidad de **Desafíos** ahora soporta partidas multijugador (más de 2 personas) con cupo configurable de 2 a 8 jugadores.
