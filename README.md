@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.7**
+- Frontend: **v1.2.8**
 
 
 
@@ -18,6 +18,12 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 
 
+
+## Novedades de la versión 1.2.8
+- Se corrigió la validación al crear desafíos para aceptar payloads parametrizados de forma robusta: categorías en minúsculas/mayúsculas y campos numéricos serializados como string ahora se normalizan antes de validar.
+- Se evita el falso error de **"Datos inválidos"** cuando el cliente envía datos tipados de forma compatible pero no estrictamente idéntica (caso común en integraciones y formularios).
+- Se añadió una prueba automatizada del esquema de creación de desafíos para prevenir regresiones de validación.
+- Footer actualizado a **v1.2.8** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.7
 - Se ajustó la protección de autenticación para evitar bloqueos injustos: el límite de intentos ahora se aplica solo a **login/registro**, sin impactar endpoints autenticados como `me` o `profile`.
