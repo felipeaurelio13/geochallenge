@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  createUnansweredResult,
   determineDuelWinner,
   shouldAutoCloseQuestion,
   shouldResolveQuestion,
@@ -31,6 +32,20 @@ describe('duel timeout guard', () => {
   });
 });
 
+
+
+describe('duel unanswered result helper', () => {
+  it('crea una respuesta vacía compatible con AnswerResult', () => {
+    expect(createUnansweredResult('q-1')).toEqual({
+      questionId: 'q-1',
+      isCorrect: false,
+      correctAnswer: '',
+      userAnswer: '',
+      points: 0,
+      timeRemaining: 0,
+    });
+  });
+});
 
 describe('duel ready timeout guard', () => {
   it('fuerza inicio cuando se supera timeout y falta un jugador por confirmar', () => {

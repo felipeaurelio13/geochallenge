@@ -31,7 +31,8 @@ export const authLimiter: RateLimitRequestHandler = rateLimit({
   skipSuccessfulRequests: true,
   message: authErrorMessage,
   handler: (req, res, _next, options) => {
-    const retryAfterSeconds = calculateRetryAfterSeconds(req.rateLimit?.resetTime);
+    const requestWithRateLimit = req as typeof req & { rateLimit?: { resetTime?: Date } };
+    const retryAfterSeconds = calculateRetryAfterSeconds(requestWithRateLimit.rateLimit?.resetTime);
 
     res.status(options.statusCode).json({
       ...authErrorMessage,

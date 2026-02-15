@@ -4,7 +4,13 @@ import { getQuestionsForGame, validateAnswer, saveGameResult, AnswerResult, Game
 import { updateLeaderboardScore } from '../services/leaderboard.service.js';
 import { config } from '../config/env.js';
 import { prisma } from '../config/database.js';
-import { determineDuelWinner, shouldAutoCloseQuestion, shouldForceStartDuel, shouldResolveQuestion } from './duel.utils.js';
+import {
+  createUnansweredResult,
+  determineDuelWinner,
+  shouldAutoCloseQuestion,
+  shouldForceStartDuel,
+  shouldResolveQuestion,
+} from './duel.utils.js';
 
 interface QueuedPlayer {
   userId: string;
@@ -439,13 +445,7 @@ function sendQuestion(io: SocketIOServer, duel: ActiveDuel) {
       for (const player of currentDuel.players) {
         if (player.answers.length <= questionIndex) {
           player.pendingQuestionIndex = undefined;
-          player.answers.push({
-            questionId: question.id,
-            isCorrect: false,
-            correctAnswer: '',
-            userAnswer: '',
-            points: 0,
-          });
+          player.answers.push(createUnansweredResult(question.id));
         }
       }
       showQuestionResult(io, currentDuel, questionIndex);
