@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.12**
+- Frontend: **v1.2.13**
 
 
 
@@ -19,6 +19,13 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 
 
+
+## Novedades de la versión 1.2.13
+- Se aplicaron 3 mejoras de estilo globales con enfoque mobile-first y coherencia visual: nuevo `app-shell` reutilizable, paneles `surface-panel` y footer unificado con badge de versión para reducir duplicidad entre pantallas clave.
+- Se optimizó la usabilidad móvil en la grilla horizontal de categorías ocultando el scrollbar visual (`scrollbar-none`) sin perder desplazamiento táctil, manteniendo una UI más limpia y minimalista.
+- Se incorporó soporte global de accesibilidad para usuarios con `prefers-reduced-motion`, reduciendo animaciones/transiciones para una experiencia más confortable sin afectar funcionalidad.
+- Se actualizaron pruebas de Home y Menú para cubrir las nuevas clases globales y el badge de versión en footer.
+- Footer actualizado a **v1.2.13** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.12
 - Se corrigió el test E2E mobile de Home que fallaba en CI por depender de una versión fija (`v1.2.7`): ahora valida la versión real leyendo `frontend/package.json`, evitando obsolescencia en cada release.

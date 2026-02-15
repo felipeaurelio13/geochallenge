@@ -51,10 +51,10 @@ describe('HomePage', () => {
     );
 
     expect(screen.getByText('Trivia geográfica competitiva')).toBeInTheDocument();
-    expect(document.querySelector('div.overflow-x-clip')).toBeInTheDocument();
+    expect(document.querySelector('div.app-shell')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Iniciar sesión' })).toHaveAttribute('href', '/login');
     expect(screen.getByRole('link', { name: 'Crear cuenta' })).toHaveAttribute('href', '/register');
-    expect(screen.getByText(/v\d+\.\d+\.\d+/i)).toBeInTheDocument();
+    expect(screen.getByText(/v\d+\.\d+\.\d+/i)).toHaveClass('app-footer__version');
   });
 
 

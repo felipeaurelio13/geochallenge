@@ -111,7 +111,7 @@ describe('MenuPage', () => {
 
     expect(mockNavigate).toHaveBeenCalledWith('/game/single?category=CAPITAL');
     expect(screen.getByText('Desliza para ver más categorías')).toBeInTheDocument();
-    expect(screen.getByText(/v\d+\.\d+\.\d+/i)).toBeInTheDocument();
+    expect(screen.getByText(/v\d+\.\d+\.\d+/i)).toHaveClass('app-footer__version');
   });
 
 
@@ -128,14 +128,14 @@ describe('MenuPage', () => {
     expect(screen.queryByRole('link', { name: /rankings/i })).not.toBeInTheDocument();
   });
 
-  it('aplica contención visual mobile-first para evitar desbordes horizontales', () => {
+  it('aplica contención visual mobile-first con shell global reutilizable', () => {
     const { container } = render(
       <MemoryRouter future={routerFutureConfig}>
         <MenuPage />
       </MemoryRouter>
     );
 
-    expect(container.firstChild).toHaveClass('overflow-x-clip');
+    expect(container.firstChild).toHaveClass('app-shell');
 
     expect(screen.getByRole('button', { name: /un jugador · mixto/i })).toBeInTheDocument();
   });
