@@ -124,8 +124,9 @@
     "playAgain": "Play Again",
     "viewRankings": "View Rankings",
     "shareScore": "Share your score",
-    "shareText": "I scored {{score}} points in GeoChallenge! {{correct}}/{{total}} correct",
-    "copied": "Copied to clipboard!"
+    "shareText": "🎯 I just finished a GeoChallenge round with {{score}} points ({{correct}}/{{total}} correct, {{accuracy}} accuracy). Think you can beat me?",
+    "copied": "Result ready to share!",
+    "shareButton": "Share result"
   },
   "duel": {
     "searching": "Searching for opponent...",
