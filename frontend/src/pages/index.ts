@@ -9,3 +9,5 @@ export { ProfilePage } from './ProfilePage';
 export { DuelPage } from './DuelPage';
 export { ChallengesPage } from './ChallengesPage';
 export { ChallengeGamePage } from './ChallengeGamePage';
+
+export { ChallengeResultsPage } from './ChallengeResultsPage';

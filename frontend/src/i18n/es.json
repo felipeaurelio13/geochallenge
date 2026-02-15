@@ -182,7 +182,7 @@
     "backToList": "Volver a desafíos",
     "challengeMode": "Modo desafío",
     "join": "Unirme",
-    "waitingReady": "Listo para jugar",
+    "waitingReady": "Esperando que se complete el cupo",
     "categories": "Categorías",
     "maxPlayers": "Cupo de jugadores",
     "answerTime": "Tiempo por pregunta",
@@ -191,7 +191,10 @@
     "answerTimeHint": "Define el tiempo máximo para responder cada pregunta.",
     "summary": "Configuración: {{categories}} · {{maxPlayers}} jugadores · {{answerTimeSeconds}}s por pregunta",
     "availableSlots": "Quedan {{count}} cupos disponibles",
-    "fullLobby": "Convocatoria cerrada para nuevos ingresos"
+    "fullLobby": "Convocatoria cerrada para nuevos ingresos",
+    "resultsSubtitle": "Resumen de tu partida. Ya puedes volver a la lista y seguir compitiendo.",
+    "resultsUnavailable": "No encontramos los resultados de este desafío. Vuelve a la lista para continuar.",
+    "playAgain": "Volver a jugar este desafío"
   },
   "rankings": {
     "title": "Rankings Globales",

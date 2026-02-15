@@ -123,11 +123,15 @@ export function ChallengesPage() {
   };
 
   const canPlay = (challenge: Challenge) => {
-    if (challenge.status !== 'ACCEPTED' && challenge.status !== 'PENDING') return false;
-    if (!challenge.isUserParticipant) return false;
+    const isReady = challenge.status === 'ACCEPTED' || (challenge.status === 'PENDING' && challenge.participantsCount >= challenge.maxPlayers);
+    if (!isReady || !challenge.isUserParticipant) return false;
     const me = challenge.participants.find((p) => p.userId === user?.id);
     return me?.score === null;
   };
+
+  const canShowWaiting = (challenge: Challenge) => (
+    challenge.status === 'PENDING' && challenge.isUserParticipant && challenge.participantsCount < challenge.maxPlayers
+  );
 
   const getStatusLabel = (status: Challenge['status']) => t(`challenges.status.${status.toLowerCase()}`);
   const getCategoryLabel = (category: string) => t(`categories.${categoryKeyByValue[category] ?? 'mixed'}`);
@@ -181,7 +185,6 @@ export function ChallengesPage() {
         ) : (
           <div className="space-y-3">
             {filteredChallenges.map((challenge) => {
-              const hasStarted = challenge.status === 'ACCEPTED';
               const availableSlots = challenge.maxPlayers - challenge.participantsCount;
               const creatorLabel = `${t('challenges.from')} ${challenge.creator.username}`;
 
@@ -216,7 +219,12 @@ export function ChallengesPage() {
                     )}
                     {canPlay(challenge) && (
                       <button onClick={() => handlePlay(challenge.id)} className="flex-1 py-2 rounded-lg bg-primary text-white">
-                        {hasStarted ? t('challenges.play') : t('challenges.waitingReady')}
+                        {t('challenges.play')}
+                      </button>
+                    )}
+                    {canShowWaiting(challenge) && (
+                      <button type="button" disabled className="flex-1 py-2 rounded-lg bg-gray-700 text-gray-300 cursor-not-allowed">
+                        {t('challenges.waitingReady')}
                       </button>
                     )}
                   </div>

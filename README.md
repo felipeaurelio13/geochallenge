@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.3**
+- Frontend: **v1.2.4**
 
 
 
@@ -18,6 +18,12 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 
 
+
+## Novedades de la versión 1.2.4
+- Se corrigió el flujo de cierre de partida en **Desafíos**: ahora existe una pantalla de resultados dedicada para `/challenges/:id/results`, evitando la navegación a una página inservible al terminar.
+- Se mejoró la usabilidad al parametrizar y jugar desafíos grupales: si todavía no se completa el cupo de jugadores, el CTA se muestra deshabilitado y con estado de espera claro (sin redirecciones erróneas).
+- Se añadieron/actualizaron pruebas automatizadas para cubrir la nueva ruta de resultados y el estado de espera del botón en desafíos pendientes.
+- Footer actualizado a **v1.2.4** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.3
 - Se simplificó la **Home** para mantener solo lo esencial: propuesta de valor clara, CTA principal y navegación directa, eliminando bloques de relleno visual.

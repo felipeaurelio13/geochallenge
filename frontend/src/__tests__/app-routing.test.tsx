@@ -18,3 +18,10 @@ describe('App single-player routing', () => {
     expect(layoutElement.type).toBe(SinglePlayerGameLayout);
   });
 });
+
+
+describe('Challenge routing', () => {
+  it('defines a dedicated route for challenge results', () => {
+    expect(appRoutes.some((route) => route.path === '/challenges/:id/results')).toBe(true);
+  });
+});
