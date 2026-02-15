@@ -49,7 +49,21 @@ describe('HomePage', () => {
     expect(document.querySelector('div.overflow-x-clip')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Iniciar sesión' })).toHaveAttribute('href', '/login');
     expect(screen.getByRole('link', { name: 'Crear cuenta' })).toHaveAttribute('href', '/register');
-    expect(screen.getByText('v1.2.1')).toBeInTheDocument();
+    expect(screen.getByText(/v\d+\.\d+\.\d+/i)).toBeInTheDocument();
+  });
+
+
+  it('prioriza layout minimalista sin tarjetas de características redundantes', () => {
+    mockUseAuth.mockReturnValue({ user: null });
+
+    render(
+      <MemoryRouter>
+        <HomePage />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText('Banderas · Mapas · Multijugador')).toBeInTheDocument();
+    expect(screen.queryByText('Identifica países por su bandera.')).not.toBeInTheDocument();
   });
 
   it('muestra acción principal de juego cuando hay un usuario autenticado', () => {

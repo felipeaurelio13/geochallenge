@@ -98,6 +98,18 @@ describe('MenuPage', () => {
 
 
 
+
+  it('mantiene menú enfocado y oculta estadísticas para reducir ruido visual', () => {
+    render(
+      <MemoryRouter>
+        <MenuPage />
+      </MemoryRouter>
+    );
+
+    expect(screen.queryByText('Tus estadísticas')).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /rankings/i })).not.toBeInTheDocument();
+  });
+
   it('aplica contención visual mobile-first para evitar desbordes horizontales', () => {
     const { container } = render(
       <MemoryRouter>
@@ -107,8 +119,7 @@ describe('MenuPage', () => {
 
     expect(container.firstChild).toHaveClass('overflow-x-clip');
 
-    const modeCardTitle = container.querySelector('h3.break-words');
-    expect(modeCardTitle).toHaveClass('break-words');
+    expect(screen.getByRole('button', { name: /un jugador · mixto/i })).toBeInTheDocument();
   });
 
   it('permite cambiar categoría y navegar a partida individual con categoría seleccionada', () => {

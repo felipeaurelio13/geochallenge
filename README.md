@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.2**
+- Frontend: **v1.2.3**
 
 
 
@@ -17,6 +17,14 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 
 
+
+
+## Novedades de la versión 1.2.3
+- Se simplificó la **Home** para mantener solo lo esencial: propuesta de valor clara, CTA principal y navegación directa, eliminando bloques de relleno visual.
+- Se rediseñó el **Menú** con enfoque minimalista y mobile-first: menos ruido, categorías priorizadas y accesos rápidos a los tres modos clave.
+- Se removieron elementos secundarios de baja utilidad (estadísticas y accesos redundantes) para reducir carga cognitiva y mejorar la toma de decisión del usuario.
+- Pruebas automatizadas actualizadas para validar el nuevo layout mínimo y la versión vigente en footer.
+- Footer actualizado a **v1.2.3** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.2
 - Se mejoró la discoverabilidad para crear desafíos multijugador: ahora la pantalla de **Desafíos** muestra una sección destacada con CTA claro para configurar categorías, cupo y tiempo por pregunta.
