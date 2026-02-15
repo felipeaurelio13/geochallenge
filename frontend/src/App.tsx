@@ -14,6 +14,7 @@ import {
   DuelPage,
   ChallengesPage,
   ChallengeGamePage,
+  ChallengeResultsPage,
 } from './pages';
 import { LoadingSpinner, ErrorBoundary, ServerWakeUp } from './components';
 
@@ -138,6 +139,11 @@ export const appRoutes = [
     {
       path: '/challenges/:id/play',
       element: <AppWrapper><ProtectedRoute><ChallengeGamePage /></ProtectedRoute></AppWrapper>,
+    },
+
+    {
+      path: '/challenges/:id/results',
+      element: <AppWrapper><ProtectedRoute><ChallengeResultsPage /></ProtectedRoute></AppWrapper>,
     },
     {
       path: '*',

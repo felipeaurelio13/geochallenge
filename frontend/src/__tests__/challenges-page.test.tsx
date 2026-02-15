@@ -62,6 +62,37 @@ describe('ChallengesPage', () => {
     });
   });
 
+
+  it('muestra estado de espera y bloquea jugar hasta completar el cupo', async () => {
+    mocks.apiGet.mockResolvedValue({
+      challenges: [
+        {
+          id: 'c2',
+          status: 'PENDING',
+          categories: ['MAP'],
+          maxPlayers: 4,
+          answerTimeSeconds: 20,
+          participantsCount: 2,
+          isJoinable: false,
+          isUserParticipant: true,
+          winnerId: null,
+          createdAt: new Date().toISOString(),
+          creator: { id: 'u1', username: 'yo' },
+          participants: [
+            { userId: 'u1', score: null, user: { id: 'u1', username: 'yo' } },
+            { userId: 'u2', score: null, user: { id: 'u2', username: 'ana' } },
+          ],
+        },
+      ],
+    });
+
+    render(<ChallengesPage />);
+
+    const waitingButton = await screen.findByRole('button', { name: 'challenges.waitingReady' });
+    expect(waitingButton).toBeDisabled();
+    expect(screen.queryByRole('button', { name: 'challenges.play' })).not.toBeInTheDocument();
+  });
+
   it('permite unirse a una convocatoria abierta desde la pestaña para unirme', async () => {
     mocks.apiGet.mockResolvedValue({
       challenges: [
