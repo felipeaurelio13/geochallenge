@@ -28,6 +28,15 @@ interface Challenge {
 
 type TabType = 'mine' | 'joinable' | 'completed';
 const categories = ['MIXED', 'FLAG', 'CAPITAL', 'MAP', 'SILHOUETTE'];
+const playerOptions = [2, 3, 4, 5, 6, 7, 8];
+
+const categoryKeyByValue: Record<string, string> = {
+  MIXED: 'mixed',
+  FLAG: 'flags',
+  CAPITAL: 'capitals',
+  MAP: 'maps',
+  SILHOUETTE: 'silhouettes',
+};
 
 export function ChallengesPage() {
   const { t } = useTranslation();
@@ -120,6 +129,9 @@ export function ChallengesPage() {
     return me?.score === null;
   };
 
+  const getStatusLabel = (status: Challenge['status']) => t(`challenges.status.${status.toLowerCase()}`);
+  const getCategoryLabel = (category: string) => t(`categories.${categoryKeyByValue[category] ?? 'mixed'}`);
+
   return (
     <div className="min-h-screen bg-gray-900">
       <header className="bg-gray-800 border-b border-gray-700 sticky top-0 z-10">
@@ -149,6 +161,7 @@ export function ChallengesPage() {
           <div className="space-y-3">
             {filteredChallenges.map((challenge) => {
               const hasStarted = challenge.status === 'ACCEPTED';
+              const availableSlots = challenge.maxPlayers - challenge.participantsCount;
               const creatorLabel = `${t('challenges.from')} ${challenge.creator.username}`;
 
               return (
@@ -157,10 +170,15 @@ export function ChallengesPage() {
                     <div>
                       <h3 className="font-semibold text-white">{creatorLabel}</h3>
                       <p className="text-xs text-gray-400 mt-1">
-                        {challenge.categories.join(', ')} · {challenge.participantsCount}/{challenge.maxPlayers} · {challenge.answerTimeSeconds}s
+                        {challenge.categories.map(getCategoryLabel).join(', ')} · {challenge.participantsCount}/{challenge.maxPlayers} · {challenge.answerTimeSeconds}s
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {challenge.isJoinable
+                          ? t('challenges.availableSlots', { count: availableSlots })
+                          : t('challenges.fullLobby')}
                       </p>
                     </div>
-                    <span className="text-xs px-2 py-1 rounded bg-gray-700 text-gray-200">{challenge.status}</span>
+                    <span className="text-xs px-2 py-1 rounded bg-gray-700 text-gray-200">{getStatusLabel(challenge.status)}</span>
                   </div>
 
                   <div className="mt-3 flex flex-wrap gap-2 text-xs">
@@ -196,6 +214,7 @@ export function ChallengesPage() {
             <form onSubmit={handleCreate} className="space-y-4">
               <div>
                 <label className="text-sm text-gray-300 block mb-2">{t('challenges.categories')}</label>
+                <p className="text-xs text-gray-400 mb-2">{t('challenges.categoriesHint')}</p>
                 <div className="grid grid-cols-2 gap-2">
                   {categories.map((category) => (
                     <button
@@ -204,7 +223,7 @@ export function ChallengesPage() {
                       onClick={() => toggleCategory(category)}
                       className={`px-2 py-2 rounded-lg text-sm border ${createCategories.includes(category) ? 'bg-primary/20 border-primary text-white' : 'border-gray-600 text-gray-300'}`}
                     >
-                      {t(`categories.${category.toLowerCase() === 'flag' ? 'flags' : category.toLowerCase() === 'capital' ? 'capitals' : category.toLowerCase() === 'map' ? 'maps' : category.toLowerCase() === 'silhouette' ? 'silhouettes' : 'mixed'}`)}
+                      {getCategoryLabel(category)}
                     </button>
                   ))}
                 </div>
@@ -212,11 +231,24 @@ export function ChallengesPage() {
 
               <div>
                 <label className="text-sm text-gray-300 block mb-2">{t('challenges.maxPlayers')}</label>
-                <input type="number" min={2} max={8} value={createMaxPlayers} onChange={(e) => setCreateMaxPlayers(Number(e.target.value))} className="w-full px-3 py-2 rounded-lg bg-gray-700 text-white border border-gray-600" />
+                <p className="text-xs text-gray-400 mb-2">{t('challenges.maxPlayersHint')}</p>
+                <div className="grid grid-cols-4 gap-2">
+                  {playerOptions.map((playerCount) => (
+                    <button
+                      key={playerCount}
+                      type="button"
+                      onClick={() => setCreateMaxPlayers(playerCount)}
+                      className={`py-2 rounded-lg text-sm ${createMaxPlayers === playerCount ? 'bg-primary text-white' : 'bg-gray-700 text-gray-200'}`}
+                    >
+                      {playerCount}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div>
                 <label className="text-sm text-gray-300 block mb-2">{t('challenges.answerTime')}</label>
+                <p className="text-xs text-gray-400 mb-2">{t('challenges.answerTimeHint')}</p>
                 <div className="grid grid-cols-3 gap-2">
                   {[10, 20, 30].map((time) => (
                     <button key={time} type="button" onClick={() => setCreateTime(time as 10 | 20 | 30)} className={`py-2 rounded-lg ${createTime === time ? 'bg-primary text-white' : 'bg-gray-700 text-gray-300'}`}>
@@ -224,6 +256,14 @@ export function ChallengesPage() {
                     </button>
                   ))}
                 </div>
+              </div>
+
+              <div className="rounded-lg border border-gray-700 bg-gray-900/40 p-3 text-xs text-gray-300">
+                {t('challenges.summary', {
+                  categories: createCategories.map(getCategoryLabel).join(', '),
+                  maxPlayers: createMaxPlayers,
+                  answerTimeSeconds: createTime,
+                })}
               </div>
 
               <div className="flex gap-2">

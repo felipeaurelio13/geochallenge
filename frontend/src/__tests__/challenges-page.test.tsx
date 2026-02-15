@@ -40,7 +40,7 @@ describe('ChallengesPage', () => {
     fireEvent.click(await screen.findByRole('button', { name: /\+ challenges.create/i }));
 
     fireEvent.click(screen.getByRole('button', { name: '10s' }));
-    fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '4' } });
+    fireEvent.click(screen.getByRole('button', { name: '4' }));
     fireEvent.click(screen.getByRole('button', { name: 'categories.flags' }));
 
     fireEvent.click(screen.getByRole('button', { name: 'challenges.send' }));
@@ -51,6 +51,39 @@ describe('ChallengesPage', () => {
         maxPlayers: 4,
         answerTimeSeconds: 10,
       });
+    });
+  });
+
+  it('permite unirse a una convocatoria abierta desde la pestaña para unirme', async () => {
+    mocks.apiGet.mockResolvedValue({
+      challenges: [
+        {
+          id: 'c1',
+          status: 'PENDING',
+          categories: ['MAP', 'FLAG'],
+          maxPlayers: 4,
+          answerTimeSeconds: 30,
+          participantsCount: 2,
+          isJoinable: true,
+          isUserParticipant: false,
+          winnerId: null,
+          createdAt: new Date().toISOString(),
+          creator: { id: 'u2', username: 'ana' },
+          participants: [
+            { userId: 'u2', score: null, user: { id: 'u2', username: 'ana' } },
+            { userId: 'u3', score: null, user: { id: 'u3', username: 'max' } },
+          ],
+        },
+      ],
+    });
+
+    render(<ChallengesPage />);
+
+    fireEvent.click(await screen.findByRole('button', { name: 'challenges.tabs.joinable' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'challenges.join' }));
+
+    await waitFor(() => {
+      expect(mocks.apiPost).toHaveBeenCalledWith('/challenges/c1/join');
     });
   });
 });

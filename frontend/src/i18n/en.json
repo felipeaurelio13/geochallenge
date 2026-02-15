@@ -182,7 +182,13 @@
     "waitingReady": "Ready to play",
     "categories": "Categories",
     "maxPlayers": "Player limit",
-    "answerTime": "Answer time"
+    "answerTime": "Answer time",
+    "categoriesHint": "Choose one or more categories for this group duel.",
+    "maxPlayersHint": "Select how many people can join (including you).",
+    "answerTimeHint": "Set the maximum time to answer each question.",
+    "summary": "Setup: {{categories}} · {{maxPlayers}} players · {{answerTimeSeconds}}s per question",
+    "availableSlots": "{{count}} slots available",
+    "fullLobby": "Challenge is closed for new players"
   },
   "rankings": {
     "title": "Global Rankings",
