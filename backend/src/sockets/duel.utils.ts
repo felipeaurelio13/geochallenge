@@ -1,3 +1,5 @@
+import type { AnswerResult } from '../services/game.service.js';
+
 export function shouldAutoCloseQuestion(
   duelStatus: 'waiting' | 'countdown' | 'playing' | 'finished',
   scheduledQuestionIndex: number,
@@ -60,4 +62,15 @@ export function determineDuelWinner(players: [DuelPlayerSummary, DuelPlayerSumma
   }
 
   return null;
+}
+
+export function createUnansweredResult(questionId: string): AnswerResult {
+  return {
+    questionId,
+    isCorrect: false,
+    correctAnswer: '',
+    userAnswer: '',
+    points: 0,
+    timeRemaining: 0,
+  };
 }

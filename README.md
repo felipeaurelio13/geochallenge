@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.8**
+- Frontend: **v1.2.9**
 
 
 
@@ -18,6 +18,14 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 
 
+
+
+## Novedades de la versión 1.2.9
+- Se corrigió un error crítico de compilación en backend que rompía deploys: las respuestas automáticas por timeout en duelos ahora incluyen `timeRemaining`, cumpliendo el contrato tipado de `AnswerResult`.
+- Se centralizó la creación de respuestas vacías en un helper reutilizable para evitar futuras divergencias de tipo en flujos de juego en tiempo real.
+- Se añadió una prueba automatizada específica para blindar la estructura mínima requerida de respuestas no contestadas.
+- Se incorporó un workflow de CI para backend que ejecuta instalación, build TypeScript y tests en cada push/PR, previniendo que errores de compilación lleguen a producción.
+- Footer actualizado a **v1.2.9** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.8
 - Se corrigió la validación al crear desafíos para aceptar payloads parametrizados de forma robusta: categorías en minúsculas/mayúsculas y campos numéricos serializados como string ahora se normalizan antes de validar.
