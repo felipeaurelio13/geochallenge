@@ -14,16 +14,36 @@ export function LoginPage() {
     password: '',
   });
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const isBusy = isLoading || isSubmitting;
+
+  const getErrorMessage = (err: any) => {
+    if (err?.response?.data?.retryAfterSeconds) {
+      const seconds = Number(err.response.data.retryAfterSeconds);
+      const minutes = Math.ceil(seconds / 60);
+      return `Demasiados intentos. Intenta de nuevo en ${minutes} min.`;
+    }
+
+    if (err instanceof Error && err.message) {
+      return err.message;
+    }
+
+    return err?.response?.data?.error || t('auth.loginError');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setIsSubmitting(true);
 
     try {
       await login(formData.email, formData.password);
       navigate('/menu');
     } catch (err: any) {
-      setError(err.response?.data?.error || t('auth.loginError'));
+      setError(getErrorMessage(err));
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -92,10 +112,10 @@ export function LoginPage() {
 
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isBusy}
               className="w-full py-3.5 rounded-xl bg-primary text-white font-semibold border border-primary/80 shadow-lg shadow-primary/30 hover:bg-primary/90 active:scale-[0.99] transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/70 disabled:opacity-60 disabled:cursor-wait disabled:scale-100 flex items-center justify-center gap-2"
             >
-              {isLoading ? (
+              {isBusy ? (
                 <>
                   <LoadingSpinner size="sm" />
                   <span className="text-sm">Procesando...</span>

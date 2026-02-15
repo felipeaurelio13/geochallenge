@@ -70,18 +70,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
-    const response = await api.login({ email, password });
+    setState((prev) => ({ ...prev, isLoading: true }));
 
-    localStorage.setItem('token', response.token);
-    setState({
-      user: response.user,
-      token: response.token,
-      isLoading: false,
-      isAuthenticated: true,
-    });
+    try {
+      const response = await api.login({ email, password });
 
-    // Connect socket
-    await socketService.connect(response.token);
+      localStorage.setItem('token', response.token);
+      setState({
+        user: response.user,
+        token: response.token,
+        isLoading: false,
+        isAuthenticated: true,
+      });
+
+      // Connect socket in background to avoid blocking login UX.
+      socketService.connect(response.token);
+    } catch (error) {
+      setState((prev) => ({ ...prev, isLoading: false }));
+      throw error;
+    }
   }, []);
 
   const register = useCallback(async (username: string, email: string, password: string) => {
