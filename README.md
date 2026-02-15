@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.1.23**
+- Frontend: **v1.1.24**
 
 
 
@@ -17,6 +17,12 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 
 
+
+## Novedades de la versión 1.1.24
+- Se reforzó la ejecución de calidad para que ESLint y Playwright se lancen siempre con comandos consistentes desde `package.json`, tanto en local como en CI.
+- El workflow de frontend ahora ejecuta el script único `test:e2e:ci`, reduciendo fallos por diferencias de comandos entre entornos.
+- Nueva prueba automatizada para validar la configuración mobile-first de Playwright y el arranque e2e (build + preview) y prevenir regresiones.
+- Footer actualizado a **v1.1.24** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.1.23
 - Corrección en duelos para preguntas consecutivas de tipo **MAP**: ahora el componente del mapa recibe `questionId`, permitiendo resetear correctamente el viewport (centro + zoom) al iniciar cada nueva pregunta y evitando arrastrar la vista anterior.
