@@ -3,6 +3,11 @@ import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 import { MenuPage } from '../pages/MenuPage';
 
+const routerFutureConfig = {
+  v7_startTransition: true,
+  v7_relativeSplatPath: true,
+};
+
 const mockNavigate = vi.fn();
 const mockLogout = vi.fn();
 
@@ -63,7 +68,7 @@ vi.mock('react-i18next', () => ({
 describe('MenuPage', () => {
   it('envía la categoría seleccionada al iniciar un duelo', () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter future={routerFutureConfig}>
         <MenuPage />
       </MemoryRouter>
     );
@@ -79,7 +84,7 @@ describe('MenuPage', () => {
 
   it('abre desafíos con categoría preseleccionada para parametrizar rápido', () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter future={routerFutureConfig}>
         <MenuPage />
       </MemoryRouter>
     );
@@ -93,7 +98,7 @@ describe('MenuPage', () => {
 
   it('muestra CTA mobile con categoría activa y footer con versión', () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter future={routerFutureConfig}>
         <MenuPage />
       </MemoryRouter>
     );
@@ -114,7 +119,7 @@ describe('MenuPage', () => {
 
   it('mantiene menú enfocado y oculta estadísticas para reducir ruido visual', () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter future={routerFutureConfig}>
         <MenuPage />
       </MemoryRouter>
     );
@@ -125,7 +130,7 @@ describe('MenuPage', () => {
 
   it('aplica contención visual mobile-first para evitar desbordes horizontales', () => {
     const { container } = render(
-      <MemoryRouter>
+      <MemoryRouter future={routerFutureConfig}>
         <MenuPage />
       </MemoryRouter>
     );
@@ -137,7 +142,7 @@ describe('MenuPage', () => {
 
   it('permite cambiar categoría y navegar a partida individual con categoría seleccionada', () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter future={routerFutureConfig}>
         <MenuPage />
       </MemoryRouter>
     );

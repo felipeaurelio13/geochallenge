@@ -3,6 +3,11 @@ import { MemoryRouter } from 'react-router-dom';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { HomePage } from '../pages/HomePage';
 
+const routerFutureConfig = {
+  v7_startTransition: true,
+  v7_relativeSplatPath: true,
+};
+
 const mockUseAuth = vi.fn();
 
 vi.mock('../context/AuthContext', () => ({
@@ -40,7 +45,7 @@ describe('HomePage', () => {
     mockUseAuth.mockReturnValue({ user: null });
 
     render(
-      <MemoryRouter>
+      <MemoryRouter future={routerFutureConfig}>
         <HomePage />
       </MemoryRouter>
     );
@@ -57,7 +62,7 @@ describe('HomePage', () => {
     mockUseAuth.mockReturnValue({ user: null });
 
     render(
-      <MemoryRouter>
+      <MemoryRouter future={routerFutureConfig}>
         <HomePage />
       </MemoryRouter>
     );
@@ -70,7 +75,7 @@ describe('HomePage', () => {
     mockUseAuth.mockReturnValue({ user: { id: 'u1', username: 'geo' } });
 
     render(
-      <MemoryRouter>
+      <MemoryRouter future={routerFutureConfig}>
         <HomePage />
       </MemoryRouter>
     );
