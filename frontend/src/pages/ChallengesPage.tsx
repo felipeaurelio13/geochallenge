@@ -138,7 +138,7 @@ export function ChallengesPage() {
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
           <Link to="/menu" className="text-gray-400 hover:text-white">← {t('common.back')}</Link>
           <h1 className="text-base sm:text-xl font-bold text-white">📨 {t('challenges.title')}</h1>
-          <button onClick={() => setShowCreateModal(true)} className="px-3 py-2 bg-primary text-white rounded-lg text-sm">
+          <button onClick={() => setShowCreateModal(true)} className="px-3 py-2 bg-primary text-white rounded-lg text-sm font-medium">
             + {t('challenges.create')}
           </button>
         </div>
@@ -154,9 +154,30 @@ export function ChallengesPage() {
         </div>
       </div>
 
-      <main className="max-w-4xl mx-auto px-4 py-4">
+      <main className="max-w-4xl mx-auto px-4 py-4 space-y-4">
+        <section className="rounded-xl border border-primary/30 bg-primary/10 p-4">
+          <p className="text-sm font-semibold text-white">{t('challenges.createMultiplayerTitle')}</p>
+          <p className="mt-1 text-xs text-gray-300 sm:text-sm">{t('challenges.createMultiplayerHint')}</p>
+          <button
+            type="button"
+            onClick={() => setShowCreateModal(true)}
+            className="mt-3 w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white sm:w-auto"
+          >
+            {t('challenges.createMultiplayerCta')}
+          </button>
+        </section>
+
         {loading ? <LoadingSpinner size="lg" /> : filteredChallenges.length === 0 ? (
-          <div className="text-center text-gray-400 py-16">{t('challenges.empty')}</div>
+          <div className="rounded-xl border border-gray-700 bg-gray-800/40 px-4 py-12 text-center">
+            <p className="text-gray-300">{t('challenges.empty')}</p>
+            <button
+              type="button"
+              onClick={() => setShowCreateModal(true)}
+              className="mt-4 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white"
+            >
+              {t('challenges.createMultiplayerCta')}
+            </button>
+          </div>
         ) : (
           <div className="space-y-3">
             {filteredChallenges.map((challenge) => {
