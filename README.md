@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.1.20**
+- Frontend: **v1.1.21**
 
 
 
@@ -16,6 +16,14 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 
 
+
+## Novedades de la versión 1.1.21
+- Corrección visual mobile-first en pantalla de resultados: los badges de **Correctas/Incorrectas** ahora quedan contenidos dentro de sus tarjetas, evitando desbordes y mejorando legibilidad en pantallas pequeñas.
+- Refuerzo global del componente `AnswerStatusBadge` para prevenir overflow en otros contextos (ancho máximo, truncado y espaciado más compacto).
+- Mejora del bloque de compartir resultados con CTA más claro, jerarquía visual más limpia y feedback inline no intrusivo (sin `alert`).
+- Mensaje de compartir actualizado para ser más útil y motivador, incluyendo puntaje, aciertos totales y precisión.
+- Nueva prueba automatizada de `ResultsPage` para validar contención visual y flujo de compartir (texto copiado + confirmación).
+- Footer actualizado a **v1.1.21** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.1.20
 - Ajuste mobile-first de consistencia visual en Home y Menú: se reforzó la contención horizontal de layout (`overflow-x-clip`) para evitar desbordes involuntarios entre secciones en pantallas pequeñas.

@@ -124,8 +124,9 @@
     "playAgain": "Jugar de nuevo",
     "viewRankings": "Ver rankings",
     "shareScore": "Comparte tu puntuación",
-    "shareText": "¡Obtuve {{score}} puntos en GeoChallenge! {{correct}}/{{total}} correctas",
-    "copied": "¡Copiado al portapapeles!"
+    "shareText": "🎯 Terminé una partida en GeoChallenge con {{score}} puntos ({{correct}}/{{total}} correctas, {{accuracy}} de precisión). ¿Te animas a superarme?",
+    "copied": "¡Resultado listo para compartir!",
+    "shareButton": "Compartir resultado"
   },
   "duel": {
     "searching": "Buscando oponente...",

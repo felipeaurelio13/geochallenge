@@ -9,7 +9,7 @@ export function AnswerStatusBadge({ status, label, className = '' }: AnswerStatu
 
   return (
     <span
-      className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm font-semibold ${
+      className={`inline-flex max-w-full min-w-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-sm font-semibold ${
         isCorrect
           ? 'border-green-400/60 bg-green-500/15 text-green-300'
           : 'border-red-400/60 bg-red-500/15 text-red-300'
@@ -23,8 +23,7 @@ export function AnswerStatusBadge({ status, label, className = '' }: AnswerStatu
       >
         {isCorrect ? '✓' : '✕'}
       </span>
-      {label}
+      <span className="truncate">{label}</span>
     </span>
   );
 }
-

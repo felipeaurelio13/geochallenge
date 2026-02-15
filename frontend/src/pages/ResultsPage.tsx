@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useGame } from '../context/GameContext';
@@ -16,9 +16,9 @@ export function ResultsPage() {
 
   const [userRank, setUserRank] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+  const [shareStatus, setShareStatus] = useState<'idle' | 'success'>('idle');
 
   useEffect(() => {
-    // Fetch user rank
     const fetchRank = async () => {
       try {
         const rankData = await api.getMyRank();
@@ -35,6 +35,11 @@ export function ResultsPage() {
 
   const totalQuestions = questions.length || 10;
   const percentage = Math.round((correctAnswers / totalQuestions) * 100);
+
+  const shareText = useMemo(
+    () => t('results.shareText', { score, correct: correctAnswers, total: totalQuestions, accuracy: `${percentage}%` }),
+    [t, score, correctAnswers, totalQuestions, percentage]
+  );
 
   const getPerformanceEmoji = () => {
     if (percentage >= 90) return '🏆';
@@ -57,7 +62,28 @@ export function ResultsPage() {
     navigate('/menu');
   };
 
-  // If no game was played, redirect to menu
+  const handleShareResults = async () => {
+    const sharePayload = {
+      title: t('app.name'),
+      text: shareText,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(sharePayload);
+      } else {
+        await navigator.clipboard.writeText(shareText);
+      }
+
+      setShareStatus('success');
+      window.setTimeout(() => setShareStatus('idle'), 2500);
+    } catch (error) {
+      if ((error as Error)?.name !== 'AbortError') {
+        console.error('Failed to share score:', error);
+      }
+    }
+  };
+
   if (questions.length === 0 && !loading) {
     navigate('/menu');
     return null;
@@ -66,51 +92,52 @@ export function ResultsPage() {
   return (
     <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4 py-8">
       <div className="max-w-lg w-full">
-        {/* Results Card */}
-        <div className="bg-gray-800 rounded-xl p-8 text-center shadow-lg">
-          {/* Performance Emoji */}
-          <div className="text-7xl mb-4">{getPerformanceEmoji()}</div>
+        <div className="bg-gray-800 rounded-xl p-6 sm:p-8 text-center shadow-lg">
+          <div className="text-6xl sm:text-7xl mb-4">{getPerformanceEmoji()}</div>
 
-          {/* Title */}
           <h1 className="text-3xl font-bold text-white mb-2">
             {t('results.gameOver')}
           </h1>
           <p className="text-xl text-gray-400 mb-6">{getPerformanceMessage()}</p>
 
-          {/* Score Display */}
           <div className="bg-gray-900 rounded-xl p-6 mb-6">
             <div className="text-5xl font-bold text-primary mb-2">
               {score.toLocaleString()}
             </div>
             <div className="text-gray-400">{t('results.points')}</div>
-
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-4 mb-6">
-            <div className="bg-gray-900 rounded-lg p-4">
+          <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-6">
+            <div className="min-w-0 bg-gray-900 rounded-lg p-3 sm:p-4">
               <div className="text-2xl font-bold text-green-400">
                 {correctAnswers}
               </div>
-              <div className="mt-1 flex justify-center">
-                <AnswerStatusBadge status="correct" label={t('results.correct')} className="text-xs" />
+              <div className="mt-2 flex justify-center min-w-0">
+                <AnswerStatusBadge
+                  status="correct"
+                  label={t('results.correct')}
+                  className="w-full justify-center text-[11px] sm:text-xs"
+                />
               </div>
             </div>
-            <div className="bg-gray-900 rounded-lg p-4">
+            <div className="min-w-0 bg-gray-900 rounded-lg p-3 sm:p-4">
               <div className="text-2xl font-bold text-red-400">
                 {totalQuestions - correctAnswers}
               </div>
-              <div className="mt-1 flex justify-center">
-                <AnswerStatusBadge status="incorrect" label={t('results.incorrect')} className="text-xs" />
+              <div className="mt-2 flex justify-center min-w-0">
+                <AnswerStatusBadge
+                  status="incorrect"
+                  label={t('results.incorrect')}
+                  className="w-full justify-center text-[11px] sm:text-xs"
+                />
               </div>
             </div>
-            <div className="bg-gray-900 rounded-lg p-4">
+            <div className="min-w-0 bg-gray-900 rounded-lg p-3 sm:p-4">
               <div className="text-2xl font-bold text-white">{percentage}%</div>
               <div className="text-xs text-gray-400">{t('results.accuracy')}</div>
             </div>
           </div>
 
-          {/* Rank */}
           {loading ? (
             <div className="mb-6">
               <LoadingSpinner size="sm" />
@@ -122,7 +149,6 @@ export function ResultsPage() {
             </div>
           ) : null}
 
-          {/* Action Buttons */}
           <div className="flex flex-col gap-3">
             <button
               onClick={handlePlayAgain}
@@ -145,21 +171,17 @@ export function ResultsPage() {
           </div>
         </div>
 
-        {/* Share Section */}
-        <div className="mt-6 text-center">
-          <p className="text-gray-400 text-sm mb-3">{t('results.shareScore')}</p>
-          <div className="flex justify-center gap-3">
-            <button
-              onClick={() => {
-                const text = `${t('results.shareText', { score, correct: correctAnswers, total: totalQuestions })} 🌍`;
-                navigator.clipboard.writeText(text);
-                alert(t('results.copied'));
-              }}
-              className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm"
-            >
-              📋 {t('results.copyScore')}
-            </button>
-          </div>
+        <div className="mt-6 text-center rounded-xl border border-gray-800 bg-gray-900/60 p-4 sm:p-5">
+          <p className="text-gray-300 text-sm mb-3">{t('results.shareScore')}</p>
+          <button
+            onClick={handleShareResults}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/90 sm:w-auto"
+          >
+            🔗 {t('results.shareButton')}
+          </button>
+          <p className="mt-2 min-h-5 text-xs text-green-300" aria-live="polite">
+            {shareStatus === 'success' ? t('results.copied') : ''}
+          </p>
         </div>
       </div>
     </div>
