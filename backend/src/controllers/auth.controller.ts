@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import { prisma } from '../config/database.js';
 import { generateToken, authenticateJWT, AuthRequest } from '../middleware/auth.js';
+import { authLimiter } from '../middleware/rateLimit.js';
 
 const router = Router();
 
@@ -30,7 +31,7 @@ const loginSchema = z.object({
  * POST /api/auth/register
  * Registrar nuevo usuario
  */
-router.post('/register', async (req: Request, res: Response) => {
+router.post('/register', authLimiter, async (req: Request, res: Response) => {
   try {
     const validation = registerSchema.safeParse(req.body);
 
@@ -101,7 +102,7 @@ router.post('/register', async (req: Request, res: Response) => {
  * POST /api/auth/login
  * Iniciar sesión
  */
-router.post('/login', async (req: Request, res: Response) => {
+router.post('/login', authLimiter, async (req: Request, res: Response) => {
   try {
     const validation = loginSchema.safeParse(req.body);
 
