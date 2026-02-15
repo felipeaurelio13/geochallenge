@@ -63,7 +63,7 @@ Object.defineProperty(navigator, 'clipboard', {
 
 
 Object.defineProperty(globalThis, '__APP_VERSION__', {
-  value: '1.1.22',
+  value: '1.1.23',
   writable: true,
   configurable: true,
 });

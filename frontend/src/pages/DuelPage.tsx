@@ -377,6 +377,7 @@ export function DuelPage() {
             {isMapQuestion ? (
               <Suspense fallback={<LoadingSpinner size="lg" />}>
                 <MapInteractive
+                  questionId={currentQuestion.id}
                   onLocationSelect={(lat, lng) => setMapLocation({ lat, lng })}
                   selectedLocation={mapLocation}
                   correctLocation={

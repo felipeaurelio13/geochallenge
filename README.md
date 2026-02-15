@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.1.22**
+- Frontend: **v1.1.23**
 
 
 
@@ -17,6 +17,11 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 
 
+
+## Novedades de la versión 1.1.23
+- Corrección en duelos para preguntas consecutivas de tipo **MAP**: ahora el componente del mapa recibe `questionId`, permitiendo resetear correctamente el viewport (centro + zoom) al iniciar cada nueva pregunta y evitando arrastrar la vista anterior.
+- Se añadió prueba automatizada en `DuelPage` para validar que el `questionId` se propaga al mapa y prevenir regresiones en este flujo.
+- Footer actualizado a **v1.1.23** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.1.22
 - Se configuró ESLint en frontend con una base estable para que `npm run lint` pueda ejecutarse de forma consistente en local y CI.
