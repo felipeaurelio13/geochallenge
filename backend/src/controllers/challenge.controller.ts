@@ -6,10 +6,15 @@ import { Category } from '@prisma/client';
 
 const router = Router();
 
-const createChallengeSchema = z.object({
-  categories: z.array(z.enum(['MAP', 'FLAG', 'CAPITAL', 'SILHOUETTE', 'MIXED'])).min(1),
-  maxPlayers: z.number().int().min(2).max(8),
-  answerTimeSeconds: z.number().int().refine((v) => [10, 20, 30].includes(v)),
+const normalizeCategory = (value: unknown) => {
+  if (typeof value !== 'string') return value;
+  return value.toUpperCase();
+};
+
+export const createChallengeSchema = z.object({
+  categories: z.array(z.preprocess(normalizeCategory, z.nativeEnum(Category))).min(1),
+  maxPlayers: z.coerce.number().int().min(2).max(8),
+  answerTimeSeconds: z.coerce.number().int().refine((v) => [10, 20, 30].includes(v)),
 });
 
 const submitResultSchema = z.object({
