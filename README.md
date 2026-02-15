@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.1.21**
+- Frontend: **v1.1.22**
 
 
 
@@ -16,6 +16,13 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 
 
+
+
+## Novedades de la versión 1.1.22
+- Se configuró ESLint en frontend con una base estable para que `npm run lint` pueda ejecutarse de forma consistente en local y CI.
+- Se añadió infraestructura de Playwright para e2e (`playwright.config.ts` + prueba mobile-first de Home) enfocada en validar el flujo principal sin mock data.
+- Se incorporó workflow de GitHub Actions para ejecutar lint, pruebas unitarias y pruebas e2e de Playwright en cada push/PR.
+- Footer actualizado a **v1.1.22** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.1.21
 - Corrección visual mobile-first en pantalla de resultados: los badges de **Correctas/Incorrectas** ahora quedan contenidos dentro de sus tarjetas, evitando desbordes y mejorando legibilidad en pantallas pequeñas.
