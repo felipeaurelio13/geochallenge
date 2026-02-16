@@ -15,8 +15,10 @@ export function LoginPage() {
   });
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const isBusy = isLoading || isSubmitting;
+  const isFormComplete = formData.email.trim().length > 0 && formData.password.trim().length > 0;
 
   const getErrorMessage = (err: any) => {
     if (err?.response?.data?.retryAfterSeconds) {
@@ -48,6 +50,10 @@ export function LoginPage() {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (error) {
+      setError('');
+    }
+
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -89,6 +95,10 @@ export function LoginPage() {
                 value={formData.email}
                 onChange={handleChange}
                 required
+                autoFocus
+                autoComplete="email"
+                inputMode="email"
+                spellCheck={false}
                 className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/70 focus:border-primary transition-colors"
                 placeholder="tu@email.com"
               />
@@ -98,21 +108,33 @@ export function LoginPage() {
               <label htmlFor="password" className="block text-sm font-medium text-gray-200 mb-2">
                 {t('auth.password')}
               </label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/70 focus:border-primary transition-colors"
-                placeholder="********"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  id="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  autoComplete="current-password"
+                  className="w-full px-4 py-3 pr-24 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/70 focus:border-primary transition-colors"
+                  placeholder="********"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute inset-y-1 right-1 min-h-10 rounded-lg px-3 text-xs font-semibold text-primary hover:bg-gray-700/60 focus:outline-none focus:ring-2 focus:ring-primary/70"
+                  aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
+                  aria-pressed={showPassword}
+                >
+                  {showPassword ? t('auth.hide') : t('auth.show')}
+                </button>
+              </div>
             </div>
 
             <button
               type="submit"
-              disabled={isBusy}
+              disabled={isBusy || !isFormComplete}
               className="w-full py-3.5 rounded-xl bg-primary text-white font-semibold border border-primary/80 shadow-lg shadow-primary/30 hover:bg-primary/90 active:scale-[0.99] transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/70 disabled:opacity-60 disabled:cursor-wait disabled:scale-100 flex items-center justify-center gap-2"
             >
               {isBusy ? (
@@ -124,6 +146,12 @@ export function LoginPage() {
                 t('auth.loginButton')
               )}
             </button>
+
+            {!isFormComplete && (
+              <p className="text-xs text-gray-400" aria-live="polite">
+                {t('auth.completeFieldsHint')}
+              </p>
+            )}
           </form>
 
           <div className="mt-6 text-center">
