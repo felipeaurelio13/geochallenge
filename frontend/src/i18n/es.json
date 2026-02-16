@@ -150,7 +150,10 @@
     "youWin": "¡Ganaste!",
     "youLose": "Perdiste",
     "tie": "¡Empate!",
-    "playAgain": "Buscar otro duelo"
+    "playAgain": "Buscar otro duelo",
+    "queueCategory": "Buscando en {{category}}",
+    "averageWaitHint": "Normalmente toma menos de 30 segundos. Gracias por esperar.",
+    "cancelHint": "Si cambias de idea, puedes cancelar sin perder progreso."
   },
   "challenges": {
     "title": "Desafíos",

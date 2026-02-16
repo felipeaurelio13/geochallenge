@@ -1,4 +1,4 @@
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { DuelPage } from '../pages/DuelPage';
 
@@ -37,7 +37,8 @@ vi.mock('react-router-dom', () => ({
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string) => key,
+    t: (key: string, params?: Record<string, string | number>) =>
+      params ? `${key}:${JSON.stringify(params)}` : key,
   }),
 }));
 
@@ -48,17 +49,24 @@ vi.mock('../context/AuthContext', () => ({
 }));
 
 vi.mock('../components', () => ({
-  Timer: () => <div>timer</div>,
+  Timer: ({ onTick }: { onTick?: (value: number) => void }) => (
+    <button type="button" onClick={() => onTick?.(4)}>
+      timer
+    </button>
+  ),
   QuestionCard: () => <div>question</div>,
-  OptionButton: ({ option }: { option: string }) => <button>{option}</button>,
+  OptionButton: ({ option, onClick }: { option: string; onClick: () => void }) => (
+    <button onClick={onClick}>{option}</button>
+  ),
   LoadingSpinner: ({ text }: { text?: string }) => <div>{text || 'loading'}</div>,
   AnswerStatusBadge: ({ label }: { label: string }) => <div>{label}</div>,
 }));
 
-
 vi.mock('../components/MapInteractive', () => ({
   MapInteractive: ({ questionId }: { questionId?: string }) => (
-    <div data-testid="map-interactive" data-question-id={questionId}>map</div>
+    <div data-testid="map-interactive" data-question-id={questionId}>
+      map
+    </div>
   ),
 }));
 
@@ -108,6 +116,13 @@ describe('DuelPage socket flow', () => {
     expect(await screen.findByText('rival')).toBeInTheDocument();
   });
 
+  it('muestra contexto empático durante la búsqueda del duelo', async () => {
+    render(<DuelPage />);
+
+    expect(await screen.findByText(/duel\.queueCategory/)).toBeInTheDocument();
+    expect(screen.getByText('duel.averageWaitHint')).toBeInTheDocument();
+    expect(screen.getByText('duel.cancelHint')).toBeInTheDocument();
+  });
 
   it('renderiza alternativas en grilla de dos columnas en mobile durante el duelo', async () => {
     render(<DuelPage />);
@@ -135,6 +150,62 @@ describe('DuelPage socket flow', () => {
     expect(optionsGrid).toHaveClass('grid-cols-2');
   });
 
+  it('habilita limpiar selección cuando el usuario ya eligió respuesta', async () => {
+    render(<DuelPage />);
+
+    act(() => {
+      mocks.handlers.get('duel:question')?.forEach((cb) =>
+        cb({
+          questionIndex: 0,
+          totalQuestions: 10,
+          question: {
+            id: 'dq1',
+            questionText: 'Capital de Chile',
+            options: ['Santiago', 'Lima', 'Bogotá', 'Quito'],
+            correctAnswer: 'Santiago',
+            category: 'CAPITAL',
+          },
+        })
+      );
+    });
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Santiago' }));
+
+    const clearButton = await screen.findByRole('button', {
+      name: 'game.clearSelection',
+    });
+    expect(clearButton).toBeInTheDocument();
+
+    fireEvent.click(clearButton);
+
+    await waitFor(() => {
+      expect(screen.queryByRole('button', { name: 'game.clearSelection' })).not.toBeInTheDocument();
+    });
+  });
+
+  it('muestra mensaje de bajo tiempo al entrar a los últimos segundos', async () => {
+    render(<DuelPage />);
+
+    act(() => {
+      mocks.handlers.get('duel:question')?.forEach((cb) =>
+        cb({
+          questionIndex: 0,
+          totalQuestions: 10,
+          question: {
+            id: 'dq1',
+            questionText: 'Capital de Chile',
+            options: ['Santiago', 'Lima', 'Bogotá', 'Quito'],
+            correctAnswer: 'Santiago',
+            category: 'CAPITAL',
+          },
+        })
+      );
+    });
+
+    fireEvent.click(await screen.findByRole('button', { name: 'timer' }));
+
+    expect(await screen.findByText(/game\.lowTimeHint/)).toBeInTheDocument();
+  });
 
   it('envía el questionId al mapa para resetear viewport entre preguntas de mapa consecutivas', async () => {
     render(<DuelPage />);
