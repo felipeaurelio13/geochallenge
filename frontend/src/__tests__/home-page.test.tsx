@@ -16,7 +16,7 @@ vi.mock('../context/AuthContext', () => ({
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string) => {
+    t: (key: string, options?: Record<string, string>) => {
       const translations: Record<string, string> = {
         'home.badge': 'Trivia geográfica competitiva',
         'home.subtitle': 'Pon a prueba tus conocimientos de geografía.',
@@ -32,6 +32,10 @@ vi.mock('react-i18next', () => ({
         'home.quickTrustLine': 'Sin anuncios invasivos · partidas rápidas · enfoque mobile-first',
         'common.skipToMainAction': 'Ir a las acciones principales',
       };
+
+      if (key === 'home.welcomeBack') {
+        return `¡Bienvenido de vuelta, ${options?.name ?? ''}! Tu próxima partida está a un toque.`;
+      }
 
       return translations[key] ?? key;
     },
@@ -88,6 +92,7 @@ describe('HomePage', () => {
     );
 
     expect(screen.getByRole('link', { name: 'Jugar ahora' })).toHaveAttribute('href', '/menu');
+    expect(screen.getByText('¡Bienvenido de vuelta, geo! Tu próxima partida está a un toque.')).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Iniciar sesión' })).not.toBeInTheDocument();
   });
 });

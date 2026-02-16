@@ -34,6 +34,12 @@ export function HomePage() {
               {t('home.subtitle')}
             </p>
 
+            {user && (
+              <p className="mx-auto mt-3 max-w-md rounded-lg border border-primary/30 bg-primary/10 px-3 py-2 text-xs text-primary sm:text-sm">
+                {t('home.welcomeBack', { name: user.username })}
+              </p>
+            )}
+
             <div id="home-main-actions" className="mt-7 grid grid-cols-1 gap-3">
               {user ? (
                 <Link
