@@ -51,6 +51,8 @@ export function GamePage() {
   const isFlagQuestion = currentQuestion?.category === 'FLAG';
   const isLoading = status === 'loading';
   const isLastQuestion = currentIndex >= questions.length - 1;
+  const hasSelection = Boolean(selectedAnswer || mapLocation);
+  const isLowTime = timeRemaining > 0 && timeRemaining <= 5 && !showResult;
 
   // Prevent accidental navigation during game
   useEffect(() => {
@@ -290,23 +292,43 @@ export function GamePage() {
             )}
           </div>
 
+          <div className="mt-4 rounded-xl border border-gray-700 bg-gray-800/60 px-4 py-3">
+            <p className="text-sm text-gray-200" aria-live="polite">
+              {!hasSelection
+                ? t(isMapQuestion ? 'game.selectOnMapHint' : 'game.selectOptionHint')
+                : t('game.selectionReadyHint')}
+            </p>
+            {isLowTime && (
+              <p className="mt-2 text-xs font-medium text-amber-300" aria-live="assertive">
+                {t('game.lowTimeHint', { seconds: timeRemaining })}
+              </p>
+            )}
+          </div>
+
           {/* Action Buttons */}
           <div className="mt-6 sticky bottom-2 z-20">
             {!showResult ? (
               <div className="rounded-xl border border-gray-700 bg-gray-800/95 p-3 backdrop-blur-sm sm:bg-transparent sm:p-0 sm:border-0 sm:backdrop-blur-none">
-                {(selectedAnswer || mapLocation) && (
-                  <p className="mb-2 text-center text-sm text-primary font-medium">
-                    {t('game.selectionReadyHint')}
-                  </p>
-                )}
-                <div className="flex justify-center">
+                <div className="flex flex-col justify-center gap-2 sm:flex-row">
                   <button
                     onClick={handleSubmitAnswer}
-                    disabled={!selectedAnswer && !mapLocation}
+                    disabled={!hasSelection}
                     className="w-full sm:w-auto px-8 py-3.5 bg-primary text-white font-bold rounded-xl shadow-md shadow-primary/30 hover:bg-primary/85 active:scale-[0.99] transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/70 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {t('game.submit')}
                   </button>
+
+                  {hasSelection && (
+                    <button
+                      onClick={() => {
+                        setSelectedAnswer(null);
+                        setMapLocation(null);
+                      }}
+                      className="w-full sm:w-auto rounded-xl border border-gray-600 px-6 py-3.5 text-sm font-semibold text-gray-200 transition-colors hover:border-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-primary/70"
+                    >
+                      {t('game.clearSelection')}
+                    </button>
+                  )}
                 </div>
               </div>
             ) : (

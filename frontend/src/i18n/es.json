@@ -114,7 +114,11 @@
     "selectionReadyHint": "Alternativa seleccionada. Presiona Confirmar para revisar tu respuesta.",
     "selectedOption": "Seleccionada",
     "tapNextHint": "Respuesta registrada. Presiona Siguiente para continuar.",
-    "tapResultsHint": "Respuesta registrada. Presiona Ver resultados para finalizar."
+    "tapResultsHint": "Respuesta registrada. Presiona Ver resultados para finalizar.",
+    "selectOptionHint": "Selecciona una alternativa para continuar.",
+    "selectOnMapHint": "Marca una ubicación en el mapa para continuar.",
+    "lowTimeHint": "Te quedan {{seconds}} segundos. Respira y confirma tu respuesta.",
+    "clearSelection": "Cambiar selección"
   },
   "results": {
     "gameOver": "¡Partida terminada!",
