@@ -7,3 +7,4 @@ export { LoadingSpinner } from './LoadingSpinner';
 export { ErrorBoundary } from './ErrorBoundary';
 export { ServerWakeUp } from './ServerWakeUp';
 export { AnswerStatusBadge } from './AnswerStatusBadge';
+export { BackendKeepAlive } from './BackendKeepAlive';

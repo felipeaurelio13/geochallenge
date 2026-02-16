@@ -1,0 +1,23 @@
+name: Keep backend awake
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping backend health endpoint
+        env:
+          BACKEND_HEALTHCHECK_URL: ${{ secrets.BACKEND_HEALTHCHECK_URL }}
+        run: |
+          if [ -z "$BACKEND_HEALTHCHECK_URL" ]; then
+            echo "BACKEND_HEALTHCHECK_URL is not configured"
+            exit 1
+          fi
+
+          echo "Pinging $BACKEND_HEALTHCHECK_URL"
+          curl --fail --show-error --silent "$BACKEND_HEALTHCHECK_URL" >/dev/null
+          echo "Backend ping successful"
