@@ -29,6 +29,8 @@ vi.mock('react-i18next', () => ({
         'home.features.mapsDesc': 'Encuentra ubicaciones en el mapa.',
         'home.features.multiplayer': 'Multijugador',
         'home.features.multiplayerDesc': 'Compite en duelos en tiempo real.',
+        'home.quickTrustLine': 'Sin anuncios invasivos · partidas rápidas · enfoque mobile-first',
+        'common.skipToMainAction': 'Ir a las acciones principales',
       };
 
       return translations[key] ?? key;
@@ -52,6 +54,10 @@ describe('HomePage', () => {
 
     expect(screen.getByText('Trivia geográfica competitiva')).toBeInTheDocument();
     expect(document.querySelector('div.app-shell')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Ir a las acciones principales' })).toHaveAttribute(
+      'href',
+      '#home-main-actions'
+    );
     expect(screen.getByRole('link', { name: 'Iniciar sesión' })).toHaveAttribute('href', '/login');
     expect(screen.getByRole('link', { name: 'Crear cuenta' })).toHaveAttribute('href', '/register');
     expect(screen.getByText(/v\d+\.\d+\.\d+/i)).toHaveClass('app-footer__version');
@@ -68,6 +74,7 @@ describe('HomePage', () => {
     );
 
     expect(screen.getByText('Banderas · Mapas · Multijugador')).toBeInTheDocument();
+    expect(screen.getByText('Sin anuncios invasivos · partidas rápidas · enfoque mobile-first')).toBeInTheDocument();
     expect(screen.queryByText('Identifica países por su bandera.')).not.toBeInTheDocument();
   });
 

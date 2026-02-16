@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.14**
+- Frontend: **v1.2.15**
 
 ### Mantener backend activo en producción
 Configura el secret **`BACKEND_HEALTHCHECK_URL`** en GitHub (Settings → Secrets and variables → Actions) con la URL pública de salud de tu API, por ejemplo:
@@ -27,6 +27,13 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 
 
 
+
+## Novedades de la versión 1.2.15
+- Se unificó el footer en un componente reutilizable (`AppFooter`) para reducir duplicidad y asegurar consistencia visual de la versión en Home y Menú.
+- Home ahora incluye un **skip link** accesible (“Ir a las acciones principales”) para mejorar navegación con teclado y lectores de pantalla, especialmente en mobile con accesorios.
+- Se añadió una línea de confianza breve en Home y una confirmación visible/`aria-live` de categoría activa en Menú para reducir fricción y reforzar claridad de estado.
+- Se actualizaron pruebas de Home y Menú para cubrir las nuevas mejoras de usabilidad y accesibilidad.
+- Footer actualizado a **v1.2.15** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.14
 - Se añadió un workflow de GitHub Actions (`keep-backend-awake.yml`) que hace ping automático cada 10 minutos al endpoint de salud del backend para reducir los cold starts y evitar tener que “despertar” manualmente el servidor antes de jugar.

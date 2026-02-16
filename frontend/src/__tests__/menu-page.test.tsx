@@ -103,14 +103,15 @@ describe('MenuPage', () => {
       </MemoryRouter>
     );
 
-    const ctaButton = screen.getByRole('button', { name: /un jugador · mixto/i });
+    const ctaButton = screen.getByRole('button', { name: /un jugador\s+mixto/i });
     expect(ctaButton).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /capitales/i }));
-    fireEvent.click(screen.getByRole('button', { name: /un jugador · capitales/i }));
+    fireEvent.click(screen.getByRole('button', { name: /un jugador\s+capitales/i }));
 
     expect(mockNavigate).toHaveBeenCalledWith('/game/single?category=CAPITAL');
     expect(screen.getByText('Desliza para ver más categorías')).toBeInTheDocument();
+    expect(screen.getByText('Categoría activa:')).toBeInTheDocument();
     expect(screen.getByText(/v\d+\.\d+\.\d+/i)).toHaveClass('app-footer__version');
   });
 
@@ -137,7 +138,7 @@ describe('MenuPage', () => {
 
     expect(container.firstChild).toHaveClass('app-shell');
 
-    expect(screen.getByRole('button', { name: /un jugador · mixto/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /un jugador\s+mixto/i })).toBeInTheDocument();
   });
 
   it('permite cambiar categoría y navegar a partida individual con categoría seleccionada', () => {
