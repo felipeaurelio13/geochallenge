@@ -105,6 +105,25 @@ describe('GamePage ending flow', () => {
     expect(optionsGrid).toHaveClass('sm:grid-cols-2');
   });
 
+
+
+  it('muestra guía contextual antes de seleccionar y permite limpiar selección', () => {
+    render(<GamePage />);
+
+    expect(screen.getByText('game.selectOptionHint')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'game.clearSelection' })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Santiago' }));
+
+    expect(screen.getByText('game.selectionReadyHint')).toBeInTheDocument();
+
+    const clearButton = screen.getByRole('button', { name: 'game.clearSelection' });
+    fireEvent.click(clearButton);
+
+    expect(screen.getByText('game.selectOptionHint')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'game.clearSelection' })).not.toBeInTheDocument();
+  });
+
   it('mantiene el estado hasta resultados sin resetear el juego al desmontar', async () => {
     render(<GamePage />);
 

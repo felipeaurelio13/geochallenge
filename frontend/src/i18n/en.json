@@ -114,7 +114,11 @@
     "selectionReadyHint": "Option selected. Press Submit to check your answer.",
     "selectedOption": "Selected",
     "tapNextHint": "Answer saved. Press Next to continue.",
-    "tapResultsHint": "Answer saved. Press See Results to finish."
+    "tapResultsHint": "Answer saved. Press See Results to finish.",
+    "selectOptionHint": "Select an option to continue.",
+    "selectOnMapHint": "Pick a location on the map to continue.",
+    "lowTimeHint": "{{seconds}} seconds left. Take a breath and confirm your answer.",
+    "clearSelection": "Change selection"
   },
   "results": {
     "gameOver": "Game Over!",

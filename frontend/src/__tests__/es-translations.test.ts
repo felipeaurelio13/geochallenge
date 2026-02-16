@@ -7,6 +7,9 @@ describe('traducciones en español', () => {
     expect(es.game.confirmExit).toBe('¿Seguro que quieres salir? Perderás tu progreso.');
     expect(es.game.score).toBe('Puntuación');
     expect(es.game.questionCapital).toBe('¿Cuál es la capital de {{country}}?');
+    expect(es.game.selectOptionHint).toBe('Selecciona una alternativa para continuar.');
+    expect(es.game.selectOnMapHint).toBe('Marca una ubicación en el mapa para continuar.');
+    expect(es.game.lowTimeHint).toBe('Te quedan {{seconds}} segundos. Respira y confirma tu respuesta.');
     expect(es.results.newHighScore).toBe('¡Nuevo récord!');
     expect(es.challenges.title).toBe('Desafíos');
     expect(es.challenges.createMultiplayerCta).toBe('Crear desafío multijugador');
