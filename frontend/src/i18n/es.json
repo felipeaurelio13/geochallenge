@@ -50,7 +50,12 @@
     "passwordMismatch": "Las contraseñas no coinciden",
     "passwordTooShort": "La contraseña debe tener al menos 6 caracteres",
     "passwordHint": "Mínimo 6 caracteres",
-    "logout": "Cerrar sesión"
+    "logout": "Cerrar sesión",
+    "showPassword": "Mostrar contraseña",
+    "hidePassword": "Ocultar contraseña",
+    "show": "Mostrar",
+    "hide": "Ocultar",
+    "completeFieldsHint": "Completa correo y contraseña para continuar."
   },
   "menu": {
     "welcome": "¡Hola, {{name}}!",

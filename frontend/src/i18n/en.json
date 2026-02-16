@@ -50,7 +50,12 @@
     "passwordMismatch": "Passwords do not match",
     "passwordTooShort": "Password must be at least 6 characters",
     "passwordHint": "Minimum 6 characters",
-    "logout": "Logout"
+    "logout": "Logout",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "show": "Show",
+    "hide": "Hide",
+    "completeFieldsHint": "Complete email and password to continue."
   },
   "menu": {
     "welcome": "Hello, {{name}}!",
