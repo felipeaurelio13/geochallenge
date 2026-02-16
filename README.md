@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.19**
+- Frontend: **v1.2.20**
 
 ### Mantener backend activo en producción
 Configura el secret **`BACKEND_HEALTHCHECK_URL`** en GitHub (Settings → Secrets and variables → Actions) con la URL pública de salud de tu API, por ejemplo:
@@ -14,6 +14,13 @@ Configura el secret **`BACKEND_HEALTHCHECK_URL`** en GitHub (Settings → Secret
 
 Con ese secret configurado, el workflow **Keep backend awake** hará ping automático cada 10 minutos para minimizar el estado dormido del servicio free.
 
+### Despliegue en GitHub Pages
+1. En GitHub, abre **Settings → Pages** y selecciona **Build and deployment: GitHub Actions**.
+2. Configura en **Settings → Secrets and variables → Actions** estos secrets del frontend:
+   - `VITE_API_URL` (ejemplo: `https://tu-backend.onrender.com/api`)
+   - `VITE_SOCKET_URL` (ejemplo: `https://tu-backend.onrender.com`)
+3. Haz push a `main` (o ejecuta manualmente el workflow **Deploy Frontend to GitHub Pages**).
+4. El workflow compila con `npm run build:pages`, genera fallback SPA (`dist/404.html`) y publica en Pages.
 
 
 
@@ -27,6 +34,14 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 
 
 
+
+
+## Novedades de la versión 1.2.20
+- Se dejó automatizado el despliegue del frontend a **GitHub Pages** con un workflow dedicado (`deploy-pages.yml`) que compila, publica el artefacto y despliega en la rama/entorno de Pages.
+- Se agregó resolución automática del `base path` de Vite para GitHub Pages usando el nombre del repositorio en GitHub Actions, manteniendo `/` en local y permitiendo override por `VITE_BASE_PATH`.
+- Se añadió fallback SPA (`404.html`) en el pipeline de Pages para que rutas como `/menu` o `/duel` funcionen al recargar directamente.
+- Se incorporaron pruebas automatizadas para validar la resolución de `base` de despliegue y el script de build para Pages.
+- Footer actualizado a **v1.2.20** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.19
 - Se corrigió el fallo de build en TypeScript eliminando imports de APIs de Node en el test `qa-scripts` y reemplazándolos por import directo de `package.json`, compatible con el entorno de compilación web.

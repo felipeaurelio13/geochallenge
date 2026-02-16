@@ -2,8 +2,16 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import { resolve } from 'path';
+import { resolveViteBase } from './src/utils/deployBase';
+
+const base = resolveViteBase({
+  viteBasePath: process.env.VITE_BASE_PATH,
+  githubActions: process.env.GITHUB_ACTIONS,
+  githubRepository: process.env.GITHUB_REPOSITORY,
+});
 
 export default defineConfig({
+  base,
   define: {
     __APP_VERSION__: JSON.stringify(process.env.npm_package_version ?? '0.0.0'),
   },

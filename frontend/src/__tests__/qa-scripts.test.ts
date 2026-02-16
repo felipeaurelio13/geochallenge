@@ -15,5 +15,6 @@ describe('qa scripts', () => {
     expect(scripts?.['test:e2e']).toContain('test:e2e:install');
     expect(scripts?.['test:e2e:ci']).toContain('install --with-deps chromium');
     expect(scripts?.['test:e2e:ci']).toContain('playwright test');
+    expect(scripts?.['build:pages']).toBe('tsc && vite build');
   });
 });
