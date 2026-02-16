@@ -1,22 +1,19 @@
-import { readFileSync } from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import packageJson from '../../package.json';
 import { describe, expect, it } from 'vitest';
 
-const currentDir = path.dirname(fileURLToPath(import.meta.url));
-const packageJson = JSON.parse(
-  readFileSync(path.resolve(currentDir, '../../package.json'), 'utf-8'),
-) as {
+type PackageJson = {
   scripts?: Record<string, string>;
 };
 
+const scripts = (packageJson as PackageJson).scripts;
+
 describe('qa scripts', () => {
   it('mantiene scripts de lint y e2e consistentes para local y CI', () => {
-    expect(packageJson.scripts?.lint).toBe(
+    expect(scripts?.lint).toBe(
       'eslint . --ext .ts,.tsx --report-unused-disable-directives --max-warnings 0',
     );
-    expect(packageJson.scripts?.['test:e2e']).toContain('test:e2e:install');
-    expect(packageJson.scripts?.['test:e2e:ci']).toContain('install --with-deps chromium');
-    expect(packageJson.scripts?.['test:e2e:ci']).toContain('playwright test');
+    expect(scripts?.['test:e2e']).toContain('test:e2e:install');
+    expect(scripts?.['test:e2e:ci']).toContain('install --with-deps chromium');
+    expect(scripts?.['test:e2e:ci']).toContain('playwright test');
   });
 });

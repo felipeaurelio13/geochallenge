@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.18**
+- Frontend: **v1.2.19**
 
 ### Mantener backend activo en producción
 Configura el secret **`BACKEND_HEALTHCHECK_URL`** en GitHub (Settings → Secrets and variables → Actions) con la URL pública de salud de tu API, por ejemplo:
@@ -27,6 +27,11 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 
 
 
+
+## Novedades de la versión 1.2.19
+- Se corrigió el fallo de build en TypeScript eliminando imports de APIs de Node en el test `qa-scripts` y reemplazándolos por import directo de `package.json`, compatible con el entorno de compilación web.
+- Se mantiene la cobertura de QA para scripts de lint y E2E en local/CI sin depender de tipados de Node en el pipeline de despliegue.
+- Footer actualizado a **v1.2.19** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.18
 - Login reforzado con 3 mejoras de usabilidad mobile-first: botón de acceso deshabilitado hasta completar datos, ayuda contextual visible y toggle para mostrar/ocultar contraseña con targets táctiles cómodos.
