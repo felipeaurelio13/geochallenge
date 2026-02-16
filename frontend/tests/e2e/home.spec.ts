@@ -1,5 +1,12 @@
 import { test, expect } from 'playwright/test';
-import frontendPackage from '../../package.json';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const currentDir = path.dirname(fileURLToPath(import.meta.url));
+const frontendPackage = JSON.parse(
+  readFileSync(path.resolve(currentDir, '../../package.json'), 'utf-8'),
+) as { version: string };
 
 test('home renderiza CTA principales en mobile', async ({ page }) => {
   await page.goto('/');
