@@ -150,7 +150,10 @@
     "youWin": "You win!",
     "youLose": "You lose",
     "tie": "It's a tie!",
-    "playAgain": "Find another duel"
+    "playAgain": "Find another duel",
+    "queueCategory": "Searching in {{category}}",
+    "averageWaitHint": "This usually takes under 30 seconds. Thanks for waiting.",
+    "cancelHint": "If you change your mind, you can cancel without losing progress."
   },
   "challenges": {
     "title": "Challenges",

@@ -60,6 +60,8 @@ export function DuelPage() {
   const scoreRef = useRef(0);
   const opponentRef = useRef<{ id: string; username: string } | null>(null);
   const duelCategory = parseDuelCategory(searchParams.get('category'));
+  const hasSelection = Boolean(selectedAnswer || mapLocation);
+  const isLowTime = timeRemaining <= 5;
 
   useEffect(() => {
     scoreRef.current = myScore;
@@ -209,7 +211,7 @@ export function DuelPage() {
   if (duelState === 'searching') {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
-        <div className="text-center">
+        <div className="text-center w-full max-w-sm">
           <div className="text-6xl mb-6 animate-pulse">⚔️</div>
           <h1 className="text-2xl font-bold text-white mb-2">
             {t('duel.searching')}
@@ -218,7 +220,30 @@ export function DuelPage() {
           <div className="mb-6">
             <LoadingSpinner size="lg" />
           </div>
-          <p className="text-gray-500 mb-6">{formatSearchTime(searchTime)}</p>
+          <p className="text-gray-500 mb-3">{formatSearchTime(searchTime)}</p>
+
+          <div className="mb-6 rounded-xl border border-gray-700 bg-gray-800/80 px-4 py-3 text-left text-sm">
+            <p className="text-primary font-semibold mb-1">
+              {t('duel.queueCategory', {
+                category: t(
+                  `categories.${
+                    duelCategory === 'FLAG'
+                      ? 'flags'
+                      : duelCategory === 'CAPITAL'
+                      ? 'capitals'
+                      : duelCategory === 'MAP'
+                      ? 'maps'
+                      : duelCategory === 'SILHOUETTE'
+                      ? 'silhouettes'
+                      : 'mixed'
+                  }`
+                ),
+              })}
+            </p>
+            <p className="text-gray-300">{t('duel.averageWaitHint')}</p>
+            <p className="text-gray-400 mt-1">{t('duel.cancelHint')}</p>
+          </div>
+
           <button
             onClick={handleCancelSearch}
             className="px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
@@ -327,6 +352,11 @@ export function DuelPage() {
   }
 
   const isMapQuestion = currentQuestion.category === 'MAP';
+  const helperText = hasSelection
+    ? t('game.selectionReadyHint')
+    : isMapQuestion
+    ? t('game.selectOnMapHint')
+    : t('game.selectOptionHint');
 
   return (
     <div className="min-h-screen bg-gray-900 flex flex-col">
@@ -411,15 +441,30 @@ export function DuelPage() {
           <div className="mt-6 sticky bottom-2 z-20">
             {duelState === 'playing' && !showResult && (
               <div className="rounded-xl border border-gray-700 bg-gray-800/95 p-3 backdrop-blur-sm sm:bg-transparent sm:p-0 sm:border-0 sm:backdrop-blur-none">
-                {(selectedAnswer || mapLocation) && (
-                  <p className="mb-2 text-center text-sm text-primary font-medium">
-                    {t('game.selectionReadyHint')}
-                  </p>
-                )}
-                <div className="flex justify-center">
+                <p
+                  aria-live="polite"
+                  className={`mb-2 text-center text-sm font-medium ${
+                    isLowTime ? 'text-amber-300' : hasSelection ? 'text-primary' : 'text-gray-300'
+                  }`}
+                >
+                  {isLowTime ? t('game.lowTimeHint', { seconds: timeRemaining }) : helperText}
+                </p>
+                <div className="flex justify-center gap-2">
+                  {hasSelection && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedAnswer(null);
+                        setMapLocation(null);
+                      }}
+                      className="w-full sm:w-auto px-4 py-3 border border-gray-600 text-gray-200 font-semibold rounded-xl hover:bg-gray-700/80 transition-colors"
+                    >
+                      {t('game.clearSelection')}
+                    </button>
+                  )}
                   <button
                     onClick={handleSubmitAnswer}
-                    disabled={!selectedAnswer && !mapLocation}
+                    disabled={!hasSelection}
                     className="w-full sm:w-auto px-8 py-3.5 bg-primary text-white font-bold rounded-xl shadow-md shadow-primary/30 hover:bg-primary/85 active:scale-[0.99] transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/70 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {t('game.submit')}
