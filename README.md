@@ -5,7 +5,14 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.13**
+- Frontend: **v1.2.14**
+
+### Mantener backend activo en producción
+Configura el secret **`BACKEND_HEALTHCHECK_URL`** en GitHub (Settings → Secrets and variables → Actions) con la URL pública de salud de tu API, por ejemplo:
+
+`https://tu-backend.onrender.com/health`
+
+Con ese secret configurado, el workflow **Keep backend awake** hará ping automático cada 10 minutos para minimizar el estado dormido del servicio free.
 
 
 
@@ -19,6 +26,13 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 
 
+
+
+## Novedades de la versión 1.2.14
+- Se añadió un workflow de GitHub Actions (`keep-backend-awake.yml`) que hace ping automático cada 10 minutos al endpoint de salud del backend para reducir los cold starts y evitar tener que “despertar” manualmente el servidor antes de jugar.
+- Se incorporó un keep-alive silencioso en frontend que envía un ping cada 4 minutos mientras la app está abierta y visible, mejorando continuidad en sesiones móviles reales sin afectar la UI minimalista.
+- Se agregaron pruebas automatizadas para validar el comportamiento del keep-alive en pestaña visible/oculta.
+- Footer actualizado a **v1.2.14** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.13
 - Se aplicaron 3 mejoras de estilo globales con enfoque mobile-first y coherencia visual: nuevo `app-shell` reutilizable, paneles `surface-panel` y footer unificado con badge de versión para reducir duplicidad entre pantallas clave.

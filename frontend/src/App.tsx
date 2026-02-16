@@ -16,7 +16,7 @@ import {
   ChallengeGamePage,
   ChallengeResultsPage,
 } from './pages';
-import { LoadingSpinner, ErrorBoundary, ServerWakeUp } from './components';
+import { LoadingSpinner, ErrorBoundary, ServerWakeUp, BackendKeepAlive } from './components';
 import { getRouterBasename, toAppPath } from './utils/routing';
 
 // Protected route wrapper
@@ -177,6 +177,7 @@ const router = createBrowserRouter(
 export function App() {
   return (
     <ServerWakeUp>
+      <BackendKeepAlive />
       <RouterProvider router={router} />
     </ServerWakeUp>
   );
