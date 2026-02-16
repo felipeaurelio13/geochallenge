@@ -45,6 +45,10 @@
     @apply mt-1 inline-flex rounded-full border border-gray-700 bg-gray-900 px-2 py-0.5 text-[11px] text-gray-400;
   }
 
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-50 focus:rounded-lg focus:bg-gray-900 focus:px-3 focus:py-2 focus:text-sm focus:text-white focus:ring-2 focus:ring-blue-400;
+  }
+
   .scrollbar-none {
     -ms-overflow-style: none;
     scrollbar-width: none;

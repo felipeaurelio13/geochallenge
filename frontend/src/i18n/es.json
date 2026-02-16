@@ -16,7 +16,8 @@
       "mapsDesc": "Ubica ciudades y capitales en el mapa",
       "multiplayer": "Multijugador",
       "multiplayerDesc": "Desafía a tus amigos en tiempo real"
-    }
+    },
+    "quickTrustLine": "Sin anuncios invasivos · partidas rápidas · enfoque mobile-first"
   },
   "nav": {
     "home": "Inicio",
@@ -234,6 +235,7 @@
     "retry": "Reintentar",
     "back": "Volver",
     "backToMenu": "Volver al menú",
-    "save": "Guardar"
+    "save": "Guardar",
+    "skipToMainAction": "Ir a las acciones principales"
   }
 }

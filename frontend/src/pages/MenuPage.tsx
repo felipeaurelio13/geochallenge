@@ -2,8 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
-
-const APP_VERSION = __APP_VERSION__ || '0.0.0';
+import { AppFooter } from '../components/AppFooter';
 
 type Category = 'FLAG' | 'CAPITAL' | 'MAP' | 'SILHOUETTE' | 'MIXED';
 
@@ -84,9 +83,13 @@ export function MenuPage() {
             ))}
           </div>
           <p className="mt-2 text-xs text-gray-500 sm:hidden">{t('menu.mobileCategoriesHint')}</p>
+
+          <p className="mt-3 text-xs text-primary" aria-live="polite">
+            {t('menu.selectedCategory')}: <span className="font-semibold">{selectedCategoryLabel}</span>
+          </p>
         </section>
 
-        <section className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <section className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3" aria-label={t('menu.chooseMode')}>
           <button
             onClick={() => navigate(`/game/single?category=${selectedCategory}`)}
             className="group rounded-2xl border border-primary/40 bg-primary/10 p-5 text-left transition-all hover:border-primary/70 hover:bg-primary/15 focus:outline-none focus:ring-2 focus:ring-primary/70"
@@ -118,15 +121,13 @@ export function MenuPage() {
         <button
           onClick={() => navigate(`/game/single?category=${selectedCategory}`)}
           className="w-full rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-primary/70"
+          aria-label={`${t('menu.singlePlayer')} ${selectedCategoryLabel}`}
         >
           {t('menu.singlePlayer')} · {selectedCategoryLabel}
         </button>
       </div>
 
-      <footer className="app-footer sm:pb-4">
-        <p>GeoChallenge &copy; {new Date().getFullYear()}</p>
-        <p className="app-footer__version">v{APP_VERSION}</p>
-      </footer>
+      <AppFooter className="sm:pb-4" />
     </div>
   );
 }

@@ -16,7 +16,8 @@
       "mapsDesc": "Locate cities and capitals on the map",
       "multiplayer": "Multiplayer",
       "multiplayerDesc": "Challenge your friends in real-time"
-    }
+    },
+    "quickTrustLine": "No intrusive ads · quick rounds · mobile-first experience"
   },
   "nav": {
     "home": "Home",
@@ -234,6 +235,7 @@
     "retry": "Retry",
     "back": "Back",
     "backToMenu": "Back to Menu",
-    "save": "Save"
+    "save": "Save",
+    "skipToMainAction": "Skip to main actions"
   }
 }

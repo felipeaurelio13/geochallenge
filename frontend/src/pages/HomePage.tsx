@@ -1,8 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
-
-const APP_VERSION = __APP_VERSION__ || '0.0.0';
+import { AppFooter } from '../components/AppFooter';
 
 export function HomePage() {
   const { t } = useTranslation();
@@ -10,6 +9,10 @@ export function HomePage() {
 
   return (
     <div className="app-shell">
+      <a href="#home-main-actions" className="skip-link">
+        {t('common.skipToMainAction')}
+      </a>
+
       <div className="relative flex-1 overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(34,197,94,0.2),_transparent_45%)]" />
 
@@ -31,7 +34,7 @@ export function HomePage() {
               {t('home.subtitle')}
             </p>
 
-            <div className="mt-7 grid grid-cols-1 gap-3">
+            <div id="home-main-actions" className="mt-7 grid grid-cols-1 gap-3">
               {user ? (
                 <Link
                   to="/menu"
@@ -60,14 +63,13 @@ export function HomePage() {
             <p className="mt-5 text-xs text-gray-400 sm:text-sm">
               {t('home.features.flags')} · {t('home.features.maps')} · {t('home.features.multiplayer')}
             </p>
+
+            <p className="mt-2 text-xs text-gray-500">{t('home.quickTrustLine')}</p>
           </section>
         </main>
       </div>
 
-      <footer className="app-footer">
-        <p>GeoChallenge &copy; {new Date().getFullYear()}</p>
-        <p className="app-footer__version">v{APP_VERSION}</p>
-      </footer>
+      <AppFooter />
     </div>
   );
 }
