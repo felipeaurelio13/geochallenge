@@ -18,7 +18,20 @@ export function MenuPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const [selectedCategory, setSelectedCategory] = React.useState<Category>('MIXED');
+  const [selectedCategory, setSelectedCategory] = React.useState<Category>(() => {
+    if (typeof window === 'undefined') return 'MIXED';
+
+    const storedCategory = window.localStorage.getItem('geochallenge:last-category');
+    if (storedCategory && categories.some((cat) => cat.id === storedCategory)) {
+      return storedCategory as Category;
+    }
+
+    return 'MIXED';
+  });
+
+  React.useEffect(() => {
+    window.localStorage.setItem('geochallenge:last-category', selectedCategory);
+  }, [selectedCategory]);
 
   const selectedCategoryLabel = t(
     categories.find((cat) => cat.id === selectedCategory)?.labelKey ?? 'categories.mixed'
@@ -118,13 +131,30 @@ export function MenuPage() {
       </main>
 
       <div className="fixed inset-x-0 bottom-0 z-30 border-t border-gray-800/90 bg-gray-950/95 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur sm:hidden">
-        <button
-          onClick={() => navigate(`/game/single?category=${selectedCategory}`)}
-          className="w-full rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-primary/70"
-          aria-label={`${t('menu.singlePlayer')} ${selectedCategoryLabel}`}
-        >
-          {t('menu.singlePlayer')} · {selectedCategoryLabel}
-        </button>
+        <p className="mb-2 text-center text-xs font-medium tracking-wide text-gray-400">{t('menu.quickActions')}</p>
+        <div className="grid grid-cols-3 gap-2">
+          <button
+            onClick={() => navigate(`/game/single?category=${selectedCategory}`)}
+            className="rounded-xl bg-primary px-3 py-3 text-xs font-semibold text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-primary/70"
+            aria-label={`${t('menu.singlePlayer')} ${selectedCategoryLabel}`}
+          >
+            {t('menu.singlePlayer')}
+          </button>
+          <button
+            onClick={() => navigate(`/duel?category=${selectedCategory}`)}
+            className="rounded-xl border border-gray-700 bg-gray-900 px-3 py-3 text-xs font-semibold text-gray-100 transition-colors hover:border-gray-500 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary/70"
+            aria-label={`${t('menu.duel')} ${selectedCategoryLabel}`}
+          >
+            {t('menu.duel')}
+          </button>
+          <button
+            onClick={() => navigate(`/challenges?category=${selectedCategory}&openCreate=1`)}
+            className="rounded-xl border border-gray-700 bg-gray-900 px-3 py-3 text-xs font-semibold text-gray-100 transition-colors hover:border-gray-500 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary/70"
+            aria-label={`${t('menu.challenge')} ${selectedCategoryLabel}`}
+          >
+            {t('menu.challenge')}
+          </button>
+        </div>
       </div>
 
       <AppFooter className="sm:pb-4" />

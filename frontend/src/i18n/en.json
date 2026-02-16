@@ -17,7 +17,8 @@
       "multiplayer": "Multiplayer",
       "multiplayerDesc": "Challenge your friends in real-time"
     },
-    "quickTrustLine": "No intrusive ads · quick rounds · mobile-first experience"
+    "quickTrustLine": "No intrusive ads · quick rounds · mobile-first experience",
+    "welcomeBack": "Welcome back, {{name}}! Your next match is one tap away."
   },
   "nav": {
     "home": "Home",
@@ -64,7 +65,8 @@
     "yourStats": "Your statistics",
     "selectCategory": "Select a category",
     "selectedCategory": "Active category",
-    "mobileCategoriesHint": "Swipe to see more categories"
+    "mobileCategoriesHint": "Swipe to see more categories",
+    "quickActions": "Quick actions"
   },
   "categories": {
     "mixed": "Mixed",

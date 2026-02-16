@@ -17,7 +17,8 @@
       "multiplayer": "Multijugador",
       "multiplayerDesc": "Desafía a tus amigos en tiempo real"
     },
-    "quickTrustLine": "Sin anuncios invasivos · partidas rápidas · enfoque mobile-first"
+    "quickTrustLine": "Sin anuncios invasivos · partidas rápidas · enfoque mobile-first",
+    "welcomeBack": "¡Bienvenido de nuevo, {{name}}! Tu próxima partida está a un toque."
   },
   "nav": {
     "home": "Inicio",
@@ -64,7 +65,8 @@
     "yourStats": "Tus estadísticas",
     "selectCategory": "Selecciona una categoría",
     "selectedCategory": "Categoría activa",
-    "mobileCategoriesHint": "Desliza para ver más categorías"
+    "mobileCategoriesHint": "Desliza para ver más categorías",
+    "quickActions": "Acciones rápidas"
   },
   "categories": {
     "mixed": "Mixto",

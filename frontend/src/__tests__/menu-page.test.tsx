@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MenuPage } from '../pages/MenuPage';
 
 const routerFutureConfig = {
@@ -49,6 +49,7 @@ vi.mock('react-i18next', () => ({
         'menu.yourStats': 'Tus estadísticas',
         'menu.selectedCategory': 'Categoría activa',
         'menu.mobileCategoriesHint': 'Desliza para ver más categorías',
+        'menu.quickActions': 'Acciones rápidas',
         'categories.flags': 'Banderas',
         'categories.capitals': 'Capitales',
         'categories.maps': 'Mapas',
@@ -66,6 +67,12 @@ vi.mock('react-i18next', () => ({
 }));
 
 describe('MenuPage', () => {
+  beforeEach(() => {
+    mockNavigate.mockReset();
+    mockLogout.mockReset();
+    window.localStorage.clear();
+  });
+
   it('envía la categoría seleccionada al iniciar un duelo', () => {
     render(
       <MemoryRouter future={routerFutureConfig}>
@@ -76,7 +83,7 @@ describe('MenuPage', () => {
     const banderasButton = screen.getByRole('button', { name: /banderas/i });
     fireEvent.click(banderasButton);
 
-    const duelModeButton = screen.getByRole('button', { name: /duelo/i });
+    const duelModeButton = screen.getByRole('button', { name: /duelo[\s\S]*compite/i });
     fireEvent.click(duelModeButton);
 
     expect(mockNavigate).toHaveBeenCalledWith('/duel?category=FLAG');
@@ -90,24 +97,23 @@ describe('MenuPage', () => {
     );
 
     fireEvent.click(screen.getByRole('button', { name: /capitales/i }));
-    fireEvent.click(screen.getByRole('button', { name: /desafíos/i }));
+    fireEvent.click(screen.getByRole('button', { name: /desafíos[\s\S]*envía/i }));
 
     expect(mockNavigate).toHaveBeenCalledWith('/challenges?category=CAPITAL&openCreate=1');
   });
 
 
-  it('muestra CTA mobile con categoría activa y footer con versión', () => {
+  it('muestra acciones rápidas mobile con categoría activa y footer con versión', () => {
     render(
       <MemoryRouter future={routerFutureConfig}>
         <MenuPage />
       </MemoryRouter>
     );
 
-    const ctaButton = screen.getByRole('button', { name: /un jugador\s+mixto/i });
-    expect(ctaButton).toBeInTheDocument();
+    expect(screen.getByText('Acciones rápidas')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /capitales/i }));
-    fireEvent.click(screen.getByRole('button', { name: /un jugador\s+capitales/i }));
+    fireEvent.click(screen.getByRole('button', { name: /un jugador capitales/i }));
 
     expect(mockNavigate).toHaveBeenCalledWith('/game/single?category=CAPITAL');
     expect(screen.getByText('Desliza para ver más categorías')).toBeInTheDocument();
@@ -139,6 +145,21 @@ describe('MenuPage', () => {
     expect(container.firstChild).toHaveClass('app-shell');
 
     expect(screen.getByRole('button', { name: /un jugador\s+mixto/i })).toBeInTheDocument();
+  });
+
+
+  it('recupera la última categoría elegida para reducir fricción', () => {
+    window.localStorage.setItem('geochallenge:last-category', 'MAP');
+
+    render(
+      <MemoryRouter future={routerFutureConfig}>
+        <MenuPage />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText('Categoría activa:')).toBeInTheDocument();
+    expect(screen.getByText('Mapas')).toBeInTheDocument();
+
   });
 
   it('permite cambiar categoría y navegar a partida individual con categoría seleccionada', () => {
