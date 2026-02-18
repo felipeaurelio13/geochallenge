@@ -11,12 +11,19 @@ describe('frontend deploy workflow', () => {
     expect(workflowContent).toContain('needs: quality-gate');
     expect(workflowContent).toContain('actions/deploy-pages@v4');
     expect(workflowContent).toContain('VITE_BASE_PATH: /${{ github.event.repository.name }}/');
+    expect(workflowContent).toContain("run: npm run ci:quality");
+    expect(workflowContent).toContain("paths:");
   });
 
-  it('uses a configurable base path for GitHub Pages builds', () => {
+  it('uses a configurable base path for GitHub Pages builds and a shared quality script', () => {
     const viteConfigPath = resolve(__dirname, '../../../frontend/vite.config.ts');
     const viteConfigContent = readFileSync(viteConfigPath, 'utf-8');
 
     expect(viteConfigContent).toContain("base: process.env.VITE_BASE_PATH ?? '/'");
+
+    const frontendPackagePath = resolve(__dirname, '../../../frontend/package.json');
+    const frontendPackageContent = readFileSync(frontendPackagePath, 'utf-8');
+
+    expect(frontendPackageContent).toContain('\"ci:quality\"');
   });
 });

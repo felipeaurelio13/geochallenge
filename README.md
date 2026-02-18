@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.30**
+- Frontend: **v1.2.31**
 
 ### Mantener backend activo en producción
 Configura el secret **`BACKEND_HEALTHCHECK_URL`** en GitHub (Settings → Secrets and variables → Actions) con la URL pública de salud de tu API, por ejemplo:
@@ -16,10 +16,12 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 
 ### Flujo interno recomendado para evitar fallas de deploy
 1. Trabajar siempre en branch de feature y abrir PR a `main`.
-2. Verificar localmente en frontend: `npm run lint`, `npm run test` y `npm run build`.
+2. Verificar localmente en frontend con un solo comando: `npm run ci:quality` (equivale a lint + tests + build).
 3. Hacer merge sólo cuando estén en verde los workflows `Frontend Quality` y `Backend Quality`.
 4. El deploy a GitHub Pages se ejecuta automáticamente en push a `main` con quality gate previo (`lint + tests + build`).
 5. Si falla deploy, revisar primero el job `Frontend quality gate`: ese job corta el release antes de publicar para evitar romper producción.
+6. El workflow de deploy se dispara solo con cambios de frontend o del propio pipeline, reduciendo ruido por cambios ajenos al cliente web.
+7. Si el deploy falla, usar este protocolo interno: (a) `npm run ci:quality` local, (b) revisar secretos/configuración de Pages, (c) relanzar workflow solo tras corregir la causa raíz.
 
 
 
@@ -37,6 +39,13 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 
 
 
+
+## Novedades de la versión 1.2.31
+- Se fortaleció el pipeline de despliegue a GitHub Pages para reducir fallas intermitentes: el artefacto se construye una sola vez en el quality gate y luego se publica, evitando dobles builds inconsistentes.
+- El workflow de deploy ahora se ejecuta únicamente cuando hay cambios relevantes de frontend o del propio pipeline, disminuyendo alertas innecesarias.
+- Se unificó el chequeo de calidad de frontend en el script `npm run ci:quality` para estandarizar validación local/CI y simplificar el flujo interno del equipo.
+- Se actualizó la prueba automatizada del workflow para blindar esta configuración y prevenir regresiones futuras en CI/CD.
+- Footer/versionado actualizado a **v1.2.31** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.30
 - Se creó un workflow dedicado de **deploy a GitHub Pages** con `quality gate` previo (lint + tests unitarios + build), para bloquear despliegues con regresiones antes de publicar.
