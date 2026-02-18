@@ -108,6 +108,17 @@ describe('GamePage ending flow', () => {
 
 
 
+
+  it('muestra estado de selección en cabecera de progreso para orientar al usuario', () => {
+    render(<GamePage />);
+
+    expect(screen.getAllByText('game.submit').length).toBeGreaterThan(0);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Santiago' }));
+
+    expect(screen.getByText('game.selectedOption')).toBeInTheDocument();
+  });
+
   it('mantiene bandeja de acciones fija en mobile con espacio inferior seguro', () => {
     render(<GamePage />);
 
