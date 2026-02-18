@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.26**
+- Frontend: **v1.2.27**
 
 ### Mantener backend activo en producción
 Configura el secret **`BACKEND_HEALTHCHECK_URL`** en GitHub (Settings → Secrets and variables → Actions) con la URL pública de salud de tu API, por ejemplo:
@@ -30,6 +30,11 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 
 
 
+
+## Novedades de la versión 1.2.27
+- Se corrigió un error de tipado en pruebas de `ResultsPage` que rompía el build de TypeScript en CI/deploy.
+- Se ajustó el flujo async del test de compartir resultado para mantener cobertura sin sacrificar estabilidad del pipeline.
+- Footer/versionado actualizado a **v1.2.27** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.26
 - Se aplicaron **10+ mejoras de UX mobile-first** en `ChallengeGamePage`: header sticky con salida rápida, temporizador y puntuación más legibles, bandeja de acción fija inferior con safe-area y CTA principal con mejor jerarquía táctil.

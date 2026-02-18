@@ -113,7 +113,7 @@ describe('ResultsPage', () => {
   });
 
   it('deshabilita compartir mientras está en progreso para evitar toques dobles', async () => {
-    let resolveShare: (() => void) | null = null;
+    let resolveShare: () => void = () => {};
     mocks.writeTextMock.mockImplementationOnce(
       () =>
         new Promise<void>((resolve) => {
@@ -129,7 +129,7 @@ describe('ResultsPage', () => {
     expect(shareButton).toBeDisabled();
     expect(screen.getByRole('button', { name: /cargando/i })).toBeInTheDocument();
 
-    resolveShare?.();
+    resolveShare();
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /compartir resultado/i })).toBeEnabled();
