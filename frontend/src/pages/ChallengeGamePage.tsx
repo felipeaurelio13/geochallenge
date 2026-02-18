@@ -34,14 +34,17 @@ export function ChallengeGamePage() {
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [mapLocation, setMapLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [showResult, setShowResult] = useState(false);
-  const [lastAnswerCorrect, setLastAnswerCorrect] = useState(false);
   const [previousScore, setPreviousScore] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [alreadyPlayed, setAlreadyPlayed] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const currentQuestion = questions[currentIndex];
   const isMapQuestion = currentQuestion?.category === 'MAP';
+  const hasSelection = Boolean(selectedAnswer || mapLocation);
+  const isLastQuestion = currentIndex >= questions.length - 1;
+  const isLowTime = !showResult && timeRemaining <= Math.max(5, Math.floor(timePerQuestion * 0.2));
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -99,7 +102,6 @@ export function ChallengeGamePage() {
 
     if (isMapQuestion) {
       if (mapLocation && currentQuestion.latitude && currentQuestion.longitude) {
-        // Calculate distance
         const R = 6371;
         const dLat = ((currentQuestion.latitude - mapLocation.lat) * Math.PI) / 180;
         const dLon = ((currentQuestion.longitude - mapLocation.lng) * Math.PI) / 180;
@@ -125,7 +127,6 @@ export function ChallengeGamePage() {
       setScore((prev) => prev + points);
     }
 
-    setLastAnswerCorrect(isCorrect);
     setResults((prev) => {
       if (prev.length > currentIndex) {
         return prev;
@@ -137,8 +138,8 @@ export function ChallengeGamePage() {
 
   const handleNextQuestion = async () => {
     if (currentIndex >= questions.length - 1) {
-      // Game finished - submit result
       try {
+        setIsSubmitting(true);
         await api.post<{ success: boolean }>(`/challenges/${id}/submit`, {
           score,
           correctCount: correctAnswers,
@@ -153,6 +154,8 @@ export function ChallengeGamePage() {
       } catch (err: any) {
         alert(err.response?.data?.error || 'Error al guardar resultado');
         navigate('/challenges');
+      } finally {
+        setIsSubmitting(false);
       }
     } else {
       setCurrentIndex((prev) => prev + 1);
@@ -161,6 +164,27 @@ export function ChallengeGamePage() {
       setShowResult(false);
       setTimeRemaining(timePerQuestion);
     }
+  };
+
+  const handleClearSelection = () => {
+    setSelectedAnswer(null);
+    setMapLocation(null);
+  };
+
+  const getContextHint = () => {
+    if (showResult) {
+      return isLastQuestion ? t('game.tapResultsHint') : t('game.tapNextHint');
+    }
+
+    if (isLowTime) {
+      return t('game.lowTimeHint', { seconds: Math.max(0, timeRemaining) });
+    }
+
+    if (isMapQuestion) {
+      return mapLocation ? t('game.selectionReadyHint') : t('game.selectOnMapHint');
+    }
+
+    return selectedAnswer ? t('game.selectionReadyHint') : t('game.selectOptionHint');
   };
 
   if (loading) {
@@ -216,15 +240,23 @@ export function ChallengeGamePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 flex flex-col">
-      {/* Header */}
-      <header className="bg-gray-800 border-b border-gray-700 px-4 py-3">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div className="text-sm text-gray-400">
+    <div className="min-h-screen bg-gray-900 flex flex-col pb-[calc(env(safe-area-inset-bottom)+5.5rem)] md:pb-8">
+      <header className="sticky top-0 z-20 border-b border-gray-700 bg-gray-800/95 px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.6rem)] backdrop-blur">
+        <div className="mx-auto flex w-full max-w-4xl items-center justify-between gap-3">
+          <button
+            onClick={() => navigate('/challenges')}
+            className="rounded-xl border border-gray-600 bg-gray-900/50 px-3 py-2 text-sm font-medium text-gray-100 transition-colors hover:border-primary/60 hover:text-white"
+          >
+            ← {t('game.exit')}
+          </button>
+
+          <div className="hidden rounded-full border border-primary/35 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary sm:block">
             📨 {t('challenges.challengeMode')}
           </div>
 
-          <ScoreDisplay score={score} previousScore={previousScore} showAnimation={showResult} />
+          <div className="min-w-[100px] rounded-xl bg-gray-900/60 px-3 py-2">
+            <ScoreDisplay score={score} previousScore={previousScore} showAnimation={showResult} />
+          </div>
 
           <Timer
             duration={timePerQuestion}
@@ -236,8 +268,7 @@ export function ChallengeGamePage() {
         </div>
       </header>
 
-      {/* Progress */}
-      <div className="bg-gray-800/50 px-4 py-3">
+      <div className="bg-gray-800/65 px-4 py-3">
         <div className="max-w-4xl mx-auto">
           <ProgressBar
             current={currentIndex + 1}
@@ -247,16 +278,26 @@ export function ChallengeGamePage() {
         </div>
       </div>
 
-      {/* Main Content */}
-      <main className="flex-1 px-4 py-6">
-        <div className="max-w-4xl mx-auto">
+      <main className="flex-1 px-4 py-5">
+        <div className="max-w-4xl mx-auto space-y-4">
           <QuestionCard
             question={currentQuestion}
             questionNumber={currentIndex + 1}
             totalQuestions={questions.length}
           />
 
-          <div className="mt-6">
+          <div
+            className={`rounded-2xl border px-4 py-3 text-sm font-medium ${
+              isLowTime
+                ? 'border-amber-400/40 bg-amber-500/15 text-amber-100'
+                : 'border-gray-700 bg-gray-800/70 text-gray-200'
+            }`}
+            aria-live="polite"
+          >
+            {getContextHint()}
+          </div>
+
+          <div>
             {isMapQuestion ? (
               <Suspense fallback={<LoadingSpinner size="lg" />}>
                 <MapInteractive
@@ -273,7 +314,11 @@ export function ChallengeGamePage() {
                 />
               </Suspense>
             ) : (
-              <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
+              <div
+                className={`grid gap-2.5 sm:gap-3 ${
+                  currentQuestion.category === 'FLAG' ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-2'
+                }`}
+              >
                 {currentQuestion.options.map((option, index) => (
                   <OptionButton
                     key={option}
@@ -289,38 +334,52 @@ export function ChallengeGamePage() {
               </div>
             )}
           </div>
+        </div>
+      </main>
 
-          <div className="mt-6 flex justify-center">
+      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-gray-700 bg-gradient-to-t from-gray-950 via-gray-900/95 to-gray-900/70 px-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-3 backdrop-blur">
+        <div className="mx-auto flex w-full max-w-4xl flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center justify-between rounded-xl border border-gray-700 bg-gray-800/70 px-3 py-2 text-sm text-gray-200 sm:max-w-xs">
+            <span>{t('game.questionOf', { current: currentIndex + 1, total: questions.length })}</span>
+            <span className="ml-3 rounded-full bg-green-500/20 px-2 py-0.5 text-xs font-semibold text-green-200">
+              {correctAnswers}/{results.length || currentIndex + Number(showResult)}
+            </span>
+          </div>
+
+          <div className="flex gap-2">
+            {!showResult && hasSelection && (
+              <button
+                onClick={handleClearSelection}
+                className="min-h-[48px] rounded-xl border border-gray-600 px-4 py-2 text-sm font-semibold text-gray-100 transition-colors hover:border-gray-400"
+              >
+                {t('game.clearSelection')}
+              </button>
+            )}
+
             {!showResult ? (
               <button
                 onClick={handleSubmitAnswer}
-                disabled={!selectedAnswer && !mapLocation}
-                className="px-8 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={!hasSelection}
+                className="min-h-[48px] flex-1 rounded-xl bg-primary px-5 py-3 text-base font-bold text-white transition-colors hover:bg-primary/85 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {t('game.submit')}
               </button>
             ) : (
-              <div className="text-center">
-                <div
-                  className={`mb-4 text-xl font-bold ${
-                    lastAnswerCorrect ? 'text-green-400' : 'text-red-400'
-                  }`}
-                >
-                  {lastAnswerCorrect ? t('game.correct') : t('game.incorrect')}
-                </div>
-                <button
-                  onClick={handleNextQuestion}
-                  className="px-8 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary/80 transition-colors"
-                >
-                  {currentIndex >= questions.length - 1
+              <button
+                onClick={handleNextQuestion}
+                disabled={isSubmitting}
+                className="min-h-[48px] flex-1 rounded-xl bg-primary px-5 py-3 text-base font-bold text-white transition-colors hover:bg-primary/85 disabled:cursor-wait disabled:opacity-70"
+              >
+                {isSubmitting
+                  ? t('common.loading')
+                  : isLastQuestion
                     ? t('game.seeResults')
                     : t('game.next')}
-                </button>
-              </div>
+              </button>
             )}
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

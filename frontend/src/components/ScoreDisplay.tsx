@@ -43,17 +43,17 @@ export function ScoreDisplay({ score, previousScore = 0, showAnimation = true }:
   const pointsGained = score - previousScore;
 
   return (
-    <div className="text-center">
-      <div className="text-sm text-gray-400 mb-1">{t('game.score')}</div>
+    <div className="text-center" aria-live="polite">
+      <div className="text-[11px] uppercase tracking-wide text-gray-400 mb-1">{t('game.score')}</div>
       <div
-        className={`text-3xl font-bold transition-transform duration-200 ${
+        className={`text-2xl sm:text-3xl font-bold transition-transform duration-200 ${
           isAnimating ? 'scale-110 text-primary' : 'text-white'
         }`}
       >
         {displayScore.toLocaleString()}
       </div>
       {showAnimation && pointsGained > 0 && isAnimating && (
-        <div className="text-green-400 text-sm font-semibold animate-bounce-subtle">
+        <div className="text-green-400 text-xs sm:text-sm font-semibold animate-bounce-subtle">
           +{pointsGained}
         </div>
       )}

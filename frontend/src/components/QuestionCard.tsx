@@ -79,7 +79,7 @@ export function QuestionCard({ question, questionNumber, totalQuestions }: Quest
   };
 
   return (
-    <div className="rounded-3xl border border-gray-700 bg-gray-800/95 px-5 py-6 shadow-xl shadow-black/25 sm:px-6">
+    <div className="rounded-3xl border border-gray-700 bg-gray-800/95 px-4 py-5 shadow-xl shadow-black/25 sm:px-6 sm:py-6">
       {/* Progress indicator */}
       <div className="mb-5 flex items-center justify-between">
         <span className="text-sm text-gray-400">
@@ -95,13 +95,13 @@ export function QuestionCard({ question, questionNumber, totalQuestions }: Quest
           <div className="mb-6">
             <img
               src={question.imageUrl}
-              alt="Question image"
+              alt={t('game.questionImageAlt', { category: question.category.toLowerCase() })}
               loading="lazy"
               width={question.category === 'FLAG' ? 360 : 180}
               height={question.category === 'FLAG' ? 180 : 180}
               className={`mx-auto ${
                 question.category === 'FLAG'
-                  ? 'max-h-52 w-full max-w-md rounded-xl border border-amber-400/70 bg-black/10 object-contain p-1 shadow-lg shadow-black/30'
+                  ? 'max-h-52 w-full max-w-md rounded-xl border border-amber-400/70 bg-black/10 object-contain p-1 shadow-lg shadow-black/30 ring-1 ring-white/10'
                   : 'max-h-48 w-auto filter invert'
               }`}
               onError={(e) => {
@@ -113,7 +113,7 @@ export function QuestionCard({ question, questionNumber, totalQuestions }: Quest
         )}
 
         {/* Question text */}
-        <h2 className="text-[2rem] leading-tight font-bold text-white sm:text-4xl">
+        <h2 className="text-[2rem] leading-tight font-bold text-white sm:text-4xl break-words">
           {getQuestionText()}
         </h2>
 

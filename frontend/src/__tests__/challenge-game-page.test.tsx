@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ChallengeGamePage } from '../pages/ChallengeGamePage';
 
@@ -29,7 +29,9 @@ vi.mock('../services/api', () => ({
 vi.mock('../components', () => ({
   Timer: () => <div>timer</div>,
   QuestionCard: () => <div>question-card</div>,
-  OptionButton: ({ option }: { option: string }) => <button>{option}</button>,
+  OptionButton: ({ option, onClick }: { option: string; onClick: () => void }) => (
+    <button onClick={onClick}>{option}</button>
+  ),
   ScoreDisplay: () => <div>score</div>,
   ProgressBar: () => <div>progress</div>,
   LoadingSpinner: ({ text }: { text?: string }) => <div>{text || 'loading'}</div>,
@@ -38,6 +40,7 @@ vi.mock('../components', () => ({
 describe('ChallengeGamePage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.apiPostMock.mockResolvedValue({ success: true });
     mocks.apiGetMock.mockResolvedValue({
       questions: [
         {
@@ -63,5 +66,34 @@ describe('ChallengeGamePage', () => {
     await waitFor(() => {
       expect(mocks.apiGetMock).toHaveBeenCalledWith('/challenges/challenge-1/questions');
     });
+  });
+
+  it('muestra la bandeja sticky de acción y el botón confirmar deshabilitado hasta seleccionar', async () => {
+    render(<ChallengeGamePage />);
+
+    const submitButton = await screen.findByRole('button', { name: 'game.submit' });
+    expect(submitButton).toBeDisabled();
+
+    const stickyTray = submitButton.closest('div.fixed');
+    expect(stickyTray).toHaveClass('fixed');
+    expect(stickyTray).toHaveClass('bottom-0');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Santiago' }));
+    expect(submitButton).toBeEnabled();
+  });
+
+  it('permite limpiar la selección antes de confirmar para reducir errores táctiles', async () => {
+    render(<ChallengeGamePage />);
+
+    const option = await screen.findByRole('button', { name: 'Santiago' });
+    fireEvent.click(option);
+
+    const clearButton = screen.getByRole('button', { name: 'game.clearSelection' });
+    expect(clearButton).toBeInTheDocument();
+
+    fireEvent.click(clearButton);
+
+    expect(screen.queryByRole('button', { name: 'game.clearSelection' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'game.submit' })).toBeDisabled();
   });
 });
