@@ -12,11 +12,12 @@ export function ResultsPage() {
   const { state, resetGame } = useGame();
 
   const { score, questions, results } = state;
-  const correctAnswers = results.filter(r => r.isCorrect).length;
+  const correctAnswers = results.filter((r) => r.isCorrect).length;
 
   const [userRank, setUserRank] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [shareStatus, setShareStatus] = useState<'idle' | 'success'>('idle');
+  const [isSharing, setIsSharing] = useState(false);
 
   useEffect(() => {
     const fetchRank = async () => {
@@ -35,9 +36,16 @@ export function ResultsPage() {
 
   const totalQuestions = questions.length || 10;
   const percentage = Math.round((correctAnswers / totalQuestions) * 100);
+  const incorrectAnswers = totalQuestions - correctAnswers;
 
   const shareText = useMemo(
-    () => t('results.shareText', { score, correct: correctAnswers, total: totalQuestions, accuracy: `${percentage}%` }),
+    () =>
+      t('results.shareText', {
+        score,
+        correct: correctAnswers,
+        total: totalQuestions,
+        accuracy: `${percentage}%`,
+      }),
     [t, score, correctAnswers, totalQuestions, percentage]
   );
 
@@ -69,6 +77,7 @@ export function ResultsPage() {
     };
 
     try {
+      setIsSharing(true);
       if (navigator.share) {
         await navigator.share(sharePayload);
       } else {
@@ -81,6 +90,8 @@ export function ResultsPage() {
       if ((error as Error)?.name !== 'AbortError') {
         console.error('Failed to share score:', error);
       }
+    } finally {
+      setIsSharing(false);
     }
   };
 
@@ -90,28 +101,36 @@ export function ResultsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4 py-8">
-      <div className="max-w-lg w-full">
-        <div className="bg-gray-800 rounded-xl p-6 sm:p-8 text-center shadow-lg">
-          <div className="text-6xl sm:text-7xl mb-4">{getPerformanceEmoji()}</div>
+    <div className="min-h-screen bg-gray-900 px-4 pb-[calc(env(safe-area-inset-bottom)+1.25rem)] pt-[calc(env(safe-area-inset-top)+1.25rem)] sm:px-6 sm:py-8">
+      <main className="mx-auto w-full max-w-xl" aria-label="results-summary">
+        <section className="rounded-3xl border border-gray-700 bg-gray-800/95 p-5 text-center shadow-2xl shadow-black/30 sm:p-8">
+          <div className="text-6xl sm:text-7xl mb-3" aria-hidden="true">{getPerformanceEmoji()}</div>
 
-          <h1 className="text-3xl font-bold text-white mb-2">
-            {t('results.gameOver')}
-          </h1>
-          <p className="text-xl text-gray-400 mb-6">{getPerformanceMessage()}</p>
+          <h1 className="text-3xl font-bold text-white sm:text-4xl">{t('results.gameOver')}</h1>
+          <p className="mt-2 text-lg text-gray-300 sm:text-xl">{getPerformanceMessage()}</p>
 
-          <div className="bg-gray-900 rounded-xl p-6 mb-6">
-            <div className="text-5xl font-bold text-primary mb-2">
-              {score.toLocaleString()}
-            </div>
-            <div className="text-gray-400">{t('results.points')}</div>
+          <div className="mt-6 rounded-2xl border border-primary/35 bg-gray-900/90 p-5">
+            <p className="text-sm font-medium uppercase tracking-wide text-primary/80">{t('game.score')}</p>
+            <div className="mt-1 text-5xl font-black text-white sm:text-6xl">{score.toLocaleString()}</div>
+            <div className="mt-1 text-gray-400">{t('results.points')}</div>
           </div>
 
-          <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-6">
-            <div className="min-w-0 bg-gray-900 rounded-lg p-3 sm:p-4">
-              <div className="text-2xl font-bold text-green-400">
-                {correctAnswers}
-              </div>
+          <div className="mt-6 rounded-2xl border border-gray-700 bg-gray-900/75 p-4 text-left">
+            <div className="mb-2 flex items-center justify-between text-sm text-gray-300">
+              <span>{t('results.accuracy')}</span>
+              <span className="font-semibold text-white">{percentage}%</span>
+            </div>
+            <div className="h-2.5 rounded-full bg-gray-700/80 p-0.5" data-testid="results-accuracy-bar">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-green-400 via-emerald-400 to-primary transition-all duration-500"
+                style={{ width: `${percentage}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="mt-6 grid grid-cols-3 gap-3 sm:gap-4">
+            <article className="min-w-0 rounded-xl border border-gray-700 bg-gray-900/95 p-3 sm:p-4">
+              <div className="text-2xl font-bold text-green-400">{correctAnswers}</div>
               <div className="mt-2 flex justify-center min-w-0">
                 <AnswerStatusBadge
                   status="correct"
@@ -119,11 +138,9 @@ export function ResultsPage() {
                   className="w-full justify-center text-[11px] sm:text-xs"
                 />
               </div>
-            </div>
-            <div className="min-w-0 bg-gray-900 rounded-lg p-3 sm:p-4">
-              <div className="text-2xl font-bold text-red-400">
-                {totalQuestions - correctAnswers}
-              </div>
+            </article>
+            <article className="min-w-0 rounded-xl border border-gray-700 bg-gray-900/95 p-3 sm:p-4">
+              <div className="text-2xl font-bold text-red-400">{incorrectAnswers}</div>
               <div className="mt-2 flex justify-center min-w-0">
                 <AnswerStatusBadge
                   status="incorrect"
@@ -131,59 +148,66 @@ export function ResultsPage() {
                   className="w-full justify-center text-[11px] sm:text-xs"
                 />
               </div>
-            </div>
-            <div className="min-w-0 bg-gray-900 rounded-lg p-3 sm:p-4">
+            </article>
+            <article className="min-w-0 rounded-xl border border-gray-700 bg-gray-900/95 p-3 sm:p-4">
               <div className="text-2xl font-bold text-white">{percentage}%</div>
               <div className="text-xs text-gray-400">{t('results.accuracy')}</div>
-            </div>
+            </article>
           </div>
 
           {loading ? (
-            <div className="mb-6">
+            <div className="mt-6">
               <LoadingSpinner size="sm" />
             </div>
           ) : userRank ? (
-            <div className="mb-6 p-4 bg-gradient-to-r from-yellow-900/50 to-orange-900/50 rounded-lg border border-yellow-700">
-              <div className="text-sm text-yellow-300 mb-1">{t('results.yourRank')}</div>
+            <div className="mt-6 rounded-xl border border-yellow-700 bg-gradient-to-r from-yellow-900/50 to-orange-900/50 p-4">
+              <div className="text-sm text-yellow-300">{t('results.yourRank')}</div>
               <div className="text-3xl font-bold text-yellow-400">#{userRank}</div>
             </div>
-          ) : null}
+          ) : (
+            <div className="mt-6 rounded-xl border border-gray-700 bg-gray-900/70 p-4 text-sm text-gray-300">
+              {t('rankings.empty')}
+            </div>
+          )}
+        </section>
 
-          <div className="flex flex-col gap-3">
+        <section className="mt-5 rounded-2xl border border-gray-700 bg-gray-800/80 p-4 sm:p-5">
+          <p className="text-sm text-gray-300">{t('results.shareScore')}</p>
+          <button
+            onClick={handleShareResults}
+            disabled={isSharing}
+            className="mt-3 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            🔗 {isSharing ? `${t('common.loading')}...` : t('results.shareButton')}
+          </button>
+          <p className="mt-2 min-h-5 text-xs text-green-300" aria-live="polite">
+            {shareStatus === 'success' ? t('results.copied') : ''}
+          </p>
+        </section>
+
+        <section
+          className="sticky bottom-0 z-10 mt-5 rounded-2xl border border-gray-700 bg-gray-800/95 p-3 backdrop-blur-sm"
+          data-testid="results-action-tray"
+        >
+          <div className="flex flex-col gap-2.5">
             <button
               onClick={handlePlayAgain}
-              className="w-full py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary/80 transition-colors"
+              className="w-full min-h-12 rounded-xl bg-primary px-4 py-3 text-base font-bold text-white shadow-md shadow-primary/25 transition-colors hover:bg-primary/85"
             >
               {t('results.playAgain')}
             </button>
             <Link
               to="/rankings"
-              className="w-full py-3 bg-gray-700 text-white font-bold rounded-lg hover:bg-gray-600 transition-colors inline-block"
+              className="inline-flex w-full min-h-12 items-center justify-center rounded-xl bg-gray-700 px-4 py-3 text-base font-bold text-white transition-colors hover:bg-gray-600"
             >
               {t('results.viewRankings')}
             </Link>
-            <Link
-              to="/menu"
-              className="text-gray-400 hover:text-white transition-colors mt-2"
-            >
+            <Link to="/menu" className="py-2 text-center text-gray-300 transition-colors hover:text-white">
               {t('common.backToMenu')}
             </Link>
           </div>
-        </div>
-
-        <div className="mt-6 text-center rounded-xl border border-gray-800 bg-gray-900/60 p-4 sm:p-5">
-          <p className="text-gray-300 text-sm mb-3">{t('results.shareScore')}</p>
-          <button
-            onClick={handleShareResults}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/90 sm:w-auto"
-          >
-            🔗 {t('results.shareButton')}
-          </button>
-          <p className="mt-2 min-h-5 text-xs text-green-300" aria-live="polite">
-            {shareStatus === 'success' ? t('results.copied') : ''}
-          </p>
-        </div>
-      </div>
+        </section>
+      </main>
     </div>
   );
 }

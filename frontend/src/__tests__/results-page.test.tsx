@@ -30,6 +30,7 @@ vi.mock('react-i18next', () => ({
     t: (key: string, options?: Record<string, string | number>) => {
       const translations: Record<string, string> = {
         'app.name': 'GeoChallenge',
+        'game.score': 'Puntuación',
         'results.gameOver': '¡Partida terminada!',
         'results.great': '¡Muy bien!',
         'results.excellent': '¡Excelente!',
@@ -47,6 +48,8 @@ vi.mock('react-i18next', () => ({
         'results.shareButton': 'Compartir resultado',
         'results.copied': '¡Resultado listo para compartir!',
         'common.backToMenu': 'Volver al menú',
+        'common.loading': 'Cargando',
+        'rankings.empty': 'Aún no hay jugadores en el ranking',
       };
 
       if (key === 'results.shareText') {
@@ -81,7 +84,7 @@ describe('ResultsPage', () => {
     vi.spyOn(navigator.clipboard, 'writeText').mockImplementation(mocks.writeTextMock);
   });
 
-  it('mantiene badges contenidos en tarjetas y muestra botón de compartir mejorado', async () => {
+  it('mantiene badges contenidos y agrega barra de precisión visible', async () => {
     const { container } = render(<ResultsPage />);
 
     await waitFor(() => {
@@ -90,11 +93,13 @@ describe('ResultsPage', () => {
 
     expect(screen.getByText('Correctas').parentElement).toHaveClass('w-full', 'justify-center');
     expect(screen.getByText('Incorrectas').parentElement).toHaveClass('w-full', 'justify-center');
-    expect(container.querySelectorAll('div.min-w-0').length).toBeGreaterThanOrEqual(3);
-    expect(screen.getByRole('button', { name: /compartir resultado/i })).toBeInTheDocument();
+    expect(container.querySelectorAll('article.min-w-0').length).toBeGreaterThanOrEqual(3);
+
+    const accuracyBar = screen.getByTestId('results-accuracy-bar').firstElementChild as HTMLElement;
+    expect(accuracyBar.style.width).toBe('80%');
   });
 
-  it('copia mensaje de compartir mejorado y muestra confirmación inline', async () => {
+  it('copia mensaje, muestra confirmación inline y bandeja fija de acciones', async () => {
     render(<ResultsPage />);
 
     fireEvent.click(screen.getByRole('button', { name: /compartir resultado/i }));
@@ -104,5 +109,30 @@ describe('ResultsPage', () => {
     });
 
     expect(screen.getByText('¡Resultado listo para compartir!')).toBeInTheDocument();
+    expect(screen.getByTestId('results-action-tray')).toHaveClass('sticky', 'bottom-0');
+  });
+
+  it('deshabilita compartir mientras está en progreso para evitar toques dobles', async () => {
+    let resolveShare: (() => void) | null = null;
+    mocks.writeTextMock.mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveShare = resolve;
+        })
+    );
+
+    render(<ResultsPage />);
+
+    const shareButton = screen.getByRole('button', { name: /compartir resultado/i });
+    fireEvent.click(shareButton);
+
+    expect(shareButton).toBeDisabled();
+    expect(screen.getByRole('button', { name: /cargando/i })).toBeInTheDocument();
+
+    resolveShare?.();
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /compartir resultado/i })).toBeEnabled();
+    });
   });
 });
