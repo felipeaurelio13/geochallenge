@@ -107,6 +107,18 @@ describe('GamePage ending flow', () => {
 
 
 
+
+  it('mantiene bandeja de acciones fija en mobile con espacio inferior seguro', () => {
+    render(<GamePage />);
+
+    const main = screen.getByRole('main');
+    expect(main).toHaveClass('pb-28');
+
+    const tray = screen.getByTestId('mobile-action-tray');
+    expect(tray).toHaveClass('sticky');
+    expect(tray).toHaveClass('bottom-0');
+  });
+
   it('muestra guía contextual antes de seleccionar y permite limpiar selección', () => {
     render(<GamePage />);
 

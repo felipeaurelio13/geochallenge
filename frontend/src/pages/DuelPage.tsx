@@ -395,7 +395,7 @@ export function DuelPage() {
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 px-4 py-6">
+      <main className="flex-1 px-4 py-6 pb-28 sm:pb-6">
         <div className="max-w-4xl mx-auto">
           <QuestionCard
             question={currentQuestion}
@@ -438,7 +438,10 @@ export function DuelPage() {
           </div>
 
           {/* Submit Button */}
-          <div className="mt-6 sticky bottom-2 z-20">
+          <div
+            className="mt-6 sticky bottom-0 z-20 -mx-1 bg-gradient-to-t from-gray-900 via-gray-900/95 to-transparent px-1 pb-[calc(env(safe-area-inset-bottom)+0.35rem)] pt-2 sm:mx-0 sm:bg-none sm:px-0 sm:pb-0 sm:pt-0"
+            data-testid="mobile-action-tray"
+          >
             {duelState === 'playing' && !showResult && (
               <div className="rounded-xl border border-gray-700 bg-gray-800/95 p-3 backdrop-blur-sm sm:bg-transparent sm:p-0 sm:border-0 sm:backdrop-blur-none">
                 <p
