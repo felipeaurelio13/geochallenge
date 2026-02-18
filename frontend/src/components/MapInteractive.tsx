@@ -4,7 +4,6 @@ import { Icon, latLngBounds } from 'leaflet';
 import { useTranslation } from 'react-i18next';
 import 'leaflet/dist/leaflet.css';
 
-// Fix for default marker icon
 const defaultIcon = new Icon({
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
@@ -124,10 +123,9 @@ export function MapInteractive({
 }: MapInteractiveProps) {
   const { t } = useTranslation();
 
-  // Calculate distance between two points
   const calculateDistance = useCallback(() => {
     if (!selectedLocation || !correctLocation) return null;
-    const R = 6371; // Earth's radius in km
+    const R = 6371;
     const dLat = ((correctLocation.lat - selectedLocation.lat) * Math.PI) / 180;
     const dLon = ((correctLocation.lng - selectedLocation.lng) * Math.PI) / 180;
     const a =
@@ -144,11 +142,11 @@ export function MapInteractive({
 
   return (
     <div className="relative">
-      <div className="rounded-xl overflow-hidden border-2 border-gray-700">
+      <div className="overflow-hidden rounded-2xl border-2 border-gray-700/80 bg-gray-900/30 shadow-sm shadow-black/30">
         <MapContainer
           center={MAP_DEFAULT_VIEW.center}
           zoom={MAP_DEFAULT_VIEW.zoom}
-          style={{ height: 'clamp(250px, 50vh, 400px)', width: '100%' }}
+          style={{ height: 'clamp(260px, 52vh, 420px)', width: '100%' }}
           className="z-0 touch-manipulation"
         >
           <TileLayer
@@ -163,7 +161,6 @@ export function MapInteractive({
             correctLocation={correctLocation}
           />
 
-          {/* User's selected location */}
           {selectedLocation && (
             <Marker
               position={[selectedLocation.lat, selectedLocation.lng]}
@@ -171,7 +168,6 @@ export function MapInteractive({
             />
           )}
 
-          {/* Correct location (shown after answer) */}
           {showResult && correctLocation && (
             <>
               <Marker
@@ -192,30 +188,29 @@ export function MapInteractive({
         </MapContainer>
       </div>
 
-      {/* Instructions or result */}
-      <div className="mt-4 text-center">
+      <div className="mt-4 text-center" aria-live="polite">
         {!selectedLocation && !showResult && (
-          <p className="text-gray-400">{t('game.clickMap')}</p>
+          <p className="text-sm text-gray-400">{t('game.clickMap')}</p>
         )}
         {selectedLocation && !showResult && (
-          <p className="text-primary">{t('game.locationSelected')}</p>
+          <p className="text-sm font-medium text-primary">{t('game.locationSelected')}</p>
         )}
         {showResult && distance !== null && (
-          <div className="bg-gray-800 rounded-lg p-4">
-            <p className="text-lg">
-              {t('game.distance')}: <span className="font-bold text-primary">{distance} km</span>
+          <div className="rounded-2xl border border-gray-700 bg-gray-800/75 px-4 py-4 shadow-sm shadow-black/25">
+            <p className="text-[clamp(1.1rem,3.8vw,2rem)] leading-tight text-white">
+              {t('game.distance')}: <span className="font-bold text-white">{distance} km</span>
             </p>
             {distance < 50 && (
-              <p className="text-green-400 mt-1">{t('game.excellent')}</p>
+              <p className="mt-2 text-xl font-medium text-green-400">{t('game.excellent')}</p>
             )}
             {distance >= 50 && distance < 200 && (
-              <p className="text-yellow-400 mt-1">{t('game.good')}</p>
+              <p className="mt-2 text-xl font-medium text-yellow-400">{t('game.good')}</p>
             )}
             {distance >= 200 && distance < 500 && (
-              <p className="text-orange-400 mt-1">{t('game.notBad')}</p>
+              <p className="mt-2 text-xl font-medium text-orange-400">{t('game.notBad')}</p>
             )}
             {distance >= 500 && (
-              <p className="text-red-400 mt-1">{t('game.farAway')}</p>
+              <p className="mt-2 text-xl font-medium text-red-400">{t('game.farAway')}</p>
             )}
           </div>
         )}

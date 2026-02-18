@@ -205,7 +205,7 @@ export function GamePage() {
   return (
     <div className="min-h-screen bg-gray-900 flex flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-gray-800/95 border-b border-gray-700 px-3 py-2.5 backdrop-blur sm:px-4 sm:py-3">
+      <header className="sticky top-0 z-30 border-b border-gray-700 bg-gray-800/95 px-3 py-3 backdrop-blur sm:px-4 sm:py-4">
         <div className="max-w-4xl mx-auto grid grid-cols-[auto_1fr_auto] items-center gap-2 sm:gap-4">
           <button
             onClick={() => {
@@ -233,7 +233,7 @@ export function GamePage() {
       </header>
 
       {/* Progress */}
-      <div className="bg-gray-800/70 px-3 py-2.5 sm:px-4 sm:py-3">
+      <div className="bg-gray-800/70 px-3 py-3 sm:px-4 sm:py-3">
         <div className="max-w-4xl mx-auto">
           <ProgressBar
             current={currentIndex + 1}
@@ -244,7 +244,7 @@ export function GamePage() {
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 px-3 py-5 pb-28 sm:px-4 sm:py-6 sm:pb-6">
+      <main className="flex-1 px-3 py-4 pb-28 sm:px-4 sm:py-6 sm:pb-6">
         <div className="max-w-4xl mx-auto">
           {/* Question Card */}
           <QuestionCard
@@ -292,18 +292,20 @@ export function GamePage() {
             )}
           </div>
 
-          <div className="mt-4 rounded-xl border border-gray-700 bg-gray-800/60 px-4 py-3">
-            <p className="text-sm text-gray-200" aria-live="polite">
-              {!hasSelection
-                ? t(isMapQuestion ? 'game.selectOnMapHint' : 'game.selectOptionHint')
-                : t('game.selectionReadyHint')}
-            </p>
-            {isLowTime && (
-              <p className="mt-2 text-xs font-medium text-amber-300" aria-live="assertive">
-                {t('game.lowTimeHint', { seconds: timeRemaining })}
+          {!showResult && (
+            <div className="mt-4 rounded-xl border border-gray-700 bg-gray-800/60 px-4 py-3">
+              <p className="text-sm text-gray-200" aria-live="polite">
+                {!hasSelection
+                  ? t(isMapQuestion ? 'game.selectOnMapHint' : 'game.selectOptionHint')
+                  : t('game.selectionReadyHint')}
               </p>
-            )}
-          </div>
+              {isLowTime && (
+                <p className="mt-2 text-xs font-medium text-amber-300" aria-live="assertive">
+                  {t('game.lowTimeHint', { seconds: timeRemaining })}
+                </p>
+              )}
+            </div>
+          )}
 
           {/* Action Buttons */}
           <div
@@ -335,7 +337,7 @@ export function GamePage() {
                 </div>
               </div>
             ) : (
-              <div className="text-center rounded-xl border border-gray-700 bg-gray-800/95 p-4 backdrop-blur-sm">
+              <div className="text-center rounded-2xl border border-gray-700 bg-gray-800/95 p-4 backdrop-blur-sm shadow-sm shadow-black/30">
                 {/* Result feedback */}
                 <AnswerStatusBadge
                   status={lastAnswerCorrect ? 'correct' : 'incorrect'}
