@@ -118,7 +118,8 @@
     "selectOptionHint": "Selecciona una alternativa para continuar.",
     "selectOnMapHint": "Marca una ubicación en el mapa para continuar.",
     "lowTimeHint": "Te quedan {{seconds}} segundos. Respira y confirma tu respuesta.",
-    "clearSelection": "Cambiar selección"
+    "clearSelection": "Cambiar selección",
+    "questionImageAlt": "Imagen de pregunta de tipo {{category}}"
   },
   "results": {
     "gameOver": "¡Partida terminada!",

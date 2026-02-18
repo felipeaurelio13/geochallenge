@@ -118,7 +118,8 @@
     "selectOptionHint": "Select an option to continue.",
     "selectOnMapHint": "Pick a location on the map to continue.",
     "lowTimeHint": "{{seconds}} seconds left. Take a breath and confirm your answer.",
-    "clearSelection": "Change selection"
+    "clearSelection": "Change selection",
+    "questionImageAlt": "Question image for {{category}} category"
   },
   "results": {
     "gameOver": "Game Over!",
