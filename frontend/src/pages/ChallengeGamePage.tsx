@@ -240,7 +240,7 @@ export function ChallengeGamePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 flex flex-col pb-[calc(env(safe-area-inset-bottom)+5.5rem)] md:pb-8">
+    <div className="min-h-screen bg-gray-900 flex flex-col pb-[calc(env(safe-area-inset-bottom)+4.75rem)] md:pb-8">
       <header className="sticky top-0 z-20 border-b border-gray-700 bg-gray-800/95 px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.6rem)] backdrop-blur">
         <div className="mx-auto flex w-full max-w-4xl items-center justify-between gap-3">
           <button
@@ -269,21 +269,23 @@ export function ChallengeGamePage() {
       </header>
 
       <div className="bg-gray-800/65 px-4 py-3">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto overflow-x-hidden">
           <ProgressBar
             current={currentIndex + 1}
             total={questions.length}
             results={results}
+            showCurrentResult={showResult}
           />
         </div>
       </div>
 
-      <main className="flex-1 px-4 py-5">
-        <div className="max-w-4xl mx-auto space-y-4">
+      <main className="flex-1 overflow-x-hidden px-3 py-3 sm:px-4 sm:py-4">
+        <div className="max-w-4xl mx-auto space-y-3 overflow-hidden">
           <QuestionCard
             question={currentQuestion}
             questionNumber={currentIndex + 1}
             totalQuestions={questions.length}
+            compact
           />
 
           <div
@@ -297,7 +299,7 @@ export function ChallengeGamePage() {
             {getContextHint()}
           </div>
 
-          <div>
+          <div className="overflow-hidden">
             {isMapQuestion ? (
               <Suspense fallback={<LoadingSpinner size="lg" />}>
                 <MapInteractive
@@ -337,7 +339,7 @@ export function ChallengeGamePage() {
         </div>
       </main>
 
-      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-gray-700 bg-gradient-to-t from-gray-950 via-gray-900/95 to-gray-900/70 px-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-3 backdrop-blur">
+      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-gray-700 bg-gradient-to-t from-gray-950 via-gray-900/95 to-gray-900/70 px-3 pb-[calc(env(safe-area-inset-bottom)+0.6rem)] pt-2.5 backdrop-blur sm:px-4">
         <div className="mx-auto flex w-full max-w-4xl flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center justify-between rounded-xl border border-gray-700 bg-gray-800/70 px-3 py-2 text-sm text-gray-200 sm:max-w-xs">
             <span>{t('game.questionOf', { current: currentIndex + 1, total: questions.length })}</span>

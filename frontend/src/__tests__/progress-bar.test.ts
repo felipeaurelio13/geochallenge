@@ -9,10 +9,16 @@ describe('ProgressBar question status mapping', () => {
     expect(getQuestionIndicatorStatus(1, 3, results)).toBe('correct');
   });
 
-  it('keeps the current unanswered question active when there are fewer results than progress', () => {
-    const results = [{ isCorrect: true }, { isCorrect: false }];
+  it('keeps the current unanswered question in pending color state while not answered', () => {
+    const results = [{ isCorrect: true }, { isCorrect: false }, { isCorrect: false }];
 
-    expect(getQuestionIndicatorStatus(2, 3, results)).toBe('current');
+    expect(getQuestionIndicatorStatus(3, 4, results, false)).toBe('current');
+  });
+
+  it('shows current question result only after confirmation', () => {
+    const results = [{ isCorrect: true }, { isCorrect: false }, { isCorrect: true }];
+
+    expect(getQuestionIndicatorStatus(2, 3, results, true)).toBe('correct');
   });
 
   it('marks pending questions correctly', () => {

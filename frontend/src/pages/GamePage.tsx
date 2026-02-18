@@ -53,7 +53,7 @@ export function GamePage() {
   const isLastQuestion = currentIndex >= questions.length - 1;
   const hasSelection = Boolean(selectedAnswer || mapLocation);
   const isLowTime = timeRemaining > 0 && timeRemaining <= 5 && !showResult;
-  const shouldUseCompactQuestionCard = currentQuestion?.category === 'SILHOUETTE';
+  const shouldUseCompactQuestionCard = true;
 
   // Prevent accidental navigation during game
   useEffect(() => {
@@ -241,18 +241,19 @@ export function GamePage() {
             {hasSelection ? t('game.selectedOption') : t('game.submit')}
           </span>
         </div>
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto overflow-x-hidden">
           <ProgressBar
             current={currentIndex + 1}
             total={questions.length}
             results={results}
+            showCurrentResult={showResult}
           />
         </div>
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 px-3 py-3 pb-32 sm:px-4 sm:py-6 sm:pb-6">
-        <div className="max-w-4xl mx-auto">
+      <main className="flex-1 overflow-x-hidden px-3 py-2 pb-28 sm:px-4 sm:py-4 sm:pb-6">
+        <div className="max-w-4xl mx-auto overflow-hidden">
           {/* Question Card */}
           <QuestionCard
             question={currentQuestion}
@@ -262,7 +263,7 @@ export function GamePage() {
           />
 
           {/* Answer Options or Map */}
-          <div className="mt-4">
+          <div className="mt-3 overflow-hidden">
             {isMapQuestion ? (
               <Suspense fallback={<LoadingSpinner size="lg" text={t('game.loading')} />}>
                 <MapInteractive
@@ -317,7 +318,7 @@ export function GamePage() {
 
           {/* Action Buttons */}
           <div
-            className="sticky bottom-0 z-20 -mx-1 bg-gradient-to-t from-gray-900 via-gray-900/95 to-transparent px-1 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-2 sm:mx-0 sm:bg-none sm:px-0 sm:pb-0 sm:pt-0"
+            className="sticky bottom-0 z-20 -mx-1 bg-gradient-to-t from-gray-900 via-gray-900/95 to-transparent px-1 pb-[calc(env(safe-area-inset-bottom)+0.4rem)] pt-2 sm:mx-0 sm:bg-none sm:px-0 sm:pb-0 sm:pt-0"
             data-testid="mobile-action-tray"
           >
             {!showResult ? (

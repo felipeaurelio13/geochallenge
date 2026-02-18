@@ -2,20 +2,26 @@ interface ProgressBarProps {
   current: number;
   total: number;
   results: Array<{ isCorrect: boolean }>;
+  showCurrentResult?: boolean;
 }
 
 export function getQuestionIndicatorStatus(
   index: number,
   current: number,
-  results: Array<{ isCorrect: boolean }>
+  results: Array<{ isCorrect: boolean }>,
+  showCurrentResult = false
 ) {
-  const answeredCount = results.length;
+  const currentIndex = Math.max(0, current - 1);
+
+  if (index === currentIndex && !showCurrentResult) {
+    return 'current';
+  }
+
+  const answeredCount = showCurrentResult ? results.length : Math.min(results.length, currentIndex);
 
   if (index < answeredCount) {
     return results[index]?.isCorrect ? 'correct' : 'incorrect';
   }
-
-  const currentIndex = Math.max(0, current - 1);
 
   if (index === currentIndex) {
     return 'current';
@@ -24,7 +30,7 @@ export function getQuestionIndicatorStatus(
   return 'pending';
 }
 
-export function ProgressBar({ current, total, results }: ProgressBarProps) {
+export function ProgressBar({ current, total, results, showCurrentResult = false }: ProgressBarProps) {
   const percentage = (current / total) * 100;
 
   return (
@@ -38,7 +44,7 @@ export function ProgressBar({ current, total, results }: ProgressBarProps) {
 
       <div className="scrollbar-none mt-3.5 -mx-1 flex items-center gap-2 overflow-x-auto px-1 pb-1 sm:mx-0 sm:justify-between sm:overflow-visible sm:px-0 sm:pb-0" role="list" aria-label="Progreso de preguntas">
         {Array.from({ length: total }, (_, i) => {
-          const status = getQuestionIndicatorStatus(i, current, results);
+          const status = getQuestionIndicatorStatus(i, current, results, showCurrentResult);
 
           return (
             <div
@@ -51,7 +57,7 @@ export function ProgressBar({ current, total, results }: ProgressBarProps) {
                   : status === 'incorrect'
                     ? 'border-red-400 bg-red-500 text-white'
                     : status === 'current'
-                      ? 'border-primary/80 bg-primary/25 text-white ring-2 ring-primary/70 ring-offset-2 ring-offset-gray-900'
+                      ? 'border-amber-300 bg-amber-500/30 text-amber-100 ring-2 ring-amber-300/70 ring-offset-2 ring-offset-gray-900'
                       : 'border-gray-600 bg-gray-700/80 text-gray-400'
               }`}
               aria-current={status === 'current' ? 'step' : undefined}

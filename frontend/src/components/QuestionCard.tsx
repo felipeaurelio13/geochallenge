@@ -80,7 +80,7 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
   };
 
   return (
-    <div className={`rounded-3xl border border-gray-700 bg-gray-800/95 shadow-xl shadow-black/25 ${compact ? 'px-4 py-4 sm:px-6 sm:py-6' : 'px-4 py-5 sm:px-6 sm:py-6'}`}>
+    <div className={`rounded-3xl border border-gray-700 bg-gray-800/95 shadow-xl shadow-black/25 overflow-hidden ${compact ? 'px-4 py-4 sm:px-6 sm:py-6' : 'px-4 py-5 sm:px-6 sm:py-6'}`}>
       {/* Progress indicator */}
       <div className={`flex items-center justify-between ${compact ? 'mb-3' : 'mb-5'}`}>
         <span className={`text-gray-400 ${compact ? 'hidden text-sm sm:inline' : 'text-sm'}`}>

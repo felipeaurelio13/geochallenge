@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.31**
+- Frontend: **v1.2.32**
 
 ### Mantener backend activo en producción
 Configura el secret **`BACKEND_HEALTHCHECK_URL`** en GitHub (Settings → Secrets and variables → Actions) con la URL pública de salud de tu API, por ejemplo:
@@ -39,6 +39,13 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 
 
 
+
+## Novedades de la versión 1.2.32
+- Se mejoró la experiencia mobile-first en juego individual y desafíos para reducir el scroll al responder: tarjetas más compactas, menor padding vertical y bandeja de acción ajustada al safe-area para priorizar visibilidad inmediata de contenido clave.
+- El indicador de pregunta actual ya no comunica error antes de responder: ahora se representa en **amarillo (pendiente actual)** y recién toma estado verde/rojo cuando la respuesta fue confirmada.
+- Se reforzó la contención visual para evitar desbordes horizontales en contenedores (pregunta, opciones y barras de progreso), mejorando estabilidad y legibilidad en pantallas pequeñas.
+- Se actualizaron pruebas automatizadas del progreso de preguntas y del layout móvil para cubrir estos comportamientos y prevenir regresiones.
+- Footer/versionado actualizado a **v1.2.32** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.31
 - Se fortaleció el pipeline de despliegue a GitHub Pages para reducir fallas intermitentes: el artefacto se construye una sola vez en el quality gate y luego se publica, evitando dobles builds inconsistentes.

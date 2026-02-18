@@ -142,7 +142,7 @@ describe('GamePage ending flow', () => {
     render(<GamePage />);
 
     const main = screen.getByRole('main');
-    expect(main).toHaveClass('pb-32');
+    expect(main).toHaveClass('pb-28');
 
     const tray = screen.getByTestId('mobile-action-tray');
     expect(tray).toHaveClass('sticky');
