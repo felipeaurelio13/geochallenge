@@ -204,9 +204,9 @@ export function GamePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 flex flex-col">
+    <div className="h-[100dvh] bg-gray-900 flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="sticky top-0 z-30 border-b border-gray-700 bg-gray-800/95 px-3 pb-3 pt-[calc(env(safe-area-inset-top)+0.65rem)] backdrop-blur sm:px-4 sm:py-4">
+      <header className="sticky top-0 z-30 border-b border-gray-700 bg-gray-800/95 px-3 pb-2.5 pt-[calc(env(safe-area-inset-top)+0.5rem)] backdrop-blur sm:px-4 sm:py-4">
         <div className="max-w-4xl mx-auto grid grid-cols-[auto_1fr_auto] items-center gap-2 sm:gap-4">
           <button
             onClick={() => {
@@ -234,8 +234,8 @@ export function GamePage() {
       </header>
 
       {/* Progress */}
-      <div className="bg-gray-800/70 px-3 py-3 sm:px-4 sm:py-3">
-        <div className="mx-auto mb-2 flex w-full max-w-4xl items-center justify-between rounded-xl border border-gray-700 bg-gray-900/55 px-3 py-2 text-xs text-gray-300 sm:text-sm">
+      <div className="bg-gray-800/70 px-3 py-2 sm:px-4 sm:py-3">
+        <div className="mx-auto mb-2 flex w-full max-w-4xl items-center justify-between rounded-xl border border-gray-700 bg-gray-900/55 px-3 py-1.5 text-xs text-gray-300 sm:text-sm">
           <span>{t('game.questionOf', { current: currentIndex + 1, total: questions.length })}</span>
           <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${hasSelection ? 'bg-emerald-500/20 text-emerald-200 border border-emerald-400/40' : 'bg-gray-700/70 text-gray-300 border border-gray-600'}`}>
             {hasSelection ? t('game.selectedOption') : t('game.submit')}
@@ -252,8 +252,8 @@ export function GamePage() {
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-x-hidden px-3 py-2 pb-28 sm:px-4 sm:py-4 sm:pb-6">
-        <div className="max-w-4xl mx-auto overflow-hidden">
+      <main className="flex-1 min-h-0 overflow-hidden px-3 py-2 pb-24 sm:px-4 sm:py-4 sm:pb-6">
+        <div className="max-w-4xl mx-auto flex h-full flex-col overflow-hidden">
           {/* Question Card */}
           <QuestionCard
             question={currentQuestion}
@@ -263,7 +263,7 @@ export function GamePage() {
           />
 
           {/* Answer Options or Map */}
-          <div className="mt-3 overflow-hidden">
+          <div className="mt-2.5 overflow-hidden">
             {isMapQuestion ? (
               <Suspense fallback={<LoadingSpinner size="lg" text={t('game.loading')} />}>
                 <MapInteractive
@@ -302,7 +302,7 @@ export function GamePage() {
           </div>
 
           {!showResult && (
-            <div className="mt-3 rounded-2xl border border-gray-700 bg-gray-800/60 px-4 py-3">
+            <div className="mt-2.5 rounded-2xl border border-gray-700 bg-gray-800/60 px-4 py-2.5">
               <p className="text-base leading-relaxed text-gray-100" aria-live="polite">
                 {!hasSelection
                   ? t(isMapQuestion ? 'game.selectOnMapHint' : 'game.selectOptionHint')
@@ -318,7 +318,7 @@ export function GamePage() {
 
           {/* Action Buttons */}
           <div
-            className="sticky bottom-0 z-20 -mx-1 bg-gradient-to-t from-gray-900 via-gray-900/95 to-transparent px-1 pb-[calc(env(safe-area-inset-bottom)+0.4rem)] pt-2 sm:mx-0 sm:bg-none sm:px-0 sm:pb-0 sm:pt-0"
+            className="sticky bottom-0 z-20 mt-2 -mx-1 bg-gradient-to-t from-gray-900 via-gray-900/95 to-transparent px-1 pb-[calc(env(safe-area-inset-bottom)+0.35rem)] pt-2 sm:mx-0 sm:mt-3 sm:bg-none sm:px-0 sm:pb-0 sm:pt-0"
             data-testid="mobile-action-tray"
           >
             {!showResult ? (
@@ -327,7 +327,7 @@ export function GamePage() {
                   <button
                     onClick={handleSubmitAnswer}
                     disabled={!hasSelection}
-                    className="w-full sm:w-auto rounded-2xl px-8 py-4 bg-primary text-white text-lg sm:text-xl font-bold shadow-md shadow-primary/30 hover:bg-primary/85 active:scale-[0.99] transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/70 disabled:opacity-45 disabled:cursor-not-allowed disabled:bg-gray-700 disabled:text-gray-400"
+                    className="w-full sm:w-auto rounded-2xl px-8 py-3.5 bg-primary text-white text-base sm:text-xl font-bold shadow-md shadow-primary/30 hover:bg-primary/85 active:scale-[0.99] transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/70 disabled:opacity-45 disabled:cursor-not-allowed disabled:bg-gray-700 disabled:text-gray-400"
                   >
                     {t('game.submit')}
                   </button>
@@ -338,7 +338,7 @@ export function GamePage() {
                         setSelectedAnswer(null);
                         setMapLocation(null);
                       }}
-                      className="w-full sm:w-auto rounded-2xl border border-gray-600 px-6 py-4 text-lg font-semibold text-gray-200 transition-colors hover:border-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-primary/70"
+                      className="w-full sm:w-auto rounded-2xl border border-gray-600 px-6 py-3.5 text-base sm:text-lg font-semibold text-gray-200 transition-colors hover:border-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-primary/70"
                     >
                       {t('game.clearSelection')}
                     </button>
@@ -346,7 +346,7 @@ export function GamePage() {
                 </div>
               </div>
             ) : (
-              <div className="text-center rounded-2xl border border-gray-700 bg-gray-800/95 p-4 sm:p-5 backdrop-blur-sm shadow-sm shadow-black/30">
+              <div className="text-center rounded-2xl border border-gray-700 bg-gray-800/95 p-3.5 sm:p-5 backdrop-blur-sm shadow-sm shadow-black/30">
                 {/* Result feedback */}
                 <AnswerStatusBadge
                   status={lastAnswerCorrect ? 'correct' : 'incorrect'}
@@ -358,7 +358,7 @@ export function GamePage() {
 
                 <button
                   onClick={handleNextQuestion}
-                  className="w-full sm:w-auto rounded-2xl px-8 py-4 bg-primary text-white text-lg sm:text-xl font-bold shadow-md shadow-primary/30 hover:bg-primary/85 active:scale-[0.99] transition-all duration-150 animate-pulse focus:outline-none focus:ring-2 focus:ring-primary/70"
+                  className="w-full sm:w-auto rounded-2xl px-8 py-3.5 bg-primary text-white text-base sm:text-xl font-bold shadow-md shadow-primary/30 hover:bg-primary/85 active:scale-[0.99] transition-all duration-150 animate-pulse focus:outline-none focus:ring-2 focus:ring-primary/70"
                 >
                   {isLastQuestion ? t('game.seeResults') : t('game.next')}
                 </button>

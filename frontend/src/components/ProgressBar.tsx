@@ -33,6 +33,8 @@ export function getQuestionIndicatorStatus(
 export function ProgressBar({ current, total, results, showCurrentResult = false }: ProgressBarProps) {
   const percentage = (current / total) * 100;
 
+  const safeTotal = Math.max(1, total);
+
   return (
     <div className="w-full">
       <div className="h-3 rounded-full bg-gray-700/80 p-0.5" aria-hidden="true">
@@ -42,7 +44,12 @@ export function ProgressBar({ current, total, results, showCurrentResult = false
         />
       </div>
 
-      <div className="scrollbar-none mt-3.5 -mx-1 flex items-center gap-2 overflow-x-auto px-1 pb-1 sm:mx-0 sm:justify-between sm:overflow-visible sm:px-0 sm:pb-0" role="list" aria-label="Progreso de preguntas">
+      <div
+        className="mt-3 grid w-full gap-1.5 sm:mt-3.5 sm:gap-2"
+        style={{ gridTemplateColumns: `repeat(${safeTotal}, minmax(0, 1fr))` }}
+        role="list"
+        aria-label="Progreso de preguntas"
+      >
         {Array.from({ length: total }, (_, i) => {
           const status = getQuestionIndicatorStatus(i, current, results, showCurrentResult);
 
@@ -51,7 +58,7 @@ export function ProgressBar({ current, total, results, showCurrentResult = false
               key={i}
               role="listitem"
               aria-label={`Pregunta ${i + 1} ${status}`}
-              className={`h-10 w-10 shrink-0 rounded-full border text-sm font-semibold transition-all duration-300 flex items-center justify-center ${
+              className={`aspect-square w-full min-w-0 rounded-full border text-[0.72rem] font-semibold transition-all duration-300 flex items-center justify-center sm:text-sm ${
                 status === 'correct'
                   ? 'border-green-400 bg-green-500 text-white'
                   : status === 'incorrect'

@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { getQuestionIndicatorStatus } from '../components/ProgressBar';
+import { createElement } from 'react';
+import { render, screen } from '@testing-library/react';
+import { getQuestionIndicatorStatus, ProgressBar } from '../components/ProgressBar';
 
 describe('ProgressBar question status mapping', () => {
   it('marks each answered question according to its own result', () => {
@@ -25,5 +27,15 @@ describe('ProgressBar question status mapping', () => {
     const results = [{ isCorrect: true }];
 
     expect(getQuestionIndicatorStatus(2, 1, results)).toBe('pending');
+  });
+
+  it('distribuye los indicadores en grilla para evitar scroll horizontal', () => {
+    render(createElement(ProgressBar, { current: 4, total: 10, results: [{ isCorrect: true }, { isCorrect: false }] }));
+
+    const progressList = screen.getByRole('list', { name: 'Progreso de preguntas' });
+
+    expect(progressList).toHaveClass('grid');
+    expect(progressList).not.toHaveClass('overflow-x-auto');
+    expect(progressList).toHaveStyle({ gridTemplateColumns: 'repeat(10, minmax(0, 1fr))' });
   });
 });

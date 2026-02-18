@@ -26,7 +26,7 @@ export function OptionButton({
 
   const getButtonClasses = () => {
     const baseClasses =
-      'w-full rounded-2xl text-left transition-all duration-200 flex items-start gap-3 overflow-hidden border-2 px-3 py-3 min-h-[58px] sm:items-center sm:px-4 sm:py-3.5 sm:min-h-[64px]';
+      'w-full rounded-2xl text-left transition-all duration-200 flex items-start gap-3 overflow-hidden border-2 px-3 py-3 min-h-[54px] sm:items-center sm:px-4 sm:py-3.5 sm:min-h-[64px]';
 
     if (showResult) {
       if (isCorrect) {
@@ -57,7 +57,7 @@ export function OptionButton({
       aria-pressed={selected}
     >
       <span
-        className={`h-9 w-9 shrink-0 rounded-full flex items-center justify-center font-bold text-sm transition-colors ${
+        className={`h-8 w-8 shrink-0 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm transition-colors ${
           showResult && isCorrect
             ? 'bg-green-500 text-white'
             : showResult && selected && !isCorrect
@@ -71,13 +71,13 @@ export function OptionButton({
       </span>
 
       <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <span className="min-w-0 text-base font-medium leading-tight [overflow-wrap:anywhere] sm:text-lg md:text-xl">
+        <span className="min-w-0 text-[0.95rem] font-medium leading-tight [overflow-wrap:anywhere] sm:text-lg md:text-xl">
           {option}
         </span>
 
         <div className="inline-flex items-center self-start sm:self-auto">
           {selected && !showResult && (
-            <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/50 bg-white/15 text-sm font-semibold text-white shadow-sm shadow-black/20">
+            <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/50 bg-white/15 text-sm font-semibold text-white shadow-sm shadow-black/20">
               ✓
             </span>
           )}
