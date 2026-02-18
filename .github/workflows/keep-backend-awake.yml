@@ -14,8 +14,8 @@ jobs:
           BACKEND_HEALTHCHECK_URL: ${{ secrets.BACKEND_HEALTHCHECK_URL }}
         run: |
           if [ -z "$BACKEND_HEALTHCHECK_URL" ]; then
-            echo "BACKEND_HEALTHCHECK_URL is not configured"
-            exit 1
+            echo "::warning::BACKEND_HEALTHCHECK_URL is not configured; skipping backend ping."
+            exit 0
           fi
 
           echo "Pinging $BACKEND_HEALTHCHECK_URL"

@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.27**
+- Frontend: **v1.2.28**
 
 ### Mantener backend activo en producción
 Configura el secret **`BACKEND_HEALTHCHECK_URL`** en GitHub (Settings → Secrets and variables → Actions) con la URL pública de salud de tu API, por ejemplo:
@@ -30,6 +30,11 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 
 
 
+
+## Novedades de la versión 1.2.28
+- Se ajustó el workflow `keep-backend-awake` para que, si el secret `BACKEND_HEALTHCHECK_URL` no está configurado, emita una advertencia y finalice sin error en lugar de romper la ejecución.
+- Se mantiene el comportamiento de ping cada 10 minutos cuando el secret está presente, sin cambios en la URL de salud configurada.
+- Footer/versionado actualizado a **v1.2.28** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.27
 - Se corrigió un error de tipado en pruebas de `ResultsPage` que rompía el build de TypeScript en CI/deploy.
