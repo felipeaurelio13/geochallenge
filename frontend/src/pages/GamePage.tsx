@@ -205,7 +205,7 @@ export function GamePage() {
   return (
     <div className="min-h-screen bg-gray-900 flex flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-gray-800/95 border-b border-gray-700 px-3 py-3 backdrop-blur sm:px-4">
+      <header className="sticky top-0 z-30 bg-gray-800/95 border-b border-gray-700 px-3 py-2.5 backdrop-blur sm:px-4 sm:py-3">
         <div className="max-w-4xl mx-auto grid grid-cols-[auto_1fr_auto] items-center gap-2 sm:gap-4">
           <button
             onClick={() => {
@@ -233,7 +233,7 @@ export function GamePage() {
       </header>
 
       {/* Progress */}
-      <div className="bg-gray-800/70 px-3 py-3 sm:px-4">
+      <div className="bg-gray-800/70 px-3 py-2.5 sm:px-4 sm:py-3">
         <div className="max-w-4xl mx-auto">
           <ProgressBar
             current={currentIndex + 1}
@@ -244,7 +244,7 @@ export function GamePage() {
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 px-3 py-5 sm:px-4 sm:py-6">
+      <main className="flex-1 px-3 py-5 pb-28 sm:px-4 sm:py-6 sm:pb-6">
         <div className="max-w-4xl mx-auto">
           {/* Question Card */}
           <QuestionCard
@@ -306,7 +306,10 @@ export function GamePage() {
           </div>
 
           {/* Action Buttons */}
-          <div className="mt-6 sticky bottom-2 z-20">
+          <div
+            className="sticky bottom-0 z-20 -mx-1 bg-gradient-to-t from-gray-900 via-gray-900/95 to-transparent px-1 pb-[calc(env(safe-area-inset-bottom)+0.35rem)] pt-2 sm:mx-0 sm:bg-none sm:px-0 sm:pb-0 sm:pt-0"
+            data-testid="mobile-action-tray"
+          >
             {!showResult ? (
               <div className="rounded-xl border border-gray-700 bg-gray-800/95 p-3 backdrop-blur-sm sm:bg-transparent sm:p-0 sm:border-0 sm:backdrop-blur-none">
                 <div className="flex flex-col justify-center gap-2 sm:flex-row">

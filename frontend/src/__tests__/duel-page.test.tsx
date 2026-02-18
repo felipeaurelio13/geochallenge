@@ -150,6 +150,34 @@ describe('DuelPage socket flow', () => {
     expect(optionsGrid).toHaveClass('grid-cols-2');
   });
 
+
+  it('ancla la bandeja de acciones en mobile para CTA siempre visible', async () => {
+    render(<DuelPage />);
+
+    act(() => {
+      mocks.handlers.get('duel:question')?.forEach((cb) =>
+        cb({
+          questionIndex: 0,
+          totalQuestions: 10,
+          question: {
+            id: 'dq1',
+            questionText: 'Capital de Chile',
+            options: ['Santiago', 'Lima', 'Bogotá', 'Quito'],
+            correctAnswer: 'Santiago',
+            category: 'CAPITAL',
+          },
+        })
+      );
+    });
+
+    const main = screen.getByRole('main');
+    expect(main).toHaveClass('pb-28');
+
+    const tray = await screen.findByTestId('mobile-action-tray');
+    expect(tray).toHaveClass('sticky');
+    expect(tray).toHaveClass('bottom-0');
+  });
+
   it('habilita limpiar selección cuando el usuario ya eligió respuesta', async () => {
     render(<DuelPage />);
 
