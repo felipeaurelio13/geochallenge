@@ -34,6 +34,8 @@ export function ProgressBar({ current, total, results, showCurrentResult = false
   const percentage = (current / total) * 100;
 
   const safeTotal = Math.max(1, total);
+  const indicatorGapPx = 4;
+  const indicatorWidth = `calc((100% - ${(safeTotal - 1) * indicatorGapPx}px) / ${safeTotal})`;
 
   return (
     <div className="w-full">
@@ -44,12 +46,7 @@ export function ProgressBar({ current, total, results, showCurrentResult = false
         />
       </div>
 
-      <div
-        className="mt-3 grid w-full gap-1.5 sm:mt-3.5 sm:gap-2"
-        style={{ gridTemplateColumns: `repeat(${safeTotal}, minmax(0, 1fr))` }}
-        role="list"
-        aria-label="Progreso de preguntas"
-      >
+      <div className="mt-3 flex w-full flex-nowrap gap-1 overflow-hidden sm:mt-3.5" role="list" aria-label="Progreso de preguntas">
         {Array.from({ length: total }, (_, i) => {
           const status = getQuestionIndicatorStatus(i, current, results, showCurrentResult);
 
@@ -58,13 +55,14 @@ export function ProgressBar({ current, total, results, showCurrentResult = false
               key={i}
               role="listitem"
               aria-label={`Pregunta ${i + 1} ${status}`}
-              className={`aspect-square w-full min-w-0 rounded-full border text-[0.72rem] font-semibold transition-all duration-300 flex items-center justify-center sm:text-sm ${
+              style={{ width: indicatorWidth }}
+              className={`h-7 min-w-0 shrink-0 rounded-full border text-[0.66rem] font-semibold transition-all duration-300 flex items-center justify-center sm:h-8 sm:text-xs ${
                 status === 'correct'
                   ? 'border-green-400 bg-green-500 text-white'
                   : status === 'incorrect'
                     ? 'border-red-400 bg-red-500 text-white'
                     : status === 'current'
-                      ? 'border-amber-300 bg-amber-500/30 text-amber-100 ring-2 ring-amber-300/70 ring-offset-2 ring-offset-gray-900'
+                      ? 'border-amber-300 bg-amber-500/30 text-amber-100 ring-1 ring-amber-300/70'
                       : 'border-gray-600 bg-gray-700/80 text-gray-400'
               }`}
               aria-current={status === 'current' ? 'step' : undefined}

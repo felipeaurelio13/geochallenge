@@ -29,13 +29,13 @@ describe('ProgressBar question status mapping', () => {
     expect(getQuestionIndicatorStatus(2, 1, results)).toBe('pending');
   });
 
-  it('distribuye los indicadores en grilla para evitar scroll horizontal', () => {
+  it('mantiene los indicadores en una sola fila sin scroll horizontal', () => {
     render(createElement(ProgressBar, { current: 4, total: 10, results: [{ isCorrect: true }, { isCorrect: false }] }));
 
     const progressList = screen.getByRole('list', { name: 'Progreso de preguntas' });
 
-    expect(progressList).toHaveClass('grid');
-    expect(progressList).not.toHaveClass('overflow-x-auto');
-    expect(progressList).toHaveStyle({ gridTemplateColumns: 'repeat(10, minmax(0, 1fr))' });
+    expect(progressList).toHaveClass('flex');
+    expect(progressList).toHaveClass('flex-nowrap');
+    expect(progressList).toHaveClass('overflow-hidden');
   });
 });
