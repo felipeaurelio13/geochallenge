@@ -53,6 +53,7 @@ export function GamePage() {
   const isLastQuestion = currentIndex >= questions.length - 1;
   const hasSelection = Boolean(selectedAnswer || mapLocation);
   const isLowTime = timeRemaining > 0 && timeRemaining <= 5 && !showResult;
+  const shouldUseCompactQuestionCard = currentQuestion?.category === 'SILHOUETTE';
 
   // Prevent accidental navigation during game
   useEffect(() => {
@@ -250,17 +251,18 @@ export function GamePage() {
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 px-3 py-4 pb-32 sm:px-4 sm:py-6 sm:pb-6">
+      <main className="flex-1 px-3 py-3 pb-32 sm:px-4 sm:py-6 sm:pb-6">
         <div className="max-w-4xl mx-auto">
           {/* Question Card */}
           <QuestionCard
             question={currentQuestion}
             questionNumber={currentIndex + 1}
             totalQuestions={questions.length}
+            compact={shouldUseCompactQuestionCard}
           />
 
           {/* Answer Options or Map */}
-          <div className="mt-6">
+          <div className="mt-4">
             {isMapQuestion ? (
               <Suspense fallback={<LoadingSpinner size="lg" text={t('game.loading')} />}>
                 <MapInteractive
@@ -299,7 +301,7 @@ export function GamePage() {
           </div>
 
           {!showResult && (
-            <div className="mt-4 rounded-2xl border border-gray-700 bg-gray-800/60 px-4 py-3.5">
+            <div className="mt-3 rounded-2xl border border-gray-700 bg-gray-800/60 px-4 py-3">
               <p className="text-base leading-relaxed text-gray-100" aria-live="polite">
                 {!hasSelection
                   ? t(isMapQuestion ? 'game.selectOnMapHint' : 'game.selectOptionHint')

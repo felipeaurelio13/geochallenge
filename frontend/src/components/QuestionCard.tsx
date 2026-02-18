@@ -5,9 +5,10 @@ interface QuestionCardProps {
   question: Question;
   questionNumber: number;
   totalQuestions: number;
+  compact?: boolean;
 }
 
-export function QuestionCard({ question, questionNumber, totalQuestions }: QuestionCardProps) {
+export function QuestionCard({ question, questionNumber, totalQuestions, compact = false }: QuestionCardProps) {
   const { t } = useTranslation();
 
   // Guard against undefined question
@@ -79,20 +80,20 @@ export function QuestionCard({ question, questionNumber, totalQuestions }: Quest
   };
 
   return (
-    <div className="rounded-3xl border border-gray-700 bg-gray-800/95 px-4 py-5 shadow-xl shadow-black/25 sm:px-6 sm:py-6">
+    <div className={`rounded-3xl border border-gray-700 bg-gray-800/95 shadow-xl shadow-black/25 ${compact ? 'px-4 py-4 sm:px-6 sm:py-6' : 'px-4 py-5 sm:px-6 sm:py-6'}`}>
       {/* Progress indicator */}
-      <div className="mb-5 flex items-center justify-between">
-        <span className="text-sm text-gray-400">
+      <div className={`flex items-center justify-between ${compact ? 'mb-3' : 'mb-5'}`}>
+        <span className={`text-gray-400 ${compact ? 'hidden text-sm sm:inline' : 'text-sm'}`}>
           {t('game.questionOf', { current: questionNumber, total: totalQuestions })}
         </span>
-        <span className="text-3xl leading-none" aria-hidden="true">{getCategoryIcon()}</span>
+        <span className={`${compact ? 'text-2xl sm:text-3xl' : 'text-3xl'} leading-none`} aria-hidden="true">{getCategoryIcon()}</span>
       </div>
 
       {/* Question content */}
       <div className="text-center">
         {/* Image for flag or silhouette questions */}
         {question.imageUrl && (question.category === 'FLAG' || question.category === 'SILHOUETTE') && (
-          <div className="mb-6">
+          <div className={compact ? 'mb-4' : 'mb-6'}>
             <img
               src={question.imageUrl}
               alt={t('game.questionImageAlt', { category: question.category.toLowerCase() })}
@@ -101,8 +102,8 @@ export function QuestionCard({ question, questionNumber, totalQuestions }: Quest
               height={question.category === 'FLAG' ? 180 : 180}
               className={`mx-auto ${
                 question.category === 'FLAG'
-                  ? 'max-h-52 w-full max-w-md rounded-xl border border-amber-400/70 bg-black/10 object-contain p-1 shadow-lg shadow-black/30 ring-1 ring-white/10'
-                  : 'max-h-48 w-auto filter invert'
+                  ? `${compact ? 'max-h-36 sm:max-h-52' : 'max-h-52'} w-full max-w-md rounded-xl border border-amber-400/70 bg-black/10 object-contain p-1 shadow-lg shadow-black/30 ring-1 ring-white/10`
+                  : `${compact ? 'max-h-28 sm:max-h-48' : 'max-h-48'} w-auto filter invert`
               }`}
               onError={(e) => {
                 // Hide broken images
@@ -113,13 +114,13 @@ export function QuestionCard({ question, questionNumber, totalQuestions }: Quest
         )}
 
         {/* Question text */}
-        <h2 className="text-[2rem] leading-tight font-bold text-white sm:text-4xl break-words">
+        <h2 className={`${compact ? 'text-[1.7rem] sm:text-4xl' : 'text-[2rem] sm:text-4xl'} leading-tight font-bold text-white break-words`}>
           {getQuestionText()}
         </h2>
 
         {/* Difficulty indicator */}
         {question.difficulty && (
-          <div className="mt-5">
+          <div className={compact ? 'mt-3' : 'mt-5'}>
             <span className={`inline-block rounded-full px-4 py-1.5 text-sm font-semibold ${getDifficultyClass()}`}>
               {t(getDifficultyKey())}
             </span>
