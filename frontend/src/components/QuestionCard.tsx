@@ -114,14 +114,14 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
         )}
 
         {/* Question text */}
-        <h2 className={`${compact ? 'text-[1.7rem] sm:text-4xl' : 'text-[2rem] sm:text-4xl'} leading-tight font-bold text-white break-words`}>
+        <h2 className={`${compact ? 'text-[1.4rem] sm:text-4xl' : 'text-[1.8rem] sm:text-4xl'} leading-tight font-bold text-white break-words`}>
           {getQuestionText()}
         </h2>
 
         {/* Difficulty indicator */}
         {question.difficulty && (
           <div className={compact ? 'mt-3' : 'mt-5'}>
-            <span className={`inline-block rounded-full px-4 py-1.5 text-sm font-semibold ${getDifficultyClass()}`}>
+            <span className={`inline-block rounded-full px-3.5 py-1 text-xs sm:text-sm font-semibold ${getDifficultyClass()}`}>
               {t(getDifficultyKey())}
             </span>
           </div>

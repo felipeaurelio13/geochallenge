@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.33**
+- Frontend: **v1.2.35**
 
 ### Mantener backend activo en producción
 Configura el secret **`BACKEND_HEALTHCHECK_URL`** en GitHub (Settings → Secrets and variables → Actions) con la URL pública de salud de tu API, por ejemplo:
@@ -39,6 +39,20 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 
 
 
+
+## Novedades de la versión 1.2.35
+- Se ajustó la barra de progreso para que los números de preguntas queden **en una sola fila** en mobile y desktop, sin saltos de línea ni desplazamiento horizontal.
+- Cada indicador ahora calcula su ancho de forma proporcional dentro del contenedor, manteniendo todos los números visibles y adaptados al margen disponible.
+- Se redujo el peso visual del estado actual en los indicadores para priorizar legibilidad en pantallas pequeñas sin perder feedback de estado.
+- Se actualizó la prueba unitaria de `ProgressBar` para validar explícitamente el layout en una sola fila (`flex-nowrap` + `overflow-hidden`).
+- Footer/versionado actualizado a **v1.2.35** para mantener trazabilidad con el despliegue en GitHub Pages.
+
+## Novedades de la versión 1.2.34
+- Se rediseñó la barra de progreso de preguntas en formato **grilla responsiva**, eliminando el scroll horizontal para que todos los números se vean completos dentro del contenedor en mobile-first.
+- Se compactó el layout vertical de `GamePage` (header, estado de progreso, tarjetas y CTA) para que el contenido clave quede mejor adaptado al alto de pantalla y se reduzca la necesidad de desplazamiento.
+- Se ajustaron tipografías y alturas mínimas de tarjeta/opciones con foco empático en legibilidad y control táctil en teléfonos pequeños.
+- Se agregaron y actualizaron pruebas automatizadas para blindar la nueva grilla de progreso sin overflow y los cambios de layout móvil.
+- Footer/versionado actualizado a **v1.2.34** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.33
 - Se corrigió el desborde de texto en las opciones de respuesta dentro de tarjetas, priorizando una lectura fluida en mobile-first: ahora los textos largos se adaptan dentro del ancho disponible y no rompen el layout del contenedor.
