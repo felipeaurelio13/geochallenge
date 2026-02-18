@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.28**
+- Frontend: **v1.2.29**
 
 ### Mantener backend activo en producción
 Configura el secret **`BACKEND_HEALTHCHECK_URL`** en GitHub (Settings → Secrets and variables → Actions) con la URL pública de salud de tu API, por ejemplo:
@@ -30,6 +30,12 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 
 
 
+
+## Novedades de la versión 1.2.29
+- Se optimizó la pantalla de juego individual para móviles en preguntas de silueta: la tarjeta de pregunta ahora usa un layout compacto (menos altura de imagen y tipografía ajustada) para responder sin necesidad de scroll en la mayoría de pantallas pequeñas.
+- Se redujeron espacios verticales en el flujo de pregunta/respuesta para mantener el CTA principal más accesible con el pulgar y mejorar la continuidad de uso.
+- Se agregó cobertura de pruebas en `GamePage` para validar la activación automática del modo compacto en la categoría `SILHOUETTE`.
+- Footer/versionado actualizado a **v1.2.29** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.28
 - Se ajustó el workflow `keep-backend-awake` para que, si el secret `BACKEND_HEALTHCHECK_URL` no está configurado, emita una advertencia y finalice sin error en lugar de romper la ejecución.

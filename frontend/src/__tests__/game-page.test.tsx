@@ -50,7 +50,9 @@ vi.mock('../context/GameContext', () => ({
 
 vi.mock('../components', () => ({
   Timer: () => <div>timer</div>,
-  QuestionCard: () => <div>question-card</div>,
+  QuestionCard: ({ compact }: { compact?: boolean }) => (
+    <div data-testid="question-card" data-compact={compact ? 'true' : 'false'}>question-card</div>
+  ),
   OptionButton: ({ option, onClick }: { option: string; onClick: () => void }) => (
     <button onClick={onClick}>{option}</button>
   ),
@@ -108,6 +110,23 @@ describe('GamePage ending flow', () => {
 
 
 
+
+
+  it('activa layout compacto en siluetas para minimizar scroll en móviles', () => {
+    mocks.gameState.questions = [
+      {
+        id: 'q3',
+        questionText: '¿Qué país representa esta silueta?',
+        options: ['Grecia', 'Italia', 'España', 'Portugal'],
+        correctAnswer: 'Grecia',
+        category: 'SILHOUETTE',
+      },
+    ];
+
+    render(<GamePage />);
+
+    expect(screen.getByTestId('question-card')).toHaveAttribute('data-compact', 'true');
+  });
 
   it('muestra estado de selección en cabecera de progreso para orientar al usuario', () => {
     render(<GamePage />);
