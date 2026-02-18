@@ -244,7 +244,7 @@ export function GamePage() {
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 px-3 py-4 pb-28 sm:px-4 sm:py-6 sm:pb-6">
+      <main className="flex-1 px-3 py-4 pb-32 sm:px-4 sm:py-6 sm:pb-6">
         <div className="max-w-4xl mx-auto">
           {/* Question Card */}
           <QuestionCard
@@ -293,14 +293,14 @@ export function GamePage() {
           </div>
 
           {!showResult && (
-            <div className="mt-4 rounded-xl border border-gray-700 bg-gray-800/60 px-4 py-3">
-              <p className="text-sm text-gray-200" aria-live="polite">
+            <div className="mt-4 rounded-2xl border border-gray-700 bg-gray-800/60 px-4 py-3.5">
+              <p className="text-base leading-relaxed text-gray-100" aria-live="polite">
                 {!hasSelection
                   ? t(isMapQuestion ? 'game.selectOnMapHint' : 'game.selectOptionHint')
                   : t('game.selectionReadyHint')}
               </p>
               {isLowTime && (
-                <p className="mt-2 text-xs font-medium text-amber-300" aria-live="assertive">
+                <p className="mt-2 text-sm font-semibold text-amber-300" aria-live="assertive">
                   {t('game.lowTimeHint', { seconds: timeRemaining })}
                 </p>
               )}
@@ -309,16 +309,16 @@ export function GamePage() {
 
           {/* Action Buttons */}
           <div
-            className="sticky bottom-0 z-20 -mx-1 bg-gradient-to-t from-gray-900 via-gray-900/95 to-transparent px-1 pb-[calc(env(safe-area-inset-bottom)+0.35rem)] pt-2 sm:mx-0 sm:bg-none sm:px-0 sm:pb-0 sm:pt-0"
+            className="sticky bottom-0 z-20 -mx-1 bg-gradient-to-t from-gray-900 via-gray-900/95 to-transparent px-1 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-2 sm:mx-0 sm:bg-none sm:px-0 sm:pb-0 sm:pt-0"
             data-testid="mobile-action-tray"
           >
             {!showResult ? (
-              <div className="rounded-xl border border-gray-700 bg-gray-800/95 p-3 backdrop-blur-sm sm:bg-transparent sm:p-0 sm:border-0 sm:backdrop-blur-none">
+              <div className="rounded-2xl border border-gray-700 bg-gray-800/95 p-3.5 backdrop-blur-sm sm:bg-transparent sm:p-0 sm:border-0 sm:backdrop-blur-none">
                 <div className="flex flex-col justify-center gap-2 sm:flex-row">
                   <button
                     onClick={handleSubmitAnswer}
                     disabled={!hasSelection}
-                    className="w-full sm:w-auto px-8 py-3.5 bg-primary text-white font-bold rounded-xl shadow-md shadow-primary/30 hover:bg-primary/85 active:scale-[0.99] transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/70 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full sm:w-auto rounded-2xl px-8 py-4 bg-primary text-white text-lg sm:text-xl font-bold shadow-md shadow-primary/30 hover:bg-primary/85 active:scale-[0.99] transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/70 disabled:opacity-45 disabled:cursor-not-allowed disabled:bg-gray-700 disabled:text-gray-400"
                   >
                     {t('game.submit')}
                   </button>
@@ -329,7 +329,7 @@ export function GamePage() {
                         setSelectedAnswer(null);
                         setMapLocation(null);
                       }}
-                      className="w-full sm:w-auto rounded-xl border border-gray-600 px-6 py-3.5 text-sm font-semibold text-gray-200 transition-colors hover:border-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-primary/70"
+                      className="w-full sm:w-auto rounded-2xl border border-gray-600 px-6 py-4 text-lg font-semibold text-gray-200 transition-colors hover:border-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-primary/70"
                     >
                       {t('game.clearSelection')}
                     </button>
@@ -337,7 +337,7 @@ export function GamePage() {
                 </div>
               </div>
             ) : (
-              <div className="text-center rounded-2xl border border-gray-700 bg-gray-800/95 p-4 backdrop-blur-sm shadow-sm shadow-black/30">
+              <div className="text-center rounded-2xl border border-gray-700 bg-gray-800/95 p-4 sm:p-5 backdrop-blur-sm shadow-sm shadow-black/30">
                 {/* Result feedback */}
                 <AnswerStatusBadge
                   status={lastAnswerCorrect ? 'correct' : 'incorrect'}
@@ -345,11 +345,11 @@ export function GamePage() {
                   className="mb-4 text-base"
                 />
 
-                <p className="mb-3 text-sm text-gray-300">{t(getPostAnswerHintKey(isLastQuestion))}</p>
+                <p className="mb-4 text-base leading-relaxed text-gray-300">{t(getPostAnswerHintKey(isLastQuestion))}</p>
 
                 <button
                   onClick={handleNextQuestion}
-                  className="w-full sm:w-auto px-8 py-3.5 bg-primary text-white font-bold rounded-xl shadow-md shadow-primary/30 hover:bg-primary/85 active:scale-[0.99] transition-all duration-150 animate-pulse focus:outline-none focus:ring-2 focus:ring-primary/70"
+                  className="w-full sm:w-auto rounded-2xl px-8 py-4 bg-primary text-white text-lg sm:text-xl font-bold shadow-md shadow-primary/30 hover:bg-primary/85 active:scale-[0.99] transition-all duration-150 animate-pulse focus:outline-none focus:ring-2 focus:ring-primary/70"
                 >
                   {isLastQuestion ? t('game.seeResults') : t('game.next')}
                 </button>
