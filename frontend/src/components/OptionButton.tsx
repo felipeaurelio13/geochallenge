@@ -26,7 +26,7 @@ export function OptionButton({
 
   const getButtonClasses = () => {
     const baseClasses =
-      'w-full rounded-2xl text-left transition-all duration-200 flex items-center gap-3 overflow-hidden border-2 px-3 py-3 min-h-[58px] sm:px-4 sm:py-3.5 sm:min-h-[64px]';
+      'w-full rounded-2xl text-left transition-all duration-200 flex items-start gap-3 overflow-hidden border-2 px-3 py-3 min-h-[58px] sm:items-center sm:px-4 sm:py-3.5 sm:min-h-[64px]';
 
     if (showResult) {
       if (isCorrect) {
@@ -70,28 +70,34 @@ export function OptionButton({
         {optionLetters[index]}
       </span>
 
-      <span className="flex-1 min-w-0 break-words text-lg font-medium leading-tight sm:text-xl">{option}</span>
-
-      {selected && !showResult && (
-        <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/50 bg-white/15 text-sm font-semibold text-white shadow-sm shadow-black/20">
-          ✓
+      <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <span className="min-w-0 text-base font-medium leading-tight [overflow-wrap:anywhere] sm:text-lg md:text-xl">
+          {option}
         </span>
-      )}
 
-      {showResult && isCorrect && (
-        <AnswerStatusBadge
-          status="correct"
-          label={t('game.correctLabel')}
-          className="text-xs"
-        />
-      )}
-      {showResult && selected && !isCorrect && (
-        <AnswerStatusBadge
-          status="incorrect"
-          label={t('game.incorrectLabel')}
-          className="text-xs"
-        />
-      )}
+        <div className="inline-flex items-center self-start sm:self-auto">
+          {selected && !showResult && (
+            <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/50 bg-white/15 text-sm font-semibold text-white shadow-sm shadow-black/20">
+              ✓
+            </span>
+          )}
+
+          {showResult && isCorrect && (
+            <AnswerStatusBadge
+              status="correct"
+              label={t('game.correctLabel')}
+              className="text-xs"
+            />
+          )}
+          {showResult && selected && !isCorrect && (
+            <AnswerStatusBadge
+              status="incorrect"
+              label={t('game.incorrectLabel')}
+              className="text-xs"
+            />
+          )}
+        </div>
+      </div>
     </button>
   );
 }

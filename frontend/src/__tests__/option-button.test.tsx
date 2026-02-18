@@ -57,4 +57,20 @@ describe('OptionButton', () => {
     expect(screen.queryByText('✓')).not.toBeInTheDocument();
     expect(screen.getByText('Incorrecta')).toBeInTheDocument();
   });
+
+  it('mantiene textos largos dentro del contenedor para una lectura mobile-friendly', () => {
+    render(
+      <OptionButton
+        option="AndorraLaVellaAndorraLaVellaAndorraLaVella"
+        index={2}
+        onClick={() => {}}
+        disabled={false}
+        selected={false}
+        showResult={false}
+      />
+    );
+
+    const optionText = screen.getByText('AndorraLaVellaAndorraLaVellaAndorraLaVella');
+    expect(optionText.className).toContain('[overflow-wrap:anywhere]');
+  });
 });
