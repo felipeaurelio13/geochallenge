@@ -65,11 +65,11 @@ export function QuestionCard({ question, questionNumber, totalQuestions }: Quest
     const difficulty = question.difficulty?.toUpperCase() || 'MEDIUM';
     switch (difficulty) {
       case 'EASY':
-        return 'bg-green-900 text-green-300';
+        return 'border border-green-500/30 bg-green-500/15 text-green-200';
       case 'HARD':
-        return 'bg-red-900 text-red-300';
+        return 'border border-red-500/30 bg-red-500/15 text-red-200';
       default:
-        return 'bg-yellow-900 text-yellow-300';
+        return 'border border-amber-500/30 bg-amber-500/15 text-amber-200';
     }
   };
 
@@ -79,13 +79,13 @@ export function QuestionCard({ question, questionNumber, totalQuestions }: Quest
   };
 
   return (
-    <div className="bg-gray-800 rounded-xl p-6 shadow-lg">
+    <div className="rounded-3xl border border-gray-700 bg-gray-800/95 px-5 py-6 shadow-xl shadow-black/25 sm:px-6">
       {/* Progress indicator */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="mb-5 flex items-center justify-between">
         <span className="text-sm text-gray-400">
           {t('game.questionOf', { current: questionNumber, total: totalQuestions })}
         </span>
-        <span className="text-2xl">{getCategoryIcon()}</span>
+        <span className="text-3xl leading-none" aria-hidden="true">{getCategoryIcon()}</span>
       </div>
 
       {/* Question content */}
@@ -97,12 +97,12 @@ export function QuestionCard({ question, questionNumber, totalQuestions }: Quest
               src={question.imageUrl}
               alt="Question image"
               loading="lazy"
-              width={question.category === 'FLAG' ? 320 : 160}
-              height={question.category === 'FLAG' ? 128 : 160}
+              width={question.category === 'FLAG' ? 360 : 180}
+              height={question.category === 'FLAG' ? 180 : 180}
               className={`mx-auto ${
                 question.category === 'FLAG'
-                  ? 'h-32 w-auto rounded shadow-lg border border-gray-700'
-                  : 'h-40 w-auto filter invert'
+                  ? 'max-h-52 w-full max-w-md rounded-xl border border-amber-400/70 bg-black/10 object-contain p-1 shadow-lg shadow-black/30'
+                  : 'max-h-48 w-auto filter invert'
               }`}
               onError={(e) => {
                 // Hide broken images
@@ -113,14 +113,14 @@ export function QuestionCard({ question, questionNumber, totalQuestions }: Quest
         )}
 
         {/* Question text */}
-        <h2 className="text-xl md:text-2xl font-bold text-white mb-2">
+        <h2 className="text-[2rem] leading-tight font-bold text-white sm:text-4xl">
           {getQuestionText()}
         </h2>
 
         {/* Difficulty indicator */}
         {question.difficulty && (
-          <div className="mt-4">
-            <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getDifficultyClass()}`}>
+          <div className="mt-5">
+            <span className={`inline-block rounded-full px-4 py-1.5 text-sm font-semibold ${getDifficultyClass()}`}>
               {t(getDifficultyKey())}
             </span>
           </div>

@@ -112,7 +112,7 @@ describe('GamePage ending flow', () => {
     render(<GamePage />);
 
     const main = screen.getByRole('main');
-    expect(main).toHaveClass('pb-28');
+    expect(main).toHaveClass('pb-32');
 
     const tray = screen.getByTestId('mobile-action-tray');
     expect(tray).toHaveClass('sticky');
@@ -136,6 +136,15 @@ describe('GamePage ending flow', () => {
     expect(screen.queryByRole('button', { name: 'game.clearSelection' })).not.toBeInTheDocument();
   });
 
+  it('mantiene el botón Confirmar deshabilitado hasta elegir una alternativa', () => {
+    render(<GamePage />);
+
+    const submitButton = screen.getByRole('button', { name: 'game.submit' });
+    expect(submitButton).toBeDisabled();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Santiago' }));
+    expect(submitButton).toBeEnabled();
+  });
 
   it('oculta la guía contextual al mostrar resultado para evitar mensajes duplicados', async () => {
     render(<GamePage />);
