@@ -6,7 +6,6 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => {
       const dictionary: Record<string, string> = {
-        'game.selectedOption': 'Seleccionada',
         'game.correctLabel': 'Correcta',
         'game.incorrectLabel': 'Incorrecta',
       };
@@ -34,10 +33,9 @@ describe('OptionButton', () => {
     const button = screen.getByRole('button');
 
     expect(button).toHaveAttribute('aria-pressed', 'true');
-    expect(button.className).toContain('ring-4');
-    expect(button.className).toContain('min-h-[44px]');
-    expect(screen.getByText('✓')).toHaveClass('sm:hidden');
-    expect(screen.getByText('✓ Seleccionada')).toBeInTheDocument();
+    expect(button.className).toContain('ring-2');
+    expect(button.className).toContain('min-h-[58px]');
+    expect(screen.getByText('✓')).toBeInTheDocument();
 
     fireEvent.click(button);
     expect(onClick).toHaveBeenCalledTimes(1);
@@ -56,7 +54,7 @@ describe('OptionButton', () => {
       />
     );
 
-    expect(screen.queryByText('✓ Seleccionada')).not.toBeInTheDocument();
+    expect(screen.queryByText('✓')).not.toBeInTheDocument();
     expect(screen.getByText('Incorrecta')).toBeInTheDocument();
   });
 });

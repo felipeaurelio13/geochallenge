@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.29**
+- Frontend: **v1.2.30**
 
 ### Mantener backend activo en producción
 Configura el secret **`BACKEND_HEALTHCHECK_URL`** en GitHub (Settings → Secrets and variables → Actions) con la URL pública de salud de tu API, por ejemplo:
@@ -14,6 +14,12 @@ Configura el secret **`BACKEND_HEALTHCHECK_URL`** en GitHub (Settings → Secret
 
 Con ese secret configurado, el workflow **Keep backend awake** hará ping automático cada 10 minutos para minimizar el estado dormido del servicio free.
 
+### Flujo interno recomendado para evitar fallas de deploy
+1. Trabajar siempre en branch de feature y abrir PR a `main`.
+2. Verificar localmente en frontend: `npm run lint`, `npm run test` y `npm run build`.
+3. Hacer merge sólo cuando estén en verde los workflows `Frontend Quality` y `Backend Quality`.
+4. El deploy a GitHub Pages se ejecuta automáticamente en push a `main` con quality gate previo (`lint + tests + build`).
+5. Si falla deploy, revisar primero el job `Frontend quality gate`: ese job corta el release antes de publicar para evitar romper producción.
 
 
 
@@ -30,6 +36,14 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 
 
 
+
+
+## Novedades de la versión 1.2.30
+- Se creó un workflow dedicado de **deploy a GitHub Pages** con `quality gate` previo (lint + tests unitarios + build), para bloquear despliegues con regresiones antes de publicar.
+- El despliegue ahora usa `concurrency` para cancelar ejecuciones simultáneas y reducir fallas intermitentes por carreras entre pushes.
+- Se configuró el build para GitHub Pages con `VITE_BASE_PATH` dinámico por repositorio, evitando errores de carga de assets/rutas al publicar en `/<repo>/`.
+- Se añadió prueba automatizada para blindar la existencia del flujo de deploy y la configuración del base path, evitando que futuras modificaciones rompan CI/CD.
+- Footer/versionado actualizado a **v1.2.30** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.29
 - Se optimizó la pantalla de juego individual para móviles en preguntas de silueta: la tarjeta de pregunta ahora usa un layout compacto (menos altura de imagen y tipografía ajustada) para responder sin necesidad de scroll en la mayoría de pantallas pequeñas.
