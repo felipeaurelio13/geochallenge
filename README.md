@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.22**
+- Frontend: **v1.2.23**
 
 ### Mantener backend activo en producción
 Configura el secret **`BACKEND_HEALTHCHECK_URL`** en GitHub (Settings → Secrets and variables → Actions) con la URL pública de salud de tu API, por ejemplo:
@@ -28,6 +28,13 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 
 
 
+
+## Novedades de la versión 1.2.23
+- Se mejoró la experiencia mobile-first en la modalidad individual: la guía de selección ahora se oculta automáticamente al mostrar el resultado, evitando mensajes duplicados y reduciendo ruido visual.
+- Se reforzó la jerarquía visual del mapa y del bloque de distancia con contenedores más claros y espaciado consistente, para lectura rápida en pantallas pequeñas.
+- Se ajustó la barra de progreso de preguntas con indicadores más cómodos para touch y scroll horizontal en móvil cuando sea necesario.
+- Se agregaron/actualizaron pruebas de `GamePage` para validar que la guía contextual no aparezca durante la revisión de respuesta.
+- Footer actualizado a **v1.2.23** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.22
 - Se aplicó una mejora de usabilidad mobile-first en Juego individual y Duelo: la bandeja de acciones (Confirmar/Cambiar selección/Siguiente) ahora queda anclada al borde inferior con gradiente sutil, mejorando visibilidad y alcance con pulgar.

@@ -136,6 +136,19 @@ describe('GamePage ending flow', () => {
     expect(screen.queryByRole('button', { name: 'game.clearSelection' })).not.toBeInTheDocument();
   });
 
+
+  it('oculta la guía contextual al mostrar resultado para evitar mensajes duplicados', async () => {
+    render(<GamePage />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Santiago' }));
+    fireEvent.click(screen.getByRole('button', { name: 'game.submit' }));
+
+    await screen.findByText('game.correct');
+
+    expect(screen.queryByText('game.selectionReadyHint')).not.toBeInTheDocument();
+    expect(screen.queryByText('game.selectOptionHint')).not.toBeInTheDocument();
+  });
+
   it('mantiene el estado hasta resultados sin resetear el juego al desmontar', async () => {
     render(<GamePage />);
 
