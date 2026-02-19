@@ -16,7 +16,7 @@ import {
   ChallengeGamePage,
   ChallengeResultsPage,
 } from './pages';
-import { LoadingSpinner, ErrorBoundary, ServerWakeUp, BackendKeepAlive } from './components';
+import { LoadingSpinner, ErrorBoundary, ServerWakeUp, BackendKeepAlive, AppRoot, Screen } from './components';
 import { getRouterBasename, toAppPath } from './utils/routing';
 
 // Protected route wrapper
@@ -25,7 +25,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="h-full min-h-0 bg-gray-900 flex items-center justify-center">
         <LoadingSpinner size="lg" />
       </div>
     );
@@ -44,7 +44,7 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="h-full min-h-0 bg-gray-900 flex items-center justify-center">
         <LoadingSpinner size="lg" />
       </div>
     );
@@ -60,7 +60,7 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 // Router error fallback
 function RouteErrorFallback() {
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
+    <div className="h-full min-h-0 bg-gray-900 flex items-center justify-center px-4">
       <div className="text-center">
         <div className="text-6xl mb-4">:(</div>
         <h2 className="text-2xl font-bold text-white mb-2">Algo salio mal</h2>
@@ -80,7 +80,9 @@ function RootProviders() {
   return (
     <ErrorBoundary>
       <AuthProvider>
-        <Outlet />
+        <Screen>
+          <Outlet />
+        </Screen>
       </AuthProvider>
     </ErrorBoundary>
   );
@@ -176,10 +178,12 @@ const router = createBrowserRouter(
 
 export function App() {
   return (
-    <ServerWakeUp>
-      <BackendKeepAlive />
-      <RouterProvider router={router} />
-    </ServerWakeUp>
+    <AppRoot>
+      <ServerWakeUp>
+        <BackendKeepAlive />
+        <RouterProvider router={router} />
+      </ServerWakeUp>
+    </AppRoot>
   );
 }
 

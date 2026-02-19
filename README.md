@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.43**
+- Frontend: **v1.2.44**
 
 ### Mantener backend activo en producción
 Configura el secret **`BACKEND_HEALTHCHECK_URL`** en GitHub (Settings → Secrets and variables → Actions) con la URL pública de salud de tu API, por ejemplo:
@@ -39,6 +39,15 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 
 
 
+
+
+## Novedades de la versión 1.2.44
+- Se implementó un contenedor raíz `app-root` full-screen con `100svh` (fallback `100vh`), safe areas y bloqueo de overflow global para estabilizar altura visible en iOS Safari y Chrome Android.
+- Se introdujo el componente reutilizable `Screen` (header/content/footer) para estandarizar pantallas de altura fija sin scroll del `body`, delegando el scroll sólo a contenedores internos cuando corresponde.
+- Se añadió el hook `useLockBodyScroll(ref)` y un ejemplo `OverlayModal` para bloquear fondo en overlays y reducir rubber-band/scroll accidental en mobile.
+- Se ajustó el viewport meta, estilos globales (`html`, `body`, `#root`) y reemplazos de `100vh/min-h-screen` conflictivos por patrón robusto mobile-first.
+- Se agregaron tests automatizados para validar `Screen` y el lock/unlock del scroll de `body`.
+- Footer/versionado actualizado a **v1.2.44** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.43
 - Se compactó el layout del menú principal en mobile (cabecera de contenido, selector de categoría y tarjetas de modo) para aprovechar mejor el alto disponible y reducir scroll innecesario sin recortar información.

@@ -183,7 +183,7 @@ export function ChallengeGamePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="h-full min-h-0 bg-gray-900 flex items-center justify-center">
         <LoadingSpinner size="lg" text={t('game.loading')} />
       </div>
     );
@@ -191,7 +191,7 @@ export function ChallengeGamePage() {
 
   if (alreadyPlayed) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
+      <div className="h-full min-h-0 bg-gray-900 flex items-center justify-center px-4">
         <div className="text-center">
           <div className="text-6xl mb-4">✅</div>
           <h2 className="text-2xl font-bold text-white mb-2">{t('challenges.alreadyPlayed')}</h2>
@@ -209,7 +209,7 @@ export function ChallengeGamePage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
+      <div className="h-full min-h-0 bg-gray-900 flex items-center justify-center px-4">
         <div className="text-center">
           <div className="text-6xl mb-4">😢</div>
           <h2 className="text-2xl font-bold text-white mb-2">{t('game.error')}</h2>
@@ -227,7 +227,7 @@ export function ChallengeGamePage() {
 
   if (!currentQuestion) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="h-full min-h-0 bg-gray-900 flex items-center justify-center">
         <LoadingSpinner size="lg" />
       </div>
     );
@@ -235,7 +235,7 @@ export function ChallengeGamePage() {
 
   return (
     <GameRoundScaffold
-      rootClassName="min-h-[100dvh] bg-gray-900 flex flex-col overflow-x-hidden pb-[calc(env(safe-area-inset-bottom)+5.8rem)] md:pb-8"
+      rootClassName="h-full min-h-0 bg-gray-900 flex flex-col overflow-x-hidden pb-[calc(env(safe-area-inset-bottom)+5.8rem)] md:pb-8"
       mainClassName="flex-1 min-h-0 overflow-y-auto overscroll-contain px-3 py-2 sm:px-4 sm:py-3"
       header={
         <header className="sticky top-0 z-30 border-b border-gray-700 bg-gray-800/95 px-3 pb-2.5 pt-[calc(env(safe-area-inset-top)+0.45rem)] backdrop-blur sm:px-4">

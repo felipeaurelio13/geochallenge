@@ -4,14 +4,26 @@
 
 /* Custom base styles */
 @layer base {
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+  }
+
   html {
     @apply scroll-smooth;
   }
 
   body {
-    @apply bg-gray-900 text-white min-h-screen;
+    @apply bg-gray-900 text-white;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    /* Body scroll is disabled so each route manages scroll in explicit internal containers. */
+  }
+
+  #root {
+    height: 100%;
   }
 
   /* Remove tap highlight on mobile */
@@ -29,8 +41,37 @@
 
 /* Custom component styles */
 @layer components {
+  .app-root {
+    height: 100vh;
+    height: 100svh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding-top: env(safe-area-inset-top);
+    padding-right: env(safe-area-inset-right);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    background-color: rgb(3 7 18);
+    /* 100svh tracks visible viewport on iOS/Android while 100vh remains fallback. */
+    /* viewport-fit=cover allows safe-area env() insets to map notch/gesture areas. */
+  }
+
+  .screen {
+    @apply flex h-full min-h-0 flex-1 flex-col;
+  }
+
+  .screen-header,
+  .screen-footer {
+    flex: 0 0 auto;
+  }
+
+  .screen-content {
+    @apply flex min-h-0 flex-1 flex-col;
+    overflow: hidden;
+  }
+
   .app-shell {
-    @apply flex min-h-screen flex-col overflow-x-clip bg-gray-950 text-white;
+    @apply flex h-full min-h-0 flex-col overflow-hidden bg-gray-950 text-white;
   }
 
   .surface-panel {
@@ -172,7 +213,7 @@
   }
   100% {
     opacity: 0;
-    transform: translateY(100vh) rotate(720deg);
+    transform: translateY(100svh) rotate(720deg);
   }
 }
 

@@ -17,7 +17,7 @@ export function ChallengeResultsPage() {
 
   if (!resultState || !id) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
+      <div className="h-full min-h-0 bg-gray-900 flex items-center justify-center px-4">
         <div className="w-full max-w-md rounded-2xl border border-gray-700 bg-gray-800 p-5 text-center sm:p-6">
           <p className="text-sm text-gray-300">{t('challenges.resultsUnavailable')}</p>
           <button
@@ -36,7 +36,7 @@ export function ChallengeResultsPage() {
   const accuracy = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
 
   return (
-    <div className="min-h-screen bg-gray-900 px-4 py-8 text-white">
+    <div className="h-full min-h-0 bg-gray-900 px-4 py-8 text-white">
       <div className="mx-auto w-full max-w-md space-y-4">
         <header className="rounded-2xl border border-gray-700 bg-gray-800 p-5 text-center sm:p-6">
           <p className="text-xs uppercase tracking-wide text-primary">{t('challenges.challengeMode')}</p>

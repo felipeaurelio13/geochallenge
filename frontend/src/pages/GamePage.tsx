@@ -168,7 +168,7 @@ export function GamePage() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="h-full min-h-0 bg-gray-900 flex items-center justify-center">
         <LoadingSpinner size="lg" text={t('game.loading')} />
       </div>
     );
@@ -177,7 +177,7 @@ export function GamePage() {
   // Error state
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
+      <div className="h-full min-h-0 bg-gray-900 flex items-center justify-center px-4">
         <div className="text-center">
           <div className="text-6xl mb-4">😢</div>
           <h2 className="text-2xl font-bold text-white mb-2">{t('game.error')}</h2>
@@ -196,7 +196,7 @@ export function GamePage() {
   // No question loaded yet
   if (!currentQuestion) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="h-full min-h-0 bg-gray-900 flex items-center justify-center">
         <LoadingSpinner size="lg" text={t('game.preparing')} />
       </div>
     );

@@ -47,7 +47,7 @@ export function ProfilePage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="h-full min-h-0 bg-gray-900 flex items-center justify-center">
         <LoadingSpinner size="lg" />
       </div>
     );
@@ -58,7 +58,7 @@ export function ProfilePage() {
     : 0;
 
   return (
-    <div className="min-h-screen bg-gray-900">
+    <div className="h-full min-h-0 bg-gray-900">
       {/* Header */}
       <header className="bg-gray-800 border-b border-gray-700">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">

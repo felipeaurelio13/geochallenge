@@ -42,7 +42,7 @@ export function GameRoundScaffold({
   isLowTime,
   lowTimeHint,
   actionTray,
-  rootClassName = 'min-h-[100dvh] bg-gray-900 flex flex-col overflow-x-hidden',
+  rootClassName = 'h-full min-h-0 bg-gray-900 flex flex-col overflow-x-hidden',
   mainClassName = 'flex-1 min-h-0 overflow-y-auto overscroll-contain px-3 py-2 pb-[calc(env(safe-area-inset-bottom)+6.7rem)] sm:px-4 sm:py-3 sm:pb-28',
   optionsGridClassName = 'grid gap-2 sm:gap-2.5 grid-cols-2',
 }: GameRoundScaffoldProps) {

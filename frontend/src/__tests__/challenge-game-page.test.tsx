@@ -49,7 +49,7 @@ vi.mock('../components', () => ({
       {showResult && resultLabel && <p>{resultLabel}</p>}
     </div>
   ),
-  GameRoundScaffold: ({ header, progress, actionTray, mapContent, isMapQuestion, question, onOptionSelect, showResult, disableOptions, contextHint, isLowTime, lowTimeHint, optionsGridClassName, rootClassName = 'min-h-screen bg-gray-900 flex flex-col pb-[calc(env(safe-area-inset-bottom)+4.75rem)] md:pb-8', mainClassName = 'flex-1 overflow-x-hidden px-3 py-3 sm:px-4 sm:py-4' }: any) => (
+  GameRoundScaffold: ({ header, progress, actionTray, mapContent, isMapQuestion, question, onOptionSelect, showResult, disableOptions, contextHint, isLowTime, lowTimeHint, optionsGridClassName, rootClassName = 'h-full min-h-0 bg-gray-900 flex flex-col pb-[calc(env(safe-area-inset-bottom)+4.75rem)] md:pb-8', mainClassName = 'flex-1 overflow-x-hidden px-3 py-3 sm:px-4 sm:py-4' }: any) => (
     <div className={rootClassName}>
       {header}
       {progress}

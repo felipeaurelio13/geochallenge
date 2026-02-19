@@ -151,7 +151,7 @@ export function ChallengesPage() {
   const getCategoryLabel = (category: string) => t(`categories.${categoryKeyByValue[category] ?? 'mixed'}`);
 
   return (
-    <div className="min-h-screen bg-gray-900">
+    <div className="h-full min-h-0 bg-gray-900">
       <header className="bg-gray-800 border-b border-gray-700 sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
           <Link to="/menu" className="text-gray-400 hover:text-white">← {t('common.back')}</Link>
