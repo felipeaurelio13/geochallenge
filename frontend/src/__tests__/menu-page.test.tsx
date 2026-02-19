@@ -134,7 +134,7 @@ describe('MenuPage', () => {
     expect(screen.queryByRole('link', { name: /rankings/i })).not.toBeInTheDocument();
   });
 
-  it('aplica contención visual mobile-first con shell global reutilizable', () => {
+  it('aplica layout compacto mobile-first para reducir scroll sin recortar CTAs', () => {
     const { container } = render(
       <MemoryRouter future={routerFutureConfig}>
         <MenuPage />
@@ -143,7 +143,14 @@ describe('MenuPage', () => {
 
     expect(container.firstChild).toHaveClass('app-shell');
 
-    expect(screen.getByRole('button', { name: /mixto\s+un jugador/i })).toBeInTheDocument();
+    const main = container.querySelector('main');
+    expect(main?.className).toContain('py-3');
+
+    const categoryButton = screen.getByRole('button', { name: /🎲\s*mixto/i });
+    expect(categoryButton.className).toContain('min-h-10');
+
+    const singleModeButton = screen.getByRole('button', { name: /mixto\s+un jugador/i });
+    expect(singleModeButton.className).toContain('p-3');
   });
 
 

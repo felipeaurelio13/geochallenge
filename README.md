@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.42**
+- Frontend: **v1.2.43**
 
 ### Mantener backend activo en producción
 Configura el secret **`BACKEND_HEALTHCHECK_URL`** en GitHub (Settings → Secrets and variables → Actions) con la URL pública de salud de tu API, por ejemplo:
@@ -39,6 +39,12 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 
 
 
+
+## Novedades de la versión 1.2.43
+- Se compactó el layout del menú principal en mobile (cabecera de contenido, selector de categoría y tarjetas de modo) para aprovechar mejor el alto disponible y reducir scroll innecesario sin recortar información.
+- Se ajustó la densidad visual de chips y CTAs con jerarquía más clara, manteniendo contraste y legibilidad en dark mode.
+- Se actualizaron tests automatizados del menú para validar el nuevo layout compacto mobile-first y prevenir regresiones de espaciado/altura.
+- Footer/versionado actualizado a **v1.2.43** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.42
 - Se consolidó una bandeja de acción fija para ronda en mobile (confirmar/siguiente/espera) en modo individual, duelo y desafío, evitando que los CTA críticos queden fuera de pantalla.
