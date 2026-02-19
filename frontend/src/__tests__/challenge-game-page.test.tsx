@@ -35,6 +35,23 @@ vi.mock('../components', () => ({
   ScoreDisplay: () => <div>score</div>,
   ProgressBar: () => <div>progress</div>,
   LoadingSpinner: ({ text }: { text?: string }) => <div>{text || 'loading'}</div>,
+  GameRoundScaffold: ({ header, progress, actionTray, mapContent, isMapQuestion, question, onOptionSelect, showResult, disableOptions, contextHint, isLowTime, lowTimeHint, optionsGridClassName, rootClassName = 'min-h-screen bg-gray-900 flex flex-col pb-[calc(env(safe-area-inset-bottom)+4.75rem)] md:pb-8', mainClassName = 'flex-1 overflow-x-hidden px-3 py-3 sm:px-4 sm:py-4' }: any) => (
+    <div className={rootClassName}>
+      {header}
+      {progress}
+      <main role="main" className={mainClassName}>
+        {isMapQuestion ? mapContent : (
+          <div className={optionsGridClassName}>
+            {question.options.map((option: string) => (
+              <button key={option} onClick={() => onOptionSelect(option)} disabled={showResult || disableOptions}>{option}</button>
+            ))}
+          </div>
+        )}
+        {contextHint && !showResult && <p>{isLowTime && lowTimeHint ? lowTimeHint : contextHint}</p>}
+        {actionTray}
+      </main>
+    </div>
+  ),
 }));
 
 describe('ChallengeGamePage', () => {
