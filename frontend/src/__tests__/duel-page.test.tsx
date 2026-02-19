@@ -60,6 +60,20 @@ vi.mock('../components', () => ({
   ),
   LoadingSpinner: ({ text }: { text?: string }) => <div>{text || 'loading'}</div>,
   AnswerStatusBadge: ({ label }: { label: string }) => <div>{label}</div>,
+
+  RoundActionTray: ({ mode = 'single', showResult, canSubmit, isWaiting, submitLabel, clearLabel, nextLabel, waitingLabel, onSubmit, onNext, onClear, showClearButton, resultLabel }: any) => (
+    <div data-testid="mobile-action-tray" className={mode === 'challenge' ? 'fixed bottom-0' : 'sticky bottom-0'}>
+      {!showResult && !isWaiting && (
+        <>
+          {showClearButton && <button onClick={onClear}>{clearLabel}</button>}
+          <button onClick={onSubmit} disabled={!canSubmit}>{submitLabel}</button>
+        </>
+      )}
+      {isWaiting && <p>{waitingLabel}</p>}
+      {showResult && nextLabel && <button onClick={onNext}>{nextLabel}</button>}
+      {showResult && resultLabel && <p>{resultLabel}</p>}
+    </div>
+  ),
   GameRoundScaffold: ({ header, progress, actionTray, mapContent, isMapQuestion, question, onOptionSelect, showResult, disableOptions, contextHint, isLowTime, lowTimeHint, optionsGridClassName, rootClassName, mainClassName }: any) => (
     <div className={rootClassName}>
       {header}

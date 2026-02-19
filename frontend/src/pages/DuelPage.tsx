@@ -6,8 +6,8 @@ import { socketService } from '../services/socket';
 import {
   Timer,
   LoadingSpinner,
-  AnswerStatusBadge,
   GameRoundScaffold,
+  RoundActionTray,
 } from '../components';
 import { Category, Question } from '../types';
 import { GAME_CONSTANTS } from '../constants/game';
@@ -424,51 +424,24 @@ export function DuelPage() {
       isLowTime={isLowTime}
       lowTimeHint={t('game.lowTimeHint', { seconds: timeRemaining })}
       actionTray={
-        <div
-          className="mt-6 sticky bottom-0 z-20 -mx-1 bg-gradient-to-t from-gray-900 via-gray-900/95 to-transparent px-1 pb-[calc(env(safe-area-inset-bottom)+0.35rem)] pt-2 sm:mx-0 sm:bg-none sm:px-0 sm:pb-0 sm:pt-0"
-          data-testid="mobile-action-tray"
-        >
-          {duelState === 'playing' && !showResult && (
-            <div className="rounded-xl border border-gray-700 bg-gray-800/95 p-3 backdrop-blur-sm sm:bg-transparent sm:p-0 sm:border-0 sm:backdrop-blur-none">
-              <div className="flex justify-center gap-2">
-                {hasSelection && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedAnswer(null);
-                      setMapLocation(null);
-                    }}
-                    className="w-full sm:w-auto px-4 py-3 border border-gray-600 text-gray-200 font-semibold rounded-xl hover:bg-gray-700/80 transition-colors"
-                  >
-                    {t('game.clearSelection')}
-                  </button>
-                )}
-                <button
-                  onClick={handleSubmitAnswer}
-                  disabled={!hasSelection}
-                  className="w-full sm:w-auto px-8 py-3.5 bg-primary text-white font-bold rounded-xl shadow-md shadow-primary/30 hover:bg-primary/85 active:scale-[0.99] transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/70 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {t('game.submit')}
-                </button>
-              </div>
-            </div>
-          )}
-          {duelState === 'waiting' && (
-            <div className="text-center">
-              <LoadingSpinner size="sm" />
-              <p className="text-gray-400 mt-2">{t('duel.waitingForOpponent')}</p>
-            </div>
-          )}
-          {showResult && (
-            <div className="text-center rounded-xl border border-gray-700 bg-gray-800/95 p-4 backdrop-blur-sm">
-              <AnswerStatusBadge
-                status={lastAnswerCorrect ? 'correct' : 'incorrect'}
-                label={lastAnswerCorrect ? t('game.correct') : t('game.incorrect')}
-                className="text-base"
-              />
-            </div>
-          )}
-        </div>
+        <RoundActionTray
+          mode="duel"
+          showResult={showResult}
+          canSubmit={hasSelection}
+          isWaiting={duelState === 'waiting'}
+          submitLabel={t('game.submit')}
+          clearLabel={t('game.clearSelection')}
+          waitingLabel={t('duel.waitingForOpponent')}
+          resultLabel={lastAnswerCorrect ? t('game.correct') : t('game.incorrect')}
+          showClearButton={hasSelection}
+          showResultBadge
+          isCorrect={lastAnswerCorrect}
+          onSubmit={handleSubmitAnswer}
+          onClear={() => {
+            setSelectedAnswer(null);
+            setMapLocation(null);
+          }}
+        />
       }
     />
   );

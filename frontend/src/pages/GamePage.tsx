@@ -7,8 +7,8 @@ import {
   ScoreDisplay,
   ProgressBar,
   LoadingSpinner,
-  AnswerStatusBadge,
   GameRoundScaffold,
+  RoundActionTray,
 } from '../components';
 import { Question } from '../types';
 import { GAME_CONSTANTS } from '../constants/game';
@@ -279,53 +279,25 @@ export function GamePage() {
       isLowTime={isLowTime}
       lowTimeHint={t('game.lowTimeHint', { seconds: timeRemaining })}
       actionTray={
-        <div
-          className="sticky bottom-0 z-20 mt-2 -mx-1 bg-gradient-to-t from-gray-900 via-gray-900/95 to-transparent px-1 pb-[calc(env(safe-area-inset-bottom)+0.35rem)] pt-2 sm:mx-0 sm:mt-3 sm:bg-none sm:px-0 sm:pb-0 sm:pt-0"
-          data-testid="mobile-action-tray"
-        >
-          {!showResult ? (
-            <div className="rounded-2xl border border-gray-600 bg-gray-800/95 p-3.5 shadow-lg shadow-black/35 backdrop-blur-sm sm:bg-transparent sm:p-0 sm:border-0 sm:shadow-none sm:backdrop-blur-none">
-              <div className="flex flex-col justify-center gap-2 sm:flex-row">
-                <button
-                  onClick={handleSubmitAnswer}
-                  disabled={!hasSelection}
-                  className="w-full sm:w-auto rounded-2xl px-8 py-3.5 bg-primary text-white text-base sm:text-xl font-bold shadow-md shadow-primary/30 hover:bg-primary/85 active:scale-[0.99] transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/70 disabled:opacity-45 disabled:cursor-not-allowed disabled:bg-gray-700 disabled:text-gray-400"
-                >
-                  {t('game.submit')}
-                </button>
-
-                {hasSelection && (
-                  <button
-                    onClick={() => {
-                      setSelectedAnswer(null);
-                      setMapLocation(null);
-                    }}
-                    className="w-full sm:w-auto rounded-2xl border border-gray-600 px-6 py-3.5 text-base sm:text-lg font-semibold text-gray-200 transition-colors hover:border-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-primary/70"
-                  >
-                    {t('game.clearSelection')}
-                  </button>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="text-center rounded-2xl border border-gray-700 bg-gray-800/95 p-3.5 sm:p-5 backdrop-blur-sm shadow-sm shadow-black/30">
-              <AnswerStatusBadge
-                status={lastAnswerCorrect ? 'correct' : 'incorrect'}
-                label={lastAnswerCorrect ? t('game.correct') : t('game.incorrect')}
-                className="mb-4 text-base"
-              />
-
-              <p className="mb-4 text-base leading-relaxed text-gray-200" aria-live="polite">{t(getPostAnswerHintKey(isLastQuestion))}</p>
-
-              <button
-                onClick={handleNextQuestion}
-                className="w-full sm:w-auto rounded-2xl px-8 py-3.5 bg-primary text-white text-base sm:text-xl font-bold shadow-md shadow-primary/30 hover:bg-primary/85 active:scale-[0.99] transition-all duration-150 animate-pulse focus:outline-none focus:ring-2 focus:ring-primary/70"
-              >
-                {isLastQuestion ? t('game.seeResults') : t('game.next')}
-              </button>
-            </div>
-          )}
-        </div>
+        <RoundActionTray
+          mode="single"
+          showResult={showResult}
+          canSubmit={hasSelection}
+          submitLabel={t('game.submit')}
+          clearLabel={t('game.clearSelection')}
+          nextLabel={isLastQuestion ? t('game.seeResults') : t('game.next')}
+          resultLabel={lastAnswerCorrect ? t('game.correct') : t('game.incorrect')}
+          resultHint={t(getPostAnswerHintKey(isLastQuestion))}
+          showClearButton={hasSelection}
+          showResultBadge
+          isCorrect={lastAnswerCorrect}
+          onSubmit={handleSubmitAnswer}
+          onNext={handleNextQuestion}
+          onClear={() => {
+            setSelectedAnswer(null);
+            setMapLocation(null);
+          }}
+        />
       }
     />
   );
