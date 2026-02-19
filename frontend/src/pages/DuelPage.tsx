@@ -5,10 +5,9 @@ import { useAuth } from '../context/AuthContext';
 import { socketService } from '../services/socket';
 import {
   Timer,
-  QuestionCard,
-  OptionButton,
   LoadingSpinner,
   AnswerStatusBadge,
+  GameRoundScaffold,
 } from '../components';
 import { Category, Question } from '../types';
 import { GAME_CONSTANTS } from '../constants/game';
@@ -359,140 +358,118 @@ export function DuelPage() {
     : t('game.selectOptionHint');
 
   return (
-    <div className="min-h-screen bg-gray-900 flex flex-col">
-      {/* Header with scores */}
-      <header className="bg-gray-800 border-b border-gray-700 px-4 py-3">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold text-white">
-              {user?.username?.charAt(0).toUpperCase()}
-            </div>
-            <span className="text-xl font-bold text-primary">{myScore}</span>
-          </div>
-
-          <Timer
-            duration={TIME_PER_QUESTION}
-            timeRemaining={timeRemaining}
-            onTick={setTimeRemaining}
-            onComplete={handleTimeComplete}
-            isActive={duelState === 'playing' && !showResult}
-          />
-
-          <div className="flex items-center gap-2">
-            <span className="text-xl font-bold text-red-400">{opponentScore}</span>
-            <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-sm font-bold text-white">
-              {opponent?.username?.charAt(0).toUpperCase()}
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Progress */}
-      <div className="bg-gray-800/50 px-4 py-2 text-center">
-        <span className="text-gray-400">
-          {t('game.questionOf', { current: questionNumber, total: totalQuestions })}
-        </span>
-      </div>
-
-      {/* Main Content */}
-      <main className="flex-1 px-4 py-6 pb-28 sm:pb-6">
-        <div className="max-w-4xl mx-auto">
-          <QuestionCard
-            question={currentQuestion}
-            questionNumber={questionNumber}
-            totalQuestions={totalQuestions}
-          />
-
-          <div className="mt-6">
-            {isMapQuestion ? (
-              <Suspense fallback={<LoadingSpinner size="lg" />}>
-                <MapInteractive
-                  questionId={currentQuestion.id}
-                  onLocationSelect={(lat, lng) => setMapLocation({ lat, lng })}
-                  selectedLocation={mapLocation}
-                  correctLocation={
-                    showResult && currentQuestion.latitude && currentQuestion.longitude
-                      ? { lat: currentQuestion.latitude, lng: currentQuestion.longitude }
-                      : null
-                  }
-                  showResult={showResult}
-                  disabled={showResult || duelState === 'waiting'}
-                />
-              </Suspense>
-            ) : (
-              <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
-                {currentQuestion.options.map((option, index) => (
-                  <OptionButton
-                    key={option}
-                    option={option}
-                    index={index}
-                    onClick={() => setSelectedAnswer(option)}
-                    disabled={showResult || duelState === 'waiting'}
-                    selected={selectedAnswer === option}
-                    isCorrect={option === currentQuestion.correctAnswer}
-                    showResult={showResult}
-                  />
-                ))}
+    <GameRoundScaffold
+      rootClassName="min-h-screen bg-gray-900 flex flex-col"
+      mainClassName="flex-1 px-4 py-6 pb-28 sm:pb-6"
+      header={
+        <header className="bg-gray-800 border-b border-gray-700 px-4 py-3">
+          <div className="max-w-4xl mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold text-white">
+                {user?.username?.charAt(0).toUpperCase()}
               </div>
-            )}
-          </div>
+              <span className="text-xl font-bold text-primary">{myScore}</span>
+            </div>
 
-          {/* Submit Button */}
-          <div
-            className="mt-6 sticky bottom-0 z-20 -mx-1 bg-gradient-to-t from-gray-900 via-gray-900/95 to-transparent px-1 pb-[calc(env(safe-area-inset-bottom)+0.35rem)] pt-2 sm:mx-0 sm:bg-none sm:px-0 sm:pb-0 sm:pt-0"
-            data-testid="mobile-action-tray"
-          >
-            {duelState === 'playing' && !showResult && (
-              <div className="rounded-xl border border-gray-700 bg-gray-800/95 p-3 backdrop-blur-sm sm:bg-transparent sm:p-0 sm:border-0 sm:backdrop-blur-none">
-                <p
-                  aria-live="polite"
-                  className={`mb-2 text-center text-sm font-medium ${
-                    isLowTime ? 'text-amber-300' : hasSelection ? 'text-primary' : 'text-gray-300'
-                  }`}
-                >
-                  {isLowTime ? t('game.lowTimeHint', { seconds: timeRemaining }) : helperText}
-                </p>
-                <div className="flex justify-center gap-2">
-                  {hasSelection && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedAnswer(null);
-                        setMapLocation(null);
-                      }}
-                      className="w-full sm:w-auto px-4 py-3 border border-gray-600 text-gray-200 font-semibold rounded-xl hover:bg-gray-700/80 transition-colors"
-                    >
-                      {t('game.clearSelection')}
-                    </button>
-                  )}
+            <Timer
+              duration={TIME_PER_QUESTION}
+              timeRemaining={timeRemaining}
+              onTick={setTimeRemaining}
+              onComplete={handleTimeComplete}
+              isActive={duelState === 'playing' && !showResult}
+            />
+
+            <div className="flex items-center gap-2">
+              <span className="text-xl font-bold text-red-400">{opponentScore}</span>
+              <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-sm font-bold text-white">
+                {opponent?.username?.charAt(0).toUpperCase()}
+              </div>
+            </div>
+          </div>
+        </header>
+      }
+      progress={
+        <div className="bg-gray-800/50 px-4 py-2 text-center">
+          <span className="text-gray-400">
+            {t('game.questionOf', { current: questionNumber, total: totalQuestions })}
+          </span>
+        </div>
+      }
+      question={currentQuestion}
+      questionNumber={questionNumber}
+      totalQuestions={totalQuestions}
+      isMapQuestion={isMapQuestion}
+      mapContent={
+        <Suspense fallback={<LoadingSpinner size="lg" />}>
+          <MapInteractive
+            questionId={currentQuestion.id}
+            onLocationSelect={(lat, lng) => setMapLocation({ lat, lng })}
+            selectedLocation={mapLocation}
+            correctLocation={
+              showResult && currentQuestion.latitude && currentQuestion.longitude
+                ? { lat: currentQuestion.latitude, lng: currentQuestion.longitude }
+                : null
+            }
+            showResult={showResult}
+            disabled={showResult || duelState === 'waiting'}
+          />
+        </Suspense>
+      }
+      selectedAnswer={selectedAnswer}
+      onOptionSelect={setSelectedAnswer}
+      showResult={showResult}
+      disableOptions={duelState === 'waiting'}
+      optionsGridClassName="grid grid-cols-2 gap-2.5 sm:gap-3"
+      contextHint={helperText}
+      isLowTime={isLowTime}
+      lowTimeHint={t('game.lowTimeHint', { seconds: timeRemaining })}
+      actionTray={
+        <div
+          className="mt-6 sticky bottom-0 z-20 -mx-1 bg-gradient-to-t from-gray-900 via-gray-900/95 to-transparent px-1 pb-[calc(env(safe-area-inset-bottom)+0.35rem)] pt-2 sm:mx-0 sm:bg-none sm:px-0 sm:pb-0 sm:pt-0"
+          data-testid="mobile-action-tray"
+        >
+          {duelState === 'playing' && !showResult && (
+            <div className="rounded-xl border border-gray-700 bg-gray-800/95 p-3 backdrop-blur-sm sm:bg-transparent sm:p-0 sm:border-0 sm:backdrop-blur-none">
+              <div className="flex justify-center gap-2">
+                {hasSelection && (
                   <button
-                    onClick={handleSubmitAnswer}
-                    disabled={!hasSelection}
-                    className="w-full sm:w-auto px-8 py-3.5 bg-primary text-white font-bold rounded-xl shadow-md shadow-primary/30 hover:bg-primary/85 active:scale-[0.99] transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/70 disabled:opacity-50 disabled:cursor-not-allowed"
+                    type="button"
+                    onClick={() => {
+                      setSelectedAnswer(null);
+                      setMapLocation(null);
+                    }}
+                    className="w-full sm:w-auto px-4 py-3 border border-gray-600 text-gray-200 font-semibold rounded-xl hover:bg-gray-700/80 transition-colors"
                   >
-                    {t('game.submit')}
+                    {t('game.clearSelection')}
                   </button>
-                </div>
+                )}
+                <button
+                  onClick={handleSubmitAnswer}
+                  disabled={!hasSelection}
+                  className="w-full sm:w-auto px-8 py-3.5 bg-primary text-white font-bold rounded-xl shadow-md shadow-primary/30 hover:bg-primary/85 active:scale-[0.99] transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/70 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {t('game.submit')}
+                </button>
               </div>
-            )}
-            {duelState === 'waiting' && (
-              <div className="text-center">
-                <LoadingSpinner size="sm" />
-                <p className="text-gray-400 mt-2">{t('duel.waitingForOpponent')}</p>
-              </div>
-            )}
-            {showResult && (
-              <div className="text-center rounded-xl border border-gray-700 bg-gray-800/95 p-4 backdrop-blur-sm">
-                <AnswerStatusBadge
-                  status={lastAnswerCorrect ? 'correct' : 'incorrect'}
-                  label={lastAnswerCorrect ? t('game.correct') : t('game.incorrect')}
-                  className="text-base"
-                />
-              </div>
-            )}
-          </div>
+            </div>
+          )}
+          {duelState === 'waiting' && (
+            <div className="text-center">
+              <LoadingSpinner size="sm" />
+              <p className="text-gray-400 mt-2">{t('duel.waitingForOpponent')}</p>
+            </div>
+          )}
+          {showResult && (
+            <div className="text-center rounded-xl border border-gray-700 bg-gray-800/95 p-4 backdrop-blur-sm">
+              <AnswerStatusBadge
+                status={lastAnswerCorrect ? 'correct' : 'incorrect'}
+                label={lastAnswerCorrect ? t('game.correct') : t('game.incorrect')}
+                className="text-base"
+              />
+            </div>
+          )}
         </div>
-      </main>
-    </div>
+      }
+    />
   );
 }

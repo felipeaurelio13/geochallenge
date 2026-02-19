@@ -9,3 +9,4 @@ export { ServerWakeUp } from './ServerWakeUp';
 export { AnswerStatusBadge } from './AnswerStatusBadge';
 export { BackendKeepAlive } from './BackendKeepAlive';
 export { AppFooter } from './AppFooter';
+export { GameRoundScaffold } from './GameRoundScaffold';

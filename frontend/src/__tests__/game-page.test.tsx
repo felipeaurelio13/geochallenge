@@ -60,6 +60,24 @@ vi.mock('../components', () => ({
   ProgressBar: () => <div>progress</div>,
   LoadingSpinner: ({ text }: { text?: string }) => <div>{text || 'loading'}</div>,
   AnswerStatusBadge: ({ label }: { label: string }) => <div>{label}</div>,
+  GameRoundScaffold: ({ header, progress, actionTray, mapContent, isMapQuestion, question, onOptionSelect, showResult, disableOptions, contextHint, isLowTime, lowTimeHint, optionsGridClassName, rootClassName = 'min-h-[100dvh] bg-gray-900 flex flex-col overflow-x-hidden', mainClassName = 'flex-1 min-h-0 overflow-y-auto overscroll-contain px-3 py-2 pb-28 sm:px-4 sm:py-4 sm:pb-8' }: any) => (
+    <div className={rootClassName}>
+      {header}
+      {progress}
+      <main role="main" className={mainClassName}>
+        <div data-testid="question-card" data-compact="true">question-card</div>
+        {isMapQuestion ? (mapContent) : (
+          <div className={optionsGridClassName}>
+            {question.options.map((option: string) => (
+              <button key={option} onClick={() => onOptionSelect(option)} disabled={showResult || disableOptions}>{option}</button>
+            ))}
+          </div>
+        )}
+        {contextHint && !showResult && <p>{isLowTime && lowTimeHint ? lowTimeHint : contextHint}</p>}
+        {actionTray}
+      </main>
+    </div>
+  ),
 }));
 
 describe('GamePage ending flow', () => {

@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.36**
+- Frontend: **v1.2.37**
 
 ### Mantener backend activo en producción
 Configura el secret **`BACKEND_HEALTHCHECK_URL`** en GitHub (Settings → Secrets and variables → Actions) con la URL pública de salud de tu API, por ejemplo:
@@ -39,6 +39,12 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 
 
 
+
+## Novedades de la versión 1.2.37
+- Se unificó la estructura visual de ronda de juego en un componente reutilizable (`GameRoundScaffold`) para modo individual, duelo y desafío, evitando divergencias de layout entre modos.
+- Ahora cada modo reutiliza los mismos bloques base (header/progreso/contenido/CTA) y sólo define qué piezas se muestran según estado interno, manteniendo una experiencia coherente mobile-first en claro/oscuro.
+- Se actualizaron pruebas de páginas de juego para cubrir la reutilización del scaffold y prevenir regresiones de UX/UI al evolucionar nuevos modos.
+- Footer/versionado actualizado a **v1.2.37** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.36
 - Se corrigió el layout de `GamePage` para evitar recortes visuales tras seleccionar/responder: ahora el contenido principal puede crecer y desplazarse verticalmente sin cortar tarjetas, alternativas ni bloque de resultado.

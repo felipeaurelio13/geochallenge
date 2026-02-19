@@ -4,12 +4,11 @@ import { useTranslation } from 'react-i18next';
 import { useGame } from '../context/GameContext';
 import {
   Timer,
-  QuestionCard,
-  OptionButton,
   ScoreDisplay,
   ProgressBar,
   LoadingSpinner,
   AnswerStatusBadge,
+  GameRoundScaffold,
 } from '../components';
 import { Question } from '../types';
 import { GAME_CONSTANTS } from '../constants/game';
@@ -204,169 +203,130 @@ export function GamePage() {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-gray-900 flex flex-col overflow-x-hidden">
-      {/* Header */}
-      <header className="sticky top-0 z-30 border-b border-gray-700 bg-gray-800/95 px-3 pb-2.5 pt-[calc(env(safe-area-inset-top)+0.5rem)] backdrop-blur sm:px-4 sm:py-4">
-        <div className="max-w-4xl mx-auto grid grid-cols-[auto_1fr_auto] items-center gap-2 sm:gap-4">
-          <button
-            onClick={() => {
-              if (window.confirm(t('game.confirmExit'))) {
-                resetGame();
-                navigate('/menu');
-              }
-            }}
-            className="rounded-lg border border-gray-600 px-2.5 py-1.5 text-xs sm:text-sm text-gray-200 hover:text-white hover:border-gray-400 transition-colors"
-            aria-label={t('game.exit')}
-          >
-            ✕ {t('game.exit')}
-          </button>
+    <GameRoundScaffold
+      header={
+        <header className="sticky top-0 z-30 border-b border-gray-700 bg-gray-800/95 px-3 pb-2.5 pt-[calc(env(safe-area-inset-top)+0.5rem)] backdrop-blur sm:px-4 sm:py-4">
+          <div className="max-w-4xl mx-auto grid grid-cols-[auto_1fr_auto] items-center gap-2 sm:gap-4">
+            <button
+              onClick={() => {
+                if (window.confirm(t('game.confirmExit'))) {
+                  resetGame();
+                  navigate('/menu');
+                }
+              }}
+              className="rounded-lg border border-gray-600 px-2.5 py-1.5 text-xs sm:text-sm text-gray-200 hover:text-white hover:border-gray-400 transition-colors"
+              aria-label={t('game.exit')}
+            >
+              ✕ {t('game.exit')}
+            </button>
 
-          <ScoreDisplay score={score} previousScore={previousScore} showAnimation={showResult} />
+            <ScoreDisplay score={score} previousScore={previousScore} showAnimation={showResult} />
 
-          <Timer
-            duration={TIME_PER_QUESTION}
-            timeRemaining={timeRemaining}
-            onTick={setTimeRemaining}
-            onComplete={handleTimeComplete}
-            isActive={!showResult && status === 'playing'}
-          />
-        </div>
-      </header>
-
-      {/* Progress */}
-      <div className="bg-gray-800/70 px-3 py-2 sm:px-4 sm:py-3">
-        <div className="mx-auto mb-2 flex w-full max-w-4xl items-center justify-between rounded-xl border border-gray-700 bg-gray-900/55 px-3 py-1.5 text-xs text-gray-300 sm:text-sm">
-          <span>{t('game.questionOf', { current: currentIndex + 1, total: questions.length })}</span>
-          <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${hasSelection ? 'bg-emerald-500/20 text-emerald-200 border border-emerald-400/40' : 'bg-gray-700/70 text-gray-300 border border-gray-600'}`}>
-            {hasSelection ? t('game.selectedOption') : t('game.submit')}
-          </span>
-        </div>
-        <div className="max-w-4xl mx-auto overflow-x-hidden">
-          <ProgressBar
-            current={currentIndex + 1}
-            total={questions.length}
-            results={results}
-            showCurrentResult={showResult}
-          />
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <main className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-3 py-2 pb-28 sm:px-4 sm:py-4 sm:pb-8">
-        <div className="max-w-4xl mx-auto flex flex-col">
-          {/* Question Card */}
-          <QuestionCard
-            question={currentQuestion}
-            questionNumber={currentIndex + 1}
-            totalQuestions={questions.length}
-            compact={shouldUseCompactQuestionCard}
-          />
-
-          {/* Answer Options or Map */}
-          <div className="mt-2.5">
-            {isMapQuestion ? (
-              <Suspense fallback={<LoadingSpinner size="lg" text={t('game.loading')} />}>
-                <MapInteractive
-                  questionId={currentQuestion.id}
-                  onLocationSelect={handleMapSelect}
-                  selectedLocation={mapLocation}
-                  correctLocation={
-                    showResult && currentQuestion.latitude && currentQuestion.longitude
-                      ? { lat: currentQuestion.latitude, lng: currentQuestion.longitude }
-                      : null
-                  }
-                  showResult={showResult}
-                  disabled={showResult}
-                />
-              </Suspense>
-            ) : (
-              <div
-                className={`grid gap-2.5 sm:gap-3 ${
-                  isFlagQuestion ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-2'
-                }`}
-              >
-                {currentQuestion.options.map((option, index) => (
-                  <OptionButton
-                    key={option}
-                    option={option}
-                    index={index}
-                    onClick={() => handleOptionSelect(option)}
-                    disabled={showResult}
-                    selected={selectedAnswer === option}
-                    isCorrect={option === currentQuestion.correctAnswer}
-                    showResult={showResult}
-                  />
-                ))}
-              </div>
-            )}
+            <Timer
+              duration={TIME_PER_QUESTION}
+              timeRemaining={timeRemaining}
+              onTick={setTimeRemaining}
+              onComplete={handleTimeComplete}
+              isActive={!showResult && status === 'playing'}
+            />
           </div>
+        </header>
+      }
+      progress={
+        <div className="bg-gray-800/70 px-3 py-2 sm:px-4 sm:py-3">
+          <div className="mx-auto mb-2 flex w-full max-w-4xl items-center justify-between rounded-xl border border-gray-700 bg-gray-900/55 px-3 py-1.5 text-xs text-gray-300 sm:text-sm">
+            <span>{t('game.questionOf', { current: currentIndex + 1, total: questions.length })}</span>
+            <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${hasSelection ? 'bg-emerald-500/20 text-emerald-200 border border-emerald-400/40' : 'bg-gray-700/70 text-gray-300 border border-gray-600'}`}>
+              {hasSelection ? t('game.selectedOption') : t('game.submit')}
+            </span>
+          </div>
+          <div className="max-w-4xl mx-auto overflow-x-hidden">
+            <ProgressBar
+              current={currentIndex + 1}
+              total={questions.length}
+              results={results}
+              showCurrentResult={showResult}
+            />
+          </div>
+        </div>
+      }
+      question={currentQuestion}
+      questionNumber={currentIndex + 1}
+      totalQuestions={questions.length}
+      compactQuestionCard={shouldUseCompactQuestionCard}
+      isMapQuestion={Boolean(isMapQuestion)}
+      mapContent={
+        <Suspense fallback={<LoadingSpinner size="lg" text={t('game.loading')} />}>
+          <MapInteractive
+            questionId={currentQuestion.id}
+            onLocationSelect={handleMapSelect}
+            selectedLocation={mapLocation}
+            correctLocation={
+              showResult && currentQuestion.latitude && currentQuestion.longitude
+                ? { lat: currentQuestion.latitude, lng: currentQuestion.longitude }
+                : null
+            }
+            showResult={showResult}
+            disabled={showResult}
+          />
+        </Suspense>
+      }
+      selectedAnswer={selectedAnswer}
+      onOptionSelect={handleOptionSelect}
+      showResult={showResult}
+      optionsGridClassName={`grid gap-2.5 sm:gap-3 ${isFlagQuestion ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-2'}`}
+      contextHint={t(!hasSelection ? (isMapQuestion ? 'game.selectOnMapHint' : 'game.selectOptionHint') : 'game.selectionReadyHint')}
+      isLowTime={isLowTime}
+      lowTimeHint={t('game.lowTimeHint', { seconds: timeRemaining })}
+      actionTray={
+        <div
+          className="sticky bottom-0 z-20 mt-2 -mx-1 bg-gradient-to-t from-gray-900 via-gray-900/95 to-transparent px-1 pb-[calc(env(safe-area-inset-bottom)+0.35rem)] pt-2 sm:mx-0 sm:mt-3 sm:bg-none sm:px-0 sm:pb-0 sm:pt-0"
+          data-testid="mobile-action-tray"
+        >
+          {!showResult ? (
+            <div className="rounded-2xl border border-gray-600 bg-gray-800/95 p-3.5 shadow-lg shadow-black/35 backdrop-blur-sm sm:bg-transparent sm:p-0 sm:border-0 sm:shadow-none sm:backdrop-blur-none">
+              <div className="flex flex-col justify-center gap-2 sm:flex-row">
+                <button
+                  onClick={handleSubmitAnswer}
+                  disabled={!hasSelection}
+                  className="w-full sm:w-auto rounded-2xl px-8 py-3.5 bg-primary text-white text-base sm:text-xl font-bold shadow-md shadow-primary/30 hover:bg-primary/85 active:scale-[0.99] transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/70 disabled:opacity-45 disabled:cursor-not-allowed disabled:bg-gray-700 disabled:text-gray-400"
+                >
+                  {t('game.submit')}
+                </button>
 
-          {!showResult && (
-            <div className="mt-2.5 rounded-2xl border border-gray-700 bg-gray-800/60 px-4 py-2.5">
-              <p className="text-base leading-relaxed text-gray-100" aria-live="polite">
-                {!hasSelection
-                  ? t(isMapQuestion ? 'game.selectOnMapHint' : 'game.selectOptionHint')
-                  : t('game.selectionReadyHint')}
-              </p>
-              {isLowTime && (
-                <p className="mt-2 text-sm font-semibold text-amber-300" aria-live="assertive">
-                  {t('game.lowTimeHint', { seconds: timeRemaining })}
-                </p>
-              )}
+                {hasSelection && (
+                  <button
+                    onClick={() => {
+                      setSelectedAnswer(null);
+                      setMapLocation(null);
+                    }}
+                    className="w-full sm:w-auto rounded-2xl border border-gray-600 px-6 py-3.5 text-base sm:text-lg font-semibold text-gray-200 transition-colors hover:border-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-primary/70"
+                  >
+                    {t('game.clearSelection')}
+                  </button>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="text-center rounded-2xl border border-gray-700 bg-gray-800/95 p-3.5 sm:p-5 backdrop-blur-sm shadow-sm shadow-black/30">
+              <AnswerStatusBadge
+                status={lastAnswerCorrect ? 'correct' : 'incorrect'}
+                label={lastAnswerCorrect ? t('game.correct') : t('game.incorrect')}
+                className="mb-4 text-base"
+              />
+
+              <p className="mb-4 text-base leading-relaxed text-gray-200" aria-live="polite">{t(getPostAnswerHintKey(isLastQuestion))}</p>
+
+              <button
+                onClick={handleNextQuestion}
+                className="w-full sm:w-auto rounded-2xl px-8 py-3.5 bg-primary text-white text-base sm:text-xl font-bold shadow-md shadow-primary/30 hover:bg-primary/85 active:scale-[0.99] transition-all duration-150 animate-pulse focus:outline-none focus:ring-2 focus:ring-primary/70"
+              >
+                {isLastQuestion ? t('game.seeResults') : t('game.next')}
+              </button>
             </div>
           )}
-
-          {/* Action Buttons */}
-          <div
-            className="sticky bottom-0 z-20 mt-2 -mx-1 bg-gradient-to-t from-gray-900 via-gray-900/95 to-transparent px-1 pb-[calc(env(safe-area-inset-bottom)+0.35rem)] pt-2 sm:mx-0 sm:mt-3 sm:bg-none sm:px-0 sm:pb-0 sm:pt-0"
-            data-testid="mobile-action-tray"
-          >
-            {!showResult ? (
-              <div className="rounded-2xl border border-gray-600 bg-gray-800/95 p-3.5 shadow-lg shadow-black/35 backdrop-blur-sm sm:bg-transparent sm:p-0 sm:border-0 sm:shadow-none sm:backdrop-blur-none">
-                <div className="flex flex-col justify-center gap-2 sm:flex-row">
-                  <button
-                    onClick={handleSubmitAnswer}
-                    disabled={!hasSelection}
-                    className="w-full sm:w-auto rounded-2xl px-8 py-3.5 bg-primary text-white text-base sm:text-xl font-bold shadow-md shadow-primary/30 hover:bg-primary/85 active:scale-[0.99] transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/70 disabled:opacity-45 disabled:cursor-not-allowed disabled:bg-gray-700 disabled:text-gray-400"
-                  >
-                    {t('game.submit')}
-                  </button>
-
-                  {hasSelection && (
-                    <button
-                      onClick={() => {
-                        setSelectedAnswer(null);
-                        setMapLocation(null);
-                      }}
-                      className="w-full sm:w-auto rounded-2xl border border-gray-600 px-6 py-3.5 text-base sm:text-lg font-semibold text-gray-200 transition-colors hover:border-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-primary/70"
-                    >
-                      {t('game.clearSelection')}
-                    </button>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <div className="text-center rounded-2xl border border-gray-700 bg-gray-800/95 p-3.5 sm:p-5 backdrop-blur-sm shadow-sm shadow-black/30">
-                {/* Result feedback */}
-                <AnswerStatusBadge
-                  status={lastAnswerCorrect ? 'correct' : 'incorrect'}
-                  label={lastAnswerCorrect ? t('game.correct') : t('game.incorrect')}
-                  className="mb-4 text-base"
-                />
-
-                <p className="mb-4 text-base leading-relaxed text-gray-200" aria-live="polite">{t(getPostAnswerHintKey(isLastQuestion))}</p>
-
-                <button
-                  onClick={handleNextQuestion}
-                  className="w-full sm:w-auto rounded-2xl px-8 py-3.5 bg-primary text-white text-base sm:text-xl font-bold shadow-md shadow-primary/30 hover:bg-primary/85 active:scale-[0.99] transition-all duration-150 animate-pulse focus:outline-none focus:ring-2 focus:ring-primary/70"
-                >
-                  {isLastQuestion ? t('game.seeResults') : t('game.next')}
-                </button>
-              </div>
-            )}
-          </div>
         </div>
-      </main>
-    </div>
+      }
+    />
   );
 }

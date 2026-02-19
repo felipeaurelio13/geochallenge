@@ -60,6 +60,24 @@ vi.mock('../components', () => ({
   ),
   LoadingSpinner: ({ text }: { text?: string }) => <div>{text || 'loading'}</div>,
   AnswerStatusBadge: ({ label }: { label: string }) => <div>{label}</div>,
+  GameRoundScaffold: ({ header, progress, actionTray, mapContent, isMapQuestion, question, onOptionSelect, showResult, disableOptions, contextHint, isLowTime, lowTimeHint, optionsGridClassName, rootClassName, mainClassName }: any) => (
+    <div className={rootClassName}>
+      {header}
+      {progress}
+      <main role="main" className={mainClassName}>
+        <div data-testid="question-card" data-compact="true">question-card</div>
+        {isMapQuestion ? (mapContent) : (
+          <div className={optionsGridClassName}>
+            {question.options.map((option: string) => (
+              <button key={option} onClick={() => onOptionSelect(option)} disabled={showResult || disableOptions}>{option}</button>
+            ))}
+          </div>
+        )}
+        {contextHint && !showResult && <p>{isLowTime && lowTimeHint ? lowTimeHint : contextHint}</p>}
+        {actionTray}
+      </main>
+    </div>
+  ),
 }));
 
 vi.mock('../components/MapInteractive', () => ({
