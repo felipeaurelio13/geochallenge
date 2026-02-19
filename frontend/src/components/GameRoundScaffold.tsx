@@ -42,9 +42,9 @@ export function GameRoundScaffold({
   isLowTime,
   lowTimeHint,
   actionTray,
-  rootClassName = 'min-h-screen bg-gray-900 flex flex-col overflow-x-hidden',
-  mainClassName = 'flex-1 min-h-0 overflow-y-auto overscroll-contain px-3 py-2 pb-28 sm:px-4 sm:py-4 sm:pb-8',
-  optionsGridClassName = 'grid gap-2.5 sm:gap-3 grid-cols-2',
+  rootClassName = 'min-h-[100dvh] bg-gray-900 flex flex-col overflow-x-hidden',
+  mainClassName = 'flex-1 min-h-0 overflow-y-auto overscroll-contain px-3 py-2 pb-[calc(env(safe-area-inset-bottom)+6.7rem)] sm:px-4 sm:py-3 sm:pb-28',
+  optionsGridClassName = 'grid gap-2 sm:gap-2.5 grid-cols-2',
 }: GameRoundScaffoldProps) {
   return (
     <div className={rootClassName}>
@@ -52,7 +52,7 @@ export function GameRoundScaffold({
       {progress}
 
       <main className={mainClassName}>
-        <div className="max-w-4xl mx-auto flex flex-col">
+        <div className="max-w-4xl mx-auto flex flex-col gap-2">
           <QuestionCard
             question={question}
             questionNumber={questionNumber}
@@ -60,34 +60,32 @@ export function GameRoundScaffold({
             compact={compactQuestionCard}
           />
 
-          <div className="mt-2.5">
-            {isMapQuestion ? (
-              mapContent
-            ) : (
-              <div className={optionsGridClassName}>
-                {question.options.map((option, index) => (
-                  <OptionButton
-                    key={option}
-                    option={option}
-                    index={index}
-                    onClick={() => onOptionSelect(option)}
-                    disabled={showResult || disableOptions}
-                    selected={selectedAnswer === option}
-                    isCorrect={option === question.correctAnswer}
-                    showResult={showResult}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
+          {isMapQuestion ? (
+            mapContent
+          ) : (
+            <div className={optionsGridClassName}>
+              {question.options.map((option, index) => (
+                <OptionButton
+                  key={option}
+                  option={option}
+                  index={index}
+                  onClick={() => onOptionSelect(option)}
+                  disabled={showResult || disableOptions}
+                  selected={selectedAnswer === option}
+                  isCorrect={option === question.correctAnswer}
+                  showResult={showResult}
+                />
+              ))}
+            </div>
+          )}
 
           {contextHint && !showResult && (
-            <div className="mt-2.5 rounded-2xl border border-gray-700 bg-gray-800/60 px-4 py-2.5">
-              <p className="text-base leading-relaxed text-gray-100" aria-live="polite">
+            <div className="rounded-2xl border border-gray-700 bg-gray-800/60 px-3.5 py-2">
+              <p className="text-sm leading-relaxed text-gray-100 sm:text-base" aria-live="polite">
                 {contextHint}
               </p>
               {Boolean(isLowTime && lowTimeHint) && (
-                <p className="mt-2 text-sm font-semibold text-amber-300" aria-live="assertive">
+                <p className="mt-1.5 text-xs font-semibold text-amber-300 sm:text-sm" aria-live="assertive">
                   {lowTimeHint}
                 </p>
               )}

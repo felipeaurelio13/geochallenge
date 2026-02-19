@@ -235,10 +235,10 @@ export function ChallengeGamePage() {
 
   return (
     <GameRoundScaffold
-      rootClassName="min-h-screen bg-gray-900 flex flex-col pb-[calc(env(safe-area-inset-bottom)+4.75rem)] md:pb-8"
-      mainClassName="flex-1 overflow-x-hidden px-3 py-3 sm:px-4 sm:py-4"
+      rootClassName="min-h-[100dvh] bg-gray-900 flex flex-col overflow-x-hidden pb-[calc(env(safe-area-inset-bottom)+5.8rem)] md:pb-8"
+      mainClassName="flex-1 min-h-0 overflow-y-auto overscroll-contain px-3 py-2 sm:px-4 sm:py-3"
       header={
-        <header className="sticky top-0 z-20 border-b border-gray-700 bg-gray-800/95 px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.6rem)] backdrop-blur">
+        <header className="sticky top-0 z-30 border-b border-gray-700 bg-gray-800/95 px-3 pb-2.5 pt-[calc(env(safe-area-inset-top)+0.45rem)] backdrop-blur sm:px-4">
           <div className="mx-auto flex w-full max-w-4xl items-center justify-between gap-3">
             <button
               onClick={() => navigate('/challenges')}
@@ -266,7 +266,7 @@ export function ChallengeGamePage() {
         </header>
       }
       progress={
-        <div className="bg-gray-800/65 px-4 py-3">
+        <div className="bg-gray-800/65 px-3 py-2 sm:px-4">
           <div className="max-w-4xl mx-auto overflow-x-hidden">
             <ProgressBar
               current={currentIndex + 1}

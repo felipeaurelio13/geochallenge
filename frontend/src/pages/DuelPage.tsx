@@ -359,10 +359,10 @@ export function DuelPage() {
 
   return (
     <GameRoundScaffold
-      rootClassName="min-h-screen bg-gray-900 flex flex-col"
-      mainClassName="flex-1 px-4 py-6 pb-28 sm:pb-6"
+      rootClassName="min-h-[100dvh] bg-gray-900 flex flex-col overflow-x-hidden"
+      mainClassName="flex-1 min-h-0 overflow-y-auto overscroll-contain px-3 py-2 pb-[calc(env(safe-area-inset-bottom)+6.7rem)] sm:px-4 sm:py-3 sm:pb-28"
       header={
-        <header className="bg-gray-800 border-b border-gray-700 px-4 py-3">
+        <header className="sticky top-0 z-30 border-b border-gray-700 bg-gray-800/95 px-3 py-2.5 pt-[calc(env(safe-area-inset-top)+0.45rem)] backdrop-blur sm:px-4">
           <div className="max-w-4xl mx-auto flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold text-white">
@@ -389,8 +389,8 @@ export function DuelPage() {
         </header>
       }
       progress={
-        <div className="bg-gray-800/50 px-4 py-2 text-center">
-          <span className="text-gray-400">
+        <div className="bg-gray-800/65 px-3 py-2 text-center sm:px-4">
+          <span className="text-gray-300 text-sm">
             {t('game.questionOf', { current: questionNumber, total: totalQuestions })}
           </span>
         </div>
