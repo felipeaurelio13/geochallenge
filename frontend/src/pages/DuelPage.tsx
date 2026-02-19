@@ -430,18 +430,12 @@ export function DuelPage() {
           canSubmit={hasSelection}
           isWaiting={duelState === 'waiting'}
           submitLabel={t('game.submit')}
-          clearLabel={t('game.clearSelection')}
           selectionAssistiveText={t('game.selectionReadyShortHint')}
           waitingLabel={t('duel.waitingForOpponent')}
           resultLabel={lastAnswerCorrect ? t('game.correct') : t('game.incorrect')}
-          showClearButton={hasSelection}
           showResultBadge
           isCorrect={lastAnswerCorrect}
           onSubmit={handleSubmitAnswer}
-          onClear={() => {
-            setSelectedAnswer(null);
-            setMapLocation(null);
-          }}
         />
       }
     />

@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.39**
+- Frontend: **v1.2.40**
 
 ### Mantener backend activo en producción
 Configura el secret **`BACKEND_HEALTHCHECK_URL`** en GitHub (Settings → Secrets and variables → Actions) con la URL pública de salud de tu API, por ejemplo:
@@ -39,6 +39,12 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 
 
 
+
+## Novedades de la versión 1.2.40
+- Se simplificó la bandeja de acciones en ronda para que **Confirmar** sea el único CTA principal antes de responder, reduciendo ruido visual y priorizando la acción clave.
+- Se eliminó el botón secundario de “Cambiar selección”: ahora basta con tocar otra alternativa para corregir, manteniendo una interacción más natural y mobile-first.
+- Se actualizaron pruebas de bandeja y páginas de juego (individual, duelo y desafío) para validar la nueva jerarquía de acciones sin CTA auxiliar.
+- Footer/versionado actualizado a **v1.2.40** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.39
 - Se mejoró visualmente la bandeja de acciones en dark mode con un estilo más atractivo para contexto Río: contraste reforzado, profundidad sutil y CTA principal con gradiente cian/azulado para jerarquía clara.

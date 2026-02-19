@@ -9,14 +9,11 @@ type RoundActionTrayProps = {
   isSubmitting?: boolean;
   submitLabel: string;
   nextLabel?: string;
-  clearLabel: string;
   waitingLabel?: string;
   resultLabel?: string;
   selectionAssistiveText?: string;
   onSubmit: () => void;
   onNext?: () => void;
-  onClear: () => void;
-  showClearButton?: boolean;
   showResultBadge?: boolean;
   isCorrect?: boolean;
   resultHint?: string;
@@ -40,14 +37,11 @@ export function RoundActionTray({
   isSubmitting = false,
   submitLabel,
   nextLabel,
-  clearLabel,
   waitingLabel,
   resultLabel,
   selectionAssistiveText,
   onSubmit,
   onNext,
-  onClear,
-  showClearButton = false,
   showResultBadge = false,
   isCorrect = false,
   resultHint,
@@ -64,19 +58,6 @@ export function RoundActionTray({
 
         {!showResult && !isWaiting && (
           <div className="flex flex-1 flex-col justify-center gap-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
-            {showClearButton && (
-              <button
-                type="button"
-                onClick={onClear}
-                className="w-full sm:w-auto rounded-2xl border border-cyan-300/45 bg-slate-900/70 px-5 py-3 text-base font-semibold text-cyan-100 transition-all duration-150 hover:border-cyan-200 hover:bg-slate-800/85 hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan-300/70"
-              >
-                <span className="inline-flex items-center justify-center gap-2">
-                  <span aria-hidden>↺</span>
-                  {clearLabel}
-                </span>
-              </button>
-            )}
-
             <button
               type="button"
               onClick={onSubmit}

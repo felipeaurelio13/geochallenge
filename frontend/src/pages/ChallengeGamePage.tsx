@@ -165,12 +165,6 @@ export function ChallengeGamePage() {
       setTimeRemaining(timePerQuestion);
     }
   };
-
-  const handleClearSelection = () => {
-    setSelectedAnswer(null);
-    setMapLocation(null);
-  };
-
   const getContextHint = () => {
     if (showResult) {
       return isLastQuestion ? t('game.tapResultsHint') : t('game.tapNextHint');
@@ -317,13 +311,10 @@ export function ChallengeGamePage() {
           canSubmit={hasSelection}
           isSubmitting={isSubmitting}
           submitLabel={t('game.submit')}
-          clearLabel={t('game.clearSelection')}
           selectionAssistiveText={t('game.selectionReadyShortHint')}
           nextLabel={isSubmitting ? t('common.loading') : isLastQuestion ? t('game.seeResults') : t('game.next')}
-          showClearButton={hasSelection}
           onSubmit={handleSubmitAnswer}
           onNext={handleNextQuestion}
-          onClear={handleClearSelection}
           summarySlot={
             <div className="flex items-center justify-between rounded-xl border border-gray-700 bg-gray-800/70 px-3 py-2 text-sm text-gray-200 sm:max-w-xs">
               <span>{t('game.questionOf', { current: currentIndex + 1, total: questions.length })}</span>
