@@ -113,18 +113,13 @@ describe('ChallengeGamePage', () => {
     expect(submitButton).toBeEnabled();
   });
 
-  it('permite limpiar la selección antes de confirmar para reducir errores táctiles', async () => {
+  it('mantiene solo confirmar como acción principal tras seleccionar alternativa', async () => {
     render(<ChallengeGamePage />);
 
     const option = await screen.findByRole('button', { name: 'Santiago' });
     fireEvent.click(option);
 
-    const clearButton = screen.getByRole('button', { name: 'game.clearSelection' });
-    expect(clearButton).toBeInTheDocument();
-
-    fireEvent.click(clearButton);
-
+    expect(screen.getByRole('button', { name: 'game.submit' })).toBeEnabled();
     expect(screen.queryByRole('button', { name: 'game.clearSelection' })).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'game.submit' })).toBeDisabled();
   });
 });

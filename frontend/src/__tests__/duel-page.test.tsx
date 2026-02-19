@@ -210,7 +210,7 @@ describe('DuelPage socket flow', () => {
     expect(tray).toHaveClass('bottom-0');
   });
 
-  it('habilita limpiar selección cuando el usuario ya eligió respuesta', async () => {
+  it('prioriza confirmar sin mostrar CTA secundario al elegir respuesta', async () => {
     render(<DuelPage />);
 
     act(() => {
@@ -231,16 +231,8 @@ describe('DuelPage socket flow', () => {
 
     fireEvent.click(await screen.findByRole('button', { name: 'Santiago' }));
 
-    const clearButton = await screen.findByRole('button', {
-      name: 'game.clearSelection',
-    });
-    expect(clearButton).toBeInTheDocument();
-
-    fireEvent.click(clearButton);
-
-    await waitFor(() => {
-      expect(screen.queryByRole('button', { name: 'game.clearSelection' })).not.toBeInTheDocument();
-    });
+    expect(screen.getByRole('button', { name: 'game.submit' })).toBeEnabled();
+    expect(screen.queryByRole('button', { name: 'game.clearSelection' })).not.toBeInTheDocument();
   });
 
   it('muestra mensaje de bajo tiempo al entrar a los últimos segundos', async () => {

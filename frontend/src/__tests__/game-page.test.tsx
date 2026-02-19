@@ -201,7 +201,7 @@ describe('GamePage ending flow', () => {
     expect(nextButton).toBeVisible();
   });
 
-  it('muestra guía contextual antes de seleccionar y permite limpiar selección', () => {
+  it('muestra guía contextual antes de seleccionar y prioriza confirmar como CTA principal', () => {
     render(<GamePage />);
 
     expect(screen.getByText('game.selectOptionHint')).toBeInTheDocument();
@@ -210,11 +210,7 @@ describe('GamePage ending flow', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Santiago' }));
 
     expect(screen.getByText('game.selectionReadyHint')).toBeInTheDocument();
-
-    const clearButton = screen.getByRole('button', { name: 'game.clearSelection' });
-    fireEvent.click(clearButton);
-
-    expect(screen.getByText('game.selectOptionHint')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'game.submit' })).toBeEnabled();
     expect(screen.queryByRole('button', { name: 'game.clearSelection' })).not.toBeInTheDocument();
   });
 

@@ -3,9 +3,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { RoundActionTray } from '../components/RoundActionTray';
 
 describe('RoundActionTray', () => {
-  it('reutiliza el layout base y muestra acciones de envío/limpiar en estado activo', () => {
+  it('reutiliza el layout base y prioriza la acción principal de envío en estado activo', () => {
     const onSubmit = vi.fn();
-    const onClear = vi.fn();
 
     render(
       <RoundActionTray
@@ -13,10 +12,7 @@ describe('RoundActionTray', () => {
         showResult={false}
         canSubmit
         submitLabel="Enviar"
-        clearLabel="Limpiar"
         onSubmit={onSubmit}
-        onClear={onClear}
-        showClearButton
       />
     );
 
@@ -24,10 +20,8 @@ describe('RoundActionTray', () => {
     expect(tray).toHaveClass('sticky');
     expect(tray).toHaveClass('bottom-0');
 
-    fireEvent.click(screen.getByRole('button', { name: 'Limpiar' }));
     fireEvent.click(screen.getByRole('button', { name: 'Enviar' }));
 
-    expect(onClear).toHaveBeenCalledTimes(1);
     expect(onSubmit).toHaveBeenCalledTimes(1);
   });
 
@@ -40,11 +34,9 @@ describe('RoundActionTray', () => {
         showResult
         canSubmit
         submitLabel="Enviar"
-        clearLabel="Limpiar"
         nextLabel="Siguiente"
         onSubmit={vi.fn()}
         onNext={onNext}
-        onClear={vi.fn()}
         summarySlot={<div>resumen</div>}
       />
     );
@@ -64,11 +56,8 @@ describe('RoundActionTray', () => {
         showResult={false}
         canSubmit
         submitLabel="Confirmar"
-        clearLabel="Cambiar selección"
         selectionAssistiveText="Selección lista para confirmar."
         onSubmit={vi.fn()}
-        onClear={vi.fn()}
-        showClearButton
       />
     );
 
