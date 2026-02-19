@@ -103,21 +103,20 @@ describe('MenuPage', () => {
   });
 
 
-  it('muestra acciones rápidas mobile con categoría activa y footer con versión', () => {
+  it('mantiene categoría activa visible y footer con versión sin CTA duplicados sticky', () => {
     render(
       <MemoryRouter future={routerFutureConfig}>
         <MenuPage />
       </MemoryRouter>
     );
 
-    expect(screen.getByText('Acciones rápidas')).toBeInTheDocument();
-
     fireEvent.click(screen.getByRole('button', { name: /capitales/i }));
-    fireEvent.click(screen.getByRole('button', { name: /un jugador capitales/i }));
+    fireEvent.click(screen.getByRole('button', { name: /un jugador[\s\S]*juega solo/i }));
 
     expect(mockNavigate).toHaveBeenCalledWith('/game/single?category=CAPITAL');
     expect(screen.getByText('Desliza para ver más categorías')).toBeInTheDocument();
     expect(screen.getByText('Categoría activa:')).toBeInTheDocument();
+    expect(screen.queryByText('Acciones rápidas')).not.toBeInTheDocument();
     expect(screen.getByText(/v\d+\.\d+\.\d+/i)).toHaveClass('app-footer__version');
   });
 
@@ -144,7 +143,7 @@ describe('MenuPage', () => {
 
     expect(container.firstChild).toHaveClass('app-shell');
 
-    expect(screen.getByRole('button', { name: /un jugador\s+mixto/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /mixto\s+un jugador/i })).toBeInTheDocument();
   });
 
 

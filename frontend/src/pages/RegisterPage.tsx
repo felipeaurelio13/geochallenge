@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { LoadingSpinner } from '../components';
+import { AppFooter } from '../components/AppFooter';
 
 export function RegisterPage() {
   const { t } = useTranslation();
@@ -47,10 +48,9 @@ export function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4 py-8">
-      <div className="max-w-md w-full">
-        {/* Header */}
-        <div className="text-center mb-8">
+    <div className="app-shell">
+      <main className="mx-auto flex min-h-[100dvh] w-full max-w-md flex-1 flex-col justify-center px-4 py-6 sm:py-8">
+        <div className="text-center mb-5">
           <Link to="/" className="inline-block">
             <span className="text-4xl">🌍</span>
             <h1 className="text-2xl font-bold text-white mt-2">
@@ -59,21 +59,20 @@ export function RegisterPage() {
           </Link>
         </div>
 
-        {/* Form Card */}
-        <div className="bg-gray-800 rounded-xl p-8 shadow-lg">
+        <div className="rounded-2xl border border-gray-800 bg-gray-900/95 p-5 shadow-xl shadow-black/20 sm:p-8">
           <h2 className="text-2xl font-bold text-white mb-6 text-center">
             {t('auth.register')}
           </h2>
 
           {error && (
-            <div className="bg-red-900/50 border border-red-500 text-red-300 px-4 py-3 rounded-lg mb-6">
+            <div className="bg-red-900/50 border border-red-500 text-red-300 px-4 py-3 rounded-lg mb-6 text-sm">
               {error}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="username" className="block text-sm font-medium text-gray-200 mb-2">
                 {t('auth.username')}
               </label>
               <input
@@ -85,13 +84,13 @@ export function RegisterPage() {
                 required
                 minLength={3}
                 maxLength={20}
-                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary transition-colors"
+                className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/70 focus:border-primary transition-colors"
                 placeholder="GeoMaster2024"
               />
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-200 mb-2">
                 {t('auth.email')}
               </label>
               <input
@@ -101,13 +100,13 @@ export function RegisterPage() {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary transition-colors"
+                className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/70 focus:border-primary transition-colors"
                 placeholder="tu@email.com"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-200 mb-2">
                 {t('auth.password')}
               </label>
               <input
@@ -118,14 +117,14 @@ export function RegisterPage() {
                 onChange={handleChange}
                 required
                 minLength={6}
-                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary transition-colors"
+                className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/70 focus:border-primary transition-colors"
                 placeholder="********"
               />
               <p className="mt-1 text-xs text-gray-500">{t('auth.passwordHint')}</p>
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-200 mb-2">
                 {t('auth.confirmPassword')}
               </label>
               <input
@@ -135,7 +134,7 @@ export function RegisterPage() {
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary transition-colors"
+                className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/70 focus:border-primary transition-colors"
                 placeholder="********"
               />
             </div>
@@ -143,7 +142,7 @@ export function RegisterPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3.5 bg-primary text-white font-bold rounded-xl shadow-md shadow-primary/30 hover:bg-primary/85 active:scale-[0.99] transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/70 disabled:opacity-50 disabled:cursor-wait disabled:scale-100 flex items-center justify-center gap-2"
+              className="w-full py-3.5 bg-primary text-white font-bold rounded-xl shadow-md shadow-primary/30 border border-primary/80 hover:bg-primary/85 active:scale-[0.99] transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/70 disabled:opacity-50 disabled:cursor-wait disabled:scale-100 flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <>
@@ -156,8 +155,8 @@ export function RegisterPage() {
             </button>
           </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-gray-400">
+          <div className="mt-5 text-center">
+            <p className="text-gray-400 text-sm">
               {t('auth.hasAccount')}{' '}
               <Link to="/login" className="text-primary hover:underline">
                 {t('auth.loginHere')}
@@ -166,13 +165,14 @@ export function RegisterPage() {
           </div>
         </div>
 
-        {/* Back link */}
-        <div className="mt-6 text-center">
-          <Link to="/" className="text-gray-400 hover:text-white transition-colors">
+        <div className="mt-4 text-center">
+          <Link to="/" className="text-gray-400 hover:text-white transition-colors text-sm">
             ← {t('common.back')}
           </Link>
         </div>
-      </div>
+      </main>
+
+      <AppFooter />
     </div>
   );
 }
