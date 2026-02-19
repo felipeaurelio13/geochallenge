@@ -318,6 +318,7 @@ export function ChallengeGamePage() {
           isSubmitting={isSubmitting}
           submitLabel={t('game.submit')}
           clearLabel={t('game.clearSelection')}
+          selectionAssistiveText={t('game.selectionReadyShortHint')}
           nextLabel={isSubmitting ? t('common.loading') : isLastQuestion ? t('game.seeResults') : t('game.next')}
           showClearButton={hasSelection}
           onSubmit={handleSubmitAnswer}
