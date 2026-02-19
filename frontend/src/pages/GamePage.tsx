@@ -204,7 +204,7 @@ export function GamePage() {
   }
 
   return (
-    <div className="h-[100dvh] bg-gray-900 flex flex-col overflow-hidden">
+    <div className="min-h-[100dvh] bg-gray-900 flex flex-col overflow-x-hidden">
       {/* Header */}
       <header className="sticky top-0 z-30 border-b border-gray-700 bg-gray-800/95 px-3 pb-2.5 pt-[calc(env(safe-area-inset-top)+0.5rem)] backdrop-blur sm:px-4 sm:py-4">
         <div className="max-w-4xl mx-auto grid grid-cols-[auto_1fr_auto] items-center gap-2 sm:gap-4">
@@ -252,8 +252,8 @@ export function GamePage() {
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 min-h-0 overflow-hidden px-3 py-2 pb-24 sm:px-4 sm:py-4 sm:pb-6">
-        <div className="max-w-4xl mx-auto flex h-full flex-col overflow-hidden">
+      <main className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-3 py-2 pb-28 sm:px-4 sm:py-4 sm:pb-8">
+        <div className="max-w-4xl mx-auto flex flex-col">
           {/* Question Card */}
           <QuestionCard
             question={currentQuestion}
@@ -263,7 +263,7 @@ export function GamePage() {
           />
 
           {/* Answer Options or Map */}
-          <div className="mt-2.5 overflow-hidden">
+          <div className="mt-2.5">
             {isMapQuestion ? (
               <Suspense fallback={<LoadingSpinner size="lg" text={t('game.loading')} />}>
                 <MapInteractive
