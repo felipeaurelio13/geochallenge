@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { LoadingSpinner } from '../components';
+import { AppFooter } from '../components/AppFooter';
 
 export function LoginPage() {
   const { t } = useTranslation();
@@ -61,9 +62,9 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4 py-8">
-      <div className="max-w-md w-full">
-        <div className="text-center mb-6">
+    <div className="app-shell">
+      <main className="mx-auto flex min-h-[100dvh] w-full max-w-md flex-1 flex-col justify-center px-4 py-6 sm:py-8">
+        <div className="text-center mb-5">
           <Link to="/" className="inline-flex flex-col items-center gap-2">
             <span className="text-4xl">🌍</span>
             <h1 className="text-2xl font-bold text-white">
@@ -72,7 +73,7 @@ export function LoginPage() {
           </Link>
         </div>
 
-        <div className="rounded-2xl border border-gray-800 bg-gray-900/95 p-6 shadow-xl shadow-black/20 sm:p-8">
+        <div className="rounded-2xl border border-gray-800 bg-gray-900/95 p-5 shadow-xl shadow-black/20 sm:p-8">
           <h2 className="text-2xl font-bold text-white mb-6 text-center">
             {t('auth.login')}
           </h2>
@@ -154,7 +155,7 @@ export function LoginPage() {
             )}
           </form>
 
-          <div className="mt-6 text-center">
+          <div className="mt-5 text-center">
             <p className="text-gray-400 text-sm">
               {t('auth.noAccount')}{' '}
               <Link to="/register" className="text-primary hover:underline font-medium">
@@ -164,12 +165,14 @@ export function LoginPage() {
           </div>
         </div>
 
-        <div className="mt-6 text-center">
+        <div className="mt-4 text-center">
           <Link to="/" className="text-gray-400 hover:text-white transition-colors text-sm">
             ← {t('common.back')}
           </Link>
         </div>
-      </div>
+      </main>
+
+      <AppFooter />
     </div>
   );
 }

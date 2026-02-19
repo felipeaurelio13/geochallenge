@@ -70,27 +70,27 @@ export function MenuPage() {
         </div>
       </header>
 
-      <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-4 py-6 pb-28 sm:px-6 sm:py-8 sm:pb-10">
-        <section className="surface-panel p-5 sm:p-6">
+      <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-4 py-4 pb-6 sm:px-6 sm:py-6 sm:pb-8">
+        <section className="surface-panel p-4 sm:p-6">
           <h1 className="text-2xl font-bold text-white sm:text-3xl">{t('menu.welcome', { name: user?.username })}</h1>
           <p className="mt-1 text-sm text-gray-300 sm:text-base">{t('menu.chooseMode')}</p>
         </section>
 
-        <section className="surface-panel mt-5 p-4 sm:p-5">
-          <h2 className="mb-3 text-base font-semibold text-white">{t('menu.selectCategory')}</h2>
+        <section className="surface-panel mt-4 p-4 sm:p-5">
+          <h2 className="mb-2 text-base font-semibold text-white">{t('menu.selectCategory')}</h2>
           <div className="scrollbar-none -mx-1 flex snap-x snap-mandatory gap-2 overflow-x-auto px-1 pb-1 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-2.5 sm:overflow-visible sm:px-0 lg:grid-cols-5">
             {categories.map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`min-h-11 min-w-[8.2rem] snap-start rounded-xl border px-3 py-3 text-left transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/60 sm:min-w-0 ${
+                className={`min-h-11 min-w-[7.4rem] snap-start rounded-xl border px-3 py-2.5 text-left transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/60 sm:min-w-0 ${
                   selectedCategory === cat.id
                     ? 'border-primary/70 bg-primary/15 text-white shadow-md shadow-primary/15'
                     : 'border-gray-800 bg-gray-950 text-gray-300 hover:border-gray-600 hover:text-white'
                 }`}
                 aria-pressed={selectedCategory === cat.id}
               >
-                <span className="mb-1 block text-xl">{cat.icon}</span>
+                <span className="mb-1 block text-lg">{cat.icon}</span>
                 <span className="text-xs font-medium sm:text-sm">{t(cat.labelKey)}</span>
               </button>
             ))}
@@ -102,60 +102,33 @@ export function MenuPage() {
           </p>
         </section>
 
-        <section className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3" aria-label={t('menu.chooseMode')}>
+        <section className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-3" aria-label={t('menu.chooseMode')}>
           <button
             onClick={() => navigate(`/game/single?category=${selectedCategory}`)}
-            className="group rounded-2xl border border-primary/40 bg-primary/10 p-5 text-left transition-all hover:border-primary/70 hover:bg-primary/15 focus:outline-none focus:ring-2 focus:ring-primary/70"
+            className="group rounded-2xl border border-primary/40 bg-primary/10 p-4 text-left transition-all hover:border-primary/70 hover:bg-primary/15 focus:outline-none focus:ring-2 focus:ring-primary/70"
           >
             <p className="text-xs font-semibold uppercase tracking-wide text-primary">{selectedCategoryLabel}</p>
-            <h3 className="mt-1 text-xl font-bold text-white">{t('menu.singlePlayer')}</h3>
+            <h3 className="mt-1 text-lg font-bold text-white">{t('menu.singlePlayer')}</h3>
             <p className="mt-1 text-sm text-gray-300">{t('menu.singlePlayerDesc')}</p>
           </button>
 
           <button
             onClick={() => navigate(`/duel?category=${selectedCategory}`)}
-            className="rounded-2xl border border-gray-800 bg-gray-900 p-5 text-left transition-colors hover:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary/70"
+            className="rounded-2xl border border-gray-800 bg-gray-900 p-4 text-left transition-colors hover:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary/70"
           >
-            <h3 className="text-xl font-bold text-white">{t('menu.duel')}</h3>
+            <h3 className="text-lg font-bold text-white">{t('menu.duel')}</h3>
             <p className="mt-1 text-sm text-gray-300">{t('menu.duelDesc')}</p>
           </button>
 
           <button
             onClick={() => navigate(`/challenges?category=${selectedCategory}&openCreate=1`)}
-            className="rounded-2xl border border-gray-800 bg-gray-900 p-5 text-left transition-colors hover:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary/70"
+            className="rounded-2xl border border-gray-800 bg-gray-900 p-4 text-left transition-colors hover:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary/70"
           >
-            <h3 className="text-xl font-bold text-white">{t('menu.challenge')}</h3>
+            <h3 className="text-lg font-bold text-white">{t('menu.challenge')}</h3>
             <p className="mt-1 text-sm text-gray-300">{t('menu.challengeDesc')}</p>
           </button>
         </section>
       </main>
-
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-gray-800/90 bg-gray-950/95 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur sm:hidden">
-        <p className="mb-2 text-center text-xs font-medium tracking-wide text-gray-400">{t('menu.quickActions')}</p>
-        <div className="grid grid-cols-3 gap-2">
-          <button
-            onClick={() => navigate(`/game/single?category=${selectedCategory}`)}
-            className="rounded-xl bg-primary px-3 py-3 text-xs font-semibold text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-primary/70"
-            aria-label={`${t('menu.singlePlayer')} ${selectedCategoryLabel}`}
-          >
-            {t('menu.singlePlayer')}
-          </button>
-          <button
-            onClick={() => navigate(`/duel?category=${selectedCategory}`)}
-            className="rounded-xl border border-gray-700 bg-gray-900 px-3 py-3 text-xs font-semibold text-gray-100 transition-colors hover:border-gray-500 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary/70"
-            aria-label={`${t('menu.duel')} ${selectedCategoryLabel}`}
-          >
-            {t('menu.duel')}
-          </button>
-          <button
-            onClick={() => navigate(`/challenges?category=${selectedCategory}&openCreate=1`)}
-            className="rounded-xl border border-gray-700 bg-gray-900 px-3 py-3 text-xs font-semibold text-gray-100 transition-colors hover:border-gray-500 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary/70"
-            aria-label={`${t('menu.challenge')} ${selectedCategoryLabel}`}
-          >
-            {t('menu.challenge')}
-          </button>
-        </div>
-      </div>
 
       <AppFooter className="sm:pb-4" />
     </div>
