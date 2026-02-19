@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { RoundActionTray } from '../components/RoundActionTray';
 
 describe('RoundActionTray', () => {
-  it('reutiliza el layout base y prioriza la acción principal de envío en estado activo', () => {
+  it('mantiene la acción principal siempre visible con contenedor fijo en mobile', () => {
     const onSubmit = vi.fn();
 
     render(
@@ -17,7 +17,7 @@ describe('RoundActionTray', () => {
     );
 
     const tray = screen.getByTestId('mobile-action-tray');
-    expect(tray).toHaveClass('sticky');
+    expect(tray).toHaveClass('fixed');
     expect(tray).toHaveClass('bottom-0');
 
     fireEvent.click(screen.getByRole('button', { name: 'Enviar' }));

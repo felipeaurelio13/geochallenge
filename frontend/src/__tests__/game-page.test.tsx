@@ -61,8 +61,8 @@ vi.mock('../components', () => ({
   LoadingSpinner: ({ text }: { text?: string }) => <div>{text || 'loading'}</div>,
   AnswerStatusBadge: ({ label }: { label: string }) => <div>{label}</div>,
 
-  RoundActionTray: ({ mode = 'single', showResult, canSubmit, isWaiting, submitLabel, clearLabel, nextLabel, waitingLabel, onSubmit, onNext, onClear, showClearButton, resultLabel }: any) => (
-    <div data-testid="mobile-action-tray" className={mode === 'challenge' ? 'fixed bottom-0' : 'sticky bottom-0'}>
+  RoundActionTray: ({ showResult, canSubmit, isWaiting, submitLabel, clearLabel, nextLabel, waitingLabel, onSubmit, onNext, onClear, showClearButton, resultLabel }: any) => (
+    <div data-testid="mobile-action-tray" className='fixed bottom-0'>
       {!showResult && !isWaiting && (
         <>
           {showClearButton && <button onClick={onClear}>{clearLabel}</button>}
@@ -178,7 +178,7 @@ describe('GamePage ending flow', () => {
     expect(main).toHaveClass('pb-28');
 
     const tray = screen.getByTestId('mobile-action-tray');
-    expect(tray).toHaveClass('sticky');
+    expect(tray).toHaveClass('fixed');
     expect(tray).toHaveClass('bottom-0');
   });
 

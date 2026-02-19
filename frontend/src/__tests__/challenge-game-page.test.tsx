@@ -36,8 +36,8 @@ vi.mock('../components', () => ({
   ProgressBar: () => <div>progress</div>,
   LoadingSpinner: ({ text }: { text?: string }) => <div>{text || 'loading'}</div>,
 
-  RoundActionTray: ({ mode = 'single', showResult, canSubmit, isWaiting, submitLabel, clearLabel, nextLabel, waitingLabel, onSubmit, onNext, onClear, showClearButton, resultLabel }: any) => (
-    <div data-testid="mobile-action-tray" className={mode === 'challenge' ? 'fixed bottom-0' : 'sticky bottom-0'}>
+  RoundActionTray: ({ showResult, canSubmit, isWaiting, submitLabel, clearLabel, nextLabel, waitingLabel, onSubmit, onNext, onClear, showClearButton, resultLabel }: any) => (
+    <div data-testid="mobile-action-tray" className='fixed bottom-0'>
       {!showResult && !isWaiting && (
         <>
           {showClearButton && <button onClick={onClear}>{clearLabel}</button>}
@@ -99,7 +99,7 @@ describe('ChallengeGamePage', () => {
     });
   });
 
-  it('muestra la bandeja sticky de acción y el botón confirmar deshabilitado hasta seleccionar', async () => {
+  it('muestra la bandeja fija de acción y el botón confirmar deshabilitado hasta seleccionar', async () => {
     render(<ChallengeGamePage />);
 
     const submitButton = await screen.findByRole('button', { name: 'game.submit' });
