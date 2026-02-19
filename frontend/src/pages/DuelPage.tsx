@@ -209,7 +209,7 @@ export function DuelPage() {
   // Searching state
   if (duelState === 'searching') {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
+      <div className="h-full min-h-0 bg-gray-900 flex items-center justify-center px-4">
         <div className="text-center w-full max-w-sm">
           <div className="text-6xl mb-6 animate-pulse">⚔️</div>
           <h1 className="text-2xl font-bold text-white mb-2">
@@ -257,7 +257,7 @@ export function DuelPage() {
   // Matched state
   if (duelState === 'matched' && opponent) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
+      <div className="h-full min-h-0 bg-gray-900 flex items-center justify-center px-4">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-white mb-8">
             {t('duel.opponentFound')}
@@ -289,7 +289,7 @@ export function DuelPage() {
     const isTie = duelResult.myScore === duelResult.opponentScore;
 
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
+      <div className="h-full min-h-0 bg-gray-900 flex items-center justify-center px-4">
         <div className="max-w-md w-full bg-gray-800 rounded-xl p-8 text-center">
           <div className="text-6xl mb-4">
             {isTie ? '🤝' : isWinner ? '🏆' : '😢'}
@@ -344,7 +344,7 @@ export function DuelPage() {
   // Playing state
   if (!currentQuestion) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="h-full min-h-0 bg-gray-900 flex items-center justify-center">
         <LoadingSpinner size="lg" text={t('duel.loadingQuestion')} />
       </div>
     );
@@ -359,7 +359,7 @@ export function DuelPage() {
 
   return (
     <GameRoundScaffold
-      rootClassName="min-h-[100dvh] bg-gray-900 flex flex-col overflow-x-hidden"
+      rootClassName="h-full min-h-0 bg-gray-900 flex flex-col overflow-x-hidden"
       mainClassName="flex-1 min-h-0 overflow-y-auto overscroll-contain px-3 py-2 pb-[calc(env(safe-area-inset-bottom)+6.7rem)] sm:px-4 sm:py-3 sm:pb-28"
       header={
         <header className="sticky top-0 z-30 border-b border-gray-700 bg-gray-800/95 px-3 py-2.5 pt-[calc(env(safe-area-inset-top)+0.45rem)] backdrop-blur sm:px-4">

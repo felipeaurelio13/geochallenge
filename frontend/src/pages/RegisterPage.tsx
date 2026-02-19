@@ -49,7 +49,7 @@ export function RegisterPage() {
 
   return (
     <div className="app-shell">
-      <main className="mx-auto flex min-h-[100dvh] w-full max-w-md flex-1 flex-col justify-center px-4 py-6 sm:py-8">
+      <main className="mx-auto flex h-full min-h-0 w-full max-w-md flex-1 flex-col justify-center px-4 py-6 sm:py-8">
         <div className="text-center mb-5">
           <Link to="/" className="inline-block">
             <span className="text-4xl">🌍</span>

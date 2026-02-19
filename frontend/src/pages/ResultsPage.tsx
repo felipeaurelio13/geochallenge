@@ -101,7 +101,7 @@ export function ResultsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 px-4 pb-[calc(env(safe-area-inset-bottom)+1.25rem)] pt-[calc(env(safe-area-inset-top)+1.25rem)] sm:px-6 sm:py-8">
+    <div className="h-full min-h-0 bg-gray-900 px-4 pb-[calc(env(safe-area-inset-bottom)+1.25rem)] pt-[calc(env(safe-area-inset-top)+1.25rem)] sm:px-6 sm:py-8">
       <main className="mx-auto w-full max-w-xl" aria-label="results-summary">
         <section className="rounded-3xl border border-gray-700 bg-gray-800/95 p-5 text-center shadow-2xl shadow-black/30 sm:p-8">
           <div className="text-6xl sm:text-7xl mb-3" aria-hidden="true">{getPerformanceEmoji()}</div>

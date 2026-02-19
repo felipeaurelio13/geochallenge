@@ -16,7 +16,7 @@ export function HomePage() {
       <div className="relative flex-1 overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(34,197,94,0.2),_transparent_45%)]" />
 
-        <main className="relative mx-auto flex min-h-[100dvh] w-full max-w-6xl flex-1 flex-col justify-center px-4 py-6 sm:px-6 sm:py-10 lg:px-8">
+        <main className="relative mx-auto flex h-full min-h-0 w-full max-w-6xl flex-1 flex-col justify-center px-4 py-6 sm:px-6 sm:py-10 lg:px-8">
           <section className="mx-auto w-full max-w-lg rounded-3xl border border-gray-800/80 bg-gray-900/70 px-5 py-6 text-center shadow-xl shadow-black/20 backdrop-blur sm:px-8 sm:py-8">
             <p className="mb-4 inline-flex items-center rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
               {t('home.badge')}

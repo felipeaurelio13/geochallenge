@@ -74,7 +74,7 @@ vi.mock('../components', () => ({
       {showResult && resultLabel && <p>{resultLabel}</p>}
     </div>
   ),
-  GameRoundScaffold: ({ header, progress, actionTray, mapContent, isMapQuestion, question, onOptionSelect, showResult, disableOptions, contextHint, isLowTime, lowTimeHint, optionsGridClassName, rootClassName = 'min-h-[100dvh] bg-gray-900 flex flex-col overflow-x-hidden', mainClassName = 'flex-1 min-h-0 overflow-y-auto overscroll-contain px-3 py-2 pb-28 sm:px-4 sm:py-4 sm:pb-8' }: any) => (
+  GameRoundScaffold: ({ header, progress, actionTray, mapContent, isMapQuestion, question, onOptionSelect, showResult, disableOptions, contextHint, isLowTime, lowTimeHint, optionsGridClassName, rootClassName = 'h-full min-h-0 bg-gray-900 flex flex-col overflow-x-hidden', mainClassName = 'flex-1 min-h-0 overflow-y-auto overscroll-contain px-3 py-2 pb-28 sm:px-4 sm:py-4 sm:pb-8' }: any) => (
     <div className={rootClassName}>
       {header}
       {progress}
@@ -186,7 +186,7 @@ describe('GamePage ending flow', () => {
     const { container } = render(<GamePage />);
 
     const root = container.firstElementChild;
-    expect(root).toHaveClass('min-h-[100dvh]');
+    expect(root).toHaveClass('h-full min-h-0');
     expect(root).toHaveClass('overflow-x-hidden');
 
     fireEvent.click(screen.getByRole('button', { name: 'Santiago' }));
