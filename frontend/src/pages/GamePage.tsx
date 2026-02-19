@@ -285,6 +285,7 @@ export function GamePage() {
           canSubmit={hasSelection}
           submitLabel={t('game.submit')}
           clearLabel={t('game.clearSelection')}
+          selectionAssistiveText={t('game.selectionReadyShortHint')}
           nextLabel={isLastQuestion ? t('game.seeResults') : t('game.next')}
           resultLabel={lastAnswerCorrect ? t('game.correct') : t('game.incorrect')}
           resultHint={t(getPostAnswerHintKey(isLastQuestion))}

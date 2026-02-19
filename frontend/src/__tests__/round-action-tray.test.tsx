@@ -56,4 +56,23 @@ describe('RoundActionTray', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Siguiente' }));
     expect(onNext).toHaveBeenCalledTimes(1);
   });
+
+  it('muestra ayuda breve al tener selección lista para confirmar', () => {
+    render(
+      <RoundActionTray
+        mode="single"
+        showResult={false}
+        canSubmit
+        submitLabel="Confirmar"
+        clearLabel="Cambiar selección"
+        selectionAssistiveText="Selección lista para confirmar."
+        onSubmit={vi.fn()}
+        onClear={vi.fn()}
+        showClearButton
+      />
+    );
+
+    expect(screen.getByText('Selección lista para confirmar.')).toBeInTheDocument();
+  });
+
 });

@@ -112,6 +112,7 @@
       "hard": "Difícil"
     },
     "selectionReadyHint": "Alternativa seleccionada. Presiona Confirmar para revisar tu respuesta.",
+    "selectionReadyShortHint": "Selección lista para confirmar.",
     "selectedOption": "Seleccionada",
     "tapNextHint": "Respuesta registrada. Presiona Siguiente para continuar.",
     "tapResultsHint": "Respuesta registrada. Presiona Ver resultados para finalizar.",
