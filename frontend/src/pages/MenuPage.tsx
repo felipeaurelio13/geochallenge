@@ -70,28 +70,28 @@ export function MenuPage() {
         </div>
       </header>
 
-      <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-4 py-4 pb-6 sm:px-6 sm:py-6 sm:pb-8">
-        <section className="surface-panel p-4 sm:p-6">
-          <h1 className="text-2xl font-bold text-white sm:text-3xl">{t('menu.welcome', { name: user?.username })}</h1>
-          <p className="mt-1 text-sm text-gray-300 sm:text-base">{t('menu.chooseMode')}</p>
+      <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-4 py-3 pb-4 sm:px-6 sm:py-4 sm:pb-6">
+        <section className="surface-panel p-3.5 sm:p-5">
+          <h1 className="text-xl font-bold text-white sm:text-3xl">{t('menu.welcome', { name: user?.username })}</h1>
+          <p className="mt-1 text-sm text-gray-300">{t('menu.chooseMode')}</p>
         </section>
 
-        <section className="surface-panel mt-4 p-4 sm:p-5">
-          <h2 className="mb-2 text-base font-semibold text-white">{t('menu.selectCategory')}</h2>
+        <section className="surface-panel mt-3 p-3.5 sm:mt-4 sm:p-5">
+          <h2 className="mb-2 text-sm font-semibold text-white sm:text-base">{t('menu.selectCategory')}</h2>
           <div className="scrollbar-none -mx-1 flex snap-x snap-mandatory gap-2 overflow-x-auto px-1 pb-1 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-2.5 sm:overflow-visible sm:px-0 lg:grid-cols-5">
             {categories.map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`min-h-11 min-w-[7.4rem] snap-start rounded-xl border px-3 py-2.5 text-left transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/60 sm:min-w-0 ${
+                className={`min-h-10 min-w-[7rem] snap-start rounded-xl border px-3 py-2 text-left transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/60 sm:min-w-0 ${
                   selectedCategory === cat.id
                     ? 'border-primary/70 bg-primary/15 text-white shadow-md shadow-primary/15'
                     : 'border-gray-800 bg-gray-950 text-gray-300 hover:border-gray-600 hover:text-white'
                 }`}
                 aria-pressed={selectedCategory === cat.id}
               >
-                <span className="mb-1 block text-lg">{cat.icon}</span>
-                <span className="text-xs font-medium sm:text-sm">{t(cat.labelKey)}</span>
+                <span className="mb-0.5 block text-base">{cat.icon}</span>
+                <span className="text-xs font-medium leading-tight sm:text-sm">{t(cat.labelKey)}</span>
               </button>
             ))}
           </div>
@@ -102,30 +102,30 @@ export function MenuPage() {
           </p>
         </section>
 
-        <section className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-3" aria-label={t('menu.chooseMode')}>
+        <section className="mt-3 grid grid-cols-1 gap-2 sm:mt-4 sm:grid-cols-3" aria-label={t('menu.chooseMode')}>
           <button
             onClick={() => navigate(`/game/single?category=${selectedCategory}`)}
-            className="group rounded-2xl border border-primary/40 bg-primary/10 p-4 text-left transition-all hover:border-primary/70 hover:bg-primary/15 focus:outline-none focus:ring-2 focus:ring-primary/70"
+            className="group rounded-2xl border border-primary/40 bg-primary/10 p-3 text-left transition-all hover:border-primary/70 hover:bg-primary/15 focus:outline-none focus:ring-2 focus:ring-primary/70 sm:p-4"
           >
-            <p className="text-xs font-semibold uppercase tracking-wide text-primary">{selectedCategoryLabel}</p>
-            <h3 className="mt-1 text-lg font-bold text-white">{t('menu.singlePlayer')}</h3>
-            <p className="mt-1 text-sm text-gray-300">{t('menu.singlePlayerDesc')}</p>
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-primary">{selectedCategoryLabel}</p>
+            <h3 className="mt-0.5 text-base font-bold text-white sm:mt-1 sm:text-lg">{t('menu.singlePlayer')}</h3>
+            <p className="mt-0.5 text-sm leading-snug text-gray-300">{t('menu.singlePlayerDesc')}</p>
           </button>
 
           <button
             onClick={() => navigate(`/duel?category=${selectedCategory}`)}
-            className="rounded-2xl border border-gray-800 bg-gray-900 p-4 text-left transition-colors hover:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary/70"
+            className="rounded-2xl border border-gray-800 bg-gray-900 p-3 text-left transition-colors hover:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary/70 sm:p-4"
           >
-            <h3 className="text-lg font-bold text-white">{t('menu.duel')}</h3>
-            <p className="mt-1 text-sm text-gray-300">{t('menu.duelDesc')}</p>
+            <h3 className="text-base font-bold text-white sm:text-lg">{t('menu.duel')}</h3>
+            <p className="mt-0.5 text-sm leading-snug text-gray-300">{t('menu.duelDesc')}</p>
           </button>
 
           <button
             onClick={() => navigate(`/challenges?category=${selectedCategory}&openCreate=1`)}
-            className="rounded-2xl border border-gray-800 bg-gray-900 p-4 text-left transition-colors hover:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary/70"
+            className="rounded-2xl border border-gray-800 bg-gray-900 p-3 text-left transition-colors hover:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary/70 sm:p-4"
           >
-            <h3 className="text-lg font-bold text-white">{t('menu.challenge')}</h3>
-            <p className="mt-1 text-sm text-gray-300">{t('menu.challengeDesc')}</p>
+            <h3 className="text-base font-bold text-white sm:text-lg">{t('menu.challenge')}</h3>
+            <p className="mt-0.5 text-sm leading-snug text-gray-300">{t('menu.challengeDesc')}</p>
           </button>
         </section>
       </main>
