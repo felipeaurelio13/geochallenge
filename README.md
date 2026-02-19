@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.35**
+- Frontend: **v1.2.36**
 
 ### Mantener backend activo en producción
 Configura el secret **`BACKEND_HEALTHCHECK_URL`** en GitHub (Settings → Secrets and variables → Actions) con la URL pública de salud de tu API, por ejemplo:
@@ -39,6 +39,13 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 
 
 
+
+## Novedades de la versión 1.2.36
+- Se corrigió el layout de `GamePage` para evitar recortes visuales tras seleccionar/responder: ahora el contenido principal puede crecer y desplazarse verticalmente sin cortar tarjetas, alternativas ni bloque de resultado.
+- Se mantuvo la bandeja de acción sticky con espacio seguro inferior, pero reforzando el contenedor para no sacrificar contenido visible en pantallas pequeñas y dark mode.
+- Se agregaron/actualizaron pruebas de `GamePage` para blindar el comportamiento de contención (sin clipping) y la visibilidad de CTA/resultados.
+- Se creó `AGENTS.md` en la raíz con lineamientos de diseño/UX permanentes (mobile-first, dark mode, no clipping, tests obligatorios, actualización de README + footer versionado).
+- Footer/versionado actualizado a **v1.2.36** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.35
 - Se ajustó la barra de progreso para que los números de preguntas queden **en una sola fila** en mobile y desktop, sin saltos de línea ni desplazamiento horizontal.

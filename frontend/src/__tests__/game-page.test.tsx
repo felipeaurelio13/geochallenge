@@ -142,11 +142,31 @@ describe('GamePage ending flow', () => {
     render(<GamePage />);
 
     const main = screen.getByRole('main');
-    expect(main).toHaveClass('pb-24');
+    expect(main).toHaveClass('overflow-y-auto');
+    expect(main).toHaveClass('pb-28');
 
     const tray = screen.getByTestId('mobile-action-tray');
     expect(tray).toHaveClass('sticky');
     expect(tray).toHaveClass('bottom-0');
+  });
+
+  it('permite que el contenido crezca sin recortar tarjetas ni alternativas al responder', async () => {
+    const { container } = render(<GamePage />);
+
+    const root = container.firstElementChild;
+    expect(root).toHaveClass('min-h-[100dvh]');
+    expect(root).toHaveClass('overflow-x-hidden');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Santiago' }));
+    fireEvent.click(screen.getByRole('button', { name: 'game.submit' }));
+
+    await screen.findByText('game.correct');
+
+    const questionCard = screen.getByTestId('question-card');
+    expect(questionCard).toBeInTheDocument();
+
+    const nextButton = screen.getByRole('button', { name: 'game.seeResults' });
+    expect(nextButton).toBeVisible();
   });
 
   it('muestra guía contextual antes de seleccionar y permite limpiar selección', () => {
