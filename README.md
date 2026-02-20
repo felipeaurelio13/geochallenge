@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.50**
+- Frontend: **v1.2.51**
 
 ### Mantener backend activo en producción
 Configura el secret **`BACKEND_HEALTHCHECK_URL`** en GitHub (Settings → Secrets and variables → Actions) con la URL pública de salud de tu API, por ejemplo:
@@ -41,6 +41,15 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 
 
 
+
+
+## Novedades de la versión 1.2.51
+- Se compactó la pantalla de ronda en modo individual para aprovechar mejor el alto en mobile: se eliminó la barra textual `Pregunta X de Y`, se redujo el margen superior del header y se quitaron mensajes contextuales redundantes en el cuerpo/resultado.
+- En preguntas de capitales se retiró el icono superior para evitar ocupar una línea completa y mejorar la jerarquía visual del enunciado.
+- Las alternativas ahora reemplazan la letra por ✓/✕ de color al mostrar resultado, eliminando badges de texto para reducir ruido visual y ganar espacio útil.
+- Se reforzó la renderización de imágenes en `QuestionCard`: normalización de URL de bandera (código ISO en minúsculas para `flagcdn`) y contenedores con alturas mínimas para que banderas/siluetas se vean completas con `object-contain`.
+- Se actualizaron pruebas automatizadas de `GamePage`, `DuelPage` y `OptionButton` para reflejar el nuevo layout y prevenir regresiones.
+- Footer/versionado actualizado a **v1.2.51** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.50
 - Se centralizó el footer global en el layout `Screen` para que la versión de la app aparezca de forma consistente en **todas las vistas** del frontend, incluyendo rutas protegidas y públicas.

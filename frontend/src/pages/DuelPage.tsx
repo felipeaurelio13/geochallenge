@@ -60,7 +60,6 @@ export function DuelPage() {
   const opponentRef = useRef<{ id: string; username: string } | null>(null);
   const duelCategory = parseDuelCategory(searchParams.get('category'));
   const hasSelection = Boolean(selectedAnswer || mapLocation);
-  const isLowTime = timeRemaining <= 5;
 
   useEffect(() => {
     scoreRef.current = myScore;
@@ -351,12 +350,6 @@ export function DuelPage() {
   }
 
   const isMapQuestion = currentQuestion.category === 'MAP';
-  const helperText = hasSelection
-    ? t('game.selectionReadyHint')
-    : isMapQuestion
-    ? t('game.selectOnMapHint')
-    : t('game.selectOptionHint');
-
   return (
     <GameRoundScaffold
       rootClassName="h-full min-h-0 bg-gray-900 flex flex-col overflow-hidden"
@@ -420,9 +413,6 @@ export function DuelPage() {
       showResult={showResult}
       disableOptions={duelState === 'waiting'}
       optionsGridClassName="grid grid-cols-2 gap-2.5 sm:gap-3"
-      contextHint={helperText}
-      isLowTime={isLowTime}
-      lowTimeHint={t('game.lowTimeHint', { seconds: timeRemaining })}
       actionTray={
         <RoundActionTray
           mode="duel"

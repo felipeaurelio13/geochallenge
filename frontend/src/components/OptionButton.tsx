@@ -1,6 +1,3 @@
-import { useTranslation } from 'react-i18next';
-import { AnswerStatusBadge } from './AnswerStatusBadge';
-
 interface OptionButtonProps {
   option: string;
   index: number;
@@ -22,8 +19,6 @@ export function OptionButton({
   isCorrect,
   showResult,
 }: OptionButtonProps) {
-  const { t } = useTranslation();
-
   const getButtonClasses = () => {
     const baseClasses =
       'w-full rounded-2xl text-left transition-all duration-200 flex items-start gap-3 overflow-hidden border-2 px-3 py-3 option-button-base sm:items-center sm:px-4 sm:py-3.5';
@@ -67,7 +62,7 @@ export function OptionButton({
                 : 'bg-gray-700 text-gray-200'
         }`}
       >
-        {optionLetters[index]}
+        {showResult && isCorrect ? '✓' : showResult && selected && !isCorrect ? '✕' : optionLetters[index]}
       </span>
 
       <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -75,28 +70,11 @@ export function OptionButton({
           {option}
         </span>
 
-        <div className="inline-flex items-center self-start sm:self-auto">
-          {selected && !showResult && (
-            <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/50 bg-white/15 text-sm font-semibold text-white shadow-sm shadow-black/20">
-              ✓
-            </span>
-          )}
-
-          {showResult && isCorrect && (
-            <AnswerStatusBadge
-              status="correct"
-              label={t('game.correctLabel')}
-              className="text-xs"
-            />
-          )}
-          {showResult && selected && !isCorrect && (
-            <AnswerStatusBadge
-              status="incorrect"
-              label={t('game.incorrectLabel')}
-              className="text-xs"
-            />
-          )}
-        </div>
+        {selected && !showResult && (
+          <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center self-start rounded-full border border-white/50 bg-white/15 text-sm font-semibold text-white shadow-sm shadow-black/20 sm:self-auto">
+            ✓
+          </span>
+        )}
       </div>
     </button>
   );

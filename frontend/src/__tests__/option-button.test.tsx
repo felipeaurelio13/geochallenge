@@ -2,19 +2,6 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { OptionButton } from '../components/OptionButton';
 
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string) => {
-      const dictionary: Record<string, string> = {
-        'game.correctLabel': 'Correcta',
-        'game.incorrectLabel': 'Incorrecta',
-      };
-
-      return dictionary[key] ?? key;
-    },
-  }),
-}));
-
 describe('OptionButton', () => {
   it('muestra feedback visual y accesible cuando la alternativa está seleccionada', () => {
     const onClick = vi.fn();
@@ -41,21 +28,33 @@ describe('OptionButton', () => {
     expect(onClick).toHaveBeenCalledTimes(1);
   });
 
-  it('oculta el badge de seleccionada cuando se muestra el resultado', () => {
+  it('reemplaza la letra por icono de resultado para ahorrar espacio en mobile', () => {
     render(
-      <OptionButton
-        option="Argentina"
-        index={0}
-        onClick={() => {}}
-        disabled
-        selected
-        isCorrect={false}
-        showResult
-      />
+      <>
+        <OptionButton
+          option="Argentina"
+          index={0}
+          onClick={() => {}}
+          disabled
+          selected
+          isCorrect={false}
+          showResult
+        />
+        <OptionButton
+          option="Chile"
+          index={1}
+          onClick={() => {}}
+          disabled
+          selected={false}
+          isCorrect
+          showResult
+        />
+      </>
     );
 
-    expect(screen.queryByText('✓')).not.toBeInTheDocument();
-    expect(screen.getByText('Incorrecta')).toBeInTheDocument();
+    expect(screen.getByText('✕')).toBeInTheDocument();
+    expect(screen.getByText('✓')).toBeInTheDocument();
+    expect(screen.queryByText('Incorrecta')).not.toBeInTheDocument();
   });
 
   it('mantiene textos largos dentro del contenedor para una lectura mobile-friendly', () => {

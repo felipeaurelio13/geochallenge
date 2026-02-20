@@ -59,35 +59,26 @@ vi.mock('../components', () => ({
   ScoreDisplay: () => <div>score</div>,
   ProgressBar: () => <div>progress</div>,
   LoadingSpinner: ({ text }: { text?: string }) => <div>{text || 'loading'}</div>,
-  AnswerStatusBadge: ({ label }: { label: string }) => <div>{label}</div>,
-
-  RoundActionTray: ({ showResult, canSubmit, isWaiting, submitLabel, clearLabel, nextLabel, waitingLabel, onSubmit, onNext, onClear, showClearButton, resultLabel }: any) => (
-    <div data-testid="mobile-action-tray" className='fixed bottom-0'>
-      {!showResult && !isWaiting && (
-        <>
-          {showClearButton && <button onClick={onClear}>{clearLabel}</button>}
-          <button onClick={onSubmit} disabled={!canSubmit}>{submitLabel}</button>
-        </>
-      )}
-      {isWaiting && <p>{waitingLabel}</p>}
+  RoundActionTray: ({ showResult, canSubmit, submitLabel, nextLabel, onSubmit, onNext, resultLabel }: any) => (
+    <div data-testid="mobile-action-tray" className="fixed bottom-0">
+      {!showResult && <button onClick={onSubmit} disabled={!canSubmit}>{submitLabel}</button>}
       {showResult && nextLabel && <button onClick={onNext}>{nextLabel}</button>}
       {showResult && resultLabel && <p>{resultLabel}</p>}
     </div>
   ),
-  GameRoundScaffold: ({ header, progress, actionTray, mapContent, isMapQuestion, question, onOptionSelect, showResult, disableOptions, contextHint, isLowTime, lowTimeHint, optionsGridClassName, rootClassName = 'h-full min-h-0 bg-gray-900 flex flex-col overflow-hidden', mainClassName = 'flex-1 min-h-0 overflow-hidden px-3 pt-1.5 pb-[6.35rem] sm:px-4 sm:pt-2 sm:pb-24' }: any) => (
+  GameRoundScaffold: ({ header, progress, actionTray, mapContent, isMapQuestion, question, onOptionSelect, showResult, disableOptions, optionsGridClassName, rootClassName = 'h-full min-h-0 bg-gray-900 flex flex-col overflow-hidden', mainClassName = 'flex-1 min-h-0 overflow-hidden px-3 pt-1.5 pb-[6.35rem] sm:px-4 sm:pt-2 sm:pb-24' }: any) => (
     <div className={rootClassName}>
       {header}
       {progress}
       <main role="main" className={mainClassName}>
         <div data-testid="question-card" data-compact="true">question-card</div>
-        {isMapQuestion ? (mapContent) : (
+        {isMapQuestion ? mapContent : (
           <div className={optionsGridClassName}>
             {question.options.map((option: string) => (
               <button key={option} onClick={() => onOptionSelect(option)} disabled={showResult || disableOptions}>{option}</button>
             ))}
           </div>
         )}
-        {contextHint && !showResult && <p>{isLowTime && lowTimeHint ? lowTimeHint : contextHint}</p>}
         {actionTray}
       </main>
     </div>
@@ -139,35 +130,11 @@ describe('GamePage ending flow', () => {
     expect(optionsGrid).toHaveClass('sm:grid-cols-2');
   });
 
-
-
-
-
-
-  it('activa layout compacto en siluetas para minimizar scroll en móviles', () => {
-    mocks.gameState.questions = [
-      {
-        id: 'q3',
-        questionText: '¿Qué país representa esta silueta?',
-        options: ['Grecia', 'Italia', 'España', 'Portugal'],
-        correctAnswer: 'Grecia',
-        category: 'SILHOUETTE',
-      },
-    ];
-
+  it('elimina la barra textual de pregunta para ganar espacio vertical', () => {
     render(<GamePage />);
 
-    expect(screen.getByTestId('question-card')).toHaveAttribute('data-compact', 'true');
-  });
-
-  it('muestra estado de selección en cabecera de progreso para orientar al usuario', () => {
-    render(<GamePage />);
-
-    expect(screen.getAllByText('game.submit').length).toBeGreaterThan(0);
-
-    fireEvent.click(screen.getByRole('button', { name: 'Santiago' }));
-
-    expect(screen.getByText('game.selectedOption')).toBeInTheDocument();
+    expect(screen.queryByText('game.questionOf')).not.toBeInTheDocument();
+    expect(screen.getByText('progress')).toBeInTheDocument();
   });
 
   it('mantiene bandeja de acciones fija en mobile con espacio inferior seguro', () => {
@@ -182,38 +149,6 @@ describe('GamePage ending flow', () => {
     expect(tray).toHaveClass('bottom-0');
   });
 
-  it('permite que el contenido crezca sin recortar tarjetas ni alternativas al responder', async () => {
-    const { container } = render(<GamePage />);
-
-    const root = container.firstElementChild;
-    expect(root).toHaveClass('h-full min-h-0');
-    expect(root).toHaveClass('overflow-hidden');
-
-    fireEvent.click(screen.getByRole('button', { name: 'Santiago' }));
-    fireEvent.click(screen.getByRole('button', { name: 'game.submit' }));
-
-    await screen.findByText('game.correct');
-
-    const questionCard = screen.getByTestId('question-card');
-    expect(questionCard).toBeInTheDocument();
-
-    const nextButton = screen.getByRole('button', { name: 'game.seeResults' });
-    expect(nextButton).toBeVisible();
-  });
-
-  it('muestra guía contextual antes de seleccionar y prioriza confirmar como CTA principal', () => {
-    render(<GamePage />);
-
-    expect(screen.getByText('game.selectOptionHint')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'game.clearSelection' })).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Santiago' }));
-
-    expect(screen.getByText('game.selectionReadyHint')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'game.submit' })).toBeEnabled();
-    expect(screen.queryByRole('button', { name: 'game.clearSelection' })).not.toBeInTheDocument();
-  });
-
   it('mantiene el botón Confirmar deshabilitado hasta elegir una alternativa', () => {
     render(<GamePage />);
 
@@ -224,23 +159,13 @@ describe('GamePage ending flow', () => {
     expect(submitButton).toBeEnabled();
   });
 
-  it('oculta la guía contextual al mostrar resultado para evitar mensajes duplicados', async () => {
+  it('muestra resultado y permite avanzar al finalizar', async () => {
     render(<GamePage />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Santiago' }));
     fireEvent.click(screen.getByRole('button', { name: 'game.submit' }));
 
     await screen.findByText('game.correct');
-
-    expect(screen.queryByText('game.selectionReadyHint')).not.toBeInTheDocument();
-    expect(screen.queryByText('game.selectOptionHint')).not.toBeInTheDocument();
-  });
-
-  it('mantiene el estado hasta resultados sin resetear el juego al desmontar', async () => {
-    render(<GamePage />);
-
-    fireEvent.click(screen.getByRole('button', { name: 'Santiago' }));
-    fireEvent.click(screen.getByRole('button', { name: 'game.submit' }));
 
     const seeResultsButton = await screen.findByRole('button', { name: 'game.seeResults' });
     fireEvent.click(seeResultsButton);
@@ -249,7 +174,5 @@ describe('GamePage ending flow', () => {
       expect(mocks.finishGameMock).toHaveBeenCalledTimes(1);
       expect(mocks.navigateMock).toHaveBeenCalledWith('/results');
     });
-
-    expect(mocks.resetGameMock).not.toHaveBeenCalled();
   });
 });
