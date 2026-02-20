@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.46**
+- Frontend: **v1.2.47**
 
 ### Mantener backend activo en producción
 Configura el secret **`BACKEND_HEALTHCHECK_URL`** en GitHub (Settings → Secrets and variables → Actions) con la URL pública de salud de tu API, por ejemplo:
@@ -41,6 +41,12 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 
 
 
+
+## Novedades de la versión 1.2.47
+- Se eliminó código muerto del frontend: se retiraron `OverlayModal` y `useLockBodyScroll`, que no estaban referenciados en rutas ni componentes activos.
+- Se limpió duplicación de lógica en rutas de autenticación extrayendo el estado de carga compartido a `AuthRouteLoading`.
+- Se actualizaron exports del barrel de componentes y pruebas de layout para reflejar la limpieza sin afectar UX mobile-first.
+- Footer/versionado actualizado a **v1.2.47** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.46
 - Se refactorizó el sistema visual del frontend hacia **CSS Custom Properties globales** en `:root`, documentando tokens de color, spacing, radios, sombras y breakpoints para mantener consistencia mobile-first y facilitar evolución de UI.

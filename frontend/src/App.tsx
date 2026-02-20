@@ -1,4 +1,3 @@
-import React from 'react';
 import { createBrowserRouter, RouterProvider, Navigate, Outlet } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { GameProvider } from './context/GameContext';
@@ -16,7 +15,14 @@ import {
   ChallengeGamePage,
   ChallengeResultsPage,
 } from './pages';
-import { LoadingSpinner, ErrorBoundary, ServerWakeUp, BackendKeepAlive, AppRoot, Screen } from './components';
+import {
+  ErrorBoundary,
+  ServerWakeUp,
+  BackendKeepAlive,
+  AppRoot,
+  Screen,
+  AuthRouteLoading,
+} from './components';
 import { getRouterBasename, toAppPath } from './utils/routing';
 
 // Protected route wrapper
@@ -24,11 +30,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
 
   if (isLoading) {
-    return (
-      <div className="h-full min-h-0 bg-gray-900 flex items-center justify-center">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
+    return <AuthRouteLoading />;
   }
 
   if (!user) {
@@ -43,11 +45,7 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
 
   if (isLoading) {
-    return (
-      <div className="h-full min-h-0 bg-gray-900 flex items-center justify-center">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
+    return <AuthRouteLoading />;
   }
 
   if (user) {
