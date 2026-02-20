@@ -51,4 +51,40 @@ describe('QuestionCard', () => {
 
     expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('¿Cuál es la capital de Chile?');
   });
+
+  it('aumenta el espacio visual de la silueta en modo compacto', () => {
+    const question = {
+      id: 'q2',
+      category: 'SILHOUETTE',
+      questionText: '',
+      questionData: '',
+      imageUrl: 'https://example.com/silhouette.png',
+      options: ['A', 'B', 'C', 'D'],
+      correctAnswer: 'A',
+      difficulty: 'MEDIUM',
+    } as Question;
+
+    const { container } = render(
+      <QuestionCard question={question} questionNumber={2} totalQuestions={10} compact />
+    );
+
+    const silhouetteImage = container.querySelector('img');
+    expect(silhouetteImage).toHaveClass('h-[7.75rem]');
+  });
+
+  it('aplica tipografía más compacta al enunciado del mapa', () => {
+    const question = {
+      id: 'q3',
+      category: 'MAP',
+      questionText: '',
+      questionData: 'Maseru',
+      options: ['A', 'B', 'C', 'D'],
+      correctAnswer: 'A',
+      difficulty: 'MEDIUM',
+    } as Question;
+
+    render(<QuestionCard question={question} questionNumber={3} totalQuestions={10} compact />);
+
+    expect(screen.getByRole('heading', { level: 2 })).toHaveClass('text-\[1.15rem\]', 'leading-snug');
+  });
 });

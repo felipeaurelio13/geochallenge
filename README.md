@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.51**
+- Frontend: **v1.2.52**
 
 ### Mantener backend activo en producción
 Configura el secret **`BACKEND_HEALTHCHECK_URL`** en GitHub (Settings → Secrets and variables → Actions) con la URL pública de salud de tu API, por ejemplo:
@@ -42,6 +42,12 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 
 
 
+
+## Novedades de la versión 1.2.52
+- Se amplió el área visual de preguntas de silueta en `QuestionCard`, aumentando altura mínima del contenedor e imagen para que la forma del país se perciba completa y con mejor legibilidad en mobile.
+- Se optimizó el enunciado de preguntas de mapa en layout compacto con tipografía y `line-height` más contenidos, evitando que el texto compita con el mapa y mejorando la jerarquía visual.
+- Se añadieron pruebas automatizadas de `QuestionCard` para validar el nuevo espacio de silueta y el ajuste tipográfico del enunciado de mapa, reduciendo riesgo de regresión visual.
+- Footer/versionado actualizado a **v1.2.52** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.51
 - Se compactó la pantalla de ronda en modo individual para aprovechar mejor el alto en mobile: se eliminó la barra textual `Pregunta X de Y`, se redujo el margen superior del header y se quitaron mensajes contextuales redundantes en el cuerpo/resultado.
