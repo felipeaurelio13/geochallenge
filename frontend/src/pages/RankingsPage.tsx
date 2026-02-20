@@ -137,7 +137,7 @@ export function RankingsPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <span
-                        className={`text-2xl font-bold min-w-[60px] ${
+                        className={`text-2xl font-bold min-w-rank ${
                           entry.rank <= 3 ? 'text-3xl' : 'text-gray-400'
                         }`}
                       >

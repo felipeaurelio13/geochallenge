@@ -26,7 +26,7 @@ export function OptionButton({
 
   const getButtonClasses = () => {
     const baseClasses =
-      'w-full rounded-2xl text-left transition-all duration-200 flex items-start gap-3 overflow-hidden border-2 px-3 py-3 min-h-[54px] sm:items-center sm:px-4 sm:py-3.5 sm:min-h-[64px]';
+      'w-full rounded-2xl text-left transition-all duration-200 flex items-start gap-3 overflow-hidden border-2 px-3 py-3 option-button-base sm:items-center sm:px-4 sm:py-3.5';
 
     if (showResult) {
       if (isCorrect) {

@@ -107,7 +107,7 @@ export function MenuPage() {
             onClick={() => navigate(`/game/single?category=${selectedCategory}`)}
             className="group rounded-2xl border border-primary/40 bg-primary/10 p-3 text-left transition-all hover:border-primary/70 hover:bg-primary/15 focus:outline-none focus:ring-2 focus:ring-primary/70 sm:p-4"
           >
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-primary">{selectedCategoryLabel}</p>
+            <p className="text-2xs-token font-semibold uppercase tracking-wide text-primary">{selectedCategoryLabel}</p>
             <h3 className="mt-0.5 text-base font-bold text-white sm:mt-1 sm:text-lg">{t('menu.singlePlayer')}</h3>
             <p className="mt-0.5 text-sm leading-snug text-gray-300">{t('menu.singlePlayerDesc')}</p>
           </button>

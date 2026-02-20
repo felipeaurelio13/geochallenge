@@ -44,7 +44,7 @@ export function ScoreDisplay({ score, previousScore = 0, showAnimation = true }:
 
   return (
     <div className="text-center" aria-live="polite">
-      <div className="text-[11px] uppercase tracking-wide text-gray-400 mb-1">{t('game.score')}</div>
+      <div className="text-score-label uppercase tracking-wide text-gray-400 mb-1">{t('game.score')}</div>
       <div
         className={`text-2xl sm:text-3xl font-bold transition-transform duration-200 ${
           isAnimating ? 'scale-110 text-primary' : 'text-white'

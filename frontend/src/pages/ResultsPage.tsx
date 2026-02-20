@@ -135,7 +135,7 @@ export function ResultsPage() {
                 <AnswerStatusBadge
                   status="correct"
                   label={t('results.correct')}
-                  className="w-full justify-center text-[11px] sm:text-xs"
+                  className="w-full justify-center text-2xs-token sm:text-xs"
                 />
               </div>
             </article>
@@ -145,7 +145,7 @@ export function ResultsPage() {
                 <AnswerStatusBadge
                   status="incorrect"
                   label={t('results.incorrect')}
-                  className="w-full justify-center text-[11px] sm:text-xs"
+                  className="w-full justify-center text-2xs-token sm:text-xs"
                 />
               </div>
             </article>

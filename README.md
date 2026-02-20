@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.45**
+- Frontend: **v1.2.46**
 
 ### Mantener backend activo en producción
 Configura el secret **`BACKEND_HEALTHCHECK_URL`** en GitHub (Settings → Secrets and variables → Actions) con la URL pública de salud de tu API, por ejemplo:
@@ -40,6 +40,15 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 
 
 
+
+
+## Novedades de la versión 1.2.46
+- Se refactorizó el sistema visual del frontend hacia **CSS Custom Properties globales** en `:root`, documentando tokens de color, spacing, radios, sombras y breakpoints para mantener consistencia mobile-first y facilitar evolución de UI.
+- Se habilitó **dark mode automático** mediante `prefers-color-scheme`, manteniendo contraste y jerarquía visual en componentes compartidos.
+- Se sincronizó `tailwind.config.js` con `theme.extend` basado en variables CSS para usar los mismos tokens de diseño desde utilidades Tailwind.
+- Se actualizaron componentes principales (`Timer`, `MapInteractive`, `OptionButton`, `ScoreDisplay`) para consumir tokens globales en lugar de valores hardcodeados.
+- Se agregó cobertura automatizada para validar la existencia y mapeo del token system (`design-tokens.test.js`) y se actualizaron tests afectados por el refactor de estilos.
+- Footer/versionado actualizado a **v1.2.46** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.45
 - Se optimizó el layout de rondas (individual, duelo y desafío) para que el área central use mejor el alto disponible: header/progreso compactados, contenido principal con `flex-1` + `min-h-0` y scroll interno sólo en el bloque que realmente lo necesita.

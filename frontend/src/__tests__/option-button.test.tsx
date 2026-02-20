@@ -34,7 +34,7 @@ describe('OptionButton', () => {
 
     expect(button).toHaveAttribute('aria-pressed', 'true');
     expect(button.className).toContain('ring-2');
-    expect(button.className).toContain('min-h-[54px]');
+    expect(button.className).toContain('option-button-base');
     expect(screen.getByText('✓')).toBeInTheDocument();
 
     fireEvent.click(button);
