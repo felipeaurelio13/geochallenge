@@ -4,6 +4,7 @@ export { OptionButton } from './OptionButton';
 export { ScoreDisplay } from './ScoreDisplay';
 export { ProgressBar } from './ProgressBar';
 export { LoadingSpinner } from './LoadingSpinner';
+export { AuthRouteLoading } from './AuthRouteLoading';
 export { ErrorBoundary } from './ErrorBoundary';
 export { ServerWakeUp } from './ServerWakeUp';
 export { AnswerStatusBadge } from './AnswerStatusBadge';
@@ -14,4 +15,3 @@ export { RoundActionTray } from './RoundActionTray';
 
 export { AppRoot } from './AppRoot';
 export { Screen } from './Screen';
-export { OverlayModal } from './OverlayModal';
