@@ -2,7 +2,6 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
-import { AppFooter } from '../components/AppFooter';
 
 type Category = 'FLAG' | 'CAPITAL' | 'MAP' | 'SILHOUETTE' | 'MIXED';
 
@@ -130,7 +129,6 @@ export function MenuPage() {
         </section>
       </main>
 
-      <AppFooter className="sm:pb-4" />
     </div>
   );
 }

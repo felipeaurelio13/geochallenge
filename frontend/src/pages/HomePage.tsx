@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
-import { AppFooter } from '../components/AppFooter';
 
 export function HomePage() {
   const { t } = useTranslation();
@@ -75,7 +74,6 @@ export function HomePage() {
         </main>
       </div>
 
-      <AppFooter />
     </div>
   );
 }

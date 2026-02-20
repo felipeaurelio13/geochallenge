@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MenuPage } from '../pages/MenuPage';
+import { Screen } from '../components/Screen';
 
 const routerFutureConfig = {
   v7_startTransition: true,
@@ -76,7 +77,9 @@ describe('MenuPage', () => {
   it('envía la categoría seleccionada al iniciar un duelo', () => {
     render(
       <MemoryRouter future={routerFutureConfig}>
-        <MenuPage />
+        <Screen>
+          <MenuPage />
+        </Screen>
       </MemoryRouter>
     );
 
@@ -92,7 +95,9 @@ describe('MenuPage', () => {
   it('abre desafíos con categoría preseleccionada para parametrizar rápido', () => {
     render(
       <MemoryRouter future={routerFutureConfig}>
-        <MenuPage />
+        <Screen>
+          <MenuPage />
+        </Screen>
       </MemoryRouter>
     );
 
@@ -106,7 +111,9 @@ describe('MenuPage', () => {
   it('mantiene categoría activa visible y footer con versión sin CTA duplicados sticky', () => {
     render(
       <MemoryRouter future={routerFutureConfig}>
-        <MenuPage />
+        <Screen>
+          <MenuPage />
+        </Screen>
       </MemoryRouter>
     );
 

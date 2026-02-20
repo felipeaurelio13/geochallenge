@@ -14,4 +14,14 @@ describe('mobile layout primitives', () => {
     expect(screen.getByText('Body').parentElement).toHaveClass('screen-content');
     expect(screen.getByText('Footer').parentElement).toHaveClass('screen-footer');
   });
+
+  it('renders AppFooter by default when footer prop is not provided', () => {
+    render(
+      <Screen>
+        <div>Body</div>
+      </Screen>
+    );
+
+    expect(screen.getByText(/v\d+\.\d+\.\d+/i)).toHaveClass('app-footer__version');
+  });
 });
