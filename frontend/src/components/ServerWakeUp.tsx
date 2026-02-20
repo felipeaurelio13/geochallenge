@@ -11,10 +11,8 @@ export function ServerWakeUp({ children }: ServerWakeUpProps) {
   const [showWakeUp, setShowWakeUp] = useState(false);
 
   useEffect(() => {
-    let showTimer: ReturnType<typeof setTimeout>;
-
     // After 3s without response, show "waking up" message
-    showTimer = setTimeout(() => {
+    const showTimer: ReturnType<typeof setTimeout> = setTimeout(() => {
       if (!serverReady) {
         setShowWakeUp(true);
       }

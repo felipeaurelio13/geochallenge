@@ -1,0 +1,26 @@
+{
+  "name": "geochallenge-tooling",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "prepare": "husky",
+    "lint": "npm run lint --prefix frontend && npm run lint --prefix backend",
+    "test": "npm run test --prefix frontend && npm run test --prefix backend",
+    "format": "prettier --write \"**/*.{js,cjs,mjs,ts,tsx,json,md,yml,yaml,css}\"",
+    "format:check": "prettier --check \"**/*.{js,cjs,mjs,ts,tsx,json,md,yml,yaml,css}\""
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.0",
+    "prettier": "^3.5.3"
+  },
+  "lint-staged": {
+    "*.{js,cjs,mjs,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml,css}": [
+      "prettier --write"
+    ]
+  }
+}
