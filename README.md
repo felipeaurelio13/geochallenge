@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.44**
+- Frontend: **v1.2.45**
 
 ### Mantener backend activo en producción
 Configura el secret **`BACKEND_HEALTHCHECK_URL`** en GitHub (Settings → Secrets and variables → Actions) con la URL pública de salud de tu API, por ejemplo:
@@ -40,6 +40,14 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 
 
 
+
+## Novedades de la versión 1.2.45
+- Se optimizó el layout de rondas (individual, duelo y desafío) para que el área central use mejor el alto disponible: header/progreso compactados, contenido principal con `flex-1` + `min-h-0` y scroll interno sólo en el bloque que realmente lo necesita.
+- Se eliminó espacio vertical desperdiciado sobre el core de juego reduciendo paddings superiores y gaps, con una jerarquía visual más cercana al header sin perder legibilidad en dark mode.
+- Se consolidó el patrón de viewport mobile con `height: 100%` + `min-height` (`100svh`/`100dvh`) en el contenedor raíz, manteniendo `html/body` sin scroll global y evitando regresiones de `100vh` en iOS/Android.
+- Se ajustó el mapa interactivo para usar una altura más equilibrada en mobile y disminuir scroll innecesario en preguntas de mapa.
+- Se actualizaron tests automatizados de layout en páginas de juego para cubrir las nuevas clases de contenedor y safe area.
+- Footer/versionado actualizado a **v1.2.45** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.44
 - Se implementó un contenedor raíz `app-root` full-screen con `100svh` (fallback `100vh`), safe areas y bloqueo de overflow global para estabilizar altura visible en iOS Safari y Chrome Android.
