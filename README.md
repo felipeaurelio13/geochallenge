@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.47**
+- Frontend: **v1.2.48**
 
 ### Mantener backend activo en producción
 Configura el secret **`BACKEND_HEALTHCHECK_URL`** en GitHub (Settings → Secrets and variables → Actions) con la URL pública de salud de tu API, por ejemplo:
@@ -41,6 +41,12 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 
 
 
+
+## Novedades de la versión 1.2.48
+- Se recuperó la visualización del enunciado en preguntas cuando `questionData` llega serializado como JSON string, parseándolo de forma segura para extraer `country/capital` y mantener la experiencia consistente.
+- Se añadió fallback para casos legacy sin `questionText`, priorizando contexto útil del usuario antes de dejar el enunciado vacío.
+- Se agregó prueba automatizada de `QuestionCard` para asegurar que el enunciado de capital se renderice correctamente con `questionData` serializado.
+- Footer/versionado actualizado a **v1.2.48** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.47
 - Se eliminó código muerto del frontend: se retiraron `OverlayModal` y `useLockBodyScroll`, que no estaban referenciados en rutas ni componentes activos.
