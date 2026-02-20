@@ -142,11 +142,11 @@ export function MapInteractive({
 
   return (
     <div className="relative">
-      <div className="overflow-hidden rounded-2xl border-2 border-gray-700/80 bg-gray-900/30 shadow-sm shadow-black/30">
+      <div className="map-surface overflow-hidden rounded-2xl">
         <MapContainer
           center={MAP_DEFAULT_VIEW.center}
           zoom={MAP_DEFAULT_VIEW.zoom}
-          style={{ height: 'clamp(240px, 46svh, 400px)', width: '100%' }}
+          style={{ height: 'clamp(var(--map-height-min), var(--map-height-fluid), var(--map-height-max))', width: '100%' }}
           className="z-0 touch-manipulation"
         >
           <TileLayer
@@ -178,8 +178,8 @@ export function MapInteractive({
                 center={[correctLocation.lat, correctLocation.lng]}
                 radius={50000}
                 pathOptions={{
-                  color: '#22c55e',
-                  fillColor: '#22c55e',
+                  color: 'var(--color-success-500)',
+                  fillColor: 'var(--color-success-500)',
                   fillOpacity: 0.2,
                 }}
               />

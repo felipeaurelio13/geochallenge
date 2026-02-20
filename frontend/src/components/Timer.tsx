@@ -8,6 +8,12 @@ interface TimerProps {
   isActive: boolean;
 }
 
+export function getTimerColorToken(percentage: number): string {
+  if (percentage > 50) return 'var(--color-success-500)';
+  if (percentage > 25) return 'var(--color-warning-500)';
+  return 'var(--color-error-500)';
+}
+
 export function Timer({ duration, timeRemaining, onTick, onComplete, isActive }: TimerProps) {
   const intervalRef = useRef<number | null>(null);
 
@@ -37,16 +43,9 @@ export function Timer({ duration, timeRemaining, onTick, onComplete, isActive }:
     }
   }, [timeRemaining, isActive, onComplete]);
 
-  // Calculate percentage for visual
   const percentage = (timeRemaining / duration) * 100;
   const strokeDashoffset = 283 - (283 * percentage) / 100;
-
-  // Color based on time remaining
-  const getColor = () => {
-    if (percentage > 50) return '#22c55e'; // green
-    if (percentage > 25) return '#eab308'; // yellow
-    return '#ef4444'; // red
-  };
+  const timerColor = getTimerColorToken(percentage);
 
   return (
     <div
@@ -55,36 +54,23 @@ export function Timer({ duration, timeRemaining, onTick, onComplete, isActive }:
       aria-live="off"
       aria-label={`Tiempo restante ${Math.max(0, timeRemaining)} segundos`}
     >
-      <svg className="h-16 w-16 transform -rotate-90 sm:h-20 sm:w-20" viewBox="0 0 100 100">
-        {/* Background circle */}
+      <svg className="h-16 w-16 -rotate-90 transform sm:h-20 sm:w-20" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="45" fill="none" className="timer-ring-bg" strokeWidth="8" />
         <circle
           cx="50"
           cy="50"
           r="45"
           fill="none"
-          stroke="#374151"
-          strokeWidth="8"
-        />
-        {/* Progress circle */}
-        <circle
-          cx="50"
-          cy="50"
-          r="45"
-          fill="none"
-          stroke={getColor()}
+          stroke={timerColor}
           strokeWidth="8"
           strokeLinecap="round"
           strokeDasharray="283"
           strokeDashoffset={strokeDashoffset}
-          className="transition-all duration-1000 ease-linear drop-shadow-[0_0_6px_rgba(255,255,255,0.25)]"
+          className="transition-all duration-1000 ease-linear shadow-glow-primary"
         />
       </svg>
-      {/* Time text */}
       <div className="absolute inset-0 flex items-center justify-center">
-        <span
-          className="text-xl font-bold transition-colors duration-300 sm:text-2xl"
-          style={{ color: getColor() }}
-        >
+        <span className="text-xl font-bold transition-colors duration-300 sm:text-2xl" style={{ color: timerColor }}>
           {Math.max(0, timeRemaining)}
         </span>
       </div>

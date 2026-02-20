@@ -251,7 +251,7 @@ export function ChallengeGamePage() {
               📨 {t('challenges.challengeMode')}
             </div>
 
-            <div className="min-w-[100px] rounded-xl bg-gray-900/60 px-3 py-2">
+            <div className="min-w-chip rounded-xl bg-gray-900/60 px-3 py-2">
               <ScoreDisplay score={score} previousScore={previousScore} showAnimation={showResult} />
             </div>
 

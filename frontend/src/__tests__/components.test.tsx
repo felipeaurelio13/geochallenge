@@ -48,9 +48,9 @@ describe('Component Tests', () => {
 
   describe('Timer Logic', () => {
     const getTimerColor = (percentage: number): string => {
-      if (percentage > 50) return '#22c55e'; // green
-      if (percentage > 25) return '#eab308'; // yellow
-      return '#ef4444'; // red
+      if (percentage > 50) return 'var(--color-success-500)';
+      if (percentage > 25) return 'var(--color-warning-500)';
+      return 'var(--color-error-500)'
     };
 
     const calculateStrokeDashoffset = (percentage: number): number => {
@@ -58,21 +58,21 @@ describe('Component Tests', () => {
     };
 
     it('should return green for > 50%', () => {
-      expect(getTimerColor(100)).toBe('#22c55e');
-      expect(getTimerColor(60)).toBe('#22c55e');
-      expect(getTimerColor(51)).toBe('#22c55e');
+      expect(getTimerColor(100)).toBe('var(--color-success-500)');
+      expect(getTimerColor(60)).toBe('var(--color-success-500)');
+      expect(getTimerColor(51)).toBe('var(--color-success-500)');
     });
 
     it('should return yellow for 25-50%', () => {
-      expect(getTimerColor(50)).toBe('#eab308');
-      expect(getTimerColor(30)).toBe('#eab308');
-      expect(getTimerColor(26)).toBe('#eab308');
+      expect(getTimerColor(50)).toBe('var(--color-warning-500)');
+      expect(getTimerColor(30)).toBe('var(--color-warning-500)');
+      expect(getTimerColor(26)).toBe('var(--color-warning-500)');
     });
 
     it('should return red for <= 25%', () => {
-      expect(getTimerColor(25)).toBe('#ef4444');
-      expect(getTimerColor(10)).toBe('#ef4444');
-      expect(getTimerColor(0)).toBe('#ef4444');
+      expect(getTimerColor(25)).toBe('var(--color-error-500)');
+      expect(getTimerColor(10)).toBe('var(--color-error-500)');
+      expect(getTimerColor(0)).toBe('var(--color-error-500)');
     });
 
     it('should calculate correct stroke dashoffset', () => {
