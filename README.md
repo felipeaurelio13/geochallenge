@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.52**
+- Frontend: **v1.2.53**
 
 ### Mantener backend activo en producción
 Configura el secret **`BACKEND_HEALTHCHECK_URL`** en GitHub (Settings → Secrets and variables → Actions) con la URL pública de salud de tu API, por ejemplo:
@@ -42,6 +42,12 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 
 
 
+
+## Novedades de la versión 1.2.53
+- Se corrigió el layout de la ronda para evitar que el enunciado de la pregunta (especialmente en modo mapa y en iPhone) se comprima verticalmente cuando ocupa más de una línea: ahora el bloque de pregunta mantiene su altura natural y el scroll ocurre en el contenedor correcto.
+- Se añadió una prueba automatizada nueva de `GameRoundScaffold` que valida que la tarjeta de pregunta no se encoja, previniendo regresiones de texto cortado en mobile.
+- Se revisó visualmente el flujo de juego en viewport móvil para validar jerarquía, lectura y espaciados en la zona de pregunta/mapa.
+- Footer/versionado actualizado a **v1.2.53** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.52
 - Se amplió el área visual de preguntas de silueta en `QuestionCard`, aumentando altura mínima del contenedor e imagen para que la forma del país se perciba completa y con mejor legibilidad en mobile.
