@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { useLocalStorage } from '../hooks';
 import { api } from '../services/api';
 import { socketService } from '../services/socket';
 import { testAuthBypass, buildTestBypassUser } from '../utils/testAuthBypass';
@@ -18,9 +19,14 @@ function normalizeEmail(email: string) {
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [token, setToken] = useLocalStorage<string | null>('token', null, {
+    parse: (value) => value || null,
+    stringify: (value) => value ?? '',
+  });
+
   const [state, setState] = useState<AuthState>({
     user: null,
-    token: localStorage.getItem('token'),
+    token,
     isLoading: true,
     isAuthenticated: false,
   });
@@ -28,10 +34,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Check if user is already logged in
   useEffect(() => {
     const checkAuth = async () => {
-      const token = localStorage.getItem('token');
       const shouldUseBypass = testAuthBypass.isEnabled && testAuthBypass.isConfigured;
+      const authToken = token;
 
-      if (!token && !shouldUseBypass) {
+      if (!authToken && !shouldUseBypass) {
         setState((prev) => ({ ...prev, isLoading: false }));
         return;
       }
@@ -40,14 +46,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const user = await api.getMe();
         setState({
           user,
-          token,
+          token: authToken,
           isLoading: false,
           isAuthenticated: true,
         });
 
         // Connect socket
-        if (token) {
-          await socketService.connect(token);
+        if (authToken) {
+          await socketService.connect(authToken);
         }
       } catch (error) {
         if (shouldUseBypass) {
@@ -60,7 +66,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return;
         }
 
-        localStorage.removeItem('token');
+        setToken(null);
         setState({
           user: null,
           token: null,
@@ -71,7 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     checkAuth();
-  }, []);
+  }, [setToken, token]);
 
   const login = useCallback(async (email: string, password: string) => {
     setState((prev) => ({ ...prev, isLoading: true }));
@@ -79,7 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const response = await api.login({ email: normalizeEmail(email), password });
 
-      localStorage.setItem('token', response.token);
+      setToken(response.token);
       setState({
         user: response.user,
         token: response.token,
@@ -93,12 +99,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setState((prev) => ({ ...prev, isLoading: false }));
       throw error;
     }
-  }, []);
+  }, [setToken]);
 
   const register = useCallback(async (username: string, email: string, password: string) => {
     const response = await api.register({ username: username.trim(), email: normalizeEmail(email), password });
 
-    localStorage.setItem('token', response.token);
+    setToken(response.token);
     setState({
       user: response.user,
       token: response.token,
@@ -108,10 +114,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Connect socket
     await socketService.connect(response.token);
-  }, []);
+  }, [setToken]);
 
   const logout = useCallback(() => {
-    localStorage.removeItem('token');
+    setToken(null);
     socketService.disconnect();
     setState({
       user: null,
@@ -119,7 +125,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isLoading: false,
       isAuthenticated: false,
     });
-  }, []);
+  }, [setToken]);
 
   const updateUser = useCallback((data: Partial<User>) => {
     setState((prev) => ({

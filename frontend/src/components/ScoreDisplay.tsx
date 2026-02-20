@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useAnimation } from '../hooks';
 
 interface ScoreDisplayProps {
   score: number;
@@ -10,7 +11,7 @@ interface ScoreDisplayProps {
 export function ScoreDisplay({ score, previousScore = 0, showAnimation = true }: ScoreDisplayProps) {
   const { t } = useTranslation();
   const [displayScore, setDisplayScore] = useState(previousScore);
-  const [isAnimating, setIsAnimating] = useState(false);
+  const { isAnimating, triggerAnimation } = useAnimation(500);
 
   useEffect(() => {
     if (!showAnimation || score === previousScore) {
@@ -18,27 +19,25 @@ export function ScoreDisplay({ score, previousScore = 0, showAnimation = true }:
       return;
     }
 
-    setIsAnimating(true);
+    triggerAnimation();
     const difference = score - previousScore;
-    const duration = 500; // ms
     const steps = 20;
     const increment = difference / steps;
-    const stepDuration = duration / steps;
+    const stepDuration = 500 / steps;
 
     let currentStep = 0;
-    const timer = setInterval(() => {
+    const timer = window.setInterval(() => {
       currentStep++;
       if (currentStep >= steps) {
         setDisplayScore(score);
-        setIsAnimating(false);
-        clearInterval(timer);
+        window.clearInterval(timer);
       } else {
         setDisplayScore(Math.round(previousScore + increment * currentStep));
       }
     }, stepDuration);
 
-    return () => clearInterval(timer);
-  }, [score, previousScore, showAnimation]);
+    return () => window.clearInterval(timer);
+  }, [score, previousScore, showAnimation, triggerAnimation]);
 
   const pointsGained = score - previousScore;
 

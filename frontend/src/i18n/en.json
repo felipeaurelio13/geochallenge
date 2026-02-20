@@ -222,7 +222,8 @@
     "stats": "Statistics",
     "totalPlayers": "Total players",
     "topScore": "Top score",
-    "avgScore": "Average"
+    "avgScore": "Average",
+    "searchPlaceholder": "Search player..."
   },
   "profile": {
     "title": "My Profile",
@@ -252,6 +253,7 @@
     "back": "Back",
     "backToMenu": "Back to Menu",
     "save": "Save",
-    "skipToMainAction": "Skip to main actions"
+    "skipToMainAction": "Skip to main actions",
+    "search": "Search"
   }
 }

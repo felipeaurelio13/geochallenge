@@ -1,15 +1,29 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { z } from 'zod';
 import { useAuth } from '../context/AuthContext';
+import { useFormValidation } from '../hooks';
 import { LoadingSpinner } from '../components';
+
+const registerSchema = z
+  .object({
+    username: z.string().trim().min(3, 'Mínimo 3 caracteres').max(20, 'Máximo 20 caracteres'),
+    email: z.string().trim().email('Email inválido'),
+    password: z.string().min(6, 'Mínimo 6 caracteres'),
+    confirmPassword: z.string().min(6, 'Mínimo 6 caracteres'),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    path: ['confirmPassword'],
+    message: 'Las contraseñas no coinciden',
+  });
 
 export function RegisterPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { register, isLoading } = useAuth();
 
-  const [formData, setFormData] = useState({
+  const { values, errors, setFieldValue, validate } = useFormValidation(registerSchema, {
     username: '',
     email: '',
     password: '',
@@ -21,29 +35,20 @@ export function RegisterPage() {
     e.preventDefault();
     setError('');
 
-    if (formData.password !== formData.confirmPassword) {
-      setError(t('auth.passwordMismatch'));
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      setError(t('auth.passwordTooShort'));
+    if (!validate()) {
       return;
     }
 
     try {
-      await register(formData.username, formData.email, formData.password);
+      await register(values.username, values.email, values.password);
       navigate('/menu');
     } catch (err: any) {
-      setError(err.response?.data?.error || t('auth.registerError'));
+      setError(err?.response?.data?.error || t('auth.registerError'));
     }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setFieldValue(e.target.name as keyof typeof values, e.target.value);
   };
 
   return (
@@ -59,17 +64,11 @@ export function RegisterPage() {
         </div>
 
         <div className="rounded-2xl border border-gray-800 bg-gray-900/95 p-5 shadow-xl shadow-black/20 sm:p-8">
-          <h2 className="text-2xl font-bold text-white mb-6 text-center">
-            {t('auth.register')}
-          </h2>
+          <h2 className="text-2xl font-bold text-white mb-6 text-center">{t('auth.register')}</h2>
 
-          {error && (
-            <div className="bg-red-900/50 border border-red-500 text-red-300 px-4 py-3 rounded-lg mb-6 text-sm">
-              {error}
-            </div>
-          )}
+          {error && <div className="bg-red-900/50 border border-red-500 text-red-300 px-4 py-3 rounded-lg mb-6 text-sm">{error}</div>}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-5" noValidate>
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-gray-200 mb-2">
                 {t('auth.username')}
@@ -78,7 +77,7 @@ export function RegisterPage() {
                 type="text"
                 id="username"
                 name="username"
-                value={formData.username}
+                value={values.username}
                 onChange={handleChange}
                 required
                 minLength={3}
@@ -86,6 +85,7 @@ export function RegisterPage() {
                 className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/70 focus:border-primary transition-colors"
                 placeholder="GeoMaster2024"
               />
+              {errors.username && <p className="mt-1 text-xs text-red-300">{errors.username}</p>}
             </div>
 
             <div>
@@ -96,12 +96,13 @@ export function RegisterPage() {
                 type="email"
                 id="email"
                 name="email"
-                value={formData.email}
+                value={values.email}
                 onChange={handleChange}
                 required
                 className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/70 focus:border-primary transition-colors"
                 placeholder="tu@email.com"
               />
+              {errors.email && <p className="mt-1 text-xs text-red-300">{errors.email}</p>}
             </div>
 
             <div>
@@ -112,7 +113,7 @@ export function RegisterPage() {
                 type="password"
                 id="password"
                 name="password"
-                value={formData.password}
+                value={values.password}
                 onChange={handleChange}
                 required
                 minLength={6}
@@ -120,6 +121,7 @@ export function RegisterPage() {
                 placeholder="********"
               />
               <p className="mt-1 text-xs text-gray-500">{t('auth.passwordHint')}</p>
+              {errors.password && <p className="mt-1 text-xs text-red-300">{errors.password}</p>}
             </div>
 
             <div>
@@ -130,12 +132,13 @@ export function RegisterPage() {
                 type="password"
                 id="confirmPassword"
                 name="confirmPassword"
-                value={formData.confirmPassword}
+                value={values.confirmPassword}
                 onChange={handleChange}
                 required
                 className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/70 focus:border-primary transition-colors"
                 placeholder="********"
               />
+              {errors.confirmPassword && <p className="mt-1 text-xs text-red-300">{errors.confirmPassword}</p>}
             </div>
 
             <button
