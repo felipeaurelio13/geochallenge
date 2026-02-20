@@ -203,7 +203,7 @@ describe('DuelPage socket flow', () => {
     });
 
     const main = screen.getByRole('main');
-    expect(main.className).toContain('pb-[calc(env(safe-area-inset-bottom)+6.7rem)]');
+    expect(main.className).toContain('pb-[6.35rem]');
 
     const tray = await screen.findByTestId('mobile-action-tray');
     expect(tray).toHaveClass('fixed');

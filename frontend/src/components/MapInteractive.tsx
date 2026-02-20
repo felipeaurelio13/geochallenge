@@ -146,7 +146,7 @@ export function MapInteractive({
         <MapContainer
           center={MAP_DEFAULT_VIEW.center}
           zoom={MAP_DEFAULT_VIEW.zoom}
-          style={{ height: 'clamp(260px, 52vh, 420px)', width: '100%' }}
+          style={{ height: 'clamp(240px, 46svh, 400px)', width: '100%' }}
           className="z-0 touch-manipulation"
         >
           <TileLayer
@@ -188,7 +188,7 @@ export function MapInteractive({
         </MapContainer>
       </div>
 
-      <div className="mt-4 text-center" aria-live="polite">
+      <div className="mt-2 text-center" aria-live="polite">
         {!selectedLocation && !showResult && (
           <p className="text-sm text-gray-400">{t('game.clickMap')}</p>
         )}

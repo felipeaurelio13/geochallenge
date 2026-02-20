@@ -42,8 +42,8 @@ export function GameRoundScaffold({
   isLowTime,
   lowTimeHint,
   actionTray,
-  rootClassName = 'h-full min-h-0 bg-gray-900 flex flex-col overflow-x-hidden',
-  mainClassName = 'flex-1 min-h-0 overflow-y-auto overscroll-contain px-3 py-2 pb-[calc(env(safe-area-inset-bottom)+6.7rem)] sm:px-4 sm:py-3 sm:pb-28',
+  rootClassName = 'h-full min-h-0 bg-gray-900 flex flex-col overflow-hidden',
+  mainClassName = 'flex-1 min-h-0 overflow-hidden px-3 pt-1.5 pb-[6.35rem] sm:px-4 sm:pt-2 sm:pb-24',
   optionsGridClassName = 'grid gap-2 sm:gap-2.5 grid-cols-2',
 }: GameRoundScaffoldProps) {
   return (
@@ -52,49 +52,52 @@ export function GameRoundScaffold({
       {progress}
 
       <main className={mainClassName}>
-        <div className="max-w-4xl mx-auto flex flex-col gap-2">
-          <QuestionCard
-            question={question}
-            questionNumber={questionNumber}
-            totalQuestions={totalQuestions}
-            compact={compactQuestionCard}
-          />
+        <div className="mx-auto flex h-full w-full max-w-4xl min-h-0 flex-col">
+          {/* min-h-0 + flex-1 permite que este bloque se encoja dentro del layout y solo haga scroll si realmente no cabe. */}
+          <div className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto overscroll-contain">
+            <QuestionCard
+              question={question}
+              questionNumber={questionNumber}
+              totalQuestions={totalQuestions}
+              compact={compactQuestionCard}
+            />
 
-          {isMapQuestion ? (
-            mapContent
-          ) : (
-            <div className={optionsGridClassName}>
-              {question.options.map((option, index) => (
-                <OptionButton
-                  key={option}
-                  option={option}
-                  index={index}
-                  onClick={() => onOptionSelect(option)}
-                  disabled={showResult || disableOptions}
-                  selected={selectedAnswer === option}
-                  isCorrect={option === question.correctAnswer}
-                  showResult={showResult}
-                />
-              ))}
-            </div>
-          )}
+            {isMapQuestion ? (
+              mapContent
+            ) : (
+              <div className={optionsGridClassName}>
+                {question.options.map((option, index) => (
+                  <OptionButton
+                    key={option}
+                    option={option}
+                    index={index}
+                    onClick={() => onOptionSelect(option)}
+                    disabled={showResult || disableOptions}
+                    selected={selectedAnswer === option}
+                    isCorrect={option === question.correctAnswer}
+                    showResult={showResult}
+                  />
+                ))}
+              </div>
+            )}
 
-          {contextHint && !showResult && (
-            <div className="rounded-2xl border border-gray-700 bg-gray-800/60 px-3.5 py-2">
-              <p className="text-sm leading-relaxed text-gray-100 sm:text-base" aria-live="polite">
-                {contextHint}
-              </p>
-              {Boolean(isLowTime && lowTimeHint) && (
-                <p className="mt-1.5 text-xs font-semibold text-amber-300 sm:text-sm" aria-live="assertive">
-                  {lowTimeHint}
+            {contextHint && !showResult && (
+              <div className="rounded-2xl border border-gray-700 bg-gray-800/60 px-3.5 py-2">
+                <p className="text-sm leading-relaxed text-gray-100 sm:text-base" aria-live="polite">
+                  {contextHint}
                 </p>
-              )}
-            </div>
-          )}
-
-          {actionTray}
+                {Boolean(isLowTime && lowTimeHint) && (
+                  <p className="mt-1.5 text-xs font-semibold text-amber-300 sm:text-sm" aria-live="assertive">
+                    {lowTimeHint}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </main>
+
+      {actionTray}
     </div>
   );
 }
