@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { prisma } from '../config/database.js';
 import { generateToken, authenticateJWT, AuthRequest } from '../middleware/auth.js';
 import { authLimiter } from '../middleware/rateLimit.js';
+import { normalizeEmail, normalizeUsername } from '../utils/authNormalization.js';
 
 const router = Router();
 
@@ -43,17 +44,19 @@ router.post('/register', authLimiter, async (req: Request, res: Response) => {
       return;
     }
 
-    const { username, email, password, preferredLanguage } = validation.data;
+    const normalizedUsername = normalizeUsername(validation.data.username);
+    const normalizedEmail = normalizeEmail(validation.data.email);
+    const { password, preferredLanguage } = validation.data;
 
     // Verificar si el usuario ya existe
     const existingUser = await prisma.user.findFirst({
       where: {
-        OR: [{ email }, { username }],
+        OR: [{ email: { equals: normalizedEmail, mode: 'insensitive' } }, { username: normalizedUsername }],
       },
     });
 
     if (existingUser) {
-      const field = existingUser.email === email ? 'email' : 'nombre de usuario';
+      const field = existingUser.email.toLowerCase() === normalizedEmail ? 'email' : 'nombre de usuario';
       res.status(400).json({ error: `El ${field} ya está registrado` });
       return;
     }
@@ -64,8 +67,8 @@ router.post('/register', authLimiter, async (req: Request, res: Response) => {
     // Crear usuario
     const user = await prisma.user.create({
       data: {
-        username,
-        email,
+        username: normalizedUsername,
+        email: normalizedEmail,
         passwordHash,
         preferredLanguage,
       },
@@ -114,11 +117,17 @@ router.post('/login', authLimiter, async (req: Request, res: Response) => {
       return;
     }
 
-    const { email, password } = validation.data;
+    const normalizedEmail = normalizeEmail(validation.data.email);
+    const { password } = validation.data;
 
-    // Buscar usuario
-    const user = await prisma.user.findUnique({
-      where: { email },
+    // Buscar usuario (email case-insensitive + trim)
+    const user = await prisma.user.findFirst({
+      where: {
+        email: {
+          equals: normalizedEmail,
+          mode: 'insensitive',
+        },
+      },
     });
 
     if (!user) {

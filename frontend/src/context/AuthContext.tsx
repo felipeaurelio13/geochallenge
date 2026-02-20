@@ -13,6 +13,10 @@ interface AuthContextType extends AuthState {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
+function normalizeEmail(email: string) {
+  return email.trim().toLowerCase();
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AuthState>({
     user: null,
@@ -73,7 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setState((prev) => ({ ...prev, isLoading: true }));
 
     try {
-      const response = await api.login({ email, password });
+      const response = await api.login({ email: normalizeEmail(email), password });
 
       localStorage.setItem('token', response.token);
       setState({
@@ -92,7 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const register = useCallback(async (username: string, email: string, password: string) => {
-    const response = await api.register({ username, email, password });
+    const response = await api.register({ username: username.trim(), email: normalizeEmail(email), password });
 
     localStorage.setItem('token', response.token);
     setState({

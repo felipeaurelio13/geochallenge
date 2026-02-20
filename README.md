@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.48**
+- Frontend: **v1.2.49**
 
 ### Mantener backend activo en producción
 Configura el secret **`BACKEND_HEALTHCHECK_URL`** en GitHub (Settings → Secrets and variables → Actions) con la URL pública de salud de tu API, por ejemplo:
@@ -41,6 +41,13 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 
 
 
+
+## Novedades de la versión 1.2.49
+- Se auditó y reforzó el flujo completo de autenticación para evitar fallas silenciosas en login/registro causadas por emails con espacios o mayúsculas.
+- Backend: el email ahora se normaliza (`trim + lowercase`) en login y registro, y la búsqueda de usuario en login se realiza en modo case-insensitive para mejorar robustez.
+- Frontend: `AuthContext` normaliza email y username antes de invocar la API, reduciendo errores de ingreso desde mobile/autocompletado.
+- Se añadieron pruebas automatizadas nuevas en frontend y backend para cubrir la normalización de credenciales y prevenir regresiones.
+- Footer/versionado actualizado a **v1.2.49** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.48
 - Se recuperó la visualización del enunciado en preguntas cuando `questionData` llega serializado como JSON string, parseándolo de forma segura para extraer `country/capital` y mantener la experiencia consistente.
