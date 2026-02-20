@@ -44,7 +44,6 @@ export function ChallengeGamePage() {
   const isMapQuestion = currentQuestion?.category === 'MAP';
   const hasSelection = Boolean(selectedAnswer || mapLocation);
   const isLastQuestion = currentIndex >= questions.length - 1;
-  const isLowTime = !showResult && timeRemaining <= Math.max(5, Math.floor(timePerQuestion * 0.2));
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -165,21 +164,6 @@ export function ChallengeGamePage() {
       setTimeRemaining(timePerQuestion);
     }
   };
-  const getContextHint = () => {
-    if (showResult) {
-      return isLastQuestion ? t('game.tapResultsHint') : t('game.tapNextHint');
-    }
-
-    if (isLowTime) {
-      return t('game.lowTimeHint', { seconds: Math.max(0, timeRemaining) });
-    }
-
-    if (isMapQuestion) {
-      return mapLocation ? t('game.selectionReadyHint') : t('game.selectOnMapHint');
-    }
-
-    return selectedAnswer ? t('game.selectionReadyHint') : t('game.selectOptionHint');
-  };
 
   if (loading) {
     return (
@@ -285,9 +269,6 @@ export function ChallengeGamePage() {
       onOptionSelect={setSelectedAnswer}
       showResult={showResult}
       optionsGridClassName={`grid gap-2.5 sm:gap-3 ${currentQuestion.category === 'FLAG' ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-2'}`}
-      contextHint={getContextHint()}
-      isLowTime={isLowTime}
-      lowTimeHint={t('game.lowTimeHint', { seconds: Math.max(0, timeRemaining) })}
       mapContent={
         <Suspense fallback={<LoadingSpinner size="lg" />}>
           <MapInteractive

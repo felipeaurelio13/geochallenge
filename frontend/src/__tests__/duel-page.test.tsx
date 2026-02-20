@@ -235,7 +235,7 @@ describe('DuelPage socket flow', () => {
     expect(screen.queryByRole('button', { name: 'game.clearSelection' })).not.toBeInTheDocument();
   });
 
-  it('muestra mensaje de bajo tiempo al entrar a los últimos segundos', async () => {
+  it('prioriza una interfaz limpia sin mensajes de bajo tiempo en el cuerpo', async () => {
     render(<DuelPage />);
 
     act(() => {
@@ -256,7 +256,7 @@ describe('DuelPage socket flow', () => {
 
     fireEvent.click(await screen.findByRole('button', { name: 'timer' }));
 
-    expect(await screen.findByText(/game\.lowTimeHint/)).toBeInTheDocument();
+    expect(screen.queryByText(/game\.lowTimeHint/)).not.toBeInTheDocument();
   });
 
   it('envía el questionId al mapa para resetear viewport entre preguntas de mapa consecutivas', async () => {

@@ -12,7 +12,6 @@ import {
 } from '../components';
 import { Question } from '../types';
 import { GAME_CONSTANTS } from '../constants/game';
-import { getPostAnswerHintKey } from '../utils/gameFlow';
 
 const MapInteractive = lazy(() =>
   import('../components/MapInteractive').then((m) => ({ default: m.MapInteractive }))
@@ -51,7 +50,6 @@ export function GamePage() {
   const isLoading = status === 'loading';
   const isLastQuestion = currentIndex >= questions.length - 1;
   const hasSelection = Boolean(selectedAnswer || mapLocation);
-  const isLowTime = timeRemaining > 0 && timeRemaining <= 5 && !showResult;
   const shouldUseCompactQuestionCard = true;
 
   // Prevent accidental navigation during game
@@ -205,7 +203,7 @@ export function GamePage() {
   return (
     <GameRoundScaffold
       header={
-        <header className="sticky top-0 z-30 border-b border-gray-700 bg-gray-800/95 px-3 pb-2 pt-[calc(env(safe-area-inset-top)+0.35rem)] backdrop-blur sm:px-4 sm:py-3">
+        <header className="sticky top-0 z-30 border-b border-gray-700 bg-gray-800/95 px-3 py-2 backdrop-blur sm:px-4 sm:py-3">
           <div className="max-w-4xl mx-auto grid grid-cols-[auto_1fr_auto] items-center gap-2 sm:gap-4">
             <button
               onClick={() => {
@@ -234,12 +232,6 @@ export function GamePage() {
       }
       progress={
         <div className="bg-gray-800/70 px-3 py-1.5 sm:px-4 sm:py-2">
-          <div className="mx-auto mb-2 flex w-full max-w-4xl items-center justify-between rounded-xl border border-gray-700 bg-gray-900/55 px-3 py-1.5 text-xs text-gray-300 sm:text-sm">
-            <span>{t('game.questionOf', { current: currentIndex + 1, total: questions.length })}</span>
-            <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${hasSelection ? 'bg-emerald-500/20 text-emerald-200 border border-emerald-400/40' : 'bg-gray-700/70 text-gray-300 border border-gray-600'}`}>
-              {hasSelection ? t('game.selectedOption') : t('game.submit')}
-            </span>
-          </div>
           <div className="max-w-4xl mx-auto overflow-x-hidden">
             <ProgressBar
               current={currentIndex + 1}
@@ -275,19 +267,14 @@ export function GamePage() {
       onOptionSelect={handleOptionSelect}
       showResult={showResult}
       optionsGridClassName={`grid gap-2.5 sm:gap-3 ${isFlagQuestion ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-2'}`}
-      contextHint={t(!hasSelection ? (isMapQuestion ? 'game.selectOnMapHint' : 'game.selectOptionHint') : 'game.selectionReadyHint')}
-      isLowTime={isLowTime}
-      lowTimeHint={t('game.lowTimeHint', { seconds: timeRemaining })}
       actionTray={
         <RoundActionTray
           mode="single"
           showResult={showResult}
           canSubmit={hasSelection}
           submitLabel={t('game.submit')}
-          selectionAssistiveText={t('game.selectionReadyShortHint')}
           nextLabel={isLastQuestion ? t('game.seeResults') : t('game.next')}
           resultLabel={lastAnswerCorrect ? t('game.correct') : t('game.incorrect')}
-          resultHint={t(getPostAnswerHintKey(isLastQuestion))}
           showResultBadge
           isCorrect={lastAnswerCorrect}
           onSubmit={handleSubmitAnswer}

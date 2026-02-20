@@ -1,3 +1,4 @@
+import { useMemo, useState } from 'react';
 import { Question } from '../types';
 import { useTranslation } from 'react-i18next';
 
@@ -10,30 +11,7 @@ interface QuestionCardProps {
 
 export function QuestionCard({ question, questionNumber, totalQuestions, compact = false }: QuestionCardProps) {
   const { t } = useTranslation();
-
-  // Guard against undefined question
-  if (!question) {
-    return (
-      <div className="bg-gray-800 rounded-xl p-6 shadow-lg">
-        <div className="text-center text-gray-400">Loading...</div>
-      </div>
-    );
-  }
-
-  const getCategoryIcon = () => {
-    switch (question.category) {
-      case 'FLAG':
-        return '🏳️';
-      case 'CAPITAL':
-        return '🏛️';
-      case 'MAP':
-        return '🗺️';
-      case 'SILHOUETTE':
-        return '🖼️';
-      default:
-        return '🌍';
-    }
-  };
+  const [hasImageError, setHasImageError] = useState(false);
 
   // Get the questionData value - it could be a string or an object
   const getQuestionDataValue = (): string => {
@@ -115,46 +93,50 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
     return `game.difficulty.${difficulty}`;
   };
 
-  return (
-    <div className={`rounded-3xl border border-gray-700 bg-gray-800/95 shadow-xl shadow-black/25 overflow-hidden ${compact ? 'px-4 py-3.5 sm:px-5 sm:py-4' : 'px-4 py-5 sm:px-6 sm:py-6'}`}>
-      {/* Progress indicator */}
-      <div className={`flex items-center justify-between ${compact ? 'mb-2.5' : 'mb-5'}`}>
-        <span className={`text-gray-400 ${compact ? 'hidden text-sm sm:inline' : 'text-sm'}`}>
-          {t('game.questionOf', { current: questionNumber, total: totalQuestions })}
-        </span>
-        <span className={`${compact ? 'text-2xl sm:text-3xl' : 'text-3xl'} leading-none`} aria-hidden="true">{getCategoryIcon()}</span>
-      </div>
+  const normalizedImageUrl = useMemo(() => {
+    if (!question.imageUrl) return '';
 
-      {/* Question content */}
+    if (question.category === 'FLAG') {
+      return question.imageUrl.replace(/(flagcdn\.com\/w\d+\/)([A-Z]{2})(\.png)$/i, (_match, prefix, code, suffix) => {
+        return `${prefix}${String(code).toLowerCase()}${suffix}`;
+      });
+    }
+
+    return question.imageUrl;
+  }, [question.category, question.imageUrl]);
+
+  const showQuestionImage =
+    Boolean(normalizedImageUrl) &&
+    !hasImageError &&
+    (question.category === 'FLAG' || question.category === 'SILHOUETTE');
+
+  return (
+    <div aria-label={t('game.questionOf', { current: questionNumber, total: totalQuestions })} className={`rounded-3xl border border-gray-700 bg-gray-800/95 shadow-xl shadow-black/25 overflow-hidden ${compact ? 'px-4 py-3 sm:px-5 sm:py-3.5' : 'px-4 py-5 sm:px-6 sm:py-6'}`}>
       <div className="text-center">
-        {/* Image for flag or silhouette questions */}
-        {question.imageUrl && (question.category === 'FLAG' || question.category === 'SILHOUETTE') && (
+        {showQuestionImage && (
           <div className={compact ? 'mb-3' : 'mb-6'}>
-            <img
-              src={question.imageUrl}
-              alt={t('game.questionImageAlt', { category: question.category.toLowerCase() })}
-              loading="lazy"
-              width={question.category === 'FLAG' ? 360 : 180}
-              height={question.category === 'FLAG' ? 180 : 180}
-              className={`mx-auto ${
-                question.category === 'FLAG'
-                  ? `${compact ? 'max-h-32 sm:max-h-48' : 'max-h-52'} w-full max-w-md rounded-xl border border-amber-400/70 bg-black/10 object-contain p-1 shadow-lg shadow-black/30 ring-1 ring-white/10`
-                  : `${compact ? 'max-h-24 sm:max-h-40' : 'max-h-48'} w-auto filter invert`
-              }`}
-              onError={(e) => {
-                // Hide broken images
-                (e.target as HTMLImageElement).style.display = 'none';
-              }}
-            />
+            <div className={`mx-auto flex items-center justify-center rounded-xl border border-gray-600/70 bg-black/15 px-2 ${question.category === 'FLAG' ? 'min-h-[5.5rem] sm:min-h-[7rem]' : 'min-h-[7rem] sm:min-h-[8.75rem]'}`}>
+              <img
+                src={normalizedImageUrl}
+                alt={t('game.questionImageAlt', { category: question.category.toLowerCase() })}
+                loading="lazy"
+                width={question.category === 'FLAG' ? 360 : 220}
+                height={question.category === 'FLAG' ? 190 : 220}
+                className={`mx-auto object-contain ${
+                  question.category === 'FLAG'
+                    ? 'h-[5rem] w-full max-w-md sm:h-[6.5rem]'
+                    : 'h-[6.5rem] w-full max-w-sm sm:h-[8.25rem] filter invert'
+                }`}
+                onError={() => setHasImageError(true)}
+              />
+            </div>
           </div>
         )}
 
-        {/* Question text */}
         <h2 className={`${compact ? 'text-[1.3rem] sm:text-3xl' : 'text-[1.8rem] sm:text-4xl'} leading-tight font-bold text-white break-words`}>
           {getQuestionText()}
         </h2>
 
-        {/* Difficulty indicator */}
         {question.difficulty && (
           <div className={compact ? 'mt-2.5' : 'mt-5'}>
             <span className={`inline-block rounded-full px-3.5 py-1 text-xs sm:text-sm font-semibold ${getDifficultyClass()}`}>
