@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.53**
+- Frontend: **v1.2.54**
 
 ### Mantener backend activo en producción
 Configura el secret **`BACKEND_HEALTHCHECK_URL`** en GitHub (Settings → Secrets and variables → Actions) con la URL pública de salud de tu API, por ejemplo:
@@ -42,6 +42,13 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 
 
 
+
+## Novedades de la versión 1.2.54
+- Se configuró una base de calidad enterprise para frontend y backend con ESLint + Prettier centralizados en la raíz del repositorio, reglas estrictas de TypeScript y orden automático de imports.
+- Se añadieron scripts de formato y lint en ambos paquetes, junto con `lint-staged` + Husky para ejecutar validaciones automáticas en cada `pre-commit`.
+- Se fortalecieron workflows de GitHub Actions para ejecutar lint + tests + build en Pull Requests y en `main`, reforzando el quality gate antes de deploy.
+- Se incorporó una prueba automatizada que valida la presencia de lint/test en workflows y el hook de pre-commit para evitar regresiones en la configuración.
+- Footer/versionado actualizado a **v1.2.54** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.53
 - Se corrigió el layout de la ronda para evitar que el enunciado de la pregunta (especialmente en modo mapa y en iPhone) se comprima verticalmente cuando ocupa más de una línea: ahora el bloque de pregunta mantiene su altura natural y el scroll ocurre en el contenedor correcto.

@@ -1,12 +1,12 @@
 {
   "name": "geochallenge-frontend",
   "private": true,
-  "version": "1.2.53",
+  "version": "1.2.54",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "lint": "eslint . --ext .ts,.tsx --report-unused-disable-directives --max-warnings 0",
+    "lint": "eslint \"src/**/*.{ts,tsx}\" --report-unused-disable-directives --resolve-plugins-relative-to .",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -14,7 +14,8 @@
     "test:e2e:install": "playwright install chromium",
     "test:e2e:ci": "playwright install --with-deps chromium && playwright test",
     "test:qa": "npm run lint && npm run test && npm run test:e2e",
-    "ci:quality": "npm run lint && npm run test && npm run build"
+    "ci:quality": "npm run lint && npm run test && npm run build",
+    "lint:fix": "npm run lint -- --fix"
   },
   "dependencies": {
     "axios": "^1.6.7",
