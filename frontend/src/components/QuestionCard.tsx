@@ -110,30 +110,54 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
     !hasImageError &&
     (question.category === 'FLAG' || question.category === 'SILHOUETTE');
 
+  const getImageContainerClassName = () => {
+    if (question.category === 'FLAG') {
+      return 'min-h-[5.5rem] sm:min-h-[7rem]';
+    }
+
+    return compact
+      ? 'min-h-[8.5rem] sm:min-h-[10.25rem]'
+      : 'min-h-[9rem] sm:min-h-[11rem]';
+  };
+
+  const getImageClassName = () => {
+    if (question.category === 'FLAG') {
+      return 'h-[5rem] w-full max-w-md sm:h-[6.5rem]';
+    }
+
+    return compact
+      ? 'h-[7.75rem] w-full max-w-sm sm:h-[9.25rem] filter invert'
+      : 'h-[8.25rem] w-full max-w-sm sm:h-[9.75rem] filter invert';
+  };
+
+  const headingClassName = `${
+    compact
+      ? question.category === 'MAP'
+        ? 'text-[1.15rem] sm:text-[1.45rem]'
+        : 'text-[1.3rem] sm:text-3xl'
+      : 'text-[1.8rem] sm:text-4xl'
+  } font-bold text-white break-words ${question.category === 'MAP' ? 'leading-snug' : 'leading-tight'}`;
+
   return (
     <div aria-label={t('game.questionOf', { current: questionNumber, total: totalQuestions })} className={`rounded-3xl border border-gray-700 bg-gray-800/95 shadow-xl shadow-black/25 overflow-hidden ${compact ? 'px-4 py-3 sm:px-5 sm:py-3.5' : 'px-4 py-5 sm:px-6 sm:py-6'}`}>
       <div className="text-center">
         {showQuestionImage && (
           <div className={compact ? 'mb-3' : 'mb-6'}>
-            <div className={`mx-auto flex items-center justify-center rounded-xl border border-gray-600/70 bg-black/15 px-2 ${question.category === 'FLAG' ? 'min-h-[5.5rem] sm:min-h-[7rem]' : 'min-h-[7rem] sm:min-h-[8.75rem]'}`}>
+            <div className={`mx-auto flex items-center justify-center rounded-xl border border-gray-600/70 bg-black/15 px-2 ${getImageContainerClassName()}`}>
               <img
                 src={normalizedImageUrl}
                 alt={t('game.questionImageAlt', { category: question.category.toLowerCase() })}
                 loading="lazy"
                 width={question.category === 'FLAG' ? 360 : 220}
                 height={question.category === 'FLAG' ? 190 : 220}
-                className={`mx-auto object-contain ${
-                  question.category === 'FLAG'
-                    ? 'h-[5rem] w-full max-w-md sm:h-[6.5rem]'
-                    : 'h-[6.5rem] w-full max-w-sm sm:h-[8.25rem] filter invert'
-                }`}
+                className={`mx-auto object-contain ${getImageClassName()}`}
                 onError={() => setHasImageError(true)}
               />
             </div>
           </div>
         )}
 
-        <h2 className={`${compact ? 'text-[1.3rem] sm:text-3xl' : 'text-[1.8rem] sm:text-4xl'} leading-tight font-bold text-white break-words`}>
+        <h2 className={headingClassName}>
           {getQuestionText()}
         </h2>
 
