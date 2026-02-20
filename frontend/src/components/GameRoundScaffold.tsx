@@ -49,12 +49,14 @@ export function GameRoundScaffold({
         <div className="mx-auto flex h-full w-full max-w-4xl min-h-0 flex-col">
           {/* min-h-0 + flex-1 permite que este bloque se encoja dentro del layout y solo haga scroll si realmente no cabe. */}
           <div className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto overscroll-contain">
-            <QuestionCard
-              question={question}
-              questionNumber={questionNumber}
-              totalQuestions={totalQuestions}
-              compact={compactQuestionCard}
-            />
+            <div className="shrink-0">
+              <QuestionCard
+                question={question}
+                questionNumber={questionNumber}
+                totalQuestions={totalQuestions}
+                compact={compactQuestionCard}
+              />
+            </div>
 
             {isMapQuestion ? (
               mapContent

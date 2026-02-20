@@ -85,6 +85,6 @@ describe('QuestionCard', () => {
 
     render(<QuestionCard question={question} questionNumber={3} totalQuestions={10} compact />);
 
-    expect(screen.getByRole('heading', { level: 2 })).toHaveClass('text-\[1.15rem\]', 'leading-snug');
+    expect(screen.getByRole('heading', { level: 2 })).toHaveClass('text-[1.15rem]', 'leading-snug');
   });
 });
