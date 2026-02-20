@@ -1,7 +1,7 @@
-import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
+import { useGesture, useLocalStorage, useMediaQuery } from '../hooks';
 
 type Category = 'FLAG' | 'CAPITAL' | 'MAP' | 'SILHOUETTE' | 'MIXED';
 
@@ -13,24 +13,40 @@ const categories: { id: Category; icon: string; labelKey: string }[] = [
   { id: 'MIXED', icon: '🎲', labelKey: 'categories.mixed' },
 ];
 
+const categorySerializer = {
+  parse: (value: string): Category => {
+    if (categories.some((cat) => cat.id === value)) {
+      return value as Category;
+    }
+
+    return 'MIXED';
+  },
+  stringify: (value: Category) => value,
+};
+
 export function MenuPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const [selectedCategory, setSelectedCategory] = React.useState<Category>(() => {
-    if (typeof window === 'undefined') return 'MIXED';
+  const isMobile = useMediaQuery('(max-width: 640px)');
 
-    const storedCategory = window.localStorage.getItem('geochallenge:last-category');
-    if (storedCategory && categories.some((cat) => cat.id === storedCategory)) {
-      return storedCategory as Category;
-    }
+  const [selectedCategory, setSelectedCategory] = useLocalStorage<Category>(
+    'geochallenge:last-category',
+    'MIXED',
+    categorySerializer
+  );
 
-    return 'MIXED';
+  const selectedCategoryIndex = categories.findIndex((category) => category.id === selectedCategory);
+
+  const updateCategoryByOffset = (offset: number) => {
+    const nextIndex = (selectedCategoryIndex + offset + categories.length) % categories.length;
+    setSelectedCategory(categories[nextIndex].id);
+  };
+
+  const swipeHandlers = useGesture({
+    onSwipeLeft: () => isMobile && updateCategoryByOffset(1),
+    onSwipeRight: () => isMobile && updateCategoryByOffset(-1),
   });
-
-  React.useEffect(() => {
-    window.localStorage.setItem('geochallenge:last-category', selectedCategory);
-  }, [selectedCategory]);
 
   const selectedCategoryLabel = t(
     categories.find((cat) => cat.id === selectedCategory)?.labelKey ?? 'categories.mixed'
@@ -75,7 +91,7 @@ export function MenuPage() {
           <p className="mt-1 text-sm text-gray-300">{t('menu.chooseMode')}</p>
         </section>
 
-        <section className="surface-panel mt-3 p-3.5 sm:mt-4 sm:p-5">
+        <section className="surface-panel mt-3 p-3.5 sm:mt-4 sm:p-5" {...swipeHandlers}>
           <h2 className="mb-2 text-sm font-semibold text-white sm:text-base">{t('menu.selectCategory')}</h2>
           <div className="scrollbar-none -mx-1 flex snap-x snap-mandatory gap-2 overflow-x-auto px-1 pb-1 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-2.5 sm:overflow-visible sm:px-0 lg:grid-cols-5">
             {categories.map((cat) => (

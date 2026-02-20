@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
+import { useApi, useDebounce } from '../hooks';
 import { LoadingSpinner } from '../components';
 
 interface LeaderboardEntry {
@@ -12,42 +13,54 @@ interface LeaderboardEntry {
   isCurrentUser?: boolean;
 }
 
+type RankingsResponse = {
+  leaderboard: LeaderboardEntry[];
+  userRank: number | null;
+  userScore: number | null;
+};
+
 export function RankingsPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 200);
 
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
-  const [userRank, setUserRank] = useState<number | null>(null);
-  const [userScore, setUserScore] = useState<number | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const { data, error, isLoading, run, invalidate } = useApi<RankingsResponse>(
+    async () => {
+      const leaderboardData = await api.getLeaderboard(50);
+      const userRankData = await api.getMyRank();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const leaderboardData = await api.getLeaderboard(50);
-        const userRankData = await api.getMyRank();
-
-        const entries = leaderboardData.leaderboard.map((entry, index) => ({
+      return {
+        leaderboard: leaderboardData.leaderboard.map((entry, index) => ({
           rank: index + 1,
           username: entry.username,
           score: entry.score,
           isCurrentUser: entry.username === user?.username,
-        }));
+        })),
+        userRank: userRankData.userRank?.rank || null,
+        userScore: userRankData.userRank?.score || null,
+      };
+    },
+    {
+      cacheKey: `rankings-${user?.username ?? 'anonymous'}`,
+      ttlMs: 60_000,
+    }
+  );
 
-        setLeaderboard(entries);
-        setUserRank(userRankData.userRank?.rank || null);
-        setUserScore(userRankData.userRank?.score || null);
-      } catch (err) {
-        setError(t('rankings.loadError'));
-        console.error('Failed to fetch leaderboard:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  useEffect(() => {
+    void run();
+  }, [run]);
 
-    fetchData();
-  }, [user?.username, t]);
+  const filteredLeaderboard = useMemo(() => {
+    const source = data?.leaderboard ?? [];
+    const normalizedSearch = debouncedSearch.trim().toLowerCase();
+
+    if (!normalizedSearch) {
+      return source;
+    }
+
+    return source.filter((entry) => entry.username.toLowerCase().includes(normalizedSearch));
+  }, [data?.leaderboard, debouncedSearch]);
 
   const getRankDisplay = (rank: number) => {
     if (rank === 1) return '🥇';
@@ -65,7 +78,6 @@ export function RankingsPage() {
 
   return (
     <div className="h-full min-h-0 bg-gray-900">
-      {/* Header */}
       <header className="bg-gray-800 border-b border-gray-700">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link to="/menu" className="text-gray-400 hover:text-white transition-colors">
@@ -74,41 +86,51 @@ export function RankingsPage() {
           <h1 className="text-xl font-bold text-white">
             🏆 {t('rankings.title')}
           </h1>
-          <div className="w-16" /> {/* Spacer */}
+          <div className="w-16" />
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 py-8">
-        {/* User's Position (if not in top 50) */}
-        {userRank && userRank > 50 && (
+      <main className="max-w-4xl mx-auto px-4 py-6 sm:py-8">
+        {data?.userRank && data.userRank > 50 && (
           <div className="mb-6 p-4 bg-primary/20 border border-primary rounded-xl">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <span className="text-2xl font-bold text-primary">#{userRank}</span>
+                <span className="text-2xl font-bold text-primary">#{data.userRank}</span>
                 <span className="text-white font-semibold">{user?.username}</span>
               </div>
-              <span className="text-xl font-bold text-white">
-                {userScore?.toLocaleString()} pts
-              </span>
+              <span className="text-xl font-bold text-white">{data.userScore?.toLocaleString()} pts</span>
             </div>
           </div>
         )}
 
-        {/* Loading State */}
-        {loading && (
+        <div className="mb-4">
+          <label htmlFor="rankings-search" className="mb-1 block text-xs font-medium uppercase tracking-wide text-gray-400">
+            {t('common.search')}
+          </label>
+          <input
+            id="rankings-search"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            className="w-full rounded-xl border border-gray-700 bg-gray-800 px-4 py-3 text-sm text-white placeholder-gray-500 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/60"
+            placeholder={t('rankings.searchPlaceholder', { defaultValue: 'Buscar jugador...' })}
+          />
+        </div>
+
+        {isLoading && (
           <div className="flex justify-center py-12">
             <LoadingSpinner size="lg" text={t('rankings.loading')} />
           </div>
         )}
 
-        {/* Error State */}
         {error && (
           <div className="text-center py-12">
             <div className="text-4xl mb-4">😢</div>
             <p className="text-gray-400">{error}</p>
             <button
-              onClick={() => window.location.reload()}
+              onClick={() => {
+                invalidate();
+                void run();
+              }}
               className="mt-4 px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/80 transition-colors"
             >
               {t('common.retry')}
@@ -116,22 +138,19 @@ export function RankingsPage() {
           </div>
         )}
 
-        {/* Leaderboard */}
-        {!loading && !error && (
+        {!isLoading && !error && (
           <div className="space-y-3">
-            {leaderboard.length === 0 ? (
+            {filteredLeaderboard.length === 0 ? (
               <div className="text-center py-12">
                 <div className="text-4xl mb-4">📊</div>
                 <p className="text-gray-400">{t('rankings.empty')}</p>
               </div>
             ) : (
-              leaderboard.map((entry) => (
+              filteredLeaderboard.map((entry) => (
                 <div
                   key={entry.rank}
                   className={`p-4 rounded-xl border-2 transition-transform hover:scale-[1.02] ${
-                    entry.isCurrentUser
-                      ? 'bg-primary/20 border-primary'
-                      : getRankStyle(entry.rank)
+                    entry.isCurrentUser ? 'bg-primary/20 border-primary' : getRankStyle(entry.rank)
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -152,9 +171,7 @@ export function RankingsPage() {
                         </span>
                       </div>
                     </div>
-                    <span className="text-xl font-bold text-white">
-                      {entry.score.toLocaleString()} pts
-                    </span>
+                    <span className="text-xl font-bold text-white">{entry.score.toLocaleString()} pts</span>
                   </div>
                 </div>
               ))
@@ -162,29 +179,22 @@ export function RankingsPage() {
           </div>
         )}
 
-        {/* Stats Summary */}
-        {!loading && !error && leaderboard.length > 0 && (
+        {!isLoading && !error && filteredLeaderboard.length > 0 && (
           <div className="mt-8 p-6 bg-gray-800 rounded-xl">
-            <h3 className="text-lg font-semibold text-white mb-4">
-              {t('rankings.stats')}
-            </h3>
+            <h3 className="text-lg font-semibold text-white mb-4">{t('rankings.stats')}</h3>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-center">
               <div>
-                <div className="text-2xl font-bold text-primary">
-                  {leaderboard.length}
-                </div>
+                <div className="text-2xl font-bold text-primary">{filteredLeaderboard.length}</div>
                 <div className="text-sm text-gray-400">{t('rankings.totalPlayers')}</div>
               </div>
               <div>
-                <div className="text-2xl font-bold text-white">
-                  {leaderboard[0]?.score.toLocaleString() || 0}
-                </div>
+                <div className="text-2xl font-bold text-white">{filteredLeaderboard[0]?.score.toLocaleString() || 0}</div>
                 <div className="text-sm text-gray-400">{t('rankings.topScore')}</div>
               </div>
               <div>
                 <div className="text-2xl font-bold text-white">
                   {Math.round(
-                    leaderboard.reduce((acc, e) => acc + e.score, 0) / leaderboard.length
+                    filteredLeaderboard.reduce((acc, entry) => acc + entry.score, 0) / filteredLeaderboard.length
                   ).toLocaleString()}
                 </div>
                 <div className="text-sm text-gray-400">{t('rankings.avgScore')}</div>

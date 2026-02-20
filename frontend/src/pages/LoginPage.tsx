@@ -1,24 +1,31 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { z } from 'zod';
 import { useAuth } from '../context/AuthContext';
+import { useFormValidation } from '../hooks';
 import { LoadingSpinner } from '../components';
+
+const loginSchema = z.object({
+  email: z.string().trim().email('Email inválido'),
+  password: z.string().trim().min(1, 'Ingresa tu contraseña'),
+});
 
 export function LoginPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { login, isLoading } = useAuth();
 
-  const [formData, setFormData] = useState({
+  const { values, errors, setFieldValue, isValid, validate } = useFormValidation(loginSchema, {
     email: '',
     password: '',
   });
+
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const isBusy = isLoading || isSubmitting;
-  const isFormComplete = formData.email.trim().length > 0 && formData.password.trim().length > 0;
 
   const getErrorMessage = (err: any) => {
     if (err?.response?.data?.retryAfterSeconds) {
@@ -37,10 +44,15 @@ export function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    if (!validate()) {
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      await login(formData.email, formData.password);
+      await login(values.email, values.password);
       navigate('/menu');
     } catch (err: any) {
       setError(getErrorMessage(err));
@@ -54,10 +66,7 @@ export function LoginPage() {
       setError('');
     }
 
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setFieldValue(e.target.name as 'email' | 'password', e.target.value);
   };
 
   return (
@@ -73,17 +82,11 @@ export function LoginPage() {
         </div>
 
         <div className="rounded-2xl border border-gray-800 bg-gray-900/95 p-5 shadow-xl shadow-black/20 sm:p-8">
-          <h2 className="text-2xl font-bold text-white mb-6 text-center">
-            {t('auth.login')}
-          </h2>
+          <h2 className="text-2xl font-bold text-white mb-6 text-center">{t('auth.login')}</h2>
 
-          {error && (
-            <div className="bg-red-900/40 border border-red-500/60 text-red-200 px-4 py-3 rounded-lg mb-6 text-sm">
-              {error}
-            </div>
-          )}
+          {error && <div className="bg-red-900/40 border border-red-500/60 text-red-200 px-4 py-3 rounded-lg mb-6 text-sm">{error}</div>}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-5" noValidate>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-200 mb-2">
                 {t('auth.email')}
@@ -92,7 +95,7 @@ export function LoginPage() {
                 type="email"
                 id="email"
                 name="email"
-                value={formData.email}
+                value={values.email}
                 onChange={handleChange}
                 required
                 autoFocus
@@ -102,6 +105,7 @@ export function LoginPage() {
                 className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/70 focus:border-primary transition-colors"
                 placeholder="tu@email.com"
               />
+              {errors.email && <p className="mt-1 text-xs text-red-300">{errors.email}</p>}
             </div>
 
             <div>
@@ -113,7 +117,7 @@ export function LoginPage() {
                   type={showPassword ? 'text' : 'password'}
                   id="password"
                   name="password"
-                  value={formData.password}
+                  value={values.password}
                   onChange={handleChange}
                   required
                   autoComplete="current-password"
@@ -130,11 +134,12 @@ export function LoginPage() {
                   {showPassword ? t('auth.hide') : t('auth.show')}
                 </button>
               </div>
+              {errors.password && <p className="mt-1 text-xs text-red-300">{errors.password}</p>}
             </div>
 
             <button
               type="submit"
-              disabled={isBusy || !isFormComplete}
+              disabled={isBusy || !isValid}
               className="w-full py-3.5 rounded-xl bg-primary text-white font-semibold border border-primary/80 shadow-lg shadow-primary/30 hover:bg-primary/90 active:scale-[0.99] transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/70 disabled:opacity-60 disabled:cursor-wait disabled:scale-100 flex items-center justify-center gap-2"
             >
               {isBusy ? (
@@ -147,7 +152,7 @@ export function LoginPage() {
               )}
             </button>
 
-            {!isFormComplete && (
+            {!isValid && (
               <p className="text-xs text-gray-400" aria-live="polite">
                 {t('auth.completeFieldsHint')}
               </p>

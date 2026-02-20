@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.54**
+- Frontend: **v1.2.55**
 
 ### Mantener backend activo en producción
 Configura el secret **`BACKEND_HEALTHCHECK_URL`** en GitHub (Settings → Secrets and variables → Actions) con la URL pública de salud de tu API, por ejemplo:
@@ -42,6 +42,14 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 
 
 
+
+## Novedades de la versión 1.2.55
+- Se extrajo lógica de negocio del frontend a un set de custom hooks reutilizables en `hooks/` (persistencia en localStorage, debounce, media query, tamaño de ventana, animaciones y gestos) para reducir lógica inline en componentes.
+- Se incorporó un hook `useApi` con soporte de caché temporal y mutaciones optimistas con rollback para mejorar experiencia percibida en rankings/perfil.
+- Login y registro ahora validan formularios con esquema (`Zod`) mediante `useFormValidation`, centralizando reglas y mensajes de error por campo.
+- Se refactorizaron vistas y componentes para usar hooks reutilizables (`MenuPage`, `RankingsPage`, `ProfilePage`, `ScoreDisplay`, `AppRoot`) y se añadió estado global mínimo para viewport/preferencias de interacción.
+- Se añadieron pruebas automatizadas para los nuevos hooks y se actualizaron traducciones para búsqueda en rankings.
+- Footer/versionado actualizado a **v1.2.55** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.54
 - Se configuró una base de calidad enterprise para frontend y backend con ESLint + Prettier centralizados en la raíz del repositorio, reglas estrictas de TypeScript y orden automático de imports.

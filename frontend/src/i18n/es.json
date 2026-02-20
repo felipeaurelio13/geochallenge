@@ -222,7 +222,8 @@
     "stats": "Estadísticas",
     "totalPlayers": "Jugadores totales",
     "topScore": "Mejor puntuación",
-    "avgScore": "Promedio"
+    "avgScore": "Promedio",
+    "searchPlaceholder": "Buscar jugador..."
   },
   "profile": {
     "title": "Mi Perfil",
@@ -252,6 +253,7 @@
     "back": "Volver",
     "backToMenu": "Volver al menú",
     "save": "Guardar",
-    "skipToMainAction": "Ir a las acciones principales"
+    "skipToMainAction": "Ir a las acciones principales",
+    "search": "Buscar"
   }
 }
