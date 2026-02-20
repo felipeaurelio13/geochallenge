@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.49**
+- Frontend: **v1.2.50**
 
 ### Mantener backend activo en producción
 Configura el secret **`BACKEND_HEALTHCHECK_URL`** en GitHub (Settings → Secrets and variables → Actions) con la URL pública de salud de tu API, por ejemplo:
@@ -41,6 +41,12 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 
 
 
+
+## Novedades de la versión 1.2.50
+- Se centralizó el footer global en el layout `Screen` para que la versión de la app aparezca de forma consistente en **todas las vistas** del frontend, incluyendo rutas protegidas y públicas.
+- Se retiraron footers duplicados en páginas que ya estaban renderizando versión manualmente para evitar inconsistencias y mantener jerarquía visual limpia en mobile-first.
+- Se actualizaron pruebas de vistas y layout para validar que el footer/versionado siga visible tras el cambio arquitectónico.
+- Footer/versionado actualizado a **v1.2.50** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.49
 - Se auditó y reforzó el flujo completo de autenticación para evitar fallas silenciosas en login/registro causadas por emails con espacios o mayúsculas.

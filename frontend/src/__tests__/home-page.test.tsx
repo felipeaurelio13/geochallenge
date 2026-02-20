@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { HomePage } from '../pages/HomePage';
+import { Screen } from '../components/Screen';
 
 const routerFutureConfig = {
   v7_startTransition: true,
@@ -52,7 +53,9 @@ describe('HomePage', () => {
 
     render(
       <MemoryRouter future={routerFutureConfig}>
-        <HomePage />
+        <Screen>
+          <HomePage />
+        </Screen>
       </MemoryRouter>
     );
 

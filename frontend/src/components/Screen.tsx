@@ -1,4 +1,5 @@
 import React from 'react';
+import { AppFooter } from './AppFooter';
 
 export type ScreenProps = {
   header?: React.ReactNode;
@@ -8,11 +9,13 @@ export type ScreenProps = {
 
 // Screen encapsulates a single viewport-sized route with fixed header/footer slots.
 export function Screen({ header, footer, children }: ScreenProps) {
+  const footerContent = footer ?? <AppFooter />;
+
   return (
     <section className="screen">
       {header ? <header className="screen-header">{header}</header> : null}
       <main className="screen-content">{children}</main>
-      {footer ? <footer className="screen-footer">{footer}</footer> : null}
+      <footer className="screen-footer">{footerContent}</footer>
     </section>
   );
 }

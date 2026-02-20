@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 import { RegisterPage } from '../pages/RegisterPage';
+import { Screen } from '../components/Screen';
 
 const routerFutureConfig = {
   v7_startTransition: true,
@@ -43,11 +44,13 @@ describe('RegisterPage', () => {
 
     const { container } = render(
       <MemoryRouter future={routerFutureConfig}>
-        <RegisterPage />
+        <Screen>
+          <RegisterPage />
+        </Screen>
       </MemoryRouter>
     );
 
-    expect(container.firstChild).toHaveClass('app-shell');
+    expect(container.querySelector('div.app-shell')).toBeInTheDocument();
     expect(screen.getByText(/v\d+\.\d+\.\d+/i)).toHaveClass('app-footer__version');
   });
 
@@ -57,7 +60,9 @@ describe('RegisterPage', () => {
 
     render(
       <MemoryRouter future={routerFutureConfig}>
-        <RegisterPage />
+        <Screen>
+          <RegisterPage />
+        </Screen>
       </MemoryRouter>
     );
 

@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { LoadingSpinner } from '../components';
-import { AppFooter } from '../components/AppFooter';
 
 export function RegisterPage() {
   const { t } = useTranslation();
@@ -172,7 +171,6 @@ export function RegisterPage() {
         </div>
       </main>
 
-      <AppFooter />
     </div>
   );
 }
