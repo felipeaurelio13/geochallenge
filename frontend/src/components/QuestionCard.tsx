@@ -38,9 +38,45 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
   // Get the questionData value - it could be a string or an object
   const getQuestionDataValue = (): string => {
     if (!question.questionData) return '';
-    if (typeof question.questionData === 'string') return question.questionData;
+    if (typeof question.questionData === 'string') {
+      const trimmedData = question.questionData.trim();
+
+      if (trimmedData.startsWith('{') && trimmedData.endsWith('}')) {
+        try {
+          const parsedData = JSON.parse(trimmedData) as { country?: string; capital?: string };
+          return parsedData.country || parsedData.capital || '';
+        } catch {
+          // Si no es JSON válido, se usa el valor original.
+        }
+      }
+
+      return question.questionData;
+    }
     // If it's an object, try to extract relevant field
     return question.questionData.country || question.questionData.capital || '';
+  };
+
+  const getFallbackQuestionText = () => {
+    const legacyQuestionText = (question as Partial<Question> & { question?: string }).question;
+    const dataValue = getQuestionDataValue();
+
+    if (question.questionText?.trim()) {
+      return question.questionText;
+    }
+
+    if (legacyQuestionText?.trim()) {
+      return legacyQuestionText;
+    }
+
+    if (question.category === 'CAPITAL') {
+      return t('game.questionCapital', { country: dataValue });
+    }
+
+    if (question.category === 'MAP') {
+      return t('game.questionMap', { capital: dataValue });
+    }
+
+    return dataValue;
   };
 
   const getQuestionText = () => {
@@ -51,14 +87,14 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
         return t('game.questionFlag');
       case 'CAPITAL':
         // For capital questions, questionData contains the country name
-        return t('game.questionCapital', { country: dataValue || question.questionText || '' });
+        return t('game.questionCapital', { country: dataValue || getFallbackQuestionText() });
       case 'MAP':
         // For map questions, questionData contains the capital/city to find
-        return t('game.questionMap', { capital: dataValue || question.questionText || '' });
+        return t('game.questionMap', { capital: dataValue || getFallbackQuestionText() });
       case 'SILHOUETTE':
         return t('game.questionSilhouette');
       default:
-        return question.questionText || '';
+        return getFallbackQuestionText();
     }
   };
 
