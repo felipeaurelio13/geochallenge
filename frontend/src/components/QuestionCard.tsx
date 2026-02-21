@@ -112,7 +112,7 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
 
   const getImageContainerClassName = () => {
     if (question.category === 'FLAG') {
-      return 'aspect-[3/2] min-h-[6rem] w-full max-w-md sm:min-h-[7rem]';
+      return 'aspect-[3/2] min-h-[3.9rem] w-full max-w-md sm:min-h-[4.75rem]';
     }
 
     return compact
@@ -142,7 +142,7 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
     <div aria-label={t('game.questionOf', { current: questionNumber, total: totalQuestions })} className={`rounded-3xl border border-gray-700 bg-gray-800/95 shadow-xl shadow-black/25 overflow-hidden ${compact ? 'px-4 py-3 sm:px-5 sm:py-3.5' : 'px-4 py-5 sm:px-6 sm:py-6'}`}>
       <div className="text-center">
         {showQuestionImage && (
-          <div className={compact ? 'mb-3' : 'mb-6'}>
+          <div className={compact ? 'mb-2' : 'mb-6'}>
             <div className={`mx-auto flex items-center justify-center overflow-hidden rounded-xl border border-gray-600/70 bg-black/15 px-2 ${getImageContainerClassName()}`}>
               <img
                 src={normalizedImageUrl}
@@ -157,17 +157,19 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
           </div>
         )}
 
-        <h2 className={headingClassName}>
-          {getQuestionText()}
-        </h2>
+        <div className={`flex ${compact ? 'flex-row items-start justify-center gap-2 text-left' : 'flex-col items-center'} `}>
+          <h2 className={headingClassName}>
+            {getQuestionText()}
+          </h2>
 
-        {question.difficulty && (
-          <div className={compact ? 'mt-2.5' : 'mt-5'}>
-            <span className={`inline-block rounded-full px-3.5 py-1 text-xs sm:text-sm font-semibold ${getDifficultyClass()}`}>
-              {t(getDifficultyKey())}
-            </span>
-          </div>
-        )}
+          {question.difficulty && (
+            <div className={compact ? 'mt-0.5 shrink-0' : 'mt-5'}>
+              <span className={`inline-block rounded-full ${compact ? 'px-2.5 py-0.5 text-[0.65rem] sm:text-xs' : 'px-3.5 py-1 text-xs sm:text-sm'} font-semibold ${getDifficultyClass()}`}>
+                {t(getDifficultyKey())}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
