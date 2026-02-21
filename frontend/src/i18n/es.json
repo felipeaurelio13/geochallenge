@@ -71,7 +71,9 @@
     "selectCategory": "Selecciona una categoría",
     "selectedCategory": "Categoría activa",
     "mobileCategoriesHint": "Desliza para ver más categorías",
-    "quickActions": "Acciones rápidas"
+    "quickActions": "Acciones rápidas",
+    "welcomeExplore": "¡Hola {{name}}! ¿Qué vamos a explorar hoy?",
+    "gameModes": "Modos de juego"
   },
   "categories": {
     "mixed": "Mixto",

@@ -4,7 +4,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.59**
+- Frontend: **v1.2.60**
 
 ### Mantener backend activo en producción
 
@@ -23,6 +23,15 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 5. Si falla deploy, revisar primero el job `Frontend quality gate`: ese job corta el release antes de publicar para evitar romper producción.
 6. El workflow de deploy se dispara solo con cambios de frontend o del propio pipeline, reduciendo ruido por cambios ajenos al cliente web.
 7. Si el deploy falla, usar este protocolo interno: (a) `npm run ci:quality` local, (b) revisar secretos/configuración de Pages, (c) relanzar workflow solo tras corregir la causa raíz.
+
+## Novedades de la versión 1.2.60
+
+- Se simplificó la pantalla de menú eliminando redundancias de categoría activa: ya no se muestra el texto duplicado ni la cápsula intermedia, dejando al estado visual del carrusel como fuente principal de contexto.
+- Se mejoró la jerarquía visual con un saludo más sutil y una única sección explícita de **Modos de juego**, reduciendo ruido vertical y facilitando la lectura mobile-first.
+- Se ajustó el layout para evitar el efecto de “cajas dentro de cajas”: las categorías ahora flotan sobre el fondo, mantienen scroll horizontal natural y refuerzan contraste en estados desactivados.
+- Se añadieron íconos descriptivos en acciones de juego (`Un Jugador`, `Duelo`, `Desafíos`) para aumentar feedback visual inmediato y escaneabilidad.
+- Se actualizaron pruebas de `MenuPage` para cubrir la eliminación de textos redundantes, la nueva jerarquía de títulos y la persistencia de categoría activa sin labels duplicados.
+- Footer/versionado actualizado a **v1.2.60** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.59
 
