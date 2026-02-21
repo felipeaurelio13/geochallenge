@@ -46,7 +46,6 @@ export function GamePage() {
 
   const currentQuestion: Question | null = questions[currentIndex] || null;
   const isMapQuestion = currentQuestion?.category === 'MAP';
-  const isFlagQuestion = currentQuestion?.category === 'FLAG';
   const isLoading = status === 'loading';
   const isLastQuestion = currentIndex >= questions.length - 1;
   const hasSelection = Boolean(selectedAnswer || mapLocation);
