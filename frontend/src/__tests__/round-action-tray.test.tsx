@@ -17,9 +17,8 @@ describe('RoundActionTray', () => {
     );
 
     const tray = screen.getByTestId('mobile-action-tray');
-    expect(tray).toHaveClass('fixed');
-    expect(tray).toHaveClass('bottom-0');
-    expect(tray.className).toContain('pt-1');
+    expect(tray).toHaveClass('w-full');
+    expect(tray.className).toContain('pt-2');
 
     fireEvent.click(screen.getByRole('button', { name: 'Enviar' }));
 
@@ -43,7 +42,7 @@ describe('RoundActionTray', () => {
     );
 
     const tray = screen.getByTestId('mobile-action-tray');
-    expect(tray).toHaveClass('fixed');
+    expect(tray).toHaveClass('w-full');
     expect(screen.getByText('resumen')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Siguiente' }));

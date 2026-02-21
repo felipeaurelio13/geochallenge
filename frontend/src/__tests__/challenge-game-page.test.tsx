@@ -85,14 +85,14 @@ describe('ChallengeGamePage', () => {
     });
   });
 
-  it('renderiza alternativas en grilla de dos columnas para reducir scroll en mobile', async () => {
+  it('renderiza alternativas en lista vertical universal para reducir scroll en mobile', async () => {
     render(<ChallengeGamePage />);
 
     const firstOption = await screen.findByRole('button', { name: 'Santiago' });
     const optionsGrid = firstOption.parentElement;
 
     expect(optionsGrid).toHaveClass('grid');
-    expect(optionsGrid).toHaveClass('grid-cols-2');
+    expect(optionsGrid).toHaveClass('grid-cols-1');
 
     await waitFor(() => {
       expect(mocks.apiGetMock).toHaveBeenCalledWith('/challenges/challenge-1/questions');

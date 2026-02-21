@@ -22,7 +22,7 @@ describe('OptionButton', () => {
     expect(button).toHaveAttribute('aria-pressed', 'true');
     expect(button.className).toContain('ring-2');
     expect(button.className).toContain('option-button-base');
-    expect(button.className).toContain('py-2');
+    expect(button.className).toContain('py-3');
     expect(screen.getByText('✓')).toBeInTheDocument();
 
     fireEvent.click(button);
@@ -72,5 +72,24 @@ describe('OptionButton', () => {
 
     const optionText = screen.getByText('AndorraLaVellaAndorraLaVellaAndorraLaVella');
     expect(optionText.className).toContain('[overflow-wrap:anywhere]');
+  });
+
+  it('mantiene fondo sólido en estado de resultado para evitar transparencia', () => {
+    render(
+      <OptionButton
+        option="Perú"
+        index={1}
+        onClick={() => {}}
+        disabled
+        selected={false}
+        isCorrect={false}
+        showResult
+      />
+    );
+
+    const button = screen.getByRole('button');
+    expect(button.className).toContain('bg-gray-800');
+    expect(button.className).not.toContain('opacity');
+    expect(button.className).not.toContain('transparent');
   });
 });

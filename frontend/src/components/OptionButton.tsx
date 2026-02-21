@@ -21,27 +21,27 @@ export function OptionButton({
 }: OptionButtonProps) {
   const getButtonClasses = () => {
     const baseClasses =
-      'w-full rounded-2xl text-left transition-all duration-200 flex items-start gap-2 overflow-hidden border-2 px-3 py-2 option-button-base sm:items-center sm:px-3.5 sm:py-2.5';
+      'w-full rounded-2xl text-left transition-all duration-200 flex items-start gap-2 overflow-hidden border-2 px-3 py-3 option-button-base sm:items-center sm:px-3.5 sm:py-3';
 
     if (showResult) {
       if (isCorrect) {
-        return `${baseClasses} bg-green-600/25 border-green-400 text-green-100`;
+        return `${baseClasses} bg-green-600 border-green-400 text-white`;
       }
       if (selected && !isCorrect) {
-        return `${baseClasses} bg-red-600/20 border-red-400 text-red-100`;
+        return `${baseClasses} bg-red-600 border-red-400 text-white`;
       }
-      return `${baseClasses} bg-gray-800/70 border-gray-700 text-gray-500 opacity-60`;
+      return `${baseClasses} bg-gray-800 border-gray-700 text-gray-200`;
     }
 
     if (selected) {
-      return `${baseClasses} bg-primary/20 border-primary text-white ring-2 ring-primary/60 shadow-lg shadow-primary/20`;
+      return `${baseClasses} bg-gray-800 border-blue-400 text-white ring-2 ring-blue-400/80 shadow-lg shadow-blue-500/20`;
     }
 
     if (disabled) {
       return `${baseClasses} bg-gray-800 border-gray-700 text-gray-400 cursor-not-allowed`;
     }
 
-    return `${baseClasses} bg-gray-800/95 border-gray-700 text-white hover:border-primary/80 hover:bg-gray-700/80 cursor-pointer`;
+    return `${baseClasses} bg-gray-800 border-gray-700 text-white hover:border-blue-300 hover:bg-gray-700 cursor-pointer`;
   };
 
   return (
@@ -58,7 +58,7 @@ export function OptionButton({
             : showResult && selected && !isCorrect
               ? 'bg-red-500 text-white'
               : selected
-                ? 'bg-white text-primary'
+                ? 'bg-blue-100 text-blue-800'
                 : 'bg-gray-700 text-gray-200'
         }`}
       >
@@ -71,7 +71,7 @@ export function OptionButton({
         </span>
 
         {selected && !showResult && (
-          <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center self-start rounded-full border border-white/50 bg-white/15 text-sm font-semibold text-white shadow-sm shadow-black/20 sm:self-auto">
+          <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center self-start rounded-full border border-blue-200/80 bg-blue-500 text-sm font-semibold text-white shadow-sm shadow-black/20 sm:self-auto">
             ✓
           </span>
         )}

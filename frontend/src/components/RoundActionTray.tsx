@@ -22,11 +22,11 @@ type RoundActionTrayProps = {
 
 const MODE_CONTAINER_CLASS: Record<NonNullable<RoundActionTrayProps['mode']>, string> = {
   single:
-    'fixed inset-x-0 bottom-0 z-30 border-t border-gray-700/80 bg-gradient-to-t from-gray-950 via-gray-900/96 to-gray-900/65 px-3 pb-[calc(env(safe-area-inset-bottom)+0.25rem)] pt-1 backdrop-blur sm:px-4',
+    'w-full border-t border-gray-700/80 bg-gradient-to-t from-gray-950 via-gray-900/96 to-gray-900/65 px-3 pb-[calc(env(safe-area-inset-bottom)+0.25rem)] pt-2 backdrop-blur sm:px-4',
   duel:
-    'fixed inset-x-0 bottom-0 z-30 border-t border-gray-700/80 bg-gradient-to-t from-gray-950 via-gray-900/96 to-gray-900/65 px-3 pb-[calc(env(safe-area-inset-bottom)+0.25rem)] pt-1 backdrop-blur sm:px-4',
+    'w-full border-t border-gray-700/80 bg-gradient-to-t from-gray-950 via-gray-900/96 to-gray-900/65 px-3 pb-[calc(env(safe-area-inset-bottom)+0.25rem)] pt-2 backdrop-blur sm:px-4',
   challenge:
-    'fixed inset-x-0 bottom-0 z-30 border-t border-gray-700/80 bg-gradient-to-t from-gray-950 via-gray-900/96 to-gray-900/65 px-3 pb-[calc(env(safe-area-inset-bottom)+0.25rem)] pt-1 backdrop-blur sm:px-4',
+    'w-full border-t border-gray-700/80 bg-gradient-to-t from-gray-950 via-gray-900/96 to-gray-900/65 px-3 pb-[calc(env(safe-area-inset-bottom)+0.25rem)] pt-2 backdrop-blur sm:px-4',
 };
 
 export function RoundActionTray({
@@ -50,7 +50,7 @@ export function RoundActionTray({
   const wrapperClassName =
     mode === 'challenge'
       ? 'mx-auto flex w-full max-w-4xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between'
-      : 'mx-auto flex w-full max-w-4xl flex-col gap-1 rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-slate-900/96 via-gray-900/96 to-emerald-950/45 p-2 shadow-xl shadow-cyan-950/30 sm:flex-row sm:items-center sm:justify-between sm:bg-transparent sm:p-0 sm:border-0 sm:shadow-none';
+      : 'mx-auto flex w-full max-w-4xl flex-col gap-1 rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-slate-900/96 via-gray-900/96 to-emerald-950/45 p-2 shadow-xl shadow-cyan-950/30 sm:flex-row sm:items-center sm:justify-between sm:p-2';
 
   return (
     <div className={MODE_CONTAINER_CLASS[mode]} data-testid="mobile-action-tray">
