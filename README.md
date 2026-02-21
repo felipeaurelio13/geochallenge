@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.57**
+- Frontend: **v1.2.58**
 
 ### Mantener backend activo en producción
 Configura el secret **`BACKEND_HEALTHCHECK_URL`** en GitHub (Settings → Secrets and variables → Actions) con la URL pública de salud de tu API, por ejemplo:
@@ -42,6 +42,12 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 
 
 
+
+## Novedades de la versión 1.2.58
+- Se corrigió el fallo de compilación en TypeScript que bloqueaba deploy en GitHub Pages: `Icon.tsx` eliminó un import de `React` no utilizado que rompía `tsc` con `noUnusedLocals` activo.
+- Se ejecutó y validó el pipeline de calidad del frontend (`lint + tests + build`) para asegurar que el deploy no vuelva a fallar por errores de tipado o regresiones de pruebas.
+- Se mantuvo el flujo de validación de formularios basado en `zod` y se verificó su cobertura de tests para login/registro y hooks.
+- Footer/versionado actualizado a **v1.2.58** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.57
 - Se realizó una revisión integral post-refactor Atomic Design para eliminar errores de ejecución y cerrar brechas de calidad detectadas: ahora `zod` se consume desde una dependencia normal del frontend, evitando fallos de resolución en entornos limpios.
