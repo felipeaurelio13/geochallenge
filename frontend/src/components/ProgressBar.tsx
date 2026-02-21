@@ -31,22 +31,13 @@ export function getQuestionIndicatorStatus(
 }
 
 export function ProgressBar({ current, total, results, showCurrentResult = false }: ProgressBarProps) {
-  const percentage = (current / total) * 100;
-
   const safeTotal = Math.max(1, total);
   const indicatorGapPx = 4;
   const indicatorWidth = `calc((100% - ${(safeTotal - 1) * indicatorGapPx}px) / ${safeTotal})`;
 
   return (
     <div className="w-full">
-      <div className="h-3 rounded-full bg-gray-700/80 p-0.5" aria-hidden="true">
-        <div
-          className="h-full rounded-full bg-gradient-to-r from-primary to-secondary transition-all duration-500 ease-out"
-          style={{ width: `${percentage}%` }}
-        />
-      </div>
-
-      <div className="mt-3 flex w-full flex-nowrap gap-1 overflow-hidden sm:mt-3.5" role="list" aria-label="Progreso de preguntas">
+      <div className="flex w-full flex-nowrap gap-1 overflow-hidden" role="list" aria-label="Progreso de preguntas">
         {Array.from({ length: total }, (_, i) => {
           const status = getQuestionIndicatorStatus(i, current, results, showCurrentResult);
 

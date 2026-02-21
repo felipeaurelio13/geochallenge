@@ -112,7 +112,7 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
 
   const getImageContainerClassName = () => {
     if (question.category === 'FLAG') {
-      return 'min-h-[5.5rem] sm:min-h-[7rem]';
+      return 'aspect-[3/2] min-h-[6rem] w-full max-w-md sm:min-h-[7rem]';
     }
 
     return compact
@@ -122,7 +122,7 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
 
   const getImageClassName = () => {
     if (question.category === 'FLAG') {
-      return 'h-[5rem] w-full max-w-md sm:h-[6.5rem]';
+      return 'h-full w-full';
     }
 
     return compact
@@ -143,7 +143,7 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
       <div className="text-center">
         {showQuestionImage && (
           <div className={compact ? 'mb-3' : 'mb-6'}>
-            <div className={`mx-auto flex items-center justify-center rounded-xl border border-gray-600/70 bg-black/15 px-2 ${getImageContainerClassName()}`}>
+            <div className={`mx-auto flex items-center justify-center overflow-hidden rounded-xl border border-gray-600/70 bg-black/15 px-2 ${getImageContainerClassName()}`}>
               <img
                 src={normalizedImageUrl}
                 alt={t('game.questionImageAlt', { category: question.category.toLowerCase() })}

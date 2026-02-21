@@ -63,7 +63,7 @@ export function RoundActionTray({
               type="button"
               onClick={onSubmit}
               disabled={!canSubmit}
-              className="w-full sm:w-auto rounded-2xl border border-emerald-200/35 bg-gradient-to-r from-cyan-500 via-sky-500 to-emerald-500 px-7 py-3 text-base font-bold text-slate-950 shadow-lg shadow-cyan-900/45 transition-all duration-150 hover:from-cyan-400 hover:via-sky-400 hover:to-emerald-400 hover:shadow-cyan-700/55 active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-cyan-200/80 disabled:cursor-not-allowed disabled:border-gray-600/70 disabled:bg-gray-700 disabled:bg-none disabled:text-gray-300 disabled:shadow-none sm:text-lg"
+              className="w-full sm:w-auto rounded-2xl border border-emerald-200/35 bg-gradient-to-r from-cyan-500 via-sky-500 to-emerald-500 px-7 py-3 text-base font-bold text-slate-950 shadow-lg shadow-cyan-900/45 transition-all duration-150 hover:from-cyan-400 hover:via-sky-400 hover:to-emerald-400 hover:shadow-cyan-700/55 active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-cyan-200/80 disabled:cursor-not-allowed disabled:border-sky-300/25 disabled:bg-slate-600/95 disabled:bg-none disabled:text-slate-100/85 disabled:shadow-none disabled:opacity-90 sm:text-lg"
             >
               {submitLabel}
             </button>

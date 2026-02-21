@@ -4,7 +4,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.60**
+- Frontend: **v1.2.61**
 
 ### Mantener backend activo en producción
 
@@ -23,6 +23,15 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 5. Si falla deploy, revisar primero el job `Frontend quality gate`: ese job corta el release antes de publicar para evitar romper producción.
 6. El workflow de deploy se dispara solo con cambios de frontend o del propio pipeline, reduciendo ruido por cambios ajenos al cliente web.
 7. Si el deploy falla, usar este protocolo interno: (a) `npm run ci:quality` local, (b) revisar secretos/configuración de Pages, (c) relanzar workflow solo tras corregir la causa raíz.
+
+## Novedades de la versión 1.2.61
+
+- Se eliminó la barra azul continua de progreso en juego para reducir ruido visual: ahora la progresión se comunica únicamente con los indicadores discretos de preguntas (1-10) y sus estados (correcta/incorrecta/actual).
+- Se ajustó el header de partida con safe-areas reales en mobile y se separó el timer del borde derecho para evitar solapamientos con batería/señal/notch.
+- Se corrigió el encuadre de banderas en `QuestionCard` con contenedor de aspect-ratio fijo y render `object-contain`, evitando recortes en banderas altas o alargadas.
+- Se mejoró la legibilidad del botón `Confirmar` en estado deshabilitado aumentando contraste visual para mantener jerarquía clara sin parecer componente roto.
+- Se actualizaron pruebas automatizadas (`GamePage`, `ProgressBar`, `QuestionCard`, `RoundActionTray`) para blindar safe-areas, eliminación de barra continua, escalado de bandera y contraste del CTA.
+- Footer/versionado actualizado a **v1.2.61** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.60
 
