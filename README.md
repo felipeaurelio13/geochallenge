@@ -4,7 +4,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.62**
+- Frontend: **v1.2.63**
 
 ### Mantener backend activo en producción
 
@@ -23,6 +23,16 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 5. Si falla deploy, revisar primero el job `Frontend quality gate`: ese job corta el release antes de publicar para evitar romper producción.
 6. El workflow de deploy se dispara solo con cambios de frontend o del propio pipeline, reduciendo ruido por cambios ajenos al cliente web.
 7. Si el deploy falla, usar este protocolo interno: (a) `npm run ci:quality` local, (b) revisar secretos/configuración de Pages, (c) relanzar workflow solo tras corregir la causa raíz.
+
+## Novedades de la versión 1.2.63
+
+- Pantalla de juego optimizada para mobile-first: contenedor principal fijado a viewport (`100vh/100dvh`) con distribución flex para reducir scroll accidental y mantener CTA sticky sin overflow horizontal.
+- Se redimensionó el contenedor de bandera con límites responsivos (~22% del alto visible), manteniendo `object-contain` para evitar deformaciones/recortes y moviendo el badge de dificultad dentro del bloque visual de la imagen.
+- Se compactaron alternativas y bandeja de acción (`OptionButton` + `RoundActionTray`) reduciendo paddings y separaciones verticales para que más contenido crítico quede visible antes del botón Confirmar.
+- En menú se redujo el espacio entre categorías y “Modos de juego”, se bajó la altura de los CTAs de modo (~15%) y se compactó tipografía descriptiva para dar más aire al footer.
+- Se reforzó safe-area superior en headers (juego y shell principal) para evitar choques visuales con isla dinámica/notch.
+- Se actualizaron pruebas unitarias de `GamePage`, `GameRoundScaffold`, `QuestionCard`, `OptionButton`, `RoundActionTray` y `MenuPage` para blindar la nueva densidad visual y clases de layout mobile.
+- Footer/versionado actualizado a **v1.2.63** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.62
 

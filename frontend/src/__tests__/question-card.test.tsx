@@ -89,10 +89,11 @@ describe('QuestionCard', () => {
       <QuestionCard question={question} questionNumber={4} totalQuestions={10} compact />
     );
 
-    const flagContainer = container.querySelector('div[class*="aspect-"]');
     const flagImage = container.querySelector('img');
+    const flagContainer = flagImage?.parentElement;
 
-    expect(flagContainer?.className).toContain('aspect-[3/2]');
+    expect(flagContainer?.className).toContain('h-[22svh]');
+    expect(flagContainer?.className).toContain('max-h-[12.5rem]');
     expect(flagImage).toHaveClass('object-contain');
     expect(flagImage).toHaveClass('h-full');
     expect(flagImage).toHaveClass('w-full');
@@ -115,13 +116,15 @@ describe('QuestionCard', () => {
       <QuestionCard question={question} questionNumber={5} totalQuestions={10} compact />
     );
 
-    const flagContainer = container.querySelector('div[class*="min-h-"]');
+    const flagImage = container.querySelector('img');
+    const flagContainer = flagImage?.parentElement;
     const heading = screen.getByRole('heading', { level: 2 });
     const difficultyBadge = screen.getByText('game.difficulty.medium');
 
-    expect(flagContainer?.className).toContain('min-h-[3.9rem]');
+    expect(flagContainer?.className).toContain('min-h-[4.5rem]');
     expect(heading.className).toContain('text-[1.3rem]');
-    expect(difficultyBadge.className).toContain('text-[0.65rem]');
+    expect(difficultyBadge.className).toContain('absolute');
+    expect(difficultyBadge.className).toContain('top-2');
   });
 
   it('aplica tipografía más compacta al enunciado del mapa', () => {

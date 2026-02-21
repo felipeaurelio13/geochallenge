@@ -66,7 +66,7 @@ vi.mock('../components', () => ({
       {showResult && resultLabel && <p>{resultLabel}</p>}
     </div>
   ),
-  GameRoundScaffold: ({ header, progress, actionTray, mapContent, isMapQuestion, question, onOptionSelect, showResult, disableOptions, optionsGridClassName, rootClassName = 'h-full min-h-0 bg-gray-900 flex flex-col overflow-hidden', mainClassName = 'flex-1 min-h-0 overflow-hidden px-3 pt-1.5 pb-[6.35rem] sm:px-4 sm:pt-2 sm:pb-24' }: any) => (
+  GameRoundScaffold: ({ header, progress, actionTray, mapContent, isMapQuestion, question, onOptionSelect, showResult, disableOptions, optionsGridClassName, rootClassName = 'h-full min-h-0 bg-gray-900 flex flex-col overflow-hidden', mainClassName = 'flex-1 min-h-0 overflow-hidden px-3 pt-1 pb-[5.15rem] sm:px-4 sm:pt-1.5 sm:pb-[5.6rem]' }: any) => (
     <div className={rootClassName}>
       {header}
       {progress}
@@ -142,7 +142,7 @@ describe('GamePage ending flow', () => {
 
     const main = screen.getByRole('main');
     expect(main).toHaveClass('overflow-hidden');
-    expect(main).toHaveClass('pb-[6.35rem]');
+    expect(main).toHaveClass('pb-[5.15rem]');
 
     const tray = screen.getByTestId('mobile-action-tray');
     expect(tray).toHaveClass('fixed');
@@ -156,7 +156,7 @@ describe('GamePage ending flow', () => {
     const header = container.querySelector('header');
     const timerWrapper = screen.getByText('timer').parentElement;
 
-    expect(header).toHaveClass('pt-[calc(env(safe-area-inset-top)+0.35rem)]');
+    expect(header).toHaveClass('pt-[calc(env(safe-area-inset-top)+0.8rem)]');
     expect(timerWrapper).toHaveClass('pr-[max(env(safe-area-inset-right),0.5rem)]');
   });
 

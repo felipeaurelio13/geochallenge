@@ -203,8 +203,8 @@ export function GamePage() {
   return (
     <GameRoundScaffold
       header={
-        <header className="sticky top-0 z-30 border-b border-gray-700 bg-gray-800/95 px-3 pb-2 pt-[calc(env(safe-area-inset-top)+0.35rem)] backdrop-blur sm:px-4 sm:pb-3 sm:pt-[calc(env(safe-area-inset-top)+0.55rem)]">
-          <div className="max-w-4xl mx-auto grid grid-cols-[auto_1fr_auto] items-center gap-2 sm:gap-4">
+        <header className="sticky top-0 z-30 border-b border-gray-700 bg-gray-800/95 px-3 pb-2 pt-[calc(env(safe-area-inset-top)+0.8rem)] backdrop-blur sm:px-4 sm:pb-3 sm:pt-[calc(env(safe-area-inset-top)+0.95rem)]">
+          <div className="max-w-4xl mx-auto grid grid-cols-[auto_1fr_auto] items-center gap-2.5 sm:gap-4">
             <button
               onClick={() => {
                 if (window.confirm(t('game.confirmExit'))) {
@@ -233,7 +233,7 @@ export function GamePage() {
         </header>
       }
       progress={
-        <div className="bg-gray-800/70 px-3 py-1.5 sm:px-4 sm:py-2">
+        <div className="bg-gray-800/70 px-3 py-1 sm:px-4 sm:py-1.5">
           <div className="max-w-4xl mx-auto overflow-x-hidden">
             <ProgressBar
               current={currentIndex + 1}
@@ -268,7 +268,7 @@ export function GamePage() {
       selectedAnswer={selectedAnswer}
       onOptionSelect={handleOptionSelect}
       showResult={showResult}
-      optionsGridClassName={`grid gap-2 sm:gap-2.5 ${isFlagQuestion ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-2'} auto-rows-fr`}
+      optionsGridClassName={`grid gap-1.5 sm:gap-2 ${isFlagQuestion ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-2'} auto-rows-fr`}
       actionTray={
         <RoundActionTray
           mode="single"
