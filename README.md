@@ -4,7 +4,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.65**
+- Frontend: **v1.2.66**
 
 ### Mantener backend activo en producción
 
@@ -23,6 +23,15 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 5. Si falla deploy, revisar primero el job `Frontend quality gate`: ese job corta el release antes de publicar para evitar romper producción.
 6. El workflow de deploy se dispara solo con cambios de frontend o del propio pipeline, reduciendo ruido por cambios ajenos al cliente web.
 7. Si el deploy falla, usar este protocolo interno: (a) `npm run ci:quality` local, (b) revisar secretos/configuración de Pages, (c) relanzar workflow solo tras corregir la causa raíz.
+
+## Novedades de la versión 1.2.66
+
+- Se reforzó el `UniversalGameLayout` con `height/min-height: 100dvh`, `overflow: hidden`, `overscroll-behavior: none`, safe-areas en header/footer y estructura estable sin scroll para las rondas de juego.
+- Se corrigieron estados de `OptionButton` para mantener fondos sólidos en todos los casos (default, selected, locked, correct, wrong, disabled), eliminando transparencias/opacidad en post-respuesta.
+- Se ajustó el scaffold de ronda para evitar solapamientos post-respuesta en Banderas y centrar verticalmente la pregunta en Capitales cuando no hay media.
+- Se afinó la UI de mapas con insets para controles/atribución Leaflet dentro del card redondeado y estilo consistente mediante tokens de tema.
+- Se ampliaron pruebas en `GameRoundScaffold`, `OptionButton` y `MapInteractive` para blindar cero-scroll, integridad visual de opciones y contenedor de mapa sin desbordes.
+- Footer/versionado actualizado a **v1.2.66** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.65
 

@@ -20,6 +20,7 @@ describe('OptionButton', () => {
     const button = screen.getByRole('button');
 
     expect(button).toHaveAttribute('aria-pressed', 'true');
+    expect(button).toHaveAttribute('data-state', 'selected');
     expect(button.className).toContain('ring-2');
     expect(button.className).toContain('option-button-base');
     expect(button.className).toContain('py-3');
@@ -74,8 +75,8 @@ describe('OptionButton', () => {
     expect(optionText.className).toContain('[overflow-wrap:anywhere]');
   });
 
-  it('mantiene fondo sólido en estado de resultado para evitar transparencia', () => {
-    render(
+  it('mantiene fondo sólido en locked/correct/wrong sin opacity ni transparency', () => {
+    const { rerender } = render(
       <OptionButton
         option="Perú"
         index={1}
@@ -88,8 +89,35 @@ describe('OptionButton', () => {
     );
 
     const button = screen.getByRole('button');
-    expect(button.className).toContain('bg-gray-800');
+    expect(button).toHaveAttribute('data-state', 'locked');
+    expect(button.className).toContain('bg-[var(--color-surface-muted)]');
     expect(button.className).not.toContain('opacity');
     expect(button.className).not.toContain('transparent');
+
+    rerender(
+      <OptionButton
+        option="Perú"
+        index={1}
+        onClick={() => {}}
+        disabled
+        selected
+        isCorrect={false}
+        showResult
+      />
+    );
+    expect(screen.getByRole('button')).toHaveAttribute('data-state', 'wrong');
+
+    rerender(
+      <OptionButton
+        option="Perú"
+        index={1}
+        onClick={() => {}}
+        disabled
+        selected={false}
+        isCorrect
+        showResult
+      />
+    );
+    expect(screen.getByRole('button')).toHaveAttribute('data-state', 'correct');
   });
 });

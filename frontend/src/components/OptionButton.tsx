@@ -19,29 +19,32 @@ export function OptionButton({
   isCorrect,
   showResult,
 }: OptionButtonProps) {
+  const baseClasses =
+    'w-full rounded-2xl text-left transition-all duration-200 flex items-start gap-2 overflow-hidden border-2 px-3 py-3 option-button-base sm:items-center sm:px-3.5 sm:py-3';
+
+  const defaultStateClasses =
+    'bg-[var(--color-surface-muted)] border-[var(--color-border)] text-[var(--color-text-primary)] hover:border-[var(--color-primary-300)] hover:bg-[var(--color-surface)] cursor-pointer';
+  const selectedStateClasses =
+    'bg-[var(--color-primary-900)] border-[var(--color-primary-400)] text-[var(--color-text-primary)] ring-2 ring-[var(--color-primary-400)]/80 shadow-lg shadow-[var(--color-primary-900)]/40';
+  const disabledStateClasses =
+    'bg-[var(--color-surface-muted)] border-[var(--color-border)] text-[var(--color-text-muted)] cursor-not-allowed';
+  const lockedStateClasses =
+    'bg-[var(--color-surface-muted)] border-[var(--color-border)] text-[var(--color-text-secondary)] cursor-not-allowed';
+  const correctStateClasses =
+    'bg-[var(--color-success-600)] border-[var(--color-success-500)] text-white cursor-not-allowed';
+  const wrongStateClasses =
+    'bg-[var(--color-error-600)] border-[var(--color-error-500)] text-white cursor-not-allowed';
+
   const getButtonClasses = () => {
-    const baseClasses =
-      'w-full rounded-2xl text-left transition-all duration-200 flex items-start gap-2 overflow-hidden border-2 px-3 py-3 option-button-base sm:items-center sm:px-3.5 sm:py-3';
-
     if (showResult) {
-      if (isCorrect) {
-        return `${baseClasses} bg-green-600 border-green-400 text-white`;
-      }
-      if (selected && !isCorrect) {
-        return `${baseClasses} bg-red-600 border-red-400 text-white`;
-      }
-      return `${baseClasses} bg-gray-800 border-gray-700 text-gray-200`;
+      if (isCorrect) return `${baseClasses} ${correctStateClasses}`;
+      if (selected && !isCorrect) return `${baseClasses} ${wrongStateClasses}`;
+      return `${baseClasses} ${lockedStateClasses}`;
     }
 
-    if (selected) {
-      return `${baseClasses} bg-gray-800 border-blue-400 text-white ring-2 ring-blue-400/80 shadow-lg shadow-blue-500/20`;
-    }
-
-    if (disabled) {
-      return `${baseClasses} bg-gray-800 border-gray-700 text-gray-400 cursor-not-allowed`;
-    }
-
-    return `${baseClasses} bg-gray-800 border-gray-700 text-white hover:border-blue-300 hover:bg-gray-700 cursor-pointer`;
+    if (selected) return `${baseClasses} ${selectedStateClasses}`;
+    if (disabled) return `${baseClasses} ${disabledStateClasses}`;
+    return `${baseClasses} ${defaultStateClasses}`;
   };
 
   return (
@@ -50,16 +53,17 @@ export function OptionButton({
       disabled={disabled}
       className={getButtonClasses()}
       aria-pressed={selected}
+      data-state={showResult ? (isCorrect ? 'correct' : selected ? 'wrong' : 'locked') : selected ? 'selected' : disabled ? 'disabled' : 'default'}
     >
       <span
         className={`h-7 w-7 shrink-0 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm transition-colors ${
           showResult && isCorrect
-            ? 'bg-green-500 text-white'
+            ? 'bg-[var(--color-success-500)] text-white'
             : showResult && selected && !isCorrect
-              ? 'bg-red-500 text-white'
+              ? 'bg-[var(--color-error-500)] text-white'
               : selected
-                ? 'bg-blue-100 text-blue-800'
-                : 'bg-gray-700 text-gray-200'
+                ? 'bg-[var(--color-primary-100)] text-[var(--color-primary-800)]'
+                : 'bg-[var(--color-border)] text-[var(--color-text-secondary)]'
         }`}
       >
         {showResult && isCorrect ? '✓' : showResult && selected && !isCorrect ? '✕' : optionLetters[index]}
@@ -71,7 +75,7 @@ export function OptionButton({
         </span>
 
         {selected && !showResult && (
-          <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center self-start rounded-full border border-blue-200/80 bg-blue-500 text-sm font-semibold text-white shadow-sm shadow-black/20 sm:self-auto">
+          <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center self-start rounded-full border border-[var(--color-primary-200)] bg-[var(--color-primary-500)] text-sm font-semibold text-white shadow-sm shadow-black/20 sm:self-auto">
             ✓
           </span>
         )}
