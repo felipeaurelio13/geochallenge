@@ -71,7 +71,9 @@
     "selectCategory": "Select a category",
     "selectedCategory": "Active category",
     "mobileCategoriesHint": "Swipe to see more categories",
-    "quickActions": "Quick actions"
+    "quickActions": "Quick actions",
+    "welcomeExplore": "Hi {{name}}! What shall we explore today?",
+    "gameModes": "Game modes"
   },
   "categories": {
     "mixed": "Mixed",

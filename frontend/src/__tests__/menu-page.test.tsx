@@ -38,6 +38,7 @@ vi.mock('react-i18next', () => ({
     t: (key: string, options?: Record<string, string>) => {
       const translations: Record<string, string> = {
         'menu.welcome': `Hola, ${options?.name}!`,
+        'menu.welcomeExplore': `¡Hola ${options?.name}! ¿Qué vamos a explorar hoy?`,
         'menu.chooseMode': 'Elige un modo de juego',
         'menu.selectCategory': 'Selecciona una categoría',
         'menu.rankings': 'Rankings',
@@ -51,6 +52,7 @@ vi.mock('react-i18next', () => ({
         'menu.selectedCategory': 'Categoría activa',
         'menu.mobileCategoriesHint': 'Desliza para ver más categorías',
         'menu.quickActions': 'Acciones rápidas',
+        'menu.gameModes': 'Modos de juego',
         'categories.flags': 'Banderas',
         'categories.capitals': 'Capitales',
         'categories.maps': 'Mapas',
@@ -80,7 +82,7 @@ describe('MenuPage', () => {
         <Screen>
           <MenuPage />
         </Screen>
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     const banderasButton = screen.getByRole('button', { name: /banderas/i });
@@ -98,7 +100,7 @@ describe('MenuPage', () => {
         <Screen>
           <MenuPage />
         </Screen>
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     fireEvent.click(screen.getByRole('button', { name: /capitales/i }));
@@ -107,34 +109,30 @@ describe('MenuPage', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/challenges?category=CAPITAL&openCreate=1');
   });
 
-
-  it('mantiene categoría activa visible y footer con versión sin CTA duplicados sticky', () => {
+  it('elimina textos redundantes de categoría activa y mantiene footer con versión visible', () => {
     render(
       <MemoryRouter future={routerFutureConfig}>
         <Screen>
           <MenuPage />
         </Screen>
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     fireEvent.click(screen.getByRole('button', { name: /capitales/i }));
     fireEvent.click(screen.getByRole('button', { name: /un jugador[\s\S]*juega solo/i }));
 
     expect(mockNavigate).toHaveBeenCalledWith('/game/single?category=CAPITAL');
-    expect(screen.getByText('Desliza para ver más categorías')).toBeInTheDocument();
-    expect(screen.getByText('Categoría activa:')).toBeInTheDocument();
+    expect(screen.queryByText('Desliza para ver más categorías')).not.toBeInTheDocument();
+    expect(screen.queryByText('Categoría activa:')).not.toBeInTheDocument();
     expect(screen.queryByText('Acciones rápidas')).not.toBeInTheDocument();
     expect(screen.getByText(/v\d+\.\d+\.\d+/i)).toHaveClass('app-footer__version');
   });
-
-
-
 
   it('mantiene menú enfocado y oculta estadísticas para reducir ruido visual', () => {
     render(
       <MemoryRouter future={routerFutureConfig}>
         <MenuPage />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     expect(screen.queryByText('Tus estadísticas')).not.toBeInTheDocument();
@@ -145,7 +143,7 @@ describe('MenuPage', () => {
     const { container } = render(
       <MemoryRouter future={routerFutureConfig}>
         <MenuPage />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     expect(container.firstChild).toHaveClass('app-shell');
@@ -158,28 +156,29 @@ describe('MenuPage', () => {
 
     const singleModeButton = screen.getByRole('button', { name: /mixto\s+un jugador/i });
     expect(singleModeButton.className).toContain('p-3');
+    expect(screen.getByRole('heading', { name: 'Modos de juego' })).toBeInTheDocument();
   });
 
-
-  it('recupera la última categoría elegida para reducir fricción', () => {
-    window.localStorage.setItem('geochallenge:last-category', 'MAP');
-
+  it('permite cambiar categoría en el carrusel sin textos redundantes', () => {
     render(
       <MemoryRouter future={routerFutureConfig}>
         <MenuPage />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
-    expect(screen.getByText('Categoría activa:')).toBeInTheDocument();
-    expect(screen.getByText('Mapas')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /mapas/i }));
 
+    expect(screen.getByRole('button', { name: /🗺️\s*mapas/i })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
   });
 
   it('permite cambiar categoría y navegar a partida individual con categoría seleccionada', () => {
     render(
       <MemoryRouter future={routerFutureConfig}>
         <MenuPage />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     const capitalesButton = screen.getByRole('button', { name: /capitales/i });
