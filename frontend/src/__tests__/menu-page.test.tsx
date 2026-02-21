@@ -149,13 +149,13 @@ describe('MenuPage', () => {
     expect(container.firstChild).toHaveClass('app-shell');
 
     const main = container.querySelector('main');
-    expect(main?.className).toContain('py-3');
+    expect(main?.className).toContain('py-2.5');
 
     const categoryButton = screen.getByRole('button', { name: /🎲\s*mixto/i });
     expect(categoryButton.className).toContain('min-h-10');
 
     const singleModeButton = screen.getByRole('button', { name: /mixto\s+un jugador/i });
-    expect(singleModeButton.className).toContain('p-3');
+    expect(singleModeButton.className).toContain('py-2.5');
     expect(screen.getByRole('heading', { name: 'Modos de juego' })).toBeInTheDocument();
   });
 

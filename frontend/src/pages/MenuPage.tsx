@@ -85,7 +85,7 @@ export function MenuPage() {
           }
         />
       }
-      contentClassName="py-3 pb-4 sm:py-4 sm:pb-6"
+      contentClassName="py-2.5 pb-4 sm:py-3 sm:pb-6"
     >
       <p className="px-1 text-sm text-gray-300 sm:px-0">
         {t('menu.welcomeExplore', { name: user?.username })}
@@ -117,14 +117,14 @@ export function MenuPage() {
         </div>
       </section>
 
-      <section className="mt-4" aria-label={t('menu.gameModes')}>
+      <section className="mt-2.5" aria-label={t('menu.gameModes')}>
         <h2 className="mb-2 px-1 text-sm font-semibold text-white sm:px-0 sm:text-base">
           {t('menu.gameModes')}
         </h2>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-3 sm:gap-2">
           <Button
             onClick={() => navigate(`/game/single?category=${selectedCategory}`)}
-            className="group !rounded-2xl !border-primary/40 !bg-primary/10 !p-3 text-left hover:!border-primary/70 hover:!bg-primary/15 sm:!p-4"
+            className="group !rounded-2xl !border-primary/40 !bg-primary/10 !py-2.5 !px-3 text-left hover:!border-primary/70 hover:!bg-primary/15 sm:!py-3 sm:!px-4"
           >
             <p className="text-xs font-semibold uppercase tracking-wide text-primary">
               {selectedCategoryLabel}
@@ -133,7 +133,7 @@ export function MenuPage() {
               <Icon symbol="🎯" />
               {t('menu.singlePlayer')}
             </h3>
-            <p className="mt-0.5 text-sm leading-snug text-gray-300">
+            <p className="mt-0.5 text-xs leading-snug text-gray-300 sm:text-[0.82rem]">
               {t('menu.singlePlayerDesc')}
             </p>
           </Button>
@@ -141,25 +141,25 @@ export function MenuPage() {
           <Button
             onClick={() => navigate(`/duel?category=${selectedCategory}`)}
             variant="secondary"
-            className="!rounded-2xl !border-gray-800 !bg-gray-900 !p-3 text-left sm:!p-4"
+            className="!rounded-2xl !border-gray-800 !bg-gray-900 !py-2.5 !px-3 text-left sm:!py-3 sm:!px-4"
           >
             <h3 className="flex items-center gap-2 text-base font-bold text-white sm:text-lg">
               <Icon symbol="⚔️" />
               {t('menu.duel')}
             </h3>
-            <p className="mt-0.5 text-sm leading-snug text-gray-300">{t('menu.duelDesc')}</p>
+            <p className="mt-0.5 text-xs leading-snug text-gray-300 sm:text-[0.82rem]">{t('menu.duelDesc')}</p>
           </Button>
 
           <Button
             onClick={() => navigate(`/challenges?category=${selectedCategory}&openCreate=1`)}
             variant="secondary"
-            className="!rounded-2xl !border-gray-800 !bg-gray-900 !p-3 text-left sm:!p-4"
+            className="!rounded-2xl !border-gray-800 !bg-gray-900 !py-2.5 !px-3 text-left sm:!py-3 sm:!px-4"
           >
             <h3 className="flex items-center gap-2 text-base font-bold text-white sm:text-lg">
               <Icon symbol="🏁" />
               {t('menu.challenge')}
             </h3>
-            <p className="mt-0.5 text-sm leading-snug text-gray-300">{t('menu.challengeDesc')}</p>
+            <p className="mt-0.5 text-xs leading-snug text-gray-300 sm:text-[0.82rem]">{t('menu.challengeDesc')}</p>
           </Button>
         </div>
       </section>

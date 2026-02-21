@@ -36,8 +36,8 @@ export function GameRoundScaffold({
   showResult,
   disableOptions = false,
   actionTray,
-  rootClassName = 'h-full min-h-0 bg-gray-900 flex flex-col overflow-hidden',
-  mainClassName = 'flex-1 min-h-0 overflow-hidden px-3 pt-1.5 pb-[5.6rem] sm:px-4 sm:pt-2 sm:pb-20',
+  rootClassName = 'h-[100vh] h-[100dvh] min-h-0 bg-gray-900 flex flex-col overflow-hidden',
+  mainClassName = 'flex-1 min-h-0 overflow-hidden px-3 pt-1 pb-[5.15rem] sm:px-4 sm:pt-1.5 sm:pb-[5.6rem]',
   optionsGridClassName = 'grid gap-2 sm:gap-2.5 grid-cols-2',
 }: GameRoundScaffoldProps) {
   return (
@@ -48,7 +48,7 @@ export function GameRoundScaffold({
       <main className={mainClassName}>
         <div className="mx-auto flex h-full w-full max-w-4xl min-h-0 flex-col">
           {/* min-h-0 + flex-1 permite que este bloque se encoja dentro del layout y solo haga scroll si realmente no cabe. */}
-          <div className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto overscroll-contain">
+          <div className="flex min-h-0 flex-1 flex-col justify-between gap-1.5 overflow-hidden">
             <div className="shrink-0">
               <QuestionCard
                 question={question}
@@ -59,9 +59,9 @@ export function GameRoundScaffold({
             </div>
 
             {isMapQuestion ? (
-              mapContent
+              <div className="min-h-0 flex-1 overflow-hidden">{mapContent}</div>
             ) : (
-              <div className={optionsGridClassName}>
+              <div className={`min-h-0 ${optionsGridClassName}`}>
                 {question.options.map((option, index) => (
                   <OptionButton
                     key={option}

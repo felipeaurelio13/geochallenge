@@ -21,7 +21,7 @@ export function OptionButton({
 }: OptionButtonProps) {
   const getButtonClasses = () => {
     const baseClasses =
-      'w-full rounded-2xl text-left transition-all duration-200 flex items-start gap-2.5 overflow-hidden border-2 px-3 py-2.5 option-button-base sm:items-center sm:px-3.5 sm:py-3';
+      'w-full rounded-2xl text-left transition-all duration-200 flex items-start gap-2 overflow-hidden border-2 px-3 py-2 option-button-base sm:items-center sm:px-3.5 sm:py-2.5';
 
     if (showResult) {
       if (isCorrect) {
@@ -65,8 +65,8 @@ export function OptionButton({
         {showResult && isCorrect ? '✓' : showResult && selected && !isCorrect ? '✕' : optionLetters[index]}
       </span>
 
-      <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <span className="min-w-0 text-[0.9rem] font-medium leading-tight [overflow-wrap:anywhere] sm:text-base md:text-lg">
+      <div className="flex min-w-0 flex-1 flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
+        <span className="min-w-0 text-[0.88rem] font-medium leading-tight [overflow-wrap:anywhere] sm:text-[0.98rem] md:text-lg">
           {option}
         </span>
 

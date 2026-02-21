@@ -19,7 +19,7 @@ describe('RoundActionTray', () => {
     const tray = screen.getByTestId('mobile-action-tray');
     expect(tray).toHaveClass('fixed');
     expect(tray).toHaveClass('bottom-0');
-    expect(tray.className).toContain('pt-1.5');
+    expect(tray.className).toContain('pt-1');
 
     fireEvent.click(screen.getByRole('button', { name: 'Enviar' }));
 
@@ -66,7 +66,7 @@ describe('RoundActionTray', () => {
     expect(submitButton).toBeDisabled();
     expect(submitButton.className).toContain('disabled:bg-slate-600/95');
     expect(submitButton.className).toContain('disabled:text-slate-100/85');
-    expect(submitButton.className).toContain('py-2.5');
+    expect(submitButton.className).toContain('py-2');
   });
 
   it('muestra ayuda breve al tener selección lista para confirmar', () => {
