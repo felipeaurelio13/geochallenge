@@ -39,9 +39,11 @@ export function GameRoundScaffold({
   rootClassName,
   optionsGridClassName = 'grid gap-2 grid-cols-1',
 }: GameRoundScaffoldProps) {
+  const isCapitalQuestion = !isMapQuestion && question.category === 'CAPITAL';
+
   const content = (
-    <div className="mx-auto flex h-full w-full max-w-4xl min-h-0 flex-col gap-4">
-      <div className="shrink-0">
+    <div className="mx-auto flex h-full w-full max-w-4xl min-h-0 flex-col gap-3 py-3">
+      <div className={isCapitalQuestion ? 'min-h-0 flex-1 flex items-center' : 'shrink-0'}>
         <QuestionCard
           question={question}
           questionNumber={questionNumber}
@@ -53,7 +55,7 @@ export function GameRoundScaffold({
       {isMapQuestion ? (
         <div className="min-h-0 flex-1 overflow-hidden">{mapContent}</div>
       ) : (
-        <div className={`min-h-0 w-full ${optionsGridClassName}`}>
+        <div className={`min-h-0 w-full shrink-0 ${optionsGridClassName}`}>
           {question.options.map((option, index) => (
             <OptionButton
               key={option}

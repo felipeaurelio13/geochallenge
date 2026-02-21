@@ -61,7 +61,7 @@
   --space-25: 6.25rem;
 
   --map-height-min: 15rem;
-  --map-height-fluid: 46svh;
+  --map-height-fluid: 46dvh;
   --map-height-max: 25rem;
   --option-min-h: 3.375rem;
   --option-min-h-sm: 4rem;
@@ -109,6 +109,7 @@
     padding: var(--space-0);
     height: 100%;
     overflow: hidden;
+    overscroll-behavior: none;
   }
 
   html {
@@ -141,7 +142,6 @@
 @layer components {
   .app-root {
     height: 100%;
-    min-height: 100svh;
     min-height: 100dvh;
     display: flex;
     flex-direction: column;
@@ -167,44 +167,44 @@
     overflow: hidden;
   }
 
-
-
   .universal-layout {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
     height: 100dvh;
+    min-height: 100dvh;
     overflow: hidden;
-    justify-content: space-between;
-    background-color: #111827;
+    overscroll-behavior: none;
+    min-width: 0;
+    background-color: var(--color-surface);
   }
 
   .layout-header {
     padding-top: env(safe-area-inset-top);
+    min-width: 0;
   }
 
   .layout-progress {
-    flex: 0 0 auto;
+    min-width: 0;
   }
 
   .content-area {
-    flex: 1;
+    min-width: 0;
     min-height: 0;
+    width: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-    width: 100%;
+    align-items: stretch;
     overflow: hidden;
-    padding: 0 16px;
+    padding: 0 var(--space-4);
   }
 
   .layout-footer {
-    padding-bottom: env(safe-area-inset-bottom);
+    min-width: 0;
+    padding-bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
   }
 
   .media-box {
-    max-height: 35%;
+    max-height: 30dvh;
     width: 100%;
     object-fit: contain;
   }
@@ -277,6 +277,27 @@
     background-color: color-mix(in srgb, var(--color-surface) 25%, transparent);
     box-shadow: var(--shadow-sm);
   }
+
+  .map-surface :global(.leaflet-top.leaflet-left),
+  .map-surface .leaflet-top.leaflet-left {
+    margin-top: var(--space-2_5);
+    margin-left: var(--space-2_5);
+  }
+
+  .map-surface :global(.leaflet-bottom.leaflet-right),
+  .map-surface .leaflet-bottom.leaflet-right {
+    margin-right: var(--space-2_5);
+    margin-bottom: var(--space-2_5);
+  }
+
+  .map-surface :global(.leaflet-control-attribution),
+  .map-surface .leaflet-control-attribution {
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    background-color: color-mix(in srgb, var(--color-surface) 92%, transparent);
+    color: var(--color-text-secondary);
+    padding: var(--space-1) var(--space-2);
+  }
 }
 
 @media (min-width: 40rem) {
@@ -323,5 +344,5 @@
 
 @keyframes confetti {
   0% { opacity: 1; transform: translateY(0) rotate(0deg); }
-  100% { opacity: 0; transform: translateY(100svh) rotate(720deg); }
+  100% { opacity: 0; transform: translateY(100dvh) rotate(720deg); }
 }

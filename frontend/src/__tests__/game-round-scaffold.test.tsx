@@ -8,7 +8,7 @@ vi.mock('../components/QuestionCard', () => ({
 }));
 
 vi.mock('../components/OptionButton', () => ({
-  OptionButton: ({ option }: { option: string }) => <button type="button">{option}</button>,
+  OptionButton: ({ option }: { option: string }) => <button type="button" className="option-row">{option}</button>,
 }));
 
 describe('GameRoundScaffold', () => {
@@ -38,8 +38,44 @@ describe('GameRoundScaffold', () => {
       />
     );
 
+    const layout = screen.getByText('header').closest('.universal-layout');
     const questionCard = screen.getByTestId('question-card');
+
     expect(questionCard.parentElement).toHaveClass('shrink-0');
-    expect(questionCard.closest('.universal-layout')).toBeInTheDocument();
+    expect(layout).toBeInTheDocument();
+    expect(layout).toHaveClass('universal-layout');
+
+    Object.defineProperty(document.documentElement, 'scrollHeight', { configurable: true, value: window.innerHeight });
+    Object.defineProperty(document.documentElement, 'scrollWidth', { configurable: true, value: window.innerWidth });
+    expect(document.documentElement.scrollHeight).toBeLessThanOrEqual(window.innerHeight);
+    expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth);
+  });
+
+  it('centra verticalmente capitales y mantiene opciones en flujo sin overlay absoluto', () => {
+    const capitalQuestion = {
+      ...question,
+      category: 'CAPITAL',
+      options: ['Santiago', 'Lima', 'Bogotá', 'Quito'],
+    } as Question;
+
+    render(
+      <GameRoundScaffold
+        header={<div>header</div>}
+        question={capitalQuestion}
+        questionNumber={1}
+        totalQuestions={10}
+        isMapQuestion={false}
+        mapContent={null}
+        selectedAnswer={null}
+        onOptionSelect={() => {}}
+        showResult={true}
+        actionTray={<div>tray</div>}
+      />
+    );
+
+    expect(screen.getByTestId('question-card').parentElement).toHaveClass('flex-1');
+    for (const button of screen.getAllByRole('button')) {
+      expect(button.className).not.toContain('absolute');
+    }
   });
 });
