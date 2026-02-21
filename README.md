@@ -4,7 +4,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.64**
+- Frontend: **v1.2.65**
 
 ### Mantener backend activo en producción
 
@@ -23,6 +23,12 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 5. Si falla deploy, revisar primero el job `Frontend quality gate`: ese job corta el release antes de publicar para evitar romper producción.
 6. El workflow de deploy se dispara solo con cambios de frontend o del propio pipeline, reduciendo ruido por cambios ajenos al cliente web.
 7. Si el deploy falla, usar este protocolo interno: (a) `npm run ci:quality` local, (b) revisar secretos/configuración de Pages, (c) relanzar workflow solo tras corregir la causa raíz.
+
+## Novedades de la versión 1.2.65
+
+- Se corrigió un error de compilación en `GamePage` eliminando una variable sin uso (`isFlagQuestion`) que rompía el build de TypeScript en CI/deploy.
+- Se validó nuevamente el pipeline de frontend (`tests` + `build`) para asegurar despliegue estable en GitHub Pages.
+- Footer/versionado actualizado a **v1.2.65** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.64
 
