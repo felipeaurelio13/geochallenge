@@ -72,6 +72,32 @@ describe('QuestionCard', () => {
     expect(silhouetteImage).toHaveClass('h-[7.75rem]');
   });
 
+
+  it('mantiene ratio fijo y object-contain en banderas para evitar recortes', () => {
+    const question = {
+      id: 'q4',
+      category: 'FLAG',
+      questionText: '',
+      questionData: '',
+      imageUrl: 'https://flagcdn.com/w320/lr.png',
+      options: ['Liberia', 'Tanzania', 'Gabon', 'Zimbabwe'],
+      correctAnswer: 'Liberia',
+      difficulty: 'HARD',
+    } as Question;
+
+    const { container } = render(
+      <QuestionCard question={question} questionNumber={4} totalQuestions={10} compact />
+    );
+
+    const flagContainer = container.querySelector('div[class*="aspect-"]');
+    const flagImage = container.querySelector('img');
+
+    expect(flagContainer?.className).toContain('aspect-[3/2]');
+    expect(flagImage).toHaveClass('object-contain');
+    expect(flagImage).toHaveClass('h-full');
+    expect(flagImage).toHaveClass('w-full');
+  });
+
   it('aplica tipografía más compacta al enunciado del mapa', () => {
     const question = {
       id: 'q3',

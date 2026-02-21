@@ -49,6 +49,24 @@ describe('RoundActionTray', () => {
     expect(onNext).toHaveBeenCalledTimes(1);
   });
 
+
+  it('mantiene contraste legible en botón Confirmar deshabilitado', () => {
+    render(
+      <RoundActionTray
+        mode="single"
+        showResult={false}
+        canSubmit={false}
+        submitLabel="Confirmar"
+        onSubmit={vi.fn()}
+      />
+    );
+
+    const submitButton = screen.getByRole('button', { name: 'Confirmar' });
+    expect(submitButton).toBeDisabled();
+    expect(submitButton.className).toContain('disabled:bg-slate-600/95');
+    expect(submitButton.className).toContain('disabled:text-slate-100/85');
+  });
+
   it('muestra ayuda breve al tener selección lista para confirmar', () => {
     render(
       <RoundActionTray

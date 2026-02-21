@@ -29,6 +29,15 @@ describe('ProgressBar question status mapping', () => {
     expect(getQuestionIndicatorStatus(2, 1, results)).toBe('pending');
   });
 
+
+  it('elimina la barra continua superior para reducir ruido visual y deja solo hitos discretos', () => {
+    const { container } = render(
+      createElement(ProgressBar, { current: 2, total: 10, results: [{ isCorrect: true }] })
+    );
+
+    expect(container.querySelector('.bg-gradient-to-r')).not.toBeInTheDocument();
+  });
+
   it('mantiene los indicadores en una sola fila sin scroll horizontal', () => {
     render(createElement(ProgressBar, { current: 4, total: 10, results: [{ isCorrect: true }, { isCorrect: false }] }));
 

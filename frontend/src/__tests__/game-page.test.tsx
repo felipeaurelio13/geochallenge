@@ -149,6 +149,17 @@ describe('GamePage ending flow', () => {
     expect(tray).toHaveClass('bottom-0');
   });
 
+
+  it('aplica safe-area en header y separa el timer del borde derecho del sistema', () => {
+    const { container } = render(<GamePage />);
+
+    const header = container.querySelector('header');
+    const timerWrapper = screen.getByText('timer').parentElement;
+
+    expect(header).toHaveClass('pt-[calc(env(safe-area-inset-top)+0.35rem)]');
+    expect(timerWrapper).toHaveClass('pr-[max(env(safe-area-inset-right),0.5rem)]');
+  });
+
   it('mantiene el botón Confirmar deshabilitado hasta elegir una alternativa', () => {
     render(<GamePage />);
 

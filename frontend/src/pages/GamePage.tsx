@@ -203,7 +203,7 @@ export function GamePage() {
   return (
     <GameRoundScaffold
       header={
-        <header className="sticky top-0 z-30 border-b border-gray-700 bg-gray-800/95 px-3 py-2 backdrop-blur sm:px-4 sm:py-3">
+        <header className="sticky top-0 z-30 border-b border-gray-700 bg-gray-800/95 px-3 pb-2 pt-[calc(env(safe-area-inset-top)+0.35rem)] backdrop-blur sm:px-4 sm:pb-3 sm:pt-[calc(env(safe-area-inset-top)+0.55rem)]">
           <div className="max-w-4xl mx-auto grid grid-cols-[auto_1fr_auto] items-center gap-2 sm:gap-4">
             <button
               onClick={() => {
@@ -220,13 +220,15 @@ export function GamePage() {
 
             <ScoreDisplay score={score} previousScore={previousScore} showAnimation={showResult} />
 
-            <Timer
-              duration={TIME_PER_QUESTION}
-              timeRemaining={timeRemaining}
-              onTick={setTimeRemaining}
-              onComplete={handleTimeComplete}
-              isActive={!showResult && status === 'playing'}
-            />
+            <div className="justify-self-end pr-[max(env(safe-area-inset-right),0.5rem)] sm:pr-[max(env(safe-area-inset-right),0.75rem)] md:pr-0">
+              <Timer
+                duration={TIME_PER_QUESTION}
+                timeRemaining={timeRemaining}
+                onTick={setTimeRemaining}
+                onComplete={handleTimeComplete}
+                isActive={!showResult && status === 'playing'}
+              />
+            </div>
           </div>
         </header>
       }
@@ -266,7 +268,7 @@ export function GamePage() {
       selectedAnswer={selectedAnswer}
       onOptionSelect={handleOptionSelect}
       showResult={showResult}
-      optionsGridClassName={`grid gap-2.5 sm:gap-3 ${isFlagQuestion ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-2'}`}
+      optionsGridClassName={`grid gap-2.5 sm:gap-3 ${isFlagQuestion ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-2'} auto-rows-fr`}
       actionTray={
         <RoundActionTray
           mode="single"
