@@ -52,7 +52,7 @@ export function Timer({ duration, timeRemaining, onTick, onComplete, isActive }:
       className="relative h-14 w-14 sm:h-16 sm:w-16 md:h-20 md:w-20"
       role="timer"
       aria-live="off"
-      aria-label={`Tiempo restante ${Math.max(0, timeRemaining)} segundos`}
+      aria-label={`Tiempo restante ${Math.max(0, timeRemaining)}s segundos`}
     >
       <svg className="h-14 w-14 -rotate-90 transform sm:h-16 sm:w-16 md:h-20 md:w-20" viewBox="0 0 100 100">
         <circle cx="50" cy="50" r="45" fill="none" className="timer-ring-bg" strokeWidth="8" />
@@ -71,7 +71,7 @@ export function Timer({ duration, timeRemaining, onTick, onComplete, isActive }:
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">
         <span className="text-lg font-bold transition-colors duration-300 sm:text-xl md:text-2xl" style={{ color: timerColor }}>
-          {Math.max(0, timeRemaining)}
+          {Math.max(0, timeRemaining)}s
         </span>
       </div>
     </div>

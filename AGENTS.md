@@ -34,3 +34,9 @@ Estas reglas aplican a todo el repositorio y buscan evitar regresiones de UX/UI 
   - actualizar `README.md` con novedades.
 - El despliegue se realiza en **GitHub Pages**.
 - Las secret keys se gestionan en GitHub (no hardcodear secretos).
+
+## Leyes del sistema (layout de juego)
+- **Viewport Unit Standard:** prohibido usar `vh`; usar exclusivamente `svh` o `dvh` para evitar saltos al aparecer/desaparecer barras del navegador móvil.
+- **Zero-Scroll Policy:** el contenedor raíz de juego debe usar `height: 100dvh` y `overflow: hidden`; ninguna pantalla de juego puede permitir scroll.
+- **Safe Area Isolation:** elementos fijos en extremos (header y footer/CTA confirmar) deben respetar `env(safe-area-inset-top)` y `env(safe-area-inset-bottom)`.
+- **State Integrity:** botones de opción no deben cambiar su `opacity` ni usar `background-color: transparent` en estados seleccionados/inactivos; el fondo debe mantenerse sólido para evitar superposición visual.

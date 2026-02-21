@@ -1,12 +1,12 @@
 {
   "name": "geochallenge-frontend",
   "private": true,
-  "version": "1.2.63",
+  "version": "1.2.64",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "lint": "eslint . --resolve-plugins-relative-to ./ --ext .ts,.tsx --report-unused-disable-directives --max-warnings 0",
+    "lint": "eslint . --ext .ts,.tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",

@@ -22,7 +22,7 @@ describe('GameRoundScaffold', () => {
     difficulty: 'MEDIUM',
   } as Question;
 
-  it('evita que el bloque de enunciado se comprima en mobile', () => {
+  it('usa el layout universal sin scroll y evita compresión del enunciado', () => {
     render(
       <GameRoundScaffold
         header={<div>header</div>}
@@ -40,5 +40,6 @@ describe('GameRoundScaffold', () => {
 
     const questionCard = screen.getByTestId('question-card');
     expect(questionCard.parentElement).toHaveClass('shrink-0');
+    expect(questionCard.closest('.universal-layout')).toBeInTheDocument();
   });
 });

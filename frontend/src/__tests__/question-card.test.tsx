@@ -92,8 +92,7 @@ describe('QuestionCard', () => {
     const flagImage = container.querySelector('img');
     const flagContainer = flagImage?.parentElement;
 
-    expect(flagContainer?.className).toContain('h-[22svh]');
-    expect(flagContainer?.className).toContain('max-h-[12.5rem]');
+    expect(flagContainer?.className).toContain('media-box');
     expect(flagImage).toHaveClass('object-contain');
     expect(flagImage).toHaveClass('h-full');
     expect(flagImage).toHaveClass('w-full');

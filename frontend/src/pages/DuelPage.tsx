@@ -352,8 +352,7 @@ export function DuelPage() {
   const isMapQuestion = currentQuestion.category === 'MAP';
   return (
     <GameRoundScaffold
-      rootClassName="h-full min-h-0 bg-gray-900 flex flex-col overflow-hidden"
-      mainClassName="flex-1 min-h-0 overflow-hidden px-3 pt-1.5 pb-[6.35rem] sm:px-4 sm:pt-2 sm:pb-24"
+      rootClassName="bg-gray-900"
       header={
         <header className="sticky top-0 z-30 border-b border-gray-700 bg-gray-800/95 px-3 py-2 pt-[calc(env(safe-area-inset-top)+0.35rem)] backdrop-blur sm:px-4">
           <div className="max-w-4xl mx-auto flex items-center justify-between">
@@ -412,7 +411,7 @@ export function DuelPage() {
       onOptionSelect={setSelectedAnswer}
       showResult={showResult}
       disableOptions={duelState === 'waiting'}
-      optionsGridClassName="grid grid-cols-2 gap-2.5 sm:gap-3"
+      optionsGridClassName="grid gap-2 grid-cols-1"
       actionTray={
         <RoundActionTray
           mode="duel"

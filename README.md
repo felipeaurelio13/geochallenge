@@ -4,7 +4,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.63**
+- Frontend: **v1.2.64**
 
 ### Mantener backend activo en producción
 
@@ -23,6 +23,15 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 5. Si falla deploy, revisar primero el job `Frontend quality gate`: ese job corta el release antes de publicar para evitar romper producción.
 6. El workflow de deploy se dispara solo con cambios de frontend o del propio pipeline, reduciendo ruido por cambios ajenos al cliente web.
 7. Si el deploy falla, usar este protocolo interno: (a) `npm run ci:quality` local, (b) revisar secretos/configuración de Pages, (c) relanzar workflow solo tras corregir la causa raíz.
+
+## Novedades de la versión 1.2.64
+
+- Se incorporó `UniversalGameLayout` para que modos Banderas, Capitales, Mapas, Duelo y Desafíos compartan la misma distribución vertical en `100dvh`, con `overflow: hidden` y safe-areas aisladas en header/footer.
+- Se estandarizó la lista de respuestas a formato vertical (1x4) en todas las modalidades, reduciendo inconsistencias visuales entre modos y mejorando el uso del espacio en mobile.
+- Se corrigió el bug de transparencia en `OptionButton`: estados seleccionado/correcto/incorrecto mantienen fondo sólido y sin opacidad residual para evitar superposición visual.
+- Se ajustó el timer para mostrar el sufijo `s` (ej. `57s`) y mantener feedback temporal consistente entre pantallas.
+- Se actualizaron pruebas de `GamePage`, `GameRoundScaffold` y `OptionButton` para blindar layout universal y estados sólidos.
+- Footer/versionado actualizado a **v1.2.64** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.63
 

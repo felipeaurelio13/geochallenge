@@ -12,6 +12,7 @@ export { BackendKeepAlive } from './BackendKeepAlive';
 export { AppFooter } from './AppFooter';
 export { GameRoundScaffold } from './GameRoundScaffold';
 export { RoundActionTray } from './RoundActionTray';
+export { UniversalGameLayout } from './UniversalGameLayout';
 
 export { AppRoot } from './AppRoot';
 export { Screen } from './Screen';

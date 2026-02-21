@@ -66,11 +66,11 @@ vi.mock('../components', () => ({
       {showResult && resultLabel && <p>{resultLabel}</p>}
     </div>
   ),
-  GameRoundScaffold: ({ header, progress, actionTray, mapContent, isMapQuestion, question, onOptionSelect, showResult, disableOptions, optionsGridClassName, rootClassName = 'h-full min-h-0 bg-gray-900 flex flex-col overflow-hidden', mainClassName = 'flex-1 min-h-0 overflow-hidden px-3 pt-1 pb-[5.15rem] sm:px-4 sm:pt-1.5 sm:pb-[5.6rem]' }: any) => (
+  GameRoundScaffold: ({ header, progress, actionTray, mapContent, isMapQuestion, question, onOptionSelect, showResult, disableOptions, optionsGridClassName, rootClassName = 'universal-layout bg-gray-900' }: any) => (
     <div className={rootClassName}>
       {header}
       {progress}
-      <main role="main" className={mainClassName}>
+      <main role="main" className="content-area">
         <div data-testid="question-card" data-compact="true">question-card</div>
         {isMapQuestion ? mapContent : (
           <div className={optionsGridClassName}>
@@ -79,8 +79,8 @@ vi.mock('../components', () => ({
             ))}
           </div>
         )}
-        {actionTray}
       </main>
+      {actionTray}
     </div>
   ),
 }));
@@ -99,17 +99,17 @@ describe('GamePage ending flow', () => {
     ];
   });
 
-  it('renderiza alternativas en grilla de dos columnas para reducir scroll en mobile', () => {
+  it('renderiza alternativas en lista vertical 1x4 para layout universal', () => {
     render(<GamePage />);
 
     const firstOption = screen.getByRole('button', { name: 'Santiago' });
     const optionsGrid = firstOption.parentElement;
 
     expect(optionsGrid).toHaveClass('grid');
-    expect(optionsGrid).toHaveClass('grid-cols-2');
+    expect(optionsGrid).toHaveClass('grid-cols-1');
   });
 
-  it('prioriza una columna en mobile para categoría banderas y mejora legibilidad', () => {
+  it('mantiene lista vertical también para categoría banderas', () => {
     mocks.gameState.questions = [
       {
         id: 'q2',
@@ -127,7 +127,7 @@ describe('GamePage ending flow', () => {
 
     expect(optionsGrid).toHaveClass('grid');
     expect(optionsGrid).toHaveClass('grid-cols-1');
-    expect(optionsGrid).toHaveClass('sm:grid-cols-2');
+    expect(optionsGrid).not.toHaveClass('sm:grid-cols-2');
   });
 
   it('elimina la barra textual de pregunta para ganar espacio vertical', () => {
@@ -141,8 +141,7 @@ describe('GamePage ending flow', () => {
     render(<GamePage />);
 
     const main = screen.getByRole('main');
-    expect(main).toHaveClass('overflow-hidden');
-    expect(main).toHaveClass('pb-[5.15rem]');
+    expect(main).toHaveClass('content-area');
 
     const tray = screen.getByTestId('mobile-action-tray');
     expect(tray).toHaveClass('fixed');

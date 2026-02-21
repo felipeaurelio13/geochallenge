@@ -156,7 +156,7 @@ describe('DuelPage socket flow', () => {
     expect(screen.getByText('duel.cancelHint')).toBeInTheDocument();
   });
 
-  it('renderiza alternativas en grilla de dos columnas en mobile durante el duelo', async () => {
+  it('renderiza alternativas en lista vertical durante el duelo', async () => {
     render(<DuelPage />);
 
     act(() => {
@@ -179,7 +179,7 @@ describe('DuelPage socket flow', () => {
     const optionsGrid = firstOption.parentElement;
 
     expect(optionsGrid).toHaveClass('grid');
-    expect(optionsGrid).toHaveClass('grid-cols-2');
+    expect(optionsGrid).toHaveClass('grid-cols-1');
   });
 
 
@@ -201,9 +201,6 @@ describe('DuelPage socket flow', () => {
         })
       );
     });
-
-    const main = screen.getByRole('main');
-    expect(main.className).toContain('pb-[6.35rem]');
 
     const tray = await screen.findByTestId('mobile-action-tray');
     expect(tray).toHaveClass('fixed');

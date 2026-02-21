@@ -112,7 +112,7 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
 
   const getImageContainerClassName = () => {
     if (question.category === 'FLAG') {
-      return 'relative h-[22svh] min-h-[4.5rem] max-h-[12.5rem] w-full max-w-md';
+      return 'media-box relative min-h-[4.5rem] w-full max-w-md';
     }
 
     return compact
@@ -134,6 +134,8 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
     compact
       ? question.category === 'MAP'
         ? 'text-[1.15rem] sm:text-[1.45rem]'
+        : question.category === 'CAPITAL'
+          ? 'text-2xl sm:text-[1.8rem]'
         : 'text-[1.3rem] sm:text-3xl'
       : 'text-[1.8rem] sm:text-4xl'
   } font-bold text-white break-words ${question.category === 'MAP' ? 'leading-snug' : 'leading-tight'}`;
@@ -165,7 +167,7 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
           </div>
         )}
 
-        <div className={`flex ${compact ? 'flex-row items-start justify-center gap-2 text-left' : 'flex-col items-center'} `}>
+        <div className={`flex ${compact ? 'flex-row items-start justify-center gap-2 text-left' : 'flex-col items-center'} ${question.category === 'CAPITAL' ? 'w-full justify-center text-center' : ''}`}>
           <h2 className={headingClassName}>
             {getQuestionText()}
           </h2>
