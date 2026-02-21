@@ -4,8 +4,8 @@
   "version": "1.0.0",
   "scripts": {
     "prepare": "husky",
-    "lint": "npm run lint --prefix frontend && npm run lint --prefix backend",
-    "test": "npm run test --prefix frontend && npm run test --prefix backend",
+    "lint": "npm --prefix frontend run lint && npm --prefix backend run lint",
+    "test": "npm --prefix frontend run test && npm --prefix backend run test",
     "format": "prettier --write \"**/*.{js,cjs,mjs,ts,tsx,json,md,yml,yaml,css}\"",
     "format:check": "prettier --check \"**/*.{js,cjs,mjs,ts,tsx,json,md,yml,yaml,css}\""
   },
