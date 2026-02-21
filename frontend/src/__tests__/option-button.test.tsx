@@ -22,6 +22,7 @@ describe('OptionButton', () => {
     expect(button).toHaveAttribute('aria-pressed', 'true');
     expect(button.className).toContain('ring-2');
     expect(button.className).toContain('option-button-base');
+    expect(button.className).toContain('py-2.5');
     expect(screen.getByText('✓')).toBeInTheDocument();
 
     fireEvent.click(button);

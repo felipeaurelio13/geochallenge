@@ -98,6 +98,32 @@ describe('QuestionCard', () => {
     expect(flagImage).toHaveClass('w-full');
   });
 
+
+  it('compacta bandera y dificultad en una sola fila para ganar espacio vertical', () => {
+    const question = {
+      id: 'q5',
+      category: 'FLAG',
+      questionText: '',
+      questionData: '',
+      imageUrl: 'https://flagcdn.com/w320/pe.png',
+      options: ['Perú', 'Bolivia', 'Ecuador', 'Paraguay'],
+      correctAnswer: 'Perú',
+      difficulty: 'MEDIUM',
+    } as Question;
+
+    const { container } = render(
+      <QuestionCard question={question} questionNumber={5} totalQuestions={10} compact />
+    );
+
+    const flagContainer = container.querySelector('div[class*="min-h-"]');
+    const heading = screen.getByRole('heading', { level: 2 });
+    const difficultyBadge = screen.getByText('game.difficulty.medium');
+
+    expect(flagContainer?.className).toContain('min-h-[3.9rem]');
+    expect(heading.className).toContain('text-[1.3rem]');
+    expect(difficultyBadge.className).toContain('text-[0.65rem]');
+  });
+
   it('aplica tipografía más compacta al enunciado del mapa', () => {
     const question = {
       id: 'q3',

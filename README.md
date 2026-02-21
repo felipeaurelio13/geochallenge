@@ -4,7 +4,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.61**
+- Frontend: **v1.2.62**
 
 ### Mantener backend activo en producción
 
@@ -23,6 +23,15 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 5. Si falla deploy, revisar primero el job `Frontend quality gate`: ese job corta el release antes de publicar para evitar romper producción.
 6. El workflow de deploy se dispara solo con cambios de frontend o del propio pipeline, reduciendo ruido por cambios ajenos al cliente web.
 7. Si el deploy falla, usar este protocolo interno: (a) `npm run ci:quality` local, (b) revisar secretos/configuración de Pages, (c) relanzar workflow solo tras corregir la causa raíz.
+
+## Novedades de la versión 1.2.62
+
+- Se redujo ~35% la altura mínima de la bandera en `QuestionCard` para recuperar espacio vertical en mobile sin recortar contenido, manteniendo `object-contain` y proporción fija.
+- Se compactó el bloque pregunta+dificultad en modo compacto: menor separación bajo la bandera y badge de dificultad más pequeño alineado junto al enunciado para evitar ocupar una fila completa.
+- Se adelgazaron las alternativas (`OptionButton`) con menor padding vertical, badge lateral más compacto y tipografía ajustada para sostener legibilidad en pantallas pequeñas.
+- Se redujo la altura útil del `RoundActionTray` (padding contenedor + CTA principal/secundario) y del espacio reservado en `GameRoundScaffold`, acercando `Confirmar` a la última opción y disminuyendo vacío visual.
+- Se actualizaron pruebas automatizadas de `QuestionCard`, `OptionButton` y `RoundActionTray` para blindar los nuevos tamaños compactos y prevenir regresiones visuales.
+- Footer/versionado actualizado a **v1.2.62** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.61
 
