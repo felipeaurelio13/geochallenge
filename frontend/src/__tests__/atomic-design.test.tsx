@@ -63,4 +63,18 @@ describe('Atomic design components', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Cerrar modal' }));
     expect(onClose).toHaveBeenCalledTimes(1);
   });
+
+  it('mantiene estructura sin scroll global accidental y safe-area en header mobile', () => {
+    const { container } = render(
+      <MemoryRouter future={routerFutureConfig}>
+        <PageTemplate header={<Header />}>
+          <div>Contenido</div>
+        </PageTemplate>
+      </MemoryRouter>
+    );
+
+    expect(container.firstChild).toHaveClass('app-shell');
+    expect(screen.getByRole('banner').className).toContain('safe-area-inset-top');
+    expect(container.querySelector('main')?.className).toContain('flex-1');
+  });
 });

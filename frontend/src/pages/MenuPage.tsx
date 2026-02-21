@@ -107,12 +107,13 @@ export function MenuPage() {
         </p>
       </Card>
 
-      <ListItem
-        className="mt-3"
-        title={`${t('menu.selectedCategory')}: ${selectedCategoryLabel}`}
-        description={t('menu.chooseMode')}
-        leading={<Badge tone="primary">{selectedCategoryLabel}</Badge>}
-      />
+      <ul className="mt-3">
+        <ListItem
+          title={`${t('menu.selectedCategory')}: ${selectedCategoryLabel}`}
+          description={t('menu.chooseMode')}
+          leading={<Badge tone="primary">{selectedCategoryLabel}</Badge>}
+        />
+      </ul>
 
       <section className="mt-3 grid grid-cols-1 gap-2 sm:mt-4 sm:grid-cols-3" aria-label={t('menu.chooseMode')}>
         <Button

@@ -5,7 +5,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.56**
+- Frontend: **v1.2.57**
 
 ### Mantener backend activo en producción
 Configura el secret **`BACKEND_HEALTHCHECK_URL`** en GitHub (Settings → Secrets and variables → Actions) con la URL pública de salud de tu API, por ejemplo:
@@ -42,6 +42,14 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 
 
 
+
+## Novedades de la versión 1.2.57
+- Se realizó una revisión integral post-refactor Atomic Design para eliminar errores de ejecución y cerrar brechas de calidad detectadas: ahora `zod` se consume desde una dependencia normal del frontend, evitando fallos de resolución en entornos limpios.
+- Se restauró el feedback contextual en `LoginPage` cuando faltan campos (`Completa correo y contraseña para continuar.`), manteniendo la guía empática al usuario y alineando los tests existentes.
+- Se reforzó la validación de layout con una prueba adicional de atomic design para chequear estructura base (`app-shell`, `flex-1`) y cabecera con soporte de safe-area mobile.
+- Se ajustó la composición de `MenuPage` para mantener semántica de lista consistente al reutilizar `ListItem`.
+- Se volvió a ejecutar la suite completa de frontend con **106 tests en verde** y se validó visualmente Home en mobile tanto en tema claro como oscuro.
+- Footer/versionado actualizado a **v1.2.57** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.56
 - Se refactorizó la arquitectura visual del frontend en `src/components/` con Atomic Design: **atoms** (`Button`, `Icon`, `Input`, `Badge`), **molecules** (`Card`, `FormField`, `ListItem`), **organisms** (`Header`, `Modal`, `ScreenLayout`) y **templates** reutilizables para páginas.

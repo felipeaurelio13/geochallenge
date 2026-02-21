@@ -124,6 +124,8 @@ export function LoginPage() {
           </div>
         </FormField.Root>
 
+        {!isValid && !isBusy ? <p className="text-xs text-gray-500">{t('auth.completeFieldsHint')}</p> : null}
+
         <Button type="submit" disabled={isBusy || !isValid} fullWidth size="lg">
           {isBusy ? (
             <>
