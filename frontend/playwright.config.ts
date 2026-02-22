@@ -13,7 +13,7 @@ export default defineConfig({
     trace: 'retain-on-failure',
   },
   webServer: {
-    command: 'npm run build && npm run preview -- --host 127.0.0.1 --port 4173',
+    command: 'VITE_ENABLE_TEST_AUTH_BYPASS=true VITE_TEST_AUTH_BYPASS_SECRET=playwright-e2e npm run build && npm run preview -- --host 127.0.0.1 --port 4173',
     port: 4173,
     timeout: 120_000,
     reuseExistingServer: !process.env.CI,

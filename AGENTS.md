@@ -75,3 +75,8 @@ Estas reglas aplican a todo el repositorio y buscan evitar regresiones de UX/UI 
 
 - **GitHub Pages routing:** asegurar compatibilidad con la ruta base del repositorio (usar `HashRouter` si es necesario).
 - **Versionado visible:** actualizar la versión del footer en cada commit con mejora de UI o funcionalidad.
+
+## Aprendizajes recientes
+
+- En rutas de juego (`/game/*`, `/duel`, `/challenges/:id/play`) no renderizar el footer global del shell para preservar altura útil del viewport y proteger el CTA principal.
+- Para evitar regresiones de recorte sin scroll, usar `game-options-grid` con 4 filas y `min-height: 0` en contenedores intermedios del layout universal.

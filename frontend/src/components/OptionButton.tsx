@@ -20,7 +20,7 @@ export function OptionButton({
   showResult,
 }: OptionButtonProps) {
   const baseClasses =
-    'w-full rounded-2xl text-left transition-all duration-200 flex items-start gap-2 overflow-hidden border-2 px-3 py-3 option-button-base sm:items-center sm:px-3.5 sm:py-3';
+    'w-full rounded-2xl text-left transition-all duration-200 flex items-start gap-2 overflow-hidden border-2 px-3 py-2 option-button-base sm:items-center sm:px-3.5 sm:py-2.5';
 
   const defaultStateClasses =
     'bg-[var(--color-surface-muted)] border-[var(--color-border)] text-[var(--color-text-primary)] hover:border-[var(--color-primary-300)] hover:bg-[var(--color-surface)] cursor-pointer';
@@ -70,7 +70,7 @@ export function OptionButton({
       </span>
 
       <div className="flex min-w-0 flex-1 flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
-        <span className="min-w-0 text-[0.88rem] font-medium leading-tight [overflow-wrap:anywhere] sm:text-[0.98rem] md:text-lg">
+        <span className="min-w-0 text-[0.84rem] font-medium leading-tight truncate sm:text-[0.94rem] md:text-base">
           {option}
         </span>
 

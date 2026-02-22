@@ -60,11 +60,11 @@
   --space-15: 3.75rem;
   --space-25: 6.25rem;
 
-  --map-height-min: 15rem;
-  --map-height-fluid: 46dvh;
-  --map-height-max: 25rem;
-  --option-min-h: 3.375rem;
-  --option-min-h-sm: 4rem;
+  --map-height-min: 12.5rem;
+  --map-height-fluid: 34dvh;
+  --map-height-max: 19rem;
+  --option-min-h: 2.75rem;
+  --option-min-h-sm: 3.25rem;
   --font-size-2xs: 0.6875rem;
 
   /* Radii */
@@ -200,11 +200,36 @@
 
   .layout-footer {
     min-width: 0;
-    padding-bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .game-round-content {
+    gap: clamp(var(--space-2), 1.8dvh, var(--space-3));
+    padding-top: clamp(var(--space-1), 1.1dvh, var(--space-2));
+    padding-bottom: clamp(var(--space-1), 1.1dvh, var(--space-2));
+  }
+
+  .game-question-wrap {
+    min-width: 0;
+  }
+
+  .game-question-wrap--capital {
+    align-items: center;
+  }
+
+  .game-options-wrap {
+    display: grid;
+    align-content: stretch;
+  }
+
+  .game-options-grid {
+    display: grid;
+    grid-template-rows: repeat(4, minmax(0, 1fr));
+    gap: clamp(var(--space-1_5), 1.3dvh, var(--space-2));
   }
 
   .media-box {
-    max-height: 30dvh;
+    max-height: min(26dvh, 13.75rem);
     width: 100%;
     object-fit: contain;
   }
@@ -270,6 +295,8 @@
 
   .option-button-base {
     min-height: var(--option-min-h);
+    padding-top: clamp(var(--space-1_5), 1dvh, var(--space-3));
+    padding-bottom: clamp(var(--space-1_5), 1dvh, var(--space-3));
   }
 
   .map-surface {

@@ -23,7 +23,7 @@ describe('OptionButton', () => {
     expect(button).toHaveAttribute('data-state', 'selected');
     expect(button.className).toContain('ring-2');
     expect(button.className).toContain('option-button-base');
-    expect(button.className).toContain('py-3');
+    expect(button.className).toContain('py-2');
     expect(screen.getByText('✓')).toBeInTheDocument();
 
     fireEvent.click(button);
@@ -72,7 +72,7 @@ describe('OptionButton', () => {
     );
 
     const optionText = screen.getByText('AndorraLaVellaAndorraLaVellaAndorraLaVella');
-    expect(optionText.className).toContain('[overflow-wrap:anywhere]');
+    expect(optionText.className).toContain('truncate');
   });
 
   it('mantiene fondo sólido en locked/correct/wrong sin opacity ni transparency', () => {

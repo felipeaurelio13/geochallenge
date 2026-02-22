@@ -267,7 +267,7 @@ export function GamePage() {
       selectedAnswer={selectedAnswer}
       onOptionSelect={handleOptionSelect}
       showResult={showResult}
-      optionsGridClassName="grid gap-2 grid-cols-1 auto-rows-fr"
+      optionsGridClassName="game-options-grid"
       actionTray={
         <RoundActionTray
           mode="single"

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { AppFooter } from './AppFooter';
 
 export type ScreenProps = {
@@ -9,13 +10,17 @@ export type ScreenProps = {
 
 // Screen encapsulates a single viewport-sized route with fixed header/footer slots.
 export function Screen({ header, footer, children }: ScreenProps) {
+  const { pathname } = useLocation();
+  const isGameplayRoute = pathname.startsWith('/game/')
+    || pathname === '/duel'
+    || /^\/challenges\/[^/]+\/play$/.test(pathname);
   const footerContent = footer ?? <AppFooter />;
 
   return (
     <section className="screen">
       {header ? <header className="screen-header">{header}</header> : null}
       <main className="screen-content">{children}</main>
-      <footer className="screen-footer">{footerContent}</footer>
+      {!isGameplayRoute && <footer className="screen-footer">{footerContent}</footer>}
     </section>
   );
 }

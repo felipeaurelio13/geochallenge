@@ -18,7 +18,7 @@ describe('RoundActionTray', () => {
 
     const tray = screen.getByTestId('mobile-action-tray');
     expect(tray).toHaveClass('w-full');
-    expect(tray.className).toContain('pt-2');
+    expect(tray.className).toContain('pt-[clamp(0.35rem,1.6dvh,0.55rem)]');
 
     fireEvent.click(screen.getByRole('button', { name: 'Enviar' }));
 

@@ -105,8 +105,8 @@ describe('GamePage ending flow', () => {
     const firstOption = screen.getByRole('button', { name: 'Santiago' });
     const optionsGrid = firstOption.parentElement;
 
-    expect(optionsGrid).toHaveClass('grid');
-    expect(optionsGrid).toHaveClass('grid-cols-1');
+    expect(optionsGrid).toHaveClass('game-options-grid');
+    expect(optionsGrid).not.toHaveClass('grid-cols-2');
   });
 
   it('mantiene lista vertical también para categoría banderas', () => {
@@ -125,8 +125,8 @@ describe('GamePage ending flow', () => {
     const firstOption = screen.getByRole('button', { name: 'Japón' });
     const optionsGrid = firstOption.parentElement;
 
-    expect(optionsGrid).toHaveClass('grid');
-    expect(optionsGrid).toHaveClass('grid-cols-1');
+    expect(optionsGrid).toHaveClass('game-options-grid');
+    expect(optionsGrid).not.toHaveClass('grid-cols-2');
     expect(optionsGrid).not.toHaveClass('sm:grid-cols-2');
   });
 
