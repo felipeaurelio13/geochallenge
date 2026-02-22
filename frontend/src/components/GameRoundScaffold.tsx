@@ -40,10 +40,19 @@ export function GameRoundScaffold({
   optionsGridClassName = 'game-options-grid',
 }: GameRoundScaffoldProps) {
   const isCapitalQuestion = !isMapQuestion && question.category === 'CAPITAL';
+  const hasMediaQuestion = !isMapQuestion && (question.category === 'FLAG' || question.category === 'SILHOUETTE');
 
   const content = (
     <div className="game-round-content mx-auto flex h-full w-full max-w-4xl min-h-0 flex-col">
-      <div className={isCapitalQuestion ? 'game-question-wrap game-question-wrap--capital min-h-0 flex-1 flex items-center' : 'game-question-wrap shrink-0'}>
+      <div
+        className={[
+          'game-question-wrap min-h-0',
+          isCapitalQuestion ? 'game-question-wrap--capital flex flex-1 items-center' : '',
+          hasMediaQuestion ? 'game-question-wrap--media' : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
         <QuestionCard
           question={question}
           questionNumber={questionNumber}

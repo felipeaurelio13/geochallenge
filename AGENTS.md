@@ -83,3 +83,5 @@ Estas reglas aplican a todo el repositorio y buscan evitar regresiones de UX/UI 
 - UniversalGameLayout debe mantener estructura en flujo `header/main/footer`; el action tray de ronda no puede usar overlays y siempre debe reservar espacio real con safe-area inferior.
 
 - En layout de juego mobile, usar patrón "shell fijo + scroll interno": `content-area` con `overflow-y:auto`, `-webkit-overflow-scrolling: touch` y padding inferior calculado con `--action-tray-h` + `env(safe-area-inset-bottom)` para impedir que Confirmar tape la última opción.
+- En preguntas con media (Banderas/Siluetas), `game-question-wrap` no debe usar `flex-1`; mantenerlo en tamaño contenido (`game-question-wrap--media`) para reservar altura a la lista de 4 opciones y evitar que aparezca una sola alternativa visible.
+

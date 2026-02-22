@@ -234,9 +234,17 @@
     align-items: center;
   }
 
+  .game-question-wrap--media {
+    flex: 0 0 auto;
+  }
+
   .game-options-wrap {
     display: grid;
     align-content: stretch;
+  }
+
+  .game-question-wrap--media + .game-options-wrap {
+    grid-template-rows: minmax(0, 1fr);
   }
 
   .game-options-grid {
