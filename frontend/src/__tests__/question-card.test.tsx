@@ -69,7 +69,7 @@ describe('QuestionCard', () => {
     );
 
     const silhouetteImage = container.querySelector('img');
-    expect(silhouetteImage).toHaveClass('h-[7.75rem]');
+    expect(silhouetteImage).toHaveClass('h-full');
   });
 
 
@@ -120,8 +120,8 @@ describe('QuestionCard', () => {
     const heading = screen.getByRole('heading', { level: 2 });
     const difficultyBadge = screen.getByText('game.difficulty.medium');
 
-    expect(flagContainer?.className).toContain('min-h-[4.5rem]');
-    expect(heading.className).toContain('text-[1.3rem]');
+    expect(flagContainer?.className).toContain('media-box--compact');
+    expect(heading.className).toContain('text-[1.2rem]');
     expect(difficultyBadge.className).toContain('absolute');
     expect(difficultyBadge.className).toContain('top-2');
   });
@@ -139,6 +139,6 @@ describe('QuestionCard', () => {
 
     render(<QuestionCard question={question} questionNumber={3} totalQuestions={10} compact />);
 
-    expect(screen.getByRole('heading', { level: 2 })).toHaveClass('text-[1.15rem]', 'leading-snug');
+    expect(screen.getByRole('heading', { level: 2 })).toHaveClass('text-[1.05rem]', 'leading-snug');
   });
 });

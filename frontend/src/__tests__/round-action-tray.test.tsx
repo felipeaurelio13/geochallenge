@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { RoundActionTray } from '../components/RoundActionTray';
 
 describe('RoundActionTray', () => {
-  it('mantiene la acción principal siempre visible con contenedor fijo en mobile', () => {
+  it('mantiene la acción principal visible en flujo con safe-area inferior reforzada', () => {
     const onSubmit = vi.fn();
 
     render(
@@ -18,14 +18,16 @@ describe('RoundActionTray', () => {
 
     const tray = screen.getByTestId('mobile-action-tray');
     expect(tray).toHaveClass('w-full');
-    expect(tray.className).toContain('pt-[clamp(0.35rem,1.6dvh,0.55rem)]');
+    expect(tray.className).toContain('pb-[calc(env(safe-area-inset-bottom)+0.65rem)]');
+    expect(tray.className).not.toContain('fixed');
+    expect(tray.className).not.toContain('absolute');
 
     fireEvent.click(screen.getByRole('button', { name: 'Enviar' }));
 
     expect(onSubmit).toHaveBeenCalledTimes(1);
   });
 
-  it('usa variante de desafío con contenedor fijo y CTA de siguiente en resultados', () => {
+  it('usa variante de desafío y mantiene CTA de siguiente en resultados', () => {
     const onNext = vi.fn();
 
     render(
@@ -48,7 +50,6 @@ describe('RoundActionTray', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Siguiente' }));
     expect(onNext).toHaveBeenCalledTimes(1);
   });
-
 
   it('mantiene contraste legible en botón Confirmar deshabilitado', () => {
     render(
@@ -82,5 +83,4 @@ describe('RoundActionTray', () => {
 
     expect(screen.getByText('Selección lista para confirmar.')).toBeInTheDocument();
   });
-
 });

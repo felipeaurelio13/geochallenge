@@ -22,10 +22,11 @@ describe('GameRoundScaffold', () => {
     difficulty: 'MEDIUM',
   } as Question;
 
-  it('usa el layout universal sin scroll y evita compresión del enunciado', () => {
+  it('usa estructura header/main/footer en flujo para evitar overlays', () => {
     render(
       <GameRoundScaffold
         header={<div>header</div>}
+        progress={<div>progreso</div>}
         question={question}
         questionNumber={1}
         totalQuestions={10}
@@ -34,21 +35,19 @@ describe('GameRoundScaffold', () => {
         selectedAnswer={null}
         onOptionSelect={() => {}}
         showResult={false}
-        actionTray={<div>tray</div>}
+        actionTray={<div data-testid="tray">tray</div>}
       />
     );
 
     const layout = screen.getByText('header').closest('.universal-layout');
-    const questionCard = screen.getByTestId('question-card');
+    const header = screen.getByTestId('universal-layout-header');
+    const main = screen.getByTestId('universal-layout-main');
+    const footer = screen.getByTestId('universal-layout-footer');
 
-    expect(questionCard.parentElement).toHaveClass('shrink-0');
     expect(layout).toBeInTheDocument();
-    expect(layout).toHaveClass('universal-layout');
-
-    Object.defineProperty(document.documentElement, 'scrollHeight', { configurable: true, value: window.innerHeight });
-    Object.defineProperty(document.documentElement, 'scrollWidth', { configurable: true, value: window.innerWidth });
-    expect(document.documentElement.scrollHeight).toBeLessThanOrEqual(window.innerHeight);
-    expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth);
+    expect(header).toContainElement(screen.getByText('progreso'));
+    expect(main.compareDocumentPosition(footer) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(footer).toContainElement(screen.getByTestId('tray'));
   });
 
   it('centra verticalmente capitales y mantiene opciones en flujo sin overlay absoluto', () => {
@@ -76,6 +75,7 @@ describe('GameRoundScaffold', () => {
     expect(screen.getByTestId('question-card').parentElement).toHaveClass('flex-1');
     for (const button of screen.getAllByRole('button')) {
       expect(button.className).not.toContain('absolute');
+      expect(button.className).not.toContain('fixed');
     }
   });
 });
