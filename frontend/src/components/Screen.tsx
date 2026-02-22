@@ -17,9 +17,9 @@ export function Screen({ header, footer, children }: ScreenProps) {
   const footerContent = footer ?? <AppFooter />;
 
   return (
-    <section className="screen">
+    <section className="screen min-h-0">
       {header ? <header className="screen-header">{header}</header> : null}
-      <main className="screen-content">{children}</main>
+      <main className="screen-content overflow-y-auto overscroll-contain">{children}</main>
       {!isGameplayRoute && <footer className="screen-footer">{footerContent}</footer>}
     </section>
   );

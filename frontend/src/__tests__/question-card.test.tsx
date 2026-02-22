@@ -121,7 +121,7 @@ describe('QuestionCard', () => {
     const difficultyBadge = screen.getByText('game.difficulty.medium');
 
     expect(flagContainer?.className).toContain('media-box--compact');
-    expect(heading.className).toContain('text-[1.2rem]');
+    expect(heading.className).toContain('text-[clamp(1.05rem,4vw,1.28rem)]');
     expect(difficultyBadge.className).toContain('absolute');
     expect(difficultyBadge.className).toContain('top-2');
   });
@@ -139,6 +139,6 @@ describe('QuestionCard', () => {
 
     render(<QuestionCard question={question} questionNumber={3} totalQuestions={10} compact />);
 
-    expect(screen.getByRole('heading', { level: 2 })).toHaveClass('text-[1.05rem]', 'leading-snug');
+    expect(screen.getByRole('heading', { level: 2 })).toHaveClass('text-[clamp(1rem,3.8vw,1.22rem)]', 'leading-snug');
   });
 });

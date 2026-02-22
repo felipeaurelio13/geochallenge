@@ -82,3 +82,4 @@ Estas reglas aplican a todo el repositorio y buscan evitar regresiones de UX/UI 
 - Para evitar regresiones de recorte sin scroll, usar `game-options-grid` con 4 filas y `min-height: 0` en contenedores intermedios del layout universal.
 - UniversalGameLayout debe mantener estructura en flujo `header/main/footer`; el action tray de ronda no puede usar overlays y siempre debe reservar espacio real con safe-area inferior.
 
+- En layout de juego mobile, usar patrón "shell fijo + scroll interno": `content-area` con `overflow-y:auto`, `-webkit-overflow-scrolling: touch` y padding inferior calculado con `--action-tray-h` + `env(safe-area-inset-bottom)` para impedir que Confirmar tape la última opción.
