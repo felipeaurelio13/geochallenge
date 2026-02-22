@@ -20,7 +20,15 @@ export default defineConfig({
   },
   projects: [
     {
-      name: 'Mobile Chrome',
+      name: 'iPhone SE',
+      use: { ...devices['iPhone SE'] },
+    },
+    {
+      name: 'iPhone 15 Pro',
+      use: { ...devices['iPhone 15 Pro'] },
+    },
+    {
+      name: 'Android Medium',
       use: { ...devices['Pixel 5'] },
     },
   ],

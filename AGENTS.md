@@ -85,3 +85,4 @@ Estas reglas aplican a todo el repositorio y buscan evitar regresiones de UX/UI 
 - En layout de juego mobile, usar patrón "shell fijo + scroll interno": `content-area` con `overflow-y:auto`, `-webkit-overflow-scrolling: touch` y padding inferior calculado con `--action-tray-h` + `env(safe-area-inset-bottom)` para impedir que Confirmar tape la última opción.
 - En preguntas con media (Banderas/Siluetas), `game-question-wrap` no debe usar `flex-1`; mantenerlo en tamaño contenido (`game-question-wrap--media`) para reservar altura a la lista de 4 opciones y evitar que aparezca una sola alternativa visible.
 
+- Se detectó regresión por doble reserva vertical: combinar `content-area` con `padding-bottom: var(--action-tray-h)` + footer en flujo genera zonas muertas y recortes en iPhone; preferir layout en grilla de 3 filas sin compensaciones dinámicas de altura.

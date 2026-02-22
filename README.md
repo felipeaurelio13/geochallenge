@@ -4,7 +4,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.70**
+- Frontend: **v1.2.71**
 
 - Fix: pantallas de juego sin scroll pero 100% jugables; CTA principal siempre visible; footer global oculto en juego.
 
@@ -27,6 +27,15 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 7. Si el deploy falla, usar este protocolo interno: (a) `npm run ci:quality` local, (b) revisar secretos/configuración de Pages, (c) relanzar workflow solo tras corregir la causa raíz.
 
 
+
+## Novedades de la versión 1.2.71
+
+- Se eliminó el cálculo dinámico de `--action-tray-h` y se migró el layout universal de juego a una grilla real de 3 filas (`header / content / footer`) para evitar doble reserva de espacio y vacíos bajo alternativas.
+- `content-area` ahora mantiene scroll interno consistente (`min-height: 0`, `overflow-y: auto`, `overscroll-behavior: contain`) y el action tray se renderiza en flujo normal, por lo que el CTA **Confirmar** nunca tapa opciones.
+- Se corrigió la doble aplicación de `safe-area-inset-top` en headers de juego (single/duel/challenge), eliminando recortes en iPhone con notch/dynamic island.
+- Se ajustó el contenedor de media de preguntas (banderas/siluetas) con `aspect-ratio: 16/9`, `max-height` en `dvh` y `object-fit: contain` para evitar clipping.
+- Se añadieron tests E2E mobile para iPhone SE, iPhone 15 Pro y Android Medium validando visibilidad de CTA, accesibilidad de alternativas e integridad visual de media.
+- Footer/versionado actualizado a **v1.2.71** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.70
 

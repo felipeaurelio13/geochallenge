@@ -354,7 +354,7 @@ export function DuelPage() {
     <GameRoundScaffold
       rootClassName="bg-gray-900"
       header={
-        <header className="sticky top-0 z-30 border-b border-gray-700 bg-gray-800/95 px-3 py-2 pt-[calc(env(safe-area-inset-top)+0.35rem)] backdrop-blur sm:px-4">
+        <header className="sticky top-0 z-30 border-b border-gray-700 bg-gray-800/95 px-3 py-2 pt-2 backdrop-blur sm:px-4">
           <div className="max-w-4xl mx-auto flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold text-white">
