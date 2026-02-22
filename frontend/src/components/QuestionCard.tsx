@@ -109,33 +109,33 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
 
   const getImageClassName = () => {
     if (question.category === 'FLAG') {
-      return 'h-full w-full object-contain';
+      return 'h-full w-full object-contain object-center';
     }
 
     return compact
-      ? 'h-full w-full max-w-sm object-contain filter invert'
-      : 'h-full w-full max-w-sm object-contain filter invert';
+      ? 'h-full w-full object-contain object-center filter invert'
+      : 'h-full w-full object-contain object-center filter invert';
   };
 
   const headingClassName = `${
     compact
       ? question.category === 'MAP'
-        ? 'text-[1.05rem] sm:text-[1.3rem]'
+        ? 'text-[clamp(1rem,3.8vw,1.22rem)] sm:text-[1.3rem]'
         : question.category === 'CAPITAL'
-          ? 'text-[1.35rem] sm:text-[1.6rem]'
-          : 'text-[1.2rem] sm:text-[1.5rem]'
-      : 'text-[1.8rem] sm:text-4xl'
+          ? 'text-[clamp(1.1rem,4.2vw,1.4rem)] sm:text-[1.6rem]'
+          : 'text-[clamp(1.05rem,4vw,1.28rem)] sm:text-[1.5rem]'
+      : 'text-[clamp(1.2rem,4.5vw,1.8rem)] sm:text-4xl'
   } font-bold text-white break-words ${question.category === 'MAP' ? 'leading-snug' : 'leading-tight'}`;
 
   return (
     <div
       aria-label={t('game.questionOf', { current: questionNumber, total: totalQuestions })}
-      className={`question-card rounded-3xl border border-gray-700 bg-gray-800/95 shadow-xl shadow-black/25 overflow-hidden ${compact ? 'px-4 py-2.5 sm:px-5 sm:py-3' : 'px-4 py-5 sm:px-6 sm:py-6'} ${isCompactMediaMode ? 'question-card--with-media' : ''}`}
+      className={`question-card rounded-3xl border border-gray-700 bg-gray-800/95 shadow-xl shadow-black/25 ${compact ? 'px-4 py-2 sm:px-5 sm:py-3' : 'px-4 py-4 sm:px-6 sm:py-6'} ${isCompactMediaMode ? 'question-card--with-media' : ''}`}
     >
       <div className="text-center">
         {showQuestionImage && (
           <div className={compact ? 'mb-1' : 'mb-6'}>
-            <div className={`mx-auto flex items-center justify-center overflow-hidden rounded-xl border border-gray-600/70 bg-black/15 px-2 ${getImageContainerClassName()}`}>
+            <div className={`mx-auto flex items-center justify-center rounded-xl border border-gray-600/70 bg-black/15 px-2 ${getImageContainerClassName()}`}>
               <img
                 src={normalizedImageUrl}
                 alt={t('game.questionImageAlt', { category: question.category.toLowerCase() })}

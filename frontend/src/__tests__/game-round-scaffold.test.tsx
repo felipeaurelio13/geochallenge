@@ -77,5 +77,8 @@ describe('GameRoundScaffold', () => {
       expect(button.className).not.toContain('absolute');
       expect(button.className).not.toContain('fixed');
     }
+
+    const optionsWrapper = screen.getByRole('button', { name: 'Santiago' }).closest('.game-options-wrap');
+    expect(optionsWrapper?.className).toContain('overflow-y-auto');
   });
 });

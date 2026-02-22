@@ -4,7 +4,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.68**
+- Frontend: **v1.2.69**
 
 - Fix: pantallas de juego sin scroll pero 100% jugables; CTA principal siempre visible; footer global oculto en juego.
 
@@ -26,6 +26,21 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 6. El workflow de deploy se dispara solo con cambios de frontend o del propio pipeline, reduciendo ruido por cambios ajenos al cliente web.
 7. Si el deploy falla, usar este protocolo interno: (a) `npm run ci:quality` local, (b) revisar secretos/configuración de Pages, (c) relanzar workflow solo tras corregir la causa raíz.
 
+
+## Novedades de la versión 1.2.69
+
+- Se migró la arquitectura de ronda a **fixed shell + scroll interno**: `header` y action tray permanecen estables mientras `main` ahora permite scroll táctil confinado, eliminando cortes de alternativas en iPhone.
+- `UniversalGameLayout` ahora mide dinámicamente la altura real del tray (`ResizeObserver` + `--action-tray-h`) y aplica padding inferior al área scrolleable para que **Confirmar nunca tape opciones** (incluyendo safe-area inferior de iOS).
+- `QuestionCard` ajustó densidad mobile y render de media para mostrar banderas/siluetas completas con `object-contain` real, `object-position:center` y contenedor responsivo sin cropping agresivo.
+- Se habilitó scroll interno resiliente en lista de alternativas (`min-height:0` + `overflow-y:auto`) para que todas las opciones sean alcanzables en viewports bajos sin doble scroll global.
+- Se reforzó el shell de pantallas no-juego para evitar contenido oculto bajo footer/version (Home/Profile/Rankings y vistas similares).
+- Footer/versionado actualizado a **v1.2.69** para mantener trazabilidad con el despliegue en GitHub Pages.
+
+### QA checklist mobile (anti-regresiones)
+
+- En iPhone (alto bajo y normal), validar que la **última alternativa se vea completa** haciendo scroll interno y que el tray Confirmar no la tape.
+- Validar preguntas con bandera y silueta: la imagen debe verse **completa** dentro del card (`object-fit: contain`) tanto en light como en dark mode.
+- Confirmar que Home/Profile/Rankings no oculten contenido bajo el footer/version y que no exista overflow horizontal accidental.
 
 ## Novedades de la versión 1.2.68
 
