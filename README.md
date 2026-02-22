@@ -4,7 +4,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.67**
+- Frontend: **v1.2.68**
 
 - Fix: pantallas de juego sin scroll pero 100% jugables; CTA principal siempre visible; footer global oculto en juego.
 
@@ -25,6 +25,15 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 5. Si falla deploy, revisar primero el job `Frontend quality gate`: ese job corta el release antes de publicar para evitar romper producción.
 6. El workflow de deploy se dispara solo con cambios de frontend o del propio pipeline, reduciendo ruido por cambios ajenos al cliente web.
 7. Si el deploy falla, usar este protocolo interno: (a) `npm run ci:quality` local, (b) revisar secretos/configuración de Pages, (c) relanzar workflow solo tras corregir la causa raíz.
+
+
+## Novedades de la versión 1.2.68
+
+- Se reforzó el layout universal de ronda a tres zonas en flujo (`header/main/footer`) para evitar overlays del action tray sobre alternativas y asegurar que el botón Confirmar siempre reserve espacio real.
+- Se ajustó `RoundActionTray` con mayor separación vertical y `safe-area` inferior para que el CTA no quede pegado ni recortado por el home indicator en iOS.
+- Se compactó automáticamente `QuestionCard` cuando hay media (bandera/silueta), limitando altura de tarjeta y media con `clamp(...)` para preservar visibilidad completa de las 4 opciones en viewports móviles bajos.
+- Se redujeron gaps verticales del scaffold de ronda y se ampliaron pruebas de estructura/layout para prevenir regresiones de superposición.
+- Footer/versionado actualizado a **v1.2.68** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.66
 

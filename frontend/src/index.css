@@ -169,8 +169,12 @@
 
   .universal-layout {
     display: grid;
-    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    height: 100vh;
+    height: 100svh;
     height: 100dvh;
+    min-height: 100vh;
+    min-height: 100svh;
     min-height: 100dvh;
     overflow: hidden;
     overscroll-behavior: none;
@@ -180,6 +184,10 @@
 
   .layout-header {
     padding-top: env(safe-area-inset-top);
+    min-width: 0;
+  }
+
+  .layout-header > :first-child {
     min-width: 0;
   }
 
@@ -204,9 +212,9 @@
   }
 
   .game-round-content {
-    gap: clamp(var(--space-2), 1.8dvh, var(--space-3));
-    padding-top: clamp(var(--space-1), 1.1dvh, var(--space-2));
-    padding-bottom: clamp(var(--space-1), 1.1dvh, var(--space-2));
+    gap: clamp(var(--space-1_5), 1.4dvh, var(--space-2_5));
+    padding-top: clamp(var(--space-1), 0.8dvh, var(--space-1_5));
+    padding-bottom: clamp(var(--space-1), 0.8dvh, var(--space-1_5));
   }
 
   .game-question-wrap {
@@ -228,12 +236,43 @@
     gap: clamp(var(--space-1_5), 1.3dvh, var(--space-2));
   }
 
+  .question-card {
+    max-height: clamp(13.75rem, 34dvh, 20rem);
+  }
+
+  .question-card--with-media {
+    max-height: clamp(13.75rem, 34dvh, 20rem);
+  }
+
   .media-box {
-    max-height: min(26dvh, 13.75rem);
+    min-height: clamp(5.75rem, 14dvh, 8.5rem);
+    max-height: clamp(8.75rem, 22dvh, 13.75rem);
     width: 100%;
     object-fit: contain;
   }
 
+  .media-box--compact {
+    max-height: clamp(8.75rem, 22dvh, 13.75rem);
+  }
+
+  .media-box--silhouette {
+    max-width: 20rem;
+  }
+
+
+  @media (max-height: 830px) {
+    .game-round-content {
+      gap: clamp(var(--space-1), 1dvh, var(--space-1_5));
+    }
+
+    .game-options-grid {
+      gap: clamp(var(--space-1), 1dvh, var(--space-1_5));
+    }
+
+    .media-box {
+      max-height: clamp(8rem, 20dvh, 11rem);
+    }
+  }
   .app-shell {
     background-color: var(--color-bg-shell);
     color: var(--color-text-primary);
@@ -295,8 +334,8 @@
 
   .option-button-base {
     min-height: var(--option-min-h);
-    padding-top: clamp(var(--space-1_5), 1dvh, var(--space-3));
-    padding-bottom: clamp(var(--space-1_5), 1dvh, var(--space-3));
+    padding-top: clamp(var(--space-1_5), 1.2dvh, var(--space-3));
+    padding-bottom: clamp(var(--space-1_5), 1.2dvh, var(--space-3));
   }
 
   .map-surface {

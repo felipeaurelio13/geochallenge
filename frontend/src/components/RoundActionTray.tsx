@@ -22,11 +22,11 @@ type RoundActionTrayProps = {
 
 const MODE_CONTAINER_CLASS: Record<NonNullable<RoundActionTrayProps['mode']>, string> = {
   single:
-    'w-full border-t border-gray-700/80 bg-gradient-to-t from-gray-950 via-gray-900/96 to-gray-900/65 px-3 pb-[calc(env(safe-area-inset-bottom)+0.25rem)] pt-[clamp(0.35rem,1.6dvh,0.55rem)] backdrop-blur sm:px-4',
+    'w-full border-t border-gray-700/80 bg-gradient-to-t from-gray-950 via-gray-900/96 to-gray-900/65 px-3 pb-[calc(env(safe-area-inset-bottom)+0.65rem)] pt-[clamp(0.65rem,1.9dvh,0.85rem)] backdrop-blur sm:px-4',
   duel:
-    'w-full border-t border-gray-700/80 bg-gradient-to-t from-gray-950 via-gray-900/96 to-gray-900/65 px-3 pb-[calc(env(safe-area-inset-bottom)+0.25rem)] pt-[clamp(0.35rem,1.6dvh,0.55rem)] backdrop-blur sm:px-4',
+    'w-full border-t border-gray-700/80 bg-gradient-to-t from-gray-950 via-gray-900/96 to-gray-900/65 px-3 pb-[calc(env(safe-area-inset-bottom)+0.65rem)] pt-[clamp(0.65rem,1.9dvh,0.85rem)] backdrop-blur sm:px-4',
   challenge:
-    'w-full border-t border-gray-700/80 bg-gradient-to-t from-gray-950 via-gray-900/96 to-gray-900/65 px-3 pb-[calc(env(safe-area-inset-bottom)+0.25rem)] pt-[clamp(0.35rem,1.6dvh,0.55rem)] backdrop-blur sm:px-4',
+    'w-full border-t border-gray-700/80 bg-gradient-to-t from-gray-950 via-gray-900/96 to-gray-900/65 px-3 pb-[calc(env(safe-area-inset-bottom)+0.65rem)] pt-[clamp(0.65rem,1.9dvh,0.85rem)] backdrop-blur sm:px-4',
 };
 
 export function RoundActionTray({

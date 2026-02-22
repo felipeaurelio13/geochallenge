@@ -13,7 +13,6 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
   const { t } = useTranslation();
   const [hasImageError, setHasImageError] = useState(false);
 
-  // Get the questionData value - it could be a string or an object
   const getQuestionDataValue = (): string => {
     if (!question.questionData) return '';
     if (typeof question.questionData === 'string') {
@@ -30,7 +29,6 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
 
       return question.questionData;
     }
-    // If it's an object, try to extract relevant field
     return question.questionData.country || question.questionData.capital || '';
   };
 
@@ -38,21 +36,10 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
     const legacyQuestionText = (question as Partial<Question> & { question?: string }).question;
     const dataValue = getQuestionDataValue();
 
-    if (question.questionText?.trim()) {
-      return question.questionText;
-    }
-
-    if (legacyQuestionText?.trim()) {
-      return legacyQuestionText;
-    }
-
-    if (question.category === 'CAPITAL') {
-      return t('game.questionCapital', { country: dataValue });
-    }
-
-    if (question.category === 'MAP') {
-      return t('game.questionMap', { capital: dataValue });
-    }
+    if (question.questionText?.trim()) return question.questionText;
+    if (legacyQuestionText?.trim()) return legacyQuestionText;
+    if (question.category === 'CAPITAL') return t('game.questionCapital', { country: dataValue });
+    if (question.category === 'MAP') return t('game.questionMap', { capital: dataValue });
 
     return dataValue;
   };
@@ -64,10 +51,8 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
       case 'FLAG':
         return t('game.questionFlag');
       case 'CAPITAL':
-        // For capital questions, questionData contains the country name
         return t('game.questionCapital', { country: dataValue || getFallbackQuestionText() });
       case 'MAP':
-        // For map questions, questionData contains the capital/city to find
         return t('game.questionMap', { capital: dataValue || getFallbackQuestionText() });
       case 'SILHOUETTE':
         return t('game.questionSilhouette');
@@ -110,14 +95,16 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
     !hasImageError &&
     (question.category === 'FLAG' || question.category === 'SILHOUETTE');
 
+  const isCompactMediaMode = compact && showQuestionImage;
+
   const getImageContainerClassName = () => {
     if (question.category === 'FLAG') {
-      return 'media-box relative min-h-[4.5rem] w-full max-w-md';
+      return 'media-box media-box--compact relative w-full max-w-md';
     }
 
     return compact
-      ? 'min-h-[8.5rem] sm:min-h-[10.25rem]'
-      : 'min-h-[9rem] sm:min-h-[11rem]';
+      ? 'media-box media-box--compact media-box--silhouette'
+      : 'media-box media-box--silhouette';
   };
 
   const getImageClassName = () => {
@@ -126,25 +113,28 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
     }
 
     return compact
-      ? 'h-[7.75rem] w-full max-w-sm sm:h-[9.25rem] filter invert'
-      : 'h-[8.25rem] w-full max-w-sm sm:h-[9.75rem] filter invert';
+      ? 'h-full w-full max-w-sm object-contain filter invert'
+      : 'h-full w-full max-w-sm object-contain filter invert';
   };
 
   const headingClassName = `${
     compact
       ? question.category === 'MAP'
-        ? 'text-[1.15rem] sm:text-[1.45rem]'
+        ? 'text-[1.05rem] sm:text-[1.3rem]'
         : question.category === 'CAPITAL'
-          ? 'text-2xl sm:text-[1.8rem]'
-        : 'text-[1.3rem] sm:text-3xl'
+          ? 'text-[1.35rem] sm:text-[1.6rem]'
+          : 'text-[1.2rem] sm:text-[1.5rem]'
       : 'text-[1.8rem] sm:text-4xl'
   } font-bold text-white break-words ${question.category === 'MAP' ? 'leading-snug' : 'leading-tight'}`;
 
   return (
-    <div aria-label={t('game.questionOf', { current: questionNumber, total: totalQuestions })} className={`rounded-3xl border border-gray-700 bg-gray-800/95 shadow-xl shadow-black/25 overflow-hidden ${compact ? 'px-4 py-3 sm:px-5 sm:py-3.5' : 'px-4 py-5 sm:px-6 sm:py-6'}`}>
+    <div
+      aria-label={t('game.questionOf', { current: questionNumber, total: totalQuestions })}
+      className={`question-card rounded-3xl border border-gray-700 bg-gray-800/95 shadow-xl shadow-black/25 overflow-hidden ${compact ? 'px-4 py-2.5 sm:px-5 sm:py-3' : 'px-4 py-5 sm:px-6 sm:py-6'} ${isCompactMediaMode ? 'question-card--with-media' : ''}`}
+    >
       <div className="text-center">
         {showQuestionImage && (
-          <div className={compact ? 'mb-1.5' : 'mb-6'}>
+          <div className={compact ? 'mb-1' : 'mb-6'}>
             <div className={`mx-auto flex items-center justify-center overflow-hidden rounded-xl border border-gray-600/70 bg-black/15 px-2 ${getImageContainerClassName()}`}>
               <img
                 src={normalizedImageUrl}
@@ -152,7 +142,7 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
                 loading="lazy"
                 width={question.category === 'FLAG' ? 360 : 220}
                 height={question.category === 'FLAG' ? 190 : 220}
-                className={`mx-auto object-contain ${getImageClassName()}`}
+                className={`mx-auto ${getImageClassName()}`}
                 onError={() => setHasImageError(true)}
               />
 
@@ -167,10 +157,8 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
           </div>
         )}
 
-        <div className={`flex ${compact ? 'flex-row items-start justify-center gap-2 text-left' : 'flex-col items-center'} ${question.category === 'CAPITAL' ? 'w-full justify-center text-center' : ''}`}>
-          <h2 className={headingClassName}>
-            {getQuestionText()}
-          </h2>
+        <div className={`flex ${compact ? 'flex-row items-start justify-center gap-1.5 text-left' : 'flex-col items-center'} ${question.category === 'CAPITAL' ? 'w-full justify-center text-center' : ''}`}>
+          <h2 className={headingClassName}>{getQuestionText()}</h2>
 
           {question.difficulty && question.category !== 'FLAG' && (
             <div className={compact ? 'mt-0.5 shrink-0' : 'mt-5'}>

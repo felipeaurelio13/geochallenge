@@ -80,3 +80,5 @@ Estas reglas aplican a todo el repositorio y buscan evitar regresiones de UX/UI 
 
 - En rutas de juego (`/game/*`, `/duel`, `/challenges/:id/play`) no renderizar el footer global del shell para preservar altura útil del viewport y proteger el CTA principal.
 - Para evitar regresiones de recorte sin scroll, usar `game-options-grid` con 4 filas y `min-height: 0` en contenedores intermedios del layout universal.
+- UniversalGameLayout debe mantener estructura en flujo `header/main/footer`; el action tray de ronda no puede usar overlays y siempre debe reservar espacio real con safe-area inferior.
+
