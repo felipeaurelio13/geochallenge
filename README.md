@@ -4,7 +4,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.69**
+- Frontend: **v1.2.70**
 
 - Fix: pantallas de juego sin scroll pero 100% jugables; CTA principal siempre visible; footer global oculto en juego.
 
@@ -26,6 +26,14 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 6. El workflow de deploy se dispara solo con cambios de frontend o del propio pipeline, reduciendo ruido por cambios ajenos al cliente web.
 7. Si el deploy falla, usar este protocolo interno: (a) `npm run ci:quality` local, (b) revisar secretos/configuración de Pages, (c) relanzar workflow solo tras corregir la causa raíz.
 
+
+
+## Novedades de la versión 1.2.70
+
+- Se corrigió la distribución vertical en rondas con media (Banderas/Siluetas): el bloque de pregunta vuelve a tamaño de contenido y la grilla de alternativas recupera el espacio flexible para mostrar las 4 opciones.
+- Se reforzó `GameRoundScaffold` con una variante explícita para preguntas con media (`game-question-wrap--media`) evitando que el card de bandera consuma toda la altura útil.
+- Se agregaron pruebas en `game-round-scaffold.test.tsx` para cubrir el caso visual reportado (4 alternativas visibles en modo banderas) y prevenir regresiones.
+- Footer/versionado actualizado a **v1.2.70** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.69
 

@@ -50,6 +50,38 @@ describe('GameRoundScaffold', () => {
     expect(footer).toContainElement(screen.getByTestId('tray'));
   });
 
+
+  it('en preguntas con media mantiene bloque de opciones expandible para mostrar las 4 alternativas', () => {
+    const flagQuestion = {
+      ...question,
+      category: 'FLAG',
+      imageUrl: 'https://flagcdn.com/w320/ar.png',
+      options: ['Argentina', 'Uruguay', 'Chile', 'Paraguay'],
+      correctAnswer: 'Argentina',
+    } as Question;
+
+    render(
+      <GameRoundScaffold
+        header={<div>header</div>}
+        question={flagQuestion}
+        questionNumber={1}
+        totalQuestions={10}
+        isMapQuestion={false}
+        mapContent={null}
+        selectedAnswer={null}
+        onOptionSelect={() => {}}
+        showResult={false}
+        actionTray={<div>tray</div>}
+      />
+    );
+
+    const questionWrap = screen.getByTestId('question-card').parentElement;
+    expect(questionWrap).toHaveClass('game-question-wrap--media');
+
+    const optionsWrapper = screen.getByRole('button', { name: 'Argentina' }).closest('.game-options-wrap');
+    expect(optionsWrapper).toHaveClass('flex-1');
+    expect(screen.getAllByRole('button')).toHaveLength(4);
+  });
   it('centra verticalmente capitales y mantiene opciones en flujo sin overlay absoluto', () => {
     const capitalQuestion = {
       ...question,
