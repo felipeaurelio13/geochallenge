@@ -411,7 +411,7 @@ export function DuelPage() {
       onOptionSelect={setSelectedAnswer}
       showResult={showResult}
       disableOptions={duelState === 'waiting'}
-      optionsGridClassName="grid gap-2 grid-cols-1"
+      optionsGridClassName="game-options-grid"
       actionTray={
         <RoundActionTray
           mode="duel"

@@ -4,7 +4,9 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.66**
+- Frontend: **v1.2.67**
+
+- Fix: pantallas de juego sin scroll pero 100% jugables; CTA principal siempre visible; footer global oculto en juego.
 
 ### Mantener backend activo en producción
 

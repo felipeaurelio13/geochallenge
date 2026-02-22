@@ -267,7 +267,7 @@ export function ChallengeGamePage() {
       selectedAnswer={selectedAnswer}
       onOptionSelect={setSelectedAnswer}
       showResult={showResult}
-      optionsGridClassName="grid gap-2 grid-cols-1"
+      optionsGridClassName="game-options-grid"
       mapContent={
         <Suspense fallback={<LoadingSpinner size="lg" />}>
           <MapInteractive

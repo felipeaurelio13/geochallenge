@@ -22,11 +22,11 @@ type RoundActionTrayProps = {
 
 const MODE_CONTAINER_CLASS: Record<NonNullable<RoundActionTrayProps['mode']>, string> = {
   single:
-    'w-full border-t border-gray-700/80 bg-gradient-to-t from-gray-950 via-gray-900/96 to-gray-900/65 px-3 pb-[calc(env(safe-area-inset-bottom)+0.25rem)] pt-2 backdrop-blur sm:px-4',
+    'w-full border-t border-gray-700/80 bg-gradient-to-t from-gray-950 via-gray-900/96 to-gray-900/65 px-3 pb-[calc(env(safe-area-inset-bottom)+0.25rem)] pt-[clamp(0.35rem,1.6dvh,0.55rem)] backdrop-blur sm:px-4',
   duel:
-    'w-full border-t border-gray-700/80 bg-gradient-to-t from-gray-950 via-gray-900/96 to-gray-900/65 px-3 pb-[calc(env(safe-area-inset-bottom)+0.25rem)] pt-2 backdrop-blur sm:px-4',
+    'w-full border-t border-gray-700/80 bg-gradient-to-t from-gray-950 via-gray-900/96 to-gray-900/65 px-3 pb-[calc(env(safe-area-inset-bottom)+0.25rem)] pt-[clamp(0.35rem,1.6dvh,0.55rem)] backdrop-blur sm:px-4',
   challenge:
-    'w-full border-t border-gray-700/80 bg-gradient-to-t from-gray-950 via-gray-900/96 to-gray-900/65 px-3 pb-[calc(env(safe-area-inset-bottom)+0.25rem)] pt-2 backdrop-blur sm:px-4',
+    'w-full border-t border-gray-700/80 bg-gradient-to-t from-gray-950 via-gray-900/96 to-gray-900/65 px-3 pb-[calc(env(safe-area-inset-bottom)+0.25rem)] pt-[clamp(0.35rem,1.6dvh,0.55rem)] backdrop-blur sm:px-4',
 };
 
 export function RoundActionTray({
@@ -49,8 +49,8 @@ export function RoundActionTray({
 }: RoundActionTrayProps) {
   const wrapperClassName =
     mode === 'challenge'
-      ? 'mx-auto flex w-full max-w-4xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between'
-      : 'mx-auto flex w-full max-w-4xl flex-col gap-1 rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-slate-900/96 via-gray-900/96 to-emerald-950/45 p-2 shadow-xl shadow-cyan-950/30 sm:flex-row sm:items-center sm:justify-between sm:p-2';
+      ? 'mx-auto flex w-full max-w-4xl flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between'
+      : 'mx-auto flex w-full max-w-4xl flex-col gap-1 rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-slate-900/96 via-gray-900/96 to-emerald-950/45 p-[clamp(0.4rem,1.5dvh,0.55rem)] shadow-xl shadow-cyan-950/30 sm:flex-row sm:items-center sm:justify-between';
 
   return (
     <div className={MODE_CONTAINER_CLASS[mode]} data-testid="mobile-action-tray">

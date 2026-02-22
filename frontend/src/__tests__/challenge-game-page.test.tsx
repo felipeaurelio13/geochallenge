@@ -91,8 +91,8 @@ describe('ChallengeGamePage', () => {
     const firstOption = await screen.findByRole('button', { name: 'Santiago' });
     const optionsGrid = firstOption.parentElement;
 
-    expect(optionsGrid).toHaveClass('grid');
-    expect(optionsGrid).toHaveClass('grid-cols-1');
+    expect(optionsGrid).toHaveClass('game-options-grid');
+    expect(optionsGrid).not.toHaveClass('grid-cols-2');
 
     await waitFor(() => {
       expect(mocks.apiGetMock).toHaveBeenCalledWith('/challenges/challenge-1/questions');
