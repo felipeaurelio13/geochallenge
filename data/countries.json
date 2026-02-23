@@ -89,6 +89,7 @@
     {"name": "Kazakhstan", "capital": "Astana", "continent": "Asia", "lat": 51.1694, "lng": 71.4491, "flag": "kz"},
     {"name": "Kenya", "capital": "Nairobi", "continent": "Africa", "lat": -1.2921, "lng": 36.8219, "flag": "ke"},
     {"name": "Kiribati", "capital": "Tarawa", "continent": "Oceania", "lat": 1.4518, "lng": 172.9717, "flag": "ki"},
+    {"name": "Kosovo", "capital": "Pristina", "continent": "Europe", "lat": 42.6629, "lng": 21.1655, "flag": "xk"},
     {"name": "Kuwait", "capital": "Kuwait City", "continent": "Asia", "lat": 29.3759, "lng": 47.9774, "flag": "kw"},
     {"name": "Kyrgyzstan", "capital": "Bishkek", "continent": "Asia", "lat": 42.8746, "lng": 74.5698, "flag": "kg"},
     {"name": "Laos", "capital": "Vientiane", "continent": "Asia", "lat": 17.9757, "lng": 102.6331, "flag": "la"},

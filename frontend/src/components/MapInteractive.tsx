@@ -176,7 +176,7 @@ export function MapInteractive({
               />
               <Circle
                 center={[correctLocation.lat, correctLocation.lng]}
-                radius={50000}
+                radius={150000}
                 pathOptions={{
                   color: 'var(--color-success-500)',
                   fillColor: 'var(--color-success-500)',

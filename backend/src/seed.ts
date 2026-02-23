@@ -13,6 +13,13 @@ interface CountryData {
   flag: string;
 }
 
+interface CityData {
+  name: string;
+  country: string;
+  lat: number;
+  lng: number;
+}
+
 async function main() {
   console.log('🌱 Iniciando seed de la base de datos...\n');
 
@@ -21,7 +28,12 @@ async function main() {
   const countriesData = JSON.parse(readFileSync(countriesPath, 'utf-8'));
   const countries: CountryData[] = countriesData.countries;
 
-  console.log(`📊 Cargando ${countries.length} países...\n`);
+  // Leer datos de ciudades
+  const citiesPath = join(__dirname, '../../data/cities.json');
+  const citiesData = JSON.parse(readFileSync(citiesPath, 'utf-8'));
+  const cities: CityData[] = citiesData.cities;
+
+  console.log(`📊 Cargando ${countries.length} países y ${cities.length} ciudades...\n`);
 
   // Limpiar preguntas existentes
   await prisma.question.deleteMany();
@@ -66,22 +78,30 @@ async function main() {
     });
   }
 
-  // Generar preguntas de mapa (ubicación)
+  // Generar preguntas de mapa (ubicar ciudades importantes)
   console.log('🗺️  Generando preguntas de mapa...');
-  for (const country of countries) {
+  let mapCount = 0;
+  for (const city of cities) {
+    const country = countries.find((c) => c.name === city.country);
+    if (!country) {
+      console.warn(`⚠️  País no encontrado para ciudad ${city.name}: ${city.country}`);
+      continue;
+    }
+
     questions.push({
       category: Category.MAP,
-      questionData: country.capital,
-      options: [], // No hay opciones en preguntas de mapa
-      correctAnswer: country.name,
-      latitude: country.lat,
-      longitude: country.lng,
+      questionData: city.name,
+      options: [],
+      correctAnswer: city.country,
+      latitude: city.lat,
+      longitude: city.lng,
       continent: country.continent,
-      difficulty: getDifficulty(country.name),
+      difficulty: getCityDifficulty(city.name, city.country),
     });
+    mapCount++;
   }
 
-  // Generar preguntas de siluetas (usando la misma estructura que banderas)
+  // Generar preguntas de siluetas
   console.log('🖼️  Generando preguntas de siluetas...');
   for (const country of countries) {
     const distractors = getDistractors(country, countries, 3);
@@ -90,7 +110,6 @@ async function main() {
       questionData: country.name,
       options: shuffleArray([country.name, ...distractors]),
       correctAnswer: country.name,
-      // Las siluetas se generarían con un servicio de imágenes
       imageUrl: `https://raw.githubusercontent.com/djaiss/mapsicon/master/all/${country.flag}/vector.svg`,
       latitude: country.lat,
       longitude: country.lng,
@@ -111,7 +130,7 @@ async function main() {
 📊 Resumen:
    - Preguntas de banderas: ${countries.length}
    - Preguntas de capitales: ${countries.length}
-   - Preguntas de mapa: ${countries.length}
+   - Preguntas de mapa: ${mapCount} (ciudades de ${countries.length} países)
    - Preguntas de siluetas: ${countries.length}
    - Total: ${questions.length}
   `);
@@ -144,7 +163,6 @@ function getDistractors(
  */
 function getDifficulty(countryName: string): Difficulty {
   const easyCountries = [
-    // Major world powers and very well-known countries
     'United States', 'France', 'Germany', 'Italy', 'Spain', 'Japan', 'China',
     'Brazil', 'Argentina', 'Mexico', 'United Kingdom', 'Canada', 'Australia',
     'Russia', 'India', 'Egypt', 'South Africa', 'South Korea', 'Netherlands',
@@ -155,19 +173,15 @@ function getDifficulty(countryName: string): Difficulty {
   ];
 
   const hardCountries = [
-    // Small island nations
     'Kiribati', 'Tuvalu', 'Nauru', 'Palau', 'Marshall Islands', 'Micronesia',
     'Vanuatu', 'Solomon Islands', 'Comoros', 'São Tomé and Príncipe', 'Seychelles',
     'Maldives', 'Antigua and Barbuda', 'Saint Kitts and Nevis', 'Saint Lucia',
     'Saint Vincent and the Grenadines', 'Dominica', 'Grenada', 'Barbados',
-    // Lesser known African nations
     'Djibouti', 'Eritrea', 'Burundi', 'Lesotho', 'Eswatini', 'Guinea-Bissau',
     'Equatorial Guinea', 'Gabon', 'Gambia', 'Benin', 'Togo', 'Burkina Faso',
     'Central African Republic', 'Chad', 'Mauritania', 'Cape Verde', 'Liberia',
     'Sierra Leone', 'Guinea', 'Mali', 'Niger', 'South Sudan',
-    // Lesser known Asian nations
     'Brunei', 'East Timor', 'Bhutan', 'Turkmenistan', 'Tajikistan', 'Kyrgyzstan',
-    // Lesser known European nations
     'Andorra', 'San Marino', 'Liechtenstein', 'Monaco', 'Vatican City', 'Moldova',
     'North Macedonia', 'Montenegro', 'Kosovo',
   ];
@@ -176,6 +190,123 @@ function getDifficulty(countryName: string): Difficulty {
     return Difficulty.EASY;
   }
   if (hardCountries.includes(countryName)) {
+    return Difficulty.HARD;
+  }
+  return Difficulty.MEDIUM;
+}
+
+/**
+ * Determina la dificultad de una pregunta de ciudad
+ */
+function getCityDifficulty(cityName: string, countryName: string): Difficulty {
+  const easyCities = [
+    // Ciudades mundialmente famosas
+    'New York', 'Los Angeles', 'Chicago', 'Washington, D.C.', 'Miami', 'Houston',
+    'London', 'Manchester', 'Edinburgh', 'Birmingham', 'Glasgow',
+    'Paris', 'Marseille', 'Lyon', 'Nice', 'Toulouse',
+    'Berlin', 'Munich', 'Hamburg', 'Frankfurt', 'Cologne',
+    'Rome', 'Milan', 'Naples', 'Florence', 'Turin',
+    'Madrid', 'Barcelona', 'Seville', 'Valencia', 'Bilbao',
+    'Tokyo', 'Osaka', 'Kyoto', 'Yokohama', 'Nagoya',
+    'Beijing', 'Shanghai', 'Guangzhou', 'Shenzhen', 'Chengdu',
+    'Mumbai', 'New Delhi', 'Bangalore', 'Chennai', 'Kolkata',
+    'Sydney', 'Melbourne', 'Brisbane', 'Perth', 'Canberra',
+    'Toronto', 'Montreal', 'Vancouver', 'Calgary', 'Ottawa',
+    'Moscow', 'Saint Petersburg',
+    'São Paulo', 'Rio de Janeiro', 'Brasília',
+    'Buenos Aires', 'Córdoba', 'Rosario',
+    'Mexico City', 'Guadalajara', 'Monterrey', 'Cancún',
+    'Cairo', 'Alexandria',
+    'Istanbul', 'Ankara', 'Izmir', 'Antalya',
+    'Seoul', 'Busan', 'Incheon',
+    'Bangkok', 'Chiang Mai', 'Phuket',
+    'Singapore',
+    'Amsterdam', 'Rotterdam', 'The Hague',
+    'Lisbon', 'Porto',
+    'Athens', 'Thessaloniki',
+    'Vienna', 'Salzburg',
+    'Brussels', 'Antwerp',
+    'Stockholm', 'Gothenburg',
+    'Oslo', 'Bergen',
+    'Copenhagen',
+    'Dublin', 'Cork',
+    'Zürich', 'Geneva', 'Bern',
+    'Warsaw', 'Kraków',
+    'Prague', 'Brno',
+    'Budapest',
+    'Bogotá', 'Medellín', 'Cartagena',
+    'Lima', 'Cusco',
+    'Santiago', 'Valparaíso',
+    'Havana',
+    'Johannesburg', 'Cape Town', 'Durban',
+    'Nairobi', 'Mombasa',
+    'Lagos', 'Abuja',
+    'Casablanca', 'Marrakech',
+    'Dubai', 'Abu Dhabi',
+    'Riyadh', 'Jeddah', 'Mecca',
+    'Jerusalem', 'Tel Aviv',
+    'Hanoi', 'Ho Chi Minh City',
+    'Jakarta', 'Denpasar',
+    'Manila', 'Cebu City',
+    'Kuala Lumpur',
+    'Kyiv', 'Lviv', 'Odessa',
+    'Caracas',
+    'Montevideo',
+    'Colombo',
+    'Taipei', 'Kaohsiung',
+    'Doha', 'Muscat',
+    'Reykjavik',
+  ];
+
+  const hardCities = [
+    // Ciudades poco conocidas internacionalmente
+    'Elbasan', 'Blida', 'Lubango', 'Lobito', 'Benguela',
+    'Vanadzor', 'Sumgait', 'Riffa',
+    'Rajshahi', 'Sylhet',
+    'Mogilev', 'Vitebsk', 'Grodno',
+    'Moundou', 'Bafoussam', 'Garoua',
+    'Mindelo', 'Keren',
+    'Manzini', 'Adama',
+    'Burgas', 'Bobo-Dioulasso',
+    'Battambang', 'Plzeň',
+    'Mbuji-Mayi', 'Kisangani',
+    'Aalborg', 'La Romana',
+    'Ambato', 'Manta',
+    'Bata', 'Daugavpils',
+    'Misrata', 'Klaipėda',
+    'Toamasina', 'Antsirabe',
+    'Nzérékoré', 'Nampula',
+    'Darkhan', 'Erdenet',
+    'Sfax', 'Sousse',
+    'Türkmenabat', 'Khujand',
+    'Entebbe', 'Gulu',
+    'Sikasso', 'Zinder',
+    'Hamhung', 'Ohrid',
+    'Takoradi', 'Tamale',
+    'Salalah', 'Aktau',
+    'Karaganda', 'Shymkent',
+    'Nakuru', 'Eldoret',
+    'Khon Kaen', 'Pattaya',
+    'Lalitpur', 'Pokhara',
+    'Ipoh', 'Kota Kinabalu',
+    'Port-Gentil', 'Tiraspol',
+    'Ndola', 'Livingstone',
+    'Encarnación', 'San Fernando',
+    'Omdurman', 'Port Sudan',
+    'Hai Phong', 'Nha Trang',
+    'Faisalabad', 'Peshawar',
+    'Hebron', 'Irbid',
+    'Banská Bystrica', 'Maribor',
+    'Butare', 'Thiès',
+    'Barquisimeto',
+    'Ngerulmud', 'Palikir', 'Tarawa', 'Yaren', 'Funafuti',
+    'Port Vila', 'Honiara', 'Majuro',
+  ];
+
+  if (easyCities.includes(cityName)) {
+    return Difficulty.EASY;
+  }
+  if (hardCities.includes(cityName)) {
     return Difficulty.HARD;
   }
   return Difficulty.MEDIUM;

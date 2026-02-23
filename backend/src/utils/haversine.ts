@@ -39,11 +39,11 @@ function toRadians(degrees: number): number {
  * @returns Puntaje (0-100)
  */
 export function calculateMapScore(distance: number): number {
-  if (distance < 50) return 100;
-  if (distance < 100) return 90;
-  if (distance < 200) return 75;
-  if (distance < 500) return 50;
-  if (distance < 1000) return 25;
-  if (distance < 2000) return 10;
+  if (distance < 15) return 100;
+  if (distance < 30) return 90;
+  if (distance < 75) return 75;
+  if (distance < 150) return 50;
+  if (distance < 300) return 25;
+  if (distance < 500) return 10;
   return 0;
 }
