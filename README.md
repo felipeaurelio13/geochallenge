@@ -4,7 +4,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.74**
+- Frontend: **v1.2.75**
 
 - Fix: micro-ajustes de alineación visual en selectores de categoría y alternativas de juego para evitar saltos al seleccionar.
 
@@ -28,6 +28,14 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 
 
 
+
+## Novedades de la versión 1.2.75
+
+- Se estabilizó el stack icono+label del selector de categorías (`.menu-category-selector`) con centrado consistente (`display:flex`, columna y `align-items:center`) para evitar compensaciones por `min-height`.
+- Se reemplazó `min-height` del label por altura y `line-height` controlados (`height: 2rem`, `line-height: 1rem`) para mantener consistencia visual entre etiquetas cortas/largas.
+- `MenuPage` ahora usa una caja interna común (`menu-category-selector__content`) tanto en reposo como en estado seleccionado (`aria-pressed=true`), evitando desplazamientos visuales al cambiar categoría.
+- Se actualizaron tests del menú para validar presencia de clases de alineación comunes en ambos estados.
+- Footer/versionado actualizado a **v1.2.75** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.74
 
