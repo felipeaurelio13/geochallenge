@@ -1,17 +1,11 @@
 import { PrismaClient, Category, Difficulty } from '@prisma/client';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { getActiveCountries, loadCountryCatalog, type CountryRecord } from './utils/countryCatalog';
 
 const prisma = new PrismaClient();
 
-interface CountryData {
-  name: string;
-  capital: string;
-  continent: string;
-  lat: number;
-  lng: number;
-  flag: string;
-}
+type CountryData = CountryRecord;
 
 interface CityData {
   name: string;
@@ -24,9 +18,7 @@ async function main() {
   console.log('🌱 Iniciando seed de la base de datos...\n');
 
   // Leer datos de países
-  const countriesPath = join(__dirname, '../../data/countries.json');
-  const countriesData = JSON.parse(readFileSync(countriesPath, 'utf-8'));
-  const countries: CountryData[] = countriesData.countries;
+  const countries: CountryData[] = getActiveCountries(loadCountryCatalog());
 
   // Leer datos de ciudades
   const citiesPath = join(__dirname, '../../data/cities.json');
