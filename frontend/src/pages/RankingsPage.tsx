@@ -8,6 +8,7 @@ import { LoadingSpinner } from '../components';
 
 interface LeaderboardEntry {
   rank: number;
+  userId?: string;
   username: string;
   score: number;
   isCurrentUser?: boolean;
@@ -18,6 +19,8 @@ type RankingsResponse = {
   userRank: number | null;
   userScore: number | null;
 };
+
+const USE_BACKEND_RANK = import.meta.env.VITE_RANKING_USE_BACKEND_RANK === 'true';
 
 export function RankingsPage() {
   const { t } = useTranslation();
@@ -32,7 +35,11 @@ export function RankingsPage() {
 
       return {
         leaderboard: leaderboardData.leaderboard.map((entry, index) => ({
-          rank: index + 1,
+          rank:
+            USE_BACKEND_RANK && typeof entry.rank === 'number' && Number.isFinite(entry.rank)
+              ? entry.rank
+              : index + 1,
+          userId: entry.userId,
           username: entry.username,
           score: entry.score,
           isCurrentUser: entry.username === user?.username,
@@ -148,7 +155,7 @@ export function RankingsPage() {
             ) : (
               filteredLeaderboard.map((entry) => (
                 <div
-                  key={entry.rank}
+                  key={entry.userId ? `${entry.userId}-${entry.rank}` : `${entry.username}-${entry.rank}`}
                   className={`p-4 rounded-xl border-2 transition-transform hover:scale-[1.02] ${
                     entry.isCurrentUser ? 'bg-primary/20 border-primary' : getRankStyle(entry.rank)
                   }`}
