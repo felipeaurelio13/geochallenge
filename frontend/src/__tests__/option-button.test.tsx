@@ -139,6 +139,8 @@ describe('OptionButton', () => {
     const hiddenIndicator = document.querySelector('.option-button-selected-indicator');
     expect(hiddenIndicator).toBeInTheDocument();
     expect(hiddenIndicator?.className).toContain('bg-transparent');
+    expect(hiddenIndicator?.className).not.toContain('shadow-sm');
+    expect(hiddenIndicator?.className).toContain('shadow-none');
 
     rerender(
       <OptionButton

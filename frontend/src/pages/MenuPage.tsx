@@ -108,9 +108,11 @@ export function MenuPage() {
               } menu-category-selector`}
               aria-pressed={selectedCategory === cat.id}
             >
-              <span className="menu-category-selector__icon block text-base">{cat.icon}</span>
-              <span className="menu-category-selector__label text-xs font-medium leading-tight sm:text-sm">
-                {t(cat.labelKey)}
+              <span className="menu-category-selector__content">
+                <span className="menu-category-selector__icon block text-base">{cat.icon}</span>
+                <span className="menu-category-selector__label text-xs font-medium sm:text-sm">
+                  {t(cat.labelKey)}
+                </span>
               </span>
             </Button>
           ))}

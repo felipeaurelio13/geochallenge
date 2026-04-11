@@ -186,12 +186,16 @@ describe('MenuPage', () => {
 
     expect(mixedButton.className).toContain('menu-category-selector');
     expect(flagsButton.className).toContain('menu-category-selector');
+    expect(mixedButton.querySelector('.menu-category-selector__content')).toBeInTheDocument();
+    expect(flagsButton.querySelector('.menu-category-selector__content')).toBeInTheDocument();
     expect(mixedButton.querySelector('.menu-category-selector__label')).toBeInTheDocument();
     expect(flagsButton.querySelector('.menu-category-selector__label')).toBeInTheDocument();
 
     fireEvent.click(flagsButton);
     expect(flagsButton).toHaveAttribute('aria-pressed', 'true');
     expect(flagsButton.className).toContain('menu-category-selector');
+    expect(flagsButton.querySelector('.menu-category-selector__content')).toBeInTheDocument();
+    expect(flagsButton.querySelector('.menu-category-selector__label')).toBeInTheDocument();
   });
 
   it('permite cambiar categoría y navegar a partida individual con categoría seleccionada', () => {
