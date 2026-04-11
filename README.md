@@ -35,6 +35,12 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 - Se separaron clases base del indicador de selección en `OptionButton` para distinguir explícitamente estado visible vs oculto sin alterar dimensiones del nodo.
 - El estado oculto del indicador ahora elimina sombra y borde visible (`shadow-none`, `border-transparent`) manteniendo ancho/alto para evitar layout shift horizontal.
 - Se reforzó el test de `OptionButton` para validar que el indicador oculto no conserve clases de sombra visibles.
+## Novedades de la versión 1.2.75
+
+- Se estabilizó el stack icono+label del selector de categorías (`.menu-category-selector`) con centrado consistente (`display:flex`, columna y `align-items:center`) para evitar compensaciones por `min-height`.
+- Se reemplazó `min-height` del label por altura y `line-height` controlados (`height: 2rem`, `line-height: 1rem`) para mantener consistencia visual entre etiquetas cortas/largas.
+- `MenuPage` ahora usa una caja interna común (`menu-category-selector__content`) tanto en reposo como en estado seleccionado (`aria-pressed=true`), evitando desplazamientos visuales al cambiar categoría.
+- Se actualizaron tests del menú para validar presencia de clases de alineación comunes en ambos estados.
 - Footer/versionado actualizado a **v1.2.75** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.74
