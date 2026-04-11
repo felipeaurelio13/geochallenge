@@ -4,7 +4,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.74**
+- Frontend: **v1.2.75**
 
 - Fix: micro-ajustes de alineación visual en selectores de categoría y alternativas de juego para evitar saltos al seleccionar.
 
@@ -28,6 +28,14 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 
 
 
+
+
+## Novedades de la versión 1.2.75
+
+- Se separaron clases base del indicador de selección en `OptionButton` para distinguir explícitamente estado visible vs oculto sin alterar dimensiones del nodo.
+- El estado oculto del indicador ahora elimina sombra y borde visible (`shadow-none`, `border-transparent`) manteniendo ancho/alto para evitar layout shift horizontal.
+- Se reforzó el test de `OptionButton` para validar que el indicador oculto no conserve clases de sombra visibles.
+- Footer/versionado actualizado a **v1.2.75** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.74
 
