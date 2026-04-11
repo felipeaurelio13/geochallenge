@@ -6,7 +6,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 - Frontend: **v1.2.75**
 
-- Fix: micro-ajustes de alineación visual en selectores de categoría y alternativas de juego para evitar saltos al seleccionar.
+- Fix: estabilidad de alineación en icono+label del selector de categorías para evitar desplazamientos visuales al cambiar de estado.
 
 ### Mantener backend activo en producción
 
@@ -29,6 +29,11 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 
 
 
+## Novedades de la versión 1.2.75
+
+- Se estabilizó el stack icono+label del selector de categorías del menú con centrado consistente (`align-items: center`) y sin dependencia de `min-height` rígido en el contenedor del botón.
+- La etiqueta del selector ahora usa altura y `line-height` controlados para mantener equilibrio visual entre textos cortos/largos sin “flotar” hacia arriba.
+- Se reforzó `menu-page.test.tsx` para validar clases compartidas de alineación en reposo y cuando `aria-pressed=true`.
 
 ## Novedades de la versión 1.2.75
 

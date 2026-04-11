@@ -367,16 +367,6 @@
   }
 
   .menu-category-selector {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-  }
-
-  .menu-category-selector__content {
-    display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: var(--space-1);
@@ -390,10 +380,11 @@
 
   .menu-category-selector__label {
     height: 2rem;
+    line-height: 1rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    line-height: 1rem;
+    text-align: center;
   }
 
   .map-surface {
