@@ -155,15 +155,23 @@ class ApiService {
   }
 
   // Leaderboard endpoints
-  async getLeaderboard(limit?: number) {
+  async getLeaderboard(limit?: number, scope: 'global' | 'weekly' | 'friends' = 'global') {
     const response = await this.client.get<{
       leaderboard: LeaderboardEntry[];
       totalPlayers: number;
       topScore: number | null;
       avgScore?: number | null;
+      season?: string | null;
+      window?: string | null;
+      generatedAt?: string;
+      queryMeta?: {
+        requestedScope: 'global' | 'weekly' | 'friends';
+        effectiveScope: 'global' | 'weekly' | 'friends';
+        fallbackApplied: boolean;
+      };
       userRank: { rank: number; score: number } | null;
     }>('/leaderboard', {
-      params: { limit },
+      params: { limit, scope },
     });
     return response.data;
   }

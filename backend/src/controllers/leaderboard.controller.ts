@@ -8,6 +8,27 @@ import {
 } from '../services/leaderboard.service.js';
 
 const router = Router();
+const SUPPORTED_LEADERBOARD_SCOPES = ['global'] as const;
+type LeaderboardScope = 'global' | 'weekly' | 'friends';
+
+export function resolveLeaderboardScope(rawScope: unknown): {
+  requestedScope: LeaderboardScope;
+  effectiveScope: 'global';
+  fallbackApplied: boolean;
+} {
+  const normalizedScope = typeof rawScope === 'string' ? rawScope.toLowerCase() : 'global';
+  const requestedScope: LeaderboardScope =
+    normalizedScope === 'weekly' || normalizedScope === 'friends' ? normalizedScope : 'global';
+  const isSupported = SUPPORTED_LEADERBOARD_SCOPES.includes(
+    requestedScope as (typeof SUPPORTED_LEADERBOARD_SCOPES)[number]
+  );
+
+  return {
+    requestedScope,
+    effectiveScope: 'global',
+    fallbackApplied: !isSupported,
+  };
+}
 
 /**
  * GET /api/leaderboard
@@ -16,6 +37,7 @@ const router = Router();
 router.get('/', optionalAuth, async (req: AuthRequest, res: Response) => {
   try {
     const limit = parseInt(req.query.limit as string) || 50;
+    const scopeResolution = resolveLeaderboardScope(req.query.scope);
     const leaderboard = await getTopLeaderboard(Math.min(limit, 100));
     const stats = await getLeaderboardStats();
 
@@ -30,12 +52,20 @@ router.get('/', optionalAuth, async (req: AuthRequest, res: Response) => {
       totalPlayers: stats.totalPlayers,
       topScore: stats.topScore,
       avgScore: stats.avgScore,
+      season: null,
+      window: null,
       userRank: userRank
         ? {
             rank: userRank.rank,
             score: userRank.score,
           }
         : null,
+      generatedAt: new Date().toISOString(),
+      queryMeta: {
+        requestedScope: scopeResolution.requestedScope,
+        effectiveScope: scopeResolution.effectiveScope,
+        fallbackApplied: scopeResolution.fallbackApplied,
+      },
     });
   } catch (error) {
     console.error('Error al obtener leaderboard:', error);
