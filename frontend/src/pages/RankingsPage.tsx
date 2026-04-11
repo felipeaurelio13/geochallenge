@@ -133,6 +133,8 @@ export function RankingsPage() {
 
     return source.filter((entry) => entry.username.toLowerCase().includes(normalizedSearch));
   }, [data?.leaderboard, debouncedSearch]);
+  const hasGlobalLeaderboardData = (data?.leaderboard.length ?? 0) > 0;
+  const hasNoSearchResults = hasGlobalLeaderboardData && filteredLeaderboard.length === 0;
 
   const getRankDisplay = (rank: number) => {
     if (rank === 1) return '🥇';
@@ -238,7 +240,7 @@ export function RankingsPage() {
             {filteredLeaderboard.length === 0 ? (
               <div className="text-center py-12">
                 <div className="text-4xl mb-4">📊</div>
-                <p className="text-gray-400">{t('rankings.empty')}</p>
+                <p className="text-gray-400">{t(hasNoSearchResults ? 'rankings.noSearchResults' : 'rankings.empty')}</p>
               </div>
             ) : (
               filteredLeaderboard.map((entry) => (

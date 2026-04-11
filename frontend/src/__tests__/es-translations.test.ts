@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import en from '../i18n/en.json';
 import es from '../i18n/es.json';
 
 describe('traducciones en español', () => {
@@ -15,5 +16,12 @@ describe('traducciones en español', () => {
     expect(es.challenges.createMultiplayerCta).toBe('Crear desafío multijugador');
     expect(es.rankings.empty).toBe('Aún no hay jugadores en el ranking');
     expect(es.common.success).toBe('Éxito');
+  });
+
+  it('expone claves de rankings para vacío global y búsqueda sin resultados en ambos idiomas', () => {
+    expect(es.rankings.empty).toBe('Aún no hay jugadores en el ranking');
+    expect(es.rankings.noSearchResults).toBe('No hay resultados para esta búsqueda');
+    expect(en.rankings.empty).toBe('No players in the rankings yet');
+    expect(en.rankings.noSearchResults).toBe('No results found for this search');
   });
 });

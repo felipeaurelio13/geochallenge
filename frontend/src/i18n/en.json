@@ -220,6 +220,7 @@
     "loading": "Loading rankings...",
     "loadError": "Failed to load rankings",
     "empty": "No players in the rankings yet",
+    "noSearchResults": "No results found for this search",
     "you": "You",
     "stats": "Statistics",
     "totalPlayers": "Total players",
