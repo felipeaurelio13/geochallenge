@@ -185,4 +185,26 @@ describe('RankingsPage', () => {
     expect(await screen.findByText(/Resultados filtrados:/i)).toBeInTheDocument();
     expect(screen.getByText('Filtrado por búsqueda')).toBeInTheDocument();
   });
+
+  it('muestra estado noSearchResults cuando hay datos globales pero sin coincidencias en búsqueda', async () => {
+    vi.stubEnv('VITE_RANKING_USE_BACKEND_RANK', 'true');
+    vi.resetModules();
+    const { RankingsPage } = await import('../pages/RankingsPage');
+
+    mocks.getLeaderboard.mockResolvedValue({
+      leaderboard: [{ rank: 1, userId: 'u-1', username: 'neo', score: 1200 }],
+      totalPlayers: 1,
+      topScore: 1200,
+      userRank: { rank: 1, score: 1200 },
+    });
+
+    render(<RankingsPage />);
+
+    expect(await screen.findByText('🥇')).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText('common.search'), { target: { value: 'smith' } });
+
+    expect(await screen.findByText('rankings.noSearchResults')).toBeInTheDocument();
+    expect(screen.queryByText('rankings.empty')).not.toBeInTheDocument();
+  });
 });
