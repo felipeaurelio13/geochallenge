@@ -4,9 +4,9 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.73**
+- Frontend: **v1.2.74**
 
-- Fix: pantallas de juego sin scroll pero 100% jugables; CTA principal siempre visible; footer global oculto en juego.
+- Fix: micro-ajustes de alineación visual en selectores de categoría y alternativas de juego para evitar saltos al seleccionar.
 
 ### Mantener backend activo en producción
 
@@ -28,6 +28,14 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 
 
 
+
+## Novedades de la versión 1.2.74
+
+- Se ajustó el selector de categorías del menú para alinear icono + etiqueta de forma estable en estados reposo/seleccionado, mejorando consistencia vertical y horizontal.
+- `OptionButton` ahora reserva espacio fijo para el indicador de selección, evitando “saltos” de contenido al marcar una alternativa.
+- Se reforzaron estilos de alineación con clases dedicadas (`menu-category-selector*`, `option-button-*`) manteniendo enfoque mobile-first y compatibilidad con dark mode.
+- Se añadieron tests para blindar la alineación estable de selectores de categoría y alternativas.
+- Footer/versionado actualizado a **v1.2.74** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.73
 

@@ -20,7 +20,7 @@ export function OptionButton({
   showResult,
 }: OptionButtonProps) {
   const baseClasses =
-    'w-full rounded-2xl text-left transition-all duration-200 flex items-start gap-2 overflow-hidden border-2 px-3 py-2 option-button-base sm:items-center sm:px-3.5 sm:py-2.5';
+    'option-button-shell w-full rounded-2xl text-left transition-all duration-200 flex items-stretch gap-2 overflow-hidden border-2 px-3 py-2 option-button-base sm:px-3.5 sm:py-2.5';
 
   const defaultStateClasses =
     'bg-[var(--color-surface-muted)] border-[var(--color-border)] text-[var(--color-text-primary)] hover:border-[var(--color-primary-300)] hover:bg-[var(--color-surface)] cursor-pointer';
@@ -56,12 +56,12 @@ export function OptionButton({
       data-state={showResult ? (isCorrect ? 'correct' : selected ? 'wrong' : 'locked') : selected ? 'selected' : disabled ? 'disabled' : 'default'}
     >
       <span
-        className={`h-7 w-7 shrink-0 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm transition-colors ${
+        className={`option-button-index flex h-7 w-7 shrink-0 rounded-full items-center justify-center self-center font-bold text-xs transition-colors sm:text-sm ${
           showResult && isCorrect
             ? 'bg-[var(--color-success-500)] text-white'
             : showResult && selected && !isCorrect
               ? 'bg-[var(--color-error-500)] text-white'
-              : selected
+            : selected
                 ? 'bg-[var(--color-primary-100)] text-[var(--color-primary-800)]'
                 : 'bg-[var(--color-border)] text-[var(--color-text-secondary)]'
         }`}
@@ -69,16 +69,23 @@ export function OptionButton({
         {showResult && isCorrect ? '✓' : showResult && selected && !isCorrect ? '✕' : optionLetters[index]}
       </span>
 
-      <div className="flex min-w-0 flex-1 flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
-        <span className="min-w-0 text-[0.84rem] font-medium leading-tight truncate sm:text-[0.94rem] md:text-base">
+      <div className="flex min-w-0 flex-1 items-center gap-2">
+        <span className="option-button-label min-w-0 flex-1 text-[0.84rem] font-medium leading-tight truncate sm:text-[0.94rem] md:text-base">
           {option}
         </span>
 
-        {selected && !showResult && (
-          <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center self-start rounded-full border border-[var(--color-primary-200)] bg-[var(--color-primary-500)] text-sm font-semibold text-white shadow-sm shadow-black/20 sm:self-auto">
-            ✓
-          </span>
-        )}
+        <span
+          className={`option-button-selected-indicator inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[var(--color-primary-200)] text-sm font-semibold shadow-sm shadow-black/20 ${
+            selected && !showResult
+              ? 'bg-[var(--color-primary-500)] text-white'
+              : 'border-transparent bg-transparent text-transparent'
+          }`}
+          aria-hidden={!(selected && !showResult)}
+        >
+          {selected && !showResult && (
+            <>{'✓'}</>
+          )}
+        </span>
       </div>
     </button>
   );

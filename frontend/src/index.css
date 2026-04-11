@@ -347,6 +347,36 @@
     padding-bottom: clamp(var(--space-1_5), 1.2dvh, var(--space-3));
   }
 
+  .option-button-shell {
+    align-items: center;
+  }
+
+  .option-button-label {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+  }
+
+  .option-button-selected-indicator {
+    margin-left: auto;
+  }
+
+  .menu-category-selector {
+    align-items: flex-start;
+    justify-content: center;
+    gap: var(--space-1);
+  }
+
+  .menu-category-selector__icon {
+    line-height: 1;
+  }
+
+  .menu-category-selector__label {
+    min-height: 2rem;
+    display: flex;
+    align-items: center;
+  }
+
   .map-surface {
     border: 2px solid color-mix(in srgb, var(--color-border) 85%, transparent);
     background-color: color-mix(in srgb, var(--color-surface) 25%, transparent);
