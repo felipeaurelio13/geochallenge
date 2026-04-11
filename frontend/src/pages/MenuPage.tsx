@@ -105,11 +105,11 @@ export function MenuPage() {
                 selectedCategory === cat.id
                   ? '!border-primary/70 !bg-primary/15 !text-white'
                   : '!border-gray-700 !bg-gray-900/80 !text-gray-100/90'
-              }`}
+              } menu-category-selector`}
               aria-pressed={selectedCategory === cat.id}
             >
-              <span className="mb-0.5 block text-base">{cat.icon}</span>
-              <span className="text-xs font-medium leading-tight sm:text-sm">
+              <span className="menu-category-selector__icon block text-base">{cat.icon}</span>
+              <span className="menu-category-selector__label text-xs font-medium leading-tight sm:text-sm">
                 {t(cat.labelKey)}
               </span>
             </Button>

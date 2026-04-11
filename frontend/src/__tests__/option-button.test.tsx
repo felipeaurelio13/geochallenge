@@ -23,6 +23,7 @@ describe('OptionButton', () => {
     expect(button).toHaveAttribute('data-state', 'selected');
     expect(button.className).toContain('ring-2');
     expect(button.className).toContain('option-button-base');
+    expect(button.className).toContain('option-button-shell');
     expect(button.className).toContain('py-2');
     expect(screen.getByText('✓')).toBeInTheDocument();
 
@@ -119,5 +120,36 @@ describe('OptionButton', () => {
       />
     );
     expect(screen.getByRole('button')).toHaveAttribute('data-state', 'correct');
+  });
+
+  it('reserva espacio del indicador para evitar saltos de alineación al seleccionar', () => {
+    const { rerender } = render(
+      <OptionButton
+        option="Perú"
+        index={1}
+        onClick={() => {}}
+        disabled={false}
+        selected={false}
+        showResult={false}
+      />
+    );
+
+    const hiddenIndicator = document.querySelector('.option-button-selected-indicator');
+    expect(hiddenIndicator).toBeInTheDocument();
+    expect(hiddenIndicator?.className).toContain('bg-transparent');
+
+    rerender(
+      <OptionButton
+        option="Perú"
+        index={1}
+        onClick={() => {}}
+        disabled={false}
+        selected
+        showResult={false}
+      />
+    );
+
+    const visibleIndicator = document.querySelector('.option-button-selected-indicator');
+    expect(visibleIndicator?.className).toContain('bg-[var(--color-primary-500)]');
   });
 });

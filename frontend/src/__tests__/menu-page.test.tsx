@@ -174,6 +174,26 @@ describe('MenuPage', () => {
     );
   });
 
+  it('mantiene alineación consistente en selectores de categoría en reposo y seleccionado', () => {
+    render(
+      <MemoryRouter future={routerFutureConfig}>
+        <MenuPage />
+      </MemoryRouter>,
+    );
+
+    const mixedButton = screen.getByRole('button', { name: /🎲\s*mixto/i });
+    const flagsButton = screen.getByRole('button', { name: /🏳️\s*banderas/i });
+
+    expect(mixedButton.className).toContain('menu-category-selector');
+    expect(flagsButton.className).toContain('menu-category-selector');
+    expect(mixedButton.querySelector('.menu-category-selector__label')).toBeInTheDocument();
+    expect(flagsButton.querySelector('.menu-category-selector__label')).toBeInTheDocument();
+
+    fireEvent.click(flagsButton);
+    expect(flagsButton).toHaveAttribute('aria-pressed', 'true');
+    expect(flagsButton.className).toContain('menu-category-selector');
+  });
+
   it('permite cambiar categoría y navegar a partida individual con categoría seleccionada', () => {
     render(
       <MemoryRouter future={routerFutureConfig}>
