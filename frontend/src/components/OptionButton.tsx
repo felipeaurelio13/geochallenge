@@ -75,8 +75,8 @@ export function OptionButton({
         {showResult && isCorrect ? '✓' : showResult && selected && !isCorrect ? '✕' : optionLetters[index]}
       </span>
 
-      <div className="flex min-w-0 flex-1 items-center gap-2">
-        <span className="option-button-label min-w-0 flex-1 text-[0.84rem] font-medium leading-tight truncate sm:text-[0.94rem] md:text-base">
+      <div className="flex min-w-0 flex-1 items-center gap-1.5 sm:gap-2">
+        <span className="option-button-label min-w-0 flex-1 text-[0.8rem] font-medium leading-[1.15] sm:text-[0.9rem] md:text-[0.98rem]">
           {option}
         </span>
 

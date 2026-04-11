@@ -32,6 +32,10 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 
 ## Novedades de la versión 1.2.75
 
+- Se amplió el label de alternativas a **2 líneas** (`line-clamp: 2`) con `line-height` controlado para mejorar legibilidad de textos largos sin romper densidad mobile.
+- `OptionButton` ajustó tipografía y leading para que las dos líneas convivan con el alto de botón y mantengan estable la grilla de 4 opciones.
+- Se reforzó el guardrail de CSS para bloquear overflow horizontal en `game-options-wrap` y proteger viewports móviles críticos.
+- Se actualizaron tests de `OptionButton` para validar el nuevo comportamiento multi-línea (sin dependencia de `truncate`).
 - Se separaron clases base del indicador de selección en `OptionButton` para distinguir explícitamente estado visible vs oculto sin alterar dimensiones del nodo.
 - El estado oculto del indicador ahora elimina sombra y borde visible (`shadow-none`, `border-transparent`) manteniendo ancho/alto para evitar layout shift horizontal.
 - Se reforzó el test de `OptionButton` para validar que el indicador oculto no conserve clases de sombra visibles.
