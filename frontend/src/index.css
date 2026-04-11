@@ -362,9 +362,21 @@
   }
 
   .menu-category-selector {
-    align-items: flex-start;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .menu-category-selector__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     justify-content: center;
     gap: var(--space-1);
+    width: 100%;
+    height: 100%;
   }
 
   .menu-category-selector__icon {
@@ -372,9 +384,11 @@
   }
 
   .menu-category-selector__label {
-    min-height: 2rem;
+    height: 2rem;
     display: flex;
     align-items: center;
+    justify-content: center;
+    line-height: 1rem;
   }
 
   .map-surface {
