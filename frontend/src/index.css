@@ -362,7 +362,7 @@
   }
 
   .menu-category-selector {
-    align-items: flex-start;
+    align-items: center;
     justify-content: center;
     gap: var(--space-1);
   }
@@ -372,9 +372,12 @@
   }
 
   .menu-category-selector__label {
-    min-height: 2rem;
+    height: 2rem;
+    line-height: 1rem;
     display: flex;
     align-items: center;
+    justify-content: center;
+    text-align: center;
   }
 
   .map-surface {
