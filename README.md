@@ -4,7 +4,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.72**
+- Frontend: **v1.2.73**
 
 - Fix: pantallas de juego sin scroll pero 100% jugables; CTA principal siempre visible; footer global oculto en juego.
 
@@ -28,6 +28,13 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 
 
 
+
+## Novedades de la versión 1.2.73
+
+- Se incorporó un test E2E mobile-first en dark mode para la ronda de juego, validando CTA visible, 4 opciones y ausencia de overflow horizontal accidental en iPhone SE, iPhone 15 Pro y Android Medium.
+- Se refactorizó de forma aditiva el mock de APIs de juego de E2E a un helper compartido (`tests/e2e/helpers/gameApiMocks.ts`) para evitar duplicación y facilitar mantenimiento.
+- Se agregó `pull_request_template.md` con checklist visual de release (mobile/dark mode/safe areas/overflow) para reducir drift visual en cambios rápidos.
+- Footer/versionado actualizado a **v1.2.73** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.72
 
