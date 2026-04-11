@@ -16,6 +16,9 @@ interface LeaderboardEntry {
 
 type RankingsResponse = {
   leaderboard: LeaderboardEntry[];
+  totalPlayers: number;
+  topScore: number | null;
+  avgScore?: number | null;
   userRank: number | null;
   userScore: number | null;
 };
@@ -48,6 +51,9 @@ export function RankingsPage() {
           score: entry.score,
           isCurrentUser: entry.username === user?.username,
         })),
+        totalPlayers: leaderboardData.totalPlayers,
+        topScore: leaderboardData.topScore,
+        avgScore: leaderboardData.avgScore,
         userRank: leaderboardData.userRank?.rank ?? null,
         userScore: leaderboardData.userRank?.score ?? null,
       };
@@ -271,24 +277,34 @@ export function RankingsPage() {
         {!isLoading && !error && filteredLeaderboard.length > 0 && (
           <div className="mt-8 p-6 bg-gray-800 rounded-xl">
             <h3 className="text-lg font-semibold text-white mb-4">{t('rankings.stats')}</h3>
+            <p className="mb-3 text-xs uppercase tracking-wide text-gray-400">Global</p>
+            {search.trim() && (
+              <p className="mb-4 text-sm text-gray-300">
+                Resultados filtrados: <span className="font-semibold text-white">{filteredLeaderboard.length}</span>
+              </p>
+            )}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-center">
               <div>
-                <div className="text-2xl font-bold text-primary">{filteredLeaderboard.length}</div>
+                <div className="text-2xl font-bold text-primary">{data?.totalPlayers ?? 0}</div>
                 <div className="text-sm text-gray-400">{t('rankings.totalPlayers')}</div>
               </div>
               <div>
-                <div className="text-2xl font-bold text-white">{filteredLeaderboard[0]?.score.toLocaleString() || 0}</div>
+                <div className="text-2xl font-bold text-white">{data?.topScore?.toLocaleString() ?? 0}</div>
                 <div className="text-sm text-gray-400">{t('rankings.topScore')}</div>
               </div>
-              <div>
-                <div className="text-2xl font-bold text-white">
-                  {Math.round(
-                    filteredLeaderboard.reduce((acc, entry) => acc + entry.score, 0) / filteredLeaderboard.length
-                  ).toLocaleString()}
+              {typeof data?.avgScore === 'number' && Number.isFinite(data.avgScore) && (
+                <div>
+                  <div className="text-2xl font-bold text-white">{Math.round(data.avgScore).toLocaleString()}</div>
+                  <div className="text-sm text-gray-400">{t('rankings.avgScore')}</div>
                 </div>
-                <div className="text-sm text-gray-400">{t('rankings.avgScore')}</div>
-              </div>
+              )}
             </div>
+            {search.trim() && (
+              <p className="mt-4 text-xs uppercase tracking-wide text-gray-500">Filtrado por búsqueda</p>
+            )}
+            {!search.trim() && (
+              <p className="mt-4 text-xs uppercase tracking-wide text-gray-500">Global</p>
+            )}
           </div>
         )}
       </main>

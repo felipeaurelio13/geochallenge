@@ -29,6 +29,7 @@ router.get('/', optionalAuth, async (req: AuthRequest, res: Response) => {
       leaderboard,
       totalPlayers: stats.totalPlayers,
       topScore: stats.topScore,
+      avgScore: stats.avgScore,
       userRank: userRank
         ? {
             rank: userRank.rank,
