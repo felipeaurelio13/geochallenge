@@ -23,7 +23,7 @@ export function RegisterPage() {
   const navigate = useNavigate();
   const { register, isLoading } = useAuth();
 
-  const { values, errors, setFieldValue, validate } = useFormValidation(registerSchema, {
+  const { values, errors, setFieldValue, isValid, validate } = useFormValidation(registerSchema, {
     username: '',
     email: '',
     password: '',
@@ -117,7 +117,7 @@ export function RegisterPage() {
           />
         </FormField.Root>
 
-        <Button type="submit" disabled={isLoading} fullWidth size="lg">
+        <Button type="submit" disabled={isLoading || !isValid} fullWidth size="lg">
           {isLoading ? (
             <>
               <LoadingSpinner size="sm" />
