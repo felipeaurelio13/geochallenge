@@ -4,7 +4,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.74**
+- Frontend: **v1.2.75**
 
 - Fix: micro-ajustes de alineación visual en selectores de categoría y alternativas de juego para evitar saltos al seleccionar.
 
@@ -28,6 +28,15 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 
 
 
+
+
+## Novedades de la versión 1.2.75
+
+- Se amplió el label de alternativas a **2 líneas** (`line-clamp: 2`) con `line-height` controlado para mejorar legibilidad de textos largos sin romper densidad mobile.
+- `OptionButton` ajustó tipografía y leading para que las dos líneas convivan con el alto de botón y mantengan estable la grilla de 4 opciones.
+- Se reforzó el guardrail de CSS para bloquear overflow horizontal en `game-options-wrap` y proteger viewports móviles críticos.
+- Se actualizaron tests de `OptionButton` para validar el nuevo comportamiento multi-línea (sin dependencia de `truncate`).
+- Footer/versionado actualizado a **v1.2.75** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.74
 

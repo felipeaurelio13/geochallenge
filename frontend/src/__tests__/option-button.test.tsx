@@ -60,10 +60,10 @@ describe('OptionButton', () => {
     expect(screen.queryByText('Incorrecta')).not.toBeInTheDocument();
   });
 
-  it('mantiene textos largos dentro del contenedor para una lectura mobile-friendly', () => {
+  it('permite hasta 2 líneas en textos largos sin perder densidad mobile', () => {
     render(
       <OptionButton
-        option="AndorraLaVellaAndorraLaVellaAndorraLaVella"
+        option="Andorra la Vella es una capital con nombre deliberadamente largo para validar doble línea"
         index={2}
         onClick={() => {}}
         disabled={false}
@@ -72,8 +72,10 @@ describe('OptionButton', () => {
       />
     );
 
-    const optionText = screen.getByText('AndorraLaVellaAndorraLaVellaAndorraLaVella');
-    expect(optionText.className).toContain('truncate');
+    const optionText = screen.getByText('Andorra la Vella es una capital con nombre deliberadamente largo para validar doble línea');
+    expect(optionText.className).toContain('option-button-label');
+    expect(optionText.className).toContain('leading-[1.15]');
+    expect(optionText.className).not.toContain('truncate');
   });
 
   it('mantiene fondo sólido en locked/correct/wrong sin opacity ni transparency', () => {
