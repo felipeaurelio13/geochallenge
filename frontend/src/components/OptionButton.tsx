@@ -34,6 +34,12 @@ export function OptionButton({
     'bg-[var(--color-success-600)] border-[var(--color-success-500)] text-white cursor-not-allowed';
   const wrongStateClasses =
     'bg-[var(--color-error-600)] border-[var(--color-error-500)] text-white cursor-not-allowed';
+  const selectedIndicatorBaseClasses =
+    'option-button-selected-indicator inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-sm font-semibold';
+  const selectedIndicatorVisibleClasses =
+    'border border-[var(--color-primary-200)] bg-[var(--color-primary-500)] text-white shadow-sm shadow-black/20';
+  const selectedIndicatorHiddenClasses =
+    'border border-transparent bg-transparent text-transparent shadow-none';
 
   const getButtonClasses = () => {
     if (showResult) {
@@ -75,10 +81,10 @@ export function OptionButton({
         </span>
 
         <span
-          className={`option-button-selected-indicator inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[var(--color-primary-200)] text-sm font-semibold shadow-sm shadow-black/20 ${
+          className={`${selectedIndicatorBaseClasses} ${
             selected && !showResult
-              ? 'bg-[var(--color-primary-500)] text-white'
-              : 'border-transparent bg-transparent text-transparent'
+              ? selectedIndicatorVisibleClasses
+              : selectedIndicatorHiddenClasses
           }`}
           aria-hidden={!(selected && !showResult)}
         >

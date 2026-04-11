@@ -29,6 +29,12 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 
 
 
+
+## Novedades de la versión 1.2.75
+
+- Se separaron clases base del indicador de selección en `OptionButton` para distinguir explícitamente estado visible vs oculto sin alterar dimensiones del nodo.
+- El estado oculto del indicador ahora elimina sombra y borde visible (`shadow-none`, `border-transparent`) manteniendo ancho/alto para evitar layout shift horizontal.
+- Se reforzó el test de `OptionButton` para validar que el indicador oculto no conserve clases de sombra visibles.
 ## Novedades de la versión 1.2.75
 
 - Se estabilizó el stack icono+label del selector de categorías (`.menu-category-selector`) con centrado consistente (`display:flex`, columna y `align-items:center`) para evitar compensaciones por `min-height`.
