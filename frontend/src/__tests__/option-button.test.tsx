@@ -60,10 +60,10 @@ describe('OptionButton', () => {
     expect(screen.queryByText('Incorrecta')).not.toBeInTheDocument();
   });
 
-  it('mantiene textos largos dentro del contenedor para una lectura mobile-friendly', () => {
+  it('permite hasta 2 líneas en textos largos sin perder densidad mobile', () => {
     render(
       <OptionButton
-        option="AndorraLaVellaAndorraLaVellaAndorraLaVella"
+        option="Andorra la Vella es una capital con nombre deliberadamente largo para validar doble línea"
         index={2}
         onClick={() => {}}
         disabled={false}
@@ -72,8 +72,10 @@ describe('OptionButton', () => {
       />
     );
 
-    const optionText = screen.getByText('AndorraLaVellaAndorraLaVellaAndorraLaVella');
-    expect(optionText.className).toContain('truncate');
+    const optionText = screen.getByText('Andorra la Vella es una capital con nombre deliberadamente largo para validar doble línea');
+    expect(optionText.className).toContain('option-button-label');
+    expect(optionText.className).toContain('leading-[1.15]');
+    expect(optionText.className).not.toContain('truncate');
   });
 
   it('mantiene fondo sólido en locked/correct/wrong sin opacity ni transparency', () => {
@@ -137,6 +139,8 @@ describe('OptionButton', () => {
     const hiddenIndicator = document.querySelector('.option-button-selected-indicator');
     expect(hiddenIndicator).toBeInTheDocument();
     expect(hiddenIndicator?.className).toContain('bg-transparent');
+    expect(hiddenIndicator?.className).not.toContain('shadow-sm');
+    expect(hiddenIndicator?.className).toContain('shadow-none');
 
     rerender(
       <OptionButton
@@ -151,5 +155,50 @@ describe('OptionButton', () => {
 
     const visibleIndicator = document.querySelector('.option-button-selected-indicator');
     expect(visibleIndicator?.className).toContain('bg-[var(--color-primary-500)]');
+  });
+
+  it('mantiene clases estructurales y padding/altura base en default, selected y showResult', () => {
+    const props = {
+      option: 'Argentina',
+      index: 0,
+      onClick: () => {},
+      disabled: false,
+      selected: false,
+      showResult: false,
+    } as const;
+
+    const { rerender } = render(<OptionButton {...props} />);
+
+    const assertStableStructure = (expectedState: string) => {
+      const button = screen.getByRole('button');
+      expect(button).toHaveAttribute('data-state', expectedState);
+      expect(button.className).toContain('option-button-shell');
+      expect(button.className).toContain('option-button-base');
+      expect(button.className).toContain('py-2');
+
+      const indexBadge = document.querySelector('.option-button-index');
+      expect(indexBadge).toBeInTheDocument();
+      expect(indexBadge?.className).toContain('h-7');
+
+      const indicator = document.querySelector('.option-button-selected-indicator');
+      expect(indicator).toBeInTheDocument();
+      expect(indicator?.className).toContain('h-6');
+      expect(indicator?.className).toContain('w-6');
+      expect(indicator?.className).toContain('shrink-0');
+    };
+
+    assertStableStructure('default');
+
+    rerender(<OptionButton {...props} selected />);
+    assertStableStructure('selected');
+
+    rerender(<OptionButton {...props} disabled selected isCorrect={false} showResult />);
+    assertStableStructure('wrong');
+
+    rerender(<OptionButton {...props} disabled selected={false} isCorrect showResult />);
+    assertStableStructure('correct');
+
+    rerender(<OptionButton {...props} disabled selected={false} isCorrect={false} showResult />);
+    assertStableStructure('locked');
   });
 });

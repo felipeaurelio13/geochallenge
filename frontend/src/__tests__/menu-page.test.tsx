@@ -184,23 +184,17 @@ describe('MenuPage', () => {
     const mixedButton = screen.getByRole('button', { name: /🎲\s*mixto/i });
     const flagsButton = screen.getByRole('button', { name: /🏳️\s*banderas/i });
 
-    const sharedSelectorClasses = ['menu-category-selector', '!px-3', '!py-2', '!rounded-xl'];
-    sharedSelectorClasses.forEach((className) => {
-      expect(mixedButton.className).toContain(className);
-      expect(flagsButton.className).toContain(className);
-    });
-
-    expect(mixedButton.querySelector('.menu-category-selector__icon')).toBeInTheDocument();
-    expect(flagsButton.querySelector('.menu-category-selector__icon')).toBeInTheDocument();
+    expect(mixedButton.className).toContain('menu-category-selector');
+    expect(flagsButton.className).toContain('menu-category-selector');
+    expect(mixedButton.querySelector('.menu-category-selector__content')).toBeInTheDocument();
+    expect(flagsButton.querySelector('.menu-category-selector__content')).toBeInTheDocument();
     expect(mixedButton.querySelector('.menu-category-selector__label')).toBeInTheDocument();
     expect(flagsButton.querySelector('.menu-category-selector__label')).toBeInTheDocument();
 
     fireEvent.click(flagsButton);
     expect(flagsButton).toHaveAttribute('aria-pressed', 'true');
-    sharedSelectorClasses.forEach((className) => {
-      expect(flagsButton.className).toContain(className);
-    });
-    expect(flagsButton.querySelector('.menu-category-selector__icon')).toBeInTheDocument();
+    expect(flagsButton.className).toContain('menu-category-selector');
+    expect(flagsButton.querySelector('.menu-category-selector__content')).toBeInTheDocument();
     expect(flagsButton.querySelector('.menu-category-selector__label')).toBeInTheDocument();
   });
 

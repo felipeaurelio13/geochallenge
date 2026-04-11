@@ -231,6 +231,7 @@
   .game-options-wrap {
     display: grid;
     align-content: stretch;
+    overflow-x: hidden;
   }
 
   .game-question-wrap--media + .game-options-wrap {
@@ -353,8 +354,12 @@
 
   .option-button-label {
     display: -webkit-box;
-    -webkit-line-clamp: 1;
+    -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
+    line-height: 1.15;
+    max-height: calc(2 * 1.15em);
+    overflow: hidden;
+    word-break: break-word;
   }
 
   .option-button-selected-indicator {
@@ -365,6 +370,8 @@
     align-items: center;
     justify-content: center;
     gap: var(--space-1);
+    width: 100%;
+    height: 100%;
   }
 
   .menu-category-selector__icon {

@@ -38,8 +38,10 @@ describe('UI/UX guardrails audit (mobile-first)', () => {
     expect(gameRoundScaffold).toContain('game-question-wrap--media');
   });
 
-  it('keeps 4 visible options and solid-state option backgrounds guardrail by class contract', () => {
+  it('keeps 4 visible options and blocks horizontal overflow in critical mobile viewports', () => {
     expect(css).toContain('grid-template-rows: repeat(4, minmax(0, 1fr));');
+    expect(css).toContain('.game-options-wrap');
+    expect(css).toContain('overflow-x: hidden;');
     expect(css).toContain('.option-button-base');
     expect(css).toContain('padding-top: clamp(var(--space-1_5), 1.2dvh, var(--space-3));');
     expect(css).toContain('padding-bottom: clamp(var(--space-1_5), 1.2dvh, var(--space-3));');
