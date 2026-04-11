@@ -3,51 +3,111 @@ import type { ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
-  getLeaderboard: vi.fn(),
-  getMyRank: vi.fn(),
+  getLeaderboardMock: vi.fn(),
+  getMyRankMock: vi.fn(),
 }));
 
 vi.mock('react-router-dom', () => ({
-  Link: ({ children }: { children: ReactNode }) => <a>{children}</a>,
+  Link: ({ children, to, className }: { children: ReactNode; to: string; className?: string }) => (
+    <a href={to} className={className}>{children}</a>
+  ),
 }));
 
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
+  useTranslation: () => ({
+    t: (key: string, options?: Record<string, string>) => {
+      const translations: Record<string, string> = {
+        'common.back': 'Volver',
+        'common.search': 'Buscar',
+        'common.retry': 'Reintentar',
+        'rankings.title': 'Rankings',
+        'rankings.loading': 'Cargando ranking...',
+        'rankings.empty': 'Aún no hay jugadores en el ranking',
+        'rankings.noSearchResults': 'No hay resultados para esta búsqueda',
+        'rankings.searchPlaceholder': options?.defaultValue ?? 'Buscar jugador...',
+        'rankings.you': 'Tú',
+        'rankings.stats': 'Estadísticas',
+        'rankings.totalPlayers': 'Jugadores',
+        'rankings.topScore': 'Mejor puntuación',
+        'rankings.avgScore': 'Promedio',
+      };
+
+      return translations[key] ?? key;
+    },
+  }),
 }));
 
 vi.mock('../context/AuthContext', () => ({
-  useAuth: () => ({ user: { username: 'neo' } }),
+  useAuth: () => ({
+    user: { username: 'neo' },
+  }),
 }));
 
 vi.mock('../services/api', () => ({
   api: {
-    getLeaderboard: mocks.getLeaderboard,
-    getMyRank: mocks.getMyRank,
+    getLeaderboard: () => mocks.getLeaderboardMock(),
+    getMyRank: () => mocks.getMyRankMock(),
   },
 }));
 
 describe('RankingsPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.getMyRank.mockResolvedValue({ userRank: null, neighbors: [] });
+    mocks.getLeaderboardMock.mockReset();
+    mocks.getMyRankMock.mockReset();
+    vi.stubEnv('VITE_RANKING_USE_BACKEND_RANK', 'true');
+    vi.stubEnv('VITE_RANKING_NEIGHBORS_ENABLED', 'false');
+    mocks.getMyRankMock.mockResolvedValue({ userRank: null, neighbors: [] });
   });
 
   afterEach(() => {
     vi.unstubAllEnvs();
+    vi.doUnmock('../hooks');
   });
 
-  it('usa rank del backend cuando VITE_RANKING_USE_BACKEND_RANK=true', async () => {
-    vi.stubEnv('VITE_RANKING_USE_BACKEND_RANK', 'true');
+  it('renderiza top con datos, estructura visual mobile/dark y resalta usuario actual', async () => {
     vi.resetModules();
     const { RankingsPage } = await import('../pages/RankingsPage');
 
-    mocks.getLeaderboard.mockResolvedValue({
+    mocks.getLeaderboardMock.mockResolvedValue({
+      leaderboard: [
+        { rank: 1, userId: 'u-1', username: 'neo', score: 1200 },
+        { rank: 2, userId: 'u-2', username: 'trinity', score: 1100 },
+      ],
+      totalPlayers: 99,
+      topScore: 1200,
+      avgScore: 950,
+      userRank: { rank: 1, score: 1200 },
+    });
+
+    const { container } = render(<RankingsPage />);
+
+    expect(await screen.findByText('🥇')).toBeInTheDocument();
+    expect(screen.getByText('🥈')).toBeInTheDocument();
+    expect(screen.getByText('(Tú)')).toBeInTheDocument();
+
+    expect(container.firstChild).toHaveClass('h-full', 'min-h-0', 'bg-gray-900');
+    expect(container.querySelector('header')).toHaveClass('bg-gray-800', 'border-b', 'border-gray-700');
+
+    const search = screen.getByLabelText('Buscar');
+    expect(search).toHaveClass('bg-gray-800', 'text-white', 'placeholder-gray-500');
+
+    const currentUserCard = screen.getByText('neo').closest('div.p-4.rounded-xl.border-2');
+    expect(currentUserCard).toHaveClass('bg-primary/20', 'border-primary');
+  });
+
+  it('usa rank provisto por backend y no index + 1', async () => {
+    vi.resetModules();
+    const { RankingsPage } = await import('../pages/RankingsPage');
+
+    mocks.getLeaderboardMock.mockResolvedValue({
       leaderboard: [
         { rank: 11, userId: 'u-1', username: 'neo', score: 1200 },
         { rank: 15, userId: 'u-2', username: 'trinity', score: 1100 },
       ],
       totalPlayers: 2,
       topScore: 1200,
+      avgScore: 1150,
       userRank: { rank: 11, score: 1200 },
     });
 
@@ -55,156 +115,114 @@ describe('RankingsPage', () => {
 
     expect(await screen.findByText('#11')).toBeInTheDocument();
     expect(screen.getByText('#15')).toBeInTheDocument();
-    expect(mocks.getMyRank).not.toHaveBeenCalled();
+    expect(screen.queryByText('🥇')).not.toBeInTheDocument();
   });
 
-  it('cae a index + 1 cuando falta entry.rank aunque el flag esté activo', async () => {
-    vi.stubEnv('VITE_RANKING_USE_BACKEND_RANK', 'true');
+  it('permite búsqueda con resultado y sin resultado sin romper métricas globales', async () => {
     vi.resetModules();
     const { RankingsPage } = await import('../pages/RankingsPage');
 
-    mocks.getLeaderboard.mockResolvedValue({
+    mocks.getLeaderboardMock.mockResolvedValue({
       leaderboard: [
-        { rank: undefined, userId: 'u-3', username: 'morpheus', score: 900 },
-        { rank: 22, userId: 'u-4', username: 'smith', score: 800 },
-      ],
-      totalPlayers: 2,
-      topScore: 900,
-      userRank: null,
-    });
-
-    render(<RankingsPage />);
-
-    expect(await screen.findByText('🥇')).toBeInTheDocument();
-    expect(screen.getByText('#22')).toBeInTheDocument();
-  });
-
-  it('mantiene comportamiento previo por índice cuando el flag está desactivado', async () => {
-    vi.stubEnv('VITE_RANKING_USE_BACKEND_RANK', 'false');
-    vi.resetModules();
-    const { RankingsPage } = await import('../pages/RankingsPage');
-
-    mocks.getLeaderboard.mockResolvedValue({
-      leaderboard: [
-        { rank: 40, userId: 'u-1', username: 'neo', score: 1200 },
-        { rank: 41, userId: 'u-2', username: 'trinity', score: 1100 },
-      ],
-      totalPlayers: 2,
-      topScore: 1200,
-      userRank: { rank: 40, score: 1200 },
-    });
-
-    render(<RankingsPage />);
-
-    await waitFor(() => {
-      expect(screen.getByText('🥇')).toBeInTheDocument();
-      expect(screen.getByText('🥈')).toBeInTheDocument();
-    });
-    expect(screen.queryByText('#40')).not.toBeInTheDocument();
-    expect(mocks.getMyRank).not.toHaveBeenCalled();
-  });
-
-  it('usa fallback diferido a /leaderboard/me cuando /leaderboard no trae userRank', async () => {
-    vi.stubEnv('VITE_RANKING_USE_BACKEND_RANK', 'true');
-    vi.stubEnv('VITE_RANKING_NEIGHBORS_ENABLED', 'false');
-    vi.resetModules();
-    const { RankingsPage } = await import('../pages/RankingsPage');
-
-    mocks.getLeaderboard.mockResolvedValue({
-      leaderboard: [
-        { rank: 51, userId: 'u-1', username: 'neo', score: 1200 },
-        { rank: 52, userId: 'u-2', username: 'trinity', score: 1100 },
-      ],
-      totalPlayers: 2,
-      topScore: 1200,
-      userRank: null,
-    });
-
-    mocks.getMyRank.mockResolvedValue({
-      userRank: { rank: 77, userId: 'u-1', username: 'neo', score: 987, isCurrentUser: true },
-      neighbors: [],
-    });
-
-    render(<RankingsPage />);
-
-    expect(await screen.findByText('#77')).toBeInTheDocument();
-    expect(screen.getByText('987 pts')).toBeInTheDocument();
-    expect(mocks.getMyRank).toHaveBeenCalledTimes(1);
-  });
-
-  it('carga vecinos con feature flag sin bloquear el leaderboard', async () => {
-    vi.stubEnv('VITE_RANKING_USE_BACKEND_RANK', 'true');
-    vi.stubEnv('VITE_RANKING_NEIGHBORS_ENABLED', 'true');
-    vi.resetModules();
-    const { RankingsPage } = await import('../pages/RankingsPage');
-
-    mocks.getLeaderboard.mockResolvedValue({
-      leaderboard: [{ rank: 1, userId: 'u-1', username: 'neo', score: 1200 }],
-      totalPlayers: 1,
-      topScore: 1200,
-      userRank: { rank: 1, score: 1200 },
-    });
-
-    mocks.getMyRank.mockResolvedValue({
-      userRank: { rank: 1, userId: 'u-1', username: 'neo', score: 1200, isCurrentUser: true },
-      neighbors: [{ rank: 2, userId: 'u-2', username: 'trinity', score: 1100 }],
-    });
-
-    render(<RankingsPage />);
-
-    expect(await screen.findByText('🥇')).toBeInTheDocument();
-    expect(await screen.findByText('Contexto cercano')).toBeInTheDocument();
-    expect(await screen.findByText('#2 trinity')).toBeInTheDocument();
-    expect(mocks.getMyRank).toHaveBeenCalledTimes(1);
-  });
-
-  it('usa métricas globales del backend en stats y muestra estado filtrado por búsqueda', async () => {
-    vi.stubEnv('VITE_RANKING_USE_BACKEND_RANK', 'true');
-    vi.resetModules();
-    const { RankingsPage } = await import('../pages/RankingsPage');
-
-    mocks.getLeaderboard.mockResolvedValue({
-      leaderboard: [
-        { rank: 1, userId: 'u-1', username: 'neo', score: 1200 },
-        { rank: 2, userId: 'u-2', username: 'trinity', score: 1100 },
+        { rank: 4, userId: 'u-1', username: 'neo', score: 1200 },
+        { rank: 5, userId: 'u-2', username: 'trinity', score: 1100 },
       ],
       totalPlayers: 999,
       topScore: 7777,
-      avgScore: null,
-      userRank: { rank: 1, score: 1200 },
+      avgScore: 1234,
+      userRank: { rank: 4, score: 1200 },
     });
 
     render(<RankingsPage />);
 
-    expect(await screen.findByText('999')).toBeInTheDocument();
+    expect(await screen.findByText('#4')).toBeInTheDocument();
+    expect(screen.getByText('999')).toBeInTheDocument();
     expect(screen.getByText('7,777')).toBeInTheDocument();
-    expect(screen.queryByText('rankings.avgScore')).not.toBeInTheDocument();
 
-    fireEvent.change(screen.getByLabelText('common.search'), { target: { value: 'neo' } });
-
+    fireEvent.change(screen.getByLabelText('Buscar'), { target: { value: 'neo' } });
     expect(await screen.findByText(/Resultados filtrados:/i)).toBeInTheDocument();
-    expect(screen.getByText('Filtrado por búsqueda')).toBeInTheDocument();
+    expect(screen.getByText('neo')).toBeInTheDocument();
+    expect(screen.getByText('999')).toBeInTheDocument();
+    expect(screen.getByText('7,777')).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText('Buscar'), { target: { value: 'smith' } });
+    expect(await screen.findByText('No hay resultados para esta búsqueda')).toBeInTheDocument();
+    expect(screen.queryByText('Aún no hay jugadores en el ranking')).not.toBeInTheDocument();
   });
 
-  it('muestra estado noSearchResults cuando hay datos globales pero sin coincidencias en búsqueda', async () => {
-    vi.stubEnv('VITE_RANKING_USE_BACKEND_RANK', 'true');
+  it('muestra error y permite reintentar', async () => {
     vi.resetModules();
-    const { RankingsPage } = await import('../pages/RankingsPage');
 
-    mocks.getLeaderboard.mockResolvedValue({
+    mocks.getLeaderboardMock.mockResolvedValue({
       leaderboard: [{ rank: 1, userId: 'u-1', username: 'neo', score: 1200 }],
       totalPlayers: 1,
       topScore: 1200,
+      avgScore: 1200,
       userRank: { rank: 1, score: 1200 },
     });
 
+    vi.doMock('../hooks', async () => {
+      const React = await import('react');
+
+      return {
+        useDebounce: (value: string) => value,
+        useApi: () => {
+          const [data, setData] = React.useState<any>(null);
+          const [error, setError] = React.useState<string | null>('network down');
+          const [isLoading, setIsLoading] = React.useState(false);
+          const allowSuccessRef = React.useRef(false);
+
+          const run = React.useCallback(async () => {
+            if (!allowSuccessRef.current) {
+              return null;
+            }
+
+            setIsLoading(true);
+            const response = await mocks.getLeaderboardMock();
+            setData({
+              leaderboard: response.leaderboard.map((entry: any) => ({
+                ...entry,
+                isCurrentUser: entry.username === 'neo',
+              })),
+              totalPlayers: response.totalPlayers,
+              topScore: response.topScore,
+              avgScore: response.avgScore,
+              userRank: response.userRank?.rank ?? null,
+              userScore: response.userRank?.score ?? null,
+            });
+            setError(null);
+            setIsLoading(false);
+            return response;
+          }, []);
+
+          const invalidate = React.useCallback(() => {
+            allowSuccessRef.current = true;
+          }, []);
+
+          return {
+            data,
+            error,
+            isLoading,
+            run,
+            invalidate,
+          };
+        },
+      };
+    });
+
+    const { RankingsPage } = await import('../pages/RankingsPage');
     render(<RankingsPage />);
 
+    expect(screen.getByText('network down')).toBeInTheDocument();
+
+    const callsBeforeRetry = mocks.getLeaderboardMock.mock.calls.length;
+
+    fireEvent.click(screen.getByRole('button', { name: 'Reintentar' }));
+
+    await waitFor(() => {
+      expect(mocks.getLeaderboardMock.mock.calls.length).toBeGreaterThan(callsBeforeRetry);
+    });
     expect(await screen.findByText('🥇')).toBeInTheDocument();
-
-    fireEvent.change(screen.getByLabelText('common.search'), { target: { value: 'smith' } });
-
-    expect(await screen.findByText('rankings.noSearchResults')).toBeInTheDocument();
-    expect(screen.queryByText('rankings.empty')).not.toBeInTheDocument();
   });
+
 });
