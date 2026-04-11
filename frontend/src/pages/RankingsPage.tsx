@@ -21,17 +21,21 @@ type RankingsResponse = {
 };
 
 const USE_BACKEND_RANK = import.meta.env.VITE_RANKING_USE_BACKEND_RANK === 'true';
+const RANKING_NEIGHBORS_ENABLED = import.meta.env.VITE_RANKING_NEIGHBORS_ENABLED === 'true';
 
 export function RankingsPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search, 200);
+  const [deferredUserRank, setDeferredUserRank] = useState<number | null>(null);
+  const [deferredUserScore, setDeferredUserScore] = useState<number | null>(null);
+  const [neighborEntries, setNeighborEntries] = useState<LeaderboardEntry[]>([]);
+  const [neighborsLoading, setNeighborsLoading] = useState(false);
 
   const { data, error, isLoading, run, invalidate } = useApi<RankingsResponse>(
     async () => {
       const leaderboardData = await api.getLeaderboard(50);
-      const userRankData = await api.getMyRank();
 
       return {
         leaderboard: leaderboardData.leaderboard.map((entry, index) => ({
@@ -44,8 +48,8 @@ export function RankingsPage() {
           score: entry.score,
           isCurrentUser: entry.username === user?.username,
         })),
-        userRank: userRankData.userRank?.rank || null,
-        userScore: userRankData.userRank?.score || null,
+        userRank: leaderboardData.userRank?.rank ?? null,
+        userScore: leaderboardData.userRank?.score ?? null,
       };
     },
     {
@@ -57,6 +61,61 @@ export function RankingsPage() {
   useEffect(() => {
     void run();
   }, [run]);
+
+  useEffect(() => {
+    if (!data) {
+      return;
+    }
+
+    let cancelled = false;
+    const shouldLoadRankContext = RANKING_NEIGHBORS_ENABLED || data.userRank === null;
+
+    if (!shouldLoadRankContext) {
+      setNeighborEntries([]);
+      setNeighborsLoading(false);
+      return;
+    }
+
+    setNeighborsLoading(true);
+
+    void api
+      .getMyRank()
+      .then((rankContext) => {
+        if (cancelled) {
+          return;
+        }
+
+        if (data.userRank === null) {
+          setDeferredUserRank(rankContext.userRank?.rank ?? null);
+          setDeferredUserScore(rankContext.userRank?.score ?? null);
+        }
+
+        if (RANKING_NEIGHBORS_ENABLED) {
+          setNeighborEntries(rankContext.neighbors ?? []);
+        }
+      })
+      .catch(() => {
+        if (cancelled) {
+          return;
+        }
+
+        if (RANKING_NEIGHBORS_ENABLED) {
+          setNeighborEntries([]);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setNeighborsLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [data]);
+
+  const resolvedUserRank = data?.userRank ?? deferredUserRank;
+  const resolvedUserScore = data?.userScore ?? deferredUserScore;
 
   const filteredLeaderboard = useMemo(() => {
     const source = data?.leaderboard ?? [];
@@ -98,16 +157,39 @@ export function RankingsPage() {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 py-6 sm:py-8">
-        {data?.userRank && data.userRank > 50 && (
+        {resolvedUserRank && resolvedUserRank > 50 && (
           <div className="mb-6 p-4 bg-primary/20 border border-primary rounded-xl">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <span className="text-2xl font-bold text-primary">#{data.userRank}</span>
+                <span className="text-2xl font-bold text-primary">#{resolvedUserRank}</span>
                 <span className="text-white font-semibold">{user?.username}</span>
               </div>
-              <span className="text-xl font-bold text-white">{data.userScore?.toLocaleString()} pts</span>
+              <span className="text-xl font-bold text-white">{resolvedUserScore?.toLocaleString()} pts</span>
             </div>
           </div>
+        )}
+
+        {!isLoading && !error && RANKING_NEIGHBORS_ENABLED && (
+          <section className="mb-6 rounded-xl border border-gray-700 bg-gray-800 p-4" aria-live="polite">
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-300">Contexto cercano</h2>
+            {neighborsLoading ? (
+              <p className="text-sm text-gray-400">Cargando posiciones cercanas…</p>
+            ) : neighborEntries.length === 0 ? (
+              <p className="text-sm text-gray-400">No hay datos de vecinos disponibles.</p>
+            ) : (
+              <ul className="space-y-2">
+                {neighborEntries.map((entry) => (
+                  <li
+                    key={entry.userId ? `${entry.userId}-${entry.rank}` : `${entry.username}-${entry.rank}`}
+                    className="flex items-center justify-between rounded-lg border border-gray-700 bg-gray-900 px-3 py-2"
+                  >
+                    <span className="text-sm text-gray-200">#{entry.rank} {entry.username}</span>
+                    <span className="text-sm font-semibold text-white">{entry.score.toLocaleString()} pts</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
         )}
 
         <div className="mb-4">

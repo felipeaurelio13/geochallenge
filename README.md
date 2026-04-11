@@ -4,9 +4,17 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.76**
+- Frontend: **v1.2.77**
 
-- Fix: rankings ahora pueden usar el `rank` entregado por backend mediante feature flag, con fallback defensivo al índice local.
+- Fix: Rankings usa `/leaderboard` como fuente principal para leaderboard + userRank; `/leaderboard/me` pasa a contexto diferido con flag y fallback controlado.
+
+## Novedades de la versión 1.2.77
+
+- `RankingsPage` eliminó la llamada bloqueante inicial a `/leaderboard/me`: ahora carga ranking principal únicamente desde `getLeaderboard(50)` (manteniendo cache key/TTL actuales).
+- Se incorporó `VITE_RANKING_NEIGHBORS_ENABLED` para traer vecinos desde `/leaderboard/me` en un bloque separado y no bloqueante (`Contexto cercano`).
+- Se añadió fallback diferido: si `/leaderboard` no trae `userRank`, la vista invoca `/leaderboard/me` en segundo plano para completar `userRank/userScore` sin frenar el render principal.
+- Se actualizaron pruebas de `RankingsPage` para cubrir: no llamada inicial a `/leaderboard/me`, fallback diferido y carga de vecinos por feature flag.
+- Footer/versionado actualizado a **v1.2.77** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.76
 
