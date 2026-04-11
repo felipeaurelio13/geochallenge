@@ -1041,6 +1041,35 @@ npm test             # Ejecutar tests
 
 ---
 
+## API (Contrato)
+
+### `GET /api/leaderboard`
+
+Parámetros de query:
+
+- `limit` (opcional, number): cantidad máxima de resultados (cap interno actual en `100`).
+- `scope` (opcional): `global | weekly | friends`.  
+  Valor por defecto: `global`.
+
+Comportamiento de compatibilidad:
+
+- El backend mantiene el comportamiento actual del leaderboard global.
+- Si se envía un `scope` aún no soportado (por ejemplo `weekly` o `friends`), la consulta **degrada a `global`** y responde metadatos de fallback en `queryMeta`.
+
+Respuesta (campos existentes + extensiones aditivas no rompientes):
+
+- Existentes: `leaderboard`, `totalPlayers`, `topScore`, `avgScore`, `userRank`.
+- Nuevos opcionales/no rompientes: `season`, `window`, `generatedAt`, `queryMeta`.
+  - `queryMeta.requestedScope`
+  - `queryMeta.effectiveScope`
+  - `queryMeta.fallbackApplied`
+
+Notas de frontend:
+
+- El frontend continúa consumiendo leaderboard con `scope=global` por defecto hasta habilitar feature flags para nuevos scopes.
+
+---
+
 ## Troubleshooting
 
 ### Error: "Cannot connect to database"
