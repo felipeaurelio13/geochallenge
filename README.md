@@ -4,7 +4,7 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.71**
+- Frontend: **v1.2.72**
 
 - Fix: pantallas de juego sin scroll pero 100% jugables; CTA principal siempre visible; footer global oculto en juego.
 
@@ -27,6 +27,14 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 7. Si el deploy falla, usar este protocolo interno: (a) `npm run ci:quality` local, (b) revisar secretos/configuración de Pages, (c) relanzar workflow solo tras corregir la causa raíz.
 
 
+
+
+## Novedades de la versión 1.2.72
+
+- Se realizó una auditoría experta de UX/UI mobile-first centrada en alineación, centrados por contexto, safe-areas y estabilidad del layout universal de juego.
+- Se agregó una suite automatizada de guardrails visuales (`ui-ux-audit-guardrails.test.ts`) para prevenir regresiones en: `100dvh`, grilla de 3 filas (`header/main/footer`), composición de pregunta (capital/media), `overscroll-behavior` y regla de 4 alternativas visibles.
+- Se documentó el diagnóstico técnico y el plan de mitigación incremental en `docs/ui-ux-audit-2026-04-11.md`, manteniendo cambios aditivos y rollback simple.
+- Footer/versionado actualizado a **v1.2.72** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.71
 
