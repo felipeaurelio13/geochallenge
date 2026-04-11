@@ -29,7 +29,7 @@ vi.mock('../services/api', () => ({
 describe('RankingsPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.getMyRank.mockResolvedValue({ userRank: null });
+    mocks.getMyRank.mockResolvedValue({ userRank: null, neighbors: [] });
   });
 
   afterEach(() => {
@@ -48,13 +48,14 @@ describe('RankingsPage', () => {
       ],
       totalPlayers: 2,
       topScore: 1200,
-      userRank: null,
+      userRank: { rank: 11, score: 1200 },
     });
 
     render(<RankingsPage />);
 
     expect(await screen.findByText('#11')).toBeInTheDocument();
     expect(screen.getByText('#15')).toBeInTheDocument();
+    expect(mocks.getMyRank).not.toHaveBeenCalled();
   });
 
   it('cae a index + 1 cuando falta entry.rank aunque el flag esté activo', async () => {
@@ -90,7 +91,7 @@ describe('RankingsPage', () => {
       ],
       totalPlayers: 2,
       topScore: 1200,
-      userRank: null,
+      userRank: { rank: 40, score: 1200 },
     });
 
     render(<RankingsPage />);
@@ -100,5 +101,60 @@ describe('RankingsPage', () => {
       expect(screen.getByText('🥈')).toBeInTheDocument();
     });
     expect(screen.queryByText('#40')).not.toBeInTheDocument();
+    expect(mocks.getMyRank).not.toHaveBeenCalled();
+  });
+
+  it('usa fallback diferido a /leaderboard/me cuando /leaderboard no trae userRank', async () => {
+    vi.stubEnv('VITE_RANKING_USE_BACKEND_RANK', 'true');
+    vi.stubEnv('VITE_RANKING_NEIGHBORS_ENABLED', 'false');
+    vi.resetModules();
+    const { RankingsPage } = await import('../pages/RankingsPage');
+
+    mocks.getLeaderboard.mockResolvedValue({
+      leaderboard: [
+        { rank: 51, userId: 'u-1', username: 'neo', score: 1200 },
+        { rank: 52, userId: 'u-2', username: 'trinity', score: 1100 },
+      ],
+      totalPlayers: 2,
+      topScore: 1200,
+      userRank: null,
+    });
+
+    mocks.getMyRank.mockResolvedValue({
+      userRank: { rank: 77, userId: 'u-1', username: 'neo', score: 987, isCurrentUser: true },
+      neighbors: [],
+    });
+
+    render(<RankingsPage />);
+
+    expect(await screen.findByText('#77')).toBeInTheDocument();
+    expect(screen.getByText('987 pts')).toBeInTheDocument();
+    expect(mocks.getMyRank).toHaveBeenCalledTimes(1);
+  });
+
+  it('carga vecinos con feature flag sin bloquear el leaderboard', async () => {
+    vi.stubEnv('VITE_RANKING_USE_BACKEND_RANK', 'true');
+    vi.stubEnv('VITE_RANKING_NEIGHBORS_ENABLED', 'true');
+    vi.resetModules();
+    const { RankingsPage } = await import('../pages/RankingsPage');
+
+    mocks.getLeaderboard.mockResolvedValue({
+      leaderboard: [{ rank: 1, userId: 'u-1', username: 'neo', score: 1200 }],
+      totalPlayers: 1,
+      topScore: 1200,
+      userRank: { rank: 1, score: 1200 },
+    });
+
+    mocks.getMyRank.mockResolvedValue({
+      userRank: { rank: 1, userId: 'u-1', username: 'neo', score: 1200, isCurrentUser: true },
+      neighbors: [{ rank: 2, userId: 'u-2', username: 'trinity', score: 1100 }],
+    });
+
+    render(<RankingsPage />);
+
+    expect(await screen.findByText('🥇')).toBeInTheDocument();
+    expect(await screen.findByText('Contexto cercano')).toBeInTheDocument();
+    expect(await screen.findByText('#2 trinity')).toBeInTheDocument();
+    expect(mocks.getMyRank).toHaveBeenCalledTimes(1);
   });
 });
