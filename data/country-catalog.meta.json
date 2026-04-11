@@ -1,0 +1,7 @@
+{
+  "version": "v1",
+  "source": "data/countries.json",
+  "generatedAt": "2026-04-11T20:06:22.041Z",
+  "totalCountries": 197,
+  "activeCountries": 197
+}
