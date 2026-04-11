@@ -156,4 +156,49 @@ describe('OptionButton', () => {
     const visibleIndicator = document.querySelector('.option-button-selected-indicator');
     expect(visibleIndicator?.className).toContain('bg-[var(--color-primary-500)]');
   });
+
+  it('mantiene clases estructurales y padding/altura base en default, selected y showResult', () => {
+    const props = {
+      option: 'Argentina',
+      index: 0,
+      onClick: () => {},
+      disabled: false,
+      selected: false,
+      showResult: false,
+    } as const;
+
+    const { rerender } = render(<OptionButton {...props} />);
+
+    const assertStableStructure = (expectedState: string) => {
+      const button = screen.getByRole('button');
+      expect(button).toHaveAttribute('data-state', expectedState);
+      expect(button.className).toContain('option-button-shell');
+      expect(button.className).toContain('option-button-base');
+      expect(button.className).toContain('py-2');
+
+      const indexBadge = document.querySelector('.option-button-index');
+      expect(indexBadge).toBeInTheDocument();
+      expect(indexBadge?.className).toContain('h-7');
+
+      const indicator = document.querySelector('.option-button-selected-indicator');
+      expect(indicator).toBeInTheDocument();
+      expect(indicator?.className).toContain('h-6');
+      expect(indicator?.className).toContain('w-6');
+      expect(indicator?.className).toContain('shrink-0');
+    };
+
+    assertStableStructure('default');
+
+    rerender(<OptionButton {...props} selected />);
+    assertStableStructure('selected');
+
+    rerender(<OptionButton {...props} disabled selected isCorrect={false} showResult />);
+    assertStableStructure('wrong');
+
+    rerender(<OptionButton {...props} disabled selected={false} isCorrect showResult />);
+    assertStableStructure('correct');
+
+    rerender(<OptionButton {...props} disabled selected={false} isCorrect={false} showResult />);
+    assertStableStructure('locked');
+  });
 });
