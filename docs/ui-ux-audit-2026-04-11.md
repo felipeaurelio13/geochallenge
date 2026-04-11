@@ -53,3 +53,10 @@ Para revertir este cambio de auditoría, eliminar:
 - `docs/ui-ux-audit-2026-04-11.md`
 
 Y deshacer cambios de versionado/documentación asociados.
+
+## Implementación incremental post-auditoría (2026-04-11)
+
+- Se añadió prueba E2E específica de dark mode para gameplay (`frontend/tests/e2e/game-layout-darkmode.spec.ts`) en los tres viewports mobile definidos en Playwright.
+- La prueba valida visibilidad de CTA, presencia de 4 opciones y ausencia de overflow horizontal accidental.
+- Se agregó checklist visual al PR template (`.github/pull_request_template.md`) para institucionalizar la revisión de release visual y reducir regresiones.
+
