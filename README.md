@@ -4,9 +4,17 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.75**
+- Frontend: **v1.2.76**
 
-- Fix: estabilidad de alineación en icono+label del selector de categorías para evitar desplazamientos visuales al cambiar de estado.
+- Fix: rankings ahora pueden usar el `rank` entregado por backend mediante feature flag, con fallback defensivo al índice local.
+
+## Novedades de la versión 1.2.76
+
+- `RankingsPage` ahora soporta `VITE_RANKING_USE_BACKEND_RANK=true` para usar `entry.rank` proveniente del backend sin depender del índice del cliente.
+- Se agregó fallback defensivo: si `entry.rank` llega ausente/invalidado por regresión, se mantiene `index + 1` para evitar romper la UI.
+- Las filas del ranking usan clave estable combinando `userId+rank` (o `username+rank` como fallback) para minimizar colisiones y re-renderizados incorrectos.
+- Se añadieron pruebas unitarias de `RankingsPage` cubriendo flag activo/inactivo y fallback de rank.
+- Footer/versionado actualizado a **v1.2.76** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ### Mantener backend activo en producción
 
