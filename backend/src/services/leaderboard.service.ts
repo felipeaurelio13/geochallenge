@@ -189,14 +189,26 @@ export async function syncLeaderboardFromDatabase(): Promise<number> {
 export async function getLeaderboardStats(): Promise<{
   totalPlayers: number;
   topScore: number | null;
+  avgScore: number | null;
 }> {
   const redis = getRedis();
 
   const totalPlayers = await redis.zcard(LEADERBOARD_KEY);
   const topResults = await redis.zrevrange(LEADERBOARD_KEY, 0, 0, 'WITHSCORES');
+  const totalScore = await redis.zrevrange(LEADERBOARD_KEY, 0, -1, 'WITHSCORES');
+
+  let avgScore: number | null = null;
+  if (totalPlayers > 0 && totalScore.length > 0) {
+    let sum = 0;
+    for (let i = 1; i < totalScore.length; i += 2) {
+      sum += parseFloat(totalScore[i]);
+    }
+    avgScore = sum / totalPlayers;
+  }
 
   return {
     totalPlayers,
     topScore: topResults.length >= 2 ? parseFloat(topResults[1]) : null,
+    avgScore,
   };
 }

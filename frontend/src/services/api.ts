@@ -160,6 +160,7 @@ class ApiService {
       leaderboard: LeaderboardEntry[];
       totalPlayers: number;
       topScore: number | null;
+      avgScore?: number | null;
       userRank: { rank: number; score: number } | null;
     }>('/leaderboard', {
       params: { limit },

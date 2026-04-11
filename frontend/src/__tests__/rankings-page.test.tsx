@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -156,5 +156,33 @@ describe('RankingsPage', () => {
     expect(await screen.findByText('Contexto cercano')).toBeInTheDocument();
     expect(await screen.findByText('#2 trinity')).toBeInTheDocument();
     expect(mocks.getMyRank).toHaveBeenCalledTimes(1);
+  });
+
+  it('usa métricas globales del backend en stats y muestra estado filtrado por búsqueda', async () => {
+    vi.stubEnv('VITE_RANKING_USE_BACKEND_RANK', 'true');
+    vi.resetModules();
+    const { RankingsPage } = await import('../pages/RankingsPage');
+
+    mocks.getLeaderboard.mockResolvedValue({
+      leaderboard: [
+        { rank: 1, userId: 'u-1', username: 'neo', score: 1200 },
+        { rank: 2, userId: 'u-2', username: 'trinity', score: 1100 },
+      ],
+      totalPlayers: 999,
+      topScore: 7777,
+      avgScore: null,
+      userRank: { rank: 1, score: 1200 },
+    });
+
+    render(<RankingsPage />);
+
+    expect(await screen.findByText('999')).toBeInTheDocument();
+    expect(screen.getByText('7,777')).toBeInTheDocument();
+    expect(screen.queryByText('rankings.avgScore')).not.toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText('common.search'), { target: { value: 'neo' } });
+
+    expect(await screen.findByText(/Resultados filtrados:/i)).toBeInTheDocument();
+    expect(screen.getByText('Filtrado por búsqueda')).toBeInTheDocument();
   });
 });
