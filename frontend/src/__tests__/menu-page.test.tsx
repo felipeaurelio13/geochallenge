@@ -48,6 +48,8 @@ vi.mock('react-i18next', () => ({
         'menu.duelDesc': 'Compite en tiempo real contra otro jugador',
         'menu.challenge': 'Desafíos',
         'menu.challengeDesc': 'Envía desafíos a tus amigos',
+        'menu.streak': 'Racha',
+        'menu.streakDesc': 'Sigue hasta fallar y rompe tu récord',
         'menu.yourStats': 'Tus estadísticas',
         'menu.selectedCategory': 'Categoría activa',
         'menu.mobileCategoriesHint': 'Desliza para ver más categorías',
@@ -107,6 +109,21 @@ describe('MenuPage', () => {
     fireEvent.click(screen.getByRole('button', { name: /desafíos[\s\S]*envía/i }));
 
     expect(mockNavigate).toHaveBeenCalledWith('/challenges?category=CAPITAL&openCreate=1');
+  });
+
+  it('navega a racha reutilizando GamePage con mode=streak', () => {
+    render(
+      <MemoryRouter future={routerFutureConfig}>
+        <Screen>
+          <MenuPage />
+        </Screen>
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /mapas/i }));
+    fireEvent.click(screen.getByRole('button', { name: /racha[\s\S]*sigue hasta fallar/i }));
+
+    expect(mockNavigate).toHaveBeenCalledWith('/game/single?category=MAP&mode=streak');
   });
 
   it('elimina textos redundantes de categoría activa y mantiene footer con versión visible', () => {
@@ -186,15 +203,15 @@ describe('MenuPage', () => {
 
     expect(mixedButton.className).toContain('menu-category-selector');
     expect(flagsButton.className).toContain('menu-category-selector');
-    expect(mixedButton.querySelector('.menu-category-selector__content')).toBeInTheDocument();
-    expect(flagsButton.querySelector('.menu-category-selector__content')).toBeInTheDocument();
+    expect(mixedButton.querySelector('.menu-category-selector__icon')).toBeInTheDocument();
+    expect(flagsButton.querySelector('.menu-category-selector__icon')).toBeInTheDocument();
     expect(mixedButton.querySelector('.menu-category-selector__label')).toBeInTheDocument();
     expect(flagsButton.querySelector('.menu-category-selector__label')).toBeInTheDocument();
 
     fireEvent.click(flagsButton);
     expect(flagsButton).toHaveAttribute('aria-pressed', 'true');
     expect(flagsButton.className).toContain('menu-category-selector');
-    expect(flagsButton.querySelector('.menu-category-selector__content')).toBeInTheDocument();
+    expect(flagsButton.querySelector('.menu-category-selector__icon')).toBeInTheDocument();
     expect(flagsButton.querySelector('.menu-category-selector__label')).toBeInTheDocument();
   });
 
