@@ -27,12 +27,15 @@ describe('country catalog loader', () => {
       ),
     }));
 
-    const { loadCountryCatalog, getActiveCountries } = await import('../utils/countryCatalog.js');
+    const { loadCountryCatalog, getActiveCountries, getSeedCountries } = await import(
+      '../utils/countryCatalog.js'
+    );
     const loaded = loadCountryCatalog();
 
     expect(loaded).toHaveLength(1);
     expect(loaded[0].iso2).toBe('AR');
     expect(getActiveCountries(loaded)).toHaveLength(1);
+    expect(getSeedCountries(loaded, false).countries).toHaveLength(1);
   });
 
   it('falls back to legacy countries.json when versioned catalog is unavailable', async () => {
@@ -64,5 +67,77 @@ describe('country catalog loader', () => {
     expect(loaded).toHaveLength(1);
     expect(loaded[0].status).toBe('active');
     expect(loaded[0].iso2).toBe('CL');
+  });
+
+  it('excludes extended rollout countries when extended flags are disabled', async () => {
+    const { getSeedCountries } = await import('../utils/countryCatalog.js');
+
+    const selection = getSeedCountries(
+      [
+        {
+          iso2: 'AR',
+          name: 'Argentina',
+          capital: 'Buenos Aires',
+          continent: 'South America',
+          lat: -34.6,
+          lng: -58.3,
+          flag: 'ar',
+          status: 'active',
+          rollout: 'stable',
+        },
+        {
+          iso2: 'XK',
+          name: 'Kosovo',
+          capital: 'Pristina',
+          continent: 'Europe',
+          lat: 42.7,
+          lng: 21.1,
+          flag: 'xk',
+          status: 'active',
+          rollout: 'extended',
+        },
+      ],
+      false
+    );
+
+    expect(selection.countries).toHaveLength(1);
+    expect(selection.countries[0].name).toBe('Argentina');
+    expect(selection.extendedCountriesIncluded).toBe(0);
+    expect(selection.extendedCountriesExcluded).toBe(1);
+  });
+
+  it('includes extended rollout countries when extended flags are enabled', async () => {
+    const { getSeedCountries } = await import('../utils/countryCatalog.js');
+
+    const selection = getSeedCountries(
+      [
+        {
+          iso2: 'AR',
+          name: 'Argentina',
+          capital: 'Buenos Aires',
+          continent: 'South America',
+          lat: -34.6,
+          lng: -58.3,
+          flag: 'ar',
+          status: 'active',
+        },
+        {
+          iso2: 'XK',
+          name: 'Kosovo',
+          capital: 'Pristina',
+          continent: 'Europe',
+          lat: 42.7,
+          lng: 21.1,
+          flag: 'xk',
+          status: 'active',
+          rollout: 'extended',
+        },
+      ],
+      true
+    );
+
+    expect(selection.countries).toHaveLength(2);
+    expect(selection.extendedCountriesIncluded).toBe(1);
+    expect(selection.extendedCountriesExcluded).toBe(0);
   });
 });

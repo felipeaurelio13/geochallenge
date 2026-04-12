@@ -1,7 +1,8 @@
 import { PrismaClient, Category, Difficulty } from '@prisma/client';
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { getActiveCountries, loadCountryCatalog, type CountryRecord } from './utils/countryCatalog';
+import { config } from './config/env';
+import { getSeedCountries, loadCountryCatalog, type CountryRecord } from './utils/countryCatalog';
 
 const prisma = new PrismaClient();
 
@@ -18,7 +19,11 @@ async function main() {
   console.log('🌱 Iniciando seed de la base de datos...\n');
 
   // Leer datos de países
-  const countries: CountryData[] = getActiveCountries(loadCountryCatalog());
+  const countrySelection = getSeedCountries(
+    loadCountryCatalog(),
+    config.game.enableExtendedFlags
+  );
+  const countries: CountryData[] = countrySelection.countries;
 
   // Leer datos de ciudades
   const citiesPath = join(__dirname, '../../data/cities.json');
@@ -26,6 +31,12 @@ async function main() {
   const cities: CityData[] = citiesData.cities;
 
   console.log(`📊 Cargando ${countries.length} países y ${cities.length} ciudades...\n`);
+  console.log(
+    `🚩 Extended flags: ${config.game.enableExtendedFlags ? 'ON' : 'OFF'} | ` +
+      `Activos totales: ${countrySelection.totalActiveCountries} | ` +
+      `Incluidos por modo extendido: ${countrySelection.extendedCountriesIncluded} | ` +
+      `Excluidos por modo estable: ${countrySelection.extendedCountriesExcluded}\n`
+  );
 
   // Limpiar preguntas existentes
   await prisma.question.deleteMany();
@@ -125,6 +136,9 @@ async function main() {
    - Preguntas de mapa: ${mapCount} (ciudades de ${countries.length} países)
    - Preguntas de siluetas: ${countries.length}
    - Total: ${questions.length}
+   - Banderas extendidas incluidas: ${countrySelection.extendedCountriesIncluded}
+   - Banderas extendidas excluidas (modo estable): ${countrySelection.extendedCountriesExcluded}
+   - Modo extended flags: ${config.game.enableExtendedFlags ? 'ON' : 'OFF'}
   `);
 }
 

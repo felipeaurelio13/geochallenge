@@ -27,14 +27,31 @@ Para soportar incorporación incremental de países/banderas sin romper producci
 ### Flujo de actualización recomendado
 
 1. Actualizar `data/country-catalog.v1.json` agregando/ajustando países con schema:
-   - `iso2`, `name`, `capital`, `continent`, `lat`, `lng`, `flag`, `status`.
+   - `iso2`, `name`, `capital`, `continent`, `lat`, `lng`, `flag`, `status`, `rollout` (opcional).
 2. Marcar estado por país:
    - `active`: entra al seed y se publica en preguntas.
    - `pending_review`: queda fuera del seed productivo mientras se revisa.
    - `disabled`: excluido del seed (retirado temporal o permanentemente).
-3. Regenerar `data/country-catalog.meta.json` con:
+3. Definir canal de rollout (`rollout`) para países `active`:
+   - `stable` (o sin valor): entra siempre al catálogo estable.
+   - `extended`: solo entra cuando el modo extendido está habilitado.
+4. Regenerar `data/country-catalog.meta.json` con:
    - `version`, `source`, `generatedAt`, `totalCountries`, `activeCountries`.
-4. Ejecutar seed backend (`npm --prefix backend run seed`) y validar tests.
+5. Ejecutar seed backend (`npm --prefix backend run seed`) y validar tests.
+
+### Feature flag: catálogo extendido de banderas
+
+- Variable backend: `ENABLE_EXTENDED_FLAGS`.
+- Valor por defecto: `false` (mantiene comportamiento productivo actual, catálogo estable).
+- Activación:
+  - macOS/Linux: `ENABLE_EXTENDED_FLAGS=true npm --prefix backend run seed`
+  - PowerShell: `$env:ENABLE_EXTENDED_FLAGS='true'; npm --prefix backend run seed`
+- Volver al set estable:
+  - macOS/Linux: `ENABLE_EXTENDED_FLAGS=false npm --prefix backend run seed`
+  - PowerShell: `$env:ENABLE_EXTENDED_FLAGS='false'; npm --prefix backend run seed`
+  - También puedes omitir la variable y se usará `false`.
+
+El resumen del seed ahora informa explícitamente cuántas banderas `active` entraron por el modo extendido y cuántas quedaron fuera por correr en modo estable.
 
 ### Criterios de aceptación para nuevas banderas
 

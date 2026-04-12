@@ -42,6 +42,7 @@ export const config = {
     timePerQuestion: 10,
     basePoints: 100,
     maxTimeBonus: 50,
+    enableExtendedFlags: process.env.ENABLE_EXTENDED_FLAGS === 'true',
   },
 
   testAuthBypass: {
