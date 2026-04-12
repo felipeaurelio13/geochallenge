@@ -41,3 +41,4 @@ playwright-report/
 # Misc
 *.local
 .cache/
+.gstack/
