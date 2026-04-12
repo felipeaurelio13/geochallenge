@@ -20,6 +20,22 @@ const MapInteractive = lazy(() =>
 
 const { TIME_PER_QUESTION } = GAME_CONSTANTS;
 
+function normalizeQuestionPart(value: string | undefined): string {
+  return (value || '').trim().toLowerCase();
+}
+
+function buildQuestionUniquenessKey(question: Question): string {
+  const questionData =
+    typeof question.questionData === 'string' ? question.questionData : question.questionData?.country;
+
+  return [
+    normalizeQuestionPart(question.category),
+    normalizeQuestionPart(question.imageUrl),
+    normalizeQuestionPart(questionData),
+    normalizeQuestionPart(question.correctAnswer),
+  ].join('|');
+}
+
 export function GamePage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -155,7 +171,14 @@ export function GamePage() {
       if (remainingBufferedQuestions <= 2) {
         try {
           const usedQuestionIds = questions.map((question) => question.id);
-          const refillResponse = await api.startGame(category as any, 10, 'streak', usedQuestionIds);
+          const usedQuestionKeys = questions.map((question) => buildQuestionUniquenessKey(question));
+          const refillResponse = await api.startGame(
+            category as any,
+            10,
+            'streak',
+            usedQuestionIds,
+            usedQuestionKeys
+          );
           appendQuestions(refillResponse.questions);
           bufferedQuestionCount += refillResponse.questions.length;
         } catch (err) {

@@ -4,9 +4,17 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.84**
+- Frontend: **v1.2.85**
 
-- Feature: modo Racha ahora soporta continuidad real por bloques (sin corte fijo en 3 aciertos), con refill robusto y sin repetición inmediata de preguntas.
+- Feature: modo Racha ahora evita también repetición de preguntas equivalentes (misma bandera/país) entre refills usando claves de unicidad enviadas por frontend y validadas por backend.
+
+## Novedades de la versión 1.2.85
+
+- Se agregó `excludeQuestionKeys` al contrato de `GET /api/game/start` para racha, manteniendo compatibilidad total (parámetro opcional con fallback automático).
+- `GamePage` ahora calcula y envía claves de unicidad por pregunta durante refills de racha para bloquear repetición semántica (ej. misma bandera con otro ID).
+- Backend incorpora filtro de unicidad en `getQuestionsForStreakGame` detrás de feature flag `ENABLE_STREAK_UNIQUE_QUESTIONS` (default activo, rollback inmediato al flujo previo si se desactiva).
+- Se actualizaron tests backend/frontend para cubrir parsing de `excludeQuestionKeys`, propagación al servicio y contrato de refill en racha.
+- Footer/versionado actualizado a **v1.2.85** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.84
 

@@ -39,6 +39,15 @@ describe('startGameSchema', () => {
 
     expect(parsed.excludeIds).toEqual(['q1', 'q2', 'q3']);
   });
+
+  it('normaliza excludeQuestionKeys desde query string csv', () => {
+    const parsed = startGameSchema.parse({
+      gameType: 'streak',
+      excludeQuestionKeys: 'flag|ar, flag|br,,flag|cl',
+    });
+
+    expect(parsed.excludeQuestionKeys).toEqual(['flag|ar', 'flag|br', 'flag|cl']);
+  });
 });
 
 describe('getQuestionsForStreakGame', () => {
@@ -78,5 +87,63 @@ describe('getQuestionsForStreakGame', () => {
       },
     });
     expect(questions).toHaveLength(2);
+  });
+
+  it('evita preguntas equivalentes por clave de unicidad en racha cuando el flag está activo', async () => {
+    findManyMock.mockResolvedValue([
+      {
+        id: 'flag-ar-1',
+        category: Category.FLAG,
+        questionData: 'Argentina',
+        options: ['Argentina', 'Chile', 'Perú', 'Brasil'],
+        correctAnswer: 'Argentina',
+        difficulty: 'EASY',
+        imageUrl: 'https://flags.example/ar.svg',
+      },
+      {
+        id: 'flag-ar-2',
+        category: Category.FLAG,
+        questionData: 'Argentina',
+        options: ['Argentina', 'Chile', 'Perú', 'Brasil'],
+        correctAnswer: 'Argentina',
+        difficulty: 'EASY',
+        imageUrl: 'https://flags.example/ar.svg',
+      },
+      {
+        id: 'flag-br-1',
+        category: Category.FLAG,
+        questionData: 'Brasil',
+        options: ['Argentina', 'Chile', 'Perú', 'Brasil'],
+        correctAnswer: 'Brasil',
+        difficulty: 'EASY',
+        imageUrl: 'https://flags.example/br.svg',
+      },
+      {
+        id: 'flag-cl-1',
+        category: Category.FLAG,
+        questionData: 'Chile',
+        options: ['Argentina', 'Chile', 'Perú', 'Brasil'],
+        correctAnswer: 'Chile',
+        difficulty: 'EASY',
+        imageUrl: 'https://flags.example/cl.svg',
+      },
+    ]);
+
+    const { getQuestionsForStreakGame } = await import('../services/game.service.js');
+    const questions = await getQuestionsForStreakGame(
+      Category.FLAG,
+      [],
+      3,
+      ['flag|https://flags.example/ar.svg|argentina|argentina']
+    );
+
+    const questionKeys = questions.map((question) =>
+      [question.category, question.imageUrl || '', question.questionData || '', question.correctAnswer]
+        .join('|')
+        .toLowerCase()
+    );
+
+    expect(questionKeys).not.toContain('flag|https://flags.example/ar.svg|argentina|argentina');
+    expect(new Set(questionKeys).size).toBe(questions.length);
   });
 });
