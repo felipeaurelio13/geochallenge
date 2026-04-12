@@ -1095,6 +1095,24 @@ npm test             # Ejecutar tests
 
 ## API (Contrato)
 
+### `GET /api/game/start`
+
+Parámetros de query:
+
+- `category` (opcional): `MIXED | FLAG | CAPITAL | MAP | SILHOUETTE`.  
+  Valor por defecto: `MIXED`.
+- `questionCount` (opcional, number): para `single` mantiene el flujo actual de 10 preguntas.
+- `gameType` (opcional): `single | streak`.  
+  Valor por defecto: `single` (compatibilidad hacia atrás).
+- `excludeIds` (opcional, csv o array): IDs de preguntas recientes a excluir del próximo lote.
+
+Comportamiento:
+
+- `single`: conserva comportamiento existente (partida estándar de 10 preguntas por defecto).
+- `streak`: entrega un lote pequeño de preguntas reutilizando la selección estándar y aplicando `excludeIds` para evitar repetidas inmediatas.
+
+---
+
 ### `GET /api/leaderboard`
 
 Parámetros de query:
