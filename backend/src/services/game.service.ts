@@ -37,6 +37,7 @@ export interface GameSession {
 
 // Cache de preguntas en memoria para mejor performance
 const MAP_CORRECT_DISTANCE_KM = 500;
+const STREAK_BATCH_SIZE = 3;
 
 let questionsCache: Map<string, any> = new Map();
 
@@ -88,6 +89,30 @@ export async function getQuestionsForGame(
     latitude: q.category === Category.MAP ? q.latitude || undefined : undefined,
     longitude: q.category === Category.MAP ? q.longitude || undefined : undefined,
   }));
+}
+
+/**
+ * Resuelve el tamaño de lote para modo racha con un valor pequeño y estable.
+ */
+export function getStreakBatchSize(requestedCount?: number): number {
+  if (!requestedCount || Number.isNaN(requestedCount)) {
+    return STREAK_BATCH_SIZE;
+  }
+
+  return Math.max(1, Math.min(STREAK_BATCH_SIZE, requestedCount));
+}
+
+/**
+ * Obtiene un lote reducido de preguntas para modo racha.
+ * Reutiliza la selección estándar y permite excluir IDs recién usados.
+ */
+export async function getQuestionsForStreakGame(
+  category?: Category,
+  excludeIds: string[] = [],
+  requestedCount?: number
+): Promise<GameQuestion[]> {
+  const batchSize = getStreakBatchSize(requestedCount);
+  return getQuestionsForGame(category, batchSize, excludeIds);
 }
 
 /**

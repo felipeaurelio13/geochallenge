@@ -4,6 +4,8 @@ import { Category, GameMode } from '@prisma/client';
 import { authenticateJWT, optionalAuth, AuthRequest } from '../middleware/auth.js';
 import {
   getQuestionsForGame,
+  getQuestionsForStreakGame,
+  getStreakBatchSize,
   validateAnswer,
   saveGameResult,
   getUserGameHistory,
@@ -13,11 +15,34 @@ import { updateLeaderboardScore } from '../services/leaderboard.service.js';
 import { config } from '../config/env.js';
 
 const router = Router();
+const gameTypeSchema = z.enum(['single', 'streak']);
+
+const excludeIdsSchema = z.preprocess(
+  (value) => {
+    if (typeof value === 'string') {
+      return value
+        .split(',')
+        .map((item) => item.trim())
+        .filter(Boolean);
+    }
+
+    if (Array.isArray(value)) {
+      return value
+        .map((item) => String(item).trim())
+        .filter(Boolean);
+    }
+
+    return [];
+  },
+  z.array(z.string())
+);
 
 // Schema de validación
-const startGameSchema = z.object({
+export const startGameSchema = z.object({
   category: z.nativeEnum(Category).optional().default(Category.MIXED),
   questionCount: z.number().min(5).max(20).optional().default(config.game.questionsPerGame),
+  gameType: gameTypeSchema.optional().default('single'),
+  excludeIds: excludeIdsSchema.optional().default([]),
 });
 
 const answerSchema = z.object({
@@ -65,15 +90,20 @@ router.get('/start', optionalAuth, async (req: AuthRequest, res: Response) => {
       return;
     }
 
-    const { category, questionCount } = validation.data;
+    const { category, questionCount, gameType, excludeIds } = validation.data;
+    const expectedQuestions = gameType === 'streak'
+      ? getStreakBatchSize(questionCount)
+      : questionCount;
 
-    const questions = await getQuestionsForGame(category, questionCount);
+    const questions = gameType === 'streak'
+      ? await getQuestionsForStreakGame(category, excludeIds, questionCount)
+      : await getQuestionsForGame(category, questionCount);
 
-    if (questions.length < questionCount) {
+    if (questions.length < expectedQuestions) {
       res.status(503).json({
         error: 'No hay suficientes preguntas disponibles',
         available: questions.length,
-        requested: questionCount,
+        requested: expectedQuestions,
       });
       return;
     }
@@ -84,6 +114,7 @@ router.get('/start', optionalAuth, async (req: AuthRequest, res: Response) => {
         questionsCount: questions.length,
         timePerQuestion: config.game.timePerQuestion,
         category,
+        gameType,
       },
       questions,
     });
