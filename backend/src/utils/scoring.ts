@@ -51,6 +51,48 @@ export function calculateMapScore(
   return accuracyPoints + timePoints;
 }
 
+function calculateComboBonus(streakCount: number, timeRemaining: number): number {
+  if (!config.game.enableComboScoring) return 0;
+  if (streakCount <= 1) return 0;
+
+  const comboMultiplier = config.game.fastAnswerThreshold > 0
+    ? timeRemaining >= config.game.fastAnswerThreshold
+    : true;
+
+  if (!comboMultiplier) return 0;
+
+  const rawBonus = (streakCount - 1) * config.game.comboStep;
+  return clamp(Math.round(rawBonus), 0, config.game.comboCap);
+}
+
+type CalculateRoundPointsParams = {
+  isCorrect: boolean;
+  timeRemaining: number;
+  streakCount: number;
+  distanceKm?: number;
+};
+
+/**
+ * Puntaje por ronda con fallback transparente al scoring legacy.
+ * - Cuando enableComboScoring=false conserva exactamente calculateScore/calculateMapScore.
+ * - Cuando está activo suma comboBonus sólo en respuestas correctas.
+ */
+export function calculateRoundPoints({
+  isCorrect,
+  timeRemaining,
+  streakCount,
+  distanceKm,
+}: CalculateRoundPointsParams): number {
+  const basePoints =
+    typeof distanceKm === 'number'
+      ? calculateMapScore(distanceKm, timeRemaining)
+      : calculateScore(isCorrect, timeRemaining);
+
+  if (!isCorrect) return basePoints;
+
+  return basePoints + calculateComboBonus(streakCount, timeRemaining);
+}
+
 /**
  * Mezcla un array aleatoriamente (Fisher-Yates)
  */

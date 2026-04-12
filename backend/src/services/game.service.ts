@@ -40,6 +40,11 @@ export interface GameSession {
 }
 
 export type SoloGameType = 'single' | 'streak';
+type SoloModeScoringStrategy = 'simple_1_0' | 'progressive_combo';
+
+interface SoloModeScoringContext {
+  previousStreak?: number;
+}
 
 // Cache de preguntas en memoria para mejor performance
 const MAP_CORRECT_DISTANCE_KM = 500;
@@ -279,10 +284,20 @@ export async function validateAnswer(
  */
 export function applySoloModeScoringStrategy(
   answerResult: AnswerResult,
-  gameType: SoloGameType = 'single'
+  gameType: SoloGameType = 'single',
+  scoringContext: SoloModeScoringContext = {}
 ): AnswerResult {
   if (gameType !== 'streak' || !config.game.enableStreakSimpleScoring) {
     return answerResult;
+  }
+
+  const strategy = config.game.soloModeScoringStrategy as SoloModeScoringStrategy;
+  if (strategy === 'progressive_combo') {
+    const safePreviousStreak = Math.max(0, Math.floor(scoringContext.previousStreak ?? 0));
+    return {
+      ...answerResult,
+      points: answerResult.isCorrect ? safePreviousStreak + 1 : 0,
+    };
   }
 
   return {
@@ -304,10 +319,11 @@ export async function validateAnswerByGameType(
   userAnswer: string,
   timeRemaining: number,
   userCoords?: { lat: number; lng: number },
-  gameType: SoloGameType = 'single'
+  gameType: SoloGameType = 'single',
+  scoringContext?: SoloModeScoringContext
 ): Promise<AnswerResult> {
   const baseResult = await validateAnswer(questionId, userAnswer, timeRemaining, userCoords);
-  return applySoloModeScoringStrategy(baseResult, gameType);
+  return applySoloModeScoringStrategy(baseResult, gameType, scoringContext);
 }
 
 /**

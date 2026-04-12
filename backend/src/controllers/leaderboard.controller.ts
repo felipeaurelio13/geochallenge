@@ -5,27 +5,29 @@ import {
   getUserRank,
   getUserLeaderboardContext,
   getLeaderboardStats,
+  getSeasonLeaderboard,
+  getSeasonLeaderboardStats,
+  getSeasonUserRank,
 } from '../services/leaderboard.service.js';
 
 const router = Router();
-const SUPPORTED_LEADERBOARD_SCOPES = ['global'] as const;
-type LeaderboardScope = 'global' | 'weekly' | 'friends';
+const SUPPORTED_LEADERBOARD_SCOPES = ['global', 'season'] as const;
+type LeaderboardScope = (typeof SUPPORTED_LEADERBOARD_SCOPES)[number];
 
 export function resolveLeaderboardScope(rawScope: unknown): {
   requestedScope: LeaderboardScope;
-  effectiveScope: 'global';
+  effectiveScope: LeaderboardScope;
   fallbackApplied: boolean;
 } {
   const normalizedScope = typeof rawScope === 'string' ? rawScope.toLowerCase() : 'global';
-  const requestedScope: LeaderboardScope =
-    normalizedScope === 'weekly' || normalizedScope === 'friends' ? normalizedScope : 'global';
+  const requestedScope: LeaderboardScope = normalizedScope === 'season' ? 'season' : 'global';
   const isSupported = SUPPORTED_LEADERBOARD_SCOPES.includes(
     requestedScope as (typeof SUPPORTED_LEADERBOARD_SCOPES)[number]
   );
 
   return {
     requestedScope,
-    effectiveScope: 'global',
+    effectiveScope: isSupported ? requestedScope : 'global',
     fallbackApplied: !isSupported,
   };
 }
@@ -38,22 +40,26 @@ router.get('/', optionalAuth, async (req: AuthRequest, res: Response) => {
   try {
     const limit = parseInt(req.query.limit as string) || 50;
     const scopeResolution = resolveLeaderboardScope(req.query.scope);
-    const leaderboard = await getTopLeaderboard(Math.min(limit, 100));
-    const stats = await getLeaderboardStats();
+    const clampedLimit = Math.min(limit, 100);
+    const isSeasonScope = scopeResolution.effectiveScope === 'season';
+    const leaderboard = isSeasonScope
+      ? await getSeasonLeaderboard(clampedLimit)
+      : await getTopLeaderboard(clampedLimit);
+    const stats = isSeasonScope ? await getSeasonLeaderboardStats() : await getLeaderboardStats();
 
     // Si hay usuario autenticado, incluir su posición
     let userRank = null;
     if (req.user) {
-      userRank = await getUserRank(req.user.userId);
+      userRank = isSeasonScope
+        ? await getSeasonUserRank(req.user.userId)
+        : await getUserRank(req.user.userId);
     }
 
-    res.json({
+    const response: Record<string, unknown> = {
       leaderboard,
       totalPlayers: stats.totalPlayers,
       topScore: stats.topScore,
       avgScore: stats.avgScore,
-      season: null,
-      window: null,
       userRank: userRank
         ? {
             rank: userRank.rank,
@@ -66,7 +72,20 @@ router.get('/', optionalAuth, async (req: AuthRequest, res: Response) => {
         effectiveScope: scopeResolution.effectiveScope,
         fallbackApplied: scopeResolution.fallbackApplied,
       },
-    });
+    };
+
+    if (isSeasonScope) {
+      response.season = new Date().toISOString().slice(0, 7);
+      response.window = 'month';
+      response.seasonUserRank = userRank
+        ? {
+            rank: userRank.rank,
+            score: userRank.score,
+          }
+        : null;
+    }
+
+    res.json(response);
   } catch (error) {
     console.error('Error al obtener leaderboard:', error);
     res.status(500).json({ error: 'Error interno del servidor' });

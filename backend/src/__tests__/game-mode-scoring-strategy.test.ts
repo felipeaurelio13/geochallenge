@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Category } from '@prisma/client';
+import { config } from '../config/env.js';
 
 const { findUniqueMock } = vi.hoisted(() => ({
   findUniqueMock: vi.fn(),
@@ -70,6 +71,30 @@ describe('validateAnswerByGameType', () => {
     expect(incorrect.isCorrect).toBe(false);
     expect(correct.timeRemaining).toBe(5);
     expect(correct.correctAnswer).toBe('Lima');
+  });
+
+  it('aplica progressive_combo en streak usando la racha previa', async () => {
+    config.game.soloModeScoringStrategy = 'progressive_combo';
+    findUniqueMock.mockResolvedValue({
+      id: 'q-4',
+      category: Category.CAPITAL,
+      correctAnswer: 'Madrid',
+    });
+    calculateScoreMock.mockReturnValue(90);
+
+    const { validateAnswerByGameType } = await import('../services/game.service.js');
+
+    const withCombo = await validateAnswerByGameType('q-4', 'Madrid', 6, undefined, 'streak', {
+      previousStreak: 3,
+    });
+    const failed = await validateAnswerByGameType('q-4', 'Roma', 6, undefined, 'streak', {
+      previousStreak: 3,
+    });
+    const noContext = await validateAnswerByGameType('q-4', 'Madrid', 6, undefined, 'streak');
+
+    expect(withCombo.points).toBe(4);
+    expect(failed.points).toBe(0);
+    expect(noContext.points).toBe(1);
   });
 
   it('diferencia estrategia de scoring entre single y streak para la misma respuesta correcta', async () => {
