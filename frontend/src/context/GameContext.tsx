@@ -95,6 +95,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         correctAnswer: result.correctAnswer,
         userAnswer: answer,
         points: result.points,
+        basePoints: result.basePoints,
+        timeBonus: result.timeBonus,
+        comboBonus: result.comboBonus,
+        accuracyBonus: result.accuracyBonus,
         distance: result.distance,
       };
 

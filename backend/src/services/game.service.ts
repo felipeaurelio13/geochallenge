@@ -2,7 +2,7 @@ import { prisma } from '../config/database.js';
 import { config } from '../config/env.js';
 import { Category, Difficulty, GameMode } from '@prisma/client';
 import { haversineDistance } from '../utils/haversine.js';
-import { calculateScore, calculateMapScore, shuffleArray, selectRandom } from '../utils/scoring.js';
+import { calculateScore, calculateMapScore, calculateTimeBonus, shuffleArray, selectRandom } from '../utils/scoring.js';
 
 export interface GameQuestion {
   id: string;
@@ -23,6 +23,10 @@ export interface AnswerResult {
   correctAnswer: string;
   userAnswer: string;
   points: number;
+  basePoints?: number;
+  timeBonus?: number;
+  comboBonus?: number;
+  accuracyBonus?: number;
   distance?: number; // Para preguntas de mapa
   timeRemaining: number;
 }
@@ -217,6 +221,9 @@ export async function validateAnswer(
   let isCorrect = false;
   let points = 0;
   let distance: number | undefined;
+  let basePoints: number | undefined;
+  let timeBonus: number | undefined;
+  let accuracyBonus: number | undefined;
 
   if (question.category === Category.MAP && userCoords && question.latitude && question.longitude) {
     // Para preguntas de mapa, calcular distancia
@@ -228,10 +235,25 @@ export async function validateAnswer(
     );
     points = calculateMapScore(distance, timeRemaining);
     isCorrect = distance < MAP_CORRECT_DISTANCE_KM; // Consistente con el umbral de acierto visual
+    if (points > 0) {
+      const clampedDistance = Math.min(2000, Math.max(0, distance));
+      const accuracyFactor = 1 - clampedDistance / 2000;
+      const rawTimeBonus = calculateTimeBonus(timeRemaining);
+
+      accuracyBonus = Math.round(config.game.basePoints * accuracyFactor);
+      timeBonus = Math.round(rawTimeBonus * accuracyFactor);
+      basePoints = 0;
+    } else {
+      basePoints = 0;
+      timeBonus = 0;
+      accuracyBonus = 0;
+    }
   } else {
     // Para preguntas de opción múltiple
     isCorrect = userAnswer.toLowerCase().trim() === question.correctAnswer.toLowerCase().trim();
     points = calculateScore(isCorrect, timeRemaining);
+    basePoints = isCorrect ? config.game.basePoints : 0;
+    timeBonus = isCorrect ? calculateTimeBonus(timeRemaining) : 0;
   }
 
   return {
@@ -240,6 +262,9 @@ export async function validateAnswer(
     correctAnswer: question.correctAnswer,
     userAnswer,
     points,
+    basePoints,
+    timeBonus,
+    accuracyBonus,
     distance,
     timeRemaining: Math.max(0, timeRemaining),
   };
@@ -263,6 +288,10 @@ export function applySoloModeScoringStrategy(
   return {
     ...answerResult,
     points: answerResult.isCorrect ? 1 : 0,
+    basePoints: 0,
+    timeBonus: 0,
+    comboBonus: answerResult.isCorrect ? 1 : 0,
+    accuracyBonus: undefined,
   };
 }
 

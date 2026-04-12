@@ -273,7 +273,12 @@ export function GamePage() {
               ✕ {t('game.exit')}
             </button>
 
-            <ScoreDisplay score={score} previousScore={previousScore} showAnimation={showResult} />
+            <ScoreDisplay
+              score={score}
+              previousScore={previousScore}
+              showAnimation={showResult}
+              lastResult={results[results.length - 1] ?? null}
+            />
 
             <div className="justify-self-end pr-[max(env(safe-area-inset-right),0.5rem)] sm:pr-[max(env(safe-area-inset-right),0.75rem)] md:pr-0">
               <Timer

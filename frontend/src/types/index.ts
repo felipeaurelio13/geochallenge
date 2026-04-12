@@ -67,6 +67,10 @@ export interface AnswerResult {
   correctAnswer: string;
   userAnswer: string;
   points: number;
+  basePoints?: number;
+  timeBonus?: number;
+  comboBonus?: number;
+  accuracyBonus?: number;
   distance?: number;
 }
 

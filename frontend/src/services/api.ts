@@ -130,7 +130,10 @@ class ApiService {
       isCorrect: boolean;
       correctAnswer: string;
       points: number;
-      timeBonus: number;
+      basePoints?: number;
+      timeBonus?: number;
+      comboBonus?: number;
+      accuracyBonus?: number;
       distance?: number;
     }>('/game/answer', data);
     return response.data;
