@@ -2,6 +2,14 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+type SoloModeScoringStrategy = 'simple_1_0' | 'progressive_combo';
+
+function resolveSoloModeScoringStrategy(): SoloModeScoringStrategy {
+  return process.env.SOLO_MODE_SCORING_STRATEGY === 'progressive_combo'
+    ? 'progressive_combo'
+    : 'simple_1_0';
+}
+
 const isProduction = process.env.NODE_ENV === 'production';
 
 // Validate required env vars in production
@@ -45,6 +53,7 @@ export const config = {
     enableExtendedFlags: process.env.ENABLE_EXTENDED_FLAGS === 'true',
     enableStreakSimpleScoring: process.env.ENABLE_STREAK_SIMPLE_SCORING !== 'false',
     enableStreakUniqueQuestions: process.env.ENABLE_STREAK_UNIQUE_QUESTIONS !== 'false',
+    soloModeScoringStrategy: resolveSoloModeScoringStrategy(),
   },
 
   testAuthBypass: {
