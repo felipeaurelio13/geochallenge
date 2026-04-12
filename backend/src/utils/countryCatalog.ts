@@ -12,6 +12,7 @@ export interface CountryRecord {
   lng: number;
   flag: string;
   status: CountryStatus;
+  rollout?: 'stable' | 'extended';
 }
 
 interface CountryCatalogV1 {
@@ -50,4 +51,41 @@ export function loadCountryCatalog(): CountryRecord[] {
 
 export function getActiveCountries(countries: CountryRecord[]): CountryRecord[] {
   return countries.filter((country) => country.status === 'active');
+}
+
+export interface SeedCountrySelection {
+  countries: CountryRecord[];
+  totalActiveCountries: number;
+  extendedCountriesIncluded: number;
+  extendedCountriesExcluded: number;
+}
+
+function isExtendedCountry(country: CountryRecord): boolean {
+  return country.rollout === 'extended';
+}
+
+export function getSeedCountries(
+  countries: CountryRecord[],
+  enableExtendedFlags: boolean
+): SeedCountrySelection {
+  const activeCountries = getActiveCountries(countries);
+  const extendedActiveCountries = activeCountries.filter(isExtendedCountry);
+
+  if (enableExtendedFlags) {
+    return {
+      countries: activeCountries,
+      totalActiveCountries: activeCountries.length,
+      extendedCountriesIncluded: extendedActiveCountries.length,
+      extendedCountriesExcluded: 0,
+    };
+  }
+
+  const stableCountries = activeCountries.filter((country) => !isExtendedCountry(country));
+
+  return {
+    countries: stableCountries,
+    totalActiveCountries: activeCountries.length,
+    extendedCountriesIncluded: 0,
+    extendedCountriesExcluded: extendedActiveCountries.length,
+  };
 }
