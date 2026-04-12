@@ -4,9 +4,16 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.81**
+- Frontend: **v1.2.82**
 
-- Feature: se agregó base aditiva para modo racha (`gameType=streak`) en tipos, API, contexto y flujo de `GamePage` sin romper el modo `single`.
+- Feature: modo racha ahora continúa de forma ilimitada hasta fallar, recargando preguntas incluso al cerrar un bloque.
+
+## Novedades de la versión 1.2.82
+
+- `GamePage` ahora evalúa el avance de racha con el buffer actualizado tras prefetch para evitar cierre prematuro al finalizar un bloque inicial de preguntas.
+- Se mantiene comportamiento existente del modo `single` sin cambios y con fallback natural: si falla el refill, la partida termina como hasta ahora.
+- Se agregó cobertura de test para asegurar que en la última pregunta de racha el juego continúe si el refill llega correctamente.
+- Footer/versionado actualizado a **v1.2.82** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.81
 

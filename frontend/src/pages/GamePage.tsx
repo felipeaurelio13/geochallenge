@@ -148,19 +148,22 @@ export function GamePage() {
 
   // Move to next question
   const handleNextQuestion = async () => {
+    let bufferedQuestionCount = questions.length;
+
     if (shouldUseStreakFlow) {
       const remainingBufferedQuestions = questions.length - (currentIndex + 1);
       if (remainingBufferedQuestions <= 2) {
         try {
           const refillResponse = await api.startGame(category as any, 10, 'streak');
           appendQuestions(refillResponse.questions);
+          bufferedQuestionCount += refillResponse.questions.length;
         } catch (err) {
           console.error('Error preloading streak questions:', err);
         }
       }
     }
 
-    if (currentIndex >= questions.length - 1) {
+    if (currentIndex >= bufferedQuestionCount - 1) {
       // Game finished
       try {
         await finishGame();

@@ -170,4 +170,23 @@ describe('GamePage streak mode', () => {
       expect(mocks.appendQuestionsMock).toHaveBeenCalled();
     });
   });
+
+  it('en la última pregunta de racha continúa si llega un refill', async () => {
+    mocks.gameState.currentIndex = 2;
+
+    render(<GamePage />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Quito' }));
+    fireEvent.click(screen.getByRole('button', { name: 'game.submit' }));
+
+    const nextButton = await screen.findByRole('button', { name: 'game.seeResults' });
+    fireEvent.click(nextButton);
+
+    await waitFor(() => {
+      expect(mocks.apiStartGameMock).toHaveBeenCalledWith('MIXED', 10, 'streak');
+      expect(mocks.appendQuestionsMock).toHaveBeenCalled();
+      expect(mocks.nextQuestionMock).toHaveBeenCalledTimes(1);
+      expect(mocks.navigateMock).not.toHaveBeenCalledWith('/results?gameType=streak');
+    });
+  });
 });
