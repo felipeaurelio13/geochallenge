@@ -4,9 +4,16 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.82**
+- Frontend: **v1.2.83**
 
-- Feature: modo racha ahora continúa de forma ilimitada hasta fallar, recargando preguntas incluso al cerrar un bloque.
+- Feature: CI de lint ahora distingue entre ejecución informativa (warnings permitidos) y ejecución estricta opcional para limpieza progresiva.
+
+## Novedades de la versión 1.2.83
+
+- Se ajustó el script `npm run lint` para que reporte warnings sin bloquear el pipeline por deuda histórica no crítica.
+- Se agregó `npm run lint:strict` para mantener disponible la verificación estricta (`--max-warnings 0`) cuando se quiera limpiar reglas de forma incremental.
+- Se mantiene compatibilidad total con el flujo actual de desarrollo y despliegue, evitando un refactor masivo de imports en este cambio.
+- Footer/versionado actualizado a **v1.2.83** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.82
 
