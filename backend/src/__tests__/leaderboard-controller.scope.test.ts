@@ -10,23 +10,15 @@ describe('resolveLeaderboardScope', () => {
     });
   });
 
-  it('degrada weekly a global y marca fallbackApplied', () => {
-    expect(resolveLeaderboardScope('weekly')).toEqual({
-      requestedScope: 'weekly',
-      effectiveScope: 'global',
-      fallbackApplied: true,
+  it('acepta season como scope válido', () => {
+    expect(resolveLeaderboardScope('season')).toEqual({
+      requestedScope: 'season',
+      effectiveScope: 'season',
+      fallbackApplied: false,
     });
   });
 
-  it('degrada friends a global y marca fallbackApplied', () => {
-    expect(resolveLeaderboardScope('friends')).toEqual({
-      requestedScope: 'friends',
-      effectiveScope: 'global',
-      fallbackApplied: true,
-    });
-  });
-
-  it('normaliza valores inválidos a global sin fallback', () => {
+  it('normaliza valores inválidos a global sin romper compatibilidad', () => {
     expect(resolveLeaderboardScope('invalid')).toEqual({
       requestedScope: 'global',
       effectiveScope: 'global',

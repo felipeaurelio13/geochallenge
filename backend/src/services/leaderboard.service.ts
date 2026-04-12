@@ -2,12 +2,21 @@ import { getRedis } from '../config/redis.js';
 import { prisma } from '../config/database.js';
 
 const LEADERBOARD_KEY = 'leaderboard:global';
+const SEASON_LEADERBOARD_KEY_PREFIX = 'leaderboard:season';
 
 export interface LeaderboardEntry {
   rank: number;
   userId: string;
   username: string;
   score: number;
+}
+
+function getCurrentSeasonId(now: Date = new Date()): string {
+  return now.toISOString().slice(0, 7);
+}
+
+function getSeasonLeaderboardKey(seasonId: string): string {
+  return `${SEASON_LEADERBOARD_KEY_PREFIX}:${seasonId}`;
 }
 
 /**
@@ -26,6 +35,23 @@ export async function updateLeaderboardScore(
   // Solo actualizar si es mayor
   if (currentScore === null || score > parseFloat(currentScore)) {
     await redis.zadd(LEADERBOARD_KEY, score, userId);
+    return true;
+  }
+
+  return false;
+}
+
+export async function updateSeasonLeaderboardScore(
+  userId: string,
+  score: number,
+  seasonId: string = getCurrentSeasonId()
+): Promise<boolean> {
+  const redis = getRedis();
+  const seasonKey = getSeasonLeaderboardKey(seasonId);
+  const currentScore = await redis.zscore(seasonKey, userId);
+
+  if (currentScore === null || score > parseFloat(currentScore)) {
+    await redis.zadd(seasonKey, score, userId);
     return true;
   }
 
@@ -74,6 +100,42 @@ export async function getTopLeaderboard(
   }));
 }
 
+export async function getSeasonLeaderboard(
+  count: number = 50,
+  seasonId: string = getCurrentSeasonId()
+): Promise<LeaderboardEntry[]> {
+  const redis = getRedis();
+  const seasonKey = getSeasonLeaderboardKey(seasonId);
+  const results = await redis.zrevrange(seasonKey, 0, count - 1, 'WITHSCORES');
+
+  if (results.length === 0) {
+    return [];
+  }
+
+  const entries: { userId: string; score: number }[] = [];
+  for (let i = 0; i < results.length; i += 2) {
+    entries.push({
+      userId: results[i],
+      score: parseFloat(results[i + 1]),
+    });
+  }
+
+  const userIds = entries.map((e) => e.userId);
+  const users = await prisma.user.findMany({
+    where: { id: { in: userIds } },
+    select: { id: true, username: true },
+  });
+
+  const userMap = new Map(users.map((u) => [u.id, u.username]));
+
+  return entries.map((entry, index) => ({
+    rank: index + 1,
+    userId: entry.userId,
+    username: userMap.get(entry.userId) || 'Usuario desconocido',
+    score: entry.score,
+  }));
+}
+
 /**
  * Obtiene la posición de un usuario en el leaderboard
  */
@@ -94,6 +156,57 @@ export async function getUserRank(userId: string): Promise<{
   return {
     rank: rank + 1, // Convertir a 1-indexed
     score: parseFloat(score),
+  };
+}
+
+export async function getSeasonUserRank(
+  userId: string,
+  seasonId: string = getCurrentSeasonId()
+): Promise<{
+  rank: number | null;
+  score: number | null;
+} | null> {
+  const redis = getRedis();
+  const seasonKey = getSeasonLeaderboardKey(seasonId);
+  const rank = await redis.zrevrank(seasonKey, userId);
+  const score = await redis.zscore(seasonKey, userId);
+
+  if (rank === null || score === null) {
+    return null;
+  }
+
+  return {
+    rank: rank + 1,
+    score: parseFloat(score),
+  };
+}
+
+export async function getSeasonLeaderboardStats(
+  seasonId: string = getCurrentSeasonId()
+): Promise<{
+  totalPlayers: number;
+  topScore: number | null;
+  avgScore: number | null;
+}> {
+  const redis = getRedis();
+  const seasonKey = getSeasonLeaderboardKey(seasonId);
+  const totalPlayers = await redis.zcard(seasonKey);
+  const topResults = await redis.zrevrange(seasonKey, 0, 0, 'WITHSCORES');
+  const totalScore = await redis.zrevrange(seasonKey, 0, -1, 'WITHSCORES');
+
+  let avgScore: number | null = null;
+  if (totalPlayers > 0 && totalScore.length > 0) {
+    let sum = 0;
+    for (let i = 1; i < totalScore.length; i += 2) {
+      sum += parseFloat(totalScore[i]);
+    }
+    avgScore = sum / totalPlayers;
+  }
+
+  return {
+    totalPlayers,
+    topScore: topResults.length >= 2 ? parseFloat(topResults[1]) : null,
+    avgScore,
   };
 }
 
