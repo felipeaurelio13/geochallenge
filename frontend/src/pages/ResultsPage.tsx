@@ -37,6 +37,30 @@ export function ResultsPage() {
   const totalQuestions = questions.length || 10;
   const percentage = Math.round((correctAnswers / totalQuestions) * 100);
   const incorrectAnswers = totalQuestions - correctAnswers;
+  const pointsBySource = useMemo(
+    () => ({
+      basePoints: results.reduce((acc, result) => acc + (result.basePoints ?? 0), 0),
+      timeBonus: results.reduce((acc, result) => acc + (result.timeBonus ?? 0), 0),
+      comboBonus: results.reduce((acc, result) => acc + (result.comboBonus ?? 0), 0),
+      accuracyBonus: results.reduce((acc, result) => acc + (result.accuracyBonus ?? 0), 0),
+    }),
+    [results]
+  );
+  const pointsBreakdown = [
+    { key: 'basePoints', label: t('results.basePoints'), value: pointsBySource.basePoints },
+    { key: 'timeBonus', label: t('results.timeBonus'), value: pointsBySource.timeBonus },
+    { key: 'comboBonus', label: t('results.comboBonus'), value: pointsBySource.comboBonus },
+    { key: 'accuracyBonus', label: t('results.accuracyBonus'), value: pointsBySource.accuracyBonus },
+  ].filter((item) => item.value > 0);
+  const topPointsSource = pointsBreakdown.reduce<{ key: string; label: string; value: number } | null>(
+    (currentTop, item) => {
+      if (!currentTop || item.value > currentTop.value) {
+        return item;
+      }
+      return currentTop;
+    },
+    null
+  );
 
   const shareText = useMemo(
     () =>
@@ -154,6 +178,30 @@ export function ResultsPage() {
               <div className="text-xs text-gray-400">{t('results.accuracy')}</div>
             </article>
           </div>
+
+          {pointsBreakdown.length > 0 && (
+            <div className="mt-6 rounded-2xl border border-gray-700 bg-gray-900/75 p-4 text-left">
+              <div className="mb-2 flex items-center justify-between text-sm text-gray-300">
+                <span>{t('results.pointsBreakdownTitle')}</span>
+                {topPointsSource && <span className="font-semibold text-white">{topPointsSource.label}</span>}
+              </div>
+              <div className="space-y-2">
+                {pointsBreakdown.map((item) => (
+                  <div
+                    key={item.key}
+                    className={`flex items-center justify-between rounded-lg border px-3 py-2 text-sm ${
+                      topPointsSource?.key === item.key
+                        ? 'border-primary/50 bg-primary/10 text-white'
+                        : 'border-gray-700 bg-gray-800/70 text-gray-300'
+                    }`}
+                  >
+                    <span>{item.label}</span>
+                    <span className="font-semibold">+{item.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {loading ? (
             <div className="mt-6">

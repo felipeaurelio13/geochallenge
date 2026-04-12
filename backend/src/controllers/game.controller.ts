@@ -155,7 +155,11 @@ router.post('/answer', optionalAuth, async (req: AuthRequest, res: Response) => 
 
     res.json({
       ...result,
-      timeBonus: result.isCorrect ? Math.floor((timeRemaining / config.game.timePerQuestion) * config.game.maxTimeBonus) : 0,
+      timeBonus:
+        result.timeBonus ??
+        (result.isCorrect
+          ? Math.floor((timeRemaining / config.game.timePerQuestion) * config.game.maxTimeBonus)
+          : 0),
     });
   } catch (error) {
     console.error('Error al validar respuesta:', error);

@@ -124,7 +124,12 @@
     "selectOnMapHint": "Pick a location on the map to continue.",
     "lowTimeHint": "{{seconds}} seconds left. Take a breath and confirm your answer.",
     "clearSelection": "Change selection",
-    "questionImageAlt": "Question image for {{category}} category"
+    "questionImageAlt": "Question image for {{category}} category",
+    "scoreBreakdownSummary": "+{{points}} ({{breakdown}})",
+    "scoreBreakdownBase": "base",
+    "scoreBreakdownTime": "fast",
+    "scoreBreakdownCombo": "streak",
+    "scoreBreakdownAccuracy": "accuracy"
   },
   "results": {
     "gameOver": "Game Over!",
@@ -144,7 +149,12 @@
     "shareScore": "Share your score",
     "shareText": "🎯 I just finished a GeoChallenge round with {{score}} points ({{correct}}/{{total}} correct, {{accuracy}} accuracy). Think you can beat me?",
     "copied": "Result ready to share!",
-    "shareButton": "Share result"
+    "shareButton": "Share result",
+    "pointsBreakdownTitle": "What gave you the most points",
+    "basePoints": "Base",
+    "timeBonus": "Speed",
+    "comboBonus": "Streak",
+    "accuracyBonus": "Map accuracy"
   },
   "duel": {
     "searching": "Searching for opponent...",

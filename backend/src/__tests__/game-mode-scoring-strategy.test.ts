@@ -16,10 +16,12 @@ vi.mock('../config/database.js', () => ({
 
 const calculateScoreMock = vi.fn();
 const calculateMapScoreMock = vi.fn();
+const calculateTimeBonusMock = vi.fn();
 
 vi.mock('../utils/scoring.js', () => ({
   calculateScore: calculateScoreMock,
   calculateMapScore: calculateMapScoreMock,
+  calculateTimeBonus: calculateTimeBonusMock,
   shuffleArray: <T>(values: T[]) => values,
   selectRandom: <T>(values: T[], count: number) => values.slice(0, count),
 }));
@@ -29,7 +31,7 @@ describe('validateAnswerByGameType', () => {
     findUniqueMock.mockReset();
     calculateScoreMock.mockReset();
     calculateMapScoreMock.mockReset();
-    config.game.soloModeScoringStrategy = 'simple_1_0';
+    calculateTimeBonusMock.mockReset();
   });
 
   it('mantiene puntaje original en single', async () => {
@@ -39,6 +41,7 @@ describe('validateAnswerByGameType', () => {
       correctAnswer: 'Argentina',
     });
     calculateScoreMock.mockReturnValue(123);
+    calculateTimeBonusMock.mockReturnValue(23);
 
     const { validateAnswerByGameType } = await import('../services/game.service.js');
     const result = await validateAnswerByGameType('q-1', 'Argentina', 7, undefined, 'single');
@@ -55,6 +58,7 @@ describe('validateAnswerByGameType', () => {
       correctAnswer: 'Lima',
     });
     calculateScoreMock.mockReturnValue(88);
+    calculateTimeBonusMock.mockReturnValue(10);
 
     const { validateAnswerByGameType } = await import('../services/game.service.js');
 
@@ -100,6 +104,7 @@ describe('validateAnswerByGameType', () => {
       correctAnswer: 'Quito',
     });
     calculateScoreMock.mockReturnValue(140);
+    calculateTimeBonusMock.mockReturnValue(40);
 
     const { validateAnswerByGameType } = await import('../services/game.service.js');
 

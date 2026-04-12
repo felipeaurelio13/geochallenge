@@ -124,7 +124,12 @@
     "selectOnMapHint": "Marca una ubicación en el mapa para continuar.",
     "lowTimeHint": "Te quedan {{seconds}} segundos. Respira y confirma tu respuesta.",
     "clearSelection": "Cambiar selección",
-    "questionImageAlt": "Imagen de pregunta de tipo {{category}}"
+    "questionImageAlt": "Imagen de pregunta de tipo {{category}}",
+    "scoreBreakdownSummary": "+{{points}} ({{breakdown}})",
+    "scoreBreakdownBase": "base",
+    "scoreBreakdownTime": "rápido",
+    "scoreBreakdownCombo": "racha",
+    "scoreBreakdownAccuracy": "precisión"
   },
   "results": {
     "gameOver": "¡Partida terminada!",
@@ -144,7 +149,12 @@
     "shareScore": "Comparte tu puntuación",
     "shareText": "🎯 Terminé una partida en GeoChallenge con {{score}} puntos ({{correct}}/{{total}} correctas, {{accuracy}} de precisión). ¿Te animas a superarme?",
     "copied": "¡Resultado listo para compartir!",
-    "shareButton": "Compartir resultado"
+    "shareButton": "Compartir resultado",
+    "pointsBreakdownTitle": "Qué te dio más puntos",
+    "basePoints": "Base",
+    "timeBonus": "Velocidad",
+    "comboBonus": "Racha",
+    "accuracyBonus": "Precisión mapa"
   },
   "duel": {
     "searching": "Buscando oponente...",
