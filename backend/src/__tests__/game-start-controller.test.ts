@@ -2,6 +2,7 @@ import express from 'express';
 import { AddressInfo } from 'node:net';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Category } from '@prisma/client';
+import gameRouter from '../controllers/game.controller.js';
 
 const mocks = vi.hoisted(() => ({
   getQuestionsForGameMock: vi.fn(),
@@ -72,14 +73,13 @@ describe('GET /start controller gameType handling', () => {
   });
 
   it('acepta gameType=streak y usa la estrategia de preguntas de racha', async () => {
-    const { default: gameRouter } = await import('../controllers/game.controller.js');
     const app = express();
     app.use('/api/game', gameRouter);
     const server = app.listen(0);
     const baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
 
     const response = await fetch(`${baseUrl}/api/game/start?category=FLAG&gameType=streak`);
-    const body = await response.json();
+    const body = (await response.json()) as { gameConfig: { gameType: string } };
 
     server.close();
 
@@ -90,14 +90,13 @@ describe('GET /start controller gameType handling', () => {
   });
 
   it('mantiene compatibilidad legacy cuando gameType no llega y usa single por default', async () => {
-    const { default: gameRouter } = await import('../controllers/game.controller.js');
     const app = express();
     app.use('/api/game', gameRouter);
     const server = app.listen(0);
     const baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
 
     const response = await fetch(`${baseUrl}/api/game/start?category=CAPITAL`);
-    const body = await response.json();
+    const body = (await response.json()) as { gameConfig: { gameType: string } };
 
     server.close();
 
