@@ -27,6 +27,7 @@ const mocks = vi.hoisted(() => {
     connectMock: vi.fn(),
     joinDuelQueueMock: vi.fn(),
     cancelDuelQueueMock: vi.fn(),
+    submitDuelAnswerMock: vi.fn(),
   };
 });
 
@@ -109,7 +110,7 @@ vi.mock('../services/socket', () => ({
     joinDuelQueue: mocks.joinDuelQueueMock,
     cancelDuelQueue: mocks.cancelDuelQueueMock,
     ready: mocks.readyMock,
-    submitDuelAnswer: vi.fn(),
+    submitDuelAnswer: mocks.submitDuelAnswerMock,
   },
 }));
 
@@ -282,7 +283,7 @@ describe('DuelPage socket flow', () => {
   it('mantiene una sola suscripción de sockets aunque cambie el score', async () => {
     render(<DuelPage />);
 
-    expect(mocks.socketMock.on).toHaveBeenCalledTimes(6);
+    expect(mocks.socketMock.on).toHaveBeenCalledTimes(9);
 
     act(() => {
       mocks.handlers.get('duel:questionResult')?.forEach((cb) =>
@@ -305,6 +306,65 @@ describe('DuelPage socket flow', () => {
       );
     });
 
-    expect(mocks.socketMock.on).toHaveBeenCalledTimes(6);
+    expect(mocks.socketMock.on).toHaveBeenCalledTimes(9);
+  });
+
+  it('muestra banner no bloqueante cuando llega duel:error y permite reintentar', async () => {
+    render(<DuelPage />);
+
+    act(() => {
+      mocks.handlers.get('duel:error')?.forEach((cb) =>
+        cb({ message: 'Server duel error' })
+      );
+    });
+
+    expect(await screen.findByText('Server duel error')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'duel.retry' }));
+    expect(mocks.joinDuelQueueMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('reingresa automáticamente a matchmaking al reconectar en searching', async () => {
+    render(<DuelPage />);
+
+    act(() => {
+      mocks.handlers.get('connect')?.forEach((cb) => cb());
+    });
+
+    expect(mocks.joinDuelQueueMock).toHaveBeenCalledTimes(2);
+    expect(await screen.findByText('duel.reconnectedSearching')).toBeInTheDocument();
+  });
+
+  it('al reconectar en ronda muestra sincronización y evita doble submit', async () => {
+    render(<DuelPage />);
+
+    act(() => {
+      mocks.handlers.get('duel:question')?.forEach((cb) =>
+        cb({
+          questionIndex: 0,
+          totalQuestions: 10,
+          question: {
+            id: 'dq1',
+            questionText: 'Capital de Chile',
+            options: ['Santiago', 'Lima', 'Bogotá', 'Quito'],
+            correctAnswer: 'Santiago',
+            category: 'CAPITAL',
+          },
+        })
+      );
+    });
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Santiago' }));
+
+    act(() => {
+      mocks.handlers.get('connect')?.forEach((cb) => cb());
+    });
+
+    expect(await screen.findByText('duel.reconnectedSyncing')).toBeInTheDocument();
+
+    const submitButton = screen.getByRole('button', { name: 'game.submit' });
+    expect(submitButton).toBeDisabled();
+    fireEvent.click(submitButton);
+    expect(mocks.submitDuelAnswerMock).not.toHaveBeenCalled();
   });
 });

@@ -169,7 +169,13 @@
     "playAgain": "Buscar otro duelo",
     "queueCategory": "Buscando en {{category}}",
     "averageWaitHint": "Normalmente toma menos de 30 segundos. Gracias por esperar.",
-    "cancelHint": "Si cambias de idea, puedes cancelar sin perder progreso."
+    "cancelHint": "Si cambias de idea, puedes cancelar sin perder progreso.",
+    "retry": "Reintentar",
+    "errorGeneric": "No pudimos continuar el duelo. Intenta nuevamente.",
+    "connectionLost": "Se perdió la conexión. Intentando reconectar...",
+    "reconnected": "Conexión restablecida.",
+    "reconnectedSearching": "Conexión restablecida. Volvimos a buscar oponente.",
+    "reconnectedSyncing": "Conexión restablecida. Sincronizando la ronda..."
   },
   "challenges": {
     "title": "Desafíos",

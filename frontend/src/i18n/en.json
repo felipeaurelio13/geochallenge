@@ -169,7 +169,13 @@
     "playAgain": "Find another duel",
     "queueCategory": "Searching in {{category}}",
     "averageWaitHint": "This usually takes under 30 seconds. Thanks for waiting.",
-    "cancelHint": "If you change your mind, you can cancel without losing progress."
+    "cancelHint": "If you change your mind, you can cancel without losing progress.",
+    "retry": "Retry",
+    "errorGeneric": "We couldn't continue the duel. Please try again.",
+    "connectionLost": "Connection lost. Reconnecting...",
+    "reconnected": "Connection restored.",
+    "reconnectedSearching": "Connection restored. We rejoined matchmaking.",
+    "reconnectedSyncing": "Connection restored. Syncing the current round..."
   },
   "challenges": {
     "title": "Challenges",
