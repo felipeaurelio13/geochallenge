@@ -123,6 +123,7 @@ describe('MenuPage', () => {
     fireEvent.click(screen.getByRole('button', { name: /mapas/i }));
     fireEvent.click(screen.getByRole('button', { name: /racha[\s\S]*sigue hasta fallar/i }));
 
+    expect(mockNavigate).toHaveBeenCalledTimes(1);
     expect(mockNavigate).toHaveBeenCalledWith('/game/single?category=MAP&mode=streak');
   });
 

@@ -66,4 +66,23 @@ describe('validateAnswerByGameType', () => {
     expect(correct.timeRemaining).toBe(5);
     expect(correct.correctAnswer).toBe('Lima');
   });
+
+  it('diferencia estrategia de scoring entre single y streak para la misma respuesta correcta', async () => {
+    findUniqueMock.mockResolvedValue({
+      id: 'q-3',
+      category: Category.CAPITAL,
+      correctAnswer: 'Quito',
+    });
+    calculateScoreMock.mockReturnValue(140);
+
+    const { validateAnswerByGameType } = await import('../services/game.service.js');
+
+    const singleResult = await validateAnswerByGameType('q-3', 'Quito', 9, undefined, 'single');
+    const streakResult = await validateAnswerByGameType('q-3', 'Quito', 9, undefined, 'streak');
+
+    expect(singleResult.points).toBe(140);
+    expect(streakResult.points).toBe(1);
+    expect(singleResult.isCorrect).toBe(true);
+    expect(streakResult.isCorrect).toBe(true);
+  });
 });

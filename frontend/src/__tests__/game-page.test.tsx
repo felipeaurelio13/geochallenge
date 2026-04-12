@@ -2,6 +2,8 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { GamePage } from '../pages/GamePage';
 
+let mockedSearchParams = 'category=MIXED';
+
 const mocks = vi.hoisted(() => ({
   navigateMock: vi.fn(),
   startGameMock: vi.fn().mockResolvedValue(undefined),
@@ -9,6 +11,8 @@ const mocks = vi.hoisted(() => ({
   nextQuestionMock: vi.fn(),
   finishGameMock: vi.fn().mockResolvedValue(undefined),
   resetGameMock: vi.fn(),
+  appendQuestionsMock: vi.fn(),
+  setStreakAliveMock: vi.fn(),
   gameState: {
     questions: [
       {
@@ -28,7 +32,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigateMock,
-  useSearchParams: () => [new URLSearchParams('category=MIXED')],
+  useSearchParams: () => [new URLSearchParams(mockedSearchParams)],
 }));
 
 vi.mock('react-i18next', () => ({
@@ -41,6 +45,8 @@ vi.mock('../context/GameContext', () => ({
   useGame: () => ({
     state: mocks.gameState,
     startGame: mocks.startGameMock,
+    appendQuestions: mocks.appendQuestionsMock,
+    setStreakAlive: mocks.setStreakAliveMock,
     submitAnswer: mocks.submitAnswerMock,
     nextQuestion: mocks.nextQuestionMock,
     finishGame: mocks.finishGameMock,
@@ -56,7 +62,7 @@ vi.mock('../components', () => ({
   OptionButton: ({ option, onClick }: { option: string; onClick: () => void }) => (
     <button onClick={onClick}>{option}</button>
   ),
-  ScoreDisplay: () => <div>score</div>,
+  ScoreDisplay: ({ score }: { score: number }) => <div>{`score:${score}`}</div>,
   ProgressBar: () => <div>progress</div>,
   LoadingSpinner: ({ text }: { text?: string }) => <div>{text || 'loading'}</div>,
   RoundActionTray: ({ showResult, canSubmit, submitLabel, nextLabel, onSubmit, onNext, resultLabel }: any) => (
@@ -88,6 +94,7 @@ vi.mock('../components', () => ({
 describe('GamePage ending flow', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockedSearchParams = 'category=MIXED';
     mocks.gameState.questions = [
       {
         id: 'q1',
@@ -97,6 +104,10 @@ describe('GamePage ending flow', () => {
         category: 'CAPITAL',
       },
     ];
+    mocks.gameState.currentIndex = 0;
+    mocks.gameState.score = 100;
+    mocks.gameState.status = 'playing';
+    mocks.submitAnswerMock.mockResolvedValue({ isCorrect: true });
   });
 
   it('renderiza alternativas en lista vertical 1x4 para layout universal', () => {
@@ -155,7 +166,7 @@ describe('GamePage ending flow', () => {
     const header = container.querySelector('header');
     const timerWrapper = screen.getByText('timer').parentElement;
 
-    expect(header).toHaveClass('pt-[calc(env(safe-area-inset-top)+0.8rem)]');
+    expect(header).toHaveClass('pt-3');
     expect(timerWrapper).toHaveClass('pr-[max(env(safe-area-inset-right),0.5rem)]');
   });
 
@@ -184,5 +195,74 @@ describe('GamePage ending flow', () => {
       expect(mocks.finishGameMock).toHaveBeenCalledTimes(1);
       expect(mocks.navigateMock).toHaveBeenCalledWith('/results');
     });
+  });
+
+  it('en modo streak con acierto sigue a la siguiente ronda', async () => {
+    mockedSearchParams = 'category=CAPITAL&mode=streak';
+    mocks.gameState.questions = [
+      {
+        id: 'q1',
+        questionText: 'Capital de Chile',
+        options: ['Santiago', 'Lima', 'Bogotá', 'Quito'],
+        correctAnswer: 'Santiago',
+        category: 'CAPITAL',
+      },
+      {
+        id: 'q2',
+        questionText: 'Capital de Perú',
+        options: ['Santiago', 'Lima', 'Bogotá', 'Quito'],
+        correctAnswer: 'Lima',
+        category: 'CAPITAL',
+      },
+    ];
+    mocks.submitAnswerMock.mockResolvedValue({ isCorrect: true });
+
+    render(<GamePage />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Santiago' }));
+    fireEvent.click(screen.getByRole('button', { name: 'game.submit' }));
+    await screen.findByText('game.correct');
+
+    fireEvent.click(screen.getByRole('button', { name: 'game.next' }));
+
+    await waitFor(() => {
+      expect(mocks.nextQuestionMock).toHaveBeenCalledTimes(1);
+    });
+    expect(mocks.finishGameMock).not.toHaveBeenCalled();
+    expect(mocks.navigateMock).not.toHaveBeenCalledWith('/results?gameType=streak');
+  });
+
+  it('en modo streak con fallo termina la partida y navega a resultados', async () => {
+    mockedSearchParams = 'category=CAPITAL&mode=streak';
+    mocks.submitAnswerMock.mockResolvedValue({ isCorrect: false });
+
+    render(<GamePage />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Santiago' }));
+    fireEvent.click(screen.getByRole('button', { name: 'game.submit' }));
+
+    await waitFor(() => {
+      expect(mocks.finishGameMock).toHaveBeenCalledTimes(1);
+      expect(mocks.navigateMock).toHaveBeenCalledWith('/results?gameType=streak');
+    });
+    expect(mocks.nextQuestionMock).not.toHaveBeenCalled();
+  });
+
+  it('incrementa el score de 1 en 1 cuando hay aciertos en streak', async () => {
+    mockedSearchParams = 'category=CAPITAL&mode=streak';
+    mocks.gameState.score = 0;
+    mocks.submitAnswerMock.mockImplementation(async () => {
+      mocks.gameState.score += 1;
+      return { isCorrect: true };
+    });
+
+    render(<GamePage />);
+
+    expect(screen.getByText('score:0')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Santiago' }));
+    fireEvent.click(screen.getByRole('button', { name: 'game.submit' }));
+    await screen.findByText('game.correct');
+    expect(screen.getByText('score:1')).toBeInTheDocument();
   });
 });
