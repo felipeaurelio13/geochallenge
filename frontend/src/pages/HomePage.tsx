@@ -35,12 +35,20 @@ export function HomePage() {
 
         <div id="home-main-actions" className="mt-6 grid grid-cols-1 gap-3">
           {user ? (
-            <Link
-              to="/menu"
-              className="rounded-xl bg-primary px-6 py-3.5 text-base font-semibold text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-primary/70"
-            >
-              {t('home.play')}
-            </Link>
+            <>
+              <Link
+                to="/menu"
+                className="rounded-xl bg-primary px-6 py-3.5 text-base font-semibold text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-primary/70"
+              >
+                {t('home.play')}
+              </Link>
+              <Link
+                to="/rankings"
+                className="rounded-xl border border-gray-700 bg-gray-900 px-6 py-3.5 text-base font-semibold text-gray-100 transition-colors hover:border-gray-500 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500"
+              >
+                {t('nav.rankings')}
+              </Link>
+            </>
           ) : (
             <>
               <Link
@@ -54,6 +62,12 @@ export function HomePage() {
                 className="rounded-xl border border-gray-700 bg-gray-900 px-6 py-3.5 text-base font-semibold text-gray-100 transition-colors hover:border-gray-500 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500"
               >
                 {t('home.register')}
+              </Link>
+              <Link
+                to="/rankings"
+                className="rounded-xl border border-gray-700 bg-gray-900 px-6 py-3.5 text-base font-semibold text-gray-100 transition-colors hover:border-gray-500 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500"
+              >
+                {t('nav.rankings')}
               </Link>
             </>
           )}
