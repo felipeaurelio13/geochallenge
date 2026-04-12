@@ -20,6 +20,7 @@ export interface AuthState {
 
 // Game types
 export type Category = 'MAP' | 'FLAG' | 'CAPITAL' | 'SILHOUETTE' | 'MIXED';
+export type GameType = 'single' | 'streak';
 
 export type Difficulty = 'EASY' | 'MEDIUM' | 'HARD';
 
@@ -73,6 +74,7 @@ export interface GameConfig {
   questionsCount: number;
   timePerQuestion: number;
   category: Category;
+  gameType: GameType;
 }
 
 export interface GameState {

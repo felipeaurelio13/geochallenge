@@ -2,6 +2,7 @@ import { useEffect, useCallback, useState, lazy, Suspense } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useGame } from '../context/GameContext';
+import { api } from '../services/api';
 import {
   Timer,
   ScoreDisplay,
@@ -24,10 +25,13 @@ export function GamePage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const category = searchParams.get('category') || 'MIXED';
+  const gameType = searchParams.get('gameType') === 'streak' ? 'streak' : 'single';
 
   const {
     state,
     startGame,
+    appendQuestions,
+    setStreakAlive,
     submitAnswer,
     nextQuestion,
     finishGame,
@@ -50,6 +54,7 @@ export function GamePage() {
   const isLastQuestion = currentIndex >= questions.length - 1;
   const hasSelection = Boolean(selectedAnswer || mapLocation);
   const shouldUseCompactQuestionCard = true;
+  const shouldUseStreakFlow = gameType === 'streak';
 
   // Prevent accidental navigation during game
   useEffect(() => {
@@ -66,13 +71,13 @@ export function GamePage() {
   useEffect(() => {
     const initGame = async () => {
       try {
-        await startGame(category as any);
+        await startGame(category as any, undefined, gameType);
       } catch (err: any) {
         setError(err.message || 'Error al iniciar el juego');
       }
     };
     initGame();
-  }, [category]);
+  }, [category, gameType, startGame]);
 
   // Keyboard shortcuts: A/B/C/D to select, Enter to submit/next
   const handleKeyDown = useCallback(
@@ -122,6 +127,17 @@ export function GamePage() {
 
     try {
       const result = await submitAnswer(answer, mapLocation || undefined);
+      if (shouldUseStreakFlow && !result.isCorrect) {
+        setStreakAlive(false);
+        try {
+          await finishGame();
+        } catch {
+          // noop: navega a resultados de racha incluso si el cierre falla
+        }
+        navigate('/results?gameType=streak');
+        return;
+      }
+
       setLastAnswerCorrect(result.isCorrect);
       setShowResult(true);
     } catch (err: any) {
@@ -131,13 +147,25 @@ export function GamePage() {
 
   // Move to next question
   const handleNextQuestion = async () => {
+    if (shouldUseStreakFlow) {
+      const remainingBufferedQuestions = questions.length - (currentIndex + 1);
+      if (remainingBufferedQuestions <= 2) {
+        try {
+          const refillResponse = await api.startGame(category as any, 10, 'streak');
+          appendQuestions(refillResponse.questions);
+        } catch (err) {
+          console.error('Error preloading streak questions:', err);
+        }
+      }
+    }
+
     if (currentIndex >= questions.length - 1) {
       // Game finished
       try {
         await finishGame();
-        navigate('/results');
+        navigate(shouldUseStreakFlow ? '/results?gameType=streak' : '/results');
       } catch (err) {
-        navigate('/results');
+        navigate(shouldUseStreakFlow ? '/results?gameType=streak' : '/results');
       }
     } else {
       nextQuestion();

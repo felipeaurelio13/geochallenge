@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
-import type { User, Question, GameResult, LeaderboardEntry, Category } from '../types';
+import type { User, Question, GameResult, LeaderboardEntry, Category, GameType, GameConfig } from '../types';
 import { testAuthBypass } from '../utils/testAuthBypass';
 import { toAppPath } from '../utils/routing';
 
@@ -104,16 +104,12 @@ class ApiService {
   }
 
   // Game endpoints
-  async startGame(category?: Category, questionCount?: number) {
+  async startGame(category?: Category, questionCount?: number, gameType?: GameType) {
     const response = await this.client.get<{
-      gameConfig: {
-        questionsCount: number;
-        timePerQuestion: number;
-        category: Category;
-      };
+      gameConfig: GameConfig;
       questions: Question[];
     }>('/game/start', {
-      params: { category, questionCount },
+      params: { category, questionCount, gameType },
     });
     return response.data;
   }
