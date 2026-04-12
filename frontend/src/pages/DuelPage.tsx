@@ -56,8 +56,16 @@ export function DuelPage() {
   const [lastAnswerCorrect, setLastAnswerCorrect] = useState(false);
   const [duelResult, setDuelResult] = useState<DuelResult | null>(null);
   const [searchTime, setSearchTime] = useState(0);
+  const [connectionNotice, setConnectionNotice] = useState<{
+    type: 'error' | 'warning' | 'info';
+    message: string;
+  } | null>(null);
+  const [showRetryAction, setShowRetryAction] = useState(false);
+  const [isSyncingRound, setIsSyncingRound] = useState(false);
   const scoreRef = useRef(0);
   const opponentRef = useRef<{ id: string; username: string } | null>(null);
+  const duelStateRef = useRef<DuelState>('searching');
+  const hasSubmittedCurrentQuestionRef = useRef(false);
   const duelCategory = parseDuelCategory(searchParams.get('category'));
   const hasSelection = Boolean(selectedAnswer || mapLocation);
 
@@ -68,6 +76,29 @@ export function DuelPage() {
   useEffect(() => {
     opponentRef.current = opponent;
   }, [opponent]);
+
+  useEffect(() => {
+    duelStateRef.current = duelState;
+  }, [duelState]);
+
+  const showConnectionMessage = useCallback((type: 'error' | 'warning' | 'info', message: string, retry = false) => {
+    setConnectionNotice({ type, message });
+    setShowRetryAction(retry);
+  }, []);
+
+  const retryDuelFlow = useCallback(() => {
+    setConnectionNotice(null);
+    setShowRetryAction(false);
+
+    if (duelStateRef.current === 'searching') {
+      socketService.joinDuelQueue(duelCategory);
+      return;
+    }
+
+    if (duelStateRef.current === 'matched') {
+      socketService.ready();
+    }
+  }, [duelCategory]);
 
   // Connect to socket and join queue
   useEffect(() => {
@@ -101,6 +132,10 @@ export function DuelPage() {
       setSelectedAnswer(null);
       setMapLocation(null);
       setShowResult(false);
+      setIsSyncingRound(false);
+      hasSubmittedCurrentQuestionRef.current = false;
+      setConnectionNotice(null);
+      setShowRetryAction(false);
       setDuelState('playing');
     };
 
@@ -109,6 +144,8 @@ export function DuelPage() {
       const rivalResult = data.results?.find((result: any) => result.userId !== user?.id);
 
       setShowResult(true);
+      setIsSyncingRound(false);
+      hasSubmittedCurrentQuestionRef.current = true;
       setLastAnswerCorrect(Boolean(myResult?.answer?.isCorrect));
       setMyScore(myResult?.totalScore ?? 0);
       setOpponentScore(rivalResult?.totalScore ?? 0);
@@ -137,6 +174,31 @@ export function DuelPage() {
       setDuelState('finished');
     };
 
+    const handleDuelError = (data: { message?: string }) => {
+      showConnectionMessage('error', data?.message || t('duel.errorGeneric'), true);
+    };
+
+    const handleDisconnect = () => {
+      showConnectionMessage('warning', t('duel.connectionLost'), false);
+    };
+
+    const handleConnect = () => {
+      const currentState = duelStateRef.current;
+
+      if (currentState === 'searching') {
+        socketService.joinDuelQueue(duelCategory);
+        showConnectionMessage('info', t('duel.reconnectedSearching'), false);
+        return;
+      }
+
+      if (currentState === 'playing' || currentState === 'waiting') {
+        setIsSyncingRound(true);
+        showConnectionMessage('info', t('duel.reconnectedSyncing'), false);
+      } else {
+        showConnectionMessage('info', t('duel.reconnected'), false);
+      }
+    };
+
     // Register event listeners
     socketService.socket?.on('duel:matched', handleMatched);
     socketService.socket?.on('duel:opponent', handleOpponent);
@@ -144,6 +206,9 @@ export function DuelPage() {
     socketService.socket?.on('duel:questionResult', handleAnswerResult);
     socketService.socket?.on('duel:finished', handleDuelFinished);
     socketService.socket?.on('duel:opponent-disconnected', handleOpponentDisconnected);
+    socketService.socket?.on('duel:error', handleDuelError);
+    socketService.socket?.on('disconnect', handleDisconnect);
+    socketService.socket?.on('connect', handleConnect);
 
     // Join matchmaking queue after listeners are active
     socketService.joinDuelQueue(duelCategory);
@@ -157,8 +222,11 @@ export function DuelPage() {
       socketService.socket?.off('duel:questionResult', handleAnswerResult);
       socketService.socket?.off('duel:finished', handleDuelFinished);
       socketService.socket?.off('duel:opponent-disconnected', handleOpponentDisconnected);
+      socketService.socket?.off('duel:error', handleDuelError);
+      socketService.socket?.off('disconnect', handleDisconnect);
+      socketService.socket?.off('connect', handleConnect);
     };
-  }, [duelCategory, user?.id]);
+  }, [duelCategory, showConnectionMessage, user?.id]);
 
   useEffect(() => {
     if (duelState === 'matched') {
@@ -175,7 +243,7 @@ export function DuelPage() {
 
   // Submit answer
   const handleSubmitAnswer = () => {
-    if (!currentQuestion || showResult) return;
+    if (!currentQuestion || showResult || isSyncingRound || hasSubmittedCurrentQuestionRef.current) return;
 
     const isMapQuestion = currentQuestion.category === 'MAP';
     let answer: string;
@@ -188,6 +256,7 @@ export function DuelPage() {
       answer = selectedAnswer || '';
     }
 
+    hasSubmittedCurrentQuestionRef.current = true;
     socketService.submitDuelAnswer(currentQuestion.id, answer, timeRemaining, coordinates);
     setDuelState('waiting');
   };
@@ -205,6 +274,37 @@ export function DuelPage() {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const connectionBanner = connectionNotice ? (
+    <div
+      className={`mb-4 w-full max-w-sm rounded-xl border px-4 py-3 text-left text-sm ${
+        connectionNotice.type === 'error'
+          ? 'border-red-500/50 bg-red-500/10 text-red-100'
+          : connectionNotice.type === 'warning'
+          ? 'border-yellow-500/50 bg-yellow-500/10 text-yellow-100'
+          : 'border-sky-500/50 bg-sky-500/10 text-sky-100'
+      }`}
+      role="status"
+    >
+      <p className="font-medium">{connectionNotice.message}</p>
+      <div className="mt-3 flex flex-wrap gap-2">
+        {showRetryAction && (
+          <button
+            onClick={retryDuelFlow}
+            className="rounded-md bg-white/15 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/25"
+          >
+            {t('duel.retry')}
+          </button>
+        )}
+        <button
+          onClick={() => navigate('/menu')}
+          className="rounded-md bg-black/20 px-3 py-1.5 text-xs font-semibold text-white hover:bg-black/30"
+        >
+          {t('common.backToMenu')}
+        </button>
+      </div>
+    </div>
+  ) : null;
+
   // Searching state
   if (duelState === 'searching') {
     return (
@@ -215,6 +315,7 @@ export function DuelPage() {
             {t('duel.searching')}
           </h1>
           <p className="text-gray-400 mb-6">{t('duel.waitingForOpponent')}</p>
+          {connectionBanner}
           <div className="mb-6">
             <LoadingSpinner size="lg" />
           </div>
@@ -258,6 +359,7 @@ export function DuelPage() {
     return (
       <div className="h-full min-h-0 bg-gray-900 flex items-center justify-center px-4">
         <div className="text-center">
+          {connectionBanner}
           <h1 className="text-2xl font-bold text-white mb-8">
             {t('duel.opponentFound')}
           </h1>
@@ -290,6 +392,7 @@ export function DuelPage() {
     return (
       <div className="h-full min-h-0 bg-gray-900 flex items-center justify-center px-4">
         <div className="max-w-md w-full bg-gray-800 rounded-xl p-8 text-center">
+          {connectionBanner}
           <div className="text-6xl mb-4">
             {isTie ? '🤝' : isWinner ? '🏆' : '😢'}
           </div>
@@ -343,7 +446,8 @@ export function DuelPage() {
   // Playing state
   if (!currentQuestion) {
     return (
-      <div className="h-full min-h-0 bg-gray-900 flex items-center justify-center">
+      <div className="h-full min-h-0 bg-gray-900 flex flex-col items-center justify-center px-4">
+        {connectionBanner}
         <LoadingSpinner size="lg" text={t('duel.loadingQuestion')} />
       </div>
     );
@@ -385,6 +489,9 @@ export function DuelPage() {
           <span className="text-gray-300 text-sm">
             {t('game.questionOf', { current: questionNumber, total: totalQuestions })}
           </span>
+          {isSyncingRound && (
+            <p className="mt-1 text-xs text-sky-300">{t('duel.reconnectedSyncing')}</p>
+          )}
         </div>
       }
       question={currentQuestion}
@@ -416,7 +523,7 @@ export function DuelPage() {
         <RoundActionTray
           mode="duel"
           showResult={showResult}
-          canSubmit={hasSelection}
+          canSubmit={hasSelection && !isSyncingRound}
           isWaiting={duelState === 'waiting'}
           submitLabel={t('game.submit')}
           selectionAssistiveText={t('game.selectionReadyShortHint')}
