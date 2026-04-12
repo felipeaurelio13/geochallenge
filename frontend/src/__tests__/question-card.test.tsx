@@ -125,6 +125,44 @@ describe('QuestionCard', () => {
     expect(difficultyBadge.className).toContain('absolute');
     expect(difficultyBadge.className).toContain('top-2');
   });
+  it('normaliza códigos ISO de bandera en mayúsculas para mantener contrato con flagcdn', () => {
+    const question = {
+      id: 'q6',
+      category: 'FLAG',
+      questionText: '',
+      questionData: '',
+      imageUrl: 'https://flagcdn.com/w320/AR.png',
+      options: ['Argentina', 'Uruguay', 'Paraguay', 'Chile'],
+      correctAnswer: 'Argentina',
+      difficulty: 'EASY',
+    } as Question;
+
+    render(<QuestionCard question={question} questionNumber={6} totalQuestions={10} compact />);
+
+    const flagImage = screen.getByRole('img');
+    expect(flagImage).toHaveAttribute('src', 'https://flagcdn.com/w320/ar.png');
+  });
+
+  it('mantiene render robusto cuando la URL de bandera no cumple el patrón esperado', () => {
+    const question = {
+      id: 'q7',
+      category: 'FLAG',
+      questionText: '',
+      questionData: '',
+      imageUrl: 'https://flagcdn.com/w320/argentina.png',
+      options: ['Argentina', 'Uruguay', 'Paraguay', 'Chile'],
+      correctAnswer: 'Argentina',
+      difficulty: 'EASY',
+    } as Question;
+
+    render(<QuestionCard question={question} questionNumber={7} totalQuestions={10} compact />);
+
+    const heading = screen.getByRole('heading', { level: 2 });
+    const flagImage = screen.getByRole('img');
+
+    expect(heading).toHaveTextContent('¿A qué país pertenece esta bandera?');
+    expect(flagImage).toHaveAttribute('src', 'https://flagcdn.com/w320/argentina.png');
+  });
 
   it('aplica tipografía más compacta al enunciado del mapa', () => {
     const question = {

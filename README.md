@@ -64,6 +64,10 @@ El resumen del seed ahora informa explícitamente cuántas banderas `active` ent
   - país aparece en preguntas sin errores,
   - sin regresiones en modos de juego.
 
+### Política de integridad del catálogo
+
+- Todo país nuevo requiere pasar el test de integridad (`backend/src/__tests__/country-catalog.integrity.test.ts`) antes de merge/deploy.
+
 ## Novedades de la versión 1.2.78
 
 - `RankingsPage` ahora usa `data.totalPlayers` y `data.topScore` como fuente única para el bloque de estadísticas globales, evitando sesgos por filtros locales.
