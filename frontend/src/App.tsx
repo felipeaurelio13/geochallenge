@@ -131,7 +131,7 @@ export const appRoutes = [
       },
       {
         path: '/rankings',
-        element: <ProtectedRoute><RankingsPage /></ProtectedRoute>,
+        element: <RankingsPage />,
       },
       {
         path: '/profile',

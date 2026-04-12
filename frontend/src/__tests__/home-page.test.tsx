@@ -32,6 +32,7 @@ vi.mock('react-i18next', () => ({
         'home.features.multiplayerDesc': 'Compite en duelos en tiempo real.',
         'home.quickTrustLine': 'Sin anuncios invasivos · partidas rápidas · enfoque mobile-first',
         'common.skipToMainAction': 'Ir a las acciones principales',
+        'nav.rankings': 'Rankings',
       };
 
       if (key === 'home.welcomeBack') {
@@ -67,6 +68,7 @@ describe('HomePage', () => {
     );
     expect(screen.getByRole('link', { name: 'Iniciar sesión' })).toHaveAttribute('href', '/login');
     expect(screen.getByRole('link', { name: 'Crear cuenta' })).toHaveAttribute('href', '/register');
+    expect(screen.getByRole('link', { name: 'Rankings' })).toHaveAttribute('href', '/rankings');
     expect(screen.getByText(/v\d+\.\d+\.\d+/i)).toHaveClass('app-footer__version');
   });
 
@@ -95,6 +97,7 @@ describe('HomePage', () => {
     );
 
     expect(screen.getByRole('link', { name: 'Jugar ahora' })).toHaveAttribute('href', '/menu');
+    expect(screen.getByRole('link', { name: 'Rankings' })).toHaveAttribute('href', '/rankings');
     expect(screen.getByText('¡Bienvenido de vuelta, geo! Tu próxima partida está a un toque.')).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Iniciar sesión' })).not.toBeInTheDocument();
   });

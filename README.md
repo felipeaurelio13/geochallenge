@@ -4,9 +4,16 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.85**
+- Frontend: **v1.2.86**
 
 - Feature: modo Racha ahora evita también repetición de preguntas equivalentes (misma bandera/país) entre refills usando claves de unicidad enviadas por frontend y validadas por backend.
+
+## Novedades de la versión 1.2.86
+
+- Se corrigió el acceso a rankings en frontend: la ruta `/rankings` ya no requiere autenticación, alineándose con el endpoint backend (`/api/leaderboard`) que soporta acceso público con auth opcional.
+- Home ahora incluye CTA directo a **Rankings** tanto para usuarios autenticados como no autenticados.
+- Se actualizaron tests de routing y Home para cubrir acceso público y presencia del nuevo botón.
+- Footer/versionado actualizado a **v1.2.86** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.85
 
