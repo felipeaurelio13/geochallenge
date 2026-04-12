@@ -40,6 +40,8 @@ export type SoloGameType = 'single' | 'streak';
 // Cache de preguntas en memoria para mejor performance
 const MAP_CORRECT_DISTANCE_KM = 500;
 const STREAK_BATCH_SIZE = 3;
+const STREAK_UNIQUE_FETCH_FACTOR = 4;
+const STREAK_UNIQUE_MAX_ATTEMPTS = 3;
 
 let questionsCache: Map<string, any> = new Map();
 
@@ -111,10 +113,66 @@ export function getStreakBatchSize(requestedCount?: number): number {
 export async function getQuestionsForStreakGame(
   category?: Category,
   excludeIds: string[] = [],
-  requestedCount?: number
+  requestedCount?: number,
+  excludeQuestionKeys: string[] = []
 ): Promise<GameQuestion[]> {
   const batchSize = getStreakBatchSize(requestedCount);
-  return getQuestionsForGame(category, batchSize, excludeIds);
+
+  if (!config.game.enableStreakUniqueQuestions) {
+    return getQuestionsForGame(category, batchSize, excludeIds);
+  }
+
+  const seenQuestionKeys = new Set(excludeQuestionKeys.map((key) => normalizeUniquenessPart(key)));
+  const triedIds = new Set(excludeIds);
+  const selectedQuestions: GameQuestion[] = [];
+
+  for (let attempt = 0; attempt < STREAK_UNIQUE_MAX_ATTEMPTS; attempt += 1) {
+    const remainingCount = batchSize - selectedQuestions.length;
+    if (remainingCount <= 0) {
+      break;
+    }
+
+    const candidateQuestions = await getQuestionsForGame(
+      category,
+      remainingCount * STREAK_UNIQUE_FETCH_FACTOR,
+      Array.from(triedIds)
+    );
+
+    if (candidateQuestions.length === 0) {
+      break;
+    }
+
+    for (const candidate of candidateQuestions) {
+      triedIds.add(candidate.id);
+
+      const candidateKey = buildQuestionUniquenessKey(candidate);
+      if (seenQuestionKeys.has(candidateKey)) {
+        continue;
+      }
+
+      seenQuestionKeys.add(candidateKey);
+      selectedQuestions.push(candidate);
+
+      if (selectedQuestions.length >= batchSize) {
+        break;
+      }
+    }
+  }
+
+  return selectedQuestions;
+}
+
+function normalizeUniquenessPart(value: string | undefined | null): string {
+  return (value || '').trim().toLowerCase();
+}
+
+export function buildQuestionUniquenessKey(question: Pick<GameQuestion, 'category' | 'imageUrl' | 'questionData' | 'correctAnswer'>): string {
+  return [
+    normalizeUniquenessPart(question.category),
+    normalizeUniquenessPart(question.imageUrl),
+    normalizeUniquenessPart(question.questionData),
+    normalizeUniquenessPart(question.correctAnswer),
+  ].join('|');
 }
 
 /**

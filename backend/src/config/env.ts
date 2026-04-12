@@ -44,6 +44,7 @@ export const config = {
     maxTimeBonus: 50,
     enableExtendedFlags: process.env.ENABLE_EXTENDED_FLAGS === 'true',
     enableStreakSimpleScoring: process.env.ENABLE_STREAK_SIMPLE_SCORING !== 'false',
+    enableStreakUniqueQuestions: process.env.ENABLE_STREAK_UNIQUE_QUESTIONS !== 'false',
   },
 
   testAuthBypass: {

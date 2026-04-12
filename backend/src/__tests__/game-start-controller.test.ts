@@ -84,9 +84,30 @@ describe('GET /start controller gameType handling', () => {
     server.close();
 
     expect(response.status).toBe(200);
-    expect(mocks.getQuestionsForStreakGameMock).toHaveBeenCalledWith(Category.FLAG, [], 10);
+    expect(mocks.getQuestionsForStreakGameMock).toHaveBeenCalledWith(Category.FLAG, [], 10, []);
     expect(mocks.getQuestionsForGameMock).not.toHaveBeenCalled();
     expect(body.gameConfig.gameType).toBe('streak');
+  });
+
+  it('propaga excludeQuestionKeys al servicio de racha', async () => {
+    const app = express();
+    app.use('/api/game', gameRouter);
+    const server = app.listen(0);
+    const baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+
+    const response = await fetch(
+      `${baseUrl}/api/game/start?category=FLAG&gameType=streak&excludeQuestionKeys=flag|a,flag|b`
+    );
+
+    server.close();
+
+    expect(response.status).toBe(200);
+    expect(mocks.getQuestionsForStreakGameMock).toHaveBeenCalledWith(
+      Category.FLAG,
+      [],
+      10,
+      ['flag|a', 'flag|b']
+    );
   });
 
   it('mantiene compatibilidad legacy cuando gameType no llega y usa single por default', async () => {

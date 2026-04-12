@@ -166,7 +166,17 @@ describe('GamePage streak mode', () => {
     fireEvent.click(nextButton);
 
     await waitFor(() => {
-      expect(mocks.apiStartGameMock).toHaveBeenCalledWith('MIXED', 10, 'streak', ['q1', 'q2', 'q3']);
+      expect(mocks.apiStartGameMock).toHaveBeenCalledWith(
+        'MIXED',
+        10,
+        'streak',
+        ['q1', 'q2', 'q3'],
+        [
+          'capital|||santiago',
+          'capital|||lima',
+          'capital|||quito',
+        ]
+      );
       expect(mocks.appendQuestionsMock).toHaveBeenCalled();
     });
   });
@@ -183,7 +193,17 @@ describe('GamePage streak mode', () => {
     fireEvent.click(nextButton);
 
     await waitFor(() => {
-      expect(mocks.apiStartGameMock).toHaveBeenCalledWith('MIXED', 10, 'streak', ['q1', 'q2', 'q3']);
+      expect(mocks.apiStartGameMock).toHaveBeenCalledWith(
+        'MIXED',
+        10,
+        'streak',
+        ['q1', 'q2', 'q3'],
+        [
+          'capital|||santiago',
+          'capital|||lima',
+          'capital|||quito',
+        ]
+      );
       expect(mocks.appendQuestionsMock).toHaveBeenCalled();
       expect(mocks.nextQuestionMock).toHaveBeenCalledTimes(1);
       expect(mocks.navigateMock).not.toHaveBeenCalledWith('/results?gameType=streak');

@@ -43,6 +43,7 @@ export const startGameSchema = z.object({
   questionCount: z.coerce.number().min(5).max(20).optional().default(config.game.questionsPerGame),
   gameType: gameTypeSchema.optional().default('single'),
   excludeIds: excludeIdsSchema.optional().default([]),
+  excludeQuestionKeys: excludeIdsSchema.optional().default([]),
 });
 
 const answerSchema = z.object({
@@ -92,13 +93,13 @@ router.get('/start', optionalAuth, async (req: AuthRequest, res: Response) => {
       return;
     }
 
-    const { category, questionCount, gameType, excludeIds } = validation.data;
+    const { category, questionCount, gameType, excludeIds, excludeQuestionKeys } = validation.data;
     const expectedQuestions = gameType === 'streak'
       ? getStreakBatchSize(questionCount)
       : questionCount;
 
     const questions = gameType === 'streak'
-      ? await getQuestionsForStreakGame(category, excludeIds, questionCount)
+      ? await getQuestionsForStreakGame(category, excludeIds, questionCount, excludeQuestionKeys)
       : await getQuestionsForGame(category, questionCount);
 
     if (questions.length < expectedQuestions) {
