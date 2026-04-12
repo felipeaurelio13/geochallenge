@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { calculateScore, calculateMapScore, calculateTimeBonus } from '../utils/scoring.js';
+import {
+  calculateScore,
+  calculateMapScore,
+  calculateTimeBonus,
+  calculateRoundPoints,
+} from '../utils/scoring.js';
+import { config } from '../config/env.js';
 import { haversineDistance } from '../utils/haversine.js';
 
 describe('Scoring Utils', () => {
@@ -47,6 +53,81 @@ describe('Scoring Utils', () => {
     it('should clamp at 0 when no time remains', () => {
       expect(calculateTimeBonus(0)).toBe(0);
       expect(calculateTimeBonus(-1)).toBe(0);
+    });
+  });
+
+  describe('calculateRoundPoints', () => {
+    it('should fallback to legacy multiple-choice scoring when combo is disabled', () => {
+      const original = config.game.enableComboScoring;
+      try {
+        config.game.enableComboScoring = false;
+
+        const legacy = calculateScore(true, 8);
+        const round = calculateRoundPoints({
+          isCorrect: true,
+          timeRemaining: 8,
+          streakCount: 5,
+        });
+
+        expect(round).toBe(legacy);
+      } finally {
+        config.game.enableComboScoring = original;
+      }
+    });
+
+    it('should add combo bonus only for correct answers when combo is enabled', () => {
+      const original = {
+        enabled: config.game.enableComboScoring,
+        step: config.game.comboStep,
+        cap: config.game.comboCap,
+        threshold: config.game.fastAnswerThreshold,
+      };
+
+      try {
+        config.game.enableComboScoring = true;
+        config.game.comboStep = 8;
+        config.game.comboCap = 24;
+        config.game.fastAnswerThreshold = 3;
+
+        const correctPoints = calculateRoundPoints({
+          isCorrect: true,
+          timeRemaining: 6,
+          streakCount: 4,
+        });
+
+        const incorrectPoints = calculateRoundPoints({
+          isCorrect: false,
+          timeRemaining: 6,
+          streakCount: 4,
+        });
+
+        expect(correctPoints).toBe(calculateScore(true, 6) + 24);
+        expect(incorrectPoints).toBe(0);
+      } finally {
+        config.game.enableComboScoring = original.enabled;
+        config.game.comboStep = original.step;
+        config.game.comboCap = original.cap;
+        config.game.fastAnswerThreshold = original.threshold;
+      }
+    });
+
+    it('should support map rounds and keep map base scoring compatible', () => {
+      const original = config.game.enableComboScoring;
+      try {
+        config.game.enableComboScoring = false;
+
+        const mapBase = calculateMapScore(250, 8);
+        const mapRound = calculateRoundPoints({
+          isCorrect: true,
+          timeRemaining: 8,
+          streakCount: 3,
+          distanceKm: 250,
+        });
+
+        expect(mapRound).toBe(mapBase);
+      } finally {
+        config.game.enableComboScoring = original;
+      }
     });
   });
 });

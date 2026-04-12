@@ -3,6 +3,10 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const isProduction = process.env.NODE_ENV === 'production';
+const parseNumberEnv = (value: string | undefined, fallback: number): number => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+};
 
 // Validate required env vars in production
 if (isProduction) {
@@ -42,6 +46,10 @@ export const config = {
     timePerQuestion: 10,
     basePoints: 100,
     maxTimeBonus: 50,
+    enableComboScoring: process.env.ENABLE_COMBO_SCORING === 'true',
+    comboStep: parseNumberEnv(process.env.COMBO_STEP, 10),
+    comboCap: parseNumberEnv(process.env.COMBO_CAP, 50),
+    fastAnswerThreshold: parseNumberEnv(process.env.FAST_ANSWER_THRESHOLD, 3),
     enableExtendedFlags: process.env.ENABLE_EXTENDED_FLAGS === 'true',
     enableStreakSimpleScoring: process.env.ENABLE_STREAK_SIMPLE_SCORING !== 'false',
     enableStreakUniqueQuestions: process.env.ENABLE_STREAK_UNIQUE_QUESTIONS !== 'false',
