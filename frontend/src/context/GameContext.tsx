@@ -1,10 +1,13 @@
 import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
 import { api } from '../services/api';
-import type { GameState, Answer, AnswerResult, GameResult, Category } from '../types';
+import type { GameState, Answer, AnswerResult, GameResult, Category, Question, GameType } from '../types';
 
 interface GameContextType {
   state: GameState;
-  startGame: (category?: Category) => Promise<void>;
+  streakAlive: boolean;
+  startGame: (category?: Category, questionCount?: number, gameType?: GameType) => Promise<void>;
+  appendQuestions: (questions: Question[]) => void;
+  setStreakAlive: (isAlive: boolean) => void;
   submitAnswer: (answer: string, coordinates?: { lat: number; lng: number }) => Promise<AnswerResult>;
   nextQuestion: () => void;
   finishGame: () => Promise<GameResult>;
@@ -27,6 +30,7 @@ const GameContext = createContext<GameContextType | null>(null);
 
 export function GameProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<GameState>(initialState);
+  const [streakAlive, setStreakAlive] = useState(true);
   const timerRef = useRef<number | null>(null);
 
   // Cleanup timer on unmount
@@ -38,11 +42,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const startGame = useCallback(async (category?: Category) => {
+  const startGame = useCallback(async (category?: Category, questionCount?: number, gameType?: GameType) => {
     setState((prev) => ({ ...prev, status: 'loading' }));
 
     try {
-      const response = await api.startGame(category);
+      const response = await api.startGame(category, questionCount, gameType);
 
       setState({
         status: 'playing',
@@ -54,10 +58,19 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         timeRemaining: response.gameConfig.timePerQuestion,
         config: response.gameConfig,
       });
+      setStreakAlive(true);
     } catch (error) {
       setState((prev) => ({ ...prev, status: 'idle' }));
       throw error;
     }
+  }, []);
+
+  const appendQuestions = useCallback((questions: Question[]) => {
+    if (!questions.length) return;
+    setState((prev) => ({
+      ...prev,
+      questions: [...prev.questions, ...questions],
+    }));
   }, []);
 
   const submitAnswer = useCallback(
@@ -129,6 +142,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
+    setStreakAlive(true);
     setState(initialState);
   }, []);
 
@@ -140,7 +154,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     <GameContext.Provider
       value={{
         state,
+        streakAlive,
         startGame,
+        appendQuestions,
+        setStreakAlive,
         submitAnswer,
         nextQuestion,
         finishGame,
