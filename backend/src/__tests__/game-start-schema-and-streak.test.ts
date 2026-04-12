@@ -24,10 +24,11 @@ vi.mock('../utils/scoring.js', () => ({
 describe('startGameSchema', () => {
   it('mantiene compatibilidad con gameType por default single', () => {
     const parsed = startGameSchema.parse({
-      questionCount: 10,
+      questionCount: '10',
     });
 
     expect(parsed.gameType).toBe('single');
+    expect(parsed.questionCount).toBe(10);
   });
 
   it('normaliza excludeIds desde query string csv', () => {

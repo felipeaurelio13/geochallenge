@@ -104,12 +104,12 @@ class ApiService {
   }
 
   // Game endpoints
-  async startGame(category?: Category, questionCount?: number, gameType?: GameType) {
+  async startGame(category?: Category, questionCount?: number, gameType?: GameType, excludeIds?: string[]) {
     const response = await this.client.get<{
       gameConfig: GameConfig;
       questions: Question[];
     }>('/game/start', {
-      params: { category, questionCount, gameType },
+      params: { category, questionCount, gameType, excludeIds },
     });
     return response.data;
   }
