@@ -83,6 +83,9 @@ describe('RankingsPage', () => {
     const { container } = render(<RankingsPage />);
 
     expect(await screen.findByText('🥇')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(mocks.getLeaderboardMock).toHaveBeenCalledTimes(1);
+    });
     expect(screen.getByText('🥈')).toBeInTheDocument();
     expect(screen.getByText('(Tú)')).toBeInTheDocument();
 

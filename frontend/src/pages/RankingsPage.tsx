@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
@@ -36,33 +36,37 @@ export function RankingsPage() {
   const [neighborEntries, setNeighborEntries] = useState<LeaderboardEntry[]>([]);
   const [neighborsLoading, setNeighborsLoading] = useState(false);
 
-  const { data, error, isLoading, run, invalidate } = useApi<RankingsResponse>(
-    async () => {
-      const leaderboardData = await api.getLeaderboard(50);
+  const fetchRankings = useCallback(async () => {
+    const leaderboardData = await api.getLeaderboard(50);
 
-      return {
-        leaderboard: leaderboardData.leaderboard.map((entry, index) => ({
-          rank:
-            USE_BACKEND_RANK && typeof entry.rank === 'number' && Number.isFinite(entry.rank)
-              ? entry.rank
-              : index + 1,
-          userId: entry.userId,
-          username: entry.username,
-          score: entry.score,
-          isCurrentUser: entry.username === user?.username,
-        })),
-        totalPlayers: leaderboardData.totalPlayers,
-        topScore: leaderboardData.topScore,
-        avgScore: leaderboardData.avgScore,
-        userRank: leaderboardData.userRank?.rank ?? null,
-        userScore: leaderboardData.userRank?.score ?? null,
-      };
-    },
-    {
+    return {
+      leaderboard: leaderboardData.leaderboard.map((entry, index) => ({
+        rank:
+          USE_BACKEND_RANK && typeof entry.rank === 'number' && Number.isFinite(entry.rank)
+            ? entry.rank
+            : index + 1,
+        userId: entry.userId,
+        username: entry.username,
+        score: entry.score,
+        isCurrentUser: entry.username === user?.username,
+      })),
+      totalPlayers: leaderboardData.totalPlayers,
+      topScore: leaderboardData.topScore,
+      avgScore: leaderboardData.avgScore,
+      userRank: leaderboardData.userRank?.rank ?? null,
+      userScore: leaderboardData.userRank?.score ?? null,
+    };
+  }, [user?.username]);
+
+  const useApiOptions = useMemo(
+    () => ({
       cacheKey: `rankings-${user?.username ?? 'anonymous'}`,
       ttlMs: 60_000,
-    }
+    }),
+    [user?.username]
   );
+
+  const { data, error, isLoading, run, invalidate } = useApi<RankingsResponse>(fetchRankings, useApiOptions);
 
   useEffect(() => {
     void run();
