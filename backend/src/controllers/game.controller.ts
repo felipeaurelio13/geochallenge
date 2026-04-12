@@ -40,7 +40,7 @@ const excludeIdsSchema = z.preprocess(
 // Schema de validación
 export const startGameSchema = z.object({
   category: z.nativeEnum(Category).optional().default(Category.MIXED),
-  questionCount: z.number().min(5).max(20).optional().default(config.game.questionsPerGame),
+  questionCount: z.coerce.number().min(5).max(20).optional().default(config.game.questionsPerGame),
   gameType: gameTypeSchema.optional().default('single'),
   excludeIds: excludeIdsSchema.optional().default([]),
 });

@@ -154,7 +154,8 @@ export function GamePage() {
       const remainingBufferedQuestions = questions.length - (currentIndex + 1);
       if (remainingBufferedQuestions <= 2) {
         try {
-          const refillResponse = await api.startGame(category as any, 10, 'streak');
+          const usedQuestionIds = questions.map((question) => question.id);
+          const refillResponse = await api.startGame(category as any, 10, 'streak', usedQuestionIds);
           appendQuestions(refillResponse.questions);
           bufferedQuestionCount += refillResponse.questions.length;
         } catch (err) {
@@ -306,7 +307,7 @@ export function GamePage() {
           showResult={showResult}
           canSubmit={hasSelection}
           submitLabel={t('game.submit')}
-          nextLabel={isLastQuestion ? t('game.seeResults') : t('game.next')}
+          nextLabel={shouldUseStreakFlow ? t('game.next') : isLastQuestion ? t('game.seeResults') : t('game.next')}
           resultLabel={lastAnswerCorrect ? t('game.correct') : t('game.incorrect')}
           showResultBadge
           isCorrect={lastAnswerCorrect}

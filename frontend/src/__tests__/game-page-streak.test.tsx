@@ -166,7 +166,7 @@ describe('GamePage streak mode', () => {
     fireEvent.click(nextButton);
 
     await waitFor(() => {
-      expect(mocks.apiStartGameMock).toHaveBeenCalledWith('MIXED', 10, 'streak');
+      expect(mocks.apiStartGameMock).toHaveBeenCalledWith('MIXED', 10, 'streak', ['q1', 'q2', 'q3']);
       expect(mocks.appendQuestionsMock).toHaveBeenCalled();
     });
   });
@@ -179,11 +179,11 @@ describe('GamePage streak mode', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Quito' }));
     fireEvent.click(screen.getByRole('button', { name: 'game.submit' }));
 
-    const nextButton = await screen.findByRole('button', { name: 'game.seeResults' });
+    const nextButton = await screen.findByRole('button', { name: 'game.next' });
     fireEvent.click(nextButton);
 
     await waitFor(() => {
-      expect(mocks.apiStartGameMock).toHaveBeenCalledWith('MIXED', 10, 'streak');
+      expect(mocks.apiStartGameMock).toHaveBeenCalledWith('MIXED', 10, 'streak', ['q1', 'q2', 'q3']);
       expect(mocks.appendQuestionsMock).toHaveBeenCalled();
       expect(mocks.nextQuestionMock).toHaveBeenCalledTimes(1);
       expect(mocks.navigateMock).not.toHaveBeenCalledWith('/results?gameType=streak');

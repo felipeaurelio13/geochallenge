@@ -4,9 +4,17 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.83**
+- Frontend: **v1.2.84**
 
-- Feature: CI de lint ahora distingue entre ejecución informativa (warnings permitidos) y ejecución estricta opcional para limpieza progresiva.
+- Feature: modo Racha ahora soporta continuidad real por bloques (sin corte fijo en 3 aciertos), con refill robusto y sin repetición inmediata de preguntas.
+
+## Novedades de la versión 1.2.84
+
+- Se corrigió el parsing del query param `questionCount` en backend usando coerción numérica para que los refills de racha no fallen por tipo (`"10"` string en URL).
+- `GamePage` ahora solicita refill en racha excluyendo IDs ya usados, evitando repeticiones inmediatas y permitiendo avanzar hasta agotar el pool o fallar.
+- En racha, el CTA de avance se mantiene como **Siguiente** para alinear UX con flujo potencialmente ilimitado (en lugar de sugerir cierre de partida en el tercer ítem).
+- Se actualizaron tests backend/frontend para cubrir coerción de query params y contrato de refill con `excludeIds`.
+- Footer/versionado actualizado a **v1.2.84** para mantener trazabilidad con el despliegue en GitHub Pages.
 
 ## Novedades de la versión 1.2.83
 
