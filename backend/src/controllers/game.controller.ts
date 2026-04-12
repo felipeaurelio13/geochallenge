@@ -6,7 +6,7 @@ import {
   getQuestionsForGame,
   getQuestionsForStreakGame,
   getStreakBatchSize,
-  validateAnswer,
+  validateAnswerByGameType,
   saveGameResult,
   getUserGameHistory,
   AnswerResult,
@@ -49,6 +49,7 @@ const answerSchema = z.object({
   questionId: z.string(),
   answer: z.string(),
   timeRemaining: z.number().min(0).max(config.game.timePerQuestion),
+  gameType: gameTypeSchema.optional().default('single'),
   coordinates: z
     .object({
       lat: z.number(),
@@ -71,6 +72,7 @@ const finishGameSchema = z.object({
         .optional(),
     })
   ),
+  gameType: gameTypeSchema.optional().default('single'),
   category: z.nativeEnum(Category).optional(),
 });
 
@@ -140,13 +142,14 @@ router.post('/answer', optionalAuth, async (req: AuthRequest, res: Response) => 
       return;
     }
 
-    const { questionId, answer, timeRemaining, coordinates } = validation.data;
+    const { questionId, answer, timeRemaining, coordinates, gameType } = validation.data;
 
-    const result = await validateAnswer(
+    const result = await validateAnswerByGameType(
       questionId,
       answer,
       timeRemaining,
-      coordinates
+      coordinates,
+      gameType
     );
 
     res.json({
@@ -175,16 +178,17 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
       return;
     }
 
-    const { answers, category } = validation.data;
+    const { answers, category, gameType } = validation.data;
 
     // Validar todas las respuestas
     const results: AnswerResult[] = [];
     for (const answer of answers) {
-      const result = await validateAnswer(
+      const result = await validateAnswerByGameType(
         answer.questionId,
         answer.answer,
         answer.timeRemaining,
-        answer.coordinates
+        answer.coordinates,
+        gameType
       );
       results.push(result);
     }

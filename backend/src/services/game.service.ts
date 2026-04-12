@@ -35,6 +35,8 @@ export interface GameSession {
   startedAt: Date;
 }
 
+export type SoloGameType = 'single' | 'streak';
+
 // Cache de preguntas en memoria para mejor performance
 const MAP_CORRECT_DISTANCE_KM = 500;
 const STREAK_BATCH_SIZE = 3;
@@ -183,6 +185,42 @@ export async function validateAnswer(
     distance,
     timeRemaining: Math.max(0, timeRemaining),
   };
+}
+
+/**
+ * Aplica estrategia de puntaje por tipo de partida para modos individuales.
+ * - single: conserva scoring existente
+ * - streak: 1 punto por acierto, 0 por error
+ *
+ * Si el feature flag está deshabilitado, hace fallback a scoring single.
+ */
+export function applySoloModeScoringStrategy(
+  answerResult: AnswerResult,
+  gameType: SoloGameType = 'single'
+): AnswerResult {
+  if (gameType !== 'streak' || !config.game.enableStreakSimpleScoring) {
+    return answerResult;
+  }
+
+  return {
+    ...answerResult,
+    points: answerResult.isCorrect ? 1 : 0,
+  };
+}
+
+/**
+ * Wrapper aditivo sobre validateAnswer para soportar estrategias por modo
+ * sin alterar semántica existente en single/duel/challenge.
+ */
+export async function validateAnswerByGameType(
+  questionId: string,
+  userAnswer: string,
+  timeRemaining: number,
+  userCoords?: { lat: number; lng: number },
+  gameType: SoloGameType = 'single'
+): Promise<AnswerResult> {
+  const baseResult = await validateAnswer(questionId, userAnswer, timeRemaining, userCoords);
+  return applySoloModeScoringStrategy(baseResult, gameType);
 }
 
 /**
