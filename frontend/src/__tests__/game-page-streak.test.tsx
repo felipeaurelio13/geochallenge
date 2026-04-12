@@ -129,6 +129,16 @@ describe('GamePage streak mode', () => {
     });
   });
 
+  it('acepta mode=streak como fallback de compatibilidad en query params', async () => {
+    mocks.searchParams = new URLSearchParams('category=MAP&mode=streak');
+
+    render(<GamePage />);
+
+    await waitFor(() => {
+      expect(mocks.startGameMock).toHaveBeenCalledWith('MAP', undefined, 'streak');
+    });
+  });
+
   it('finaliza inmediatamente al fallar en racha y navega a resultados de racha', async () => {
     mocks.submitAnswerMock.mockResolvedValueOnce({ isCorrect: false, points: 0 });
 

@@ -25,7 +25,8 @@ export function GamePage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const category = searchParams.get('category') || 'MIXED';
-  const gameType = searchParams.get('gameType') === 'streak' ? 'streak' : 'single';
+  const gameTypeParam = searchParams.get('gameType') ?? searchParams.get('mode');
+  const gameType = gameTypeParam === 'streak' ? 'streak' : 'single';
 
   const {
     state,

@@ -66,6 +66,8 @@
     "duelDesc": "Compete in real-time against another player",
     "challenge": "Challenges",
     "challengeDesc": "Send challenges to your friends",
+    "streak": "Streak",
+    "streakDesc": "Keep going until you miss and beat your best",
     "rankings": "Rankings",
     "yourStats": "Your statistics",
     "selectCategory": "Select a category",

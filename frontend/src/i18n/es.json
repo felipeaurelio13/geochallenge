@@ -66,6 +66,8 @@
     "duelDesc": "Compite en tiempo real contra otro jugador",
     "challenge": "Desafíos",
     "challengeDesc": "Envía desafíos a tus amigos",
+    "streak": "Racha",
+    "streakDesc": "Sigue hasta fallar y rompe tu récord",
     "rankings": "Rankings",
     "yourStats": "Tus estadísticas",
     "selectCategory": "Selecciona una categoría",
