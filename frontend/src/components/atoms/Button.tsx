@@ -1,7 +1,7 @@
 import React from 'react';
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
-type ButtonSize = 'sm' | 'md' | 'lg';
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
+export type ButtonSize = 'sm' | 'md' | 'lg';
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant;
@@ -24,6 +24,24 @@ const sizeClasses: Record<ButtonSize, string> = {
   lg: 'min-h-12 px-6 py-3 text-base rounded-xl',
 };
 
+const baseClasses =
+  'font-semibold transition-all duration-150 active:scale-[0.99] focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60 disabled:scale-100';
+
+/** Build the full class string for a button-styled element (Button, Link, etc.). */
+export function buttonVariants({
+  variant = 'primary',
+  size = 'md',
+  fullWidth = false,
+  className = '',
+}: {
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  fullWidth?: boolean;
+  className?: string;
+} = {}): string {
+  return `${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${fullWidth ? 'w-full' : ''} ${className}`.trim();
+}
+
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(function Button(
   { className = '', variant = 'primary', size = 'md', fullWidth = false, type = 'button', ...props },
   ref
@@ -32,7 +50,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(function 
     <button
       ref={ref}
       type={type}
-      className={`font-semibold transition-all duration-150 active:scale-[0.99] focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60 disabled:scale-100 ${variantClasses[variant]} ${sizeClasses[size]} ${fullWidth ? 'w-full' : ''} ${className}`.trim()}
+      className={buttonVariants({ variant, size, fullWidth, className })}
       {...props}
     />
   );

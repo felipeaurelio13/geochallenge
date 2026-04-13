@@ -11,6 +11,7 @@ import {
 } from '../components';
 import { UserAvatar } from '../components/atoms/UserAvatar';
 import { Alert } from '../components/atoms/Alert';
+import { Button } from '../components/atoms/Button';
 import { Category, Question } from '../types';
 import { GAME_CONSTANTS } from '../constants/game';
 
@@ -354,12 +355,13 @@ export function DuelPage() {
             </Alert>
           )}
 
-          <button
+          <Button
             onClick={handleCancelSearch}
-            className="px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
+            variant="secondary"
+            size="lg"
           >
             {t('duel.cancel')}
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -428,23 +430,27 @@ export function DuelPage() {
           </div>
 
           <div className="flex flex-col gap-3">
-            <button
+            <Button
               onClick={() => {
                 setDuelState('searching');
                 setSearchTime(0);
                 setSearchTimedOut(false);
                 socketService.joinDuelQueue(duelCategory);
               }}
-              className="w-full py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary/80 transition-colors"
+              variant="primary"
+              size="lg"
+              fullWidth
             >
               {t('duel.playAgain')}
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => navigate('/menu')}
-              className="w-full py-3 bg-gray-700 text-white font-bold rounded-lg hover:bg-gray-600 transition-colors"
+              variant="secondary"
+              size="lg"
+              fullWidth
             >
               {t('common.backToMenu')}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

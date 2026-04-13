@@ -1,7 +1,10 @@
 export { Alert } from './Alert';
 export { Badge } from './Badge';
 export { Button } from './Button';
+export { Card as CardAtom } from './Card';
+export { FormLabel } from './FormLabel';
 export { Icon } from './Icon';
 export { Input } from './Input';
+export { SectionTitle } from './SectionTitle';
 export { StatCard } from './StatCard';
 export { UserAvatar } from './UserAvatar';

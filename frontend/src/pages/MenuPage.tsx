@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useGesture, useLocalStorage, useMediaQuery } from '../hooks';
 import { Button, Header, Icon, PageTemplate } from '../components';
 import { UserAvatar } from '../components/atoms/UserAvatar';
+import { GameModeCard } from '../components/molecules/GameModeCard';
 
 type Category = 'FLAG' | 'CAPITAL' | 'MAP' | 'SILHOUETTE' | 'MIXED';
 
@@ -121,57 +122,38 @@ export function MenuPage() {
           {t('menu.gameModes')}
         </h2>
         <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 sm:gap-2 lg:grid-cols-4">
-          <Button
+          <GameModeCard
+            icon="🎯"
+            title={t('menu.singlePlayer')}
+            description={t('menu.singlePlayerDesc')}
             onClick={() => navigate(`/game/single?category=${selectedCategory}`)}
-            className="group !rounded-2xl !border-primary/40 !bg-primary/10 !py-2.5 !px-3 text-left hover:!border-primary/70 hover:!bg-primary/15 sm:!py-3 sm:!px-4"
+            className="border-primary/40 bg-primary/10 hover:border-primary/70 hover:bg-primary/15"
           >
             <p className="text-xs font-semibold uppercase tracking-wide text-primary">
               {selectedCategoryLabel}
             </p>
-            <h3 className="mt-1 flex items-center gap-2 text-base font-bold text-white sm:text-lg">
-              <Icon symbol="🎯" />
-              {t('menu.singlePlayer')}
-            </h3>
-            <p className="mt-0.5 text-xs leading-snug text-gray-300 sm:text-[0.82rem]">
-              {t('menu.singlePlayerDesc')}
-            </p>
-          </Button>
+          </GameModeCard>
 
-          <Button
+          <GameModeCard
+            icon="⚔️"
+            title={t('menu.duel')}
+            description={t('menu.duelDesc')}
             onClick={() => navigate(`/duel?category=${selectedCategory}`)}
-            variant="secondary"
-            className="!rounded-2xl !border-gray-800 !bg-gray-900 !py-2.5 !px-3 text-left sm:!py-3 sm:!px-4"
-          >
-            <h3 className="flex items-center gap-2 text-base font-bold text-white sm:text-lg">
-              <Icon symbol="⚔️" />
-              {t('menu.duel')}
-            </h3>
-            <p className="mt-0.5 text-xs leading-snug text-gray-300 sm:text-[0.82rem]">{t('menu.duelDesc')}</p>
-          </Button>
+          />
 
-          <Button
+          <GameModeCard
+            icon="🏁"
+            title={t('menu.challenge')}
+            description={t('menu.challengeDesc')}
             onClick={() => navigate(`/challenges?category=${selectedCategory}&openCreate=1`)}
-            variant="secondary"
-            className="!rounded-2xl !border-gray-800 !bg-gray-900 !py-2.5 !px-3 text-left sm:!py-3 sm:!px-4"
-          >
-            <h3 className="flex items-center gap-2 text-base font-bold text-white sm:text-lg">
-              <Icon symbol="🏁" />
-              {t('menu.challenge')}
-            </h3>
-            <p className="mt-0.5 text-xs leading-snug text-gray-300 sm:text-[0.82rem]">{t('menu.challengeDesc')}</p>
-          </Button>
+          />
 
-          <Button
+          <GameModeCard
+            icon="🔥"
+            title={t('menu.streak')}
+            description={t('menu.streakDesc')}
             onClick={() => navigate(`/game/single?category=${selectedCategory}&mode=streak`)}
-            variant="secondary"
-            className="!rounded-2xl !border-gray-800 !bg-gray-900 !py-2.5 !px-3 text-left sm:!py-3 sm:!px-4"
-          >
-            <h3 className="flex items-center gap-2 text-base font-bold text-white sm:text-lg">
-              <Icon symbol="🔥" />
-              {t('menu.streak')}
-            </h3>
-            <p className="mt-0.5 text-xs leading-snug text-gray-300 sm:text-[0.82rem]">{t('menu.streakDesc')}</p>
-          </Button>
+          />
         </div>
       </section>
     </PageTemplate>

@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { Badge, Card, Icon, PageTemplate } from '../components';
+import { buttonVariants } from '../components/atoms/Button';
 
 export function HomePage() {
   const { t } = useTranslation();
@@ -36,37 +37,22 @@ export function HomePage() {
         <div id="home-main-actions" className="mt-6 grid grid-cols-1 gap-3">
           {user ? (
             <>
-              <Link
-                to="/menu"
-                className="rounded-xl bg-primary px-6 py-3.5 text-base font-semibold text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-primary/70"
-              >
+              <Link to="/menu" className={buttonVariants({ variant: 'primary', size: 'lg' })}>
                 {t('home.play')}
               </Link>
-              <Link
-                to="/rankings"
-                className="rounded-xl border border-gray-700 bg-gray-900 px-6 py-3.5 text-base font-semibold text-gray-100 transition-colors hover:border-gray-500 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500"
-              >
+              <Link to="/rankings" className={buttonVariants({ variant: 'secondary', size: 'lg' })}>
                 {t('nav.rankings')}
               </Link>
             </>
           ) : (
             <>
-              <Link
-                to="/login"
-                className="rounded-xl bg-primary px-6 py-3.5 text-base font-semibold text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-primary/70"
-              >
+              <Link to="/login" className={buttonVariants({ variant: 'primary', size: 'lg' })}>
                 {t('home.login')}
               </Link>
-              <Link
-                to="/register"
-                className="rounded-xl border border-gray-700 bg-gray-900 px-6 py-3.5 text-base font-semibold text-gray-100 transition-colors hover:border-gray-500 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500"
-              >
+              <Link to="/register" className={buttonVariants({ variant: 'secondary', size: 'lg' })}>
                 {t('home.register')}
               </Link>
-              <Link
-                to="/rankings"
-                className="rounded-xl border border-gray-700 bg-gray-900 px-6 py-3.5 text-base font-semibold text-gray-100 transition-colors hover:border-gray-500 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500"
-              >
+              <Link to="/rankings" className={buttonVariants({ variant: 'secondary', size: 'lg' })}>
                 {t('nav.rankings')}
               </Link>
             </>

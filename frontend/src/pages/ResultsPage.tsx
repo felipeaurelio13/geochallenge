@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useGame } from '../context/GameContext';
 import { api } from '../services/api';
 import { LoadingSpinner } from '../components';
 import { AnswerStatusBadge } from '../components/AnswerStatusBadge';
+import { Button } from '../components/atoms/Button';
 
 export function ResultsPage() {
   const { t } = useTranslation();
@@ -221,13 +222,16 @@ export function ResultsPage() {
 
         <section className="mt-5 rounded-2xl border border-gray-700 bg-gray-800/80 p-4 sm:p-5">
           <p className="text-sm text-gray-300">{t('results.shareScore')}</p>
-          <button
+          <Button
             onClick={handleShareResults}
             disabled={isSharing}
-            className="mt-3 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-70"
+            variant="primary"
+            size="lg"
+            fullWidth
+            className="mt-3 inline-flex items-center justify-center gap-2"
           >
             🔗 {isSharing ? `${t('common.loading')}...` : t('results.shareButton')}
-          </button>
+          </Button>
           <p className="mt-2 min-h-5 text-xs text-green-300" aria-live="polite">
             {shareStatus === 'success' ? t('results.copied') : ''}
           </p>
@@ -238,21 +242,31 @@ export function ResultsPage() {
           data-testid="results-action-tray"
         >
           <div className="flex flex-col gap-2.5">
-            <button
+            <Button
               onClick={handlePlayAgain}
-              className="w-full min-h-12 rounded-xl bg-primary px-4 py-3 text-base font-bold text-white shadow-md shadow-primary/25 transition-colors hover:bg-primary/85"
+              variant="primary"
+              size="lg"
+              fullWidth
             >
               {t('results.playAgain')}
-            </button>
-            <Link
-              to="/rankings"
-              className="inline-flex w-full min-h-12 items-center justify-center rounded-xl bg-gray-700 px-4 py-3 text-base font-bold text-white transition-colors hover:bg-gray-600"
+            </Button>
+            <Button
+              onClick={() => navigate('/rankings')}
+              variant="secondary"
+              size="lg"
+              fullWidth
             >
               {t('results.viewRankings')}
-            </Link>
-            <Link to="/menu" className="py-2 text-center text-gray-300 transition-colors hover:text-white">
+            </Button>
+            <Button
+              onClick={() => navigate('/menu')}
+              variant="ghost"
+              size="md"
+              fullWidth
+              className="py-2"
+            >
               {t('common.backToMenu')}
-            </Link>
+            </Button>
           </div>
         </section>
       </main>

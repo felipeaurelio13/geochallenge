@@ -159,7 +159,7 @@ export function RankingsPage() {
 
   return (
     <div className="h-full min-h-0 bg-gray-900">
-      <PageHeader title={t('rankings.title')} backTo="/menu" backLabel={`← ${t('common.back')}`} />
+      <PageHeader title={`🏆 ${t('rankings.title')}`} backTo="/menu" backLabel={`← ${t('common.back')}`} />
 
       <main className="max-w-4xl mx-auto px-4 py-6 sm:px-6">
         {resolvedUserRank && resolvedUserRank > 50 && (

@@ -9,6 +9,7 @@ import { UserAvatar } from '../components/atoms/UserAvatar';
 import { Alert } from '../components/atoms/Alert';
 import { StatCard } from '../components/atoms/StatCard';
 import { Input } from '../components/atoms/Input';
+import { FormLabel } from '../components/atoms/FormLabel';
 
 export function ProfilePage() {
   const { t, i18n } = useTranslation();
@@ -107,7 +108,7 @@ export function ProfilePage() {
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">{t('auth.username')}</label>
+              <FormLabel>{t('auth.username')}</FormLabel>
               {isEditing ? (
                 <Input
                   type="text"
@@ -122,7 +123,7 @@ export function ProfilePage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">{t('profile.language')}</label>
+              <FormLabel>{t('profile.language')}</FormLabel>
               {isEditing ? (
                 <select
                   value={preferredLanguage}
@@ -140,13 +141,13 @@ export function ProfilePage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">{t('auth.email')}</label>
+              <FormLabel>{t('auth.email')}</FormLabel>
               <div className="px-4 py-3 bg-gray-900 rounded-lg text-gray-400">{user.email}</div>
             </div>
 
             {user.createdAt && (
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">{t('profile.memberSince')}</label>
+                <FormLabel>{t('profile.memberSince')}</FormLabel>
                 <div className="px-4 py-3 bg-gray-900 rounded-lg text-gray-400">
                   {new Date(user.createdAt).toLocaleDateString()}
                 </div>

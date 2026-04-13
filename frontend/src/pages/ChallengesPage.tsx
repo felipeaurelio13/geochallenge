@@ -7,6 +7,8 @@ import { LoadingSpinner } from '../components';
 import { PageHeader } from '../components/molecules/PageHeader';
 import { EmptyState } from '../components/molecules/EmptyState';
 import { Alert } from '../components/atoms/Alert';
+import { Button } from '../components/atoms/Button';
+import { Modal } from '../components/organisms/Modal';
 
 interface ChallengeParticipant {
   userId: string;
@@ -161,9 +163,9 @@ export function ChallengesPage() {
         backLabel={`← ${t('common.back')}`}
         sticky
         actions={
-          <button onClick={() => setShowCreateModal(true)} className="px-3 py-2 bg-primary text-white rounded-lg text-sm font-medium">
+          <Button size="sm" onClick={() => setShowCreateModal(true)}>
             + {t('challenges.create')}
-          </button>
+          </Button>
         }
       />
 
@@ -181,26 +183,25 @@ export function ChallengesPage() {
         <section className="rounded-xl border border-primary/30 bg-primary/10 p-4">
           <p className="text-sm font-semibold text-white">{t('challenges.createMultiplayerTitle')}</p>
           <p className="mt-1 text-xs text-gray-300 sm:text-sm">{t('challenges.createMultiplayerHint')}</p>
-          <button
-            type="button"
+          <Button
             onClick={() => setShowCreateModal(true)}
-            className="mt-3 w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white sm:w-auto"
+            className="mt-3 sm:w-auto"
+            fullWidth
           >
             {t('challenges.createMultiplayerCta')}
-          </button>
+          </Button>
         </section>
 
         {loading ? <LoadingSpinner size="lg" /> : filteredChallenges.length === 0 ? (
           <EmptyState
             message={t('challenges.empty')}
             action={
-              <button
-                type="button"
+              <Button
                 onClick={() => setShowCreateModal(true)}
-                className="mt-4 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white"
+                className="mt-4"
               >
                 {t('challenges.createMultiplayerCta')}
-              </button>
+              </Button>
             }
           />
         ) : (
@@ -236,17 +237,17 @@ export function ChallengesPage() {
 
                   <div className="mt-4 flex gap-2">
                     {challenge.isJoinable && (
-                      <button onClick={() => handleJoin(challenge.id)} className="flex-1 py-2 rounded-lg bg-blue-600 text-white">{t('challenges.join')}</button>
+                      <Button onClick={() => handleJoin(challenge.id)} size="sm" className="flex-1">{t('challenges.join')}</Button>
                     )}
                     {canPlay(challenge) && (
-                      <button onClick={() => handlePlay(challenge.id)} className="flex-1 py-2 rounded-lg bg-primary text-white">
+                      <Button onClick={() => handlePlay(challenge.id)} size="sm" className="flex-1">
                         {t('challenges.play')}
-                      </button>
+                      </Button>
                     )}
                     {canShowWaiting(challenge) && (
-                      <button type="button" disabled className="flex-1 py-2 rounded-lg bg-gray-700 text-gray-300 cursor-not-allowed">
+                      <Button variant="secondary" size="sm" disabled className="flex-1">
                         {t('challenges.waitingReady')}
-                      </button>
+                      </Button>
                     )}
                   </div>
                 </article>
@@ -256,74 +257,72 @@ export function ChallengesPage() {
         )}
       </main>
 
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black/70 flex items-end sm:items-center justify-center px-3 z-50">
-          <div className="bg-gray-800 rounded-t-2xl sm:rounded-xl p-5 w-full max-w-md space-y-4">
-            <h2 className="text-lg font-bold text-white">{t('challenges.createTitle')}</h2>
-            {error && <Alert type="error">{error}</Alert>}
-            <form onSubmit={handleCreate} className="space-y-4">
-              <div>
-                <label className="text-sm text-gray-300 block mb-2">{t('challenges.categories')}</label>
-                <p className="text-xs text-gray-400 mb-2">{t('challenges.categoriesHint')}</p>
-                <div className="grid grid-cols-2 gap-2">
-                  {categories.map((category) => (
-                    <button
-                      key={category}
-                      type="button"
-                      onClick={() => toggleCategory(category)}
-                      className={`px-2 py-2 rounded-lg text-sm border ${createCategories.includes(category) ? 'bg-primary/20 border-primary text-white' : 'border-gray-600 text-gray-300'}`}
-                    >
-                      {getCategoryLabel(category)}
-                    </button>
-                  ))}
-                </div>
+      <Modal.Root isOpen={showCreateModal} onClose={() => setShowCreateModal(false)}>
+        <Modal.Panel>
+          <Modal.Title>{t('challenges.createTitle')}</Modal.Title>
+          {error && <Alert type="error">{error}</Alert>}
+          <form onSubmit={handleCreate} className="mt-4 space-y-4">
+            <div>
+              <label className="text-sm text-gray-300 block mb-2">{t('challenges.categories')}</label>
+              <p className="text-xs text-gray-400 mb-2">{t('challenges.categoriesHint')}</p>
+              <div className="grid grid-cols-2 gap-2">
+                {categories.map((category) => (
+                  <button
+                    key={category}
+                    type="button"
+                    onClick={() => toggleCategory(category)}
+                    className={`px-2 py-2 rounded-lg text-sm border ${createCategories.includes(category) ? 'bg-primary/20 border-primary text-white' : 'border-gray-600 text-gray-300'}`}
+                  >
+                    {getCategoryLabel(category)}
+                  </button>
+                ))}
               </div>
+            </div>
 
-              <div>
-                <label className="text-sm text-gray-300 block mb-2">{t('challenges.maxPlayers')}</label>
-                <p className="text-xs text-gray-400 mb-2">{t('challenges.maxPlayersHint')}</p>
-                <div className="grid grid-cols-4 gap-2">
-                  {playerOptions.map((playerCount) => (
-                    <button
-                      key={playerCount}
-                      type="button"
-                      onClick={() => setCreateMaxPlayers(playerCount)}
-                      className={`py-2 rounded-lg text-sm ${createMaxPlayers === playerCount ? 'bg-primary text-white' : 'bg-gray-700 text-gray-200'}`}
-                    >
-                      {playerCount}
-                    </button>
-                  ))}
-                </div>
+            <div>
+              <label className="text-sm text-gray-300 block mb-2">{t('challenges.maxPlayers')}</label>
+              <p className="text-xs text-gray-400 mb-2">{t('challenges.maxPlayersHint')}</p>
+              <div className="grid grid-cols-4 gap-2">
+                {playerOptions.map((playerCount) => (
+                  <button
+                    key={playerCount}
+                    type="button"
+                    onClick={() => setCreateMaxPlayers(playerCount)}
+                    className={`py-2 rounded-lg text-sm ${createMaxPlayers === playerCount ? 'bg-primary text-white' : 'bg-gray-700 text-gray-200'}`}
+                  >
+                    {playerCount}
+                  </button>
+                ))}
               </div>
+            </div>
 
-              <div>
-                <label className="text-sm text-gray-300 block mb-2">{t('challenges.answerTime')}</label>
-                <p className="text-xs text-gray-400 mb-2">{t('challenges.answerTimeHint')}</p>
-                <div className="grid grid-cols-3 gap-2">
-                  {[10, 20, 30].map((time) => (
-                    <button key={time} type="button" onClick={() => setCreateTime(time as 10 | 20 | 30)} className={`py-2 rounded-lg ${createTime === time ? 'bg-primary text-white' : 'bg-gray-700 text-gray-300'}`}>
-                      {time}s
-                    </button>
-                  ))}
-                </div>
+            <div>
+              <label className="text-sm text-gray-300 block mb-2">{t('challenges.answerTime')}</label>
+              <p className="text-xs text-gray-400 mb-2">{t('challenges.answerTimeHint')}</p>
+              <div className="grid grid-cols-3 gap-2">
+                {[10, 20, 30].map((time) => (
+                  <button key={time} type="button" onClick={() => setCreateTime(time as 10 | 20 | 30)} className={`py-2 rounded-lg ${createTime === time ? 'bg-primary text-white' : 'bg-gray-700 text-gray-300'}`}>
+                    {time}s
+                  </button>
+                ))}
               </div>
+            </div>
 
-              <div className="rounded-lg border border-gray-700 bg-gray-900/40 p-3 text-xs text-gray-300">
-                {t('challenges.summary', {
-                  categories: createCategories.map(getCategoryLabel).join(', '),
-                  maxPlayers: createMaxPlayers,
-                  answerTimeSeconds: createTime,
-                })}
-              </div>
+            <div className="rounded-lg border border-gray-700 bg-gray-900/40 p-3 text-xs text-gray-300">
+              {t('challenges.summary', {
+                categories: createCategories.map(getCategoryLabel).join(', '),
+                maxPlayers: createMaxPlayers,
+                answerTimeSeconds: createTime,
+              })}
+            </div>
 
-              <div className="flex gap-2">
-                <button type="submit" disabled={creating} className="flex-1 py-3 rounded-lg bg-primary text-white">{creating ? t('common.loading') : t('challenges.send')}</button>
-                <button type="button" onClick={() => setShowCreateModal(false)} className="flex-1 py-3 rounded-lg bg-gray-700 text-white">{t('common.cancel')}</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+            <div className="flex gap-2">
+              <Button type="submit" disabled={creating} fullWidth>{creating ? t('common.loading') : t('challenges.send')}</Button>
+              <Modal.CloseButton>{t('common.cancel')}</Modal.CloseButton>
+            </div>
+          </form>
+        </Modal.Panel>
+      </Modal.Root>
     </div>
   );
 }
