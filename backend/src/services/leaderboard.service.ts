@@ -273,10 +273,12 @@ export async function getUserLeaderboardContext(
 export async function syncLeaderboardFromDatabase(): Promise<number> {
   const redis = getRedis();
 
-  // Obtener todos los usuarios con highScore > 0
+  // Obtener los top 1000 usuarios con highScore > 0
   const users = await prisma.user.findMany({
     where: { highScore: { gt: 0 } },
     select: { id: true, highScore: true },
+    orderBy: { highScore: 'desc' },
+    take: 1000,
   });
 
   if (users.length === 0) {

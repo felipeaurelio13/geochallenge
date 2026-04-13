@@ -70,20 +70,14 @@ export async function getQuestionsForGame(
     },
   });
 
-  // Si hay categoría MIXED, mezclar de todas las categorías
+  // Si hay categoría MIXED, obtener de todas las categorías en una sola query
   if (category === Category.MIXED || !category) {
-    const categories = [Category.FLAG, Category.CAPITAL, Category.MAP, Category.SILHOUETTE];
-    const mixedQuestions = [];
-    for (const cat of categories) {
-      const catQuestions = await prisma.question.findMany({
-        where: {
-          category: cat,
-          id: { notIn: excludeIds },
-        },
-      });
-      mixedQuestions.push(...catQuestions);
-    }
-    questions = mixedQuestions;
+    questions = await prisma.question.findMany({
+      where: {
+        category: { in: [Category.FLAG, Category.CAPITAL, Category.MAP, Category.SILHOUETTE] },
+        id: { notIn: excludeIds },
+      },
+    });
   }
 
   // Seleccionar aleatoriamente

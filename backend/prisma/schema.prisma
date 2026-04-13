@@ -41,6 +41,7 @@ model Question {
   difficulty     Difficulty @default(MEDIUM)
   createdAt      DateTime @default(now())
 
+  @@index([category])
   @@map("questions")
 }
 
@@ -57,6 +58,7 @@ model GameResult {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId, createdAt])
   @@map("game_results")
 }
 
@@ -76,6 +78,8 @@ model Challenge {
   creator User @relation("ChallengeCreator", fields: [creatorId], references: [id], onDelete: Cascade)
   participants ChallengeParticipant[]
 
+  @@index([status, expiresAt])
+  @@index([creatorId])
   @@map("challenges")
 }
 

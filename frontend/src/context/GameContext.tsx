@@ -32,6 +32,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<GameState>(initialState);
   const [streakAlive, setStreakAlive] = useState(true);
   const timerRef = useRef<number | null>(null);
+  const stateRef = useRef(state);
+
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
 
   // Cleanup timer on unmount
   useEffect(() => {
@@ -75,8 +80,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
   const submitAnswer = useCallback(
     async (answer: string, coordinates?: { lat: number; lng: number }): Promise<AnswerResult> => {
-      const currentQuestion = state.questions[state.currentIndex];
-      const timeRemaining = state.timeRemaining;
+      const { questions, currentIndex, timeRemaining } = stateRef.current;
+      const currentQuestion = questions[currentIndex];
 
       // Save answer locally
       const newAnswer: Answer = {
@@ -112,7 +117,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
       return answerResult;
     },
-    [state.questions, state.currentIndex, state.timeRemaining]
+    []
   );
 
   const nextQuestion = useCallback(() => {
@@ -133,13 +138,14 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const finishGame = useCallback(async (): Promise<GameResult> => {
+    const { answers, config } = stateRef.current;
     const result = await api.finishGame({
-      answers: state.answers,
-      category: state.config?.category,
+      answers,
+      category: config?.category,
     });
 
     return result;
-  }, [state.answers, state.config?.category, state.results, state.questions.length]);
+  }, []);
 
   const resetGame = useCallback(() => {
     if (timerRef.current) {

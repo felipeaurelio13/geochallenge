@@ -3,6 +3,12 @@
     "name": "GeoChallenge",
     "tagline": "Test your geography knowledge"
   },
+  "error": {
+    "title": "Something went wrong",
+    "unexpected": "An unexpected error occurred",
+    "retry": "Try again",
+    "backToMenu": "Back to menu"
+  },
   "home": {
     "badge": "Competitive geography trivia",
     "subtitle": "Test your geography knowledge",
@@ -55,7 +61,8 @@
     "hidePassword": "Hide password",
     "show": "Show",
     "hide": "Hide",
-    "completeFieldsHint": "Complete email and password to continue."
+    "completeFieldsHint": "Complete email and password to continue.",
+    "rateLimitError": "Too many attempts. Try again in {{minutes}} min."
   },
   "menu": {
     "welcome": "Hello, {{name}}!",
@@ -129,7 +136,8 @@
     "scoreBreakdownBase": "base",
     "scoreBreakdownTime": "fast",
     "scoreBreakdownCombo": "streak",
-    "scoreBreakdownAccuracy": "accuracy"
+    "scoreBreakdownAccuracy": "accuracy",
+    "timeRemaining": "Time remaining {{seconds}}s seconds"
   },
   "results": {
     "gameOver": "Game Over!",
@@ -175,7 +183,8 @@
     "connectionLost": "Connection lost. Reconnecting...",
     "reconnected": "Connection restored.",
     "reconnectedSearching": "Connection restored. We rejoined matchmaking.",
-    "reconnectedSyncing": "Connection restored. Syncing the current round..."
+    "reconnectedSyncing": "Connection restored. Syncing the current round...",
+    "searchTimeout": "No opponent found. Try again later."
   },
   "challenges": {
     "title": "Challenges",
@@ -244,7 +253,13 @@
     "totalPlayers": "Total players",
     "topScore": "Top score",
     "avgScore": "Average",
-    "searchPlaceholder": "Search player..."
+    "searchPlaceholder": "Search player...",
+    "nearbyContext": "Nearby context",
+    "loadingNeighbors": "Loading nearby positions\u2026",
+    "noNeighborsData": "No neighbor data available.",
+    "global": "Global",
+    "filteredBySearch": "Filtered by search",
+    "filteredResults": "Filtered results"
   },
   "profile": {
     "title": "My Profile",
@@ -254,7 +269,9 @@
     "language": "Language",
     "memberSince": "Member since",
     "updateSuccess": "Profile updated",
-    "updateError": "Failed to update profile"
+    "updateError": "Failed to update profile",
+    "languageEs": "Spanish",
+    "languageEn": "English"
   },
   "stats": {
     "highScore": "High Score",
@@ -274,6 +291,7 @@
     "back": "Back",
     "backToMenu": "Back to Menu",
     "save": "Save",
+    "processing": "Processing...",
     "skipToMainAction": "Skip to main actions",
     "search": "Search"
   }

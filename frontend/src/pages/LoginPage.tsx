@@ -31,7 +31,7 @@ export function LoginPage() {
     if (err?.response?.data?.retryAfterSeconds) {
       const seconds = Number(err.response.data.retryAfterSeconds);
       const minutes = Math.ceil(seconds / 60);
-      return `Demasiados intentos. Intenta de nuevo en ${minutes} min.`;
+      return t('auth.rateLimitError', { minutes });
     }
 
     if (err instanceof Error && err.message) {
@@ -130,7 +130,7 @@ export function LoginPage() {
           {isBusy ? (
             <>
               <LoadingSpinner size="sm" />
-              <span className="text-sm">Procesando...</span>
+              <span className="text-sm">{t('common.processing')}</span>
             </>
           ) : (
             t('auth.loginButton')

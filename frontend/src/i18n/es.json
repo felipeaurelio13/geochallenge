@@ -3,6 +3,12 @@
     "name": "GeoChallenge",
     "tagline": "Pon a prueba tus conocimientos geográficos"
   },
+  "error": {
+    "title": "Algo salio mal",
+    "unexpected": "Ha ocurrido un error inesperado",
+    "retry": "Intentar de nuevo",
+    "backToMenu": "Volver al menu"
+  },
   "home": {
     "badge": "Trivia geográfica competitiva",
     "subtitle": "Pon a prueba tus conocimientos geográficos",
@@ -55,7 +61,8 @@
     "hidePassword": "Ocultar contraseña",
     "show": "Mostrar",
     "hide": "Ocultar",
-    "completeFieldsHint": "Completa correo y contraseña para continuar."
+    "completeFieldsHint": "Completa correo y contraseña para continuar.",
+    "rateLimitError": "Demasiados intentos. Intenta de nuevo en {{minutes}} min."
   },
   "menu": {
     "welcome": "¡Hola, {{name}}!",
@@ -129,7 +136,8 @@
     "scoreBreakdownBase": "base",
     "scoreBreakdownTime": "rápido",
     "scoreBreakdownCombo": "racha",
-    "scoreBreakdownAccuracy": "precisión"
+    "scoreBreakdownAccuracy": "precisión",
+    "timeRemaining": "Tiempo restante {{seconds}}s segundos"
   },
   "results": {
     "gameOver": "¡Partida terminada!",
@@ -175,7 +183,8 @@
     "connectionLost": "Se perdió la conexión. Intentando reconectar...",
     "reconnected": "Conexión restablecida.",
     "reconnectedSearching": "Conexión restablecida. Volvimos a buscar oponente.",
-    "reconnectedSyncing": "Conexión restablecida. Sincronizando la ronda..."
+    "reconnectedSyncing": "Conexión restablecida. Sincronizando la ronda...",
+    "searchTimeout": "No se encontró oponente. Intenta de nuevo más tarde."
   },
   "challenges": {
     "title": "Desafíos",
@@ -244,7 +253,13 @@
     "totalPlayers": "Jugadores totales",
     "topScore": "Mejor puntuación",
     "avgScore": "Promedio",
-    "searchPlaceholder": "Buscar jugador..."
+    "searchPlaceholder": "Buscar jugador...",
+    "nearbyContext": "Contexto cercano",
+    "loadingNeighbors": "Cargando posiciones cercanas\u2026",
+    "noNeighborsData": "No hay datos de vecinos disponibles.",
+    "global": "Global",
+    "filteredBySearch": "Filtrado por búsqueda",
+    "filteredResults": "Resultados filtrados"
   },
   "profile": {
     "title": "Mi Perfil",
@@ -254,7 +269,9 @@
     "language": "Idioma",
     "memberSince": "Miembro desde",
     "updateSuccess": "Perfil actualizado",
-    "updateError": "Error al actualizar perfil"
+    "updateError": "Error al actualizar perfil",
+    "languageEs": "Español",
+    "languageEn": "English"
   },
   "stats": {
     "highScore": "Mejor puntuación",
@@ -274,6 +291,7 @@
     "back": "Volver",
     "backToMenu": "Volver al menú",
     "save": "Guardar",
+    "processing": "Procesando...",
     "skipToMainAction": "Ir a las acciones principales",
     "search": "Buscar"
   }

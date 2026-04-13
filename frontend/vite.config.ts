@@ -16,11 +16,14 @@ export default defineConfig({
       manifest: {
         name: 'GeoChallenge',
         short_name: 'GeoChallenge',
-        description: 'Juego de trivia geográfica',
+        description: 'Test your geography knowledge with flags, capitals, maps, and more!',
         theme_color: '#3B82F6',
         background_color: '#1F2937',
         display: 'standalone',
-        orientation: 'portrait',
+        orientation: 'portrait-primary',
+        categories: ['games', 'education'],
+        lang: 'es',
+        dir: 'ltr',
         icons: [
           {
             src: 'pwa-192x192.png',
@@ -32,10 +35,18 @@ export default defineConfig({
             sizes: '512x512',
             type: 'image/png',
           },
+          {
+            src: 'pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any maskable',
+          },
         ],
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        navigateFallback: 'index.html',
+        navigateFallbackDenylist: [/^\/api\//],
       },
     }),
   ],

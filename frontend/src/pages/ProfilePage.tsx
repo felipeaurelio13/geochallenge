@@ -150,12 +150,12 @@ export function ProfilePage() {
                   onChange={(event) => setPreferredLanguage(event.target.value as 'es' | 'en')}
                   className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-primary transition-colors"
                 >
-                  <option value="es">Espanol</option>
-                  <option value="en">English</option>
+                  <option value="es">{t('profile.languageEs')}</option>
+                  <option value="en">{t('profile.languageEn')}</option>
                 </select>
               ) : (
                 <div className="px-4 py-3 bg-gray-900 rounded-lg text-white">
-                  {preferredLanguage === 'es' ? 'Espanol' : 'English'}
+                  {preferredLanguage === 'es' ? t('profile.languageEs') : t('profile.languageEn')}
                 </div>
               )}
             </div>

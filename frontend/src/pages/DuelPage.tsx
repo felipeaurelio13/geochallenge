@@ -26,6 +26,7 @@ interface DuelResult {
 }
 
 const { TIME_PER_QUESTION } = GAME_CONSTANTS;
+const SEARCH_TIMEOUT_SECONDS = 120;
 const DUEL_CATEGORIES: Category[] = ['FLAG', 'CAPITAL', 'MAP', 'SILHOUETTE', 'MIXED'];
 
 function parseDuelCategory(value: string | null): Category {
@@ -62,6 +63,8 @@ export function DuelPage() {
   } | null>(null);
   const [showRetryAction, setShowRetryAction] = useState(false);
   const [isSyncingRound, setIsSyncingRound] = useState(false);
+  const [searchTimedOut, setSearchTimedOut] = useState(false);
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scoreRef = useRef(0);
   const opponentRef = useRef<{ id: string; username: string } | null>(null);
   const duelStateRef = useRef<DuelState>('searching');
@@ -109,6 +112,13 @@ export function DuelPage() {
       setSearchTime((prev) => prev + 1);
     }, 1000);
 
+    // Search timeout — auto-cancel after SEARCH_TIMEOUT_SECONDS
+    searchTimeoutRef.current = setTimeout(() => {
+      socketService.cancelDuelQueue();
+      clearInterval(searchTimer);
+      setSearchTimedOut(true);
+    }, SEARCH_TIMEOUT_SECONDS * 1000);
+
     // Event handlers
     const handleMatched = (data: any) => {
       if (data.opponent) {
@@ -116,6 +126,7 @@ export function DuelPage() {
       }
       setDuelState('matched');
       clearInterval(searchTimer);
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
 
       // Espera a que el backend emita countdown/start/question.
     };
@@ -215,6 +226,7 @@ export function DuelPage() {
 
     return () => {
       clearInterval(searchTimer);
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
       socketService.cancelDuelQueue();
       socketService.socket?.off('duel:matched', handleMatched);
       socketService.socket?.off('duel:opponent', handleOpponent);
@@ -343,6 +355,10 @@ export function DuelPage() {
             <p className="text-gray-400 mt-1">{t('duel.cancelHint')}</p>
           </div>
 
+          {searchTimedOut && (
+            <p className="text-amber-400 text-sm mb-4">{t('duel.searchTimeout')}</p>
+          )}
+
           <button
             onClick={handleCancelSearch}
             className="px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
@@ -425,6 +441,7 @@ export function DuelPage() {
               onClick={() => {
                 setDuelState('searching');
                 setSearchTime(0);
+                setSearchTimedOut(false);
                 socketService.joinDuelQueue(duelCategory);
               }}
               className="w-full py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary/80 transition-colors"

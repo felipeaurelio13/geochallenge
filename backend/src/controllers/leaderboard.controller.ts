@@ -38,7 +38,7 @@ export function resolveLeaderboardScope(rawScope: unknown): {
  */
 router.get('/', optionalAuth, async (req: AuthRequest, res: Response) => {
   try {
-    const limit = parseInt(req.query.limit as string) || 50;
+    const limit = Math.min(Math.max(parseInt(req.query.limit as string) || 50, 1), 100);
     const scopeResolution = resolveLeaderboardScope(req.query.scope);
     const clampedLimit = Math.min(limit, 100);
     const isSeasonScope = scopeResolution.effectiveScope === 'season';

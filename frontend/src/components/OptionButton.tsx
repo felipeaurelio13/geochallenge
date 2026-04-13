@@ -1,3 +1,5 @@
+import React from 'react';
+
 interface OptionButtonProps {
   option: string;
   index: number;
@@ -10,7 +12,7 @@ interface OptionButtonProps {
 
 const optionLetters = ['A', 'B', 'C', 'D'];
 
-export function OptionButton({
+export const OptionButton = React.memo(function OptionButton({
   option,
   index,
   onClick,
@@ -95,4 +97,4 @@ export function OptionButton({
       </div>
     </button>
   );
-}
+});

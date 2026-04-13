@@ -183,11 +183,11 @@ export function RankingsPage() {
 
         {!isLoading && !error && RANKING_NEIGHBORS_ENABLED && (
           <section className="mb-6 rounded-xl border border-gray-700 bg-gray-800 p-4" aria-live="polite">
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-300">Contexto cercano</h2>
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-300">{t('rankings.nearbyContext')}</h2>
             {neighborsLoading ? (
-              <p className="text-sm text-gray-400">Cargando posiciones cercanas…</p>
+              <p className="text-sm text-gray-400">{t('rankings.loadingNeighbors')}</p>
             ) : neighborEntries.length === 0 ? (
-              <p className="text-sm text-gray-400">No hay datos de vecinos disponibles.</p>
+              <p className="text-sm text-gray-400">{t('rankings.noNeighborsData')}</p>
             ) : (
               <ul className="space-y-2">
                 {neighborEntries.map((entry) => (
@@ -283,10 +283,10 @@ export function RankingsPage() {
         {!isLoading && !error && filteredLeaderboard.length > 0 && (
           <div className="mt-8 p-6 bg-gray-800 rounded-xl">
             <h3 className="text-lg font-semibold text-white mb-4">{t('rankings.stats')}</h3>
-            <p className="mb-3 text-xs uppercase tracking-wide text-gray-400">Global</p>
+            <p className="mb-3 text-xs uppercase tracking-wide text-gray-400">{t('rankings.global')}</p>
             {search.trim() && (
               <p className="mb-4 text-sm text-gray-300">
-                Resultados filtrados: <span className="font-semibold text-white">{filteredLeaderboard.length}</span>
+                {t('rankings.filteredResults')}: <span className="font-semibold text-white">{filteredLeaderboard.length}</span>
               </p>
             )}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-center">
@@ -306,10 +306,10 @@ export function RankingsPage() {
               )}
             </div>
             {search.trim() && (
-              <p className="mt-4 text-xs uppercase tracking-wide text-gray-500">Filtrado por búsqueda</p>
+              <p className="mt-4 text-xs uppercase tracking-wide text-gray-500">{t('rankings.filteredBySearch')}</p>
             )}
             {!search.trim() && (
-              <p className="mt-4 text-xs uppercase tracking-wide text-gray-500">Global</p>
+              <p className="mt-4 text-xs uppercase tracking-wide text-gray-500">{t('rankings.global')}</p>
             )}
           </div>
         )}

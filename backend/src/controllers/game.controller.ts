@@ -153,14 +153,7 @@ router.post('/answer', optionalAuth, async (req: AuthRequest, res: Response) => 
       gameType
     );
 
-    res.json({
-      ...result,
-      timeBonus:
-        result.timeBonus ??
-        (result.isCorrect
-          ? Math.floor((timeRemaining / config.game.timePerQuestion) * config.game.maxTimeBonus)
-          : 0),
-    });
+    res.json(result);
   } catch (error) {
     console.error('Error al validar respuesta:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
@@ -237,8 +230,8 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
  */
 router.get('/history', authenticateJWT, async (req: AuthRequest, res: Response) => {
   try {
-    const limit = parseInt(req.query.limit as string) || 10;
-    const history = await getUserGameHistory(req.user!.userId, Math.min(limit, 50));
+    const limit = Math.min(Math.max(parseInt(req.query.limit as string) || 10, 1), 100);
+    const history = await getUserGameHistory(req.user!.userId, limit);
 
     res.json({ history });
   } catch (error) {

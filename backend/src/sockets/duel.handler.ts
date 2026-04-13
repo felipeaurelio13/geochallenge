@@ -114,6 +114,26 @@ const activeDuels = new Map<string, ActiveDuel>();
 // Player to duel mapping
 const playerDuels = new Map<string, string>();
 
+// Mutex for answer processing to prevent race conditions
+const processingAnswers = new Set<string>();
+
+// Store ready-check timeout references for cleanup on disconnect
+const readyTimeouts = new Map<string, ReturnType<typeof setTimeout>>();
+
+// Simple per-socket event rate limiter
+const eventCounts = new Map<string, { count: number; resetAt: number }>();
+function isRateLimited(socketId: string, event: string, maxPerMinute: number = 30): boolean {
+  const key = `${socketId}:${event}`;
+  const now = Date.now();
+  const entry = eventCounts.get(key);
+  if (!entry || now > entry.resetAt) {
+    eventCounts.set(key, { count: 1, resetAt: now + 60000 });
+    return false;
+  }
+  entry.count++;
+  return entry.count > maxPerMinute;
+}
+
 const READY_TIMEOUT_MS = 7000;
 
 /**
@@ -131,6 +151,11 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
 
   // Unirse a la cola de matchmaking
   socket.on('duel:queue', async (data?: { category?: Category }) => {
+    if (isRateLimited(socket.id, 'duel:queue', 10)) {
+      socket.emit('duel:error', { message: 'Demasiadas solicitudes, intenta más tarde' });
+      return;
+    }
+
     const selectedCategory = normalizeCategory(data?.category);
 
     // Verificar si ya está en un duelo
@@ -187,6 +212,11 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
 
   // Enviar respuesta
   socket.on('duel:answer', async (data: { questionId: string; answer: string; timeRemaining: number; coordinates?: { lat: number; lng: number } }) => {
+    if (isRateLimited(socket.id, 'duel:answer', 30)) {
+      socket.emit('duel:error', { message: 'Demasiadas solicitudes, intenta más tarde' });
+      return;
+    }
+
     const duelId = playerDuels.get(user.userId);
     if (!duelId) return;
 
@@ -208,54 +238,63 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
       return;
     }
 
-    player.pendingQuestionIndex = duel.currentQuestionIndex;
+    // Mutex lock to prevent race conditions on concurrent answer submissions
+    const lockKey = `${duelId}-${user.userId}-${duel.currentQuestionIndex}`;
+    if (processingAnswers.has(lockKey)) return;
+    processingAnswers.add(lockKey);
 
-    let result: AnswerResult;
     try {
-      // Validar respuesta
-      result = await validateAnswer(
-        data.questionId,
-        data.answer,
-        data.timeRemaining,
-        data.coordinates
-      );
-    } catch (error) {
+      player.pendingQuestionIndex = duel.currentQuestionIndex;
+
+      let result: AnswerResult;
+      try {
+        // Validar respuesta
+        result = await validateAnswer(
+          data.questionId,
+          data.answer,
+          data.timeRemaining,
+          data.coordinates
+        );
+      } catch (error) {
+        player.pendingQuestionIndex = undefined;
+        console.error('Error validando respuesta en duelo:', error);
+        return;
+      }
+
+      // Revalidar por si el duelo avanzó/cerró mientras validábamos
+      if (
+        duel.status !== 'playing' ||
+        duel.currentQuestionIndex !== player.pendingQuestionIndex ||
+        player.answers.length >= duel.currentQuestionIndex + 1
+      ) {
+        player.pendingQuestionIndex = undefined;
+        return;
+      }
+
+      player.answers.push(result);
+      player.score += result.points;
       player.pendingQuestionIndex = undefined;
-      console.error('Error validando respuesta en duelo:', error);
-      return;
-    }
 
-    // Revalidar por si el duelo avanzó/cerró mientras validábamos
-    if (
-      duel.status !== 'playing' ||
-      duel.currentQuestionIndex !== player.pendingQuestionIndex ||
-      player.answers.length >= duel.currentQuestionIndex + 1
-    ) {
-      player.pendingQuestionIndex = undefined;
-      return;
-    }
+      // Notificar a ambos jugadores que este jugador respondió
+      io.to(duel.id).emit('duel:playerAnswered', {
+        userId: user.userId,
+        questionIndex: duel.currentQuestionIndex,
+      });
 
-    player.answers.push(result);
-    player.score += result.points;
-    player.pendingQuestionIndex = undefined;
-
-    // Notificar a ambos jugadores que este jugador respondió
-    io.to(duel.id).emit('duel:playerAnswered', {
-      userId: user.userId,
-      questionIndex: duel.currentQuestionIndex,
-    });
-
-    // Si ambos respondieron, mostrar resultado y pasar a siguiente pregunta
-    if (
-      duel.players.every((p) => p.answers.length > duel.currentQuestionIndex) &&
-      shouldResolveQuestion(
-        duel.status,
-        duel.currentQuestionIndex,
-        duel.currentQuestionIndex,
-        duel.resolvingQuestionIndex
-      )
-    ) {
-      await showQuestionResult(io, duel, duel.currentQuestionIndex);
+      // Si ambos respondieron, mostrar resultado y pasar a siguiente pregunta
+      if (
+        duel.players.every((p) => p.answers.length > duel.currentQuestionIndex) &&
+        shouldResolveQuestion(
+          duel.status,
+          duel.currentQuestionIndex,
+          duel.currentQuestionIndex,
+          duel.resolvingQuestionIndex
+        )
+      ) {
+        await showQuestionResult(io, duel, duel.currentQuestionIndex);
+      }
+    } finally {
+      processingAnswers.delete(lockKey);
     }
   });
 
@@ -263,11 +302,25 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
   socket.on('disconnect', () => {
     const duelId = playerDuels.get(user.userId);
     if (duelId) {
+      // Clean up ready-check timeout for this duel
+      const readyTimeout = readyTimeouts.get(duelId);
+      if (readyTimeout) {
+        clearTimeout(readyTimeout);
+        readyTimeouts.delete(duelId);
+      }
+
       const duel = activeDuels.get(duelId);
       if (duel && duel.status !== 'finished') {
         // El otro jugador gana por abandono
         const winner = duel.players.find((p) => p.userId !== user.userId);
         endDuel(io, duel, winner?.userId || null, 'opponent_disconnected');
+      }
+    }
+
+    // Clean up rate limiter entries for this socket
+    for (const key of eventCounts.keys()) {
+      if (key.startsWith(`${socket.id}:`)) {
+        eventCounts.delete(key);
       }
     }
   });
@@ -351,7 +404,8 @@ async function createDuel(
   });
 
   const waitingStartedAt = Date.now();
-  setTimeout(() => {
+  const readyTimeout = setTimeout(() => {
+    readyTimeouts.delete(duelId);
     const currentDuel = activeDuels.get(duelId);
     if (!currentDuel) {
       return;
@@ -377,6 +431,7 @@ async function createDuel(
       startDuelCountdown(io, currentDuel);
     }
   }, READY_TIMEOUT_MS);
+  readyTimeouts.set(duelId, readyTimeout);
 }
 
 /**
@@ -418,39 +473,47 @@ function startDuel(io: SocketIOServer, duel: ActiveDuel) {
  * Envía la pregunta actual a los jugadores
  */
 function sendQuestion(io: SocketIOServer, duel: ActiveDuel) {
-  const questionIndex = duel.currentQuestionIndex;
-  const question = duel.questions[questionIndex];
-  duel.questionStartedAt = new Date();
+  try {
+    const questionIndex = duel.currentQuestionIndex;
+    const question = duel.questions[questionIndex];
+    duel.questionStartedAt = new Date();
 
-  io.to(duel.id).emit('duel:question', {
-    questionIndex,
-    totalQuestions: duel.questions.length,
-    question,
-    timeLimit: config.game.timePerQuestion,
-  });
+    io.to(duel.id).emit('duel:question', {
+      questionIndex,
+      totalQuestions: duel.questions.length,
+      question,
+      timeLimit: config.game.timePerQuestion,
+    });
 
-  // Timer para forzar fin de pregunta si no responden
-  setTimeout(() => {
-    const currentDuel = activeDuels.get(duel.id);
-    if (
-      currentDuel &&
-      shouldAutoCloseQuestion(
-        currentDuel.status,
-        questionIndex,
-        currentDuel.currentQuestionIndex,
-        currentDuel.resolvingQuestionIndex
-      )
-    ) {
-      // Agregar respuestas vacías para quienes no respondieron
-      for (const player of currentDuel.players) {
-        if (player.answers.length <= questionIndex) {
-          player.pendingQuestionIndex = undefined;
-          player.answers.push(createUnansweredResult(question.id));
+    // Timer para forzar fin de pregunta si no responden
+    setTimeout(() => {
+      const currentDuel = activeDuels.get(duel.id);
+      if (
+        currentDuel &&
+        shouldAutoCloseQuestion(
+          currentDuel.status,
+          questionIndex,
+          currentDuel.currentQuestionIndex,
+          currentDuel.resolvingQuestionIndex
+        )
+      ) {
+        // Agregar respuestas vacías para quienes no respondieron
+        for (const player of currentDuel.players) {
+          if (player.answers.length <= questionIndex) {
+            player.pendingQuestionIndex = undefined;
+            player.answers.push(createUnansweredResult(question.id));
+          }
         }
+        showQuestionResult(io, currentDuel, questionIndex);
       }
-      showQuestionResult(io, currentDuel, questionIndex);
-    }
-  }, (config.game.timePerQuestion + 2) * 1000); // +2 segundos de buffer
+    }, (config.game.timePerQuestion + 2) * 1000); // +2 segundos de buffer
+  } catch (error) {
+    console.error(`Error sending question for duel ${duel.id}:`, error);
+    io.to(duel.id).emit('duel:error', { message: 'Error al enviar pregunta' });
+    // End the duel to avoid leaving it stuck
+    const winnerId = null;
+    endDuel(io, duel, winnerId, 'cancelled');
+  }
 }
 
 /**
@@ -534,35 +597,38 @@ async function endDuel(
     results: finalResults,
   });
 
-  // Guardar resultados en la base de datos
-  for (const player of duel.players) {
-    try {
-      const { totalScore, isHighScore } = await saveGameResult(
-        player.userId,
-        player.answers,
-        duel.category,
-        GameMode.DUEL
-      );
+  // Guardar resultados en la base de datos usando una transacción
+  try {
+    await prisma.$transaction(async (tx) => {
+      for (const player of duel.players) {
+        const { totalScore, isHighScore } = await saveGameResult(
+          player.userId,
+          player.answers,
+          duel.category,
+          GameMode.DUEL
+        );
 
-      // Actualizar wins/losses
-      await prisma.user.update({
-        where: { id: player.userId },
-        data: {
-          wins: player.userId === winnerId ? { increment: 1 } : undefined,
-          losses: winnerId && player.userId !== winnerId ? { increment: 1 } : undefined,
-        },
-      });
+        // Actualizar wins/losses
+        await tx.user.update({
+          where: { id: player.userId },
+          data: {
+            wins: player.userId === winnerId ? { increment: 1 } : undefined,
+            losses: winnerId && player.userId !== winnerId ? { increment: 1 } : undefined,
+          },
+        });
 
-      // Actualizar leaderboard
-      if (isHighScore) {
-        await updateLeaderboardScore(player.userId, totalScore);
+        // Actualizar leaderboard
+        if (isHighScore) {
+          await updateLeaderboardScore(player.userId, totalScore);
+        }
       }
-    } catch (error) {
-      console.error(`Error guardando resultado del duelo para ${player.username}:`, error);
-    }
+    });
+  } catch (error) {
+    console.error(`Error guardando resultados del duelo ${duel.id}:`, error);
   }
 
   // Limpiar
+  readyTimeouts.delete(duel.id);
   playerDuels.delete(duel.players[0].userId);
   playerDuels.delete(duel.players[1].userId);
   activeDuels.delete(duel.id);

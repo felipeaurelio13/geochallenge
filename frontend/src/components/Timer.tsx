@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface TimerProps {
   duration: number;
@@ -15,7 +16,13 @@ export function getTimerColorToken(percentage: number): string {
 }
 
 export function Timer({ duration, timeRemaining, onTick, onComplete, isActive }: TimerProps) {
+  const { t } = useTranslation();
   const intervalRef = useRef<number | null>(null);
+  const onTickRef = useRef(onTick);
+  const onCompleteRef = useRef(onComplete);
+
+  useEffect(() => { onTickRef.current = onTick; }, [onTick]);
+  useEffect(() => { onCompleteRef.current = onComplete; }, [onComplete]);
 
   useEffect(() => {
     if (!isActive) {
@@ -27,7 +34,7 @@ export function Timer({ duration, timeRemaining, onTick, onComplete, isActive }:
     }
 
     intervalRef.current = window.setInterval(() => {
-      onTick(timeRemaining - 1);
+      onTickRef.current(timeRemaining - 1);
     }, 1000);
 
     return () => {
@@ -35,13 +42,13 @@ export function Timer({ duration, timeRemaining, onTick, onComplete, isActive }:
         clearInterval(intervalRef.current);
       }
     };
-  }, [isActive, timeRemaining, onTick]);
+  }, [isActive, timeRemaining]);
 
   useEffect(() => {
     if (timeRemaining <= 0 && isActive) {
-      onComplete();
+      onCompleteRef.current();
     }
-  }, [timeRemaining, isActive, onComplete]);
+  }, [timeRemaining, isActive]);
 
   const percentage = (timeRemaining / duration) * 100;
   const strokeDashoffset = 283 - (283 * percentage) / 100;
@@ -52,7 +59,7 @@ export function Timer({ duration, timeRemaining, onTick, onComplete, isActive }:
       className="relative h-14 w-14 sm:h-16 sm:w-16 md:h-20 md:w-20"
       role="timer"
       aria-live="off"
-      aria-label={`Tiempo restante ${Math.max(0, timeRemaining)}s segundos`}
+      aria-label={t('game.timeRemaining', { seconds: Math.max(0, timeRemaining) })}
     >
       <svg className="h-14 w-14 -rotate-90 transform sm:h-16 sm:w-16 md:h-20 md:w-20" viewBox="0 0 100 100">
         <circle cx="50" cy="50" r="45" fill="none" className="timer-ring-bg" strokeWidth="8" />
