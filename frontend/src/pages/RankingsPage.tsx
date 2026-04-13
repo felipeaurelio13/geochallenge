@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import { useApi, useDebounce } from '../hooks';
 import { LoadingSpinner } from '../components';
+import { PageHeader } from '../components/molecules/PageHeader';
+import { EmptyState } from '../components/molecules/EmptyState';
+import { Button } from '../components/atoms/Button';
+import { Input } from '../components/atoms/Input';
 
 interface LeaderboardEntry {
   rank: number;
@@ -156,19 +159,9 @@ export function RankingsPage() {
 
   return (
     <div className="h-full min-h-0 bg-gray-900">
-      <header className="bg-gray-800 border-b border-gray-700">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/menu" className="text-gray-400 hover:text-white transition-colors">
-            ← {t('common.back')}
-          </Link>
-          <h1 className="text-xl font-bold text-white">
-            🏆 {t('rankings.title')}
-          </h1>
-          <div className="w-16" />
-        </div>
-      </header>
+      <PageHeader title={t('rankings.title')} backTo="/menu" backLabel={`← ${t('common.back')}`} />
 
-      <main className="max-w-4xl mx-auto px-4 py-6 sm:py-8">
+      <main className="max-w-4xl mx-auto px-4 py-6 sm:px-6">
         {resolvedUserRank && resolvedUserRank > 50 && (
           <div className="mb-6 p-4 bg-primary/20 border border-primary rounded-xl">
             <div className="flex items-center justify-between">
@@ -208,11 +201,11 @@ export function RankingsPage() {
           <label htmlFor="rankings-search" className="mb-1 block text-xs font-medium uppercase tracking-wide text-gray-400">
             {t('common.search')}
           </label>
-          <input
+          <Input
             id="rankings-search"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            className="w-full rounded-xl border border-gray-700 bg-gray-800 px-4 py-3 text-sm text-white placeholder-gray-500 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/60"
+            className="text-sm"
             placeholder={t('rankings.searchPlaceholder', { defaultValue: 'Buscar jugador...' })}
           />
         </div>
@@ -224,28 +217,28 @@ export function RankingsPage() {
         )}
 
         {error && (
-          <div className="text-center py-12">
-            <div className="text-4xl mb-4">😢</div>
-            <p className="text-gray-400">{error}</p>
-            <button
-              onClick={() => {
-                invalidate();
-                void run();
-              }}
-              className="mt-4 px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/80 transition-colors"
-            >
-              {t('common.retry')}
-            </button>
-          </div>
+          <EmptyState
+            emoji="😢"
+            message={error || ''}
+            action={
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => {
+                  invalidate();
+                  void run();
+                }}
+              >
+                {t('common.retry')}
+              </Button>
+            }
+          />
         )}
 
         {!isLoading && !error && (
           <div className="space-y-3">
             {filteredLeaderboard.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="text-4xl mb-4">📊</div>
-                <p className="text-gray-400">{t(hasNoSearchResults ? 'rankings.noSearchResults' : 'rankings.empty')}</p>
-              </div>
+              <EmptyState emoji="📊" message={t(hasNoSearchResults ? 'rankings.noSearchResults' : 'rankings.empty')} />
             ) : (
               filteredLeaderboard.map((entry) => (
                 <div

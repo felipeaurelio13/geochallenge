@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { useGesture, useLocalStorage, useMediaQuery } from '../hooks';
 import { Button, Header, Icon, PageTemplate } from '../components';
+import { UserAvatar } from '../components/atoms/UserAvatar';
 
 type Category = 'FLAG' | 'CAPITAL' | 'MAP' | 'SILHOUETTE' | 'MIXED';
 
@@ -65,9 +66,7 @@ export function MenuPage() {
                 to="/profile"
                 className="flex min-h-11 items-center gap-2 rounded-lg border border-gray-800 bg-gray-900 px-2.5 py-1.5 text-gray-200 transition-colors hover:border-gray-600 hover:text-white"
               >
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-sm font-bold text-white">
-                  {user?.username?.charAt(0).toUpperCase()}
-                </span>
+                <UserAvatar username={user?.username || ''} size="xs" />
                 <span className="hidden max-w-20 truncate text-xs sm:inline sm:text-sm">
                   {user?.username}
                 </span>

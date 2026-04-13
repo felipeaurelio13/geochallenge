@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { useAuth } from '../context/AuthContext';
 import { useFormValidation } from '../hooks';
 import { AuthPageTemplate, Button, FormField, LoadingSpinner } from '../components';
+import { Alert } from '../components/atoms/Alert';
 
 const registerSchema = z
   .object({
@@ -62,7 +63,7 @@ export function RegisterPage() {
         </div>
       }
     >
-      {error && <div className="mb-6 rounded-lg border border-red-500 bg-red-900/50 px-4 py-3 text-sm text-red-300">{error}</div>}
+      {error && <Alert type="error" className="mb-6">{error}</Alert>}
 
       <form onSubmit={handleSubmit} className="space-y-5" noValidate>
         <FormField.Root id="username" error={errors.username}>

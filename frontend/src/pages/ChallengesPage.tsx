@@ -1,9 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import { LoadingSpinner } from '../components';
+import { PageHeader } from '../components/molecules/PageHeader';
+import { EmptyState } from '../components/molecules/EmptyState';
+import { Alert } from '../components/atoms/Alert';
 
 interface ChallengeParticipant {
   userId: string;
@@ -152,15 +155,17 @@ export function ChallengesPage() {
 
   return (
     <div className="h-full min-h-0 bg-gray-900">
-      <header className="bg-gray-800 border-b border-gray-700 sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
-          <Link to="/menu" className="text-gray-400 hover:text-white">← {t('common.back')}</Link>
-          <h1 className="text-base sm:text-xl font-bold text-white">📨 {t('challenges.title')}</h1>
+      <PageHeader
+        title={t('challenges.title')}
+        backTo="/menu"
+        backLabel={`← ${t('common.back')}`}
+        sticky
+        actions={
           <button onClick={() => setShowCreateModal(true)} className="px-3 py-2 bg-primary text-white rounded-lg text-sm font-medium">
             + {t('challenges.create')}
           </button>
-        </div>
-      </header>
+        }
+      />
 
       <div className="bg-gray-800/50 border-b border-gray-700 px-4">
         <div className="max-w-4xl mx-auto grid grid-cols-3 gap-2 py-2 text-sm">
@@ -186,16 +191,18 @@ export function ChallengesPage() {
         </section>
 
         {loading ? <LoadingSpinner size="lg" /> : filteredChallenges.length === 0 ? (
-          <div className="rounded-xl border border-gray-700 bg-gray-800/40 px-4 py-12 text-center">
-            <p className="text-gray-300">{t('challenges.empty')}</p>
-            <button
-              type="button"
-              onClick={() => setShowCreateModal(true)}
-              className="mt-4 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white"
-            >
-              {t('challenges.createMultiplayerCta')}
-            </button>
-          </div>
+          <EmptyState
+            message={t('challenges.empty')}
+            action={
+              <button
+                type="button"
+                onClick={() => setShowCreateModal(true)}
+                className="mt-4 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white"
+              >
+                {t('challenges.createMultiplayerCta')}
+              </button>
+            }
+          />
         ) : (
           <div className="space-y-3">
             {filteredChallenges.map((challenge) => {
@@ -253,7 +260,7 @@ export function ChallengesPage() {
         <div className="fixed inset-0 bg-black/70 flex items-end sm:items-center justify-center px-3 z-50">
           <div className="bg-gray-800 rounded-t-2xl sm:rounded-xl p-5 w-full max-w-md space-y-4">
             <h2 className="text-lg font-bold text-white">{t('challenges.createTitle')}</h2>
-            {error && <p className="text-sm text-red-300 bg-red-900/40 p-2 rounded">{error}</p>}
+            {error && <Alert type="error">{error}</Alert>}
             <form onSubmit={handleCreate} className="space-y-4">
               <div>
                 <label className="text-sm text-gray-300 block mb-2">{t('challenges.categories')}</label>

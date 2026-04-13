@@ -1,10 +1,14 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import { useApi } from '../hooks';
 import { LoadingSpinner } from '../components';
+import { PageHeader } from '../components/molecules/PageHeader';
+import { UserAvatar } from '../components/atoms/UserAvatar';
+import { Alert } from '../components/atoms/Alert';
+import { StatCard } from '../components/atoms/StatCard';
+import { Input } from '../components/atoms/Input';
 
 export function ProfilePage() {
   const { t, i18n } = useTranslation();
@@ -66,49 +70,25 @@ export function ProfilePage() {
 
   return (
     <div className="h-full min-h-0 bg-gray-900">
-      <header className="bg-gray-800 border-b border-gray-700">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/menu" className="text-gray-400 hover:text-white transition-colors">
-            ← {t('common.back')}
-          </Link>
-          <h1 className="text-xl font-bold text-white">{t('profile.title')}</h1>
-          <div className="w-16" />
-        </div>
-      </header>
+      <PageHeader title={t('nav.profile')} backTo="/menu" backLabel={`← ${t('common.back')}`} />
 
-      <main className="max-w-2xl mx-auto px-4 py-8">
+      <main className="max-w-2xl mx-auto px-4 py-6 sm:px-6 sm:py-8">
         <div className="text-center mb-8">
-          <div className="w-24 h-24 bg-primary rounded-full flex items-center justify-center text-4xl font-bold text-white mx-auto mb-4">
-            {user.username.charAt(0).toUpperCase()}
-          </div>
+          <UserAvatar username={user.username} size="xl" className="mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-white">{user.username}</h2>
           <p className="text-gray-400">{user.email}</p>
         </div>
 
-        {error && <div className="mb-6 p-4 bg-red-900/50 border border-red-500 text-red-300 rounded-lg">{error}</div>}
-        {success && (
-          <div className="mb-6 p-4 bg-green-900/50 border border-green-500 text-green-300 rounded-lg">{success}</div>
-        )}
+        {error && <Alert type="error" className="mb-6">{error}</Alert>}
+        {success && <Alert type="success" className="mb-6">{success}</Alert>}
 
         <div className="bg-gray-800 rounded-xl p-6 mb-6">
           <h3 className="text-lg font-semibold text-white mb-4">{t('profile.statistics')}</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center p-4 bg-gray-900 rounded-lg">
-              <div className="text-2xl font-bold text-primary">{user.highScore.toLocaleString()}</div>
-              <div className="text-sm text-gray-400">{t('stats.highScore')}</div>
-            </div>
-            <div className="text-center p-4 bg-gray-900 rounded-lg">
-              <div className="text-2xl font-bold text-white">{user.gamesPlayed}</div>
-              <div className="text-sm text-gray-400">{t('stats.gamesPlayed')}</div>
-            </div>
-            <div className="text-center p-4 bg-gray-900 rounded-lg">
-              <div className="text-2xl font-bold text-green-400">{user.wins}</div>
-              <div className="text-sm text-gray-400">{t('stats.wins')}</div>
-            </div>
-            <div className="text-center p-4 bg-gray-900 rounded-lg">
-              <div className="text-2xl font-bold text-yellow-400">{winRate}%</div>
-              <div className="text-sm text-gray-400">{t('stats.winRate')}</div>
-            </div>
+            <StatCard value={user.highScore} label={t('stats.highScore')} color="primary" />
+            <StatCard value={user.gamesPlayed} label={t('stats.gamesPlayed')} color="white" />
+            <StatCard value={user.wins} label={t('stats.wins')} color="green" />
+            <StatCard value={`${winRate}%`} label={t('stats.winRate')} color="yellow" />
           </div>
         </div>
 
@@ -129,11 +109,10 @@ export function ProfilePage() {
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">{t('auth.username')}</label>
               {isEditing ? (
-                <input
+                <Input
                   type="text"
                   value={username}
                   onChange={(event) => setUsername(event.target.value)}
-                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-primary transition-colors"
                   minLength={3}
                   maxLength={20}
                 />

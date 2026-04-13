@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { useAuth } from '../context/AuthContext';
 import { useFormValidation } from '../hooks';
 import { AuthPageTemplate, Button, FormField, LoadingSpinner } from '../components';
+import { Alert } from '../components/atoms/Alert';
 
 const loginSchema = z.object({
   email: z.string().trim().email('Email inválido'),
@@ -80,7 +81,7 @@ export function LoginPage() {
         </div>
       }
     >
-      {error && <div className="mb-6 rounded-lg border border-red-500/60 bg-red-900/40 px-4 py-3 text-sm text-red-200">{error}</div>}
+      {error && <Alert type="error" className="mb-6">{error}</Alert>}
 
       <form onSubmit={handleSubmit} className="space-y-5" noValidate>
         <FormField.Root id="email" error={errors.email}>

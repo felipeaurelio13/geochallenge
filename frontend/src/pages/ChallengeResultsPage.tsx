@@ -1,5 +1,7 @@
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { StatCard } from '../components/atoms/StatCard';
+import { Button } from '../components/atoms/Button';
 
 interface ChallengeResultsState {
   score: number;
@@ -20,12 +22,14 @@ export function ChallengeResultsPage() {
       <div className="h-full min-h-0 bg-gray-900 flex items-center justify-center px-4">
         <div className="w-full max-w-md rounded-2xl border border-gray-700 bg-gray-800 p-5 text-center sm:p-6">
           <p className="text-sm text-gray-300">{t('challenges.resultsUnavailable')}</p>
-          <button
+          <Button
             onClick={() => navigate('/challenges')}
-            className="mt-4 w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
+            variant="primary"
+            fullWidth
+            className="mt-4"
           >
             {t('challenges.backToList')}
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -49,34 +53,28 @@ export function ChallengeResultsPage() {
           <p className="mt-1 text-4xl font-bold text-primary">{score.toLocaleString()}</p>
 
           <div className="mt-5 grid grid-cols-3 gap-2 text-center text-xs sm:gap-3 sm:text-sm">
-            <div className="rounded-xl bg-gray-900 px-2 py-3">
-              <p className="text-lg font-bold text-green-400">{correctAnswers}</p>
-              <p className="text-gray-400">{t('results.correct')}</p>
-            </div>
-            <div className="rounded-xl bg-gray-900 px-2 py-3">
-              <p className="text-lg font-bold text-red-400">{incorrectAnswers}</p>
-              <p className="text-gray-400">{t('results.incorrect')}</p>
-            </div>
-            <div className="rounded-xl bg-gray-900 px-2 py-3">
-              <p className="text-lg font-bold text-white">{accuracy}%</p>
-              <p className="text-gray-400">{t('results.accuracy')}</p>
-            </div>
+            <StatCard value={correctAnswers} label={t('results.correct')} color="green" />
+            <StatCard value={incorrectAnswers} label={t('results.incorrect')} color="red" />
+            <StatCard value={`${accuracy}%`} label={t('results.accuracy')} color="primary" />
           </div>
         </section>
 
         <div className="space-y-2">
-          <button
+          <Button
             onClick={() => navigate(`/challenges/${id}/play`)}
-            className="w-full rounded-xl border border-primary/50 bg-primary/10 px-4 py-3 text-sm font-semibold text-primary transition-colors hover:bg-primary/20"
+            variant="ghost"
+            fullWidth
+            className="border border-primary/50 bg-primary/10 text-primary hover:bg-primary/20"
           >
             {t('challenges.playAgain')}
-          </button>
-          <Link
-            to="/challenges"
-            className="inline-flex w-full items-center justify-center rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
+          </Button>
+          <Button
+            onClick={() => navigate('/challenges')}
+            variant="primary"
+            fullWidth
           >
             {t('challenges.backToList')}
-          </Link>
+          </Button>
         </div>
       </div>
     </div>

@@ -9,6 +9,8 @@ import {
   GameRoundScaffold,
   RoundActionTray,
 } from '../components';
+import { UserAvatar } from '../components/atoms/UserAvatar';
+import { Alert } from '../components/atoms/Alert';
 import { Category, Question } from '../types';
 import { GAME_CONSTANTS } from '../constants/game';
 
@@ -287,16 +289,7 @@ export function DuelPage() {
   };
 
   const connectionBanner = connectionNotice ? (
-    <div
-      className={`mb-4 w-full max-w-sm rounded-xl border px-4 py-3 text-left text-sm ${
-        connectionNotice.type === 'error'
-          ? 'border-red-500/50 bg-red-500/10 text-red-100'
-          : connectionNotice.type === 'warning'
-          ? 'border-yellow-500/50 bg-yellow-500/10 text-yellow-100'
-          : 'border-sky-500/50 bg-sky-500/10 text-sky-100'
-      }`}
-      role="status"
-    >
+    <Alert type={connectionNotice.type} className="mb-4 w-full max-w-sm text-left">
       <p className="font-medium">{connectionNotice.message}</p>
       <div className="mt-3 flex flex-wrap gap-2">
         {showRetryAction && (
@@ -314,7 +307,7 @@ export function DuelPage() {
           {t('common.backToMenu')}
         </button>
       </div>
-    </div>
+    </Alert>
   ) : null;
 
   // Searching state
@@ -356,7 +349,9 @@ export function DuelPage() {
           </div>
 
           {searchTimedOut && (
-            <p className="text-amber-400 text-sm mb-4">{t('duel.searchTimeout')}</p>
+            <Alert type="warning" className="mb-4 w-full">
+              <p className="font-medium">{t('duel.searchTimeout')}</p>
+            </Alert>
           )}
 
           <button
@@ -381,16 +376,12 @@ export function DuelPage() {
           </h1>
           <div className="flex items-center justify-center gap-8 mb-8">
             <div className="text-center">
-              <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center text-3xl font-bold text-white mb-2">
-                {user?.username?.charAt(0).toUpperCase()}
-              </div>
+              <UserAvatar username={user?.username ?? ''} size="lg" className="mb-2" />
               <p className="text-white font-semibold">{user?.username}</p>
             </div>
             <div className="text-4xl animate-pulse">⚔️</div>
             <div className="text-center">
-              <div className="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center text-3xl font-bold text-white mb-2">
-                {opponent.username.charAt(0).toUpperCase()}
-              </div>
+              <UserAvatar username={opponent.username} size="lg" color="bg-red-500" className="mb-2" />
               <p className="text-white font-semibold">{opponent.username}</p>
             </div>
           </div>
@@ -478,9 +469,7 @@ export function DuelPage() {
         <header className="sticky top-0 z-30 border-b border-gray-700 bg-gray-800/95 px-3 py-2 pt-2 backdrop-blur sm:px-4">
           <div className="max-w-4xl mx-auto flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold text-white">
-                {user?.username?.charAt(0).toUpperCase()}
-              </div>
+              <UserAvatar username={user?.username ?? ''} size="sm" />
               <span className="text-xl font-bold text-primary">{myScore}</span>
             </div>
 
@@ -494,9 +483,7 @@ export function DuelPage() {
 
             <div className="flex items-center gap-2">
               <span className="text-xl font-bold text-red-400">{opponentScore}</span>
-              <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-sm font-bold text-white">
-                {opponent?.username?.charAt(0).toUpperCase()}
-              </div>
+              <UserAvatar username={opponent?.username ?? ''} size="sm" color="bg-red-500" />
             </div>
           </div>
         </header>
