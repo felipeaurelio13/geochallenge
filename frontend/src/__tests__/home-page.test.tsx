@@ -60,7 +60,6 @@ describe('HomePage', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText('Trivia geográfica competitiva')).toBeInTheDocument();
     expect(document.querySelector('div.app-shell')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Ir a las acciones principales' })).toHaveAttribute(
       'href',
@@ -68,10 +67,9 @@ describe('HomePage', () => {
     );
     expect(screen.getByRole('link', { name: 'Iniciar sesión' })).toHaveAttribute('href', '/login');
     expect(screen.getByRole('link', { name: 'Crear cuenta' })).toHaveAttribute('href', '/register');
-    expect(screen.getByRole('link', { name: 'Rankings' })).toHaveAttribute('href', '/rankings');
+    expect(screen.queryByRole('link', { name: 'Rankings' })).not.toBeInTheDocument();
     expect(screen.getByText(/v\d+\.\d+\.\d+/i)).toHaveClass('app-footer__version');
   });
-
 
   it('prioriza layout minimalista sin tarjetas de características redundantes', () => {
     mockUseAuth.mockReturnValue({ user: null });
@@ -82,9 +80,11 @@ describe('HomePage', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText('Banderas · Mapas · Multijugador')).toBeInTheDocument();
-    expect(screen.getByText('Sin anuncios invasivos · partidas rápidas · enfoque mobile-first')).toBeInTheDocument();
+    expect(screen.queryByText('Trivia geográfica competitiva')).not.toBeInTheDocument();
+    expect(screen.queryByText('Banderas · Mapas · Multijugador')).not.toBeInTheDocument();
+    expect(screen.queryByText('Sin anuncios invasivos · partidas rápidas · enfoque mobile-first')).not.toBeInTheDocument();
     expect(screen.queryByText('Identifica países por su bandera.')).not.toBeInTheDocument();
+    expect(screen.getByText('Pon a prueba tus conocimientos de geografía.')).toBeInTheDocument();
   });
 
   it('muestra acción principal de juego cuando hay un usuario autenticado', () => {
@@ -100,5 +100,6 @@ describe('HomePage', () => {
     expect(screen.getByRole('link', { name: 'Rankings' })).toHaveAttribute('href', '/rankings');
     expect(screen.getByText('¡Bienvenido de vuelta, geo! Tu próxima partida está a un toque.')).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Iniciar sesión' })).not.toBeInTheDocument();
+    expect(screen.queryByText('Pon a prueba tus conocimientos de geografía.')).not.toBeInTheDocument();
   });
 });
