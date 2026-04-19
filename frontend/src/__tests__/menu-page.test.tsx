@@ -170,7 +170,7 @@ describe('MenuPage', () => {
     expect(main?.className).toContain('py-2.5');
 
     const categoryButton = screen.getByRole('button', { name: /🎲\s*mixto/i });
-    expect(categoryButton.className).toContain('min-h-10');
+    expect(categoryButton.className).toContain('min-h-14');
 
     const singleModeButton = screen.getByRole('button', { name: /un jugador[\s\S]*juega solo/i });
     expect(singleModeButton.className).toContain('py-2.5');

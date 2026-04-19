@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
-import { useGesture, useLocalStorage, useMediaQuery } from '../hooks';
+import { useLocalStorage } from '../hooks';
 import { Button, Header, Icon, PageTemplate } from '../components';
 import { UserAvatar } from '../components/atoms/UserAvatar';
 import { GameModeCard } from '../components/molecules/GameModeCard';
@@ -31,27 +31,12 @@ export function MenuPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const isMobile = useMediaQuery('(max-width: 640px)');
 
   const [selectedCategory, setSelectedCategory] = useLocalStorage<Category>(
     'geochallenge:last-category',
     'MIXED',
     categorySerializer,
   );
-
-  const selectedCategoryIndex = categories.findIndex(
-    (category) => category.id === selectedCategory,
-  );
-
-  const updateCategoryByOffset = (offset: number) => {
-    const nextIndex = (selectedCategoryIndex + offset + categories.length) % categories.length;
-    setSelectedCategory(categories[nextIndex].id);
-  };
-
-  const swipeHandlers = useGesture({
-    onSwipeLeft: () => isMobile && updateCategoryByOffset(1),
-    onSwipeRight: () => isMobile && updateCategoryByOffset(-1),
-  });
 
   return (
     <PageTemplate
@@ -83,25 +68,25 @@ export function MenuPage() {
       }
       contentClassName="py-2.5 pb-4 sm:py-3 sm:pb-6"
     >
-      <section {...swipeHandlers}>
+      <section>
         <p className="mb-2 px-1 text-xs font-medium uppercase tracking-wider text-gray-500 sm:px-0">
           {t('menu.selectCategory')}
         </p>
-        <div className="scrollbar-none -mx-3 flex snap-x snap-mandatory gap-2 overflow-x-auto px-3 pb-1 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-2.5 sm:overflow-visible sm:px-0 lg:grid-cols-5">
+        <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
           {categories.map((cat) => (
             <Button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
               variant={selectedCategory === cat.id ? 'primary' : 'secondary'}
-              className={`min-w-[7rem] snap-start !min-h-10 !rounded-xl !px-3 !py-2 text-left sm:min-w-0 ${
+              className={`flex flex-col items-center justify-center !min-h-14 !rounded-xl !px-1 !py-2.5 gap-1 ${
                 selectedCategory === cat.id
                   ? '!border-primary/70 !bg-primary/15 !text-white'
                   : '!border-gray-700 !bg-gray-900/80 !text-gray-100/90'
               } menu-category-selector`}
               aria-pressed={selectedCategory === cat.id}
             >
-              <span className="menu-category-selector__icon block text-base">{cat.icon}</span>
-              <span className="menu-category-selector__label text-xs font-medium sm:text-sm">
+              <span className="menu-category-selector__icon text-xl leading-none">{cat.icon}</span>
+              <span className="menu-category-selector__label text-[0.6rem] font-medium leading-tight sm:text-xs">
                 {t(cat.labelKey)}
               </span>
             </Button>
