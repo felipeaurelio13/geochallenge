@@ -37,11 +37,10 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string, options?: Record<string, string>) => {
       const translations: Record<string, string> = {
-        'menu.welcome': `Hola, ${options?.name}!`,
-        'menu.welcomeExplore': `¡Hola ${options?.name}! ¿Qué vamos a explorar hoy?`,
-        'menu.chooseMode': 'Elige un modo de juego',
         'menu.selectCategory': 'Selecciona una categoría',
-        'menu.rankings': 'Rankings',
+        'menu.gameModes': 'Modos de juego',
+        'menu.flash': 'Flash',
+        'menu.flashDesc': '60s · combo x10',
         'menu.singlePlayer': 'Un Jugador',
         'menu.singlePlayerDesc': 'Juega solo y mejora tu puntuación',
         'menu.duel': 'Duelo',
@@ -50,20 +49,11 @@ vi.mock('react-i18next', () => ({
         'menu.challengeDesc': 'Envía desafíos a tus amigos',
         'menu.streak': 'Racha',
         'menu.streakDesc': 'Sigue hasta fallar y rompe tu récord',
-        'menu.yourStats': 'Tus estadísticas',
-        'menu.selectedCategory': 'Categoría activa',
-        'menu.mobileCategoriesHint': 'Desliza para ver más categorías',
-        'menu.quickActions': 'Acciones rápidas',
-        'menu.gameModes': 'Modos de juego',
         'categories.flags': 'Banderas',
         'categories.capitals': 'Capitales',
         'categories.maps': 'Mapas',
         'categories.silhouettes': 'Siluetas',
         'categories.mixed': 'Mixto',
-        'stats.highScore': 'Puntuación máxima',
-        'stats.gamesPlayed': 'Partidas jugadas',
-        'stats.wins': 'Victorias',
-        'stats.losses': 'Derrotas',
         'auth.logout': 'Cerrar sesión',
       };
       return translations[key] ?? key;
@@ -174,6 +164,11 @@ describe('MenuPage', () => {
 
     const singleModeButton = screen.getByRole('button', { name: /un jugador[\s\S]*juega solo/i });
     expect(singleModeButton.className).toContain('py-2.5');
+
+    const streakButton = screen.getByRole('button', { name: /racha[\s\S]*sigue hasta fallar/i });
+    expect(streakButton.className).toContain('col-span-2');
+    expect(streakButton.className).toContain('lg:col-span-1');
+
     expect(screen.queryByText(/¡hola.*explorar hoy/i)).not.toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Modos de juego' })).not.toBeInTheDocument();
   });
