@@ -172,9 +172,10 @@ describe('MenuPage', () => {
     const categoryButton = screen.getByRole('button', { name: /🎲\s*mixto/i });
     expect(categoryButton.className).toContain('min-h-10');
 
-    const singleModeButton = screen.getByRole('button', { name: /mixto\s+un jugador/i });
+    const singleModeButton = screen.getByRole('button', { name: /un jugador[\s\S]*juega solo/i });
     expect(singleModeButton.className).toContain('py-2.5');
-    expect(screen.getByRole('heading', { name: 'Modos de juego' })).toBeInTheDocument();
+    expect(screen.queryByText(/¡hola.*explorar hoy/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Modos de juego' })).not.toBeInTheDocument();
   });
 
   it('permite cambiar categoría en el carrusel sin textos redundantes', () => {

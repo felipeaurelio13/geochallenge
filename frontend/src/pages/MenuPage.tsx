@@ -53,10 +53,6 @@ export function MenuPage() {
     onSwipeRight: () => isMobile && updateCategoryByOffset(-1),
   });
 
-  const selectedCategoryLabel = t(
-    categories.find((cat) => cat.id === selectedCategory)?.labelKey ?? 'categories.mixed',
-  );
-
   return (
     <PageTemplate
       header={
@@ -87,14 +83,10 @@ export function MenuPage() {
       }
       contentClassName="py-2.5 pb-4 sm:py-3 sm:pb-6"
     >
-      <p className="px-1 text-sm text-gray-300 sm:px-0">
-        {t('menu.welcomeExplore', { name: user?.username })}
-      </p>
-
-      <section className="mt-3" {...swipeHandlers}>
-        <h2 className="mb-2 px-1 text-sm font-semibold text-white sm:px-0 sm:text-base">
+      <section {...swipeHandlers}>
+        <p className="mb-2 px-1 text-xs font-medium uppercase tracking-wider text-gray-500 sm:px-0">
           {t('menu.selectCategory')}
-        </h2>
+        </p>
         <div className="scrollbar-none -mx-3 flex snap-x snap-mandatory gap-2 overflow-x-auto px-3 pb-1 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-2.5 sm:overflow-visible sm:px-0 lg:grid-cols-5">
           {categories.map((cat) => (
             <Button
@@ -117,10 +109,7 @@ export function MenuPage() {
         </div>
       </section>
 
-      <section className="mt-2.5" aria-label={t('menu.gameModes')}>
-        <h2 className="mb-2 px-1 text-sm font-semibold text-white sm:px-0 sm:text-base">
-          {t('menu.gameModes')}
-        </h2>
+      <section className="mt-4" aria-label={t('menu.gameModes')}>
         <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 sm:gap-2 lg:grid-cols-4">
           <GameModeCard
             icon="⚡"
@@ -128,38 +117,26 @@ export function MenuPage() {
             description={t('menu.flashDesc', '60s · tap o swipe · combo x10')}
             onClick={() => navigate('/game/flash')}
             className="border-amber-400/60 bg-amber-500/10 hover:border-amber-400 hover:bg-amber-500/20"
-          >
-            <p className="text-xs font-semibold uppercase tracking-wide text-amber-300">
-              {t('menu.flashBadge', 'Nuevo · Mobile')}
-            </p>
-          </GameModeCard>
-
+          />
           <GameModeCard
             icon="🎯"
             title={t('menu.singlePlayer')}
             description={t('menu.singlePlayerDesc')}
             onClick={() => navigate(`/game/single?category=${selectedCategory}`)}
             className="border-primary/40 bg-primary/10 hover:border-primary/70 hover:bg-primary/15"
-          >
-            <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-              {selectedCategoryLabel}
-            </p>
-          </GameModeCard>
-
+          />
           <GameModeCard
             icon="⚔️"
             title={t('menu.duel')}
             description={t('menu.duelDesc')}
             onClick={() => navigate(`/duel?category=${selectedCategory}`)}
           />
-
           <GameModeCard
             icon="🏁"
             title={t('menu.challenge')}
             description={t('menu.challengeDesc')}
             onClick={() => navigate(`/challenges?category=${selectedCategory}&openCreate=1`)}
           />
-
           <GameModeCard
             icon="🔥"
             title={t('menu.streak')}
