@@ -263,7 +263,10 @@
     "noNeighborsData": "No neighbor data available.",
     "global": "Global",
     "filteredBySearch": "Filtered by search",
-    "filteredResults": "Filtered results"
+    "filteredResults": "Filtered results",
+    "yourPosition": "Your position",
+    "globalStats": "Global statistics",
+    "otherPlayers": "Other players"
   },
   "profile": {
     "title": "My Profile",

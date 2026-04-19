@@ -29,6 +29,86 @@ type RankingsResponse = {
 const USE_BACKEND_RANK = import.meta.env.VITE_RANKING_USE_BACKEND_RANK === 'true';
 const RANKING_NEIGHBORS_ENABLED = import.meta.env.VITE_RANKING_NEIGHBORS_ENABLED === 'true';
 
+const PODIUM_COLORS = {
+  1: {
+    bg: 'bg-gradient-to-b from-yellow-400 to-yellow-600',
+    border: 'border-yellow-400',
+    text: 'text-yellow-400',
+    glow: 'shadow-yellow-500/40',
+    height: 'h-24',
+    crown: '👑',
+  },
+  2: {
+    bg: 'bg-gradient-to-b from-slate-300 to-slate-500',
+    border: 'border-slate-300',
+    text: 'text-slate-300',
+    glow: 'shadow-slate-400/40',
+    height: 'h-16',
+    crown: '🥈',
+  },
+  3: {
+    bg: 'bg-gradient-to-b from-amber-600 to-amber-800',
+    border: 'border-amber-600',
+    text: 'text-amber-500',
+    glow: 'shadow-amber-600/40',
+    height: 'h-12',
+    crown: '🥉',
+  },
+} as const;
+
+function PodiumBlock({ entry, topScore }: { entry: LeaderboardEntry; topScore: number }) {
+  const config = PODIUM_COLORS[entry.rank as 1 | 2 | 3];
+  const pct = topScore > 0 ? Math.round((entry.score / topScore) * 100) : 0;
+
+  return (
+    <div className="flex flex-col items-center gap-2 flex-1 min-w-0">
+      {entry.rank === 1 && <span className="text-2xl animate-bounce">👑</span>}
+      <div
+        className={`w-14 h-14 rounded-full border-2 ${config.border} flex items-center justify-center bg-gray-800 shadow-lg ${config.glow} shadow-lg`}
+        title={entry.username}
+      >
+        <span className="text-xl font-black">{entry.username.charAt(0).toUpperCase()}</span>
+      </div>
+      <span className={`text-xs font-bold truncate max-w-full px-1 ${entry.rank === 1 ? 'text-yellow-300' : 'text-gray-200'}`}>
+        {entry.username}
+      </span>
+      <span className={`text-sm font-bold ${config.text}`}>
+        {entry.score.toLocaleString()}
+      </span>
+      <div className={`w-full rounded-t-lg border ${config.border} border-b-0 ${config.bg} ${config.height} flex items-end justify-center pb-1`}>
+        <span className={`text-xs font-bold text-white/80`}>{pct}%</span>
+      </div>
+    </div>
+  );
+}
+
+function ScoreBar({ entry, topScore }: { entry: LeaderboardEntry; topScore: number }) {
+  const pct = topScore > 0 ? Math.max(4, (entry.score / topScore) * 100) : 4;
+  return (
+    <div className="flex-1 h-1.5 bg-gray-700 rounded-full overflow-hidden">
+      <div
+        className={`h-full rounded-full transition-all duration-500 ${entry.isCurrentUser ? 'bg-primary' : 'bg-indigo-500'}`}
+        style={{ width: `${pct}%` }}
+      />
+    </div>
+  );
+}
+
+function getRankBadgeStyle(rank: number, isCurrentUser?: boolean) {
+  if (isCurrentUser) return 'bg-primary/30 border-primary';
+  if (rank === 1) return 'bg-gradient-to-r from-yellow-500/20 to-yellow-700/20 border-yellow-500/60';
+  if (rank === 2) return 'bg-gradient-to-r from-slate-400/20 to-slate-600/20 border-slate-400/60';
+  if (rank === 3) return 'bg-gradient-to-r from-amber-600/20 to-amber-800/20 border-amber-600/60';
+  return 'bg-gray-800/80 border-gray-700';
+}
+
+function getRankLabel(rank: number) {
+  if (rank === 1) return '🥇';
+  if (rank === 2) return '🥈';
+  if (rank === 3) return '🥉';
+  return `#${rank}`;
+}
+
 export function RankingsPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -81,7 +161,7 @@ export function RankingsPage() {
     }
 
     let cancelled = false;
-    const shouldLoadRankContext = RANKING_NEIGHBORS_ENABLED || data.userRank === null;
+    const shouldLoadRankContext = !!user && (RANKING_NEIGHBORS_ENABLED || data.userRank === null);
 
     if (!shouldLoadRankContext) {
       setNeighborEntries([]);
@@ -125,7 +205,7 @@ export function RankingsPage() {
     return () => {
       cancelled = true;
     };
-  }, [data]);
+  }, [data, user]);
 
   const resolvedUserRank = data?.userRank ?? deferredUserRank;
   const resolvedUserScore = data?.userScore ?? deferredUserScore;
@@ -140,43 +220,59 @@ export function RankingsPage() {
 
     return source.filter((entry) => entry.username.toLowerCase().includes(normalizedSearch));
   }, [data?.leaderboard, debouncedSearch]);
+
   const hasGlobalLeaderboardData = (data?.leaderboard.length ?? 0) > 0;
   const hasNoSearchResults = hasGlobalLeaderboardData && filteredLeaderboard.length === 0;
+  const topScore = data?.topScore ?? 0;
+  const isSearching = debouncedSearch.trim().length > 0;
 
-  const getRankDisplay = (rank: number) => {
-    if (rank === 1) return '🥇';
-    if (rank === 2) return '🥈';
-    if (rank === 3) return '🥉';
-    return `#${rank}`;
-  };
+  const top3 = useMemo(() => {
+    if (isSearching) return [];
+    return (data?.leaderboard ?? []).filter((e) => e.rank <= 3);
+  }, [data?.leaderboard, isSearching]);
 
-  const getRankStyle = (rank: number) => {
-    if (rank === 1) return 'bg-gradient-to-r from-yellow-600 to-yellow-800 border-yellow-500';
-    if (rank === 2) return 'bg-gradient-to-r from-gray-400 to-gray-600 border-gray-400';
-    if (rank === 3) return 'bg-gradient-to-r from-orange-700 to-orange-900 border-orange-600';
-    return 'bg-gray-800 border-gray-700';
-  };
+  const restEntries = useMemo(() => {
+    if (isSearching) return filteredLeaderboard;
+    return filteredLeaderboard.filter((e) => e.rank > 3);
+  }, [filteredLeaderboard, isSearching]);
+
+  // Reorder top3 for podium: 2nd, 1st, 3rd
+  const podiumOrder = useMemo(() => {
+    const first = top3.find((e) => e.rank === 1);
+    const second = top3.find((e) => e.rank === 2);
+    const third = top3.find((e) => e.rank === 3);
+    return [second, first, third].filter(Boolean) as LeaderboardEntry[];
+  }, [top3]);
 
   return (
     <div className="h-full min-h-0 bg-gray-900">
       <PageHeader title={`🏆 ${t('rankings.title')}`} backTo="/menu" backLabel={`← ${t('common.back')}`} />
 
-      <main className="max-w-4xl mx-auto px-4 py-6 sm:px-6">
+      <main className="max-w-2xl mx-auto px-4 py-6 sm:px-6">
+
+        {/* My rank card — only when outside top 50 */}
         {resolvedUserRank && resolvedUserRank > 50 && (
-          <div className="mb-6 p-4 bg-primary/20 border border-primary rounded-xl">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <span className="text-2xl font-bold text-primary">#{resolvedUserRank}</span>
-                <span className="text-white font-semibold">{user?.username}</span>
+          <div className="mb-6 p-4 bg-primary/10 border border-primary/50 rounded-2xl flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/20 border border-primary/50 flex items-center justify-center text-lg font-black text-primary">
+                {user?.username?.charAt(0).toUpperCase()}
               </div>
-              <span className="text-xl font-bold text-white">{resolvedUserScore?.toLocaleString()} pts</span>
+              <div>
+                <p className="text-xs text-gray-400 uppercase tracking-wide">{t('rankings.yourPosition')}</p>
+                <p className="text-white font-semibold">{user?.username}</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-2xl font-black text-primary">#{resolvedUserRank}</p>
+              <p className="text-sm text-gray-400">{resolvedUserScore?.toLocaleString()} pts</p>
             </div>
           </div>
         )}
 
+        {/* Nearby context */}
         {!isLoading && !error && RANKING_NEIGHBORS_ENABLED && (
-          <section className="mb-6 rounded-xl border border-gray-700 bg-gray-800 p-4" aria-live="polite">
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-300">{t('rankings.nearbyContext')}</h2>
+          <section className="mb-6 rounded-2xl border border-gray-700 bg-gray-800/60 p-4" aria-live="polite">
+            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">{t('rankings.nearbyContext')}</h2>
             {neighborsLoading ? (
               <p className="text-sm text-gray-400">{t('rankings.loadingNeighbors')}</p>
             ) : neighborEntries.length === 0 ? (
@@ -186,7 +282,7 @@ export function RankingsPage() {
                 {neighborEntries.map((entry) => (
                   <li
                     key={entry.userId ? `${entry.userId}-${entry.rank}` : `${entry.username}-${entry.rank}`}
-                    className="flex items-center justify-between rounded-lg border border-gray-700 bg-gray-900 px-3 py-2"
+                    className="flex items-center justify-between rounded-xl border border-gray-700 bg-gray-900 px-3 py-2"
                   >
                     <span className="text-sm text-gray-200">#{entry.rank} {entry.username}</span>
                     <span className="text-sm font-semibold text-white">{entry.score.toLocaleString()} pts</span>
@@ -197,10 +293,8 @@ export function RankingsPage() {
           </section>
         )}
 
-        <div className="mb-4">
-          <label htmlFor="rankings-search" className="mb-1 block text-xs font-medium uppercase tracking-wide text-gray-400">
-            {t('common.search')}
-          </label>
+        {/* Search */}
+        <div className="mb-5">
           <Input
             id="rankings-search"
             value={search}
@@ -210,12 +304,14 @@ export function RankingsPage() {
           />
         </div>
 
+        {/* Loading */}
         {isLoading && (
-          <div className="flex justify-center py-12">
+          <div className="flex justify-center py-16">
             <LoadingSpinner size="lg" text={t('rankings.loading')} />
           </div>
         )}
 
+        {/* Error */}
         {error && (
           <EmptyState
             emoji="😢"
@@ -236,75 +332,125 @@ export function RankingsPage() {
         )}
 
         {!isLoading && !error && (
-          <div className="space-y-3">
+          <>
             {filteredLeaderboard.length === 0 ? (
               <EmptyState emoji="📊" message={t(hasNoSearchResults ? 'rankings.noSearchResults' : 'rankings.empty')} />
             ) : (
-              filteredLeaderboard.map((entry) => (
-                <div
-                  key={entry.userId ? `${entry.userId}-${entry.rank}` : `${entry.username}-${entry.rank}`}
-                  className={`p-4 rounded-xl border-2 transition-transform hover:scale-[1.02] ${
-                    entry.isCurrentUser ? 'bg-primary/20 border-primary' : getRankStyle(entry.rank)
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <span
-                        className={`text-2xl font-bold min-w-rank ${
-                          entry.rank <= 3 ? 'text-3xl' : 'text-gray-400'
-                        }`}
-                      >
-                        {getRankDisplay(entry.rank)}
-                      </span>
-                      <div>
-                        <span className="text-white font-semibold">
-                          {entry.username}
-                          {entry.isCurrentUser && (
-                            <span className="ml-2 text-xs text-primary">({t('rankings.you')})</span>
-                          )}
-                        </span>
-                      </div>
+              <>
+                {/* Podium top 3 — only when not searching */}
+                {!isSearching && podiumOrder.length > 0 && (
+                  <div className="mb-8">
+                    <div className="flex items-end justify-center gap-3 px-4">
+                      {podiumOrder.map((entry) => (
+                        <PodiumBlock key={entry.userId ?? entry.username} entry={entry} topScore={topScore} />
+                      ))}
                     </div>
-                    <span className="text-xl font-bold text-white">{entry.score.toLocaleString()} pts</span>
+                  </div>
+                )}
+
+                {/* Rest of leaderboard (#4+) or all filtered results */}
+                {restEntries.length > 0 && (
+                  <div className="space-y-2">
+                    {!isSearching && (
+                      <p className="text-xs uppercase tracking-wider text-gray-500 mb-3 px-1">{t('rankings.otherPlayers')}</p>
+                    )}
+                    {restEntries.map((entry) => (
+                      <div
+                        key={entry.userId ? `${entry.userId}-${entry.rank}` : `${entry.username}-${entry.rank}`}
+                        className={`px-4 py-3 rounded-xl border transition-all duration-200 hover:scale-[1.01] hover:brightness-110 ${getRankBadgeStyle(entry.rank, entry.isCurrentUser)}`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className={`font-bold min-w-[2.5rem] text-center ${entry.rank <= 3 ? 'text-2xl' : 'text-sm text-gray-400'}`}>
+                            {getRankLabel(entry.rank)}
+                          </span>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-2 mb-1">
+                              <span className="font-semibold text-white truncate">
+                                {entry.username}
+                                {entry.isCurrentUser && (
+                                  <span className="ml-2 text-xs font-normal text-primary">({t('rankings.you')})</span>
+                                )}
+                              </span>
+                              <span className="text-sm font-bold text-white whitespace-nowrap">
+                                {entry.score.toLocaleString()} <span className="text-xs text-gray-400 font-normal">pts</span>
+                              </span>
+                            </div>
+                            <ScoreBar entry={entry} topScore={topScore} />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Also show top3 when searching and they match */}
+                {isSearching && top3.length > 0 && filteredLeaderboard.some((e) => e.rank <= 3) && (
+                  <div className="space-y-2 mt-2">
+                    {filteredLeaderboard
+                      .filter((e) => e.rank <= 3)
+                      .map((entry) => (
+                        <div
+                          key={entry.userId ? `${entry.userId}-${entry.rank}` : `${entry.username}-${entry.rank}`}
+                          className={`px-4 py-3 rounded-xl border transition-all duration-200 hover:scale-[1.01] ${getRankBadgeStyle(entry.rank, entry.isCurrentUser)}`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="text-2xl font-bold min-w-[2.5rem] text-center">{getRankLabel(entry.rank)}</span>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between gap-2 mb-1">
+                                <span className="font-semibold text-white truncate">
+                                  {entry.username}
+                                  {entry.isCurrentUser && (
+                                    <span className="ml-2 text-xs font-normal text-primary">({t('rankings.you')})</span>
+                                  )}
+                                </span>
+                                <span className="text-sm font-bold text-white whitespace-nowrap">
+                                  {entry.score.toLocaleString()} <span className="text-xs text-gray-400 font-normal">pts</span>
+                                </span>
+                              </div>
+                              <ScoreBar entry={entry} topScore={topScore} />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Stats panel */}
+            {filteredLeaderboard.length > 0 && (
+              <div className="mt-8 rounded-2xl border border-gray-700/60 bg-gray-800/60 overflow-hidden">
+                <div className="px-5 py-4 border-b border-gray-700/60">
+                  <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-400">{t('rankings.globalStats')}</h3>
+                </div>
+                <div className="grid grid-cols-3 divide-x divide-gray-700/60">
+                  <div className="px-4 py-4 text-center">
+                    <div className="text-2xl font-black text-primary">{(data?.totalPlayers ?? 0).toLocaleString()}</div>
+                    <div className="text-xs text-gray-400 mt-1">{t('rankings.totalPlayers')}</div>
+                  </div>
+                  <div className="px-4 py-4 text-center">
+                    <div className="text-2xl font-black text-yellow-400">{(data?.topScore ?? 0).toLocaleString()}</div>
+                    <div className="text-xs text-gray-400 mt-1">{t('rankings.topScore')}</div>
+                  </div>
+                  <div className="px-4 py-4 text-center">
+                    <div className="text-2xl font-black text-white">
+                      {typeof data?.avgScore === 'number' && Number.isFinite(data.avgScore)
+                        ? Math.round(data.avgScore).toLocaleString()
+                        : '—'}
+                    </div>
+                    <div className="text-xs text-gray-400 mt-1">{t('rankings.avgScore')}</div>
                   </div>
                 </div>
-              ))
-            )}
-          </div>
-        )}
-
-        {!isLoading && !error && filteredLeaderboard.length > 0 && (
-          <div className="mt-8 p-6 bg-gray-800 rounded-xl">
-            <h3 className="text-lg font-semibold text-white mb-4">{t('rankings.stats')}</h3>
-            <p className="mb-3 text-xs uppercase tracking-wide text-gray-400">{t('rankings.global')}</p>
-            {search.trim() && (
-              <p className="mb-4 text-sm text-gray-300">
-                {t('rankings.filteredResults')}: <span className="font-semibold text-white">{filteredLeaderboard.length}</span>
-              </p>
-            )}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-center">
-              <div>
-                <div className="text-2xl font-bold text-primary">{data?.totalPlayers ?? 0}</div>
-                <div className="text-sm text-gray-400">{t('rankings.totalPlayers')}</div>
+                {isSearching && (
+                  <div className="px-5 py-3 border-t border-gray-700/60 bg-gray-900/40">
+                    <p className="text-xs text-gray-400">
+                      {t('rankings.filteredResults')}: <span className="font-semibold text-white">{filteredLeaderboard.length}</span>
+                    </p>
+                  </div>
+                )}
               </div>
-              <div>
-                <div className="text-2xl font-bold text-white">{data?.topScore?.toLocaleString() ?? 0}</div>
-                <div className="text-sm text-gray-400">{t('rankings.topScore')}</div>
-              </div>
-              {typeof data?.avgScore === 'number' && Number.isFinite(data.avgScore) && (
-                <div>
-                  <div className="text-2xl font-bold text-white">{Math.round(data.avgScore).toLocaleString()}</div>
-                  <div className="text-sm text-gray-400">{t('rankings.avgScore')}</div>
-                </div>
-              )}
-            </div>
-            {search.trim() && (
-              <p className="mt-4 text-xs uppercase tracking-wide text-gray-500">{t('rankings.filteredBySearch')}</p>
             )}
-            {!search.trim() && (
-              <p className="mt-4 text-xs uppercase tracking-wide text-gray-500">{t('rankings.global')}</p>
-            )}
-          </div>
+          </>
         )}
       </main>
     </div>

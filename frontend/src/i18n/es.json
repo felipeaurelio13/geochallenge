@@ -263,7 +263,10 @@
     "noNeighborsData": "No hay datos de vecinos disponibles.",
     "global": "Global",
     "filteredBySearch": "Filtrado por búsqueda",
-    "filteredResults": "Resultados filtrados"
+    "filteredResults": "Resultados filtrados",
+    "yourPosition": "Tu posición",
+    "globalStats": "Estadísticas globales",
+    "otherPlayers": "Otros jugadores"
   },
   "profile": {
     "title": "Mi Perfil",
