@@ -86,7 +86,7 @@ export function MenuPage() {
               aria-pressed={selectedCategory === cat.id}
             >
               <span className="menu-category-selector__icon text-xl leading-none">{cat.icon}</span>
-              <span className="menu-category-selector__label text-[0.6rem] font-medium leading-tight sm:text-xs">
+              <span className="menu-category-selector__label text-[0.65rem] font-medium leading-tight sm:text-xs">
                 {t(cat.labelKey)}
               </span>
             </Button>
@@ -95,20 +95,18 @@ export function MenuPage() {
       </section>
 
       <section className="mt-4" aria-label={t('menu.gameModes')}>
-        <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 sm:gap-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-1.5 sm:gap-2 lg:grid-cols-5">
           <GameModeCard
             icon="⚡"
-            title={t('menu.flash', 'Flash')}
-            description={t('menu.flashDesc', '60s · tap o swipe · combo x10')}
+            title={t('menu.flash')}
+            description={t('menu.flashDesc')}
             onClick={() => navigate('/game/flash')}
-            className="border-amber-400/60 bg-amber-500/10 hover:border-amber-400 hover:bg-amber-500/20"
           />
           <GameModeCard
             icon="🎯"
             title={t('menu.singlePlayer')}
             description={t('menu.singlePlayerDesc')}
             onClick={() => navigate(`/game/single?category=${selectedCategory}`)}
-            className="border-primary/40 bg-primary/10 hover:border-primary/70 hover:bg-primary/15"
           />
           <GameModeCard
             icon="⚔️"
@@ -127,6 +125,7 @@ export function MenuPage() {
             title={t('menu.streak')}
             description={t('menu.streakDesc')}
             onClick={() => navigate(`/game/single?category=${selectedCategory}&mode=streak`)}
+            className="col-span-2 lg:col-span-1"
           />
         </div>
       </section>
