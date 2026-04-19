@@ -13,6 +13,7 @@ import {
 import { FullScreenError } from '../components/molecules/FullScreenError';
 import { Question } from '../types';
 import { GAME_CONSTANTS } from '../constants/game';
+import { useHaptics } from '../hooks';
 
 const MapInteractive = lazy(() =>
   import('../components/MapInteractive').then((m) => ({ default: m.MapInteractive }))
@@ -30,6 +31,7 @@ export function ChallengeGamePage() {
   const [score, setScore] = useState(0);
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [results, setResults] = useState<Array<{ isCorrect: boolean }>>([]);
+  const haptics = useHaptics();
   const [timePerQuestion, setTimePerQuestion] = useState(TIME_PER_QUESTION);
   const [timeRemaining, setTimeRemaining] = useState(TIME_PER_QUESTION);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
@@ -125,6 +127,9 @@ export function ChallengeGamePage() {
     if (isCorrect) {
       setCorrectAnswers((prev) => prev + 1);
       setScore((prev) => prev + points);
+      haptics.success();
+    } else {
+      haptics.error();
     }
 
     setResults((prev) => {

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useGame } from '../context/GameContext';
 import { api } from '../services/api';
-import { LoadingSpinner } from '../components';
+import { LoadingSpinner, ShareButton } from '../components';
 import { AnswerStatusBadge } from '../components/AnswerStatusBadge';
 import { Button } from '../components/atoms/Button';
 
@@ -17,8 +17,6 @@ export function ResultsPage() {
 
   const [userRank, setUserRank] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
-  const [shareStatus, setShareStatus] = useState<'idle' | 'success'>('idle');
-  const [isSharing, setIsSharing] = useState(false);
 
   useEffect(() => {
     const fetchRank = async () => {
@@ -93,31 +91,6 @@ export function ResultsPage() {
   const handlePlayAgain = () => {
     resetGame();
     navigate('/menu');
-  };
-
-  const handleShareResults = async () => {
-    const sharePayload = {
-      title: t('app.name'),
-      text: shareText,
-    };
-
-    try {
-      setIsSharing(true);
-      if (navigator.share) {
-        await navigator.share(sharePayload);
-      } else {
-        await navigator.clipboard.writeText(shareText);
-      }
-
-      setShareStatus('success');
-      window.setTimeout(() => setShareStatus('idle'), 2500);
-    } catch (error) {
-      if ((error as Error)?.name !== 'AbortError') {
-        console.error('Failed to share score:', error);
-      }
-    } finally {
-      setIsSharing(false);
-    }
   };
 
   if (questions.length === 0 && !loading) {
@@ -222,19 +195,14 @@ export function ResultsPage() {
 
         <section className="mt-5 rounded-2xl border border-gray-700 bg-gray-800/80 p-4 sm:p-5">
           <p className="text-sm text-gray-300">{t('results.shareScore')}</p>
-          <Button
-            onClick={handleShareResults}
-            disabled={isSharing}
-            variant="primary"
-            size="lg"
-            fullWidth
-            className="mt-3 inline-flex items-center justify-center gap-2"
-          >
-            🔗 {isSharing ? `${t('common.loading')}...` : t('results.shareButton')}
-          </Button>
-          <p className="mt-2 min-h-5 text-xs text-green-300" aria-live="polite">
-            {shareStatus === 'success' ? t('results.copied') : ''}
-          </p>
+          <div className="mt-3">
+            <ShareButton
+              payload={{
+                title: t('app.name'),
+                text: shareText,
+              }}
+            />
+          </div>
         </section>
 
         <section

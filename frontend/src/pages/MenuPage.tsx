@@ -123,6 +123,18 @@ export function MenuPage() {
         </h2>
         <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 sm:gap-2 lg:grid-cols-4">
           <GameModeCard
+            icon="⚡"
+            title={t('menu.flash', 'Flash')}
+            description={t('menu.flashDesc', '60s · tap o swipe · combo x10')}
+            onClick={() => navigate('/game/flash')}
+            className="border-amber-400/60 bg-amber-500/10 hover:border-amber-400 hover:bg-amber-500/20"
+          >
+            <p className="text-xs font-semibold uppercase tracking-wide text-amber-300">
+              {t('menu.flashBadge', 'Nuevo · Mobile')}
+            </p>
+          </GameModeCard>
+
+          <GameModeCard
             icon="🎯"
             title={t('menu.singlePlayer')}
             description={t('menu.singlePlayerDesc')}

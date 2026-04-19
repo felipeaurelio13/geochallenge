@@ -1,4 +1,5 @@
 import React from 'react';
+import { triggerHaptic } from '../hooks/useHaptics';
 
 interface OptionButtonProps {
   option: string;
@@ -22,7 +23,7 @@ export const OptionButton = React.memo(function OptionButton({
   showResult,
 }: OptionButtonProps) {
   const baseClasses =
-    'option-button-shell w-full rounded-2xl text-left transition-all duration-200 flex items-stretch gap-2 overflow-hidden border-2 px-3 py-2 option-button-base sm:px-3.5 sm:py-2.5';
+    'option-button-shell pressable w-full rounded-2xl text-left transition-all duration-200 flex items-stretch gap-2 overflow-hidden border-2 px-3 py-2 option-button-base sm:px-3.5 sm:py-2.5';
 
   const defaultStateClasses =
     'bg-[var(--color-surface-muted)] border-[var(--color-border)] text-[var(--color-text-primary)] hover:border-[var(--color-primary-300)] hover:bg-[var(--color-surface)] cursor-pointer';
@@ -55,9 +56,16 @@ export const OptionButton = React.memo(function OptionButton({
     return `${baseClasses} ${defaultStateClasses}`;
   };
 
+  const handleClick = () => {
+    if (!disabled && !showResult) {
+      triggerHaptic('tap');
+    }
+    onClick();
+  };
+
   return (
     <button
-      onClick={onClick}
+      onClick={handleClick}
       disabled={disabled}
       className={getButtonClasses()}
       aria-pressed={selected}

@@ -82,7 +82,10 @@
     "mobileCategoriesHint": "Desliza para ver más categorías",
     "quickActions": "Acciones rápidas",
     "welcomeExplore": "¡Hola {{name}}! ¿Qué vamos a explorar hoy?",
-    "gameModes": "Modos de juego"
+    "gameModes": "Modos de juego",
+    "flash": "Flash",
+    "flashDesc": "60s · tap o swipe · combo x10",
+    "flashBadge": "Nuevo · Mobile"
   },
   "categories": {
     "mixed": "Mixto",
@@ -271,7 +274,45 @@
     "updateSuccess": "Perfil actualizado",
     "updateError": "Error al actualizar perfil",
     "languageEs": "Español",
-    "languageEn": "English"
+    "languageEn": "English",
+    "gamePreferences": "Preferencias de juego",
+    "hapticsLabel": "Vibración háptica",
+    "hapticsDescription": "Feedback táctil en toques, aciertos y errores",
+    "soundLabel": "Sonidos",
+    "soundDescription": "Efectos de sonido al responder (próximamente)"
+  },
+  "share": {
+    "shared": "¡Compartido!",
+    "copied": "Copiado al portapapeles",
+    "error": "No se pudo compartir"
+  },
+  "install": {
+    "title": "Instala GeoChallenge",
+    "hint": "Añádelo a tu pantalla de inicio para jugar más rápido y sin navegador.",
+    "iosHint": "Toca Compartir → Añadir a pantalla de inicio en Safari.",
+    "cta": "Instalar",
+    "dismiss": "Ahora no"
+  },
+  "offline": {
+    "banner": "Sin conexión — jugando modo offline",
+    "queued": "Resultado guardado. Se enviará cuando vuelvas online."
+  },
+  "flash": {
+    "title": "Flash",
+    "intro": "60 segundos. Banderas y siluetas. Tap o swipe. Encadena aciertos para multiplicar x10.",
+    "rule60s": "60s totales, no por pregunta",
+    "ruleSwipe": "Swipe izq/der o toca la opción",
+    "ruleCombo": "Combo x1 → x2 → x3 → x5 → x8 → x10",
+    "ruleMiss": "Fallar resetea el combo, no termina la partida",
+    "start": "¡Empezar!",
+    "finished": "¡Flash terminado!",
+    "score": "Puntuación",
+    "maxCombo": "Combo máx",
+    "correct": "Aciertos",
+    "accuracy": "Precisión",
+    "answered": "{{count}} preguntas respondidas",
+    "playAgain": "Jugar otra vez",
+    "error": "No se pudo iniciar Flash"
   },
   "stats": {
     "highScore": "Mejor puntuación",

@@ -6,6 +6,8 @@ import {
   getQuestionsForGame,
   getQuestionsForStreakGame,
   getStreakBatchSize,
+  getQuestionsForFlashGame,
+  getFlashDurationSeconds,
   validateAnswerByGameType,
   saveGameResult,
   getUserGameHistory,
@@ -15,7 +17,7 @@ import { updateLeaderboardScore } from '../services/leaderboard.service.js';
 import { config } from '../config/env.js';
 
 const router = Router();
-const gameTypeSchema = z.enum(['single', 'streak']);
+const gameTypeSchema = z.enum(['single', 'streak', 'flash']);
 
 const excludeIdsSchema = z.preprocess(
   (value) => {
@@ -51,6 +53,7 @@ const answerSchema = z.object({
   answer: z.string(),
   timeRemaining: z.number().min(0).max(config.game.timePerQuestion),
   gameType: gameTypeSchema.optional().default('single'),
+  combo: z.number().int().min(0).max(200).optional(),
   coordinates: z
     .object({
       lat: z.number(),
@@ -128,6 +131,38 @@ router.get('/start', optionalAuth, async (req: AuthRequest, res: Response) => {
 });
 
 /**
+ * GET /api/game/flash/start
+ * Inicia una sesión Flash: 60 preguntas visuales (FLAG + SILHOUETTE), 2 opciones.
+ */
+router.get('/flash/start', optionalAuth, async (_req: AuthRequest, res: Response) => {
+  try {
+    const questions = await getQuestionsForFlashGame();
+    if (questions.length < 10) {
+      res.status(503).json({
+        error: 'No hay suficientes preguntas visuales disponibles',
+        available: questions.length,
+      });
+      return;
+    }
+
+    res.json({
+      message: 'Flash iniciado',
+      gameConfig: {
+        questionsCount: questions.length,
+        timePerQuestion: config.game.timePerQuestion,
+        category: Category.MIXED,
+        gameType: 'flash',
+        durationSeconds: getFlashDurationSeconds(),
+      },
+      questions,
+    });
+  } catch (error) {
+    console.error('Error al iniciar flash:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+/**
  * POST /api/game/answer
  * Validar una respuesta individual
  */
@@ -143,14 +178,15 @@ router.post('/answer', optionalAuth, async (req: AuthRequest, res: Response) => 
       return;
     }
 
-    const { questionId, answer, timeRemaining, coordinates, gameType } = validation.data;
+    const { questionId, answer, timeRemaining, coordinates, gameType, combo } = validation.data;
 
     const result = await validateAnswerByGameType(
       questionId,
       answer,
       timeRemaining,
       coordinates,
-      gameType
+      gameType,
+      combo !== undefined ? { combo } : undefined
     );
 
     res.json(result);

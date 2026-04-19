@@ -14,6 +14,7 @@ import {
 import { FullScreenError } from '../components/molecules/FullScreenError';
 import { Question } from '../types';
 import { GAME_CONSTANTS } from '../constants/game';
+import { useHaptics } from '../hooks';
 
 const MapInteractive = lazy(() =>
   import('../components/MapInteractive').then((m) => ({ default: m.MapInteractive }))
@@ -57,6 +58,7 @@ export function GamePage() {
   } = useGame();
 
   const { questions, currentIndex, score, results, status } = state;
+  const haptics = useHaptics();
 
   const [timeRemaining, setTimeRemaining] = useState(TIME_PER_QUESTION);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
@@ -145,6 +147,11 @@ export function GamePage() {
 
     try {
       const result = await submitAnswer(answer, mapLocation || undefined);
+      if (result.isCorrect) {
+        haptics.success();
+      } else {
+        haptics.error();
+      }
       if (shouldUseStreakFlow && !result.isCorrect) {
         setStreakAlive(false);
         try {

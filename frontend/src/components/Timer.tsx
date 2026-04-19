@@ -1,5 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { triggerHaptic } from '../hooks/useHaptics';
+
+const URGENCY_THRESHOLD_SECONDS = 3;
 
 interface TimerProps {
   duration: number;
@@ -47,6 +50,13 @@ export function Timer({ duration, timeRemaining, onTick, onComplete, isActive }:
   useEffect(() => {
     if (timeRemaining <= 0 && isActive) {
       onCompleteRef.current();
+    }
+  }, [timeRemaining, isActive]);
+
+  useEffect(() => {
+    if (!isActive) return;
+    if (timeRemaining > 0 && timeRemaining <= URGENCY_THRESHOLD_SECONDS) {
+      triggerHaptic('urgency');
     }
   }, [timeRemaining, isActive]);
 

@@ -14,6 +14,7 @@ import { Alert } from '../components/atoms/Alert';
 import { Button } from '../components/atoms/Button';
 import { Category, Question } from '../types';
 import { GAME_CONSTANTS } from '../constants/game';
+import { useHaptics } from '../hooks';
 
 const MapInteractive = lazy(() =>
   import('../components/MapInteractive').then((m) => ({ default: m.MapInteractive }))
@@ -74,6 +75,7 @@ export function DuelPage() {
   const hasSubmittedCurrentQuestionRef = useRef(false);
   const duelCategory = parseDuelCategory(searchParams.get('category'));
   const hasSelection = Boolean(selectedAnswer || mapLocation);
+  const haptics = useHaptics();
 
   useEffect(() => {
     scoreRef.current = myScore;
@@ -160,22 +162,35 @@ export function DuelPage() {
       setShowResult(true);
       setIsSyncingRound(false);
       hasSubmittedCurrentQuestionRef.current = true;
-      setLastAnswerCorrect(Boolean(myResult?.answer?.isCorrect));
+      const wasCorrect = Boolean(myResult?.answer?.isCorrect);
+      setLastAnswerCorrect(wasCorrect);
       setMyScore(myResult?.totalScore ?? 0);
       setOpponentScore(rivalResult?.totalScore ?? 0);
+      if (wasCorrect) {
+        haptics.success();
+      } else {
+        haptics.error();
+      }
     };
 
     const handleDuelFinished = (data: any) => {
       const myResult = data.results?.find((result: any) => result.userId === user?.id);
       const rivalResult = data.results?.find((result: any) => result.userId !== user?.id);
+      const myFinalScore = myResult?.score ?? 0;
+      const rivalFinalScore = rivalResult?.score ?? 0;
 
       setDuelResult({
         winner: data.winnerId,
-        myScore: myResult?.score ?? 0,
-        opponentScore: rivalResult?.score ?? 0,
+        myScore: myFinalScore,
+        opponentScore: rivalFinalScore,
         opponentName: rivalResult?.username || opponent?.username || 'Opponent',
       });
       setDuelState('finished');
+      if (data.winnerId === user?.id) {
+        haptics.celebrate();
+      } else if (data.winnerId && data.winnerId !== user?.id) {
+        haptics.error();
+      }
     };
 
     const handleOpponentDisconnected = () => {

@@ -39,15 +39,30 @@ export interface GameSession {
   startedAt: Date;
 }
 
-export type SoloGameType = 'single' | 'streak';
+export type SoloGameType = 'single' | 'streak' | 'flash';
 type SoloModeScoringStrategy = 'simple_1_0' | 'progressive_combo';
+
+/**
+ * Flash mode: combo multiplier tiers for consecutive correct answers.
+ * Resets to 1 on wrong answer. Capped at x10.
+ */
+const FLASH_COMBO_TIERS = [1, 1, 2, 2, 3, 3, 5, 5, 8, 8, 10];
+export function getFlashMultiplier(combo: number): number {
+  const index = Math.max(0, Math.floor(combo));
+  return FLASH_COMBO_TIERS[Math.min(index, FLASH_COMBO_TIERS.length - 1)];
+}
+const FLASH_BASE_POINTS = 10;
 
 interface SoloModeScoringContext {
   previousStreak?: number;
+  combo?: number;
 }
 
 // Cache de preguntas en memoria para mejor performance
 const MAP_CORRECT_DISTANCE_KM = 500;
+const FLASH_TOTAL_QUESTIONS = 60;
+const FLASH_DURATION_SECONDS = 60;
+const FLASH_OPTIONS_COUNT = 2;
 const STREAK_BATCH_SIZE = 3;
 const STREAK_UNIQUE_FETCH_FACTOR = 4;
 const STREAK_UNIQUE_MAX_ATTEMPTS = 3;
@@ -96,6 +111,51 @@ export async function getQuestionsForGame(
     latitude: q.category === Category.MAP ? q.latitude || undefined : undefined,
     longitude: q.category === Category.MAP ? q.longitude || undefined : undefined,
   }));
+}
+
+/**
+ * Flash mode: 60 preguntas visuales rápidas (FLAG + SILHOUETTE), 2 opciones por pregunta.
+ * Mobile-first: carga toda la sesión una vez para evitar round-trips durante los 60s.
+ */
+export async function getQuestionsForFlashGame(): Promise<GameQuestion[]> {
+  const questions = await prisma.question.findMany({
+    where: {
+      category: { in: [Category.FLAG, Category.SILHOUETTE] },
+    },
+  });
+
+  if (questions.length === 0) {
+    return [];
+  }
+
+  const selected = selectRandom(questions, Math.min(FLASH_TOTAL_QUESTIONS, questions.length));
+
+  return selected.map((q) => {
+    const shuffled = shuffleArray(q.options);
+    const correct = q.correctAnswer;
+    const correctIdx = shuffled.findIndex(
+      (opt) => opt.toLowerCase().trim() === correct.toLowerCase().trim()
+    );
+    // Keep the correct option + one distractor (first that isn't the correct one).
+    const correctOption = correctIdx >= 0 ? shuffled[correctIdx] : correct;
+    const distractor = shuffled.find((opt) => opt !== correctOption) ?? shuffled[0];
+    const pair = shuffleArray([correctOption, distractor]).slice(0, FLASH_OPTIONS_COUNT);
+
+    return {
+      id: q.id,
+      category: q.category,
+      questionText: generateQuestionText(q),
+      options: pair,
+      correctAnswer: correct,
+      difficulty: q.difficulty,
+      questionData: q.questionData,
+      imageUrl: q.imageUrl || undefined,
+    };
+  });
+}
+
+export function getFlashDurationSeconds(): number {
+  return FLASH_DURATION_SECONDS;
 }
 
 /**
@@ -281,6 +341,19 @@ export function applySoloModeScoringStrategy(
   gameType: SoloGameType = 'single',
   scoringContext: SoloModeScoringContext = {}
 ): AnswerResult {
+  if (gameType === 'flash') {
+    const combo = Math.max(0, Math.floor(scoringContext.combo ?? 0));
+    const multiplier = getFlashMultiplier(combo);
+    return {
+      ...answerResult,
+      points: answerResult.isCorrect ? FLASH_BASE_POINTS * multiplier : 0,
+      basePoints: answerResult.isCorrect ? FLASH_BASE_POINTS : 0,
+      comboBonus: answerResult.isCorrect ? FLASH_BASE_POINTS * (multiplier - 1) : 0,
+      timeBonus: 0,
+      accuracyBonus: undefined,
+    };
+  }
+
   if (gameType !== 'streak' || !config.game.enableStreakSimpleScoring) {
     return answerResult;
   }

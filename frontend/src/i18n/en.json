@@ -82,7 +82,10 @@
     "mobileCategoriesHint": "Swipe to see more categories",
     "quickActions": "Quick actions",
     "welcomeExplore": "Hi {{name}}! What shall we explore today?",
-    "gameModes": "Game modes"
+    "gameModes": "Game modes",
+    "flash": "Flash",
+    "flashDesc": "60s · tap or swipe · combo x10",
+    "flashBadge": "New · Mobile"
   },
   "categories": {
     "mixed": "Mixed",
@@ -271,7 +274,45 @@
     "updateSuccess": "Profile updated",
     "updateError": "Failed to update profile",
     "languageEs": "Spanish",
-    "languageEn": "English"
+    "languageEn": "English",
+    "gamePreferences": "Game preferences",
+    "hapticsLabel": "Haptic feedback",
+    "hapticsDescription": "Vibration on taps, hits and misses",
+    "soundLabel": "Sound",
+    "soundDescription": "Sound effects on answers (coming soon)"
+  },
+  "share": {
+    "shared": "Shared!",
+    "copied": "Copied to clipboard",
+    "error": "Could not share"
+  },
+  "install": {
+    "title": "Install GeoChallenge",
+    "hint": "Add it to your home screen for faster, browser-free play.",
+    "iosHint": "Tap Share → Add to Home Screen in Safari.",
+    "cta": "Install",
+    "dismiss": "Not now"
+  },
+  "offline": {
+    "banner": "Offline — playing in offline mode",
+    "queued": "Result saved. It will sync when you're back online."
+  },
+  "flash": {
+    "title": "Flash",
+    "intro": "60 seconds. Flags and silhouettes. Tap or swipe. Chain hits to multiply up to x10.",
+    "rule60s": "60s total, not per question",
+    "ruleSwipe": "Swipe left/right or tap the option",
+    "ruleCombo": "Combo x1 → x2 → x3 → x5 → x8 → x10",
+    "ruleMiss": "A miss resets the combo, the round continues",
+    "start": "Start!",
+    "finished": "Flash finished!",
+    "score": "Score",
+    "maxCombo": "Max combo",
+    "correct": "Correct",
+    "accuracy": "Accuracy",
+    "answered": "{{count}} questions answered",
+    "playAgain": "Play again",
+    "error": "Flash could not start"
   },
   "stats": {
     "highScore": "High Score",
