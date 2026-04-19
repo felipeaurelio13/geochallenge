@@ -113,7 +113,7 @@ async function main() {
       questionData: country.name,
       options: shuffleArray([country.name, ...distractors]),
       correctAnswer: country.name,
-      imageUrl: `https://raw.githubusercontent.com/djaiss/mapsicon/master/all/${country.flag}/vector.svg`,
+      imageUrl: `https://cdn.jsdelivr.net/gh/djaiss/mapsicon@master/all/${country.flag}/vector.svg`,
       latitude: country.lat,
       longitude: country.lng,
       continent: country.continent,

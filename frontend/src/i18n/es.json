@@ -232,6 +232,7 @@
     "challengeMode": "Modo desafío",
     "join": "Unirme",
     "waitingReady": "Esperando que se complete el cupo",
+    "fetchError": "Error al cargar los desafíos. Intenta de nuevo.",
     "categories": "Categorías",
     "maxPlayers": "Cupo de jugadores",
     "answerTime": "Tiempo por pregunta",
