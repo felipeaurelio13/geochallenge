@@ -20,7 +20,7 @@ export interface AuthState {
 
 // Game types
 export type Category = 'MAP' | 'FLAG' | 'CAPITAL' | 'SILHOUETTE' | 'MIXED';
-export type GameType = 'single' | 'streak';
+export type GameType = 'single' | 'streak' | 'flash';
 
 export type Difficulty = 'EASY' | 'MEDIUM' | 'HARD';
 
@@ -90,6 +90,7 @@ export interface GameState {
   score: number;
   timeRemaining: number;
   config: GameConfig | null;
+  isOffline?: boolean;
 }
 
 export interface GameResult {

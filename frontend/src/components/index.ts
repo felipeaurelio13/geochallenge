@@ -13,6 +13,10 @@ export { AppFooter } from './AppFooter';
 export { GameRoundScaffold } from './GameRoundScaffold';
 export { RoundActionTray } from './RoundActionTray';
 export { UniversalGameLayout } from './UniversalGameLayout';
+export { ShareButton } from './ShareButton';
+export { InstallPromptBanner } from './InstallPromptBanner';
+export { StreakCombo } from './StreakCombo';
+export { FlashCard } from './FlashCard';
 
 export { AppRoot } from './AppRoot';
 export { Screen } from './Screen';

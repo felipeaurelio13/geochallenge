@@ -120,6 +120,33 @@ class ApiService {
     return response.data;
   }
 
+  async startFlashGame() {
+    const response = await this.client.get<{
+      gameConfig: GameConfig & { durationSeconds?: number };
+      questions: Question[];
+    }>('/game/flash/start');
+    return response.data;
+  }
+
+  async submitFlashAnswer(data: {
+    questionId: string;
+    answer: string;
+    combo: number;
+  }) {
+    const response = await this.client.post<{
+      isCorrect: boolean;
+      correctAnswer: string;
+      points: number;
+      basePoints?: number;
+      comboBonus?: number;
+    }>('/game/answer', {
+      ...data,
+      timeRemaining: 0,
+      gameType: 'flash',
+    });
+    return response.data;
+  }
+
   async submitAnswer(data: {
     questionId: string;
     answer: string;

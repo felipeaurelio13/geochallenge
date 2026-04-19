@@ -47,6 +47,9 @@ vi.mock('react-i18next', () => ({
         'results.shareScore': 'Comparte tu puntuación',
         'results.shareButton': 'Compartir resultado',
         'results.copied': '¡Resultado listo para compartir!',
+        'share.shared': '¡Compartido!',
+        'share.copied': 'Copiado al portapapeles',
+        'share.error': 'No se pudo compartir',
         'common.backToMenu': 'Volver al menú',
         'common.loading': 'Cargando',
         'rankings.empty': 'Aún no hay jugadores en el ranking',
@@ -74,9 +77,13 @@ vi.mock('../services/api', () => ({
   },
 }));
 
-vi.mock('../components', () => ({
-  LoadingSpinner: () => <div>loading</div>,
-}));
+vi.mock('../components', async () => {
+  const actual = await vi.importActual<typeof import('../components')>('../components');
+  return {
+    ...actual,
+    LoadingSpinner: () => <div>loading</div>,
+  };
+});
 
 describe('ResultsPage', () => {
   beforeEach(() => {
@@ -108,7 +115,7 @@ describe('ResultsPage', () => {
       expect(mocks.writeTextMock).toHaveBeenCalledWith('🎯 1100 pts 8/10 (80%)');
     });
 
-    expect(screen.getByText('¡Resultado listo para compartir!')).toBeInTheDocument();
+    expect(screen.getByText('Copiado al portapapeles')).toBeInTheDocument();
     expect(screen.getByTestId('results-action-tray')).toHaveClass('sticky', 'bottom-0');
   });
 

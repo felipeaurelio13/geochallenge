@@ -7,6 +7,7 @@ import {
   RegisterPage,
   MenuPage,
   GamePage,
+  FlashGamePage,
   ResultsPage,
   RankingsPage,
   ProfilePage,
@@ -136,6 +137,10 @@ export const appRoutes = [
       {
         path: '/profile',
         element: <ProtectedRoute><ProfilePage /></ProtectedRoute>,
+      },
+      {
+        path: '/game/flash',
+        element: <ProtectedRoute><FlashGamePage /></ProtectedRoute>,
       },
       {
         path: '/duel',

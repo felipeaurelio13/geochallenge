@@ -3,6 +3,7 @@ export { LoginPage } from './LoginPage';
 export { RegisterPage } from './RegisterPage';
 export { MenuPage } from './MenuPage';
 export { GamePage } from './GamePage';
+export { FlashGamePage } from './FlashGamePage';
 export { ResultsPage } from './ResultsPage';
 export { RankingsPage } from './RankingsPage';
 export { ProfilePage } from './ProfilePage';

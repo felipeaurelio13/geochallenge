@@ -10,10 +10,14 @@ import { Alert } from '../components/atoms/Alert';
 import { StatCard } from '../components/atoms/StatCard';
 import { Input } from '../components/atoms/Input';
 import { FormLabel } from '../components/atoms/FormLabel';
+import { uiStoreActions, useUiStore } from '../store/useUiStore';
 
 export function ProfilePage() {
   const { t, i18n } = useTranslation();
   const { user, updateUser } = useAuth();
+
+  const hapticsEnabled = useUiStore((store) => store.hapticsEnabled);
+  const soundEnabled = useUiStore((store) => store.soundEnabled);
 
   const [isEditing, setIsEditing] = useState(false);
   const [username, setUsername] = useState(user?.username || '');
@@ -173,6 +177,50 @@ export function ProfilePage() {
               </button>
             </div>
           )}
+        </div>
+
+        <div className="bg-gray-800 rounded-xl p-6 mt-6">
+          <h3 className="text-lg font-semibold text-white mb-4">
+            {t('profile.gamePreferences', 'Preferencias de juego')}
+          </h3>
+
+          <div className="space-y-3">
+            <label className="pressable flex cursor-pointer items-center justify-between rounded-lg border border-gray-700 bg-gray-900 px-4 py-3 hover:border-gray-600">
+              <div className="pr-4">
+                <div className="text-sm font-medium text-white">
+                  {t('profile.hapticsLabel', 'Vibración háptica')}
+                </div>
+                <div className="text-xs text-gray-400">
+                  {t('profile.hapticsDescription', 'Feedback táctil en toques, aciertos y errores')}
+                </div>
+              </div>
+              <input
+                type="checkbox"
+                checked={hapticsEnabled}
+                onChange={(event) => uiStoreActions.setHapticsEnabled(event.target.checked)}
+                className="h-5 w-5 cursor-pointer accent-primary"
+                aria-label={t('profile.hapticsLabel', 'Vibración háptica')}
+              />
+            </label>
+
+            <label className="pressable flex cursor-pointer items-center justify-between rounded-lg border border-gray-700 bg-gray-900 px-4 py-3 hover:border-gray-600">
+              <div className="pr-4">
+                <div className="text-sm font-medium text-white">
+                  {t('profile.soundLabel', 'Sonidos')}
+                </div>
+                <div className="text-xs text-gray-400">
+                  {t('profile.soundDescription', 'Efectos de sonido al responder (próximamente)')}
+                </div>
+              </div>
+              <input
+                type="checkbox"
+                checked={soundEnabled}
+                onChange={(event) => uiStoreActions.setSoundEnabled(event.target.checked)}
+                className="h-5 w-5 cursor-pointer accent-primary"
+                aria-label={t('profile.soundLabel', 'Sonidos')}
+              />
+            </label>
+          </div>
         </div>
       </main>
     </div>
