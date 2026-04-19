@@ -201,4 +201,23 @@ describe('OptionButton', () => {
     rerender(<OptionButton {...props} disabled selected={false} isCorrect={false} showResult />);
     assertStableStructure('locked');
   });
+
+  it('marca alternativa eliminada por 50/50 sin romper layout base', () => {
+    render(
+      <OptionButton
+        option="Bolivia"
+        index={1}
+        onClick={() => {}}
+        disabled
+        eliminated
+        selected={false}
+        showResult={false}
+      />
+    );
+
+    const button = screen.getByRole('button');
+    expect(button).toHaveAttribute('data-state', 'eliminated');
+    expect(button.className).toContain('option-button-base');
+    expect(screen.getByText('Bolivia').className).toContain('line-through');
+  });
 });

@@ -9,11 +9,14 @@ import {
   LoadingSpinner,
   GameRoundScaffold,
   RoundActionTray,
+  MechanicsHud,
 } from '../components';
 import { FullScreenError } from '../components/molecules/FullScreenError';
 import { Question } from '../types';
 import { GAME_CONSTANTS } from '../constants/game';
 import { useHaptics } from '../hooks';
+import { areMechanicsV2Enabled } from '../config/featureFlags';
+import { trackUxEvent } from '../utils/uxTelemetry';
 
 const MapInteractive = lazy(() =>
   import('../components/MapInteractive').then((m) => ({ default: m.MapInteractive }))
@@ -42,6 +45,13 @@ export function ChallengeGamePage() {
   const [error, setError] = useState('');
   const [alreadyPlayed, setAlreadyPlayed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [disabledOptionIndexes, setDisabledOptionIndexes] = useState<number[]>([]);
+  const [mechanicsAvailable, setMechanicsAvailable] = useState({
+    intel5050: 1,
+    focusTime: 1,
+    streakShield: 0,
+  });
+  const mechanicsEnabled = areMechanicsV2Enabled('challenge');
 
   const currentQuestion = questions[currentIndex];
   const isMapQuestion = currentQuestion?.category === 'MAP';
@@ -141,6 +151,43 @@ export function ChallengeGamePage() {
     setShowResult(true);
   };
 
+  const handleUseIntel5050 = () => {
+    if (!mechanicsEnabled || !currentQuestion || isMapQuestion || showResult || mechanicsAvailable.intel5050 <= 0) return;
+
+    const selectedIndex = selectedAnswer ? currentQuestion.options.indexOf(selectedAnswer) : -1;
+    const incorrectIndexes = currentQuestion.options
+      .map((option, index) => ({ option, index }))
+      .filter(({ option, index }) => option !== currentQuestion.correctAnswer && index !== selectedIndex)
+      .map(({ index }) => index);
+    if (incorrectIndexes.length === 0) return;
+
+    const removedIndexes = [...incorrectIndexes].sort(() => Math.random() - 0.5).slice(0, Math.min(2, incorrectIndexes.length));
+    setDisabledOptionIndexes(removedIndexes);
+    setMechanicsAvailable((prev) => ({ ...prev, intel5050: Math.max(0, prev.intel5050 - 1) }));
+    trackUxEvent('mechanic_used', {
+      mode: 'challenge',
+      questionId: currentQuestion.id,
+      value: removedIndexes.length,
+      meta: { key: 'intel5050' },
+    });
+    haptics.tap();
+  };
+
+  const handleUseFocusTime = () => {
+    if (!mechanicsEnabled || showResult || mechanicsAvailable.focusTime <= 0) return;
+    const bonusSeconds = 3;
+    const nextTime = Math.min(timePerQuestion + bonusSeconds, timeRemaining + bonusSeconds);
+    setTimeRemaining(nextTime);
+    setMechanicsAvailable((prev) => ({ ...prev, focusTime: Math.max(0, prev.focusTime - 1) }));
+    trackUxEvent('mechanic_used', {
+      mode: 'challenge',
+      questionId: currentQuestion?.id,
+      value: bonusSeconds,
+      meta: { key: 'focusTime' },
+    });
+    haptics.tap();
+  };
+
   const handleNextQuestion = async () => {
     if (currentIndex >= questions.length - 1) {
       try {
@@ -168,6 +215,7 @@ export function ChallengeGamePage() {
       setMapLocation(null);
       setShowResult(false);
       setTimeRemaining(timePerQuestion);
+      setDisabledOptionIndexes([]);
     }
   };
 
@@ -260,6 +308,7 @@ export function ChallengeGamePage() {
       selectedAnswer={selectedAnswer}
       onOptionSelect={setSelectedAnswer}
       showResult={showResult}
+      hiddenOptionIndexes={disabledOptionIndexes}
       optionsGridClassName="game-options-grid"
       mapContent={
         <Suspense fallback={<LoadingSpinner size="lg" />}>
@@ -289,12 +338,21 @@ export function ChallengeGamePage() {
           onSubmit={handleSubmitAnswer}
           onNext={handleNextQuestion}
           summarySlot={
-            <div className="flex items-center justify-between rounded-xl border border-gray-700 bg-gray-800/70 px-3 py-2 text-sm text-gray-200 sm:max-w-xs">
-              <span>{t('game.questionOf', { current: currentIndex + 1, total: questions.length })}</span>
-              <span className="ml-3 rounded-full bg-green-500/20 px-2 py-0.5 text-xs font-semibold text-green-200">
-                {correctAnswers}/{results.length || currentIndex + Number(showResult)}
-              </span>
-            </div>
+            mechanicsEnabled ? (
+              <MechanicsHud
+                available={mechanicsAvailable}
+                disabled={showResult}
+                onUseIntel5050={handleUseIntel5050}
+                onUseFocusTime={handleUseFocusTime}
+              />
+            ) : (
+              <div className="flex items-center justify-between rounded-xl border border-gray-700 bg-gray-800/70 px-3 py-2 text-sm text-gray-200 sm:max-w-xs">
+                <span>{t('game.questionOf', { current: currentIndex + 1, total: questions.length })}</span>
+                <span className="ml-3 rounded-full bg-green-500/20 px-2 py-0.5 text-xs font-semibold text-green-200">
+                  {correctAnswers}/{results.length || currentIndex + Number(showResult)}
+                </span>
+              </div>
+            )
           }
         />
       }

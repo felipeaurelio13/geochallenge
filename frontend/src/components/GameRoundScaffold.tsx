@@ -17,6 +17,7 @@ type GameRoundScaffoldProps = {
   onOptionSelect: (option: string) => void;
   showResult: boolean;
   disableOptions?: boolean;
+  hiddenOptionIndexes?: number[];
   actionTray: ReactNode;
   rootClassName?: string;
   optionsGridClassName?: string;
@@ -35,6 +36,7 @@ export function GameRoundScaffold({
   onOptionSelect,
   showResult,
   disableOptions = false,
+  hiddenOptionIndexes = [],
   actionTray,
   rootClassName,
   optionsGridClassName = 'game-options-grid',
@@ -72,7 +74,8 @@ export function GameRoundScaffold({
               option={option}
               index={index}
               onClick={() => onOptionSelect(option)}
-              disabled={showResult || disableOptions}
+              disabled={showResult || disableOptions || hiddenOptionIndexes.includes(index)}
+              eliminated={hiddenOptionIndexes.includes(index)}
               selected={selectedAnswer === option}
               isCorrect={option === question.correctAnswer}
               showResult={showResult}

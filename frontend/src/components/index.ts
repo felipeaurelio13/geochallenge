@@ -17,6 +17,7 @@ export { ShareButton } from './ShareButton';
 export { InstallPromptBanner } from './InstallPromptBanner';
 export { StreakCombo } from './StreakCombo';
 export { FlashCard } from './FlashCard';
+export { MechanicsHud } from './MechanicsHud';
 
 export { AppRoot } from './AppRoot';
 export { Screen } from './Screen';

@@ -1,5 +1,14 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
-import type { User, Question, GameResult, LeaderboardEntry, Category, GameType, GameConfig } from '../types';
+import type {
+  User,
+  Question,
+  GameResult,
+  LeaderboardEntry,
+  Category,
+  GameType,
+  GameConfig,
+  MechanicUsage,
+} from '../types';
 import { testAuthBypass } from '../utils/testAuthBypass';
 import { toAppPath } from '../utils/routing';
 
@@ -132,6 +141,7 @@ class ApiService {
     questionId: string;
     answer: string;
     combo: number;
+    mechanicUsage?: MechanicUsage;
   }) {
     const response = await this.client.post<{
       isCorrect: boolean;
@@ -151,6 +161,7 @@ class ApiService {
     questionId: string;
     answer: string;
     timeRemaining: number;
+    mechanicUsage?: MechanicUsage;
     coordinates?: { lat: number; lng: number };
   }) {
     const response = await this.client.post<{

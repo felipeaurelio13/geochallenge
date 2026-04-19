@@ -8,6 +8,7 @@ import {
   getStreakBatchSize,
   getQuestionsForFlashGame,
   getFlashDurationSeconds,
+  getMechanicsConfigForMode,
   validateAnswerByGameType,
   saveGameResult,
   getUserGameHistory,
@@ -54,6 +55,15 @@ const answerSchema = z.object({
   timeRemaining: z.number().min(0).max(config.game.timePerQuestion),
   gameType: gameTypeSchema.optional().default('single'),
   combo: z.number().int().min(0).max(200).optional(),
+  mechanicUsage: z
+    .object({
+      key: z.enum(['intel5050', 'focusTime', 'streakShield']),
+      action: z.literal('trigger'),
+      questionId: z.string().optional(),
+      roundIndex: z.number().int().min(0).optional(),
+      value: z.number().optional(),
+    })
+    .optional(),
   coordinates: z
     .object({
       lat: z.number(),
@@ -121,6 +131,7 @@ router.get('/start', optionalAuth, async (req: AuthRequest, res: Response) => {
         timePerQuestion: config.game.timePerQuestion,
         category,
         gameType,
+        mechanics: getMechanicsConfigForMode(gameType),
       },
       questions,
     });
@@ -153,6 +164,7 @@ router.get('/flash/start', optionalAuth, async (_req: AuthRequest, res: Response
         category: Category.MIXED,
         gameType: 'flash',
         durationSeconds: getFlashDurationSeconds(),
+        mechanics: getMechanicsConfigForMode('flash'),
       },
       questions,
     });

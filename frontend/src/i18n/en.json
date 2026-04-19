@@ -301,8 +301,10 @@
   "flash": {
     "title": "Flash",
     "intro": "60 seconds. Flags and silhouettes. Tap or swipe. Chain hits to multiply up to x10.",
+    "loading": "Loading Flash...",
     "rule60s": "60s total, not per question",
     "ruleSwipe": "Swipe left/right or tap the option",
+    "swipeHint": "Swipe ← or → · or tap an option",
     "ruleCombo": "Combo x1 → x2 → x3 → x5 → x8 → x10",
     "ruleMiss": "A miss resets the combo, the round continues",
     "start": "Start!",
@@ -314,6 +316,14 @@
     "answered": "{{count}} questions answered",
     "playAgain": "Play again",
     "error": "Flash could not start"
+  },
+  "mechanics": {
+    "intel5050": "Intel 50/50",
+    "focusTime": "Focus +Time",
+    "streakShield": "Streak shield",
+    "available": "Available",
+    "consumed": "Consumed",
+    "streakShieldTriggered": "Shield triggered: streak continues, but this round scores 0."
   },
   "stats": {
     "highScore": "High Score",

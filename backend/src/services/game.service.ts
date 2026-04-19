@@ -17,6 +17,14 @@ export interface GameQuestion {
   longitude?: number;
 }
 
+export type GameMechanicKey = 'intel5050' | 'focusTime' | 'streakShield';
+
+export interface MechanicsConfig {
+  enabled: boolean;
+  allowed: GameMechanicKey[];
+  limits: Partial<Record<GameMechanicKey, number>>;
+}
+
 export interface AnswerResult {
   questionId: string;
   isCorrect: boolean;
@@ -56,6 +64,59 @@ const FLASH_BASE_POINTS = 10;
 interface SoloModeScoringContext {
   previousStreak?: number;
   combo?: number;
+}
+
+function buildMechanicsLimits(): Partial<Record<GameMechanicKey, number>> {
+  const mechanicsConfig = config.game.mechanics;
+  return {
+    intel5050: mechanicsConfig?.limits?.intel5050 ?? 1,
+    focusTime: mechanicsConfig?.limits?.focusTime ?? 1,
+    streakShield: mechanicsConfig?.limits?.streakShield ?? 1,
+  };
+}
+
+export function getMechanicsConfigForMode(
+  gameMode: SoloGameType | 'duel' | 'challenge'
+): MechanicsConfig {
+  const mechanicsConfig = config.game.mechanics;
+  if (!mechanicsConfig) {
+    return { enabled: false, allowed: [], limits: {} };
+  }
+
+  const modeFlagKey: 'single' | 'flash' | 'duel' | 'challenge' =
+    gameMode === 'streak' ? 'single' : gameMode;
+  const modeEnabled = mechanicsConfig[modeFlagKey];
+  if (!modeEnabled) {
+    return { enabled: false, allowed: [], limits: {} };
+  }
+
+  if (gameMode === 'flash') {
+    return {
+      enabled: true,
+      allowed: ['intel5050', 'focusTime'],
+      limits: {
+        intel5050: mechanicsConfig.limits.intel5050,
+        focusTime: mechanicsConfig.limits.focusTime,
+      },
+    };
+  }
+
+  if (gameMode === 'duel' || gameMode === 'challenge') {
+    return {
+      enabled: true,
+      allowed: ['intel5050', 'focusTime'],
+      limits: {
+        intel5050: mechanicsConfig.limits.intel5050,
+        focusTime: mechanicsConfig.limits.focusTime,
+      },
+    };
+  }
+
+  return {
+    enabled: true,
+    allowed: ['intel5050', 'focusTime', 'streakShield'],
+    limits: buildMechanicsLimits(),
+  };
 }
 
 // Cache de preguntas en memoria para mejor performance

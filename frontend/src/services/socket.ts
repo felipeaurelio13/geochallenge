@@ -1,5 +1,13 @@
 import { io, Socket } from 'socket.io-client';
-import type { Category, Question, DuelOpponent, DuelResult, AnswerResult } from '../types';
+import type {
+  Category,
+  Question,
+  DuelOpponent,
+  DuelResult,
+  AnswerResult,
+  MechanicUsage,
+  MechanicsConfig,
+} from '../types';
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001';
 
@@ -12,6 +20,7 @@ type DuelEventHandlers = {
     timePerQuestion: number;
     category: Category;
     opponent: DuelOpponent;
+    mechanics?: MechanicsConfig;
   }) => void;
   onOpponent?: (opponent: DuelOpponent) => void;
   onCountdown?: (data: { seconds: number }) => void;
@@ -21,6 +30,7 @@ type DuelEventHandlers = {
     totalQuestions: number;
     question: Question;
     timeLimit: number;
+    mechanics?: MechanicsConfig;
   }) => void;
   onPlayerAnswered?: (data: { userId: string; questionIndex: number }) => void;
   onQuestionResult?: (data: {
@@ -195,6 +205,7 @@ class SocketService {
     questionId: string;
     answer: string;
     timeRemaining: number;
+    mechanicUsage?: MechanicUsage;
     coordinates?: { lat: number; lng: number };
   }): void {
     this.socket?.emit('duel:answer', data);
@@ -204,12 +215,14 @@ class SocketService {
     questionId: string,
     answer: string,
     timeRemaining: number,
+    mechanicUsage?: MechanicUsage,
     coordinates?: { lat: number; lng: number }
   ): void {
     this.socket?.emit('duel:answer', {
       questionId,
       answer,
       timeRemaining,
+      mechanicUsage,
       coordinates,
     });
   }

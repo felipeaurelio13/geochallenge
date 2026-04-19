@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAnimation } from '../hooks';
+import { useUiStore } from '../store/useUiStore';
 import type { AnswerResult } from '../types';
 
 interface ScoreDisplayProps {
@@ -13,10 +14,11 @@ interface ScoreDisplayProps {
 export function ScoreDisplay({ score, previousScore = 0, showAnimation = true, lastResult = null }: ScoreDisplayProps) {
   const { t } = useTranslation();
   const [displayScore, setDisplayScore] = useState(previousScore);
+  const prefersReducedMotion = useUiStore((state) => state.prefersReducedMotion);
   const { isAnimating, triggerAnimation } = useAnimation(500);
 
   useEffect(() => {
-    if (!showAnimation || score === previousScore) {
+    if (!showAnimation || prefersReducedMotion || score === previousScore) {
       setDisplayScore(score);
       return;
     }
@@ -39,7 +41,7 @@ export function ScoreDisplay({ score, previousScore = 0, showAnimation = true, l
     }, stepDuration);
 
     return () => window.clearInterval(timer);
-  }, [score, previousScore, showAnimation, triggerAnimation]);
+  }, [score, previousScore, prefersReducedMotion, showAnimation, triggerAnimation]);
 
   const pointsGained = score - previousScore;
   const scoreBreakdownParts = [
@@ -64,7 +66,7 @@ export function ScoreDisplay({ score, previousScore = 0, showAnimation = true, l
       >
         {displayScore.toLocaleString()}
       </div>
-      {showAnimation && pointsGained > 0 && isAnimating && (
+      {showAnimation && !prefersReducedMotion && pointsGained > 0 && isAnimating && (
         <div className="text-green-400 text-xs sm:text-sm font-semibold animate-bounce-subtle">
           {scoreBreakdownText
             ? t('game.scoreBreakdownSummary', { points: pointsGained, breakdown: scoreBreakdownText })

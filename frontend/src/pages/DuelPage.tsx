@@ -8,13 +8,16 @@ import {
   LoadingSpinner,
   GameRoundScaffold,
   RoundActionTray,
+  MechanicsHud,
 } from '../components';
 import { UserAvatar } from '../components/atoms/UserAvatar';
 import { Alert } from '../components/atoms/Alert';
 import { Button } from '../components/atoms/Button';
-import { Category, Question } from '../types';
+import { Category, MechanicUsage, Question } from '../types';
 import { GAME_CONSTANTS } from '../constants/game';
 import { useHaptics } from '../hooks';
+import { areMechanicsV2Enabled } from '../config/featureFlags';
+import { trackUxEvent } from '../utils/uxTelemetry';
 
 const MapInteractive = lazy(() =>
   import('../components/MapInteractive').then((m) => ({ default: m.MapInteractive }))
@@ -68,11 +71,21 @@ export function DuelPage() {
   const [showRetryAction, setShowRetryAction] = useState(false);
   const [isSyncingRound, setIsSyncingRound] = useState(false);
   const [searchTimedOut, setSearchTimedOut] = useState(false);
+  const [disabledOptionIndexes, setDisabledOptionIndexes] = useState<number[]>([]);
+  const [pendingMechanicUsage, setPendingMechanicUsage] = useState<MechanicUsage | undefined>(undefined);
+  const [mechanicsEnabled, setMechanicsEnabled] = useState(false);
+  const [mechanicsAllowed, setMechanicsAllowed] = useState<string[]>([]);
+  const [mechanicsAvailable, setMechanicsAvailable] = useState({
+    intel5050: 0,
+    focusTime: 0,
+    streakShield: 0,
+  });
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scoreRef = useRef(0);
   const opponentRef = useRef<{ id: string; username: string } | null>(null);
   const duelStateRef = useRef<DuelState>('searching');
   const hasSubmittedCurrentQuestionRef = useRef(false);
+  const duelMechanicsFeatureEnabled = areMechanicsV2Enabled('duel');
   const duelCategory = parseDuelCategory(searchParams.get('category'));
   const hasSelection = Boolean(selectedAnswer || mapLocation);
   const haptics = useHaptics();
@@ -129,6 +142,23 @@ export function DuelPage() {
       if (data.opponent) {
         setOpponent(data.opponent);
       }
+      if (duelMechanicsFeatureEnabled && data.mechanics?.enabled) {
+        setMechanicsEnabled(true);
+        setMechanicsAllowed(data.mechanics.allowed ?? []);
+        setMechanicsAvailable({
+          intel5050: data.mechanics.limits?.intel5050 ?? 1,
+          focusTime: data.mechanics.limits?.focusTime ?? 1,
+          streakShield: 0,
+        });
+      } else {
+        setMechanicsEnabled(false);
+        setMechanicsAllowed([]);
+        setMechanicsAvailable({
+          intel5050: 0,
+          focusTime: 0,
+          streakShield: 0,
+        });
+      }
       setDuelState('matched');
       clearInterval(searchTimer);
       if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
@@ -149,6 +179,8 @@ export function DuelPage() {
       setMapLocation(null);
       setShowResult(false);
       setIsSyncingRound(false);
+      setDisabledOptionIndexes([]);
+      setPendingMechanicUsage(undefined);
       hasSubmittedCurrentQuestionRef.current = false;
       setConnectionNotice(null);
       setShowRetryAction(false);
@@ -287,8 +319,70 @@ export function DuelPage() {
     }
 
     hasSubmittedCurrentQuestionRef.current = true;
-    socketService.submitDuelAnswer(currentQuestion.id, answer, timeRemaining, coordinates);
+    socketService.submitDuelAnswer(currentQuestion.id, answer, timeRemaining, pendingMechanicUsage, coordinates);
+    setPendingMechanicUsage(undefined);
     setDuelState('waiting');
+  };
+
+  const handleUseIntel5050 = () => {
+    if (!currentQuestion || isMapQuestion || showResult || duelState !== 'playing') return;
+    if (!mechanicsEnabled || !mechanicsAllowed.includes('intel5050') || mechanicsAvailable.intel5050 <= 0) return;
+
+    const selectedIndex = selectedAnswer ? currentQuestion.options.indexOf(selectedAnswer) : -1;
+    const incorrectIndexes = currentQuestion.options
+      .map((option, index) => ({ option, index }))
+      .filter(({ option, index }) => option !== currentQuestion.correctAnswer && index !== selectedIndex)
+      .map(({ index }) => index);
+
+    if (incorrectIndexes.length === 0) return;
+    const removedIndexes = [...incorrectIndexes].sort(() => Math.random() - 0.5).slice(0, Math.min(2, incorrectIndexes.length));
+
+    setDisabledOptionIndexes(removedIndexes);
+    setMechanicsAvailable((prev) => ({
+      ...prev,
+      intel5050: Math.max(0, prev.intel5050 - 1),
+    }));
+    setPendingMechanicUsage({
+      key: 'intel5050',
+      action: 'trigger',
+      questionId: currentQuestion.id,
+      roundIndex: questionNumber - 1,
+      value: removedIndexes.length,
+    });
+    trackUxEvent('mechanic_used', {
+      mode: 'duel',
+      questionId: currentQuestion.id,
+      value: removedIndexes.length,
+      meta: { key: 'intel5050' },
+    });
+    haptics.tap();
+  };
+
+  const handleUseFocusTime = () => {
+    if (!mechanicsEnabled || !mechanicsAllowed.includes('focusTime') || mechanicsAvailable.focusTime <= 0) return;
+    if (showResult || duelState !== 'playing') return;
+
+    const bonusSeconds = 3;
+    const nextTime = Math.min(TIME_PER_QUESTION + bonusSeconds, timeRemaining + bonusSeconds);
+    setTimeRemaining(nextTime);
+    setMechanicsAvailable((prev) => ({
+      ...prev,
+      focusTime: Math.max(0, prev.focusTime - 1),
+    }));
+    setPendingMechanicUsage({
+      key: 'focusTime',
+      action: 'trigger',
+      questionId: currentQuestion?.id,
+      roundIndex: questionNumber - 1,
+      value: bonusSeconds,
+    });
+    trackUxEvent('mechanic_used', {
+      mode: 'duel',
+      questionId: currentQuestion?.id,
+      value: bonusSeconds,
+      meta: { key: 'focusTime' },
+    });
+    haptics.tap();
   };
 
   // Cancel search
@@ -542,6 +636,7 @@ export function DuelPage() {
       selectedAnswer={selectedAnswer}
       onOptionSelect={setSelectedAnswer}
       showResult={showResult}
+      hiddenOptionIndexes={disabledOptionIndexes}
       disableOptions={duelState === 'waiting'}
       optionsGridClassName="game-options-grid"
       actionTray={
@@ -557,6 +652,16 @@ export function DuelPage() {
           showResultBadge
           isCorrect={lastAnswerCorrect}
           onSubmit={handleSubmitAnswer}
+          summarySlot={
+            mechanicsEnabled ? (
+              <MechanicsHud
+                available={mechanicsAvailable}
+                disabled={showResult || duelState !== 'playing'}
+                onUseIntel5050={handleUseIntel5050}
+                onUseFocusTime={handleUseFocusTime}
+              />
+            ) : undefined
+          }
         />
       }
     />

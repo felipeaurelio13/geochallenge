@@ -11,8 +11,18 @@ const mocks = vi.hoisted(() => ({
   nextQuestionMock: vi.fn(),
   finishGameMock: vi.fn().mockResolvedValue(undefined),
   resetGameMock: vi.fn(),
+  setTimeRemainingMock: vi.fn(),
   appendQuestionsMock: vi.fn(),
   setStreakAliveMock: vi.fn(),
+  apiStartGameMock: vi.fn().mockResolvedValue({
+    questions: [],
+    gameConfig: {
+      questionsCount: 0,
+      timePerQuestion: 10,
+      category: 'MIXED',
+      gameType: 'streak',
+    },
+  }),
   gameState: {
     questions: [
       {
@@ -41,6 +51,12 @@ vi.mock('react-i18next', () => ({
   }),
 }));
 
+vi.mock('../services/api', () => ({
+  api: {
+    startGame: (...args: unknown[]) => mocks.apiStartGameMock(...args),
+  },
+}));
+
 vi.mock('../context/GameContext', () => ({
   useGame: () => ({
     state: mocks.gameState,
@@ -51,6 +67,7 @@ vi.mock('../context/GameContext', () => ({
     nextQuestion: mocks.nextQuestionMock,
     finishGame: mocks.finishGameMock,
     resetGame: mocks.resetGameMock,
+    setTimeRemaining: mocks.setTimeRemainingMock,
   }),
 }));
 
@@ -65,6 +82,7 @@ vi.mock('../components', () => ({
   ScoreDisplay: ({ score }: { score: number }) => <div>{`score:${score}`}</div>,
   ProgressBar: () => <div>progress</div>,
   LoadingSpinner: ({ text }: { text?: string }) => <div>{text || 'loading'}</div>,
+  MechanicsHud: () => <div>mechanics-hud</div>,
   RoundActionTray: ({ showResult, canSubmit, submitLabel, nextLabel, onSubmit, onNext, resultLabel }: any) => (
     <div data-testid="mobile-action-tray" className="fixed bottom-0">
       {!showResult && <button onClick={onSubmit} disabled={!canSubmit}>{submitLabel}</button>}

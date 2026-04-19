@@ -1,6 +1,15 @@
 import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
 import { api } from '../services/api';
-import type { GameState, Answer, AnswerResult, GameResult, Category, Question, GameType } from '../types';
+import type {
+  GameState,
+  Answer,
+  AnswerResult,
+  GameResult,
+  Category,
+  Question,
+  GameType,
+  MechanicUsage,
+} from '../types';
 import { cacheQuestions, getCachedQuestions, enqueuePendingSession } from '../hooks/useOfflineQuestions';
 
 interface GameContextType {
@@ -9,7 +18,11 @@ interface GameContextType {
   startGame: (category?: Category, questionCount?: number, gameType?: GameType) => Promise<void>;
   appendQuestions: (questions: Question[]) => void;
   setStreakAlive: (isAlive: boolean) => void;
-  submitAnswer: (answer: string, coordinates?: { lat: number; lng: number }) => Promise<AnswerResult>;
+  submitAnswer: (
+    answer: string,
+    coordinates?: { lat: number; lng: number },
+    mechanicUsage?: MechanicUsage
+  ) => Promise<AnswerResult>;
   nextQuestion: () => void;
   finishGame: () => Promise<GameResult>;
   resetGame: () => void;
@@ -131,7 +144,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const submitAnswer = useCallback(
-    async (answer: string, coordinates?: { lat: number; lng: number }): Promise<AnswerResult> => {
+    async (
+      answer: string,
+      coordinates?: { lat: number; lng: number },
+      mechanicUsage?: MechanicUsage
+    ): Promise<AnswerResult> => {
       const { questions, currentIndex, timeRemaining, isOffline } = stateRef.current;
       const currentQuestion = questions[currentIndex];
 
@@ -140,6 +157,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         questionId: currentQuestion.id,
         answer,
         timeRemaining,
+        mechanicUsage,
         coordinates,
       };
 

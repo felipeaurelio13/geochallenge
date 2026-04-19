@@ -1,6 +1,13 @@
 import { Server as SocketIOServer, Socket } from 'socket.io';
 import { Category, GameMode } from '@prisma/client';
-import { getQuestionsForGame, validateAnswer, saveGameResult, AnswerResult, GameQuestion } from '../services/game.service.js';
+import {
+  getQuestionsForGame,
+  validateAnswer,
+  saveGameResult,
+  AnswerResult,
+  GameQuestion,
+  getMechanicsConfigForMode,
+} from '../services/game.service.js';
 import { updateLeaderboardScore } from '../services/leaderboard.service.js';
 import { config } from '../config/env.js';
 import { prisma } from '../config/database.js';
@@ -211,7 +218,19 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
   });
 
   // Enviar respuesta
-  socket.on('duel:answer', async (data: { questionId: string; answer: string; timeRemaining: number; coordinates?: { lat: number; lng: number } }) => {
+  socket.on('duel:answer', async (data: {
+    questionId: string;
+    answer: string;
+    timeRemaining: number;
+    mechanicUsage?: {
+      key: 'intel5050' | 'focusTime' | 'streakShield';
+      action: 'trigger';
+      questionId?: string;
+      roundIndex?: number;
+      value?: number;
+    };
+    coordinates?: { lat: number; lng: number };
+  }) => {
     if (isRateLimited(socket.id, 'duel:answer', 30)) {
       socket.emit('duel:error', { message: 'Demasiadas solicitudes, intenta más tarde' });
       return;
@@ -390,6 +409,7 @@ async function createDuel(
     questionsCount: questions.length,
     timePerQuestion: config.game.timePerQuestion,
     category: category || 'MIXED',
+    mechanics: getMechanicsConfigForMode('duel'),
   });
 
   // Enviar info del oponente a cada jugador
@@ -483,6 +503,7 @@ function sendQuestion(io: SocketIOServer, duel: ActiveDuel) {
       totalQuestions: duel.questions.length,
       question,
       timeLimit: config.game.timePerQuestion,
+      mechanics: getMechanicsConfigForMode('duel'),
     });
 
     // Timer para forzar fin de pregunta si no responden

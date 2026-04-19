@@ -301,8 +301,10 @@
   "flash": {
     "title": "Flash",
     "intro": "60 segundos. Banderas y siluetas. Tap o swipe. Encadena aciertos para multiplicar x10.",
+    "loading": "Cargando Flash...",
     "rule60s": "60s totales, no por pregunta",
     "ruleSwipe": "Swipe izq/der o toca la opción",
+    "swipeHint": "Desliza ← o → · o toca una opción",
     "ruleCombo": "Combo x1 → x2 → x3 → x5 → x8 → x10",
     "ruleMiss": "Fallar resetea el combo, no termina la partida",
     "start": "¡Empezar!",
@@ -314,6 +316,14 @@
     "answered": "{{count}} preguntas respondidas",
     "playAgain": "Jugar otra vez",
     "error": "No se pudo iniciar Flash"
+  },
+  "mechanics": {
+    "intel5050": "Intel 50/50",
+    "focusTime": "Focus +Tiempo",
+    "streakShield": "Escudo de racha",
+    "available": "Disponible",
+    "consumed": "Consumido",
+    "streakShieldTriggered": "Escudo activado: la racha continúa, pero esta ronda no suma."
   },
   "stats": {
     "highScore": "Mejor puntuación",

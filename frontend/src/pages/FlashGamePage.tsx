@@ -2,14 +2,17 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../services/api';
-import { FlashCard, LoadingSpinner, StreakCombo } from '../components';
+import { FlashCard, LoadingSpinner, MechanicsHud, StreakCombo } from '../components';
 import { FullScreenError } from '../components/molecules/FullScreenError';
 import { Button } from '../components/atoms/Button';
 import { useHaptics } from '../hooks';
 import type { Question } from '../types';
+import { areMechanicsV2Enabled } from '../config/featureFlags';
+import { trackUxEvent } from '../utils/uxTelemetry';
 
 const FALLBACK_DURATION_SECONDS = 60;
 const FEEDBACK_MS = 320;
+const FOCUS_TIME_BONUS_SECONDS = 5;
 const FLASH_COMBO_TIERS = [1, 1, 2, 2, 3, 3, 5, 5, 8, 8, 10];
 const FLASH_BASE_POINTS = 10;
 
@@ -44,9 +47,17 @@ export function FlashGamePage() {
   const [answered, setAnswered] = useState(0);
   const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null);
   const [results, setResults] = useState<FlashRoundResult[]>([]);
+  const [disabledOption, setDisabledOption] = useState<string | null>(null);
+  const [mechanicsRuntimeEnabled, setMechanicsRuntimeEnabled] = useState(false);
+  const [mechanicsAvailable, setMechanicsAvailable] = useState({
+    intel5050: 1,
+    focusTime: 1,
+    streakShield: 0,
+  });
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const statusRef = useRef<Status>(status);
+  const mechanicsFeatureEnabled = areMechanicsV2Enabled('flash');
 
   useEffect(() => {
     statusRef.current = status;
@@ -63,10 +74,18 @@ export function FlashGamePage() {
         const duration = response.gameConfig.durationSeconds ?? FALLBACK_DURATION_SECONDS;
         setDurationSeconds(duration);
         setTimeRemaining(duration);
+        const limits = response.gameConfig.mechanics?.limits;
+        const runtimeEnabled = mechanicsFeatureEnabled && Boolean(response.gameConfig.mechanics?.enabled);
+        setMechanicsRuntimeEnabled(runtimeEnabled);
+        setMechanicsAvailable({
+          intel5050: runtimeEnabled ? (limits?.intel5050 ?? 1) : 0,
+          focusTime: runtimeEnabled ? (limits?.focusTime ?? 1) : 0,
+          streakShield: 0,
+        });
         setStatus('intro');
       } catch (err: any) {
         if (cancelled) return;
-        setError(err?.message || 'No se pudo iniciar Flash');
+        setError(err?.message || t('flash.error'));
       }
     })();
     return () => {
@@ -114,10 +133,19 @@ export function FlashGamePage() {
   };
 
   const currentQuestion = questions[currentIndex];
+  const canUseMechanics = mechanicsRuntimeEnabled && status === 'playing';
 
   const handleAnswer = useCallback(
     (option: string) => {
       if (!currentQuestion || status !== 'playing') return;
+      if (disabledOption && option === disabledOption) {
+        trackUxEvent('option_mis_tap', {
+          mode: 'flash',
+          questionId: currentQuestion.id,
+          meta: { reason: 'intel5050-disabled-option' },
+        });
+        return;
+      }
       const isCorrect =
         option.trim().toLowerCase() === currentQuestion.correctAnswer.trim().toLowerCase();
 
@@ -148,6 +176,7 @@ export function FlashGamePage() {
       if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
       feedbackTimerRef.current = setTimeout(() => {
         setFeedback(null);
+        setDisabledOption(null);
         setCurrentIndex((idx) => {
           const next = idx + 1;
           if (next >= questions.length) {
@@ -158,8 +187,45 @@ export function FlashGamePage() {
         });
       }, FEEDBACK_MS);
     },
-    [combo, currentQuestion, finish, haptics, questions.length, status]
+    [combo, currentQuestion, disabledOption, finish, haptics, questions.length, status]
   );
+
+  const handleUseIntel5050 = useCallback(() => {
+    if (!currentQuestion || mechanicsAvailable.intel5050 <= 0 || !canUseMechanics || feedback) return;
+    const wrongOption = currentQuestion.options.find(
+      (option) => option.trim().toLowerCase() !== currentQuestion.correctAnswer.trim().toLowerCase()
+    );
+    if (!wrongOption) return;
+
+    setDisabledOption(wrongOption);
+    setMechanicsAvailable((prev) => ({
+      ...prev,
+      intel5050: Math.max(0, prev.intel5050 - 1),
+    }));
+    trackUxEvent('mechanic_used', {
+      mode: 'flash',
+      questionId: currentQuestion.id,
+      value: 1,
+      meta: { key: 'intel5050' },
+    });
+    haptics.tap();
+  }, [canUseMechanics, currentQuestion, feedback, haptics, mechanicsAvailable.intel5050]);
+
+  const handleUseFocusTime = useCallback(() => {
+    if (mechanicsAvailable.focusTime <= 0 || !canUseMechanics || feedback) return;
+    setTimeRemaining((prev) => Math.min(durationSeconds + FOCUS_TIME_BONUS_SECONDS, prev + FOCUS_TIME_BONUS_SECONDS));
+    setMechanicsAvailable((prev) => ({
+      ...prev,
+      focusTime: Math.max(0, prev.focusTime - 1),
+    }));
+    trackUxEvent('mechanic_used', {
+      mode: 'flash',
+      questionId: currentQuestion?.id,
+      value: FOCUS_TIME_BONUS_SECONDS,
+      meta: { key: 'focusTime' },
+    });
+    haptics.tap();
+  }, [canUseMechanics, currentQuestion?.id, durationSeconds, feedback, haptics, mechanicsAvailable.focusTime]);
 
   const progressPercent = useMemo(
     () => Math.max(0, Math.min(100, (timeRemaining / durationSeconds) * 100)),
@@ -171,7 +237,7 @@ export function FlashGamePage() {
   if (status === 'loading') {
     return (
       <div className="h-full min-h-0 bg-gray-900 flex items-center justify-center">
-        <LoadingSpinner size="lg" text="Cargando Flash..." />
+        <LoadingSpinner size="lg" text={t('flash.loading')} />
       </div>
     );
   }
@@ -179,7 +245,7 @@ export function FlashGamePage() {
   if (error) {
     return (
       <FullScreenError
-        title="Error"
+        title={t('game.error')}
         message={error}
         backTo="/menu"
         backLabel={t('common.backToMenu')}
@@ -193,18 +259,16 @@ export function FlashGamePage() {
         <div className="mx-auto max-w-md">
           <div className="rounded-3xl border border-gray-700 bg-gray-800/95 p-6 text-center shadow-2xl">
             <div className="text-7xl" aria-hidden="true">⚡</div>
-            <h1 className="mt-3 text-3xl font-black text-white">Flash</h1>
-            <p className="mt-2 text-gray-300">
-              60 segundos. Banderas y siluetas. Tap o swipe. Encadena aciertos para multiplicar x10.
-            </p>
+            <h1 className="mt-3 text-3xl font-black text-white">{t('flash.title')}</h1>
+            <p className="mt-2 text-gray-300">{t('flash.intro')}</p>
             <ul className="mt-4 space-y-2 text-left text-sm text-gray-300">
-              <li>⏱️ <strong className="text-white">60s</strong> totales, no por pregunta</li>
-              <li>👉 Swipe izq/der o toca la opción</li>
-              <li>🔥 Combo x1 → x2 → x3 → x5 → x8 → x10</li>
-              <li>❌ Fallar resetea el combo, no termina la partida</li>
+              <li>⏱️ {t('flash.rule60s')}</li>
+              <li>👉 {t('flash.ruleSwipe')}</li>
+              <li>🔥 {t('flash.ruleCombo')}</li>
+              <li>❌ {t('flash.ruleMiss')}</li>
             </ul>
             <Button onClick={startPlaying} variant="primary" size="lg" fullWidth className="mt-6">
-              ¡Empezar!
+              {t('flash.start')}
             </Button>
             <Button
               onClick={() => navigate('/menu')}
@@ -231,28 +295,28 @@ export function FlashGamePage() {
         <div className="mx-auto max-w-md">
           <div className="rounded-3xl border border-gray-700 bg-gray-800/95 p-6 text-center shadow-2xl">
             <div className="text-6xl" aria-hidden="true">⚡</div>
-            <h1 className="mt-2 text-2xl font-black text-white">¡Flash terminado!</h1>
+            <h1 className="mt-2 text-2xl font-black text-white">{t('flash.finished')}</h1>
             <div className="mt-5 rounded-2xl border border-primary/40 bg-gray-900/80 p-5">
               <p className="text-xs font-semibold uppercase tracking-wide text-primary/80">
-                Puntuación
+                {t('flash.score')}
               </p>
               <p className="mt-1 text-5xl font-black text-white">{score.toLocaleString()}</p>
             </div>
             <div className="mt-4 grid grid-cols-3 gap-3 text-sm">
               <div className="rounded-xl border border-gray-700 bg-gray-900/80 p-3">
                 <div className="text-2xl font-bold text-amber-400">{maxCombo}</div>
-                <div className="text-xs text-gray-400">Combo máx</div>
+                <div className="text-xs text-gray-400">{t('flash.maxCombo')}</div>
               </div>
               <div className="rounded-xl border border-gray-700 bg-gray-900/80 p-3">
                 <div className="text-2xl font-bold text-green-400">{correct}</div>
-                <div className="text-xs text-gray-400">Aciertos</div>
+                <div className="text-xs text-gray-400">{t('flash.correct')}</div>
               </div>
               <div className="rounded-xl border border-gray-700 bg-gray-900/80 p-3">
                 <div className="text-2xl font-bold text-white">{accuracy}%</div>
-                <div className="text-xs text-gray-400">Precisión</div>
+                <div className="text-xs text-gray-400">{t('flash.accuracy')}</div>
               </div>
             </div>
-            <p className="mt-3 text-sm text-gray-400">{qpm} preguntas respondidas</p>
+            <p className="mt-3 text-sm text-gray-400">{t('flash.answered', { count: qpm })}</p>
 
             <Button
               onClick={() => {
@@ -270,7 +334,7 @@ export function FlashGamePage() {
               fullWidth
               className="mt-5"
             >
-              Jugar otra vez
+              {t('flash.playAgain')}
             </Button>
             <Button
               onClick={() => navigate('/menu')}
@@ -310,6 +374,16 @@ export function FlashGamePage() {
           </div>
         </div>
 
+        {canUseMechanics && (
+          <MechanicsHud
+            compact
+            disabled={feedback !== null}
+            available={mechanicsAvailable}
+            onUseIntel5050={handleUseIntel5050}
+            onUseFocusTime={handleUseFocusTime}
+          />
+        )}
+
         <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-800" aria-hidden="true">
           <div
             className={`h-full transition-[width] duration-1000 ease-linear ${
@@ -339,6 +413,7 @@ export function FlashGamePage() {
             onAnswer={handleAnswer}
             disabled={feedback !== null}
             feedback={feedback}
+            disabledOptions={disabledOption ? [disabledOption] : []}
           />
         )}
       </div>

@@ -6,6 +6,7 @@ interface OptionButtonProps {
   index: number;
   onClick: () => void;
   disabled: boolean;
+  eliminated?: boolean;
   selected: boolean;
   isCorrect?: boolean;
   showResult: boolean;
@@ -18,6 +19,7 @@ export const OptionButton = React.memo(function OptionButton({
   index,
   onClick,
   disabled,
+  eliminated = false,
   selected,
   isCorrect,
   showResult,
@@ -33,6 +35,8 @@ export const OptionButton = React.memo(function OptionButton({
     'bg-[var(--color-surface-muted)] border-[var(--color-border)] text-[var(--color-text-muted)] cursor-not-allowed';
   const lockedStateClasses =
     'bg-[var(--color-surface-muted)] border-[var(--color-border)] text-[var(--color-text-secondary)] cursor-not-allowed';
+  const eliminatedStateClasses =
+    'bg-[var(--color-surface-muted)] border-[var(--color-border)] text-[var(--color-text-muted)] cursor-not-allowed opacity-70';
   const correctStateClasses =
     'bg-[var(--color-success-600)] border-[var(--color-success-500)] text-white cursor-not-allowed';
   const wrongStateClasses =
@@ -51,6 +55,7 @@ export const OptionButton = React.memo(function OptionButton({
       return `${baseClasses} ${lockedStateClasses}`;
     }
 
+    if (eliminated) return `${baseClasses} ${eliminatedStateClasses}`;
     if (selected) return `${baseClasses} ${selectedStateClasses}`;
     if (disabled) return `${baseClasses} ${disabledStateClasses}`;
     return `${baseClasses} ${defaultStateClasses}`;
@@ -69,7 +74,17 @@ export const OptionButton = React.memo(function OptionButton({
       disabled={disabled}
       className={getButtonClasses()}
       aria-pressed={selected}
-      data-state={showResult ? (isCorrect ? 'correct' : selected ? 'wrong' : 'locked') : selected ? 'selected' : disabled ? 'disabled' : 'default'}
+      data-state={
+        showResult
+          ? (isCorrect ? 'correct' : selected ? 'wrong' : 'locked')
+          : eliminated
+            ? 'eliminated'
+            : selected
+              ? 'selected'
+              : disabled
+                ? 'disabled'
+                : 'default'
+      }
     >
       <span
         className={`option-button-index flex h-7 w-7 shrink-0 rounded-full items-center justify-center self-center font-bold text-xs transition-colors sm:text-sm ${
@@ -77,16 +92,18 @@ export const OptionButton = React.memo(function OptionButton({
             ? 'bg-[var(--color-success-500)] text-white'
             : showResult && selected && !isCorrect
               ? 'bg-[var(--color-error-500)] text-white'
+            : eliminated
+              ? 'bg-[var(--color-border)] text-[var(--color-text-muted)]'
             : selected
                 ? 'bg-[var(--color-primary-100)] text-[var(--color-primary-800)]'
                 : 'bg-[var(--color-border)] text-[var(--color-text-secondary)]'
         }`}
       >
-        {showResult && isCorrect ? '✓' : showResult && selected && !isCorrect ? '✕' : optionLetters[index]}
+        {showResult && isCorrect ? '✓' : showResult && selected && !isCorrect ? '✕' : eliminated ? '—' : optionLetters[index]}
       </span>
 
       <div className="flex min-w-0 flex-1 items-center gap-1.5 sm:gap-2">
-        <span className="option-button-label min-w-0 flex-1 text-[0.8rem] font-medium leading-[1.15] sm:text-[0.9rem] md:text-[0.98rem]">
+        <span className={`option-button-label min-w-0 flex-1 text-[0.8rem] font-medium leading-[1.15] sm:text-[0.9rem] md:text-[0.98rem] ${eliminated ? 'line-through opacity-70' : ''}`}>
           {option}
         </span>
 

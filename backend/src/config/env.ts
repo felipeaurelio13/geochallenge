@@ -62,6 +62,18 @@ export const config = {
     enableStreakSimpleScoring: process.env.ENABLE_STREAK_SIMPLE_SCORING !== 'false',
     enableStreakUniqueQuestions: process.env.ENABLE_STREAK_UNIQUE_QUESTIONS !== 'false',
     soloModeScoringStrategy: resolveSoloModeScoringStrategy(),
+    mechanics: {
+      single: process.env.ENABLE_MECHANICS_SINGLE !== 'false',
+      flash: process.env.ENABLE_MECHANICS_FLASH !== 'false',
+      duel: process.env.ENABLE_MECHANICS_DUEL === 'true',
+      challenge: process.env.ENABLE_MECHANICS_CHALLENGE === 'true',
+      limits: {
+        intel5050: parseNumberEnv(process.env.MECHANIC_LIMIT_INTEL5050, 1),
+        focusTime: parseNumberEnv(process.env.MECHANIC_LIMIT_FOCUS_TIME, 1),
+        streakShield: parseNumberEnv(process.env.MECHANIC_LIMIT_STREAK_SHIELD, 1),
+      },
+      focusTimeBonusSeconds: parseNumberEnv(process.env.MECHANIC_FOCUS_TIME_BONUS_SECONDS, 3),
+    },
   },
 
   testAuthBypass: {

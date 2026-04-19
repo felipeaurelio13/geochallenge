@@ -2,11 +2,13 @@ import { useMemo } from 'react';
 import { Question } from '../types';
 import { useGesture } from '../hooks/useGesture';
 import { triggerHaptic } from '../hooks/useHaptics';
+import { useTranslation } from 'react-i18next';
 
 interface FlashCardProps {
   question: Question;
   onAnswer: (option: string) => void;
   disabled?: boolean;
+  disabledOptions?: string[];
   feedback?: 'correct' | 'incorrect' | null;
 }
 
@@ -15,7 +17,8 @@ const VISUAL_ALT: Record<string, string> = {
   SILHOUETTE: 'Silueta',
 };
 
-export function FlashCard({ question, onAnswer, disabled, feedback }: FlashCardProps) {
+export function FlashCard({ question, onAnswer, disabled, disabledOptions = [], feedback }: FlashCardProps) {
+  const { t } = useTranslation();
   const [optionA, optionB] = useMemo(() => {
     const opts = question.options.slice(0, 2);
     return [opts[0] ?? '', opts[1] ?? ''];
@@ -65,7 +68,7 @@ export function FlashCard({ question, onAnswer, disabled, feedback }: FlashCardP
           <div className="flex h-full items-center justify-center text-6xl">🌍</div>
         )}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-3 text-center text-xs text-gray-200">
-          Desliza ← o → · o toca una opción
+          {t('flash.swipeHint')}
         </div>
       </div>
 
@@ -73,8 +76,8 @@ export function FlashCard({ question, onAnswer, disabled, feedback }: FlashCardP
         <button
           type="button"
           onClick={() => handleAnswer(optionA)}
-          disabled={disabled}
-          className="pressable min-h-16 rounded-2xl border-2 border-gray-700 bg-gray-800 px-3 py-4 text-base font-semibold text-white shadow-md active:bg-gray-700 disabled:opacity-60"
+          disabled={disabled || disabledOptions.includes(optionA)}
+          className="pressable min-h-16 rounded-2xl border-2 border-gray-700 bg-gray-800 px-3 py-4 text-base font-semibold text-white shadow-md active:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-60"
           aria-label={`Opción A: ${optionA}`}
         >
           <span className="mr-2 text-xs text-gray-400">←</span>
@@ -83,8 +86,8 @@ export function FlashCard({ question, onAnswer, disabled, feedback }: FlashCardP
         <button
           type="button"
           onClick={() => handleAnswer(optionB)}
-          disabled={disabled}
-          className="pressable min-h-16 rounded-2xl border-2 border-gray-700 bg-gray-800 px-3 py-4 text-base font-semibold text-white shadow-md active:bg-gray-700 disabled:opacity-60"
+          disabled={disabled || disabledOptions.includes(optionB)}
+          className="pressable min-h-16 rounded-2xl border-2 border-gray-700 bg-gray-800 px-3 py-4 text-base font-semibold text-white shadow-md active:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-60"
           aria-label={`Opción B: ${optionB}`}
         >
           {optionB}

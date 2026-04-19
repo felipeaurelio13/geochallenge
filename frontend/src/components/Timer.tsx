@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { triggerHaptic } from '../hooks/useHaptics';
+import { useUiStore } from '../store/useUiStore';
 
 const URGENCY_THRESHOLD_SECONDS = 3;
 
@@ -20,6 +21,7 @@ export function getTimerColorToken(percentage: number): string {
 
 export function Timer({ duration, timeRemaining, onTick, onComplete, isActive }: TimerProps) {
   const { t } = useTranslation();
+  const prefersReducedMotion = useUiStore((state) => state.prefersReducedMotion);
   const intervalRef = useRef<number | null>(null);
   const onTickRef = useRef(onTick);
   const onCompleteRef = useRef(onComplete);
@@ -83,11 +85,14 @@ export function Timer({ duration, timeRemaining, onTick, onComplete, isActive }:
           strokeLinecap="round"
           strokeDasharray="283"
           strokeDashoffset={strokeDashoffset}
-          className="transition-all duration-1000 ease-linear shadow-glow-primary"
+          className={`shadow-glow-primary ${prefersReducedMotion ? '' : 'transition-all duration-1000 ease-linear'}`}
         />
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-lg font-bold transition-colors duration-300 sm:text-xl md:text-2xl" style={{ color: timerColor }}>
+        <span
+          className={`text-lg font-bold sm:text-xl md:text-2xl ${prefersReducedMotion ? '' : 'transition-colors duration-300'}`}
+          style={{ color: timerColor }}
+        >
           {Math.max(0, timeRemaining)}s
         </span>
       </div>

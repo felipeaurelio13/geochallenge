@@ -21,6 +21,8 @@ export interface AuthState {
 // Game types
 export type Category = 'MAP' | 'FLAG' | 'CAPITAL' | 'SILHOUETTE' | 'MIXED';
 export type GameType = 'single' | 'streak' | 'flash';
+export type GameplayMode = GameType | 'duel' | 'challenge';
+export type GameMechanicKey = 'intel5050' | 'focusTime' | 'streakShield';
 
 export type Difficulty = 'EASY' | 'MEDIUM' | 'HARD';
 
@@ -55,10 +57,19 @@ export interface Answer {
   questionId: string;
   answer: string;
   timeRemaining: number;
+  mechanicUsage?: MechanicUsage;
   coordinates?: {
     lat: number;
     lng: number;
   };
+}
+
+export interface MechanicUsage {
+  key: GameMechanicKey;
+  action: 'trigger';
+  questionId?: string;
+  roundIndex?: number;
+  value?: number;
 }
 
 export interface AnswerResult {
@@ -79,6 +90,18 @@ export interface GameConfig {
   timePerQuestion: number;
   category: Category;
   gameType: GameType;
+  mechanics?: MechanicsConfig;
+}
+
+export interface MechanicsConfig {
+  enabled: boolean;
+  allowed: GameMechanicKey[];
+  limits: Partial<Record<GameMechanicKey, number>>;
+}
+
+export interface MechanicsState {
+  disabledOptionIndexes: number[];
+  available: Record<GameMechanicKey, number>;
 }
 
 export interface GameState {

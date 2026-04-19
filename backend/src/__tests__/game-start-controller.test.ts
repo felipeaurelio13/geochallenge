@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   getQuestionsForGameMock: vi.fn(),
   getQuestionsForStreakGameMock: vi.fn(),
   getStreakBatchSizeMock: vi.fn(),
+  getMechanicsConfigForModeMock: vi.fn(() => ({ enabled: false, allowed: [] as string[], limits: {} })),
 }));
 
 vi.mock('../middleware/auth.js', () => ({
@@ -19,6 +20,7 @@ vi.mock('../services/game.service.js', () => ({
   getQuestionsForGame: mocks.getQuestionsForGameMock,
   getQuestionsForStreakGame: mocks.getQuestionsForStreakGameMock,
   getStreakBatchSize: mocks.getStreakBatchSizeMock,
+  getMechanicsConfigForMode: mocks.getMechanicsConfigForModeMock,
   validateAnswerByGameType: vi.fn(),
   saveGameResult: vi.fn(),
   getUserGameHistory: vi.fn(),
@@ -125,5 +127,28 @@ describe('GET /start controller gameType handling', () => {
     expect(mocks.getQuestionsForGameMock).toHaveBeenCalledWith(Category.CAPITAL, 10);
     expect(mocks.getQuestionsForStreakGameMock).not.toHaveBeenCalled();
     expect(body.gameConfig.gameType).toBe('single');
+  });
+
+  it('incluye configuración aditiva de mecánicas en gameConfig', async () => {
+    mocks.getMechanicsConfigForModeMock.mockReturnValueOnce({
+      enabled: true,
+      allowed: ['intel5050'],
+      limits: { intel5050: 1 },
+    });
+    const app = express();
+    app.use('/api/game', gameRouter);
+    const server = app.listen(0);
+    const baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+
+    const response = await fetch(`${baseUrl}/api/game/start?category=CAPITAL`);
+    const body = (await response.json()) as {
+      gameConfig: { mechanics?: { enabled: boolean; allowed: string[]; limits: Record<string, number> } };
+    };
+
+    server.close();
+
+    expect(response.status).toBe(200);
+    expect(body.gameConfig.mechanics?.enabled).toBe(true);
+    expect(body.gameConfig.mechanics?.allowed).toEqual(['intel5050']);
   });
 });

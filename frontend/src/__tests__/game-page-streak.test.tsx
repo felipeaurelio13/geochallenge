@@ -12,6 +12,7 @@ const mocks = vi.hoisted(() => ({
   nextQuestionMock: vi.fn(),
   finishGameMock: vi.fn().mockResolvedValue(undefined),
   resetGameMock: vi.fn(),
+  setTimeRemainingMock: vi.fn(),
   apiStartGameMock: vi.fn().mockResolvedValue({
     questions: [{
       id: 'q-extra',
@@ -55,6 +56,7 @@ const mocks = vi.hoisted(() => ({
     score: 100,
     results: [],
     status: 'playing',
+    config: null,
   },
 }));
 
@@ -85,6 +87,7 @@ vi.mock('../context/GameContext', () => ({
     nextQuestion: mocks.nextQuestionMock,
     finishGame: mocks.finishGameMock,
     resetGame: mocks.resetGameMock,
+    setTimeRemaining: mocks.setTimeRemainingMock,
   }),
 }));
 
@@ -93,6 +96,7 @@ vi.mock('../components', () => ({
   ScoreDisplay: () => <div>score</div>,
   ProgressBar: () => <div>progress</div>,
   LoadingSpinner: ({ text }: { text?: string }) => <div>{text || 'loading'}</div>,
+  MechanicsHud: () => <div>mechanics-hud</div>,
   RoundActionTray: ({ showResult, canSubmit, submitLabel, nextLabel, onSubmit, onNext }: any) => (
     <div data-testid="mobile-action-tray">
       {!showResult && <button onClick={onSubmit} disabled={!canSubmit}>{submitLabel}</button>}
@@ -119,6 +123,7 @@ describe('GamePage streak mode', () => {
     mocks.searchParams = new URLSearchParams('category=MIXED&gameType=streak');
     mocks.gameState.currentIndex = 0;
     mocks.gameState.questions = mocks.gameState.questions.slice(0, 3);
+    mocks.gameState.config = null;
   });
 
   it('inicia juego usando gameType=streak', async () => {
@@ -206,6 +211,31 @@ describe('GamePage streak mode', () => {
       );
       expect(mocks.appendQuestionsMock).toHaveBeenCalled();
       expect(mocks.nextQuestionMock).toHaveBeenCalledTimes(1);
+      expect(mocks.navigateMock).not.toHaveBeenCalledWith('/results?gameType=streak');
+    });
+  });
+
+  it('consume escudo de racha cuando está habilitado y evita terminar en el primer fallo', async () => {
+    mocks.gameState.config = {
+      questionsCount: 10,
+      timePerQuestion: 10,
+      category: 'MIXED',
+      gameType: 'streak',
+      mechanics: {
+        enabled: true,
+        allowed: ['streakShield'],
+        limits: { streakShield: 1 },
+      },
+    };
+    mocks.submitAnswerMock.mockResolvedValueOnce({ isCorrect: false, points: 0 });
+
+    render(<GamePage />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Santiago' }));
+    fireEvent.click(screen.getByRole('button', { name: 'game.submit' }));
+
+    await waitFor(() => {
+      expect(mocks.finishGameMock).not.toHaveBeenCalled();
       expect(mocks.navigateMock).not.toHaveBeenCalledWith('/results?gameType=streak');
     });
   });
