@@ -51,6 +51,7 @@ export function ChallengesPage() {
 
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState('');
   const [activeTab, setActiveTab] = useState<TabType>('mine');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createCategories, setCreateCategories] = useState<string[]>(['MIXED']);
@@ -75,10 +76,12 @@ export function ChallengesPage() {
   const fetchChallenges = async () => {
     try {
       setLoading(true);
+      setFetchError('');
       const response = await api.get<{ challenges: Challenge[] }>('/challenges');
       setChallenges(response.challenges);
     } catch (err) {
       console.error('Failed to fetch challenges:', err);
+      setFetchError(t('challenges.fetchError'));
     } finally {
       setLoading(false);
     }
@@ -180,6 +183,7 @@ export function ChallengesPage() {
       </div>
 
       <main className="max-w-4xl mx-auto px-4 py-4 space-y-4">
+        {fetchError && <Alert type="error">{fetchError}</Alert>}
         <section className="rounded-xl border border-primary/30 bg-primary/10 p-4">
           <p className="text-sm font-semibold text-white">{t('challenges.createMultiplayerTitle')}</p>
           <p className="mt-1 text-xs text-gray-300 sm:text-sm">{t('challenges.createMultiplayerHint')}</p>

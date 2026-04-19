@@ -87,6 +87,14 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
       });
     }
 
+    if (question.category === 'SILHOUETTE') {
+      // raw.githubusercontent.com serves SVG with wrong content-type; jsDelivr serves it correctly
+      return question.imageUrl.replace(
+        'https://raw.githubusercontent.com/djaiss/mapsicon/master/all/',
+        'https://cdn.jsdelivr.net/gh/djaiss/mapsicon@master/all/'
+      );
+    }
+
     return question.imageUrl;
   }, [question.category, question.imageUrl]);
 

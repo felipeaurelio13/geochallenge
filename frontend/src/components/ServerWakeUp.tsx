@@ -21,6 +21,8 @@ export function ServerWakeUp({ children }: ServerWakeUpProps) {
     api.healthCheck().then(() => {
       clearTimeout(showTimer);
       setServerReady(true);
+    }).catch(() => {
+      setServerReady(true);
     });
 
     return () => clearTimeout(showTimer);

@@ -12,7 +12,7 @@ import {
   RoundActionTray,
 } from '../components';
 import { FullScreenError } from '../components/molecules/FullScreenError';
-import { Question } from '../types';
+import { Category, Question } from '../types';
 import { GAME_CONSTANTS } from '../constants/game';
 import { useHaptics } from '../hooks';
 
@@ -91,7 +91,7 @@ export function GamePage() {
   useEffect(() => {
     const initGame = async () => {
       try {
-        await startGame(category as any, undefined, gameType);
+        await startGame(category as Category, undefined, gameType);
       } catch (err: any) {
         setError(err.message || 'Error al iniciar el juego');
       }
@@ -167,6 +167,7 @@ export function GamePage() {
       setShowResult(true);
     } catch (err: any) {
       console.error('Error submitting answer:', err);
+      setError(err.message || t('game.error'));
     }
   };
 
@@ -181,7 +182,7 @@ export function GamePage() {
           const usedQuestionIds = questions.map((question) => question.id);
           const usedQuestionKeys = questions.map((question) => buildQuestionUniquenessKey(question));
           const refillResponse = await api.startGame(
-            category as any,
+            category as Category,
             10,
             'streak',
             usedQuestionIds,

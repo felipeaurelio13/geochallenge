@@ -232,6 +232,7 @@
     "challengeMode": "Challenge mode",
     "join": "Join",
     "waitingReady": "Waiting for lobby to fill",
+    "fetchError": "Failed to load challenges. Please try again.",
     "categories": "Categories",
     "maxPlayers": "Player limit",
     "answerTime": "Answer time",
