@@ -35,7 +35,7 @@ vi.mock('../context/AuthContext', () => ({
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string, options?: Record<string, string>) => {
+    t: (key: string, _options?: Record<string, string>) => {
       const translations: Record<string, string> = {
         'menu.selectCategory': 'Selecciona una categoría',
         'menu.gameModes': 'Modos de juego',
