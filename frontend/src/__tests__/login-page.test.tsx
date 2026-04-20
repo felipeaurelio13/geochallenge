@@ -16,12 +16,13 @@ vi.mock('../context/AuthContext', () => ({
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string) => {
+    t: (key: string, opts?: Record<string, unknown>) => {
       const translations: Record<string, string> = {
         'auth.login': 'Iniciar sesión',
         'auth.email': 'Email',
         'auth.password': 'Contraseña',
         'auth.loginButton': 'Ingresar',
+        'auth.loginError': 'Error al iniciar sesión',
         'auth.noAccount': 'No tienes cuenta?',
         'auth.registerHere': 'Regístrate',
         'auth.showPassword': 'Mostrar contraseña',
@@ -29,9 +30,17 @@ vi.mock('react-i18next', () => ({
         'auth.show': 'Mostrar',
         'auth.hide': 'Ocultar',
         'auth.completeFieldsHint': 'Completa correo y contraseña para continuar.',
+        'auth.rateLimitError': 'Demasiados intentos. Intenta de nuevo en {{minutes}} min.',
         'common.back': 'Volver',
+        'common.processing': 'Procesando...',
       };
-      return translations[key] ?? key;
+      const template = translations[key] ?? key;
+      if (opts && typeof template === 'string') {
+        return template.replace(/\{\{(\w+)\}\}/g, (_, name) =>
+          opts[name] !== undefined ? String(opts[name]) : `{{${name}}}`
+        );
+      }
+      return template;
     },
   }),
 }));

@@ -56,7 +56,7 @@ const mocks = vi.hoisted(() => ({
     score: 100,
     results: [],
     status: 'playing',
-    config: null,
+    config: null as null | Record<string, unknown>,
   },
 }));
 

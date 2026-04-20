@@ -36,7 +36,7 @@ const PODIUM_COLORS = {
     text: 'text-yellow-400',
     glow: 'shadow-yellow-500/40',
     height: 'h-24',
-    crown: '👑',
+    crown: '🥇',
   },
   2: {
     bg: 'bg-gradient-to-b from-slate-300 to-slate-500',
@@ -56,13 +56,13 @@ const PODIUM_COLORS = {
   },
 } as const;
 
-function PodiumBlock({ entry, topScore }: { entry: LeaderboardEntry; topScore: number }) {
+function PodiumBlock({ entry, topScore, youLabel }: { entry: LeaderboardEntry; topScore: number; youLabel: string }) {
   const config = PODIUM_COLORS[entry.rank as 1 | 2 | 3];
   const pct = topScore > 0 ? Math.round((entry.score / topScore) * 100) : 0;
 
   return (
     <div className="flex flex-col items-center gap-2 flex-1 min-w-0">
-      {entry.rank === 1 && <span className="text-2xl animate-bounce">👑</span>}
+      <span className={`text-2xl ${entry.rank === 1 ? 'animate-bounce' : ''}`}>{config.crown}</span>
       <div
         className={`w-14 h-14 rounded-full border-2 ${config.border} flex items-center justify-center bg-gray-800 shadow-lg ${config.glow} shadow-lg`}
         title={entry.username}
@@ -71,6 +71,9 @@ function PodiumBlock({ entry, topScore }: { entry: LeaderboardEntry; topScore: n
       </div>
       <span className={`text-xs font-bold truncate max-w-full px-1 ${entry.rank === 1 ? 'text-yellow-300' : 'text-gray-200'}`}>
         {entry.username}
+        {entry.isCurrentUser && (
+          <span className="ml-1 text-xs font-normal text-primary">({youLabel})</span>
+        )}
       </span>
       <span className={`text-sm font-bold ${config.text}`}>
         {entry.score.toLocaleString()}
@@ -160,15 +163,13 @@ export function RankingsPage() {
       return;
     }
 
-    let cancelled = false;
     const shouldLoadRankContext = !!user && (RANKING_NEIGHBORS_ENABLED || data.userRank === null);
 
     if (!shouldLoadRankContext) {
-      setNeighborEntries([]);
-      setNeighborsLoading(false);
       return;
     }
 
+    let cancelled = false;
     setNeighborsLoading(true);
 
     void api
@@ -205,7 +206,7 @@ export function RankingsPage() {
     return () => {
       cancelled = true;
     };
-  }, [data, user]);
+  }, [data, user?.username]);
 
   const resolvedUserRank = data?.userRank ?? deferredUserRank;
   const resolvedUserScore = data?.userScore ?? deferredUserScore;
@@ -297,6 +298,7 @@ export function RankingsPage() {
         <div className="mb-5">
           <Input
             id="rankings-search"
+            aria-label={t('common.search', { defaultValue: 'Buscar' })}
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             className="text-sm"
@@ -342,7 +344,7 @@ export function RankingsPage() {
                   <div className="mb-8">
                     <div className="flex items-end justify-center gap-3 px-4">
                       {podiumOrder.map((entry) => (
-                        <PodiumBlock key={entry.userId ?? entry.username} entry={entry} topScore={topScore} />
+                        <PodiumBlock key={entry.userId ?? entry.username} entry={entry} topScore={topScore} youLabel={t('rankings.you')} />
                       ))}
                     </div>
                   </div>

@@ -24,7 +24,7 @@ export function RegisterPage() {
   const navigate = useNavigate();
   const { register, isLoading } = useAuth();
 
-  const { values, errors, setFieldValue, isValid, validate } = useFormValidation(registerSchema, {
+  const { values, errors, setFieldValue, validate } = useFormValidation(registerSchema, {
     username: '',
     email: '',
     password: '',
@@ -106,7 +106,15 @@ export function RegisterPage() {
           <FormField.Hint>{t('auth.passwordHint')}</FormField.Hint>
         </FormField.Root>
 
-        <FormField.Root id="confirmPassword" error={errors.confirmPassword}>
+        <FormField.Root
+          id="confirmPassword"
+          error={
+            errors.confirmPassword ||
+            (values.confirmPassword && values.password !== values.confirmPassword
+              ? t('auth.passwordMismatch')
+              : undefined)
+          }
+        >
           <FormField.Label>{t('auth.confirmPassword')}</FormField.Label>
           <FormField.Input
             type="password"
@@ -118,7 +126,7 @@ export function RegisterPage() {
           />
         </FormField.Root>
 
-        <Button type="submit" disabled={isLoading || !isValid} fullWidth size="lg">
+        <Button type="submit" disabled={isLoading} fullWidth size="lg">
           {isLoading ? (
             <>
               <LoadingSpinner size="sm" />

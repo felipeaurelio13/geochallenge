@@ -50,7 +50,7 @@ describe('RegisterPage', () => {
       </MemoryRouter>
     );
 
-    expect(container.querySelector('div.app-shell')).toBeInTheDocument();
+    expect(container.querySelector('section.screen')).toBeInTheDocument();
     expect(screen.getByText(/v\d+\.\d+\.\d+/i)).toHaveClass('app-footer__version');
   });
 

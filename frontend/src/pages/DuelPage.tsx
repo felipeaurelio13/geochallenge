@@ -319,7 +319,7 @@ export function DuelPage() {
     }
 
     hasSubmittedCurrentQuestionRef.current = true;
-    socketService.submitDuelAnswer(currentQuestion.id, answer, timeRemaining, pendingMechanicUsage, coordinates);
+    socketService.submitDuelAnswer(currentQuestion.id, answer, timeRemaining, coordinates, pendingMechanicUsage);
     setPendingMechanicUsage(undefined);
     setDuelState('waiting');
   };
