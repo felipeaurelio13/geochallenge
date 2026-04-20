@@ -92,7 +92,7 @@ export function LoginPage() {
             value={values.email}
             onChange={handleChange}
             required
-            autoFocus
+            autoFocus={typeof window !== 'undefined' && !('ontouchstart' in window)}
             autoComplete="email"
             inputMode="email"
             spellCheck={false}

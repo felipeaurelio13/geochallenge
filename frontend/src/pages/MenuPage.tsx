@@ -72,13 +72,13 @@ export function MenuPage() {
         <p className="mb-2 px-1 text-xs font-medium uppercase tracking-wider text-gray-500 sm:px-0">
           {t('menu.selectCategory')}
         </p>
-        <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
+        <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:grid sm:grid-cols-5 sm:overflow-visible sm:px-0">
           {categories.map((cat) => (
             <Button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
               variant={selectedCategory === cat.id ? 'primary' : 'secondary'}
-              className={`flex flex-col items-center justify-center !min-h-14 !rounded-xl !px-1 !py-2.5 gap-1 ${
+              className={`flex-none w-[72px] flex flex-col items-center justify-center !min-h-[4.5rem] !rounded-xl !px-1 !py-2.5 gap-1 sm:w-auto sm:flex-1 ${
                 selectedCategory === cat.id
                   ? '!border-primary/70 !bg-primary/15 !text-white'
                   : '!border-gray-700 !bg-gray-900/80 !text-gray-100/90'
@@ -86,7 +86,7 @@ export function MenuPage() {
               aria-pressed={selectedCategory === cat.id}
             >
               <span className="menu-category-selector__icon text-xl leading-none">{cat.icon}</span>
-              <span className="menu-category-selector__label text-[0.65rem] font-medium leading-tight sm:text-xs">
+              <span className="menu-category-selector__label text-[0.7rem] font-medium leading-tight xs:text-[0.75rem] sm:text-xs">
                 {t(cat.labelKey)}
               </span>
             </Button>

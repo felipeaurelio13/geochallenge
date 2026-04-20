@@ -99,7 +99,7 @@ export function ResultsPage() {
   }
 
   return (
-    <div className="h-full min-h-0 bg-gray-900 px-4 py-5 pt-[calc(env(safe-area-inset-top)+1.25rem)] sm:px-6 sm:py-8">
+    <div className="h-full min-h-0 overflow-y-auto bg-[var(--color-bg-app)] px-4 py-5 pt-[calc(env(safe-area-inset-top)+1.25rem)] pb-[calc(env(safe-area-inset-bottom)+1.25rem)] sm:px-6 sm:py-8">
       <main className="mx-auto w-full max-w-xl" aria-label="results-summary">
         <section className="rounded-3xl border border-gray-700 bg-gray-800/95 p-5 text-center shadow-2xl shadow-black/30 sm:p-8">
           <div className="text-6xl sm:text-7xl mb-3" aria-hidden="true">{getPerformanceEmoji()}</div>
@@ -206,7 +206,7 @@ export function ResultsPage() {
         </section>
 
         <section
-          className="sticky bottom-0 z-10 mt-5 rounded-2xl border border-gray-700 bg-gray-800/95 p-3 backdrop-blur-sm"
+          className="sticky bottom-0 z-10 mt-5 rounded-2xl border border-gray-700 bg-gray-800/95 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-sm"
           data-testid="results-action-tray"
         >
           <div className="flex flex-col gap-2.5">

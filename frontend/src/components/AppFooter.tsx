@@ -6,7 +6,7 @@ const APP_VERSION = __APP_VERSION__ || '0.0.0';
 
 export function AppFooter({ className }: AppFooterProps) {
   return (
-    <footer className={`app-footer ${className ?? ''}`.trim()}>
+    <footer className={`app-footer hidden sm:block ${className ?? ''}`.trim()}>
       <p>GeoChallenge &copy; {new Date().getFullYear()}</p>
       <p className="app-footer__version">v{APP_VERSION}</p>
     </footer>
