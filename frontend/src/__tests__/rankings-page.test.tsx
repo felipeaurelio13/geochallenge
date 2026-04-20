@@ -30,6 +30,9 @@ vi.mock('react-i18next', () => ({
         'rankings.totalPlayers': 'Jugadores',
         'rankings.topScore': 'Mejor puntuación',
         'rankings.avgScore': 'Promedio',
+        'rankings.filteredResults': 'Resultados filtrados',
+        'rankings.otherPlayers': 'Otros jugadores',
+        'rankings.globalStats': 'Estadísticas globales',
       };
 
       return translations[key] ?? key;
@@ -95,8 +98,7 @@ describe('RankingsPage', () => {
     const search = screen.getByLabelText('Buscar');
     expect(search).toHaveClass('bg-gray-800', 'text-white', 'placeholder-gray-500');
 
-    const currentUserCard = screen.getByText('neo').closest('div.p-4.rounded-xl.border-2');
-    expect(currentUserCard).toHaveClass('bg-primary/20', 'border-primary');
+    expect(screen.getByText('(Tú)')).toHaveClass('text-primary');
   });
 
   it('usa rank provisto por backend y no index + 1', async () => {

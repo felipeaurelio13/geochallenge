@@ -215,16 +215,25 @@ class SocketService {
     questionId: string,
     answer: string,
     timeRemaining: number,
-    mechanicUsage?: MechanicUsage,
-    coordinates?: { lat: number; lng: number }
+    coordinates?: { lat: number; lng: number },
+    mechanicUsage?: MechanicUsage
   ): void {
-    this.socket?.emit('duel:answer', {
+    const payload: {
+      questionId: string;
+      answer: string;
+      timeRemaining: number;
+      coordinates: { lat: number; lng: number } | undefined;
+      mechanicUsage?: MechanicUsage;
+    } = {
       questionId,
       answer,
       timeRemaining,
-      mechanicUsage,
       coordinates,
-    });
+    };
+    if (mechanicUsage !== undefined) {
+      payload.mechanicUsage = mechanicUsage;
+    }
+    this.socket?.emit('duel:answer', payload);
   }
 }
 
