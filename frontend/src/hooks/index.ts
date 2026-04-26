@@ -10,3 +10,4 @@ export * from './useMediaQuery';
 export * from './useOfflineQuestions';
 export * from './useWebShare';
 export * from './useWindowSize';
+export * from './useImageWithFallback';

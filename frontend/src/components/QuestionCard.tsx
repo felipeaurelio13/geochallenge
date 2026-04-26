@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Question } from '../types';
+import { useImageWithFallback } from '../hooks/useImageWithFallback';
 import { useTranslation } from 'react-i18next';
 
 interface QuestionCardProps {
@@ -11,7 +12,6 @@ interface QuestionCardProps {
 
 export function QuestionCard({ question, questionNumber, totalQuestions, compact = false }: QuestionCardProps) {
   const { t } = useTranslation();
-  const [hasImageError, setHasImageError] = useState(false);
 
   const getQuestionDataValue = (): string => {
     if (!question.questionData) return '';
@@ -78,8 +78,8 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
     return `game.difficulty.${difficulty}`;
   };
 
-  const normalizedImageUrl = useMemo(() => {
-    if (!question.imageUrl) return '';
+  const primaryImageUrl = useMemo(() => {
+    if (!question.imageUrl) return undefined;
 
     if (question.category === 'FLAG') {
       return question.imageUrl.replace(/(flagcdn\.com\/w\d+\/)([A-Z]{2})(\.png)$/i, (_match, prefix, code, suffix) => {
@@ -88,7 +88,6 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
     }
 
     if (question.category === 'SILHOUETTE') {
-      // raw.githubusercontent.com serves SVG with wrong content-type; jsDelivr serves it correctly
       return question.imageUrl.replace(
         'https://raw.githubusercontent.com/djaiss/mapsicon/master/all/',
         'https://cdn.jsdelivr.net/gh/djaiss/mapsicon@master/all/'
@@ -97,6 +96,8 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
 
     return question.imageUrl;
   }, [question.category, question.imageUrl]);
+
+  const { src: normalizedImageUrl, hasError: hasImageError, handleError: handleImageError } = useImageWithFallback(primaryImageUrl);
 
   const showQuestionImage =
     Boolean(normalizedImageUrl) &&
@@ -149,7 +150,7 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
                 width={question.category === 'FLAG' ? 360 : 220}
                 height={question.category === 'FLAG' ? 190 : 220}
                 className={`mx-auto ${getImageClassName()}`}
-                onError={() => setHasImageError(true)}
+                onError={handleImageError}
               />
 
               {question.category === 'FLAG' && question.difficulty && (
@@ -159,6 +160,15 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
                   {t(getDifficultyKey())}
                 </span>
               )}
+            </div>
+          </div>
+        )}
+
+        {hasImageError && question.category === 'SILHOUETTE' && (
+          <div className={compact ? 'mb-1' : 'mb-6'}>
+            <div className="media-box media-box--silhouette mx-auto flex flex-col items-center justify-center gap-2 rounded-xl border border-slate-700/60 bg-slate-950/90 p-3">
+              <span className="text-4xl opacity-30">🌐</span>
+              <p className="text-xs text-slate-500">{t('game.silhouetteUnavailable', 'Silueta no disponible')}</p>
             </div>
           </div>
         )}

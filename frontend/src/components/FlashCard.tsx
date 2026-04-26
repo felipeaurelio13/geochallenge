@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { Question } from '../types';
 import { useGesture } from '../hooks/useGesture';
 import { triggerHaptic } from '../hooks/useHaptics';
+import { useImageWithFallback } from '../hooks/useImageWithFallback';
 import { useTranslation } from 'react-i18next';
 
 interface FlashCardProps {
@@ -24,11 +25,13 @@ export function FlashCard({ question, onAnswer, disabled, disabledOptions = [], 
     return [opts[0] ?? '', opts[1] ?? ''];
   }, [question]);
 
-  const imageUrl =
+  const rawImageUrl =
     question.imageUrl ||
     (typeof question.questionData === 'object' && question.questionData
       ? (question.questionData.flagUrl ?? question.questionData.silhouetteUrl)
       : undefined);
+
+  const { src: imageUrl, hasError: hasImageError, handleError: handleImageError } = useImageWithFallback(rawImageUrl);
 
   const handleAnswer = (option: string) => {
     if (disabled || !option) return;
@@ -57,12 +60,13 @@ export function FlashCard({ question, onAnswer, disabled, disabledOptions = [], 
         role="img"
         aria-label={`${VISUAL_ALT[question.category] ?? 'Imagen'} a identificar`}
       >
-        {imageUrl ? (
+        {imageUrl && !hasImageError ? (
           <img
             src={imageUrl}
             alt={`${VISUAL_ALT[question.category] ?? 'Imagen'}`}
             className={`absolute inset-0 h-full w-full object-contain p-6${question.category === 'SILHOUETTE' ? ' filter invert drop-shadow-[0_0_14px_rgba(148,163,184,0.45)]' : ''}`}
             draggable={false}
+            onError={handleImageError}
           />
         ) : (
           <div className="flex h-full items-center justify-center text-6xl">🌍</div>
