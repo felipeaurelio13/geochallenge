@@ -518,10 +518,10 @@ export function GamePage() {
           onSubmit={handleSubmitAnswer}
           onNext={handleNextQuestion}
           summarySlot={
-            mechanicsRuntimeEnabled ? (
+            mechanicsRuntimeEnabled && !showResult ? (
               <MechanicsHud
                 available={mechanicsAvailable}
-                disabled={showResult}
+                disabled={false}
                 onUseIntel5050={handleUseIntel5050}
                 onUseFocusTime={handleUseFocusTime}
                 showShieldStatus={shouldUseStreakFlow}

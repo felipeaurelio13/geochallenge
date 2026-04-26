@@ -25,28 +25,22 @@ export const OptionButton = React.memo(function OptionButton({
   showResult,
 }: OptionButtonProps) {
   const baseClasses =
-    'option-button-shell pressable w-full rounded-2xl text-left transition-all duration-200 flex items-stretch gap-2 overflow-hidden border-2 px-3 py-2 option-button-base sm:px-3.5 sm:py-2.5';
+    'option-button-shell pressable w-full rounded-2xl text-left transition-all duration-200 flex items-stretch gap-2.5 overflow-hidden border px-3 py-2 option-button-base sm:px-3.5 sm:py-2.5';
 
   const defaultStateClasses =
-    'bg-[var(--color-surface-muted)] border-[var(--color-border)] text-[var(--color-text-primary)] hover:border-[var(--color-primary-300)] hover:bg-[var(--color-surface)] cursor-pointer';
+    'bg-[var(--color-surface-muted)] border-[var(--color-border)] text-[var(--color-text-primary)] hover:border-[var(--color-primary-400)] hover:bg-[var(--color-surface)] cursor-pointer';
   const selectedStateClasses =
-    'bg-[var(--color-primary-900)] border-[var(--color-primary-400)] text-[var(--color-text-primary)] ring-2 ring-[var(--color-primary-400)]/80 shadow-lg shadow-[var(--color-primary-900)]/40';
+    'bg-[var(--color-primary-900)]/80 border-[var(--color-primary-400)] text-[var(--color-text-primary)] ring-1 ring-[var(--color-primary-400)]/60 shadow-md shadow-[var(--color-primary-900)]/30';
   const disabledStateClasses =
     'bg-[var(--color-surface-muted)] border-[var(--color-border)] text-[var(--color-text-muted)] cursor-not-allowed';
   const lockedStateClasses =
     'bg-[var(--color-surface-muted)] border-[var(--color-border)] text-[var(--color-text-secondary)] cursor-not-allowed';
   const eliminatedStateClasses =
-    'bg-[var(--color-surface-muted)] border-[var(--color-border)] text-[var(--color-text-muted)] cursor-not-allowed opacity-70';
+    'bg-[var(--color-surface-muted)] border-[var(--color-border)] text-[var(--color-text-muted)] cursor-not-allowed opacity-50';
   const correctStateClasses =
-    'bg-[var(--color-success-600)] border-[var(--color-success-500)] text-white cursor-not-allowed';
+    'bg-[var(--color-success-600)] border-[var(--color-success-500)] text-white cursor-not-allowed shadow-sm shadow-green-900/30';
   const wrongStateClasses =
     'bg-[var(--color-error-600)] border-[var(--color-error-500)] text-white cursor-not-allowed';
-  const selectedIndicatorBaseClasses =
-    'option-button-selected-indicator inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-sm font-semibold';
-  const selectedIndicatorVisibleClasses =
-    'border border-[var(--color-primary-200)] bg-[var(--color-primary-500)] text-white shadow-sm shadow-black/20';
-  const selectedIndicatorHiddenClasses =
-    'border border-transparent bg-transparent text-transparent shadow-none';
 
   const getButtonClasses = () => {
     if (showResult) {
@@ -102,22 +96,9 @@ export const OptionButton = React.memo(function OptionButton({
         {showResult && isCorrect ? '✓' : showResult && selected && !isCorrect ? '✕' : eliminated ? '—' : optionLetters[index]}
       </span>
 
-      <div className="flex min-w-0 flex-1 items-center gap-1.5 sm:gap-2">
-        <span className={`option-button-label min-w-0 flex-1 text-[0.8rem] font-medium leading-[1.15] sm:text-[0.9rem] md:text-[0.98rem] ${eliminated ? 'line-through opacity-70' : ''}`}>
+      <div className="flex min-w-0 flex-1 items-center">
+        <span className={`option-button-label min-w-0 flex-1 text-[0.82rem] font-medium leading-[1.2] sm:text-[0.92rem] md:text-[1rem] ${eliminated ? 'line-through opacity-60' : ''}`}>
           {option}
-        </span>
-
-        <span
-          className={`${selectedIndicatorBaseClasses} ${
-            selected && !showResult
-              ? selectedIndicatorVisibleClasses
-              : selectedIndicatorHiddenClasses
-          }`}
-          aria-hidden={!(selected && !showResult)}
-        >
-          {selected && !showResult && (
-            <>{'✓'}</>
-          )}
         </span>
       </div>
     </button>

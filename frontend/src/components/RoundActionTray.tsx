@@ -81,23 +81,23 @@ export function RoundActionTray({
         )}
 
         {showResult && (
-          <div className="w-full rounded-2xl border border-gray-700 bg-gray-800/95 p-2 text-center backdrop-blur-sm shadow-sm shadow-black/30 sm:p-4">
+          <div className="w-full flex flex-col items-center gap-1.5">
             {showResultBadge && resultLabel && (
               <AnswerStatusBadge
                 status={isCorrect ? 'correct' : 'incorrect'}
                 label={resultLabel}
-                className="mb-2.5 text-sm"
+                className="text-sm"
               />
             )}
 
-            {resultHint && <p className="mb-2.5 text-xs leading-relaxed text-gray-200 sm:text-sm">{resultHint}</p>}
+            {resultHint && <p className="text-center text-xs leading-snug text-gray-300">{resultHint}</p>}
 
             {nextLabel && onNext && (
               <button
                 type="button"
                 onClick={onNext}
                 disabled={isSubmitting}
-                className="w-full sm:w-auto rounded-2xl px-6 py-2 bg-primary text-white text-sm sm:text-base font-bold shadow-md shadow-primary/30 hover:bg-primary/85 active:scale-[0.99] transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/70 disabled:cursor-wait disabled:opacity-70"
+                className="w-full rounded-2xl px-6 py-2 bg-primary text-white text-sm sm:text-base font-bold shadow-md shadow-primary/30 hover:bg-primary/85 active:scale-[0.99] transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/70 disabled:cursor-wait disabled:opacity-70"
               >
                 {nextLabel}
               </button>

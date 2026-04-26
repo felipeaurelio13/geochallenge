@@ -66,7 +66,7 @@ export function GameRoundScaffold({
       {isMapQuestion ? (
         <div className="min-h-0 flex-1 overflow-hidden">{mapContent}</div>
       ) : (
-        <div className="game-options-wrap min-h-0 w-full flex-1 overflow-y-auto overscroll-contain pr-1">
+        <div className="game-options-wrap min-h-0 w-full flex-1 overflow-hidden">
           <div className={optionsGridClassName}>
             {question.options.map((option, index) => (
             <OptionButton
