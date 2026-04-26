@@ -248,10 +248,10 @@ export function RankingsPage() {
   }, [top3]);
 
   return (
-    <div className="h-full min-h-0 bg-gray-900">
+    <div className="h-full min-h-0 overflow-y-auto bg-[var(--color-bg-app)]">
       <PageHeader title={`🏆 ${t('rankings.title')}`} backTo="/menu" backLabel={`← ${t('common.back')}`} />
 
-      <main className="max-w-2xl mx-auto px-4 py-6 sm:px-6">
+      <main className="max-w-2xl mx-auto px-4 py-6 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] sm:px-6">
 
         {/* My rank card — only when outside top 50 */}
         {resolvedUserRank && resolvedUserRank > 50 && (
@@ -297,15 +297,24 @@ export function RankingsPage() {
         )}
 
         {/* Search */}
-        <div className="mb-5">
+        <div className="relative mb-5">
           <Input
             id="rankings-search"
             aria-label={t('common.search', { defaultValue: 'Buscar' })}
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            className="text-sm"
+            className={`text-sm ${search ? 'pr-11' : ''}`}
             placeholder={t('rankings.searchPlaceholder', { defaultValue: 'Buscar jugador...' })}
           />
+          {search && (
+            <button
+              onClick={() => setSearch('')}
+              aria-label={t('common.clear', { defaultValue: 'Limpiar búsqueda' })}
+              className="absolute inset-y-0 right-0 flex min-w-[44px] items-center justify-center rounded-r-xl text-gray-400 transition-colors hover:text-white"
+            >
+              ✕
+            </button>
+          )}
         </div>
 
         {/* Loading */}
@@ -361,7 +370,7 @@ export function RankingsPage() {
                     {restEntries.map((entry) => (
                       <div
                         key={entry.userId ? `${entry.userId}-${entry.rank}` : `${entry.username}-${entry.rank}`}
-                        className={`px-4 py-3 rounded-xl border transition-all duration-200 hover:scale-[1.01] hover:brightness-110 ${getRankBadgeStyle(entry.rank, entry.isCurrentUser)}`}
+                        className={`px-4 py-3 rounded-xl border transition-all duration-150 active:scale-[0.99] active:brightness-95 ${getRankBadgeStyle(entry.rank, entry.isCurrentUser)}`}
                       >
                         <div className="flex items-center gap-3">
                           <span className={`font-bold min-w-[2.5rem] text-center ${entry.rank <= 3 ? 'text-2xl' : 'text-sm text-gray-400'}`}>
@@ -395,7 +404,7 @@ export function RankingsPage() {
                       .map((entry) => (
                         <div
                           key={entry.userId ? `${entry.userId}-${entry.rank}` : `${entry.username}-${entry.rank}`}
-                          className={`px-4 py-3 rounded-xl border transition-all duration-200 hover:scale-[1.01] ${getRankBadgeStyle(entry.rank, entry.isCurrentUser)}`}
+                          className={`px-4 py-3 rounded-xl border transition-all duration-150 active:scale-[0.99] ${getRankBadgeStyle(entry.rank, entry.isCurrentUser)}`}
                         >
                           <div className="flex items-center gap-3">
                             <span className="text-2xl font-bold min-w-[2.5rem] text-center">{getRankLabel(entry.rank)}</span>

@@ -10,6 +10,7 @@ import { Alert } from '../components/atoms/Alert';
 import { StatCard } from '../components/atoms/StatCard';
 import { Input } from '../components/atoms/Input';
 import { FormLabel } from '../components/atoms/FormLabel';
+import { Button } from '../components/atoms/Button';
 import { uiStoreActions, useUiStore } from '../store/useUiStore';
 
 export function ProfilePage() {
@@ -74,10 +75,10 @@ export function ProfilePage() {
   const winRate = user.gamesPlayed > 0 ? Math.round((user.wins / user.gamesPlayed) * 100) : 0;
 
   return (
-    <div className="h-full min-h-0 bg-gray-900">
+    <div className="h-full min-h-0 overflow-y-auto bg-[var(--color-bg-app)]">
       <PageHeader title={t('nav.profile')} backTo="/menu" backLabel={`← ${t('common.back')}`} />
 
-      <main className="max-w-2xl mx-auto px-4 py-6 sm:px-6 sm:py-8">
+      <main className="max-w-2xl mx-auto px-4 py-6 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] sm:px-6 sm:py-8">
         <div className="text-center mb-8">
           <UserAvatar username={user.username} size="xl" className="mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-white">{user.username}</h2>
@@ -103,7 +104,7 @@ export function ProfilePage() {
             {!isEditing && (
               <button
                 onClick={() => setIsEditing(true)}
-                className="text-primary hover:text-primary/80 transition-colors"
+                className="min-h-10 rounded-lg px-3 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/10 hover:text-primary/80"
               >
                 {t('profile.edit')}
               </button>
@@ -129,14 +130,19 @@ export function ProfilePage() {
             <div>
               <FormLabel>{t('profile.language')}</FormLabel>
               {isEditing ? (
-                <select
-                  value={preferredLanguage}
-                  onChange={(event) => setPreferredLanguage(event.target.value as 'es' | 'en')}
-                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-primary transition-colors"
-                >
-                  <option value="es">{t('profile.languageEs')}</option>
-                  <option value="en">{t('profile.languageEn')}</option>
-                </select>
+                <div className="grid grid-cols-2 gap-2">
+                  {(['es', 'en'] as const).map((lang) => (
+                    <Button
+                      key={lang}
+                      variant={preferredLanguage === lang ? 'primary' : 'secondary'}
+                      size="md"
+                      onClick={() => setPreferredLanguage(lang)}
+                      aria-pressed={preferredLanguage === lang}
+                    >
+                      {lang === 'es' ? t('profile.languageEs') : t('profile.languageEn')}
+                    </Button>
+                  ))}
+                </div>
               ) : (
                 <div className="px-4 py-3 bg-gray-900 rounded-lg text-white">
                   {preferredLanguage === 'es' ? t('profile.languageEs') : t('profile.languageEn')}
@@ -198,9 +204,13 @@ export function ProfilePage() {
                 type="checkbox"
                 checked={hapticsEnabled}
                 onChange={(event) => uiStoreActions.setHapticsEnabled(event.target.checked)}
-                className="h-5 w-5 cursor-pointer accent-primary"
+                className="sr-only"
                 aria-label={t('profile.hapticsLabel', 'Vibración háptica')}
               />
+              <div className="relative flex-shrink-0" aria-hidden="true">
+                <div className={`h-6 w-11 rounded-full transition-colors duration-200 ${hapticsEnabled ? 'bg-primary' : 'bg-gray-600'}`} />
+                <div className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform duration-200 ${hapticsEnabled ? 'translate-x-5' : 'translate-x-0.5'}`} />
+              </div>
             </label>
 
             <label className="pressable flex cursor-pointer items-center justify-between rounded-lg border border-gray-700 bg-gray-900 px-4 py-3 hover:border-gray-600">
@@ -216,9 +226,13 @@ export function ProfilePage() {
                 type="checkbox"
                 checked={soundEnabled}
                 onChange={(event) => uiStoreActions.setSoundEnabled(event.target.checked)}
-                className="h-5 w-5 cursor-pointer accent-primary"
+                className="sr-only"
                 aria-label={t('profile.soundLabel', 'Sonidos')}
               />
+              <div className="relative flex-shrink-0" aria-hidden="true">
+                <div className={`h-6 w-11 rounded-full transition-colors duration-200 ${soundEnabled ? 'bg-primary' : 'bg-gray-600'}`} />
+                <div className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform duration-200 ${soundEnabled ? 'translate-x-5' : 'translate-x-0.5'}`} />
+              </div>
             </label>
           </div>
         </div>
