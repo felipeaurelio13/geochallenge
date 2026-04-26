@@ -175,13 +175,19 @@ export async function getQuestionsForGame(
 }
 
 /**
- * Flash mode: 60 preguntas visuales rápidas (FLAG + SILHOUETTE), 2 opciones por pregunta.
- * Mobile-first: carga toda la sesión una vez para evitar round-trips durante los 60s.
+ * Flash mode: 60 preguntas rápidas, 2 opciones por pregunta.
+ * MAP no es compatible (requiere mapa interactivo), hace fallback a FLAG + SILHOUETTE.
  */
-export async function getQuestionsForFlashGame(): Promise<GameQuestion[]> {
+export async function getQuestionsForFlashGame(category?: Category): Promise<GameQuestion[]> {
+  const visualCategories = [Category.FLAG, Category.SILHOUETTE];
+  const flashCategories =
+    category && category !== Category.MIXED && category !== Category.MAP
+      ? [category]
+      : visualCategories;
+
   const questions = await prisma.question.findMany({
     where: {
-      category: { in: [Category.FLAG, Category.SILHOUETTE] },
+      category: { in: flashCategories },
     },
   });
 

@@ -100,7 +100,7 @@ export function MenuPage() {
             icon="⚡"
             title={t('menu.flash')}
             description={t('menu.flashDesc')}
-            onClick={() => navigate('/game/flash')}
+            onClick={() => navigate(`/game/flash?category=${selectedCategory}`)}
           />
           <GameModeCard
             icon="🎯"
