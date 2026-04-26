@@ -42,6 +42,11 @@ app.use(
 app.use(express.json({ limit: '1mb' }));
 app.use(globalLimiter);
 
+// Lightweight ping for keep-alive (no DB/Redis round-trip)
+app.get('/ping', (_req, res) => {
+  res.json({ status: 'ok' });
+});
+
 // Health check (with dependency verification)
 app.get('/health', async (_req, res) => {
   try {
