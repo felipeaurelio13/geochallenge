@@ -61,7 +61,7 @@ export function FlashCard({ question, onAnswer, disabled, disabledOptions = [], 
           <img
             src={imageUrl}
             alt={`${VISUAL_ALT[question.category] ?? 'Imagen'}`}
-            className="absolute inset-0 h-full w-full object-contain p-6"
+            className={`absolute inset-0 h-full w-full object-contain p-6${question.category === 'SILHOUETTE' ? ' filter invert drop-shadow-[0_0_14px_rgba(148,163,184,0.45)]' : ''}`}
             draggable={false}
           />
         ) : (

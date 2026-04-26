@@ -120,9 +120,7 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
       return 'h-full w-full object-contain object-center';
     }
 
-    return compact
-      ? 'h-full w-full object-contain object-center filter invert'
-      : 'h-full w-full object-contain object-center filter invert';
+    return 'h-full w-full object-contain object-center filter invert drop-shadow-[0_0_14px_rgba(148,163,184,0.45)]';
   };
 
   const headingClassName = `${
@@ -143,7 +141,7 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
       <div className="text-center">
         {showQuestionImage && (
           <div className={compact ? 'mb-1' : 'mb-6'}>
-            <div className={`mx-auto flex items-center justify-center rounded-xl border border-gray-600/70 bg-black/15 px-2 ${getImageContainerClassName()}`}>
+            <div className={`mx-auto flex items-center justify-center rounded-xl ${question.category === 'SILHOUETTE' ? 'border border-slate-700/60 bg-slate-950/90 p-3' : 'border border-gray-600/70 bg-black/15 px-2'} ${getImageContainerClassName()}`}>
               <img
                 src={normalizedImageUrl}
                 alt={t('game.questionImageAlt', { category: question.category.toLowerCase() })}
