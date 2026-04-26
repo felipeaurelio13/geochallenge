@@ -1,5 +1,6 @@
 import { prisma } from '../config/database.js';
 import { Category } from '@prisma/client';
+import { updateLeaderboardScore, updateSeasonLeaderboardScore } from './leaderboard.service.js';
 
 const CHALLENGE_EXPIRY_DAYS = 7;
 const QUESTIONS_PER_CHALLENGE = 10;
@@ -296,15 +297,23 @@ export class ChallengeService {
           const isWinner = winnerId === p.userId;
           const isLoss = winnerId !== null && winnerId !== p.userId;
           const userHighScore = await this.getUserHighScore(p.userId);
+          const newScore = p.score ?? 0;
+          const isHighScore = newScore > userHighScore;
+
           await prisma.user.update({
             where: { id: p.userId },
             data: {
               gamesPlayed: { increment: 1 },
               wins: isWinner ? { increment: 1 } : undefined,
               losses: isLoss ? { increment: 1 } : undefined,
-              highScore: (p.score ?? 0) > userHighScore ? (p.score ?? 0) : undefined,
+              highScore: isHighScore ? newScore : undefined,
             },
           });
+
+          if (isHighScore) {
+            await updateLeaderboardScore(p.userId, newScore);
+          }
+          await updateSeasonLeaderboardScore(p.userId, newScore);
         })
       );
     }

@@ -7,7 +7,7 @@ import { Server as SocketIOServer } from 'socket.io';
 import { config } from './config/env.js';
 import { connectDatabase, disconnectDatabase, prisma } from './config/database.js';
 import { getRedis, disconnectRedis } from './config/redis.js';
-import { syncLeaderboardFromDatabase } from './services/leaderboard.service.js';
+import { syncLeaderboardFromDatabase, syncSeasonLeaderboardFromDatabase } from './services/leaderboard.service.js';
 
 // Controllers
 import authController from './controllers/auth.controller.js';
@@ -99,9 +99,14 @@ async function start() {
 🔗 Frontend URL: ${config.frontend.url}
       `);
 
-      void syncLeaderboardFromDatabase()
-        .then((count) => console.log(`✅ Leaderboard synced: ${count} users loaded into Redis`))
-        .catch((err) => console.error('⚠️  Leaderboard sync failed (non-fatal):', err));
+      void Promise.all([
+        syncLeaderboardFromDatabase()
+          .then((n) => console.log(`✅ Leaderboard global synced: ${n} users loaded into Redis`))
+          .catch((err) => console.error('⚠️  Global leaderboard sync failed (non-fatal):', err)),
+        syncSeasonLeaderboardFromDatabase()
+          .then((n) => console.log(`✅ Season leaderboard synced: ${n} users loaded into Redis`))
+          .catch((err) => console.error('⚠️  Season leaderboard sync failed (non-fatal):', err)),
+      ]);
     });
   } catch (error) {
     console.error('Failed to start server:', error);

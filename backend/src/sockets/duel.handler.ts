@@ -638,11 +638,11 @@ async function endDuel(
           },
         });
 
-        // Actualizar leaderboard
+        // Actualizar leaderboard global solo si es nuevo récord; temporada siempre
         if (isHighScore) {
           await updateLeaderboardScore(player.userId, totalScore);
-          await updateSeasonLeaderboardScore(player.userId, totalScore);
         }
+        await updateSeasonLeaderboardScore(player.userId, totalScore);
       }
     });
   } catch (error) {
