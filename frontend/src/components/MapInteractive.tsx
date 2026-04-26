@@ -61,9 +61,15 @@ function ResultViewportController({
       return;
     }
 
+    const userLng = selectedLocation!.lng;
+    let correctLng = correctLocation.lng;
+    const lngDiff = correctLng - userLng;
+    if (lngDiff > 180) correctLng -= 360;
+    else if (lngDiff < -180) correctLng += 360;
+
     const bounds = latLngBounds(
-      [selectedLocation!.lat, selectedLocation!.lng],
-      [correctLocation.lat, correctLocation.lng]
+      [selectedLocation!.lat, userLng],
+      [correctLocation.lat, correctLng]
     );
 
     map.fitBounds(bounds, {
