@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../services/api';
 import { FlashCard, LoadingSpinner, MechanicsHud, StreakCombo } from '../components';
@@ -33,7 +33,9 @@ interface FlashRoundResult {
 export function FlashGamePage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const haptics = useHaptics();
+  const category = searchParams.get('category') ?? undefined;
 
   const [status, setStatus] = useState<Status>('loading');
   const [error, setError] = useState<string | null>(null);
@@ -68,7 +70,7 @@ export function FlashGamePage() {
     let cancelled = false;
     (async () => {
       try {
-        const response = await api.startFlashGame();
+        const response = await api.startFlashGame(category);
         if (cancelled) return;
         setQuestions(response.questions);
         const duration = response.gameConfig.durationSeconds ?? FALLBACK_DURATION_SECONDS;

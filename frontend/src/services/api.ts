@@ -129,11 +129,11 @@ class ApiService {
     return response.data;
   }
 
-  async startFlashGame() {
+  async startFlashGame(category?: string) {
     const response = await this.client.get<{
       gameConfig: GameConfig & { durationSeconds?: number };
       questions: Question[];
-    }>('/game/flash/start');
+    }>('/game/flash/start', { params: { category } });
     return response.data;
   }
 

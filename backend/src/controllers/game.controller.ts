@@ -141,13 +141,19 @@ router.get('/start', optionalAuth, async (req: AuthRequest, res: Response) => {
   }
 });
 
+const flashStartSchema = z.object({
+  category: z.nativeEnum(Category).optional(),
+});
+
 /**
  * GET /api/game/flash/start
- * Inicia una sesión Flash: 60 preguntas visuales (FLAG + SILHOUETTE), 2 opciones.
+ * Inicia una sesión Flash: 60 preguntas visuales, 2 opciones.
  */
-router.get('/flash/start', optionalAuth, async (_req: AuthRequest, res: Response) => {
+router.get('/flash/start', optionalAuth, async (req: AuthRequest, res: Response) => {
   try {
-    const questions = await getQuestionsForFlashGame();
+    const validation = flashStartSchema.safeParse(req.query);
+    const flashCategory = validation.success ? validation.data.category : undefined;
+    const questions = await getQuestionsForFlashGame(flashCategory);
     if (questions.length < 10) {
       res.status(503).json({
         error: 'No hay suficientes preguntas visuales disponibles',
