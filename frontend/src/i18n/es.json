@@ -120,6 +120,7 @@
     "incorrectLabel": "Incorrecta",
     "next": "Siguiente",
     "seeResults": "Ver resultados",
+    "streakBroken": "¡Racha terminada! Esta era la respuesta correcta.",
     "difficulty": {
       "easy": "Fácil",
       "medium": "Medio",
