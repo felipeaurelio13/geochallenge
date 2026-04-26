@@ -241,7 +241,8 @@
   .game-options-grid {
     display: grid;
     grid-template-rows: repeat(4, minmax(0, 1fr));
-    gap: clamp(var(--space-1_5), 1.3dvh, var(--space-2));
+    gap: clamp(var(--space-1), 1.2dvh, var(--space-2));
+    height: 100%;
   }
 
   .question-card {
@@ -272,15 +273,35 @@
 
   @media (max-height: 830px) {
     .game-round-content {
-      gap: clamp(var(--space-1), 1dvh, var(--space-1_5));
+      gap: clamp(var(--space-0_5), 0.8dvh, var(--space-1_5));
     }
 
     .game-options-grid {
-      gap: clamp(var(--space-1), 1dvh, var(--space-1_5));
+      gap: clamp(var(--space-0_5), 0.8dvh, var(--space-1_5));
     }
 
     .media-box {
-      max-height: 24dvh;
+      max-height: 23dvh;
+    }
+  }
+
+  @media (max-height: 680px) {
+    .game-round-content {
+      gap: clamp(var(--space-0_5), 0.6dvh, var(--space-1));
+      padding-top: clamp(var(--space-0_5), 0.4dvh, var(--space-1));
+      padding-bottom: clamp(var(--space-0_5), 0.4dvh, var(--space-1));
+    }
+
+    .game-options-grid {
+      gap: clamp(var(--space-0_5), 0.6dvh, var(--space-1));
+    }
+
+    .media-box {
+      max-height: 20dvh;
+    }
+
+    .media-box--compact {
+      max-height: 19dvh;
     }
   }
   .app-shell {
@@ -345,8 +366,8 @@
 
   .option-button-base {
     min-height: var(--option-min-h);
-    padding-top: clamp(var(--space-1_5), 1.2dvh, var(--space-3));
-    padding-bottom: clamp(var(--space-1_5), 1.2dvh, var(--space-3));
+    padding-top: clamp(var(--space-1), 1dvh, var(--space-2_5));
+    padding-bottom: clamp(var(--space-1), 1dvh, var(--space-2_5));
   }
 
   .option-button-shell {
@@ -357,14 +378,10 @@
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
-    line-height: 1.15;
-    max-height: calc(2 * 1.15em);
+    line-height: 1.2;
+    max-height: calc(2 * 1.2em);
     overflow: hidden;
     word-break: break-word;
-  }
-
-  .option-button-selected-indicator {
-    margin-left: auto;
   }
 
   .menu-category-selector {
