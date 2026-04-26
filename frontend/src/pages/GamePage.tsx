@@ -71,6 +71,7 @@ export function GamePage() {
   const [showResult, setShowResult] = useState(false);
   const [lastAnswerCorrect, setLastAnswerCorrect] = useState(false);
   const [streakShieldTriggered, setStreakShieldTriggered] = useState(false);
+  const [streakGameOver, setStreakGameOver] = useState(false);
   const [pendingMechanicUsage, setPendingMechanicUsage] = useState<MechanicUsage | undefined>(undefined);
   const [disabledOptionIndexes, setDisabledOptionIndexes] = useState<number[]>([]);
   const [mechanicsAvailable, setMechanicsAvailable] = useState({
@@ -303,12 +304,10 @@ export function GamePage() {
 
       if (shouldUseStreakFlow && !result.isCorrect) {
         setStreakAlive(false);
-        try {
-          await finishGame();
-        } catch {
-          // noop: navega a resultados de racha incluso si el cierre falla
-        }
-        navigate('/results?gameType=streak');
+        setStreakGameOver(true);
+        setLastAnswerCorrect(false);
+        setShowResult(true);
+        finishGame().catch(() => {});
         return;
       }
 
@@ -323,6 +322,11 @@ export function GamePage() {
 
   // Move to next question
   const handleNextQuestion = async () => {
+    if (streakGameOver) {
+      navigate('/results?gameType=streak');
+      return;
+    }
+
     let bufferedQuestionCount = questions.length;
 
     if (shouldUseStreakFlow) {
@@ -509,9 +513,9 @@ export function GamePage() {
           showResult={showResult}
           canSubmit={hasSelection}
           submitLabel={t('game.submit')}
-          nextLabel={shouldUseStreakFlow ? t('game.next') : isLastQuestion ? t('game.seeResults') : t('game.next')}
+          nextLabel={streakGameOver ? t('game.seeResults') : shouldUseStreakFlow ? t('game.next') : isLastQuestion ? t('game.seeResults') : t('game.next')}
           resultLabel={lastAnswerCorrect ? t('game.correct') : t('game.incorrect')}
-          resultHint={streakShieldTriggered ? t('mechanics.streakShieldTriggered') : undefined}
+          resultHint={streakGameOver ? t('game.streakBroken') : streakShieldTriggered ? t('mechanics.streakShieldTriggered') : undefined}
           selectionAssistiveText={hasSelection && !showResult ? t('game.selectionReadyShortHint') : undefined}
           showResultBadge
           isCorrect={lastAnswerCorrect}
