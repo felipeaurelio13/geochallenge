@@ -7,6 +7,7 @@ import { Server as SocketIOServer } from 'socket.io';
 import { config } from './config/env.js';
 import { connectDatabase, disconnectDatabase, prisma } from './config/database.js';
 import { getRedis, disconnectRedis } from './config/redis.js';
+import { syncLeaderboardFromDatabase } from './services/leaderboard.service.js';
 
 // Controllers
 import authController from './controllers/auth.controller.js';
@@ -97,6 +98,10 @@ async function start() {
 📦 Environment: ${config.nodeEnv}
 🔗 Frontend URL: ${config.frontend.url}
       `);
+
+      void syncLeaderboardFromDatabase()
+        .then((count) => console.log(`✅ Leaderboard synced: ${count} users loaded into Redis`))
+        .catch((err) => console.error('⚠️  Leaderboard sync failed (non-fatal):', err));
     });
   } catch (error) {
     console.error('Failed to start server:', error);

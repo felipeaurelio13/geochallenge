@@ -8,7 +8,7 @@ import {
   GameQuestion,
   getMechanicsConfigForMode,
 } from '../services/game.service.js';
-import { updateLeaderboardScore } from '../services/leaderboard.service.js';
+import { updateLeaderboardScore, updateSeasonLeaderboardScore } from '../services/leaderboard.service.js';
 import { config } from '../config/env.js';
 import { prisma } from '../config/database.js';
 import {
@@ -641,6 +641,7 @@ async function endDuel(
         // Actualizar leaderboard
         if (isHighScore) {
           await updateLeaderboardScore(player.userId, totalScore);
+          await updateSeasonLeaderboardScore(player.userId, totalScore);
         }
       }
     });

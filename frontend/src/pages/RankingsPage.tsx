@@ -60,6 +60,8 @@ function PodiumBlock({ entry, topScore, youLabel }: { entry: LeaderboardEntry; t
   const config = PODIUM_COLORS[entry.rank as 1 | 2 | 3];
   const pct = topScore > 0 ? Math.round((entry.score / topScore) * 100) : 0;
 
+  if (!config) return null;
+
   return (
     <div className="flex flex-col items-center gap-2 flex-1 min-w-0">
       <span className={`text-2xl ${entry.rank === 1 ? 'animate-bounce' : ''}`}>{config.crown}</span>
