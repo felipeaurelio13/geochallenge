@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useGame } from '../context/GameContext';
 import { api } from '../services/api';
@@ -10,6 +10,8 @@ import { Button } from '../components/atoms/Button';
 export function ResultsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const isStreakMode = searchParams.get('gameType') === 'streak';
   const { state, resetGame } = useGame();
 
   const { score, questions, results } = state;
@@ -33,9 +35,9 @@ export function ResultsPage() {
     fetchRank();
   }, []);
 
-  const totalQuestions = questions.length || 10;
+  const totalQuestions = results.length || 1;
   const percentage = Math.round((correctAnswers / totalQuestions) * 100);
-  const incorrectAnswers = totalQuestions - correctAnswers;
+  const incorrectAnswers = results.filter((r) => !r.isCorrect).length;
   const pointsBySource = useMemo(
     () => ({
       basePoints: results.reduce((acc, result) => acc + (result.basePoints ?? 0), 0),
@@ -126,7 +128,7 @@ export function ResultsPage() {
             </div>
           </div>
 
-          <div className="mt-6 grid grid-cols-3 gap-3 sm:gap-4">
+          <div className={`mt-6 grid gap-3 sm:gap-4 ${isStreakMode ? 'grid-cols-2' : 'grid-cols-3'}`}>
             <article className="min-w-0 rounded-xl border border-gray-700 bg-gray-900/95 p-3 sm:p-4">
               <div className="text-2xl font-bold text-green-400">{correctAnswers}</div>
               <div className="mt-2 flex justify-center min-w-0">
@@ -137,16 +139,18 @@ export function ResultsPage() {
                 />
               </div>
             </article>
-            <article className="min-w-0 rounded-xl border border-gray-700 bg-gray-900/95 p-3 sm:p-4">
-              <div className="text-2xl font-bold text-red-400">{incorrectAnswers}</div>
-              <div className="mt-2 flex justify-center min-w-0">
-                <AnswerStatusBadge
-                  status="incorrect"
-                  label={t('results.incorrect')}
-                  className="w-full justify-center text-2xs-token sm:text-xs"
-                />
-              </div>
-            </article>
+            {!isStreakMode && (
+              <article className="min-w-0 rounded-xl border border-gray-700 bg-gray-900/95 p-3 sm:p-4">
+                <div className="text-2xl font-bold text-red-400">{incorrectAnswers}</div>
+                <div className="mt-2 flex justify-center min-w-0">
+                  <AnswerStatusBadge
+                    status="incorrect"
+                    label={t('results.incorrect')}
+                    className="w-full justify-center text-2xs-token sm:text-xs"
+                  />
+                </div>
+              </article>
+            )}
             <article className="min-w-0 rounded-xl border border-gray-700 bg-gray-900/95 p-3 sm:p-4">
               <div className="text-2xl font-bold text-white">{percentage}%</div>
               <div className="text-xs text-gray-400">{t('results.accuracy')}</div>
