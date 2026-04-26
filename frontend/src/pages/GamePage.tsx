@@ -307,7 +307,9 @@ export function GamePage() {
         setStreakGameOver(true);
         setLastAnswerCorrect(false);
         setShowResult(true);
-        finishGame().catch(() => {});
+        finishGame()
+          .then(() => navigate('/results?gameType=streak'))
+          .catch(() => navigate('/results?gameType=streak'));
         return;
       }
 
