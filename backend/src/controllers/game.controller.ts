@@ -253,11 +253,11 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
       GameMode.SINGLE
     );
 
-    // Actualizar leaderboard si es highscore
+    // Actualizar leaderboard global solo si es nuevo récord; temporada siempre
     if (isHighScore) {
       await updateLeaderboardScore(req.user!.userId, totalScore);
-      await updateSeasonLeaderboardScore(req.user!.userId, totalScore);
     }
+    await updateSeasonLeaderboardScore(req.user!.userId, totalScore);
 
     // Calcular estadísticas
     const correctCount = results.filter((r) => r.isCorrect).length;
