@@ -14,7 +14,7 @@ import {
   getUserGameHistory,
   AnswerResult,
 } from '../services/game.service.js';
-import { updateLeaderboardScore } from '../services/leaderboard.service.js';
+import { updateLeaderboardScore, updateSeasonLeaderboardScore } from '../services/leaderboard.service.js';
 import { config } from '../config/env.js';
 
 const router = Router();
@@ -256,6 +256,7 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
     // Actualizar leaderboard si es highscore
     if (isHighScore) {
       await updateLeaderboardScore(req.user!.userId, totalScore);
+      await updateSeasonLeaderboardScore(req.user!.userId, totalScore);
     }
 
     // Calcular estadísticas
