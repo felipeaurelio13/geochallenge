@@ -1,5 +1,10 @@
 # GeoChallenge
 
+## Deploy
+
+**Antes de cualquier push a `master`, correr `npm run build` en `frontend/` y `backend/`.**
+Render builds en cada push y un fail rompe deploy. Ver [DEPLOY.md](DEPLOY.md) para el checklist completo y los anti-patrones recurrentes (cleanups que rompen consumidores, Prisma client stale, etc.).
+
 ## Skill routing
 
 When the user's request matches an available skill, ALWAYS invoke it using the Skill

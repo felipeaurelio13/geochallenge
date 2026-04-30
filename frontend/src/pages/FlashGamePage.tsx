@@ -392,7 +392,6 @@ export function FlashGamePage() {
 
         {canUseMechanics && (
           <MechanicsHud
-            compact
             disabled={feedback !== null}
             available={mechanicsAvailable}
             onUseIntel5050={handleUseIntel5050}
