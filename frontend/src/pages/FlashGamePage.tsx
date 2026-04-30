@@ -59,11 +59,16 @@ export function FlashGamePage() {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const statusRef = useRef<Status>(status);
+  const questionsRef = useRef(questions);
   const mechanicsFeatureEnabled = areMechanicsV2Enabled('flash');
 
   useEffect(() => {
     statusRef.current = status;
   }, [status]);
+
+  useEffect(() => {
+    questionsRef.current = questions;
+  }, [questions]);
 
   // Load flash session
   useEffect(() => {
@@ -128,6 +133,15 @@ export function FlashGamePage() {
     return () => {
       if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
     };
+  }, []);
+
+  const handleFlashImageError = useCallback(() => {
+    if (statusRef.current !== 'playing') return;
+    // Skip the broken question and move to the next one silently
+    setCurrentIndex((idx) => {
+      const len = questionsRef.current.length;
+      return idx < len - 1 ? idx + 1 : idx;
+    });
   }, []);
 
   const startPlaying = () => {
@@ -416,6 +430,7 @@ export function FlashGamePage() {
             disabled={feedback !== null}
             feedback={feedback}
             disabledOptions={disabledOption ? [disabledOption] : []}
+            onImageError={handleFlashImageError}
           />
         )}
       </div>

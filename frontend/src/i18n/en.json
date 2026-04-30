@@ -106,6 +106,8 @@
     "questionCapital": "What is the capital of {{country}}?",
     "questionMap": "Where is {{capital}}?",
     "questionSilhouette": "What country does this silhouette represent?",
+    "silhouetteUnavailable": "Silhouette unavailable",
+    "flagUnavailable": "Flag unavailable",
     "clickMap": "Click on the map to select the location",
     "locationSelected": "Location selected",
     "distance": "Distance",

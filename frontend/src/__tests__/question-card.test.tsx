@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { QuestionCard } from '../components/QuestionCard';
 import type { Question } from '../types';
@@ -16,6 +16,14 @@ vi.mock('react-i18next', () => ({
 
       if (key === 'game.questionFlag') {
         return '¿A qué país pertenece esta bandera?';
+      }
+
+      if (key === 'game.flagUnavailable') {
+        return 'Bandera no disponible';
+      }
+
+      if (key === 'game.silhouetteUnavailable') {
+        return 'Silueta no disponible';
       }
 
       if (key === 'game.questionSilhouette') {
@@ -162,6 +170,54 @@ describe('QuestionCard', () => {
 
     expect(heading).toHaveTextContent('¿A qué país pertenece esta bandera?');
     expect(flagImage).toHaveAttribute('src', 'https://flagcdn.com/w320/argentina.png');
+  });
+
+  it('muestra UI de error cuando la imagen de bandera falla al cargar', () => {
+    const question = {
+      id: 'q-flag-err',
+      category: 'FLAG',
+      questionText: '',
+      questionData: '',
+      imageUrl: 'https://flagcdn.com/w320/ar.png',
+      options: ['Argentina', 'Uruguay', 'Paraguay', 'Chile'],
+      correctAnswer: 'Argentina',
+      difficulty: 'EASY',
+    } as Question;
+
+    const { container } = render(
+      <QuestionCard question={question} questionNumber={1} totalQuestions={10} />
+    );
+
+    const img = container.querySelector('img');
+    expect(img).not.toBeNull();
+    // First error: switches to fallback CDN (flagpedia.net)
+    fireEvent.error(img!);
+    // Second error: exhausts fallback, triggers error UI
+    const fallbackImg = container.querySelector('img');
+    expect(fallbackImg).not.toBeNull();
+    fireEvent.error(fallbackImg!);
+
+    expect(screen.getByText('Bandera no disponible')).toBeInTheDocument();
+    expect(container.querySelector('img')).toBeNull();
+  });
+
+  it('carga la imagen con loading eager para garantizar visibilidad inmediata', () => {
+    const question = {
+      id: 'q-flag-eager',
+      category: 'FLAG',
+      questionText: '',
+      questionData: '',
+      imageUrl: 'https://flagcdn.com/w320/pe.png',
+      options: ['Perú', 'Bolivia', 'Ecuador', 'Paraguay'],
+      correctAnswer: 'Perú',
+      difficulty: 'MEDIUM',
+    } as Question;
+
+    const { container } = render(
+      <QuestionCard question={question} questionNumber={1} totalQuestions={10} />
+    );
+
+    expect(container.querySelector('img')).toHaveAttribute('loading', 'eager');
   });
 
   it('aplica tipografía más compacta al enunciado del mapa', () => {

@@ -11,6 +11,7 @@ interface FlashCardProps {
   disabled?: boolean;
   disabledOptions?: string[];
   feedback?: 'correct' | 'incorrect' | null;
+  onImageError?: () => void;
 }
 
 const VISUAL_ALT: Record<string, string> = {
@@ -18,7 +19,7 @@ const VISUAL_ALT: Record<string, string> = {
   SILHOUETTE: 'Silueta',
 };
 
-export function FlashCard({ question, onAnswer, disabled, disabledOptions = [], feedback }: FlashCardProps) {
+export function FlashCard({ question, onAnswer, disabled, disabledOptions = [], feedback, onImageError }: FlashCardProps) {
   const { t } = useTranslation();
   const [optionA, optionB] = useMemo(() => {
     const opts = question.options.slice(0, 2);
@@ -31,7 +32,7 @@ export function FlashCard({ question, onAnswer, disabled, disabledOptions = [], 
       ? (question.questionData.flagUrl ?? question.questionData.silhouetteUrl)
       : undefined);
 
-  const { src: imageUrl, hasError: hasImageError, handleError: handleImageError } = useImageWithFallback(rawImageUrl);
+  const { src: imageUrl, hasError: hasImageError, handleError: handleImageError } = useImageWithFallback(rawImageUrl, onImageError);
 
   const handleAnswer = (option: string) => {
     if (disabled || !option) return;

@@ -60,6 +60,7 @@ export function GamePage() {
     finishGame,
     resetGame,
     setTimeRemaining: setGlobalTimeRemaining,
+    replaceCurrentQuestion,
   } = useGame();
 
   const { questions, currentIndex, score, results, status } = state;
@@ -483,6 +484,7 @@ export function GamePage() {
       showResult={showResult}
       hiddenOptionIndexes={disabledOptionIndexes}
       optionsGridClassName="game-options-grid"
+      onImageError={replaceCurrentQuestion}
       actionTray={
         <RoundActionTray
           mode="single"

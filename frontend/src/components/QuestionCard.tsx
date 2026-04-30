@@ -8,9 +8,10 @@ interface QuestionCardProps {
   questionNumber: number;
   totalQuestions: number;
   compact?: boolean;
+  onImageError?: () => void;
 }
 
-export function QuestionCard({ question, questionNumber, totalQuestions, compact = false }: QuestionCardProps) {
+export function QuestionCard({ question, questionNumber, totalQuestions, compact = false, onImageError }: QuestionCardProps) {
   const { t } = useTranslation();
 
   const getQuestionDataValue = (): string => {
@@ -97,7 +98,7 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
     return question.imageUrl;
   }, [question.category, question.imageUrl]);
 
-  const { src: normalizedImageUrl, hasError: hasImageError, handleError: handleImageError } = useImageWithFallback(primaryImageUrl);
+  const { src: normalizedImageUrl, hasError: hasImageError, handleError: handleImageError } = useImageWithFallback(primaryImageUrl, onImageError);
 
   const showQuestionImage =
     Boolean(normalizedImageUrl) &&
@@ -146,7 +147,7 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
               <img
                 src={normalizedImageUrl}
                 alt={t('game.questionImageAlt', { category: question.category.toLowerCase() })}
-                loading="lazy"
+                loading="eager"
                 width={question.category === 'FLAG' ? 360 : 220}
                 height={question.category === 'FLAG' ? 190 : 220}
                 className={`mx-auto ${getImageClassName()}`}
@@ -164,7 +165,17 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
           </div>
         )}
 
-        {hasImageError && question.category === 'SILHOUETTE' && (
+        {/* Error fallback shown only when no replacement handler is wired (e.g. offline/challenge mode) */}
+        {hasImageError && !onImageError && question.category === 'FLAG' && (
+          <div className={compact ? 'mb-1' : 'mb-6'}>
+            <div className="media-box media-box--compact mx-auto flex flex-col items-center justify-center gap-2 rounded-xl border border-gray-600/70 bg-black/15 px-2">
+              <span className="text-4xl opacity-30">🏳️</span>
+              <p className="text-xs text-slate-500">{t('game.flagUnavailable', 'Bandera no disponible')}</p>
+            </div>
+          </div>
+        )}
+
+        {hasImageError && !onImageError && question.category === 'SILHOUETTE' && (
           <div className={compact ? 'mb-1' : 'mb-6'}>
             <div className="media-box media-box--silhouette mx-auto flex flex-col items-center justify-center gap-2 rounded-xl border border-slate-700/60 bg-slate-950/90 p-3">
               <span className="text-4xl opacity-30">🌐</span>
