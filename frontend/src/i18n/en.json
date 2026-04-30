@@ -7,7 +7,17 @@
     "title": "Something went wrong",
     "unexpected": "An unexpected error occurred",
     "retry": "Try again",
-    "backToMenu": "Back to menu"
+    "backToMenu": "Back to menu",
+    "network": "No internet connection. Check your network.",
+    "noServer": "We couldn't reach the server. Retry in a moment.",
+    "timeout": "This is taking longer than usual. Retry or go back to the menu.",
+    "auth": "Your session expired. Please log in again.",
+    "forbidden": "You don't have permission for this action.",
+    "notFound": "We couldn't find what you were looking for.",
+    "rateLimit": "Too many attempts. Wait a moment and try again.",
+    "server": "The server is having issues. We're on it.",
+    "http": "The server rejected the request. Retry or go back to the menu.",
+    "unknown": "Something went wrong. Retry in a moment."
   },
   "home": {
     "badge": "Competitive geography trivia",
@@ -87,7 +97,11 @@
     "gameModes": "Game modes",
     "flash": "Flash",
     "flashDesc": "60s · tap or swipe · combo x10",
-    "flashBadge": "New · Mobile"
+    "flashBadge": "New · Mobile",
+    "recommendedForYou": "Recommended for you",
+    "newPlayerHint": "✨ Start with Flash — 60 seconds to feel the game",
+    "newPlayerCta": "Play Flash",
+    "dismissHint": "Hide"
   },
   "categories": {
     "mixed": "Mixed",

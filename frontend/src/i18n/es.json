@@ -4,10 +4,20 @@
     "tagline": "Pon a prueba tus conocimientos geográficos"
   },
   "error": {
-    "title": "Algo salio mal",
+    "title": "Algo salió mal",
     "unexpected": "Ha ocurrido un error inesperado",
     "retry": "Intentar de nuevo",
-    "backToMenu": "Volver al menu"
+    "backToMenu": "Volver al menú",
+    "network": "Sin conexión a internet. Verifica tu red.",
+    "noServer": "No pudimos contactar al servidor. Reintenta en un momento.",
+    "timeout": "Esto está tardando más de lo normal. Reintenta o vuelve al menú.",
+    "auth": "Tu sesión expiró. Vuelve a iniciar sesión.",
+    "forbidden": "No tienes permisos para esta acción.",
+    "notFound": "No encontramos lo que buscabas.",
+    "rateLimit": "Demasiados intentos. Espera un momento y vuelve a intentar.",
+    "server": "El servidor está teniendo problemas. Estamos en eso.",
+    "http": "El servidor no aceptó la solicitud. Reintenta o vuelve al menú.",
+    "unknown": "Algo salió mal. Reintenta en un momento."
   },
   "home": {
     "badge": "Trivia geográfica competitiva",
@@ -87,7 +97,11 @@
     "gameModes": "Modos de juego",
     "flash": "Flash",
     "flashDesc": "60s · tap o swipe · combo x10",
-    "flashBadge": "Nuevo · Mobile"
+    "flashBadge": "Nuevo · Mobile",
+    "recommendedForYou": "Recomendado para ti",
+    "newPlayerHint": "✨ Empieza con Flash — 60 segundos para sentir el juego",
+    "newPlayerCta": "Jugar Flash",
+    "dismissHint": "Ocultar"
   },
   "categories": {
     "mixed": "Mixto",

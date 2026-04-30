@@ -19,6 +19,48 @@ import { toAppPath } from '../utils/routing';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
+export type ApiErrorCode = 'network' | 'noServer' | 'timeout' | 'auth' | 'forbidden' | 'notFound' | 'rateLimit' | 'server' | 'http' | 'unknown';
+
+export class ApiError extends Error {
+  code: ApiErrorCode;
+  status: number | null;
+  serverMessage: string | null;
+
+  constructor(message: string, code: ApiErrorCode, status: number | null = null, serverMessage: string | null = null) {
+    super(message);
+    this.name = 'ApiError';
+    this.code = code;
+    this.status = status;
+    this.serverMessage = serverMessage;
+  }
+}
+
+function classifyError(error: AxiosError): ApiError {
+  if (error.code === 'ECONNABORTED') {
+    return new ApiError('La solicitud tardó demasiado. Reintenta en un momento.', 'timeout');
+  }
+
+  if (!error.response) {
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+      return new ApiError('Sin conexión a internet. Verifica tu red.', 'network');
+    }
+    return new ApiError('No pudimos contactar al servidor. Reintenta en un momento.', 'noServer');
+  }
+
+  const status = error.response.status;
+  const data = error.response.data as { error?: string; message?: string } | undefined;
+  const serverMessage = data?.error || data?.message || null;
+
+  if (status === 401) return new ApiError(serverMessage || 'Tu sesión expiró. Vuelve a iniciar sesión.', 'auth', 401, serverMessage);
+  if (status === 403) return new ApiError(serverMessage || 'No tienes permisos para esta acción.', 'forbidden', 403, serverMessage);
+  if (status === 404) return new ApiError(serverMessage || 'No encontramos lo que buscabas.', 'notFound', 404, serverMessage);
+  if (status === 429) return new ApiError(serverMessage || 'Demasiados intentos. Espera un momento y vuelve a intentar.', 'rateLimit', 429, serverMessage);
+  if (status >= 500) return new ApiError(serverMessage || 'El servidor está teniendo problemas. Estamos en eso.', 'server', status, serverMessage);
+  if (status >= 400) return new ApiError(serverMessage || 'El servidor no aceptó la solicitud.', 'http', status, serverMessage);
+
+  return new ApiError(serverMessage || 'Algo salió mal. Reintenta en un momento.', 'unknown', status, serverMessage);
+}
+
 class ApiService {
   private client: AxiosInstance;
 
@@ -56,13 +98,7 @@ class ApiService {
             window.location.href = toAppPath('/login');
           }
         }
-        if (error.code === 'ECONNABORTED') {
-          return Promise.reject(new Error('La solicitud tardó demasiado. Verifica tu conexión.'));
-        }
-        if (!error.response) {
-          return Promise.reject(new Error('Sin conexión a internet. Verifica tu red.'));
-        }
-        return Promise.reject(error);
+        return Promise.reject(classifyError(error));
       }
     );
   }
