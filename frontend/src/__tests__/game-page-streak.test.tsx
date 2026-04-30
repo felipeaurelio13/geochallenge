@@ -1,3 +1,4 @@
+import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { GamePage } from '../pages/GamePage';
@@ -63,6 +64,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigateMock,
   useSearchParams: () => [mocks.searchParams],
+  Link: ({ children, to }: { children: React.ReactNode; to: string }) => <a href={to}>{children}</a>,
 }));
 
 vi.mock('react-i18next', () => ({
@@ -215,17 +217,12 @@ describe('GamePage streak mode', () => {
     });
   });
 
-  it('consume escudo de racha cuando está habilitado y evita terminar en el primer fallo', async () => {
+  it('cualquier fallo termina el juego inmediatamente, sin excepción', async () => {
     mocks.gameState.config = {
       questionsCount: 10,
       timePerQuestion: 10,
       category: 'MIXED',
       gameType: 'streak',
-      mechanics: {
-        enabled: true,
-        allowed: ['streakShield'],
-        limits: { streakShield: 1 },
-      },
     };
     mocks.submitAnswerMock.mockResolvedValueOnce({ isCorrect: false, points: 0 });
 
@@ -235,8 +232,9 @@ describe('GamePage streak mode', () => {
     fireEvent.click(screen.getByRole('button', { name: 'game.submit' }));
 
     await waitFor(() => {
-      expect(mocks.finishGameMock).not.toHaveBeenCalled();
-      expect(mocks.navigateMock).not.toHaveBeenCalledWith('/results?gameType=streak');
+      expect(mocks.setStreakAliveMock).toHaveBeenCalledWith(false);
+      expect(mocks.finishGameMock).toHaveBeenCalledTimes(1);
+      expect(mocks.navigateMock).toHaveBeenCalledWith('/results?gameType=streak');
     });
   });
 });

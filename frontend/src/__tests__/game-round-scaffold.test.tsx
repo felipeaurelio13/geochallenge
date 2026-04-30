@@ -111,6 +111,6 @@ describe('GameRoundScaffold', () => {
     }
 
     const optionsWrapper = screen.getByRole('button', { name: 'Santiago' }).closest('.game-options-wrap');
-    expect(optionsWrapper?.className).toContain('overflow-y-auto');
+    expect(optionsWrapper?.className).toContain('overflow-hidden');
   });
 });

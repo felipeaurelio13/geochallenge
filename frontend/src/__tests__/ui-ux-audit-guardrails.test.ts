@@ -43,7 +43,7 @@ describe('UI/UX guardrails audit (mobile-first)', () => {
     expect(css).toContain('.game-options-wrap');
     expect(css).toContain('overflow-x: hidden;');
     expect(css).toContain('.option-button-base');
-    expect(css).toContain('padding-top: clamp(var(--space-1_5), 1.2dvh, var(--space-3));');
-    expect(css).toContain('padding-bottom: clamp(var(--space-1_5), 1.2dvh, var(--space-3));');
+    expect(css).toContain('padding-top: clamp(var(--space-1), 1dvh, var(--space-2_5));');
+    expect(css).toContain('padding-bottom: clamp(var(--space-1), 1dvh, var(--space-2_5));');
   });
 });
