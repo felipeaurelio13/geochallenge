@@ -219,6 +219,26 @@ export function ProfilePage() {
     setError('');
   };
 
+  const challengeCategory = useMemo(() => {
+    if (!selectedOpponent || selectedOpponent.recentMatches.length === 0) {
+      return 'MIXED';
+    }
+    const counts = new Map<string, number>();
+    for (const match of selectedOpponent.recentMatches) {
+      const key = (match.category || 'MIXED').toUpperCase();
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
+    let bestKey = 'MIXED';
+    let bestCount = -1;
+    for (const [key, count] of counts) {
+      if (count > bestCount) {
+        bestKey = key;
+        bestCount = count;
+      }
+    }
+    return bestKey;
+  }, [selectedOpponent]);
+
   if (!user) {
     return (
       <div className="h-full min-h-0 bg-gray-900 flex items-center justify-center">
@@ -243,26 +263,6 @@ export function ProfilePage() {
     { key: 'history', label: t('duelHistory.tabs.history') },
     { key: 'h2h', label: t('duelHistory.tabs.headToHead') },
   ];
-
-  const challengeCategory = useMemo(() => {
-    if (!selectedOpponent || selectedOpponent.recentMatches.length === 0) {
-      return 'MIXED';
-    }
-    const counts = new Map<string, number>();
-    for (const match of selectedOpponent.recentMatches) {
-      const key = (match.category || 'MIXED').toUpperCase();
-      counts.set(key, (counts.get(key) ?? 0) + 1);
-    }
-    let bestKey = 'MIXED';
-    let bestCount = -1;
-    for (const [key, count] of counts) {
-      if (count > bestCount) {
-        bestKey = key;
-        bestCount = count;
-      }
-    }
-    return bestKey;
-  }, [selectedOpponent]);
 
   return (
     <div className="h-full min-h-0 overflow-y-auto bg-[var(--color-bg-app)]">
