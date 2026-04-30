@@ -2,7 +2,6 @@ import { useTranslation } from 'react-i18next';
 import type { GameMechanicKey } from '../types';
 
 type MechanicsHudProps = {
-  compact?: boolean;
   disabled?: boolean;
   available: Record<GameMechanicKey, number>;
   onUseIntel5050?: () => void;
@@ -42,7 +41,6 @@ function MechanicButton({
 }
 
 export function MechanicsHud({
-  compact = false,
   disabled = false,
   available,
   onUseIntel5050,
