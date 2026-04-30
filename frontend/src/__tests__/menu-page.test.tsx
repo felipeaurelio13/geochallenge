@@ -136,7 +136,7 @@ describe('MenuPage', () => {
     expect(screen.getByText(/v\d+\.\d+\.\d+/i)).toHaveClass('app-footer__version');
   });
 
-  it('mantiene menú enfocado y oculta estadísticas para reducir ruido visual', () => {
+  it('muestra accesos rápidos a rankings y perfil en la sección de acciones rápidas', () => {
     render(
       <MemoryRouter future={routerFutureConfig}>
         <MenuPage />
@@ -144,7 +144,7 @@ describe('MenuPage', () => {
     );
 
     expect(screen.queryByText('Tus estadísticas')).not.toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: /rankings/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /rankings/i })).toBeInTheDocument();
   });
 
   it('aplica layout compacto mobile-first para reducir scroll sin recortar CTAs', () => {
