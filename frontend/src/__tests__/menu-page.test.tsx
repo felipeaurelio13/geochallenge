@@ -132,19 +132,21 @@ describe('MenuPage', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/game/single?category=CAPITAL');
     expect(screen.queryByText('Desliza para ver más categorías')).not.toBeInTheDocument();
     expect(screen.queryByText('Categoría activa:')).not.toBeInTheDocument();
-    expect(screen.queryByText('Acciones rápidas')).not.toBeInTheDocument();
     expect(screen.getByText(/v\d+\.\d+\.\d+/i)).toHaveClass('app-footer__version');
   });
 
-  it('mantiene menú enfocado y oculta estadísticas para reducir ruido visual', () => {
+  it('expone accesos rápidos a rankings y perfil desde el menú', () => {
     render(
       <MemoryRouter future={routerFutureConfig}>
         <MenuPage />
       </MemoryRouter>,
     );
 
-    expect(screen.queryByText('Tus estadísticas')).not.toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: /rankings/i })).not.toBeInTheDocument();
+    const rankingsLink = screen.getByRole('link', { name: /rankings/i });
+    expect(rankingsLink).toHaveAttribute('href', '/rankings');
+
+    const profileLink = screen.getByRole('link', { name: /yourStats|perfil|profile|stats/i });
+    expect(profileLink).toHaveAttribute('href', '/profile');
   });
 
   it('aplica layout compacto mobile-first para reducir scroll sin recortar CTAs', () => {
