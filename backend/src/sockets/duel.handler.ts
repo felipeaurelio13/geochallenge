@@ -644,6 +644,18 @@ async function endDuel(
         }
         await updateSeasonLeaderboardScore(player.userId, totalScore);
       }
+
+      // Registrar el duelo completo para historial head-to-head
+      await tx.duelMatch.create({
+        data: {
+          player1Id: duel.players[0].userId,
+          player2Id: duel.players[1].userId,
+          winnerId: winnerId ?? null,
+          player1Score: duel.players[0].score,
+          player2Score: duel.players[1].score,
+          category: duel.category ?? null,
+        },
+      });
     });
   } catch (error) {
     console.error(`Error guardando resultados del duelo ${duel.id}:`, error);

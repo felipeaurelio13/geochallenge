@@ -530,3 +530,238 @@ export async function getUserGameHistory(
     },
   });
 }
+
+type DuelPeriod = 'week' | 'month' | 'year' | 'all';
+
+function getPeriodStart(period: DuelPeriod): Date | undefined {
+  if (period === 'all') return undefined;
+  const now = new Date();
+  if (period === 'week') return new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6);
+  if (period === 'month') return new Date(now.getFullYear(), now.getMonth(), 1);
+  if (period === 'year') return new Date(now.getFullYear(), 0, 1);
+}
+
+function buildDuelMatchWhere(userId: string, period: DuelPeriod) {
+  const from = getPeriodStart(period);
+  const dateFilter = from ? { gte: from } : undefined;
+  return {
+    OR: [{ player1Id: userId }, { player2Id: userId }],
+    ...(dateFilter ? { createdAt: dateFilter } : {}),
+  };
+}
+
+export interface DuelMatchRecord {
+  id: string;
+  opponentId: string;
+  opponentUsername: string;
+  result: 'win' | 'loss' | 'draw';
+  myScore: number;
+  opponentScore: number;
+  category: string | null;
+  createdAt: Date;
+}
+
+export interface DuelStats {
+  wins: number;
+  draws: number;
+  losses: number;
+  total: number;
+}
+
+/**
+ * Historial de duelos del usuario, paginado, filtrado por período
+ */
+export async function getDuelMatchHistory(
+  userId: string,
+  period: DuelPeriod = 'all',
+  page: number = 1,
+  pageSize: number = 20
+): Promise<{ matches: DuelMatchRecord[]; total: number }> {
+  const where = buildDuelMatchWhere(userId, period);
+  const [total, rows] = await Promise.all([
+    prisma.duelMatch.count({ where }),
+    prisma.duelMatch.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      include: {
+        player1: { select: { id: true, username: true } },
+        player2: { select: { id: true, username: true } },
+      },
+    }),
+  ]);
+
+  const matches: DuelMatchRecord[] = rows.map((m) => {
+    const isP1 = m.player1Id === userId;
+    const opponent = isP1 ? m.player2 : m.player1;
+    const myScore = isP1 ? m.player1Score : m.player2Score;
+    const opponentScore = isP1 ? m.player2Score : m.player1Score;
+    const result: 'win' | 'loss' | 'draw' =
+      m.winnerId === null ? 'draw' : m.winnerId === userId ? 'win' : 'loss';
+    return {
+      id: m.id,
+      opponentId: opponent.id,
+      opponentUsername: opponent.username,
+      result,
+      myScore,
+      opponentScore,
+      category: m.category,
+      createdAt: m.createdAt,
+    };
+  });
+
+  return { matches, total };
+}
+
+/**
+ * Estadísticas W/D/L del usuario por período (week, month, year, all)
+ */
+export async function getDuelMatchStats(userId: string): Promise<{
+  week: DuelStats;
+  month: DuelStats;
+  year: DuelStats;
+  all: DuelStats;
+}> {
+  const periods: DuelPeriod[] = ['week', 'month', 'year', 'all'];
+
+  const statsForPeriod = async (period: DuelPeriod): Promise<DuelStats> => {
+    const where = buildDuelMatchWhere(userId, period);
+    const matches = await prisma.duelMatch.findMany({
+      where,
+      select: { winnerId: true },
+    });
+    let wins = 0, draws = 0, losses = 0;
+    for (const m of matches) {
+      if (m.winnerId === null) draws++;
+      else if (m.winnerId === userId) wins++;
+      else losses++;
+    }
+    return { wins, draws, losses, total: matches.length };
+  };
+
+  const [week, month, year, all] = await Promise.all(periods.map(statsForPeriod));
+  return { week, month, year, all };
+}
+
+/**
+ * Lista de oponentes con los que el usuario ha jugado duelos
+ */
+export async function getDuelOpponents(
+  userId: string,
+  search?: string
+): Promise<{ id: string; username: string; totalMatches: number }[]> {
+  const matches = await prisma.duelMatch.findMany({
+    where: { OR: [{ player1Id: userId }, { player2Id: userId }] },
+    orderBy: { createdAt: 'desc' },
+    include: {
+      player1: { select: { id: true, username: true } },
+      player2: { select: { id: true, username: true } },
+    },
+  });
+
+  const opponentMap = new Map<string, { id: string; username: string; count: number }>();
+  for (const m of matches) {
+    const opp = m.player1Id === userId ? m.player2 : m.player1;
+    const existing = opponentMap.get(opp.id);
+    if (existing) {
+      existing.count++;
+    } else {
+      opponentMap.set(opp.id, { id: opp.id, username: opp.username, count: 1 });
+    }
+  }
+
+  let opponents = Array.from(opponentMap.values()).map((o) => ({
+    id: o.id,
+    username: o.username,
+    totalMatches: o.count,
+  }));
+
+  if (search) {
+    const lower = search.toLowerCase();
+    opponents = opponents.filter((o) => o.username.toLowerCase().includes(lower));
+  }
+
+  return opponents;
+}
+
+/**
+ * Estadísticas head-to-head entre dos usuarios
+ */
+export async function getDuelHeadToHead(
+  userId: string,
+  opponentId: string
+): Promise<{
+  opponent: { id: string; username: string };
+  periods: { week: DuelStats; month: DuelStats; year: DuelStats; all: DuelStats };
+  recentMatches: DuelMatchRecord[];
+} | null> {
+  const opponent = await prisma.user.findUnique({
+    where: { id: opponentId },
+    select: { id: true, username: true },
+  });
+  if (!opponent) return null;
+
+  const h2hWhere = (period: DuelPeriod) => {
+    const from = getPeriodStart(period);
+    const dateFilter = from ? { createdAt: { gte: from } } : {};
+    return {
+      OR: [
+        { player1Id: userId, player2Id: opponentId },
+        { player1Id: opponentId, player2Id: userId },
+      ],
+      ...dateFilter,
+    };
+  };
+
+  const statsForPeriod = async (period: DuelPeriod): Promise<DuelStats> => {
+    const matches = await prisma.duelMatch.findMany({
+      where: h2hWhere(period),
+      select: { winnerId: true },
+    });
+    let wins = 0, draws = 0, losses = 0;
+    for (const m of matches) {
+      if (m.winnerId === null) draws++;
+      else if (m.winnerId === userId) wins++;
+      else losses++;
+    }
+    return { wins, draws, losses, total: matches.length };
+  };
+
+  const [week, month, year, all, recentRows] = await Promise.all([
+    statsForPeriod('week'),
+    statsForPeriod('month'),
+    statsForPeriod('year'),
+    statsForPeriod('all'),
+    prisma.duelMatch.findMany({
+      where: h2hWhere('all'),
+      orderBy: { createdAt: 'desc' },
+      take: 10,
+      include: {
+        player1: { select: { id: true, username: true } },
+        player2: { select: { id: true, username: true } },
+      },
+    }),
+  ]);
+
+  const recentMatches: DuelMatchRecord[] = recentRows.map((m) => {
+    const isP1 = m.player1Id === userId;
+    const opp = isP1 ? m.player2 : m.player1;
+    const myScore = isP1 ? m.player1Score : m.player2Score;
+    const oppScore = isP1 ? m.player2Score : m.player1Score;
+    const result: 'win' | 'loss' | 'draw' =
+      m.winnerId === null ? 'draw' : m.winnerId === userId ? 'win' : 'loss';
+    return {
+      id: m.id,
+      opponentId: opp.id,
+      opponentUsername: opp.username,
+      result,
+      myScore,
+      opponentScore: oppScore,
+      category: m.category,
+      createdAt: m.createdAt,
+    };
+  });
+
+  return { opponent, periods: { week, month, year, all }, recentMatches };
+}

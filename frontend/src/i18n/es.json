@@ -350,5 +350,35 @@
     "processing": "Procesando...",
     "skipToMainAction": "Ir a las acciones principales",
     "search": "Buscar"
+  },
+  "duelHistory": {
+    "title": "Historial de Duelos",
+    "tabs": {
+      "summary": "Resumen",
+      "duels": "Duelos",
+      "headToHead": "Cara a cara"
+    },
+    "periods": {
+      "week": "Semana",
+      "month": "Mes",
+      "year": "Año",
+      "all": "Todo"
+    },
+    "stats": {
+      "wins": "Victorias",
+      "draws": "Empates",
+      "losses": "Derrotas"
+    },
+    "result": {
+      "win": "Victoria",
+      "loss": "Derrota",
+      "draw": "Empate"
+    },
+    "search": "Buscar rival...",
+    "recentOpponents": "Rivales recientes",
+    "noMatches": "Sin partidas en este período",
+    "noOpponents": "No has jugado ningún duelo aún",
+    "loadMore": "Ver más",
+    "vsRecord": "Récord vs {{name}}"
   }
 }

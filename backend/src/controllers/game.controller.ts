@@ -12,6 +12,10 @@ import {
   validateAnswerByGameType,
   saveGameResult,
   getUserGameHistory,
+  getDuelMatchHistory,
+  getDuelMatchStats,
+  getDuelOpponents,
+  getDuelHeadToHead,
   AnswerResult,
 } from '../services/game.service.js';
 import { updateLeaderboardScore, updateSeasonLeaderboardScore } from '../services/leaderboard.service.js';
@@ -291,6 +295,76 @@ router.get('/history', authenticateJWT, async (req: AuthRequest, res: Response) 
     res.json({ history });
   } catch (error) {
     console.error('Error al obtener historial:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+/**
+ * GET /api/game/duel-history
+ * Historial de duelos paginado, filtrado por período
+ */
+router.get('/duel-history', authenticateJWT, async (req: AuthRequest, res: Response) => {
+  try {
+    const period = (['week', 'month', 'year', 'all'].includes(req.query.period as string)
+      ? req.query.period
+      : 'all') as 'week' | 'month' | 'year' | 'all';
+    const page = Math.max(parseInt(req.query.page as string) || 1, 1);
+    const pageSize = Math.min(Math.max(parseInt(req.query.pageSize as string) || 20, 1), 50);
+
+    const result = await getDuelMatchHistory(req.user!.userId, period, page, pageSize);
+    res.json(result);
+  } catch (error) {
+    console.error('Error al obtener historial de duelos:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+/**
+ * GET /api/game/duel-stats
+ * Estadísticas W/D/L del usuario por período
+ */
+router.get('/duel-stats', authenticateJWT, async (req: AuthRequest, res: Response) => {
+  try {
+    const stats = await getDuelMatchStats(req.user!.userId);
+    res.json(stats);
+  } catch (error) {
+    console.error('Error al obtener estadísticas de duelos:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+/**
+ * GET /api/game/duel-opponents
+ * Lista de oponentes del usuario, con búsqueda opcional
+ */
+router.get('/duel-opponents', authenticateJWT, async (req: AuthRequest, res: Response) => {
+  try {
+    const search = typeof req.query.search === 'string' && req.query.search.trim()
+      ? req.query.search.trim()
+      : undefined;
+    const opponents = await getDuelOpponents(req.user!.userId, search);
+    res.json({ opponents });
+  } catch (error) {
+    console.error('Error al obtener oponentes de duelos:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+/**
+ * GET /api/game/duel-h2h/:opponentId
+ * Estadísticas head-to-head contra un oponente específico
+ */
+router.get('/duel-h2h/:opponentId', authenticateJWT, async (req: AuthRequest, res: Response) => {
+  try {
+    const { opponentId } = req.params;
+    const data = await getDuelHeadToHead(req.user!.userId, opponentId);
+    if (!data) {
+      res.status(404).json({ error: 'Oponente no encontrado' });
+      return;
+    }
+    res.json(data);
+  } catch (error) {
+    console.error('Error al obtener head-to-head:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });

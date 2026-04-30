@@ -8,6 +8,11 @@ import type {
   GameType,
   GameConfig,
   MechanicUsage,
+  DuelMatchRecord,
+  DuelPeriodStats,
+  DuelOpponent,
+  HeadToHeadData,
+  DuelPeriod,
 } from '../types';
 import { testAuthBypass } from '../utils/testAuthBypass';
 import { toAppPath } from '../utils/routing';
@@ -235,6 +240,33 @@ class ApiService {
     } catch {
       return false;
     }
+  }
+
+  // Duel history endpoints
+  async getDuelHistory(period: DuelPeriod = 'all', page: number = 1, pageSize: number = 20) {
+    const response = await this.client.get<{ matches: DuelMatchRecord[]; total: number }>(
+      '/game/duel-history',
+      { params: { period, page, pageSize } }
+    );
+    return response.data;
+  }
+
+  async getDuelStats() {
+    const response = await this.client.get<DuelPeriodStats>('/game/duel-stats');
+    return response.data;
+  }
+
+  async getDuelOpponents(search?: string) {
+    const response = await this.client.get<{ opponents: DuelOpponent[] }>(
+      '/game/duel-opponents',
+      { params: search ? { search } : {} }
+    );
+    return response.data.opponents;
+  }
+
+  async getDuelH2H(opponentId: string) {
+    const response = await this.client.get<HeadToHeadData>(`/game/duel-h2h/${opponentId}`);
+    return response.data;
   }
 }
 
