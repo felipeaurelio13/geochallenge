@@ -300,12 +300,30 @@ export function ProfilePage() {
           <>
             <div className="bg-gray-800 rounded-xl p-6 mb-6">
               <h3 className="text-lg font-semibold text-white mb-4">{t('profile.statistics')}</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <StatCard value={user.highScore} label={t('stats.highScore')} color="primary" />
-                <StatCard value={user.gamesPlayed} label={t('stats.gamesPlayed')} color="white" />
-                <StatCard value={user.wins} label={t('stats.wins')} color="green" />
-                <StatCard value={`${winRate}%`} label={t('stats.winRate')} color="yellow" />
-              </div>
+              {user.gamesPlayed === 0 ? (
+                <div className="rounded-xl border border-dashed border-gray-700 bg-gray-900/60 px-4 py-6 text-center">
+                  <div className="text-3xl" aria-hidden="true">🎮</div>
+                  <p className="mt-2 text-sm text-gray-300">
+                    {t('profile.statsEmpty', {
+                      defaultValue: 'Aún no has jugado. Tu primera partida desbloquea las estadísticas.',
+                    })}
+                  </p>
+                  <Button
+                    onClick={() => navigate('/game/flash')}
+                    size="sm"
+                    className="mt-4"
+                  >
+                    {t('profile.statsEmptyCta', { defaultValue: 'Jugar Flash →' })}
+                  </Button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <StatCard value={user.highScore} label={t('stats.highScore')} color="primary" />
+                  <StatCard value={user.gamesPlayed} label={t('stats.gamesPlayed')} color="white" />
+                  <StatCard value={user.wins} label={t('stats.wins')} color="green" />
+                  <StatCard value={`${winRate}%`} label={t('stats.winRate')} color="yellow" />
+                </div>
+              )}
             </div>
 
             <div className="bg-gray-800 rounded-xl p-6">
