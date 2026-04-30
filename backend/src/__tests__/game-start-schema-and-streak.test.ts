@@ -84,6 +84,7 @@ describe('getQuestionsForStreakGame', () => {
       where: {
         category: Category.FLAG,
         id: { notIn: ['q1'] },
+        isAvailable: true,
       },
     });
     expect(questions).toHaveLength(2);
