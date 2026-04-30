@@ -129,6 +129,34 @@ export function MenuPage() {
           />
         </div>
       </section>
+
+      <section className="mt-4" aria-label={t('menu.quickActions')}>
+        <p className="mb-2 px-1 text-xs font-medium uppercase tracking-wider text-gray-500 sm:px-0">
+          {t('menu.quickActions')}
+        </p>
+        <div className="grid grid-cols-2 gap-2">
+          <Link
+            to="/rankings"
+            className="pressable flex items-center gap-3 rounded-xl border border-gray-700 bg-gray-900/80 px-4 py-3 text-gray-100 transition-colors hover:border-primary/60 hover:bg-primary/10"
+          >
+            <span className="text-2xl leading-none">🏆</span>
+            <div className="min-w-0 flex-1">
+              <div className="text-sm font-semibold text-white">{t('menu.rankings')}</div>
+              <div className="truncate text-xs text-gray-400">{t('menu.rankingsDesc')}</div>
+            </div>
+          </Link>
+          <Link
+            to="/profile"
+            className="pressable flex items-center gap-3 rounded-xl border border-gray-700 bg-gray-900/80 px-4 py-3 text-gray-100 transition-colors hover:border-primary/60 hover:bg-primary/10"
+          >
+            <span className="text-2xl leading-none">📊</span>
+            <div className="min-w-0 flex-1">
+              <div className="text-sm font-semibold text-white">{t('menu.yourStats')}</div>
+              <div className="truncate text-xs text-gray-400">{t('menu.yourStatsDesc')}</div>
+            </div>
+          </Link>
+        </div>
+      </section>
     </PageTemplate>
   );
 }

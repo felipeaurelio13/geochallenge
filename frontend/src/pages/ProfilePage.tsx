@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import { useApi, useDebounce } from '../hooks';
@@ -20,14 +21,40 @@ import type {
   DuelPeriod,
 } from '../types';
 
-type ProfileTab = 'summary' | 'duels' | 'h2h';
+type ProfileTab = 'summary' | 'duels' | 'h2h' | 'history';
+
+interface GameHistoryEntry {
+  id: string;
+  score: number;
+  correctCount: number;
+  totalQuestions: number;
+  category: string | null;
+  gameMode: 'SINGLE' | 'FLASH' | 'STREAK' | 'DUEL' | 'CHALLENGE';
+  createdAt: string;
+}
+
+const GAME_MODE_ICONS: Record<GameHistoryEntry['gameMode'], string> = {
+  SINGLE: '🎯',
+  FLASH: '⚡',
+  STREAK: '🔥',
+  DUEL: '⚔️',
+  CHALLENGE: '🏁',
+};
+
+const CATEGORY_LABEL_KEY: Record<string, string> = {
+  FLAG: 'categories.flags',
+  CAPITAL: 'categories.capitals',
+  MAP: 'categories.maps',
+  SILHOUETTE: 'categories.silhouettes',
+  MIXED: 'categories.mixed',
+};
 
 export function ProfilePage() {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const { user, updateUser } = useAuth();
 
   const hapticsEnabled = useUiStore((store) => store.hapticsEnabled);
-  const soundEnabled = useUiStore((store) => store.soundEnabled);
 
   const [isEditing, setIsEditing] = useState(false);
   const [username, setUsername] = useState(user?.username || '');
@@ -52,6 +79,10 @@ export function ProfilePage() {
   const [opponentsLoading, setOpponentsLoading] = useState(false);
   const [selectedOpponent, setSelectedOpponent] = useState<HeadToHeadData | null>(null);
   const [h2hLoading, setH2hLoading] = useState(false);
+
+  // History tab state
+  const [historyEntries, setHistoryEntries] = useState<GameHistoryEntry[] | null>(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
 
   const debouncedSearch = useDebounce(h2hSearch, 300);
 
@@ -79,6 +110,18 @@ export function ProfilePage() {
     }
   }, []);
 
+  const loadHistory = useCallback(async () => {
+    setHistoryLoading(true);
+    try {
+      const list = await api.getGameHistory(50);
+      setHistoryEntries(list as GameHistoryEntry[]);
+    } catch {
+      setHistoryEntries([]);
+    } finally {
+      setHistoryLoading(false);
+    }
+  }, []);
+
   const loadOpponents = useCallback(async (search: string) => {
     setOpponentsLoading(true);
     try {
@@ -103,6 +146,12 @@ export function ProfilePage() {
       loadOpponents('');
     }
   }, [activeTab, loadOpponents]);
+
+  useEffect(() => {
+    if (activeTab === 'history' && historyEntries === null) {
+      loadHistory();
+    }
+  }, [activeTab, historyEntries, loadHistory]);
 
   useEffect(() => {
     if (activeTab === 'h2h') {
@@ -191,8 +240,29 @@ export function ProfilePage() {
   const TABS: { key: ProfileTab; label: string }[] = [
     { key: 'summary', label: t('duelHistory.tabs.summary') },
     { key: 'duels', label: t('duelHistory.tabs.duels') },
+    { key: 'history', label: t('duelHistory.tabs.history') },
     { key: 'h2h', label: t('duelHistory.tabs.headToHead') },
   ];
+
+  const challengeCategory = useMemo(() => {
+    if (!selectedOpponent || selectedOpponent.recentMatches.length === 0) {
+      return 'MIXED';
+    }
+    const counts = new Map<string, number>();
+    for (const match of selectedOpponent.recentMatches) {
+      const key = (match.category || 'MIXED').toUpperCase();
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
+    let bestKey = 'MIXED';
+    let bestCount = -1;
+    for (const [key, count] of counts) {
+      if (count > bestCount) {
+        bestKey = key;
+        bestCount = count;
+      }
+    }
+    return bestKey;
+  }, [selectedOpponent]);
 
   return (
     <div className="h-full min-h-0 overflow-y-auto bg-[var(--color-bg-app)]">
@@ -353,27 +423,6 @@ export function ProfilePage() {
                   </div>
                 </label>
 
-                <label className="pressable flex cursor-pointer items-center justify-between rounded-lg border border-gray-700 bg-gray-900 px-4 py-3 hover:border-gray-600">
-                  <div className="pr-4">
-                    <div className="text-sm font-medium text-white">
-                      {t('profile.soundLabel', 'Sonidos')}
-                    </div>
-                    <div className="text-xs text-gray-400">
-                      {t('profile.soundDescription', 'Efectos de sonido al responder (próximamente)')}
-                    </div>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={soundEnabled}
-                    onChange={(event) => uiStoreActions.setSoundEnabled(event.target.checked)}
-                    className="sr-only"
-                    aria-label={t('profile.soundLabel', 'Sonidos')}
-                  />
-                  <div className="relative flex-shrink-0" aria-hidden="true">
-                    <div className={`h-6 w-11 rounded-full transition-colors duration-200 ${soundEnabled ? 'bg-primary' : 'bg-gray-600'}`} />
-                    <div className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform duration-200 ${soundEnabled ? 'translate-x-5' : 'translate-x-0.5'}`} />
-                  </div>
-                </label>
               </div>
             </div>
           </>
@@ -487,6 +536,69 @@ export function ProfilePage() {
           </div>
         )}
 
+        {/* ── Historial tab ── */}
+        {activeTab === 'history' && (
+          <div className="space-y-4">
+            <div className="bg-gray-800 rounded-xl overflow-hidden">
+              {historyLoading && historyEntries === null ? (
+                <div className="flex justify-center py-10">
+                  <LoadingSpinner size="md" />
+                </div>
+              ) : !historyEntries || historyEntries.length === 0 ? (
+                <p className="text-center text-gray-500 py-10 text-sm px-4">
+                  {t('gameHistory.empty')}
+                </p>
+              ) : (
+                <ul className="divide-y divide-gray-700">
+                  {historyEntries.map((entry) => {
+                    const accuracy = entry.totalQuestions > 0
+                      ? Math.round((entry.correctCount / entry.totalQuestions) * 100)
+                      : 0;
+                    const accuracyColor =
+                      accuracy >= 80
+                        ? 'text-green-400'
+                        : accuracy >= 50
+                        ? 'text-yellow-400'
+                        : 'text-red-400';
+                    const categoryLabel = entry.category
+                      ? t(CATEGORY_LABEL_KEY[entry.category] || 'categories.mixed')
+                      : null;
+                    return (
+                      <li key={entry.id} className="flex items-center gap-3 px-4 py-3">
+                        <span className="text-2xl leading-none" aria-hidden="true">
+                          {GAME_MODE_ICONS[entry.gameMode] ?? '🎮'}
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium text-white truncate">
+                            {t(`gameHistory.modes.${entry.gameMode}`, entry.gameMode)}
+                            {categoryLabel && (
+                              <span className="ml-2 text-xs font-normal text-gray-400">
+                                · {categoryLabel}
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {new Date(entry.createdAt).toLocaleDateString()}
+                            <span className="mx-1.5">·</span>
+                            {t('gameHistory.accuracy', {
+                              correct: entry.correctCount,
+                              total: entry.totalQuestions,
+                            })}
+                          </div>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <div className="text-base font-bold text-primary">{entry.score}</div>
+                          <div className={`text-xs font-medium ${accuracyColor}`}>{accuracy}%</div>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* ── Cara a cara tab ── */}
         {activeTab === 'h2h' && (
           <div className="space-y-4">
@@ -503,15 +615,29 @@ export function ProfilePage() {
                 <div className="bg-gray-800 rounded-xl p-4">
                   <div className="flex items-center gap-3 mb-4">
                     <UserAvatar username={selectedOpponent.opponent.username} size="md" />
-                    <div>
-                      <div className="font-semibold text-white">
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold text-white truncate">
                         {selectedOpponent.opponent.username}
                       </div>
-                      <div className="text-xs text-gray-400">
+                      <div className="text-xs text-gray-400 truncate">
                         {t('duelHistory.vsRecord', { name: selectedOpponent.opponent.username })}
                       </div>
                     </div>
                   </div>
+
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/duel?category=${challengeCategory}`)}
+                    className="pressable mb-4 flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-primary/80"
+                  >
+                    <span aria-hidden="true">⚔️</span>
+                    <span>{t('duelHistory.challengeAgain')}</span>
+                  </button>
+                  <p className="-mt-3 mb-4 text-center text-[11px] text-gray-500">
+                    {t('duelHistory.challengeHint', {
+                      category: t(CATEGORY_LABEL_KEY[challengeCategory] || 'categories.mixed'),
+                    })}
+                  </p>
 
                   {/* Stats per period */}
                   <div className="space-y-3">

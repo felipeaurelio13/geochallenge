@@ -651,44 +651,48 @@ export async function getDuelMatchStats(userId: string): Promise<{
 }
 
 /**
- * Lista de oponentes con los que el usuario ha jugado duelos
+ * Lista de oponentes con los que el usuario ha jugado duelos.
+ * Filtrado por nombre y conteo se hacen en la base — solo devuelve usuarios
+ * que efectivamente jugaron contra `userId`.
  */
 export async function getDuelOpponents(
   userId: string,
   search?: string
 ): Promise<{ id: string; username: string; totalMatches: number }[]> {
-  const matches = await prisma.duelMatch.findMany({
-    where: { OR: [{ player1Id: userId }, { player2Id: userId }] },
-    orderBy: { createdAt: 'desc' },
-    include: {
-      player1: { select: { id: true, username: true } },
-      player2: { select: { id: true, username: true } },
+  const trimmed = search?.trim();
+  const usernameFilter = trimmed
+    ? { contains: trimmed, mode: 'insensitive' as const }
+    : undefined;
+
+  const opponents = await prisma.user.findMany({
+    where: {
+      id: { not: userId },
+      ...(usernameFilter ? { username: usernameFilter } : {}),
+      OR: [
+        { duelMatchesAsP1: { some: { player2Id: userId } } },
+        { duelMatchesAsP2: { some: { player1Id: userId } } },
+      ],
     },
+    select: {
+      id: true,
+      username: true,
+      _count: {
+        select: {
+          duelMatchesAsP1: { where: { player2Id: userId } },
+          duelMatchesAsP2: { where: { player1Id: userId } },
+        },
+      },
+    },
+    take: 100,
   });
 
-  const opponentMap = new Map<string, { id: string; username: string; count: number }>();
-  for (const m of matches) {
-    const opp = m.player1Id === userId ? m.player2 : m.player1;
-    const existing = opponentMap.get(opp.id);
-    if (existing) {
-      existing.count++;
-    } else {
-      opponentMap.set(opp.id, { id: opp.id, username: opp.username, count: 1 });
-    }
-  }
-
-  let opponents = Array.from(opponentMap.values()).map((o) => ({
-    id: o.id,
-    username: o.username,
-    totalMatches: o.count,
-  }));
-
-  if (search) {
-    const lower = search.toLowerCase();
-    opponents = opponents.filter((o) => o.username.toLowerCase().includes(lower));
-  }
-
-  return opponents;
+  return opponents
+    .map((u) => ({
+      id: u.id,
+      username: u.username,
+      totalMatches: u._count.duelMatchesAsP1 + u._count.duelMatchesAsP2,
+    }))
+    .sort((a, b) => b.totalMatches - a.totalMatches);
 }
 
 /**

@@ -76,7 +76,9 @@
     "streak": "Streak",
     "streakDesc": "Keep going until you miss and beat your best",
     "rankings": "Rankings",
-    "yourStats": "Your statistics",
+    "rankingsDesc": "See the global top and your position",
+    "yourStats": "Your profile",
+    "yourStatsDesc": "Stats, duels and opponents",
     "selectCategory": "Select a category",
     "selectedCategory": "Active category",
     "mobileCategoriesHint": "Swipe to see more categories",
@@ -358,7 +360,8 @@
     "tabs": {
       "summary": "Summary",
       "duels": "Duels",
-      "headToHead": "Head to Head"
+      "headToHead": "Head to Head",
+      "history": "History"
     },
     "periods": {
       "week": "Week",
@@ -381,6 +384,21 @@
     "noMatches": "No matches in this period",
     "noOpponents": "You haven't played any duels yet",
     "loadMore": "Load more",
-    "vsRecord": "Record vs {{name}}"
+    "vsRecord": "Record vs {{name}}",
+    "challengeAgain": "Challenge again",
+    "challengeHint": "Opens the duel queue in {{category}}"
+  },
+  "gameHistory": {
+    "title": "Your games",
+    "empty": "You haven't played any games yet",
+    "loading": "Loading history...",
+    "modes": {
+      "SINGLE": "Single Player",
+      "FLASH": "Flash",
+      "STREAK": "Streak",
+      "DUEL": "Duel",
+      "CHALLENGE": "Challenge"
+    },
+    "accuracy": "{{correct}}/{{total}} correct"
   }
 }
