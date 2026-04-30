@@ -20,6 +20,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigateMock,
+  useSearchParams: () => [new URLSearchParams()],
   Link: ({ children, to, className }: { children: ReactNode; to: string; className?: string }) => (
     <a href={to} className={className}>{children}</a>
   ),

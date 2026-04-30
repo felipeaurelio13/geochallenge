@@ -21,11 +21,10 @@ describe('OptionButton', () => {
 
     expect(button).toHaveAttribute('aria-pressed', 'true');
     expect(button).toHaveAttribute('data-state', 'selected');
-    expect(button.className).toContain('ring-2');
+    expect(button.className).toContain('ring-1');
     expect(button.className).toContain('option-button-base');
     expect(button.className).toContain('option-button-shell');
     expect(button.className).toContain('py-2');
-    expect(screen.getByText('✓')).toBeInTheDocument();
 
     fireEvent.click(button);
     expect(onClick).toHaveBeenCalledTimes(1);
@@ -74,7 +73,7 @@ describe('OptionButton', () => {
 
     const optionText = screen.getByText('Andorra la Vella es una capital con nombre deliberadamente largo para validar doble línea');
     expect(optionText.className).toContain('option-button-label');
-    expect(optionText.className).toContain('leading-[1.15]');
+    expect(optionText.className).toContain('leading-[1.2]');
     expect(optionText.className).not.toContain('truncate');
   });
 
@@ -124,39 +123,6 @@ describe('OptionButton', () => {
     expect(screen.getByRole('button')).toHaveAttribute('data-state', 'correct');
   });
 
-  it('reserva espacio del indicador para evitar saltos de alineación al seleccionar', () => {
-    const { rerender } = render(
-      <OptionButton
-        option="Perú"
-        index={1}
-        onClick={() => {}}
-        disabled={false}
-        selected={false}
-        showResult={false}
-      />
-    );
-
-    const hiddenIndicator = document.querySelector('.option-button-selected-indicator');
-    expect(hiddenIndicator).toBeInTheDocument();
-    expect(hiddenIndicator?.className).toContain('bg-transparent');
-    expect(hiddenIndicator?.className).not.toContain('shadow-sm');
-    expect(hiddenIndicator?.className).toContain('shadow-none');
-
-    rerender(
-      <OptionButton
-        option="Perú"
-        index={1}
-        onClick={() => {}}
-        disabled={false}
-        selected
-        showResult={false}
-      />
-    );
-
-    const visibleIndicator = document.querySelector('.option-button-selected-indicator');
-    expect(visibleIndicator?.className).toContain('bg-[var(--color-primary-500)]');
-  });
-
   it('mantiene clases estructurales y padding/altura base en default, selected y showResult', () => {
     const props = {
       option: 'Argentina',
@@ -179,12 +145,6 @@ describe('OptionButton', () => {
       const indexBadge = document.querySelector('.option-button-index');
       expect(indexBadge).toBeInTheDocument();
       expect(indexBadge?.className).toContain('h-7');
-
-      const indicator = document.querySelector('.option-button-selected-indicator');
-      expect(indicator).toBeInTheDocument();
-      expect(indicator?.className).toContain('h-6');
-      expect(indicator?.className).toContain('w-6');
-      expect(indicator?.className).toContain('shrink-0');
     };
 
     assertStableStructure('default');

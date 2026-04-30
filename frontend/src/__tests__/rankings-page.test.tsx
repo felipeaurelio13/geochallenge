@@ -92,7 +92,7 @@ describe('RankingsPage', () => {
     expect(screen.getByText('🥈')).toBeInTheDocument();
     expect(screen.getByText('(Tú)')).toBeInTheDocument();
 
-    expect(container.firstChild).toHaveClass('h-full', 'min-h-0', 'bg-gray-900');
+    expect(container.firstChild).toHaveClass('h-full', 'min-h-0', 'bg-[var(--color-bg-app)]');
     expect(container.querySelector('header')).toHaveClass('bg-gray-800', 'border-b', 'border-gray-700');
 
     const search = screen.getByLabelText('Buscar');
