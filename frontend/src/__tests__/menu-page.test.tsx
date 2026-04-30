@@ -161,7 +161,7 @@ describe('MenuPage', () => {
     const main = container.querySelector('main');
     expect(main?.className).toContain('py-2.5');
 
-    const categoryButton = screen.getByRole('button', { name: /🎲\s*mixto/i });
+    const categoryButton = screen.getByRole('button', { name: /^mixto$/i });
     expect(categoryButton.className).toContain('min-h-[4.5rem]');
 
     const singleModeButton = screen.getByRole('button', { name: /un jugador[\s\S]*juega solo/i });
@@ -184,7 +184,7 @@ describe('MenuPage', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /mapas/i }));
 
-    expect(screen.getByRole('button', { name: /🗺️\s*mapas/i })).toHaveAttribute(
+    expect(screen.getByRole('button', { name: /^mapas$/i })).toHaveAttribute(
       'aria-pressed',
       'true',
     );
@@ -197,8 +197,8 @@ describe('MenuPage', () => {
       </MemoryRouter>,
     );
 
-    const mixedButton = screen.getByRole('button', { name: /🎲\s*mixto/i });
-    const flagsButton = screen.getByRole('button', { name: /🏳️\s*banderas/i });
+    const mixedButton = screen.getByRole('button', { name: /^mixto$/i });
+    const flagsButton = screen.getByRole('button', { name: /^banderas$/i });
 
     expect(mixedButton.className).toContain('menu-category-selector');
     expect(flagsButton.className).toContain('menu-category-selector');
