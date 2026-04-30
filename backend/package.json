@@ -16,7 +16,8 @@
     "seed": "tsx src/seed.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "validate:images": "tsx src/scripts/validate-images.ts"
   },
   "keywords": [
     "geochallenge",
