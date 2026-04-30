@@ -350,5 +350,35 @@
     "processing": "Processing...",
     "skipToMainAction": "Skip to main actions",
     "search": "Search"
+  },
+  "duelHistory": {
+    "title": "Duel History",
+    "tabs": {
+      "summary": "Summary",
+      "duels": "Duels",
+      "headToHead": "Head to Head"
+    },
+    "periods": {
+      "week": "Week",
+      "month": "Month",
+      "year": "Year",
+      "all": "All Time"
+    },
+    "stats": {
+      "wins": "Wins",
+      "draws": "Draws",
+      "losses": "Losses"
+    },
+    "result": {
+      "win": "Win",
+      "loss": "Loss",
+      "draw": "Draw"
+    },
+    "search": "Search opponent...",
+    "recentOpponents": "Recent opponents",
+    "noMatches": "No matches in this period",
+    "noOpponents": "You haven't played any duels yet",
+    "loadMore": "Load more",
+    "vsRecord": "Record vs {{name}}"
   }
 }

@@ -24,6 +24,9 @@ model User {
   games              GameResult[]
   challengesCreated  Challenge[]            @relation("ChallengeCreator")
   challengeParticipations ChallengeParticipant[]
+  duelMatchesAsP1    DuelMatch[] @relation("DuelMatchAsP1")
+  duelMatchesAsP2    DuelMatch[] @relation("DuelMatchAsP2")
+  duelMatchesWon     DuelMatch[] @relation("DuelMatchAsWinner")
 
   @@map("users")
 }
@@ -117,6 +120,25 @@ enum GameMode {
   SINGLE
   DUEL
   CHALLENGE
+}
+
+model DuelMatch {
+  id           String    @id @default(cuid())
+  player1Id    String
+  player2Id    String
+  winnerId     String?
+  player1Score Int
+  player2Score Int
+  category     Category?
+  createdAt    DateTime  @default(now())
+
+  player1 User  @relation("DuelMatchAsP1", fields: [player1Id], references: [id], onDelete: Cascade)
+  player2 User  @relation("DuelMatchAsP2", fields: [player2Id], references: [id], onDelete: Cascade)
+  winner  User? @relation("DuelMatchAsWinner", fields: [winnerId], references: [id], onDelete: SetNull)
+
+  @@index([player1Id, createdAt])
+  @@index([player2Id, createdAt])
+  @@map("duel_matches")
 }
 
 enum ChallengeStatus {

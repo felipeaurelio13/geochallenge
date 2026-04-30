@@ -163,3 +163,43 @@ export interface ApiResponse<T> {
   error?: string;
   message?: string;
 }
+
+// Duel history types
+export interface DuelMatchRecord {
+  id: string;
+  opponentId: string;
+  opponentUsername: string;
+  result: 'win' | 'loss' | 'draw';
+  myScore: number;
+  opponentScore: number;
+  category?: Category;
+  createdAt: string;
+}
+
+export interface DuelStats {
+  wins: number;
+  draws: number;
+  losses: number;
+  total: number;
+}
+
+export type DuelPeriod = 'week' | 'month' | 'year' | 'all';
+
+export interface DuelPeriodStats {
+  week: DuelStats;
+  month: DuelStats;
+  year: DuelStats;
+  all: DuelStats;
+}
+
+export interface DuelOpponent {
+  id: string;
+  username: string;
+  totalMatches: number;
+}
+
+export interface HeadToHeadData {
+  opponent: DuelOpponent;
+  periods: DuelPeriodStats;
+  recentMatches: DuelMatchRecord[];
+}
