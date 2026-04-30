@@ -38,7 +38,8 @@ export function FlashGamePage() {
   const category = searchParams.get('category') ?? undefined;
 
   const [status, setStatus] = useState<Status>('loading');
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
+  const [reloadNonce, setReloadNonce] = useState(0);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [durationSeconds, setDurationSeconds] = useState(FALLBACK_DURATION_SECONDS);
@@ -70,9 +71,11 @@ export function FlashGamePage() {
     questionsRef.current = questions;
   }, [questions]);
 
-  // Load flash session
+  // Load flash session (re-runs when reloadNonce changes for retry)
   useEffect(() => {
     let cancelled = false;
+    setStatus('loading');
+    setError(null);
     (async () => {
       try {
         const response = await api.startFlashGame(category);
@@ -90,14 +93,18 @@ export function FlashGamePage() {
           streakShield: 0,
         });
         setStatus('intro');
-      } catch (err: any) {
+      } catch (err) {
         if (cancelled) return;
-        setError(err?.message || t('flash.error'));
+        setError(err);
       }
     })();
     return () => {
       cancelled = true;
     };
+  }, [reloadNonce]);
+
+  const retryFlashLoad = useCallback(() => {
+    setReloadNonce((n) => n + 1);
   }, []);
 
   const finish = useCallback(() => {
@@ -261,10 +268,11 @@ export function FlashGamePage() {
   if (error) {
     return (
       <FullScreenError
-        title={t('game.error')}
-        message={error}
+        title={t('flash.error')}
+        error={error}
         backTo="/menu"
         backLabel={t('common.backToMenu')}
+        onRetry={retryFlashLoad}
       />
     );
   }

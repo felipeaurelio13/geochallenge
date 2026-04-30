@@ -41,8 +41,9 @@ describe('ChallengesPage', () => {
   it('muestra una llamada clara para crear desafío multijugador', async () => {
     render(<ChallengesPage />);
 
-    expect(await screen.findByText('challenges.createMultiplayerTitle')).toBeInTheDocument();
-    expect(screen.getAllByRole('button', { name: 'challenges.createMultiplayerCta' }).length).toBeGreaterThan(0);
+    // With empty list the promo card hides to avoid duplicating the empty-state CTA;
+    // the create CTA must still be reachable from at least one place (header + empty state).
+    expect((await screen.findAllByRole('button', { name: 'challenges.createMultiplayerCta' })).length).toBeGreaterThan(0);
   });
 
   it('crea desafíos multijugador con categorías, cupo y tiempo', async () => {

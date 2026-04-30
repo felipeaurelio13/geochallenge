@@ -183,20 +183,33 @@ export function ChallengesPage() {
       </div>
 
       <main className="max-w-4xl mx-auto px-4 py-4 space-y-4">
-        {fetchError && <Alert type="error">{fetchError}</Alert>}
-        <section className="rounded-xl border border-primary/30 bg-primary/10 p-4">
-          <p className="text-sm font-semibold text-white">{t('challenges.createMultiplayerTitle')}</p>
-          <p className="mt-1 text-xs text-gray-300 sm:text-sm">{t('challenges.createMultiplayerHint')}</p>
-          <Button
-            onClick={() => setShowCreateModal(true)}
-            className="mt-3 sm:w-auto"
-            fullWidth
-          >
-            {t('challenges.createMultiplayerCta')}
-          </Button>
-        </section>
+        {fetchError && (
+          <Alert type="error">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <span>{fetchError}</span>
+              <Button size="sm" variant="secondary" onClick={fetchChallenges}>
+                {t('error.retry')}
+              </Button>
+            </div>
+          </Alert>
+        )}
 
-        {loading ? <LoadingSpinner size="lg" /> : filteredChallenges.length === 0 ? (
+        {/* Promo card: only show when the list has items so it doesn't duplicate the empty-state CTA */}
+        {!loading && !fetchError && filteredChallenges.length > 0 && (
+          <section className="rounded-xl border border-primary/30 bg-primary/10 p-4">
+            <p className="text-sm font-semibold text-white">{t('challenges.createMultiplayerTitle')}</p>
+            <p className="mt-1 text-xs text-gray-300 sm:text-sm">{t('challenges.createMultiplayerHint')}</p>
+            <Button
+              onClick={() => setShowCreateModal(true)}
+              className="mt-3 sm:w-auto"
+              fullWidth
+            >
+              {t('challenges.createMultiplayerCta')}
+            </Button>
+          </section>
+        )}
+
+        {loading ? <LoadingSpinner size="lg" /> : fetchError ? null : filteredChallenges.length === 0 ? (
           <EmptyState
             message={t('challenges.empty')}
             action={

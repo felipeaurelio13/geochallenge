@@ -80,7 +80,8 @@ export function GamePage() {
     streakShield: 0,
   });
   const [previousScore, setPreviousScore] = useState(0);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
+  const [reloadNonce, setReloadNonce] = useState(0);
 
   const currentQuestion: Question | null = questions[currentIndex] || null;
   const isMapQuestion = currentQuestion?.category === 'MAP';
@@ -132,17 +133,22 @@ export function GamePage() {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [status]);
 
-  // Start game on mount
+  // Start game on mount (re-runs on reloadNonce for retry)
   useEffect(() => {
     const initGame = async () => {
+      setError(null);
       try {
         await startGame(category as Category, undefined, gameType);
-      } catch (err: any) {
-        setError(err.message || 'Error al iniciar el juego');
+      } catch (err) {
+        setError(err);
       }
     };
     initGame();
-  }, [category, gameType, startGame]);
+  }, [category, gameType, startGame, reloadNonce]);
+
+  const retryStartGame = useCallback(() => {
+    setReloadNonce((n) => n + 1);
+  }, []);
 
   // Keyboard shortcuts: A/B/C/D to select, Enter to submit/next
   const handleKeyDown = useCallback(
@@ -385,9 +391,10 @@ export function GamePage() {
     return (
       <FullScreenError
         title={t('game.error')}
-        message={error || undefined}
+        error={error}
         backTo="/menu"
         backLabel={t('common.backToMenu')}
+        onRetry={retryStartGame}
       />
     );
   }
