@@ -76,7 +76,9 @@
     "streak": "Racha",
     "streakDesc": "Sigue hasta fallar y rompe tu récord",
     "rankings": "Rankings",
-    "yourStats": "Tus estadísticas",
+    "rankingsDesc": "Mira el top global y tu posición",
+    "yourStats": "Tu perfil",
+    "yourStatsDesc": "Estadísticas, duelos y rivales",
     "selectCategory": "Selecciona una categoría",
     "selectedCategory": "Categoría activa",
     "mobileCategoriesHint": "Desliza para ver más categorías",
@@ -358,7 +360,8 @@
     "tabs": {
       "summary": "Resumen",
       "duels": "Duelos",
-      "headToHead": "Cara a cara"
+      "headToHead": "Cara a cara",
+      "history": "Historial"
     },
     "periods": {
       "week": "Semana",
@@ -381,6 +384,21 @@
     "noMatches": "Sin partidas en este período",
     "noOpponents": "No has jugado ningún duelo aún",
     "loadMore": "Ver más",
-    "vsRecord": "Récord vs {{name}}"
+    "vsRecord": "Récord vs {{name}}",
+    "challengeAgain": "Desafiar de nuevo",
+    "challengeHint": "Abre la cola de duelos en {{category}}"
+  },
+  "gameHistory": {
+    "title": "Tus partidas",
+    "empty": "Aún no has jugado partidas",
+    "loading": "Cargando historial...",
+    "modes": {
+      "SINGLE": "Un jugador",
+      "FLASH": "Flash",
+      "STREAK": "Racha",
+      "DUEL": "Duelo",
+      "CHALLENGE": "Desafío"
+    },
+    "accuracy": "{{correct}}/{{total}} correctas"
   }
 }
