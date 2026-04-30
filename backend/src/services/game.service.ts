@@ -138,11 +138,13 @@ export async function getQuestionsForGame(
   count: number = config.game.questionsPerGame,
   excludeIds: string[] = []
 ): Promise<GameQuestion[]> {
+  const baseWhere = { isAvailable: true, id: { notIn: excludeIds } };
+
   // Buscar preguntas en la base de datos
   let questions = await prisma.question.findMany({
     where: {
+      ...baseWhere,
       ...(category && category !== Category.MIXED && { category }),
-      id: { notIn: excludeIds },
     },
   });
 
@@ -150,8 +152,8 @@ export async function getQuestionsForGame(
   if (category === Category.MIXED || !category) {
     questions = await prisma.question.findMany({
       where: {
+        ...baseWhere,
         category: { in: [Category.FLAG, Category.CAPITAL, Category.MAP, Category.SILHOUETTE] },
-        id: { notIn: excludeIds },
       },
     });
   }
@@ -188,6 +190,7 @@ export async function getQuestionsForFlashGame(category?: Category): Promise<Gam
   const questions = await prisma.question.findMany({
     where: {
       category: { in: flashCategories },
+      isAvailable: true,
     },
   });
 

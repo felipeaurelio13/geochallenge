@@ -14,7 +14,7 @@ function computeFallbackUrl(url: string): string {
   return url;
 }
 
-export function useImageWithFallback(primaryUrl: string | undefined) {
+export function useImageWithFallback(primaryUrl: string | undefined, onFinalError?: () => void) {
   const [src, setSrc] = useState(primaryUrl ?? '');
   const [hasError, setHasError] = useState(false);
   const [triedFallback, setTriedFallback] = useState(false);
@@ -22,6 +22,10 @@ export function useImageWithFallback(primaryUrl: string | undefined) {
   // Always up-to-date on every render — no effect lag
   const activeUrlRef = useRef(primaryUrl);
   activeUrlRef.current = primaryUrl;
+
+  // Keep stable reference to the callback so it doesn't trigger re-memos
+  const onFinalErrorRef = useRef(onFinalError);
+  onFinalErrorRef.current = onFinalError;
 
   const fallbackUrl = useMemo(() => computeFallbackUrl(primaryUrl ?? ''), [primaryUrl]);
 
@@ -36,6 +40,7 @@ export function useImageWithFallback(primaryUrl: string | undefined) {
       setSrc(fallbackUrl);
     } else {
       setHasError(true);
+      onFinalErrorRef.current?.();
     }
   }, [triedFallback, fallbackUrl, src]);
 

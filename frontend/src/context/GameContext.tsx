@@ -27,6 +27,7 @@ interface GameContextType {
   finishGame: () => Promise<GameResult>;
   resetGame: () => void;
   setTimeRemaining: (time: number) => void;
+  replaceCurrentQuestion: () => Promise<void>;
 }
 
 const initialState: GameState = {
@@ -222,6 +223,36 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  const replaceCurrentQuestion = useCallback(async () => {
+    const { questions, currentIndex, config, isOffline } = stateRef.current;
+    const currentQuestion = questions[currentIndex];
+    if (!currentQuestion || isOffline || !isOnline()) return;
+
+    try {
+      const response = await api.startGame(
+        currentQuestion.category as Category,
+        1,
+        (config?.gameType ?? 'single') as GameType,
+        questions.map((q) => q.id),
+        []
+      );
+      const replacement = response.questions?.[0];
+      if (!replacement) return;
+
+      setState((prev) => {
+        const updated = [...prev.questions];
+        updated[prev.currentIndex] = replacement;
+        return {
+          ...prev,
+          questions: updated,
+          timeRemaining: prev.config?.timePerQuestion ?? 10,
+        };
+      });
+    } catch {
+      // Silent: if replacement fails the question stays with text-only display
+    }
+  }, []);
+
   const finishGame = useCallback(async (): Promise<GameResult> => {
     const { answers, config, isOffline, results, score } = stateRef.current;
 
@@ -281,6 +312,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         finishGame,
         resetGame,
         setTimeRemaining,
+        replaceCurrentQuestion,
       }}
     >
       {children}

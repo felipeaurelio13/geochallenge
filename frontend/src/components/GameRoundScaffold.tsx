@@ -21,6 +21,7 @@ type GameRoundScaffoldProps = {
   actionTray: ReactNode;
   rootClassName?: string;
   optionsGridClassName?: string;
+  onImageError?: () => void;
 };
 
 export function GameRoundScaffold({
@@ -40,6 +41,7 @@ export function GameRoundScaffold({
   actionTray,
   rootClassName,
   optionsGridClassName = 'game-options-grid',
+  onImageError,
 }: GameRoundScaffoldProps) {
   const isCapitalQuestion = !isMapQuestion && question.category === 'CAPITAL';
   const hasMediaQuestion = !isMapQuestion && (question.category === 'FLAG' || question.category === 'SILHOUETTE');
@@ -60,6 +62,7 @@ export function GameRoundScaffold({
           questionNumber={questionNumber}
           totalQuestions={totalQuestions}
           compact={compactQuestionCard}
+          onImageError={onImageError}
         />
       </div>
 
