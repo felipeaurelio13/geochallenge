@@ -70,14 +70,13 @@ export function GamePage() {
   const [mapLocation, setMapLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [lastAnswerCorrect, setLastAnswerCorrect] = useState(false);
-  const [streakShieldTriggered, setStreakShieldTriggered] = useState(false);
   const [streakGameOver, setStreakGameOver] = useState(false);
   const [pendingMechanicUsage, setPendingMechanicUsage] = useState<MechanicUsage | undefined>(undefined);
   const [disabledOptionIndexes, setDisabledOptionIndexes] = useState<number[]>([]);
   const [mechanicsAvailable, setMechanicsAvailable] = useState({
     intel5050: 1,
     focusTime: 1,
-    streakShield: 1,
+    streakShield: 0,
   });
   const [previousScore, setPreviousScore] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -115,11 +114,11 @@ export function GamePage() {
     setMechanicsAvailable({
       intel5050: limits?.intel5050 ?? 1,
       focusTime: limits?.focusTime ?? 1,
-      streakShield: shouldUseStreakFlow ? (limits?.streakShield ?? 1) : 0,
+      streakShield: 0,
     });
     setDisabledOptionIndexes([]);
     setPendingMechanicUsage(undefined);
-  }, [mechanicsConfig, mechanicsRuntimeEnabled, shouldUseStreakFlow]);
+  }, [mechanicsConfig, mechanicsRuntimeEnabled]);
 
   // Prevent accidental navigation during game
   useEffect(() => {
@@ -279,29 +278,6 @@ export function GamePage() {
         haptics.error();
       }
 
-      if (
-        shouldUseStreakFlow &&
-        !result.isCorrect &&
-        mechanicsRuntimeEnabled &&
-        mechanicsAllowed.has('streakShield') &&
-        mechanicsAvailable.streakShield > 0
-      ) {
-        setMechanicsAvailable((prev) => ({
-          ...prev,
-          streakShield: Math.max(0, prev.streakShield - 1),
-        }));
-        setStreakShieldTriggered(true);
-        trackUxEvent('mechanic_used', {
-          mode: gameType,
-          questionId: currentQuestion.id,
-          value: 1,
-          meta: { key: 'streakShield' },
-        });
-        setLastAnswerCorrect(false);
-        setShowResult(true);
-        return;
-      }
-
       if (shouldUseStreakFlow && !result.isCorrect) {
         setStreakAlive(false);
         setStreakGameOver(true);
@@ -313,7 +289,6 @@ export function GamePage() {
         return;
       }
 
-      setStreakShieldTriggered(false);
       setLastAnswerCorrect(result.isCorrect);
       setShowResult(true);
     } catch (err: any) {
@@ -369,7 +344,6 @@ export function GamePage() {
       setGlobalTimeRemaining(roundDuration);
       setDisabledOptionIndexes([]);
       setPendingMechanicUsage(undefined);
-      setStreakShieldTriggered(false);
     }
   };
 
@@ -517,7 +491,7 @@ export function GamePage() {
           submitLabel={t('game.submit')}
           nextLabel={streakGameOver ? t('game.seeResults') : shouldUseStreakFlow ? t('game.next') : isLastQuestion ? t('game.seeResults') : t('game.next')}
           resultLabel={lastAnswerCorrect ? t('game.correct') : t('game.incorrect')}
-          resultHint={streakGameOver ? t('game.streakBroken') : streakShieldTriggered ? t('mechanics.streakShieldTriggered') : undefined}
+          resultHint={streakGameOver ? t('game.streakBroken') : undefined}
           selectionAssistiveText={hasSelection && !showResult ? t('game.selectionReadyShortHint') : undefined}
           showResultBadge
           isCorrect={lastAnswerCorrect}
@@ -530,7 +504,6 @@ export function GamePage() {
                 disabled={false}
                 onUseIntel5050={handleUseIntel5050}
                 onUseFocusTime={handleUseFocusTime}
-                showShieldStatus={shouldUseStreakFlow}
               />
             ) : undefined
           }

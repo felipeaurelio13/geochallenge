@@ -83,8 +83,11 @@ export function getMechanicsConfigForMode(
     return { enabled: false, allowed: [], limits: {} };
   }
 
-  const modeFlagKey: 'single' | 'flash' | 'duel' | 'challenge' =
-    gameMode === 'streak' ? 'single' : gameMode;
+  if (gameMode === 'streak') {
+    return { enabled: false, allowed: [], limits: {} };
+  }
+
+  const modeFlagKey: 'single' | 'flash' | 'duel' | 'challenge' = gameMode;
   const modeEnabled = mechanicsConfig[modeFlagKey];
   if (!modeEnabled) {
     return { enabled: false, allowed: [], limits: {} };
@@ -114,7 +117,7 @@ export function getMechanicsConfigForMode(
 
   return {
     enabled: true,
-    allowed: ['intel5050', 'focusTime', 'streakShield'],
+    allowed: ['intel5050', 'focusTime'],
     limits: buildMechanicsLimits(),
   };
 }

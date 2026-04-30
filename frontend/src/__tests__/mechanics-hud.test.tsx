@@ -12,16 +12,14 @@ describe('MechanicsHud', () => {
   it('renderiza acciones de 50/50 y tiempo con contador disponible', () => {
     render(
       <MechanicsHud
-        available={{ intel5050: 1, focusTime: 2, streakShield: 1 }}
+        available={{ intel5050: 1, focusTime: 2, streakShield: 0 }}
         onUseIntel5050={() => {}}
         onUseFocusTime={() => {}}
-        showShieldStatus
       />
     );
 
     expect(screen.getByRole('button', { name: 'mechanics.intel5050 (1)' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'mechanics.focusTime (2)' })).toBeInTheDocument();
-    expect(screen.getByText('mechanics.streakShield')).toBeInTheDocument();
   });
 
   it('deshabilita acciones cuando el contador llega a cero', () => {
