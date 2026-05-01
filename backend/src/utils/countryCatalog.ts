@@ -3,6 +3,10 @@ import { join } from 'path';
 
 export type CountryStatus = 'active' | 'pending_review' | 'disabled';
 
+export type PopulationTier = 'micro' | 'small' | 'medium' | 'large' | 'xlarge';
+export type AreaTier = 'micro' | 'small' | 'medium' | 'large' | 'xlarge';
+export type FlagComplexity = 'simple' | 'moderate' | 'complex';
+
 export interface CountryRecord {
   iso2: string;
   name: string;
@@ -13,6 +17,12 @@ export interface CountryRecord {
   flag: string;
   status: CountryStatus;
   rollout?: 'stable' | 'extended';
+  isInsular?: boolean;
+  isLandlocked?: boolean;
+  subregion?: string;
+  populationTier?: PopulationTier;
+  areaTier?: AreaTier;
+  flagComplexity?: FlagComplexity;
 }
 
 interface CountryCatalogV1 {
