@@ -26,6 +26,28 @@ export type GameMechanicKey = 'intel5050' | 'focusTime' | 'streakShield';
 
 export type Difficulty = 'EASY' | 'MEDIUM' | 'HARD';
 
+export interface GameFilters {
+  continent?: string;
+  isInsular?: boolean;
+  isLandlocked?: boolean;
+  difficulty?: Difficulty;
+}
+
+export function hasActiveFilters(f?: GameFilters): boolean {
+  if (!f) return false;
+  return !!(f.continent || f.isInsular || f.isLandlocked || f.difficulty);
+}
+
+export function filtersToParams(f?: GameFilters): Record<string, string> {
+  if (!f) return {};
+  const p: Record<string, string> = {};
+  if (f.continent) p.continent = f.continent;
+  if (f.isInsular) p.isInsular = 'true';
+  if (f.isLandlocked) p.isLandlocked = 'true';
+  if (f.difficulty) p.difficulty = f.difficulty;
+  return p;
+}
+
 export interface QuestionDataObject {
   country?: string;
   capital?: string;

@@ -13,7 +13,9 @@ import type {
   DuelOpponent,
   HeadToHeadData,
   DuelPeriod,
+  GameFilters,
 } from '../types';
+import { filtersToParams } from '../types';
 import { testAuthBypass } from '../utils/testAuthBypass';
 import { toAppPath } from '../utils/routing';
 
@@ -123,22 +125,23 @@ class ApiService {
     questionCount?: number,
     gameType?: GameType,
     excludeIds?: string[],
-    excludeQuestionKeys?: string[]
+    excludeQuestionKeys?: string[],
+    filters?: GameFilters
   ) {
     const response = await this.client.get<{
       gameConfig: GameConfig;
       questions: Question[];
     }>('/game/start', {
-      params: { category, questionCount, gameType, excludeIds, excludeQuestionKeys },
+      params: { category, questionCount, gameType, excludeIds, excludeQuestionKeys, ...filtersToParams(filters) },
     });
     return response.data;
   }
 
-  async startFlashGame(category?: string) {
+  async startFlashGame(category?: string, filters?: GameFilters) {
     const response = await this.client.get<{
       gameConfig: GameConfig & { durationSeconds?: number };
       questions: Question[];
-    }>('/game/flash/start', { params: { category } });
+    }>('/game/flash/start', { params: { category, ...filtersToParams(filters) } });
     return response.data;
   }
 

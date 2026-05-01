@@ -17,6 +17,23 @@ export interface GameQuestion {
   longitude?: number;
 }
 
+export interface QuestionFilters {
+  continent?: string;
+  isInsular?: boolean;
+  isLandlocked?: boolean;
+  difficulty?: Difficulty;
+}
+
+function buildFilterWhere(filters?: QuestionFilters): object {
+  if (!filters) return {};
+  return {
+    ...(filters.continent && { continent: filters.continent }),
+    ...(filters.isInsular !== undefined && { isInsular: filters.isInsular }),
+    ...(filters.isLandlocked !== undefined && { isLandlocked: filters.isLandlocked }),
+    ...(filters.difficulty && { difficulty: filters.difficulty }),
+  };
+}
+
 export type GameMechanicKey = 'intel5050' | 'focusTime' | 'streakShield';
 
 export interface MechanicsConfig {
@@ -139,9 +156,10 @@ let questionsCache: Map<string, any> = new Map();
 export async function getQuestionsForGame(
   category?: Category,
   count: number = config.game.questionsPerGame,
-  excludeIds: string[] = []
+  excludeIds: string[] = [],
+  filters?: QuestionFilters
 ): Promise<GameQuestion[]> {
-  const baseWhere = { isAvailable: true, id: { notIn: excludeIds } };
+  const baseWhere = { isAvailable: true, id: { notIn: excludeIds }, ...buildFilterWhere(filters) };
 
   // Buscar preguntas en la base de datos
   let questions = await prisma.question.findMany({
@@ -183,7 +201,7 @@ export async function getQuestionsForGame(
  * Flash mode: 60 preguntas rápidas, 2 opciones por pregunta.
  * MAP no es compatible (requiere mapa interactivo), hace fallback a FLAG + SILHOUETTE.
  */
-export async function getQuestionsForFlashGame(category?: Category): Promise<GameQuestion[]> {
+export async function getQuestionsForFlashGame(category?: Category, filters?: QuestionFilters): Promise<GameQuestion[]> {
   const visualCategories = [Category.FLAG, Category.SILHOUETTE];
   const flashCategories =
     category && category !== Category.MIXED && category !== Category.MAP
@@ -194,6 +212,7 @@ export async function getQuestionsForFlashGame(category?: Category): Promise<Gam
     where: {
       category: { in: flashCategories },
       isAvailable: true,
+      ...buildFilterWhere(filters),
     },
   });
 
@@ -250,12 +269,13 @@ export async function getQuestionsForStreakGame(
   category?: Category,
   excludeIds: string[] = [],
   requestedCount?: number,
-  excludeQuestionKeys: string[] = []
+  excludeQuestionKeys: string[] = [],
+  filters?: QuestionFilters
 ): Promise<GameQuestion[]> {
   const batchSize = getStreakBatchSize(requestedCount);
 
   if (!config.game.enableStreakUniqueQuestions) {
-    return getQuestionsForGame(category, batchSize, excludeIds);
+    return getQuestionsForGame(category, batchSize, excludeIds, filters);
   }
 
   const seenQuestionKeys = new Set(excludeQuestionKeys.map((key) => normalizeUniquenessPart(key)));
@@ -271,7 +291,8 @@ export async function getQuestionsForStreakGame(
     const candidateQuestions = await getQuestionsForGame(
       category,
       remainingCount * STREAK_UNIQUE_FETCH_FACTOR,
-      Array.from(triedIds)
+      Array.from(triedIds),
+      filters
     );
 
     if (candidateQuestions.length === 0) {

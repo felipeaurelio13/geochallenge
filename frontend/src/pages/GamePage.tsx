@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState, lazy, Suspense } from 'react';
+import { useEffect, useCallback, useState, lazy, Suspense, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useGame } from '../context/GameContext';
@@ -13,7 +13,7 @@ import {
   MechanicsHud,
 } from '../components';
 import { FullScreenError } from '../components/molecules/FullScreenError';
-import { Category, MechanicUsage, Question } from '../types';
+import { Category, GameFilters, MechanicUsage, Question } from '../types';
 import { GAME_CONSTANTS } from '../constants/game';
 import { useHaptics } from '../hooks';
 import { areMechanicsV2Enabled } from '../config/featureFlags';
@@ -49,6 +49,17 @@ export function GamePage() {
   const category = searchParams.get('category') || 'MIXED';
   const gameTypeParam = searchParams.get('gameType') ?? searchParams.get('mode');
   const gameType = gameTypeParam === 'streak' ? 'streak' : 'single';
+
+  const gameFilters = useMemo<GameFilters>(() => {
+    const f: GameFilters = {};
+    const continent = searchParams.get('continent');
+    const difficulty = searchParams.get('difficulty');
+    if (continent) f.continent = continent;
+    if (searchParams.get('isInsular') === 'true') f.isInsular = true;
+    if (searchParams.get('isLandlocked') === 'true') f.isLandlocked = true;
+    if (difficulty === 'EASY' || difficulty === 'MEDIUM' || difficulty === 'HARD') f.difficulty = difficulty;
+    return f;
+  }, [searchParams]);
 
   const {
     state,
@@ -136,13 +147,13 @@ export function GamePage() {
   useEffect(() => {
     const initGame = async () => {
       try {
-        await startGame(category as Category, undefined, gameType);
+        await startGame(category as Category, undefined, gameType, gameFilters);
       } catch (err: any) {
         setError(err.message || 'Error al iniciar el juego');
       }
     };
     initGame();
-  }, [category, gameType, startGame]);
+  }, [category, gameType, gameFilters, startGame]);
 
   // Keyboard shortcuts: A/B/C/D to select, Enter to submit/next
   const handleKeyDown = useCallback(
@@ -318,7 +329,8 @@ export function GamePage() {
             10,
             'streak',
             usedQuestionIds,
-            usedQuestionKeys
+            usedQuestionKeys,
+            gameFilters
           );
           appendQuestions(refillResponse.questions);
           bufferedQuestionCount += refillResponse.questions.length;

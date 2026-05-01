@@ -1,10 +1,14 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { useLocalStorage } from '../hooks';
+import { useGameFilters } from '../hooks/useGameFilters';
 import { Button, Header, Icon, PageTemplate } from '../components';
 import { UserAvatar } from '../components/atoms/UserAvatar';
 import { GameModeCard } from '../components/molecules/GameModeCard';
+import { FilterDrawer } from '../components/molecules/FilterDrawer';
+import { hasActiveFilters, filtersToParams } from '../types';
 
 type Category = 'FLAG' | 'CAPITAL' | 'MAP' | 'SILHOUETTE' | 'MIXED';
 
@@ -27,16 +31,40 @@ const categorySerializer = {
   stringify: (value: Category) => value,
 };
 
+function buildUrl(base: string, params: Record<string, string>) {
+  const merged = { ...params };
+  const search = new URLSearchParams(merged).toString();
+  return search ? `${base}?${search}` : base;
+}
+
 export function MenuPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const [selectedCategory, setSelectedCategory] = useLocalStorage<Category>(
     'geochallenge:last-category',
     'MIXED',
     categorySerializer,
   );
+
+  const { filters, setFilters, clearFilters } = useGameFilters();
+  const filtersActive = hasActiveFilters(filters);
+  const fp = filtersToParams(filters);
+
+  function go(path: string, extra: Record<string, string> = {}) {
+    navigate(buildUrl(path, { ...fp, ...extra }));
+  }
+
+  function filterSummary(): string {
+    const parts: string[] = [];
+    if (filters.continent) parts.push(t(`filters.continents.${filters.continent.replace(' ', '_')}`));
+    if (filters.isInsular) parts.push(t('filters.insular'));
+    if (filters.isLandlocked) parts.push(t('filters.landlocked'));
+    if (filters.difficulty) parts.push(t(`filters.difficulties.${filters.difficulty}`));
+    return parts.join(' · ');
+  }
 
   return (
     <PageTemplate
@@ -94,37 +122,62 @@ export function MenuPage() {
         </div>
       </section>
 
-      <section className="mt-4" aria-label={t('menu.gameModes')}>
+      {/* Filter bar */}
+      <div className="mt-3 flex items-center gap-2">
+        <button
+          onClick={() => setDrawerOpen(true)}
+          className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+            filtersActive
+              ? 'border-primary/60 bg-primary/15 text-white'
+              : 'border-gray-700 bg-gray-900/80 text-gray-400 hover:border-gray-500 hover:text-gray-200'
+          }`}
+        >
+          <span>🎚️</span>
+          <span>{filtersActive ? filterSummary() : t('filters.filterBy')}</span>
+          {!filtersActive && <span className="opacity-50">▾</span>}
+        </button>
+        {filtersActive && (
+          <button
+            onClick={clearFilters}
+            className="rounded-full border border-gray-700 bg-gray-900/80 px-2 py-1.5 text-xs text-gray-400 hover:text-red-400"
+            title={t('filters.clearAll')}
+          >
+            ✕
+          </button>
+        )}
+      </div>
+
+      <section className="mt-3" aria-label={t('menu.gameModes')}>
         <div className="grid grid-cols-2 gap-1.5 sm:gap-2 lg:grid-cols-5">
           <GameModeCard
             icon="⚡"
             title={t('menu.flash')}
             description={t('menu.flashDesc')}
-            onClick={() => navigate(`/game/flash?category=${selectedCategory}`)}
+            onClick={() => go(`/game/flash`, { category: selectedCategory })}
           />
           <GameModeCard
             icon="🎯"
             title={t('menu.singlePlayer')}
             description={t('menu.singlePlayerDesc')}
-            onClick={() => navigate(`/game/single?category=${selectedCategory}`)}
+            onClick={() => go(`/game/single`, { category: selectedCategory })}
           />
           <GameModeCard
             icon="⚔️"
             title={t('menu.duel')}
             description={t('menu.duelDesc')}
-            onClick={() => navigate(`/duel?category=${selectedCategory}`)}
+            onClick={() => go(`/duel`, { category: selectedCategory })}
           />
           <GameModeCard
             icon="🏁"
             title={t('menu.challenge')}
             description={t('menu.challengeDesc')}
-            onClick={() => navigate(`/challenges?category=${selectedCategory}&openCreate=1`)}
+            onClick={() => go(`/challenges`, { category: selectedCategory, openCreate: '1' })}
           />
           <GameModeCard
             icon="🔥"
             title={t('menu.streak')}
             description={t('menu.streakDesc')}
-            onClick={() => navigate(`/game/single?category=${selectedCategory}&mode=streak`)}
+            onClick={() => go(`/game/single`, { category: selectedCategory, mode: 'streak' })}
             className="col-span-2 lg:col-span-1"
           />
         </div>
@@ -157,6 +210,14 @@ export function MenuPage() {
           </Link>
         </div>
       </section>
+
+      {drawerOpen && (
+        <FilterDrawer
+          filters={filters}
+          onChange={setFilters}
+          onClose={() => setDrawerOpen(false)}
+        />
+      )}
     </PageTemplate>
   );
 }

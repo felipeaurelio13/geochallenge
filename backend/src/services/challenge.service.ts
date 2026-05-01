@@ -1,6 +1,7 @@
 import { prisma } from '../config/database.js';
 import { Category } from '@prisma/client';
 import { updateLeaderboardScore, updateSeasonLeaderboardScore } from './leaderboard.service.js';
+import { QuestionFilters } from './game.service.js';
 
 const CHALLENGE_EXPIRY_DAYS = 7;
 const QUESTIONS_PER_CHALLENGE = 10;
@@ -37,7 +38,8 @@ export class ChallengeService {
     creatorId: string,
     categories: Category[] | undefined,
     maxPlayers: number,
-    answerTimeSeconds: number
+    answerTimeSeconds: number,
+    filters?: QuestionFilters
   ) {
     if (maxPlayers < 2 || maxPlayers > 8) {
       throw new Error('El desafío debe ser para entre 2 y 8 personas');
@@ -48,11 +50,21 @@ export class ChallengeService {
     }
 
     const selectedCategories: Category[] = categories?.length ? categories : ['MIXED'];
-    const whereClause = selectedCategories.includes('MIXED')
+    const categoryClause = selectedCategories.includes('MIXED')
       ? {}
       : { category: { in: selectedCategories } };
 
-    const questions = await prisma.question.findMany({ where: whereClause, take: 200 });
+    const filterClause = filters ? {
+      ...(filters.continent && { continent: filters.continent }),
+      ...(filters.isInsular !== undefined && { isInsular: filters.isInsular }),
+      ...(filters.isLandlocked !== undefined && { isLandlocked: filters.isLandlocked }),
+      ...(filters.difficulty && { difficulty: filters.difficulty }),
+    } : {};
+
+    const questions = await prisma.question.findMany({
+      where: { ...categoryClause, ...filterClause, isAvailable: true },
+      take: 200,
+    });
 
     if (questions.length < QUESTIONS_PER_CHALLENGE) {
       throw new Error('No hay suficientes preguntas para las categorías seleccionadas');

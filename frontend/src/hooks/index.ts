@@ -11,3 +11,4 @@ export * from './useOfflineQuestions';
 export * from './useWebShare';
 export * from './useWindowSize';
 export * from './useImageWithFallback';
+export * from './useGameFilters';

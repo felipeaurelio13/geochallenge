@@ -43,6 +43,12 @@ model Question {
   continent      String?  // Para generar distractores regionales
   difficulty     Difficulty @default(MEDIUM)
   isAvailable    Boolean  @default(true) // false = imagen no accesible en ningún CDN
+  isInsular      Boolean?
+  isLandlocked   Boolean?
+  subregion      String?
+  populationTier String?
+  areaTier       String?
+  flagComplexity String?
   createdAt      DateTime @default(now())
 
   @@index([category])

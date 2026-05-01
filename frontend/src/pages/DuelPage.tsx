@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, lazy, Suspense, useRef } from 'react';
+import { useEffect, useState, useCallback, lazy, Suspense, useRef, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
@@ -13,7 +13,7 @@ import {
 import { UserAvatar } from '../components/atoms/UserAvatar';
 import { Alert } from '../components/atoms/Alert';
 import { Button } from '../components/atoms/Button';
-import { Category, MechanicUsage, Question } from '../types';
+import { Category, GameFilters, MechanicUsage, Question } from '../types';
 import { GAME_CONSTANTS } from '../constants/game';
 import { useHaptics } from '../hooks';
 import { areMechanicsV2Enabled } from '../config/featureFlags';
@@ -88,6 +88,17 @@ export function DuelPage() {
   const duelMechanicsFeatureEnabled = areMechanicsV2Enabled('duel');
   const duelCategory = parseDuelCategory(searchParams.get('category'));
   const hasSelection = Boolean(selectedAnswer || mapLocation);
+
+  const duelFilters = useMemo<GameFilters>(() => {
+    const f: GameFilters = {};
+    const continent = searchParams.get('continent');
+    const difficulty = searchParams.get('difficulty');
+    if (continent) f.continent = continent;
+    if (searchParams.get('isInsular') === 'true') f.isInsular = true;
+    if (searchParams.get('isLandlocked') === 'true') f.isLandlocked = true;
+    if (difficulty === 'EASY' || difficulty === 'MEDIUM' || difficulty === 'HARD') f.difficulty = difficulty;
+    return f;
+  }, [searchParams]);
   const haptics = useHaptics();
 
   useEffect(() => {
@@ -112,14 +123,14 @@ export function DuelPage() {
     setShowRetryAction(false);
 
     if (duelStateRef.current === 'searching') {
-      socketService.joinDuelQueue(duelCategory);
+      socketService.joinDuelQueue(duelCategory, duelFilters);
       return;
     }
 
     if (duelStateRef.current === 'matched') {
       socketService.ready();
     }
-  }, [duelCategory]);
+  }, [duelCategory, duelFilters]);
 
   // Connect to socket and join queue
   useEffect(() => {
@@ -247,7 +258,7 @@ export function DuelPage() {
       const currentState = duelStateRef.current;
 
       if (currentState === 'searching') {
-        socketService.joinDuelQueue(duelCategory);
+        socketService.joinDuelQueue(duelCategory, duelFilters);
         showConnectionMessage('info', t('duel.reconnectedSearching'), false);
         return;
       }
@@ -272,7 +283,7 @@ export function DuelPage() {
     socketService.socket?.on('connect', handleConnect);
 
     // Join matchmaking queue after listeners are active
-    socketService.joinDuelQueue(duelCategory);
+    socketService.joinDuelQueue(duelCategory, duelFilters);
 
     return () => {
       clearInterval(searchTimer);
@@ -454,7 +465,17 @@ export function DuelPage() {
                 ),
               })}
             </p>
-            <p className="text-gray-300">{t('duel.averageWaitHint')}</p>
+            {(duelFilters.continent || duelFilters.isInsular || duelFilters.isLandlocked || duelFilters.difficulty) && (
+              <p className="mt-0.5 text-xs text-gray-400">
+                {[
+                  duelFilters.continent && t(`filters.continents.${duelFilters.continent.replace(' ', '_')}`),
+                  duelFilters.isInsular && t('filters.insular'),
+                  duelFilters.isLandlocked && t('filters.landlocked'),
+                  duelFilters.difficulty && t(`filters.difficulties.${duelFilters.difficulty}`),
+                ].filter(Boolean).join(' · ')}
+              </p>
+            )}
+            <p className="text-gray-300 mt-1">{t('duel.averageWaitHint')}</p>
             <p className="text-gray-400 mt-1">{t('duel.cancelHint')}</p>
           </div>
 
@@ -544,7 +565,7 @@ export function DuelPage() {
                 setDuelState('searching');
                 setSearchTime(0);
                 setSearchTimedOut(false);
-                socketService.joinDuelQueue(duelCategory);
+                socketService.joinDuelQueue(duelCategory, duelFilters);
               }}
               variant="primary"
               size="lg"

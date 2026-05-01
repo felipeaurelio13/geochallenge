@@ -58,6 +58,12 @@ async function main() {
       longitude: country.lng,
       continent: country.continent,
       difficulty: getDifficulty(country.name),
+      isInsular: country.isInsular ?? null,
+      isLandlocked: country.isLandlocked ?? null,
+      subregion: country.subregion ?? null,
+      populationTier: country.populationTier ?? null,
+      areaTier: country.areaTier ?? null,
+      flagComplexity: country.flagComplexity ?? null,
     });
   }
 
@@ -78,6 +84,12 @@ async function main() {
       longitude: country.lng,
       continent: country.continent,
       difficulty: getDifficulty(country.name),
+      isInsular: country.isInsular ?? null,
+      isLandlocked: country.isLandlocked ?? null,
+      subregion: country.subregion ?? null,
+      populationTier: country.populationTier ?? null,
+      areaTier: country.areaTier ?? null,
+      flagComplexity: country.flagComplexity ?? null,
     });
   }
 
@@ -100,6 +112,12 @@ async function main() {
       longitude: city.lng,
       continent: country.continent,
       difficulty: getCityDifficulty(city.name, city.country),
+      isInsular: country.isInsular ?? null,
+      isLandlocked: country.isLandlocked ?? null,
+      subregion: country.subregion ?? null,
+      populationTier: country.populationTier ?? null,
+      areaTier: country.areaTier ?? null,
+      flagComplexity: country.flagComplexity ?? null,
     });
     mapCount++;
   }
@@ -119,6 +137,12 @@ async function main() {
       longitude: country.lng,
       continent: country.continent,
       difficulty: getDifficulty(country.name),
+      isInsular: country.isInsular ?? null,
+      isLandlocked: country.isLandlocked ?? null,
+      subregion: country.subregion ?? null,
+      populationTier: country.populationTier ?? null,
+      areaTier: country.areaTier ?? null,
+      flagComplexity: country.flagComplexity ?? null,
     });
   }
 

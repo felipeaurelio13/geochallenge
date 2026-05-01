@@ -17,6 +17,7 @@ import {
   getDuelOpponents,
   getDuelHeadToHead,
   AnswerResult,
+  QuestionFilters,
 } from '../services/game.service.js';
 import { updateLeaderboardScore, updateSeasonLeaderboardScore } from '../services/leaderboard.service.js';
 import { config } from '../config/env.js';
@@ -44,6 +45,23 @@ const excludeIdsSchema = z.preprocess(
   z.array(z.string())
 );
 
+const difficultySchema = z.enum(['EASY', 'MEDIUM', 'HARD']);
+
+const questionFiltersSchema = z.object({
+  continent: z.string().optional(),
+  isInsular: z.preprocess((v) => v === 'true' || v === true, z.boolean()).optional(),
+  isLandlocked: z.preprocess((v) => v === 'true' || v === true, z.boolean()).optional(),
+  difficulty: difficultySchema.optional(),
+});
+
+function parseFilters(raw: Record<string, unknown>): QuestionFilters | undefined {
+  const result = questionFiltersSchema.safeParse(raw);
+  if (!result.success) return undefined;
+  const { continent, isInsular, isLandlocked, difficulty } = result.data;
+  if (!continent && isInsular === undefined && isLandlocked === undefined && !difficulty) return undefined;
+  return { continent, isInsular, isLandlocked, difficulty: difficulty as QuestionFilters['difficulty'] };
+}
+
 // Schema de validación
 export const startGameSchema = z.object({
   category: z.nativeEnum(Category).optional().default(Category.MIXED),
@@ -51,6 +69,11 @@ export const startGameSchema = z.object({
   gameType: gameTypeSchema.optional().default('single'),
   excludeIds: excludeIdsSchema.optional().default([]),
   excludeQuestionKeys: excludeIdsSchema.optional().default([]),
+  // Filters
+  continent: z.string().optional(),
+  isInsular: z.preprocess((v) => v === 'true' || v === true, z.boolean()).optional(),
+  isLandlocked: z.preprocess((v) => v === 'true' || v === true, z.boolean()).optional(),
+  difficulty: difficultySchema.optional(),
 });
 
 const answerSchema = z.object({
@@ -111,13 +134,14 @@ router.get('/start', optionalAuth, async (req: AuthRequest, res: Response) => {
     }
 
     const { category, questionCount, gameType, excludeIds, excludeQuestionKeys } = validation.data;
+    const filters = parseFilters(validation.data as Record<string, unknown>);
     const expectedQuestions = gameType === 'streak'
       ? getStreakBatchSize(questionCount)
       : questionCount;
 
     const questions = gameType === 'streak'
-      ? await getQuestionsForStreakGame(category, excludeIds, questionCount, excludeQuestionKeys)
-      : await getQuestionsForGame(category, questionCount, excludeIds);
+      ? await getQuestionsForStreakGame(category, excludeIds, questionCount, excludeQuestionKeys, filters)
+      : await getQuestionsForGame(category, questionCount, excludeIds, filters);
 
     if (questions.length < expectedQuestions) {
       res.status(503).json({
@@ -147,6 +171,10 @@ router.get('/start', optionalAuth, async (req: AuthRequest, res: Response) => {
 
 const flashStartSchema = z.object({
   category: z.nativeEnum(Category).optional(),
+  continent: z.string().optional(),
+  isInsular: z.preprocess((v) => v === 'true' || v === true, z.boolean()).optional(),
+  isLandlocked: z.preprocess((v) => v === 'true' || v === true, z.boolean()).optional(),
+  difficulty: difficultySchema.optional(),
 });
 
 /**
@@ -157,7 +185,8 @@ router.get('/flash/start', optionalAuth, async (req: AuthRequest, res: Response)
   try {
     const validation = flashStartSchema.safeParse(req.query);
     const flashCategory = validation.success ? validation.data.category : undefined;
-    const questions = await getQuestionsForFlashGame(flashCategory);
+    const flashFilters = validation.success ? parseFilters(validation.data as Record<string, unknown>) : undefined;
+    const questions = await getQuestionsForFlashGame(flashCategory, flashFilters);
     if (questions.length < 10) {
       res.status(503).json({
         error: 'No hay suficientes preguntas visuales disponibles',
