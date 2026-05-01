@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { hasActiveFilters } from '../types';
 import type { GameFilters } from '../types';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
+import { useGameFilters } from '../hooks/useGameFilters';
 import { LoadingSpinner } from '../components';
 import { PageHeader } from '../components/molecules/PageHeader';
 import { EmptyState } from '../components/molecules/EmptyState';
@@ -49,6 +51,7 @@ export function ChallengesPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
+  const { filters: savedFilters } = useGameFilters();
 
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,7 +65,7 @@ export function ChallengesPage() {
   const [error, setError] = useState('');
 
   const challengeFilters = useMemo<GameFilters>(() => {
-    const f: GameFilters = {};
+    const f: GameFilters = { ...savedFilters };
     const continent = searchParams.get('continent');
     const difficulty = searchParams.get('difficulty');
     if (continent) f.continent = continent;
@@ -70,7 +73,7 @@ export function ChallengesPage() {
     if (searchParams.get('isLandlocked') === 'true') f.isLandlocked = true;
     if (difficulty === 'EASY' || difficulty === 'MEDIUM' || difficulty === 'HARD') f.difficulty = difficulty;
     return f;
-  }, [searchParams]);
+  }, [searchParams, savedFilters]);
 
   useEffect(() => {
     const requestedCategory = searchParams.get('category');
@@ -332,6 +335,19 @@ export function ChallengesPage() {
                 answerTimeSeconds: createTime,
               })}
             </div>
+
+            {hasActiveFilters(challengeFilters) && (
+              <div className="rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 text-xs text-gray-300">
+                {t('challenges.activeFilters', {
+                  summary: [
+                    challengeFilters.continent && t(`filters.continents.${challengeFilters.continent.replace(' ', '_')}`),
+                    challengeFilters.isInsular && t('filters.insular'),
+                    challengeFilters.isLandlocked && t('filters.landlocked'),
+                    challengeFilters.difficulty && t(`filters.difficulties.${challengeFilters.difficulty}`),
+                  ].filter(Boolean).join(' · '),
+                })}
+              </div>
+            )}
 
             <div className="flex gap-2">
               <Button type="submit" disabled={creating} fullWidth>{creating ? t('common.loading') : t('challenges.send')}</Button>
