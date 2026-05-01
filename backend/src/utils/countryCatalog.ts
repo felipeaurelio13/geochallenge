@@ -13,6 +13,8 @@ export interface CountryRecord {
   flag: string;
   status: CountryStatus;
   rollout?: 'stable' | 'extended';
+  /** false when the country has no silhouette in the mapsicon CDN */
+  hasSilhouette?: boolean;
 }
 
 interface CountryCatalogV1 {
