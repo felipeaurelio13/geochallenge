@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { authenticateJWT, AuthRequest } from '../middleware/auth.js';
 import { challengeService } from '../services/challenge.service.js';
 import { Category } from '@prisma/client';
+import { QuestionFilters } from '../services/game.service.js';
 
 const router = Router();
 
@@ -15,6 +16,12 @@ export const createChallengeSchema = z.object({
   categories: z.array(z.preprocess(normalizeCategory, z.nativeEnum(Category))).min(1),
   maxPlayers: z.coerce.number().int().min(2).max(8),
   answerTimeSeconds: z.coerce.number().int().refine((v) => [10, 20, 30].includes(v)),
+  filters: z.object({
+    continent: z.string().optional(),
+    isInsular: z.boolean().optional(),
+    isLandlocked: z.boolean().optional(),
+    difficulty: z.enum(['EASY', 'MEDIUM', 'HARD']).optional(),
+  }).optional(),
 });
 
 const submitResultSchema = z.object({
@@ -30,7 +37,8 @@ router.post('/', authenticateJWT, async (req: AuthRequest, res: Response) => {
       req.user!.userId,
       data.categories as Category[],
       data.maxPlayers,
-      data.answerTimeSeconds
+      data.answerTimeSeconds,
+      data.filters as QuestionFilters | undefined
     );
 
     res.status(201).json({ message: 'Desafío creado exitosamente', challenge });

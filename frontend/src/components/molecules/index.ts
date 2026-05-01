@@ -1,4 +1,5 @@
 export { Card } from './Card';
+export { FilterDrawer } from './FilterDrawer';
 export { EmptyState } from './EmptyState';
 export { FormField } from './FormField';
 export { FullScreenError } from './FullScreenError';

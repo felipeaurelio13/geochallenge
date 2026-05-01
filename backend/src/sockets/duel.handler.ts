@@ -7,6 +7,7 @@ import {
   AnswerResult,
   GameQuestion,
   getMechanicsConfigForMode,
+  QuestionFilters,
 } from '../services/game.service.js';
 import { updateLeaderboardScore, updateSeasonLeaderboardScore } from '../services/leaderboard.service.js';
 import { config } from '../config/env.js';
@@ -25,12 +26,24 @@ interface QueuedPlayer {
   socketId: string;
   joinedAt: Date;
   category?: Category;
+  filters?: QuestionFilters;
 }
 
 const DUEL_CATEGORIES: Category[] = ['MAP', 'FLAG', 'CAPITAL', 'SILHOUETTE', 'MIXED'];
 
 function isCompatibleCategory(categoryA: Category, categoryB: Category): boolean {
   return categoryA === categoryB;
+}
+
+function isCompatibleFilters(a?: QuestionFilters, b?: QuestionFilters): boolean {
+  if (!a && !b) return true;
+  if (!a || !b) return false;
+  return (
+    (a.continent ?? null) === (b.continent ?? null) &&
+    (a.isInsular ?? null) === (b.isInsular ?? null) &&
+    (a.isLandlocked ?? null) === (b.isLandlocked ?? null) &&
+    (a.difficulty ?? null) === (b.difficulty ?? null)
+  );
 }
 
 function normalizeCategory(category?: Category): Category {
@@ -97,6 +110,10 @@ export class MatchmakingQueue {
           continue;
         }
 
+        if (!isCompatibleFilters(player1.filters, player2.filters)) {
+          continue;
+        }
+
         this.queue.splice(j, 1);
         this.queue.splice(i, 1);
         return [player1, player2];
@@ -157,7 +174,7 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
   const user = socket.user!;
 
   // Unirse a la cola de matchmaking
-  socket.on('duel:queue', async (data?: { category?: Category }) => {
+  socket.on('duel:queue', async (data?: { category?: Category; filters?: QuestionFilters }) => {
     if (isRateLimited(socket.id, 'duel:queue', 10)) {
       socket.emit('duel:error', { message: 'Demasiadas solicitudes, intenta más tarde' });
       return;
@@ -178,6 +195,7 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
       socketId: socket.id,
       joinedAt: new Date(),
       category: selectedCategory,
+      filters: data?.filters,
     });
 
     socket.emit('duel:queued', {
@@ -188,7 +206,7 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
     // Intentar encontrar match
     const match = queue.findMatch();
     if (match) {
-      await createDuel(io, match[0], match[1], normalizeCategory(match[0].category));
+      await createDuel(io, match[0], match[1], normalizeCategory(match[0].category), match[0].filters);
     }
   });
 
@@ -355,12 +373,13 @@ async function createDuel(
   io: SocketIOServer,
   player1: QueuedPlayer,
   player2: QueuedPlayer,
-  category?: Category
+  category?: Category,
+  filters?: QuestionFilters
 ) {
   const duelId = generateDuelId();
 
   // Obtener preguntas
-  const questions = await getQuestionsForGame(category, config.game.questionsPerGame);
+  const questions = await getQuestionsForGame(category, config.game.questionsPerGame, [], filters);
 
   // Obtener datos completos de preguntas para validación
   const questionsData = await prisma.question.findMany({

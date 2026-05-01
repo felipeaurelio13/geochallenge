@@ -7,6 +7,7 @@ import type {
   AnswerResult,
   MechanicUsage,
   MechanicsConfig,
+  GameFilters,
 } from '../types';
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001';
@@ -162,12 +163,12 @@ class SocketService {
   }
 
   // Duel actions
-  joinQueue(category?: Category): void {
-    this.socket?.emit('duel:queue', { category });
+  joinQueue(category?: Category, filters?: GameFilters): void {
+    this.socket?.emit('duel:queue', { category, filters });
   }
 
-  joinDuelQueue(category?: Category): void {
-    this.joinQueue(category);
+  joinDuelQueue(category?: Category, filters?: GameFilters): void {
+    this.joinQueue(category, filters);
   }
 
   cancelQueue(): void {

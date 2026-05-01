@@ -400,5 +400,29 @@
       "CHALLENGE": "Desafío"
     },
     "accuracy": "{{correct}}/{{total}} correctas"
+  },
+  "filters": {
+    "title": "Filtrar preguntas",
+    "filterBy": "Filtrar",
+    "clearAll": "Limpiar",
+    "apply": "Aplicar filtros",
+    "region": "Región",
+    "geoType": "Tipo geográfico",
+    "insular": "Islas",
+    "landlocked": "Sin salida al mar",
+    "difficulty": "Dificultad",
+    "continents": {
+      "Africa": "África",
+      "Europe": "Europa",
+      "Asia": "Asia",
+      "North_America": "América del Norte",
+      "South_America": "América del Sur",
+      "Oceania": "Oceanía"
+    },
+    "difficulties": {
+      "EASY": "Fácil",
+      "MEDIUM": "Medio",
+      "HARD": "Difícil"
+    }
   }
 }

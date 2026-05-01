@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import type { GameFilters } from '../types';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
@@ -59,6 +60,17 @@ export function ChallengesPage() {
   const [createTime, setCreateTime] = useState<10 | 20 | 30>(20);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState('');
+
+  const challengeFilters = useMemo<GameFilters>(() => {
+    const f: GameFilters = {};
+    const continent = searchParams.get('continent');
+    const difficulty = searchParams.get('difficulty');
+    if (continent) f.continent = continent;
+    if (searchParams.get('isInsular') === 'true') f.isInsular = true;
+    if (searchParams.get('isLandlocked') === 'true') f.isLandlocked = true;
+    if (difficulty === 'EASY' || difficulty === 'MEDIUM' || difficulty === 'HARD') f.difficulty = difficulty;
+    return f;
+  }, [searchParams]);
 
   useEffect(() => {
     const requestedCategory = searchParams.get('category');
@@ -134,6 +146,7 @@ export function ChallengesPage() {
         categories: createCategories,
         maxPlayers: createMaxPlayers,
         answerTimeSeconds: createTime,
+        ...(Object.keys(challengeFilters).length > 0 && { filters: challengeFilters }),
       });
       setShowCreateModal(false);
       fetchChallenges();
