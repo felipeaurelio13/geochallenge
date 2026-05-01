@@ -130,7 +130,7 @@ export function DuelPage() {
     if (duelStateRef.current === 'matched') {
       socketService.ready();
     }
-  }, [duelCategory]);
+  }, [duelCategory, duelFilters]);
 
   // Connect to socket and join queue
   useEffect(() => {
@@ -465,7 +465,17 @@ export function DuelPage() {
                 ),
               })}
             </p>
-            <p className="text-gray-300">{t('duel.averageWaitHint')}</p>
+            {(duelFilters.continent || duelFilters.isInsular || duelFilters.isLandlocked || duelFilters.difficulty) && (
+              <p className="mt-0.5 text-xs text-gray-400">
+                {[
+                  duelFilters.continent && t(`filters.continents.${duelFilters.continent.replace(' ', '_')}`),
+                  duelFilters.isInsular && t('filters.insular'),
+                  duelFilters.isLandlocked && t('filters.landlocked'),
+                  duelFilters.difficulty && t(`filters.difficulties.${duelFilters.difficulty}`),
+                ].filter(Boolean).join(' · ')}
+              </p>
+            )}
+            <p className="text-gray-300 mt-1">{t('duel.averageWaitHint')}</p>
             <p className="text-gray-400 mt-1">{t('duel.cancelHint')}</p>
           </div>
 

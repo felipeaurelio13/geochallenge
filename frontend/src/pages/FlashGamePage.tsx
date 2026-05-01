@@ -6,7 +6,7 @@ import { FlashCard, LoadingSpinner, MechanicsHud, StreakCombo } from '../compone
 import { FullScreenError } from '../components/molecules/FullScreenError';
 import { Button } from '../components/atoms/Button';
 import { useHaptics } from '../hooks';
-import type { Question } from '../types';
+import type { Question, GameFilters } from '../types';
 import { areMechanicsV2Enabled } from '../config/featureFlags';
 import { trackUxEvent } from '../utils/uxTelemetry';
 
@@ -36,6 +36,17 @@ export function FlashGamePage() {
   const [searchParams] = useSearchParams();
   const haptics = useHaptics();
   const category = searchParams.get('category') ?? undefined;
+
+  const gameFilters = useMemo<GameFilters>(() => {
+    const f: GameFilters = {};
+    const continent = searchParams.get('continent');
+    const difficulty = searchParams.get('difficulty');
+    if (continent) f.continent = continent;
+    if (searchParams.get('isInsular') === 'true') f.isInsular = true;
+    if (searchParams.get('isLandlocked') === 'true') f.isLandlocked = true;
+    if (difficulty === 'EASY' || difficulty === 'MEDIUM' || difficulty === 'HARD') f.difficulty = difficulty;
+    return f;
+  }, [searchParams]);
 
   const [status, setStatus] = useState<Status>('loading');
   const [error, setError] = useState<string | null>(null);
@@ -75,7 +86,7 @@ export function FlashGamePage() {
     let cancelled = false;
     (async () => {
       try {
-        const response = await api.startFlashGame(category);
+        const response = await api.startFlashGame(category, gameFilters);
         if (cancelled) return;
         setQuestions(response.questions);
         const duration = response.gameConfig.durationSeconds ?? FALLBACK_DURATION_SECONDS;
@@ -98,7 +109,7 @@ export function FlashGamePage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [category, gameFilters]);
 
   const finish = useCallback(() => {
     if (statusRef.current === 'finished') return;

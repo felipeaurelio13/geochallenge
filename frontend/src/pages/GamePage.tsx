@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState, lazy, Suspense } from 'react';
+import { useEffect, useCallback, useState, lazy, Suspense, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useGame } from '../context/GameContext';
@@ -50,13 +50,16 @@ export function GamePage() {
   const gameTypeParam = searchParams.get('gameType') ?? searchParams.get('mode');
   const gameType = gameTypeParam === 'streak' ? 'streak' : 'single';
 
-  const gameFilters: GameFilters = {};
-  const fContinent = searchParams.get('continent');
-  const fDifficulty = searchParams.get('difficulty');
-  if (fContinent) gameFilters.continent = fContinent;
-  if (searchParams.get('isInsular') === 'true') gameFilters.isInsular = true;
-  if (searchParams.get('isLandlocked') === 'true') gameFilters.isLandlocked = true;
-  if (fDifficulty === 'EASY' || fDifficulty === 'MEDIUM' || fDifficulty === 'HARD') gameFilters.difficulty = fDifficulty;
+  const gameFilters = useMemo<GameFilters>(() => {
+    const f: GameFilters = {};
+    const continent = searchParams.get('continent');
+    const difficulty = searchParams.get('difficulty');
+    if (continent) f.continent = continent;
+    if (searchParams.get('isInsular') === 'true') f.isInsular = true;
+    if (searchParams.get('isLandlocked') === 'true') f.isLandlocked = true;
+    if (difficulty === 'EASY' || difficulty === 'MEDIUM' || difficulty === 'HARD') f.difficulty = difficulty;
+    return f;
+  }, [searchParams]);
 
   const {
     state,
@@ -150,7 +153,7 @@ export function GamePage() {
       }
     };
     initGame();
-  }, [category, gameType, startGame]);
+  }, [category, gameType, gameFilters, startGame]);
 
   // Keyboard shortcuts: A/B/C/D to select, Enter to submit/next
   const handleKeyDown = useCallback(
