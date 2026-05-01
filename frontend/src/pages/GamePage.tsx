@@ -13,7 +13,7 @@ import {
   MechanicsHud,
 } from '../components';
 import { FullScreenError } from '../components/molecules/FullScreenError';
-import { Category, GameFilters, MechanicUsage, Question } from '../types';
+import { Category, GameFilters, MechanicUsage, Question, hasActiveFilters } from '../types';
 import { GAME_CONSTANTS } from '../constants/game';
 import { useHaptics } from '../hooks';
 import { areMechanicsV2Enabled } from '../config/featureFlags';
@@ -436,12 +436,24 @@ export function GamePage() {
               ✕ {t('game.exit')}
             </button>
 
-            <ScoreDisplay
-              score={score}
-              previousScore={previousScore}
-              showAnimation={showResult}
-              lastResult={results[results.length - 1] ?? null}
-            />
+            <div className="text-center">
+              <ScoreDisplay
+                score={score}
+                previousScore={previousScore}
+                showAnimation={showResult}
+                lastResult={results[results.length - 1] ?? null}
+              />
+              {hasActiveFilters(gameFilters) && (
+                <p className="mt-0.5 text-xs text-gray-500">
+                  {[
+                    gameFilters.continent && t(`filters.continents.${gameFilters.continent.replace(' ', '_')}`),
+                    gameFilters.isInsular && t('filters.insular'),
+                    gameFilters.isLandlocked && t('filters.landlocked'),
+                    gameFilters.difficulty && t(`filters.difficulties.${gameFilters.difficulty}`),
+                  ].filter(Boolean).join(' · ')}
+                </p>
+              )}
+            </div>
 
             <div className="justify-self-end pr-[max(env(safe-area-inset-right),0.5rem)] sm:pr-[max(env(safe-area-inset-right),0.75rem)] md:pr-0">
               <Timer

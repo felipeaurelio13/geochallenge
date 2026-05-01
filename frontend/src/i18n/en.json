@@ -249,7 +249,8 @@
     "fullLobby": "Challenge is closed for new players",
     "resultsSubtitle": "Summary of your match. You can now go back to the list and keep competing.",
     "resultsUnavailable": "We could not find this challenge results. Go back to the list to continue.",
-    "playAgain": "Play this challenge again"
+    "playAgain": "Play this challenge again",
+    "activeFilters": "Active filters: {{summary}}"
   },
   "rankings": {
     "title": "Global Rankings",

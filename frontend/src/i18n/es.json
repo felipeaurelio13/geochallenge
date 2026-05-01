@@ -249,7 +249,8 @@
     "fullLobby": "Convocatoria cerrada para nuevos ingresos",
     "resultsSubtitle": "Resumen de tu partida. Ya puedes volver a la lista y seguir compitiendo.",
     "resultsUnavailable": "No encontramos los resultados de este desafío. Vuelve a la lista para continuar.",
-    "playAgain": "Volver a jugar este desafío"
+    "playAgain": "Volver a jugar este desafío",
+    "activeFilters": "Filtros activos: {{summary}}"
   },
   "rankings": {
     "title": "Rankings Globales",

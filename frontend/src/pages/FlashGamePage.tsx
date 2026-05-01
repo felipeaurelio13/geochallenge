@@ -6,7 +6,7 @@ import { FlashCard, LoadingSpinner, MechanicsHud, StreakCombo } from '../compone
 import { FullScreenError } from '../components/molecules/FullScreenError';
 import { Button } from '../components/atoms/Button';
 import { useHaptics } from '../hooks';
-import type { Question, GameFilters } from '../types';
+import { hasActiveFilters, type Question, type GameFilters } from '../types';
 import { areMechanicsV2Enabled } from '../config/featureFlags';
 import { trackUxEvent } from '../utils/uxTelemetry';
 
@@ -294,6 +294,17 @@ export function FlashGamePage() {
               <li>🔥 {t('flash.ruleCombo')}</li>
               <li>❌ {t('flash.ruleMiss')}</li>
             </ul>
+            {hasActiveFilters(gameFilters) && (
+              <p className="mt-3 text-xs text-gray-400">
+                🎚️{' '}
+                {[
+                  gameFilters.continent && t(`filters.continents.${gameFilters.continent.replace(' ', '_')}`),
+                  gameFilters.isInsular && t('filters.insular'),
+                  gameFilters.isLandlocked && t('filters.landlocked'),
+                  gameFilters.difficulty && t(`filters.difficulties.${gameFilters.difficulty}`),
+                ].filter(Boolean).join(' · ')}
+              </p>
+            )}
             <Button onClick={startPlaying} variant="primary" size="lg" fullWidth className="mt-6">
               {t('flash.start')}
             </Button>
