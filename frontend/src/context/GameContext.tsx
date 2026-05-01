@@ -138,10 +138,12 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
   const appendQuestions = useCallback((questions: Question[]) => {
     if (!questions.length) return;
-    setState((prev) => ({
-      ...prev,
-      questions: [...prev.questions, ...questions],
-    }));
+    setState((prev) => {
+      const existingIds = new Set(prev.questions.map((q) => q.id));
+      const newQuestions = questions.filter((q) => !existingIds.has(q.id));
+      if (!newQuestions.length) return prev;
+      return { ...prev, questions: [...prev.questions, ...newQuestions] };
+    });
   }, []);
 
   const submitAnswer = useCallback(

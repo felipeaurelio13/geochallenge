@@ -117,7 +117,7 @@ router.get('/start', optionalAuth, async (req: AuthRequest, res: Response) => {
 
     const questions = gameType === 'streak'
       ? await getQuestionsForStreakGame(category, excludeIds, questionCount, excludeQuestionKeys)
-      : await getQuestionsForGame(category, questionCount);
+      : await getQuestionsForGame(category, questionCount, excludeIds);
 
     if (questions.length < expectedQuestions) {
       res.status(503).json({
