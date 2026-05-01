@@ -899,7 +899,8 @@
       "lat": 42.6629,
       "lng": 21.1655,
       "flag": "xk",
-      "status": "active"
+      "status": "active",
+      "hasSilhouette": false
     },
     {
       "iso2": "KW",
@@ -1079,7 +1080,8 @@
       "lat": 7.0897,
       "lng": 171.3803,
       "flag": "mh",
-      "status": "active"
+      "status": "active",
+      "hasSilhouette": false
     },
     {
       "iso2": "MR",
@@ -1119,7 +1121,8 @@
       "lat": 6.9147,
       "lng": 158.1611,
       "flag": "fm",
-      "status": "active"
+      "status": "active",
+      "hasSilhouette": false
     },
     {
       "iso2": "MD",
@@ -1339,7 +1342,8 @@
       "lat": 31.9038,
       "lng": 35.2034,
       "flag": "ps",
-      "status": "active"
+      "status": "active",
+      "hasSilhouette": false
     },
     {
       "iso2": "PA",
@@ -1829,7 +1833,8 @@
       "lat": -8.5167,
       "lng": 179.2167,
       "flag": "tv",
-      "status": "active"
+      "status": "active",
+      "hasSilhouette": false
     },
     {
       "iso2": "UG",

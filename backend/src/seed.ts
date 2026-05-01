@@ -106,7 +106,8 @@ async function main() {
 
   // Generar preguntas de siluetas
   console.log('🖼️  Generando preguntas de siluetas...');
-  for (const country of countries) {
+  const countriesWithSilhouette = countries.filter((c) => c.hasSilhouette !== false);
+  for (const country of countriesWithSilhouette) {
     const distractors = getDistractors(country, countries, 3);
     questions.push({
       category: Category.SILHOUETTE,
@@ -134,7 +135,7 @@ async function main() {
    - Preguntas de banderas: ${countries.length}
    - Preguntas de capitales: ${countries.length}
    - Preguntas de mapa: ${mapCount} (ciudades de ${countries.length} países)
-   - Preguntas de siluetas: ${countries.length}
+   - Preguntas de siluetas: ${countriesWithSilhouette.length} (${countries.length - countriesWithSilhouette.length} sin silueta en CDN)
    - Total: ${questions.length}
    - Banderas extendidas incluidas: ${countrySelection.extendedCountriesIncluded}
    - Banderas extendidas excluidas (modo estable): ${countrySelection.extendedCountriesExcluded}
