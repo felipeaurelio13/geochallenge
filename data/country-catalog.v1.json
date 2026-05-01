@@ -1440,6 +1440,7 @@
       "populationTier": "small",
       "areaTier": "micro",
       "flagComplexity": "moderate"
+      "hasSilhouette": false
     },
     {
       "iso2": "KW",
@@ -1728,6 +1729,7 @@
       "populationTier": "micro",
       "areaTier": "micro",
       "flagComplexity": "moderate"
+      "hasSilhouette": false
     },
     {
       "iso2": "MR",
@@ -1792,6 +1794,7 @@
       "populationTier": "micro",
       "areaTier": "micro",
       "flagComplexity": "moderate"
+      "hasSilhouette": false
     },
     {
       "iso2": "MD",
@@ -2144,6 +2147,7 @@
       "populationTier": "small",
       "areaTier": "micro",
       "flagComplexity": "moderate"
+      "hasSilhouette": false
     },
     {
       "iso2": "PA",
@@ -2928,6 +2932,7 @@
       "populationTier": "micro",
       "areaTier": "micro",
       "flagComplexity": "moderate"
+      "hasSilhouette": false
     },
     {
       "iso2": "UG",

@@ -23,6 +23,8 @@ export interface CountryRecord {
   populationTier?: PopulationTier;
   areaTier?: AreaTier;
   flagComplexity?: FlagComplexity;
+  /** false when the country has no silhouette in the mapsicon CDN */
+  hasSilhouette?: boolean;
 }
 
 interface CountryCatalogV1 {
