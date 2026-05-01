@@ -130,7 +130,7 @@ describe('DuelPage socket flow', () => {
     const joinCallOrder = mocks.joinDuelQueueMock.mock.invocationCallOrder[0];
 
     expect(registerCallOrder).toBeLessThan(joinCallOrder);
-    expect(mocks.joinDuelQueueMock).toHaveBeenCalledWith('FLAG');
+    expect(mocks.joinDuelQueueMock).toHaveBeenCalledWith('FLAG', {});
 
     act(() => {
       mocks.handlers.get('duel:matched')?.forEach((cb) => cb({ duelId: 'd1' }));
