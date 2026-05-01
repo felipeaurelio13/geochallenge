@@ -330,9 +330,12 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
 
       const duel = activeDuels.get(duelId);
       if (duel && duel.status !== 'finished') {
-        // El otro jugador gana por abandono
-        const winner = duel.players.find((p) => p.userId !== user.userId);
-        endDuel(io, duel, winner?.userId || null, 'opponent_disconnected');
+        const currentPlayer = duel.players.find((p) => p.userId === user.userId);
+        if (!currentPlayer || currentPlayer.socketId === socket.id) {
+          // El otro jugador gana por abandono
+          const winner = duel.players.find((p) => p.userId !== user.userId);
+          endDuel(io, duel, winner?.userId || null, 'opponent_disconnected');
+        }
       }
     }
 

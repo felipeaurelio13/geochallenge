@@ -84,12 +84,6 @@ class SocketService {
       this.setupListeners();
     });
 
-    // Re-register listeners on reconnection
-    this.socket.io.on('reconnect', () => {
-      console.log('Socket reconnected');
-      this.setupListeners();
-    });
-
     this.socket.on('connect_error', (error) => {
       console.error('Socket connection error:', error.message);
     });
@@ -116,19 +110,6 @@ class SocketService {
 
   private setupListeners(): void {
     if (!this.socket) return;
-
-    // Remove all existing listeners before re-registering to avoid duplicates
-    this.socket.removeAllListeners();
-
-    // Re-register connection events
-    this.socket.on('connect', () => {
-      console.log('Socket connected');
-      this.setupListeners();
-    });
-
-    this.socket.on('disconnect', (reason) => {
-      console.log('Socket disconnected:', reason);
-    });
 
     // Duel events — backend emits duel:* prefix for all duel events
     this.socket.on('duel:queued', (data) => {
