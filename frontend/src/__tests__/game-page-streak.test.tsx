@@ -132,7 +132,7 @@ describe('GamePage streak mode', () => {
     render(<GamePage />);
 
     await waitFor(() => {
-      expect(mocks.startGameMock).toHaveBeenCalledWith('MIXED', undefined, 'streak');
+      expect(mocks.startGameMock).toHaveBeenCalledWith('MIXED', undefined, 'streak', {});
     });
   });
 
@@ -142,7 +142,7 @@ describe('GamePage streak mode', () => {
     render(<GamePage />);
 
     await waitFor(() => {
-      expect(mocks.startGameMock).toHaveBeenCalledWith('MAP', undefined, 'streak');
+      expect(mocks.startGameMock).toHaveBeenCalledWith('MAP', undefined, 'streak', {});
     });
   });
 
@@ -182,7 +182,8 @@ describe('GamePage streak mode', () => {
           'capital|||santiago',
           'capital|||lima',
           'capital|||quito',
-        ]
+        ],
+        {}
       );
       expect(mocks.appendQuestionsMock).toHaveBeenCalled();
     });
@@ -209,7 +210,8 @@ describe('GamePage streak mode', () => {
           'capital|||santiago',
           'capital|||lima',
           'capital|||quito',
-        ]
+        ],
+        {}
       );
       expect(mocks.appendQuestionsMock).toHaveBeenCalled();
       expect(mocks.nextQuestionMock).toHaveBeenCalledTimes(1);
