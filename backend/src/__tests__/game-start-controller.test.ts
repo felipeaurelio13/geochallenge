@@ -86,7 +86,7 @@ describe('GET /start controller gameType handling', () => {
     server.close();
 
     expect(response.status).toBe(200);
-    expect(mocks.getQuestionsForStreakGameMock).toHaveBeenCalledWith(Category.FLAG, [], 10, []);
+    expect(mocks.getQuestionsForStreakGameMock).toHaveBeenCalledWith(Category.FLAG, [], 10, [], undefined);
     expect(mocks.getQuestionsForGameMock).not.toHaveBeenCalled();
     expect(body.gameConfig.gameType).toBe('streak');
   });
@@ -108,7 +108,8 @@ describe('GET /start controller gameType handling', () => {
       Category.FLAG,
       [],
       10,
-      ['flag|a', 'flag|b']
+      ['flag|a', 'flag|b'],
+      undefined
     );
   });
 
@@ -124,7 +125,7 @@ describe('GET /start controller gameType handling', () => {
     server.close();
 
     expect(response.status).toBe(200);
-    expect(mocks.getQuestionsForGameMock).toHaveBeenCalledWith(Category.CAPITAL, 10);
+    expect(mocks.getQuestionsForGameMock).toHaveBeenCalledWith(Category.CAPITAL, 10, [], undefined);
     expect(mocks.getQuestionsForStreakGameMock).not.toHaveBeenCalled();
     expect(body.gameConfig.gameType).toBe('single');
   });
