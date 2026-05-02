@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Última línea de defensa antes de que Render reciba el push.
+# Para saltárselo en una emergencia: SKIP_PREDEPLOY_CHECK=1 git push ...
+sh "$(git rev-parse --show-toplevel)/scripts/predeploy-check.sh"
