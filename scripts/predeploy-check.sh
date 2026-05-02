@@ -76,9 +76,11 @@ if [ -n "$FRONTEND_CHANGED$DATA_CHANGED" ]; then
 fi
 
 # ── 3) Build backend ──────────────────────────────────────────────────────────
+# Render corre `npm install` (que dispara `postinstall: prisma generate`) antes de cada
+# build. Espejarlo aquí para que un local con cliente stale no produzca falsos positivos.
 if [ -n "$BACKEND_CHANGED$DATA_CHANGED$PRISMA_CHANGED" ]; then
-  yellow "→ backend: tsc"
-  if ! (cd backend && npm run build) >"$LOG_DIR/predeploy-backend.log" 2>&1; then
+  yellow "→ backend: prisma generate && tsc"
+  if ! (cd backend && npx prisma generate && npm run build) >"$LOG_DIR/predeploy-backend.log" 2>&1; then
     red "✗ backend build falló (últimas 30 líneas, log completo: $LOG_DIR/predeploy-backend.log):"
     tail -30 "$LOG_DIR/predeploy-backend.log" >&2
     errors=$((errors+1))
