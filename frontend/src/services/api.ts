@@ -64,6 +64,13 @@ class ApiService {
         if (!error.response) {
           return Promise.reject(new Error('Sin conexión a internet. Verifica tu red.'));
         }
+
+        const responseData = error.response.data as { error?: string; message?: string } | undefined;
+        const backendMessage = responseData?.error || responseData?.message;
+        if (typeof backendMessage === 'string' && backendMessage.trim().length > 0) {
+          return Promise.reject(new Error(backendMessage));
+        }
+
         return Promise.reject(error);
       }
     );
