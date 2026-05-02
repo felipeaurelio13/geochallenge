@@ -130,6 +130,37 @@ describe('GET /start controller gameType handling', () => {
     expect(body.gameConfig.gameType).toBe('single');
   });
 
+
+  it('permite iniciar single con filtros aunque no alcance el questionCount cuando hay mínimo jugable', async () => {
+    mocks.getQuestionsForGameMock.mockResolvedValueOnce([
+      { id: 'single-1', category: Category.CAPITAL, options: [], correctAnswer: 'Santiago' },
+      { id: 'single-2', category: Category.CAPITAL, options: [], correctAnswer: 'Lima' },
+      { id: 'single-3', category: Category.CAPITAL, options: [], correctAnswer: 'Quito' },
+      { id: 'single-4', category: Category.CAPITAL, options: [], correctAnswer: 'Bogotá' },
+      { id: 'single-5', category: Category.CAPITAL, options: [], correctAnswer: 'Caracas' },
+    ]);
+
+    const app = express();
+    app.use('/api/game', gameRouter);
+    const server = app.listen(0);
+    const baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+
+    const response = await fetch(`${baseUrl}/api/game/start?category=CAPITAL&isInsular=true`);
+    const body = (await response.json()) as { gameConfig: { questionsCount: number }, questions: Array<{ id: string }> };
+
+    server.close();
+
+    expect(response.status).toBe(200);
+    expect(body.gameConfig.questionsCount).toBe(5);
+    expect(body.questions).toHaveLength(5);
+    expect(mocks.getQuestionsForGameMock).toHaveBeenCalledWith(
+      Category.CAPITAL,
+      10,
+      [],
+      { isInsular: true, continent: undefined, isLandlocked: undefined, difficulty: undefined }
+    );
+  });
+
   it('incluye configuración aditiva de mecánicas en gameConfig', async () => {
     mocks.getMechanicsConfigForModeMock.mockReturnValueOnce({
       enabled: true,
