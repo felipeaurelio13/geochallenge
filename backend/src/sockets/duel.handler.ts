@@ -642,6 +642,8 @@ async function endDuel(
 
   // Guardar resultados en la base de datos usando una transacción
   try {
+    const leaderboardUpdates: Array<{ userId: string; totalScore: number; isHighScore: boolean }> = [];
+
     await prisma.$transaction(async (tx) => {
       for (const player of duel.players) {
         const { totalScore, isHighScore } = await saveGameResult(
@@ -660,11 +662,7 @@ async function endDuel(
           },
         });
 
-        // Actualizar leaderboard global solo si es nuevo récord; temporada siempre
-        if (isHighScore) {
-          await updateLeaderboardScore(player.userId, totalScore);
-        }
-        await updateSeasonLeaderboardScore(player.userId, totalScore);
+        leaderboardUpdates.push({ userId: player.userId, totalScore, isHighScore });
       }
 
       // Registrar el duelo completo para historial head-to-head
@@ -679,6 +677,18 @@ async function endDuel(
         },
       });
     });
+
+    // El historial de duelos no debe depender de disponibilidad de leaderboard/Redis.
+    for (const { userId, totalScore, isHighScore } of leaderboardUpdates) {
+      try {
+        if (isHighScore) {
+          await updateLeaderboardScore(userId, totalScore);
+        }
+        await updateSeasonLeaderboardScore(userId, totalScore);
+      } catch (error) {
+        console.warn(`[duel] No se pudo actualizar leaderboard para ${userId}:`, error);
+      }
+    }
   } catch (error) {
     console.error(`Error guardando resultados del duelo ${duel.id}:`, error);
   }
