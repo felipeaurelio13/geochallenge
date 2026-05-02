@@ -130,6 +130,95 @@ describe('GET /start controller gameType handling', () => {
     expect(body.gameConfig.gameType).toBe('single');
   });
 
+
+  it('retorna 409 con metadata cuando filtros dejan menos preguntas que las solicitadas', async () => {
+    mocks.getQuestionsForGameMock.mockResolvedValueOnce([
+      { id: 'single-1', category: Category.CAPITAL, options: [], correctAnswer: 'Santiago' },
+      { id: 'single-2', category: Category.CAPITAL, options: [], correctAnswer: 'Lima' },
+      { id: 'single-3', category: Category.CAPITAL, options: [], correctAnswer: 'Quito' },
+      { id: 'single-4', category: Category.CAPITAL, options: [], correctAnswer: 'Bogotá' },
+      { id: 'single-5', category: Category.CAPITAL, options: [], correctAnswer: 'Caracas' },
+    ]);
+
+    const app = express();
+    app.use('/api/game', gameRouter);
+    const server = app.listen(0);
+    const baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+
+    const response = await fetch(`${baseUrl}/api/game/start?category=CAPITAL&isInsular=true`);
+    const body = (await response.json()) as {
+      error: string;
+      available: number;
+      requested: number;
+      canStartShortGame: boolean;
+    };
+
+    server.close();
+
+    expect(response.status).toBe(409);
+    expect(body.error).toBe('No hay suficientes preguntas disponibles');
+    expect(body.available).toBe(5);
+    expect(body.requested).toBe(10);
+    expect(body.canStartShortGame).toBe(true);
+    expect(mocks.getQuestionsForGameMock).toHaveBeenCalledWith(
+      Category.CAPITAL,
+      10,
+      [],
+      { isInsular: true, continent: undefined, isLandlocked: undefined, difficulty: undefined }
+    );
+  });
+
+  it('permite iniciar single corto cuando el jugador confirma acceptShortGame=true', async () => {
+    mocks.getQuestionsForGameMock.mockResolvedValueOnce([
+      { id: 'single-1', category: Category.CAPITAL, options: [], correctAnswer: 'Santiago' },
+      { id: 'single-2', category: Category.CAPITAL, options: [], correctAnswer: 'Lima' },
+      { id: 'single-3', category: Category.CAPITAL, options: [], correctAnswer: 'Quito' },
+      { id: 'single-4', category: Category.CAPITAL, options: [], correctAnswer: 'Bogotá' },
+      { id: 'single-5', category: Category.CAPITAL, options: [], correctAnswer: 'Caracas' },
+    ]);
+
+    const app = express();
+    app.use('/api/game', gameRouter);
+    const server = app.listen(0);
+    const baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+
+    const response = await fetch(`${baseUrl}/api/game/start?category=CAPITAL&isInsular=true&acceptShortGame=true`);
+    const body = (await response.json()) as { gameConfig: { questionsCount: number }, questions: Array<{ id: string }> };
+
+    server.close();
+
+    expect(response.status).toBe(200);
+    expect(body.gameConfig.questionsCount).toBe(5);
+    expect(body.questions).toHaveLength(5);
+  });
+
+  it('también permite flujo de juego corto sin filtros cuando hay menos pool que el solicitado', async () => {
+    mocks.getQuestionsForGameMock.mockResolvedValueOnce([
+      { id: 'single-1', category: Category.CAPITAL, options: [], correctAnswer: 'Santiago' },
+      { id: 'single-2', category: Category.CAPITAL, options: [], correctAnswer: 'Lima' },
+      { id: 'single-3', category: Category.CAPITAL, options: [], correctAnswer: 'Quito' },
+    ]);
+
+    const app = express();
+    app.use('/api/game', gameRouter);
+    const server = app.listen(0);
+    const baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+
+    const response = await fetch(`${baseUrl}/api/game/start?category=CAPITAL`);
+    const body = (await response.json()) as {
+      available: number;
+      requested: number;
+      canStartShortGame: boolean;
+    };
+
+    server.close();
+
+    expect(response.status).toBe(409);
+    expect(body.available).toBe(3);
+    expect(body.requested).toBe(10);
+    expect(body.canStartShortGame).toBe(true);
+  });
+
   it('incluye configuración aditiva de mecánicas en gameConfig', async () => {
     mocks.getMechanicsConfigForModeMock.mockReturnValueOnce({
       enabled: true,

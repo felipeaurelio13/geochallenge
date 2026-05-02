@@ -66,6 +66,15 @@ class ApiService {
         }
 
         const responseData = error.response.data as { error?: string; message?: string } | undefined;
+        const isShortGameAvailabilityError =
+          typeof responseData?.error === 'string' &&
+          typeof (responseData as { available?: unknown }).available === 'number' &&
+          typeof (responseData as { requested?: unknown }).requested === 'number';
+
+        if (isShortGameAvailabilityError) {
+          return Promise.reject(error);
+        }
+
         const backendMessage = responseData?.error || responseData?.message;
         if (typeof backendMessage === 'string' && backendMessage.trim().length > 0) {
           return Promise.reject(new Error(backendMessage));
@@ -133,13 +142,14 @@ class ApiService {
     gameType?: GameType,
     excludeIds?: string[],
     excludeQuestionKeys?: string[],
-    filters?: GameFilters
+    filters?: GameFilters,
+    acceptShortGame?: boolean
   ) {
     const response = await this.client.get<{
       gameConfig: GameConfig;
       questions: Question[];
     }>('/game/start', {
-      params: { category, questionCount, gameType, excludeIds, excludeQuestionKeys, ...filtersToParams(filters) },
+      params: { category, questionCount, gameType, excludeIds, excludeQuestionKeys, ...filtersToParams(filters), acceptShortGame },
     });
     return response.data;
   }

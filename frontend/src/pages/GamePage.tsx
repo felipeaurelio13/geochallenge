@@ -1,6 +1,7 @@
 import { useEffect, useCallback, useState, lazy, Suspense, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import axios from 'axios';
 import { useGame } from '../context/GameContext';
 import { api } from '../services/api';
 import {
@@ -149,6 +150,38 @@ export function GamePage() {
       try {
         await startGame(category as Category, undefined, gameType, gameFilters);
       } catch (err: any) {
+        const shortGameData = axios.isAxiosError(err)
+          ? (err.response?.data as { available?: number; requested?: number; canStartShortGame?: boolean; error?: string } | undefined)
+          : undefined;
+
+        if (
+          shortGameData?.canStartShortGame &&
+          typeof shortGameData.available === 'number' &&
+          shortGameData.available > 0 &&
+          typeof shortGameData.requested === 'number' &&
+          shortGameData.available < shortGameData.requested
+        ) {
+          const confirmed = window.confirm(
+            t('game.shortGameConfirm', {
+              available: shortGameData.available,
+              requested: shortGameData.requested,
+            })
+          );
+
+          if (confirmed) {
+            try {
+              await startGame(category as Category, shortGameData.available, gameType, gameFilters, true);
+              return;
+            } catch (retryErr: any) {
+              setError(retryErr.message || t('game.error'));
+              return;
+            }
+          }
+
+          setError(t('game.shortGameCancelled'));
+          return;
+        }
+
         setError(err.message || 'Error al iniciar el juego');
       }
     };
