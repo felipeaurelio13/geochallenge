@@ -144,15 +144,14 @@ router.get('/start', optionalAuth, async (req: AuthRequest, res: Response) => {
       ? await getQuestionsForStreakGame(category, excludeIds, questionCount, excludeQuestionKeys, filters)
       : await getQuestionsForGame(category, questionCount, excludeIds, filters);
 
-    const hasFilters = filters !== undefined;
-    const canServeReducedSet = gameType !== 'streak' && hasFilters && acceptShortGame === true && questions.length > 0;
+    const canServeReducedSet = gameType !== 'streak' && acceptShortGame === true && questions.length > 0;
 
     if (questions.length < expectedQuestions && !canServeReducedSet) {
       res.status(409).json({
         error: 'No hay suficientes preguntas disponibles',
         available: questions.length,
         requested: expectedQuestions,
-        canStartShortGame: gameType !== 'streak' && hasFilters && questions.length > 0,
+        canStartShortGame: gameType !== 'streak' && questions.length > 0,
       });
       return;
     }

@@ -147,7 +147,7 @@
     "scoreBreakdownAccuracy": "accuracy",
     "timeRemaining": "Time remaining {{seconds}}s seconds",
     "shortGameConfirm": "Only {{available}} questions are available (out of {{requested}} requested). Do you want to play anyway?",
-    "shortGameCancelled": "Game cancelled. Adjust filters to get more questions."
+    "shortGameCancelled": "Game cancelled. Try another category or setup to get more questions."
   },
   "results": {
     "gameOver": "Game Over!",

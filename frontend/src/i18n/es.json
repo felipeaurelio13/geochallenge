@@ -147,7 +147,7 @@
     "scoreBreakdownAccuracy": "precisión",
     "timeRemaining": "Tiempo restante {{seconds}}s segundos",
     "shortGameConfirm": "Solo hay {{available}} preguntas disponibles (de {{requested}} solicitadas). ¿Quieres jugar igualmente?",
-    "shortGameCancelled": "Partida cancelada. Ajusta los filtros para obtener más preguntas."
+    "shortGameCancelled": "Partida cancelada. Prueba con otra categoría o configuración para obtener más preguntas."
   },
   "results": {
     "gameOver": "¡Partida terminada!",
