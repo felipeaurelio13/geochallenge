@@ -148,12 +148,14 @@ export function FlashGamePage() {
 
   const handleFlashImageError = useCallback(() => {
     if (statusRef.current !== 'playing') return;
-    // Skip the broken question and move to the next one silently
+    // Skip the broken question; if it is the last one, finish the round to avoid a frozen screen.
     setCurrentIndex((idx) => {
       const len = questionsRef.current.length;
-      return idx < len - 1 ? idx + 1 : idx;
+      if (idx < len - 1) return idx + 1;
+      finish();
+      return idx;
     });
-  }, []);
+  }, [finish]);
 
   const startPlaying = () => {
     setStatus('playing');
@@ -253,6 +255,18 @@ export function FlashGamePage() {
     });
     haptics.tap();
   }, [canUseMechanics, currentQuestion?.id, durationSeconds, feedback, haptics, mechanicsAvailable.focusTime]);
+
+
+  useEffect(() => {
+    if (status !== 'playing') return;
+    if (questions.length === 0) {
+      setError(t('flash.error'));
+      return;
+    }
+    if (currentIndex >= questions.length) {
+      finish();
+    }
+  }, [currentIndex, finish, questions.length, status, t]);
 
   const progressPercent = useMemo(
     () => Math.max(0, Math.min(100, (timeRemaining / durationSeconds) * 100)),
