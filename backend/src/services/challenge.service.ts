@@ -1,5 +1,5 @@
 import { prisma } from '../config/database.js';
-import { Category } from '@prisma/client';
+import { Category, Prisma } from '@prisma/client';
 import { updateLeaderboardScore, updateSeasonLeaderboardScore } from './leaderboard.service.js';
 import { QuestionFilters } from './game.service.js';
 
@@ -13,6 +13,7 @@ interface ChallengeListItem {
   categories: Category[];
   maxPlayers: number;
   answerTimeSeconds: number;
+  filters: Prisma.JsonValue | null;
   winnerId: string | null;
   createdAt: Date;
   expiresAt: Date;
@@ -84,6 +85,7 @@ export class ChallengeService {
         maxPlayers,
         answerTimeSeconds,
         questionIds,
+        filters: filters ? (filters as unknown as Prisma.InputJsonObject) : undefined,
         expiresAt,
         participants: {
           create: {

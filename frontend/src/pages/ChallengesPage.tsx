@@ -32,11 +32,21 @@ interface Challenge {
   createdAt: string;
   creator: { id: string; username: string };
   participants: ChallengeParticipant[];
+  filters?: GameFilters;
 }
 
 type TabType = 'mine' | 'joinable' | 'completed';
 const categories = ['MIXED', 'FLAG', 'CAPITAL', 'MAP', 'SILHOUETTE'];
 const playerOptions = [2, 3, 4, 5, 6, 7, 8];
+
+function buildFilterSummary(f: GameFilters, t: (key: string) => string): string {
+  return [
+    f.continent && t(`filters.continents.${f.continent.replace(' ', '_')}`),
+    f.isInsular && t('filters.insular'),
+    f.isLandlocked && t('filters.landlocked'),
+    f.difficulty && t(`filters.difficulties.${f.difficulty}`),
+  ].filter(Boolean).join(' · ');
+}
 
 const categoryKeyByValue: Record<string, string> = {
   MIXED: 'mixed',
@@ -238,6 +248,11 @@ export function ChallengesPage() {
                       <p className="text-xs text-gray-400 mt-1">
                         {challenge.categories.map(getCategoryLabel).join(', ')} · {challenge.participantsCount}/{challenge.maxPlayers} · {challenge.answerTimeSeconds}s
                       </p>
+                      {challenge.filters && hasActiveFilters(challenge.filters) && (
+                        <p className="text-xs text-primary/70 mt-0.5">
+                          {buildFilterSummary(challenge.filters, t)}
+                        </p>
+                      )}
                       <p className="text-xs text-gray-500 mt-1">
                         {challenge.isJoinable
                           ? t('challenges.availableSlots', { count: availableSlots })
@@ -339,12 +354,7 @@ export function ChallengesPage() {
             {hasActiveFilters(challengeFilters) && (
               <div className="rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 text-xs text-gray-300">
                 {t('challenges.activeFilters', {
-                  summary: [
-                    challengeFilters.continent && t(`filters.continents.${challengeFilters.continent.replace(' ', '_')}`),
-                    challengeFilters.isInsular && t('filters.insular'),
-                    challengeFilters.isLandlocked && t('filters.landlocked'),
-                    challengeFilters.difficulty && t(`filters.difficulties.${challengeFilters.difficulty}`),
-                  ].filter(Boolean).join(' · '),
+                  summary: buildFilterSummary(challengeFilters, t),
                 })}
               </div>
             )}
