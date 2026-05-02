@@ -81,6 +81,7 @@ model Challenge {
   maxPlayers      Int
   answerTimeSeconds Int          @default(20)
   questionIds     String[]        // IDs de preguntas para reproducibilidad
+  filters         Json?           // QuestionFilters snapshot — null means no filters applied
   winnerId        String?
   createdAt       DateTime        @default(now())
   expiresAt       DateTime

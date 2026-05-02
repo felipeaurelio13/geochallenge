@@ -11,6 +11,7 @@ import type {
   MechanicUsage,
   GameFilters,
 } from '../types';
+import { hasActiveFilters } from '../types';
 import { cacheQuestions, getCachedQuestions, enqueuePendingSession } from '../hooks/useOfflineQuestions';
 
 interface GameContextType {
@@ -28,7 +29,7 @@ interface GameContextType {
   finishGame: () => Promise<GameResult>;
   resetGame: () => void;
   setTimeRemaining: (time: number) => void;
-  replaceCurrentQuestion: () => Promise<void>;
+  replaceCurrentQuestion: (filters?: GameFilters) => Promise<void>;
 }
 
 const initialState: GameState = {
@@ -100,7 +101,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       return true;
     };
 
-    if (!isOnline() && modeOfflineEligible) {
+    const filtersActive = hasActiveFilters(filters);
+
+    if (!isOnline() && modeOfflineEligible && !filtersActive) {
       const served = await fallbackToOfflineCache();
       if (served) return;
     }
@@ -121,14 +124,14 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       });
       setStreakAlive(true);
 
-      // cache for future offline use (fire-and-forget)
-      if (modeOfflineEligible && response.questions?.length) {
+      // cache for future offline use (fire-and-forget, only when no filters to avoid polluting cache)
+      if (modeOfflineEligible && !filtersActive && response.questions?.length) {
         cacheQuestions(resolvedCategory, response.questions).catch(() => {
           // noop: cache failures must not affect gameplay
         });
       }
     } catch (error) {
-      if (modeOfflineEligible) {
+      if (modeOfflineEligible && !filtersActive) {
         const served = await fallbackToOfflineCache();
         if (served) return;
       }
@@ -226,7 +229,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const replaceCurrentQuestion = useCallback(async () => {
+  const replaceCurrentQuestion = useCallback(async (filters?: GameFilters) => {
     const { questions, currentIndex, config, isOffline } = stateRef.current;
     const currentQuestion = questions[currentIndex];
     if (!currentQuestion || isOffline || !isOnline()) return;
@@ -237,7 +240,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         1,
         (config?.gameType ?? 'single') as GameType,
         questions.map((q) => q.id),
-        []
+        [],
+        filters
       );
       const replacement = response.questions?.[0];
       if (!replacement) return;

@@ -508,7 +508,7 @@ export function GamePage() {
       showResult={showResult}
       hiddenOptionIndexes={disabledOptionIndexes}
       optionsGridClassName="game-options-grid"
-      onImageError={replaceCurrentQuestion}
+      onImageError={() => replaceCurrentQuestion(gameFilters)}
       actionTray={
         <RoundActionTray
           mode="single"
