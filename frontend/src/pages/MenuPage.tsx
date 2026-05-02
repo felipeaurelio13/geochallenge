@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
@@ -9,6 +9,7 @@ import { UserAvatar } from '../components/atoms/UserAvatar';
 import { GameModeCard } from '../components/molecules/GameModeCard';
 import { FilterDrawer } from '../components/molecules/FilterDrawer';
 import { hasActiveFilters, filtersToParams } from '../types';
+import { api } from '../services/api';
 
 type Category = 'FLAG' | 'CAPITAL' | 'MAP' | 'SILHOUETTE' | 'MIXED';
 
@@ -42,6 +43,14 @@ export function MenuPage() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [canPlaySelection, setCanPlaySelection] = useState(true);
+  const [requiredQuestions, setRequiredQuestions] = useState(10);
+  const [disabledOptions, setDisabledOptions] = useState<{
+    continents?: string[];
+    difficulties?: string[];
+    isInsular?: boolean;
+    isLandlocked?: boolean;
+  }>({});
 
   const [selectedCategory, setSelectedCategory] = useLocalStorage<Category>(
     'geochallenge:last-category',
@@ -54,8 +63,38 @@ export function MenuPage() {
   const fp = filtersToParams(filters);
 
   function go(path: string, extra: Record<string, string> = {}) {
+    if (!canPlaySelection) return;
     navigate(buildUrl(path, { ...fp, ...extra }));
   }
+
+  useEffect(() => {
+    let mounted = true;
+    const run = async () => {
+      try {
+        const base = await api.getGameAvailability(selectedCategory, undefined, filters);
+        if (!mounted) return;
+        setCanPlaySelection(base.canPlay);
+        setRequiredQuestions(base.required);
+
+        const [insular, landlocked] = await Promise.all([
+          api.getGameAvailability(selectedCategory, undefined, { isInsular: true }),
+          api.getGameAvailability(selectedCategory, undefined, { isLandlocked: true }),
+        ]);
+        if (!mounted) return;
+        setDisabledOptions({
+          isInsular: !insular.canPlay,
+          isLandlocked: !landlocked.canPlay,
+        });
+      } catch {
+        if (!mounted) return;
+        setCanPlaySelection(true);
+      }
+    };
+    run();
+    return () => {
+      mounted = false;
+    };
+  }, [filters, selectedCategory]);
 
   function filterSummary(): string {
     const parts: string[] = [];
@@ -146,6 +185,9 @@ export function MenuPage() {
           </button>
         )}
       </div>
+      {!canPlaySelection && (
+        <p className="mt-2 text-xs text-amber-300">{t('filters.unavailableCombination', { required: requiredQuestions })}</p>
+      )}
 
       <section className="mt-3" aria-label={t('menu.gameModes')}>
         <div className="grid grid-cols-2 gap-1.5 sm:gap-2 lg:grid-cols-5">
@@ -216,6 +258,7 @@ export function MenuPage() {
           filters={filters}
           onChange={setFilters}
           onClose={() => setDrawerOpen(false)}
+          disabledOptions={disabledOptions}
         />
       )}
     </PageTemplate>

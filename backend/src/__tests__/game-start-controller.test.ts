@@ -9,6 +9,7 @@ const mocks = vi.hoisted(() => ({
   getQuestionsForStreakGameMock: vi.fn(),
   getStreakBatchSizeMock: vi.fn(),
   getMechanicsConfigForModeMock: vi.fn(() => ({ enabled: false, allowed: [] as string[], limits: {} })),
+  getAvailableQuestionsCountMock: vi.fn(),
 }));
 
 vi.mock('../middleware/auth.js', () => ({
@@ -21,6 +22,7 @@ vi.mock('../services/game.service.js', () => ({
   getQuestionsForStreakGame: mocks.getQuestionsForStreakGameMock,
   getStreakBatchSize: mocks.getStreakBatchSizeMock,
   getMechanicsConfigForMode: mocks.getMechanicsConfigForModeMock,
+  getAvailableQuestionsCount: mocks.getAvailableQuestionsCountMock,
   validateAnswerByGameType: vi.fn(),
   saveGameResult: vi.fn(),
   getUserGameHistory: vi.fn(),
@@ -68,6 +70,7 @@ describe('GET /start controller gameType handling', () => {
       { id: 'streak-9', category: Category.FLAG, options: [], correctAnswer: 'Colombia' },
       { id: 'streak-10', category: Category.FLAG, options: [], correctAnswer: 'Venezuela' },
     ]);
+    mocks.getAvailableQuestionsCountMock.mockResolvedValue(12);
   });
 
   afterEach(() => {
@@ -128,6 +131,25 @@ describe('GET /start controller gameType handling', () => {
     expect(mocks.getQuestionsForGameMock).toHaveBeenCalledWith(Category.CAPITAL, 10, [], undefined);
     expect(mocks.getQuestionsForStreakGameMock).not.toHaveBeenCalled();
     expect(body.gameConfig.gameType).toBe('single');
+  });
+
+  it('expone disponibilidad para filtros antes de jugar', async () => {
+    const app = express();
+    app.use('/api/game', gameRouter);
+    const server = app.listen(0);
+    const baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+
+    const response = await fetch(`${baseUrl}/api/game/availability?category=CAPITAL&isInsular=true`);
+    const body = (await response.json()) as { available: number; required: number; canPlay: boolean };
+
+    server.close();
+
+    expect(response.status).toBe(200);
+    expect(body).toEqual({ available: 12, required: 10, canPlay: true });
+    expect(mocks.getAvailableQuestionsCountMock).toHaveBeenCalledWith(
+      Category.CAPITAL,
+      { isInsular: true, continent: undefined, isLandlocked: undefined, difficulty: undefined }
+    );
   });
 
 
