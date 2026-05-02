@@ -6,6 +6,12 @@ interface FilterDrawerProps {
   filters: GameFilters;
   onChange: (f: GameFilters) => void;
   onClose: () => void;
+  disabledOptions?: {
+    continents?: string[];
+    difficulties?: string[];
+    isInsular?: boolean;
+    isLandlocked?: boolean;
+  };
 }
 
 const CONTINENTS = [
@@ -23,7 +29,7 @@ const DIFFICULTIES = [
   { id: 'HARD', icon: '🔥' },
 ] as const;
 
-export function FilterDrawer({ filters, onChange, onClose }: FilterDrawerProps) {
+export function FilterDrawer({ filters, onChange, onClose, disabledOptions }: FilterDrawerProps) {
   const { t } = useTranslation();
   const backdropRef = useRef<HTMLDivElement>(null);
 
@@ -95,10 +101,11 @@ export function FilterDrawer({ filters, onChange, onClose }: FilterDrawerProps) 
               <button
                 key={c.id}
                 onClick={() => setContinent(c.id)}
+                disabled={disabledOptions?.continents?.includes(c.id)}
                 className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${
                   filters.continent === c.id
                     ? 'border-primary/70 bg-primary/20 text-white'
-                    : 'border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-500 hover:text-white'
+                    : 'border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-40'
                 }`}
               >
                 <span>{c.icon}</span>
@@ -116,10 +123,11 @@ export function FilterDrawer({ filters, onChange, onClose }: FilterDrawerProps) 
           <div className="flex gap-2">
             <button
               onClick={toggleInsular}
+              disabled={disabledOptions?.isInsular}
               className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${
                 filters.isInsular
                   ? 'border-primary/70 bg-primary/20 text-white'
-                  : 'border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-500 hover:text-white'
+                  : 'border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-40'
               }`}
             >
               <span>🏝️</span>
@@ -127,10 +135,11 @@ export function FilterDrawer({ filters, onChange, onClose }: FilterDrawerProps) 
             </button>
             <button
               onClick={toggleLandlocked}
+              disabled={disabledOptions?.isLandlocked}
               className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${
                 filters.isLandlocked
                   ? 'border-primary/70 bg-primary/20 text-white'
-                  : 'border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-500 hover:text-white'
+                  : 'border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-40'
               }`}
             >
               <span>🔒</span>
@@ -149,10 +158,11 @@ export function FilterDrawer({ filters, onChange, onClose }: FilterDrawerProps) 
               <button
                 key={d.id}
                 onClick={() => setDifficulty(d.id)}
+                disabled={disabledOptions?.difficulties?.includes(d.id)}
                 className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${
                   filters.difficulty === d.id
                     ? 'border-primary/70 bg-primary/20 text-white'
-                    : 'border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-500 hover:text-white'
+                    : 'border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-40'
                 }`}
               >
                 <span>{d.icon}</span>

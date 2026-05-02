@@ -162,6 +162,17 @@ class ApiService {
     return response.data;
   }
 
+  async getGameAvailability(category?: Category, questionCount?: number, filters?: GameFilters) {
+    const response = await this.client.get<{
+      available: number;
+      required: number;
+      canPlay: boolean;
+    }>('/game/availability', {
+      params: { category, questionCount, ...filtersToParams(filters) },
+    });
+    return response.data;
+  }
+
   async submitFlashAnswer(data: {
     questionId: string;
     answer: string;

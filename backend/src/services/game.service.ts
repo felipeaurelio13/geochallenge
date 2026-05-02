@@ -197,6 +197,22 @@ export async function getQuestionsForGame(
   }));
 }
 
+export async function getAvailableQuestionsCount(
+  category?: Category,
+  filters?: QuestionFilters
+): Promise<number> {
+  const where = {
+    isAvailable: true,
+    ...buildFilterWhere(filters),
+    ...(category && category !== Category.MIXED && { category }),
+    ...((category === Category.MIXED || !category) && {
+      category: { in: [Category.FLAG, Category.CAPITAL, Category.MAP, Category.SILHOUETTE] },
+    }),
+  };
+
+  return prisma.question.count({ where });
+}
+
 /**
  * Flash mode: 60 preguntas rápidas, 2 opciones por pregunta.
  * MAP no es compatible (requiere mapa interactivo), hace fallback a FLAG + SILHOUETTE.

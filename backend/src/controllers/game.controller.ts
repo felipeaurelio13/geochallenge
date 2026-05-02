@@ -7,6 +7,7 @@ import {
   getQuestionsForStreakGame,
   getStreakBatchSize,
   getQuestionsForFlashGame,
+  getAvailableQuestionsCount,
   getFlashDurationSeconds,
   getMechanicsConfigForMode,
   validateAnswerByGameType,
@@ -179,6 +180,38 @@ const flashStartSchema = z.object({
   isInsular: z.preprocess((v) => v === 'true' || v === true, z.boolean()).optional(),
   isLandlocked: z.preprocess((v) => v === 'true' || v === true, z.boolean()).optional(),
   difficulty: difficultySchema.optional(),
+});
+
+const availabilitySchema = z.object({
+  category: z.nativeEnum(Category).optional().default(Category.MIXED),
+  questionCount: z.coerce.number().min(1).max(20).optional().default(config.game.questionsPerGame),
+  continent: z.string().optional(),
+  isInsular: z.preprocess((v) => v === 'true' || v === true, z.boolean()).optional(),
+  isLandlocked: z.preprocess((v) => v === 'true' || v === true, z.boolean()).optional(),
+  difficulty: difficultySchema.optional(),
+});
+
+router.get('/availability', optionalAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const validation = availabilitySchema.safeParse(req.query);
+    if (!validation.success) {
+      res.status(400).json({ error: 'Parámetros inválidos', details: validation.error.errors });
+      return;
+    }
+
+    const { category, questionCount } = validation.data;
+    const filters = parseFilters(validation.data as Record<string, unknown>);
+    const available = await getAvailableQuestionsCount(category, filters);
+
+    res.json({
+      available,
+      required: questionCount,
+      canPlay: available >= questionCount,
+    });
+  } catch (error) {
+    console.error('Error al consultar disponibilidad:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
 });
 
 /**
