@@ -17,7 +17,7 @@ import { cacheQuestions, getCachedQuestions, enqueuePendingSession } from '../ho
 interface GameContextType {
   state: GameState;
   streakAlive: boolean;
-  startGame: (category?: Category, questionCount?: number, gameType?: GameType, filters?: GameFilters) => Promise<void>;
+  startGame: (category?: Category, questionCount?: number, gameType?: GameType, filters?: GameFilters, acceptShortGame?: boolean) => Promise<void>;
   appendQuestions: (questions: Question[]) => void;
   setStreakAlive: (isAlive: boolean) => void;
   submitAnswer: (
@@ -71,7 +71,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const startGame = useCallback(async (category?: Category, questionCount?: number, gameType?: GameType, filters?: GameFilters) => {
+  const startGame = useCallback(async (category?: Category, questionCount?: number, gameType?: GameType, filters?: GameFilters, acceptShortGame?: boolean) => {
     setState((prev) => ({ ...prev, status: 'loading' }));
     const resolvedCategory = (category ?? 'MIXED') as Category;
     const desiredCount = questionCount ?? 10;
@@ -109,7 +109,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
-      const response = await api.startGame(category, questionCount, gameType, undefined, undefined, filters);
+      const response = await api.startGame(category, questionCount, gameType, undefined, undefined, filters, acceptShortGame);
 
       setState({
         status: 'playing',

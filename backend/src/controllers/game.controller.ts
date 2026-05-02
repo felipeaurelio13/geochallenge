@@ -74,6 +74,7 @@ export const startGameSchema = z.object({
   isInsular: z.preprocess((v) => v === 'true' || v === true, z.boolean()).optional(),
   isLandlocked: z.preprocess((v) => v === 'true' || v === true, z.boolean()).optional(),
   difficulty: difficultySchema.optional(),
+  acceptShortGame: z.preprocess((v) => v === 'true' || v === true, z.boolean()).optional(),
 });
 
 const answerSchema = z.object({
@@ -133,7 +134,7 @@ router.get('/start', optionalAuth, async (req: AuthRequest, res: Response) => {
       return;
     }
 
-    const { category, questionCount, gameType, excludeIds, excludeQuestionKeys } = validation.data;
+    const { category, questionCount, gameType, excludeIds, excludeQuestionKeys, acceptShortGame } = validation.data;
     const filters = parseFilters(validation.data as Record<string, unknown>);
     const expectedQuestions = gameType === 'streak'
       ? getStreakBatchSize(questionCount)
@@ -144,13 +145,14 @@ router.get('/start', optionalAuth, async (req: AuthRequest, res: Response) => {
       : await getQuestionsForGame(category, questionCount, excludeIds, filters);
 
     const hasFilters = filters !== undefined;
-    const canServeReducedSet = gameType !== 'streak' && hasFilters && questions.length >= 5;
+    const canServeReducedSet = gameType !== 'streak' && hasFilters && acceptShortGame === true && questions.length > 0;
 
     if (questions.length < expectedQuestions && !canServeReducedSet) {
-      res.status(503).json({
+      res.status(409).json({
         error: 'No hay suficientes preguntas disponibles',
         available: questions.length,
         requested: expectedQuestions,
+        canStartShortGame: gameType !== 'streak' && hasFilters && questions.length > 0,
       });
       return;
     }
