@@ -4,33 +4,39 @@ Render builds en cada push a `master`. Si el build falla, el sitio se queda con 
 
 ## Regla de oro
 
-**Nunca pushear a `master` sin haber corrido `npm run build` localmente en `frontend/` y `backend/`.** Los errores de tipo no siempre se ven en el editor — sólo `tsc` los garantiza.
+**Nunca pushear a `master` sin que `npm run predeploy` pase.** Los errores de tipo no siempre se ven en el editor — sólo `tsc` los garantiza.
 
 ## Pre-deploy checklist
 
-Ejecutar antes de cada push a `master`:
-
 ```bash
 # 1. Sincronizar
-git fetch origin
-git pull --ff-only origin master
+git fetch origin && git pull --ff-only origin master
 
-# 2. Verificar frontend (el comando que corre Render)
-cd frontend
-npm install
-npm run build            # tsc && vite build
+# 2. Un solo comando — corre prisma generate + builds + chequeos:
+npm run predeploy
 
-# 3. Verificar backend
-cd ../backend
-npm install              # postinstall corre prisma generate
-npm run build            # tsc
-npm test                 # opcional pero recomendado
-
-# 4. Si TODO pasa: push
+# 3. Si pasa con `✓ predeploy: builds limpios`, push:
 git push origin master
 ```
 
-Si cualquiera de los `npm run build` falla, **no pushees**. Arregla local primero.
+`npm run predeploy` ejecuta [scripts/predeploy-check.sh](scripts/predeploy-check.sh), que chequea:
+
+1. Archivos untracked importados por código tracked (la trampa de PR #179 / monumentos).
+2. `prisma generate && tsc` en backend si tocaste backend/data/prisma — espeja exactamente lo que hace Render via `postinstall`.
+3. `tsc && vite build` en frontend si tocaste frontend/data.
+4. `schema.prisma` modificado sin migración nueva.
+
+Si falla, **no pushees**. Arregla local primero. Para emergencias: `SKIP_PREDEPLOY_CHECK=1 git push …` (documenta por qué en el commit).
+
+### Capas automáticas
+
+No tienes que recordar correr el comando: el repo lo enforza solo.
+
+| Capa | Cuándo dispara | Qué hace |
+|---|---|---|
+| Hook `Stop` ([.claude/settings.json](.claude/settings.json)) | Cada vez que un agente Claude Code termina turno | `exit 2` → fuerza al agente a resolver bloqueadores antes de cerrar |
+| Husky `pre-push` ([.husky/pre-push](.husky/pre-push)) | `git push` (humano, Codex, o cualquier agente) | Aborta el push |
+| `npm run predeploy` | Manual | Output en pantalla |
 
 ## Errores recurrentes y cómo evitarlos
 
@@ -97,3 +103,4 @@ Lo que Render corre en cada push (definido en `render.yaml`):
 - Mergear PRs generados por agentes sin correr el build localmente. Varias veces se ha mergeado a `master` un cambio que rompe el deploy.
 - "Limpieza de props no usadas" sin grep cross-file. Si una prop está declarada pero no usada **dentro del componente**, sigue pudiendo ser pasada por consumidores — el lint detecta lo primero, no lo segundo.
 - Versionar bumps de `package.json` (1.2.86 → 1.2.87) sin que represente un cambio real — confunde el debugging.
+- Múltiples agentes editando el mismo working tree. Si tienes dos sesiones de Claude o un agente Codex en paralelo en el mismo directorio, las modificaciones se pisan. Usa worktrees (`git worktree add`) o ramas separadas por sesión.

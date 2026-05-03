@@ -118,6 +118,10 @@ Antes de terminar:
 - agrega o ajusta tests según el riesgo;
 - deja explícito qué sí validaste y qué no pudiste validar.
 
+### Antes de cualquier push a `master`
+
+**Obligatorio:** `npm run predeploy` debe pasar con `✓ predeploy: builds limpios`. Espeja lo que corre Render (`prisma generate` + `tsc` + `vite build`) y detecta los tres errores que rompen el deploy: untracked-imports, type errors, schema sin migración. Detalle completo en [DEPLOY.md](DEPLOY.md). El push está protegido por un hook `pre-push` que corre el mismo chequeo — no intentes saltarlo con `--no-verify`; si necesitas saltarlo en una emergencia, usa `SKIP_PREDEPLOY_CHECK=1` y documenta por qué en el commit.
+
 ### Calidad esperada por tipo de cambio
 
 #### Si cambias frontend
@@ -125,8 +129,8 @@ Antes de terminar:
 Prioriza, según corresponda:
 
 - `npm --prefix frontend run test`
-- `npm --prefix frontend run build`
 - `npm --prefix frontend run ci:quality`
+- `npm run predeploy` (incluye `frontend run build`)
 
 Usa E2E cuando el cambio afecte flujo real, routing, autenticación, juego o regresiones visuales/UX críticas.
 
@@ -136,11 +140,11 @@ Prioriza, según corresponda:
 
 - `npm --prefix backend run lint`
 - `npm --prefix backend run test`
-- `npm --prefix backend run build`
+- `npm run predeploy` (incluye `prisma generate` + `backend run build`)
 
 #### Si cambias ambos
 
-Valida ambos lados y explicita dependencias cruzadas de contrato.
+Valida ambos lados con `npm run predeploy` y explicita dependencias cruzadas de contrato.
 
 ## Qué debe entregar siempre la respuesta final
 

@@ -4,9 +4,18 @@ Juego de trivia geográfica con modos individual, duelos en tiempo real y desaf�
 
 ## Versión actual
 
-- Frontend: **v1.2.86**
+- Frontend: **v1.2.87**
 
-- Feature: modo Racha ahora evita también repetición de preguntas equivalentes (misma bandera/país) entre refills usando claves de unicidad enviadas por frontend y validadas por backend.
+- Feature: nueva categoría **Monumentos** (50 lugares famosos curados, dos variantes por monumento — identificar nombre o país — con foto y atribución de Wikimedia Commons).
+
+## Novedades de la versión 1.2.87
+
+- Nueva categoría **MONUMENT** junto a FLAG/CAPITAL/MAP/SILHOUETTE: 50 monumentos curados con nombre EN/ES, país, coordenadas, imagen Wikimedia y atribución verificada (autor, licencia, fuente).
+- Dos variantes de pregunta elegidas al seedear: "¿Qué monumento es este?" (4 nombres) y "¿En qué país está?" (4 países). Distractores priorizan el mismo continente.
+- `MenuPage` muestra la categoría con icono 🗿 en grilla de 6 columnas; `QuestionCard` renderiza foto 16:9 con badge de dificultad; `RoundActionTray` expone slot de atribución que aparece sólo después de responder.
+- Modo Racha bloquea repeticiones del mismo monumento aunque cambie la variante (`buildQuestionUniquenessKey` ancla al slug).
+- Backend: migración Prisma agrega `MONUMENT` al enum `Category`, `game.service` lo incluye en `MIXED` y Flash visual.
+- Frontend: contrato backend intacto (nombres canónicos en EN); `getOptionDisplayLabel` traduce opciones según `i18n.language` para el render.
 
 ## Novedades de la versión 1.2.86
 
