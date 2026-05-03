@@ -3,6 +3,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { config } from './config/env';
 import { getSeedCountries, loadCountryCatalog, type CountryRecord } from './utils/countryCatalog';
+import { loadMonumentCatalog, type MonumentRecord } from './utils/monumentCatalog';
 
 const prisma = new PrismaClient();
 
@@ -146,6 +147,60 @@ async function main() {
     });
   }
 
+  // Generar preguntas de monumentos (dos variantes por monumento: identificar nombre / identificar país)
+  console.log('🗿 Generando preguntas de monumentos...');
+  const monuments = loadMonumentCatalog();
+  let monumentCount = 0;
+  for (const monument of monuments) {
+    const country = countries.find((c) => c.name === monument.country);
+    if (!country) {
+      console.warn(`⚠️  País no encontrado para monumento ${monument.slug}: ${monument.country}`);
+      continue;
+    }
+
+    // Variante "identify": pregunta el nombre del monumento
+    const monumentDistractors = getMonumentDistractors(monument, monuments, 3);
+    questions.push({
+      category: Category.MONUMENT,
+      questionData: JSON.stringify({ slug: monument.slug, variant: 'identify' }),
+      options: shuffleArray([monument.name.en, ...monumentDistractors]),
+      correctAnswer: monument.name.en,
+      imageUrl: monument.imageUrl,
+      latitude: monument.latitude,
+      longitude: monument.longitude,
+      continent: monument.continent,
+      difficulty: monument.difficulty as Difficulty,
+      isInsular: country.isInsular ?? null,
+      isLandlocked: country.isLandlocked ?? null,
+      subregion: country.subregion ?? null,
+      populationTier: country.populationTier ?? null,
+      areaTier: country.areaTier ?? null,
+      flagComplexity: country.flagComplexity ?? null,
+    });
+
+    // Variante "country": pregunta en qué país está el monumento
+    const countryDistractors = getDistractors(country, countries, 3);
+    questions.push({
+      category: Category.MONUMENT,
+      questionData: JSON.stringify({ slug: monument.slug, variant: 'country' }),
+      options: shuffleArray([monument.country, ...countryDistractors]),
+      correctAnswer: monument.country,
+      imageUrl: monument.imageUrl,
+      latitude: monument.latitude,
+      longitude: monument.longitude,
+      continent: monument.continent,
+      difficulty: monument.difficulty as Difficulty,
+      isInsular: country.isInsular ?? null,
+      isLandlocked: country.isLandlocked ?? null,
+      subregion: country.subregion ?? null,
+      populationTier: country.populationTier ?? null,
+      areaTier: country.areaTier ?? null,
+      flagComplexity: country.flagComplexity ?? null,
+    });
+
+    monumentCount += 2;
+  }
+
   // Insertar todas las preguntas
   console.log(`\n📝 Insertando ${questions.length} preguntas en la base de datos...`);
 
@@ -160,6 +215,7 @@ async function main() {
    - Preguntas de capitales: ${countries.length}
    - Preguntas de mapa: ${mapCount} (ciudades de ${countries.length} países)
    - Preguntas de siluetas: ${countriesWithSilhouette.length} (${countries.length - countriesWithSilhouette.length} sin silueta en CDN)
+   - Preguntas de monumentos: ${monumentCount} (${monuments.length} monumentos × 2 variantes)
    - Total: ${questions.length}
    - Banderas extendidas incluidas: ${countrySelection.extendedCountriesIncluded}
    - Banderas extendidas excluidas (modo estable): ${countrySelection.extendedCountriesExcluded}
@@ -341,6 +397,25 @@ function getCityDifficulty(cityName: string, countryName: string): Difficulty {
     return Difficulty.HARD;
   }
   return Difficulty.MEDIUM;
+}
+
+/**
+ * Distractores de monumentos: prefiere mismo continente, completa con globales.
+ * Devuelve nombres en inglés (canónico) para mantener consistencia con correctAnswer.
+ */
+function getMonumentDistractors(
+  monument: MonumentRecord,
+  allMonuments: MonumentRecord[],
+  count: number
+): string[] {
+  const sameContinent = allMonuments.filter(
+    (m) => m.continent === monument.continent && m.slug !== monument.slug
+  );
+  const others = allMonuments.filter(
+    (m) => m.continent !== monument.continent && m.slug !== monument.slug
+  );
+  const candidates = [...shuffleArray(sameContinent), ...shuffleArray(others)];
+  return candidates.slice(0, count).map((m) => m.name.en);
 }
 
 /**

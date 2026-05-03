@@ -13,6 +13,7 @@ import {
 import { UserAvatar } from '../components/atoms/UserAvatar';
 import { Alert } from '../components/atoms/Alert';
 import { Button } from '../components/atoms/Button';
+import { MonumentAttribution } from '../components/MonumentAttribution';
 import { Category, GameFilters, MechanicUsage, Question } from '../types';
 import { GAME_CONSTANTS } from '../constants/game';
 import { useHaptics } from '../hooks';
@@ -670,6 +671,11 @@ export function DuelPage() {
           selectionAssistiveText={t('game.selectionReadyShortHint')}
           waitingLabel={t('duel.waitingForOpponent')}
           resultLabel={lastAnswerCorrect ? t('game.correct') : t('game.incorrect')}
+          resultAttribution={
+            currentQuestion && currentQuestion.category === 'MONUMENT'
+              ? <MonumentAttribution question={currentQuestion} />
+              : undefined
+          }
           showResultBadge
           isCorrect={lastAnswerCorrect}
           onSubmit={handleSubmitAnswer}

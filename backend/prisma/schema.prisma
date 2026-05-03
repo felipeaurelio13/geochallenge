@@ -116,6 +116,7 @@ enum Category {
   FLAG
   CAPITAL
   SILHOUETTE
+  MONUMENT
   MIXED
 }
 

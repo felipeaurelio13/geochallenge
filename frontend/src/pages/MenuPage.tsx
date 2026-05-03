@@ -11,13 +11,14 @@ import { FilterDrawer } from '../components/molecules/FilterDrawer';
 import { hasActiveFilters, filtersToParams } from '../types';
 import { api } from '../services/api';
 
-type Category = 'FLAG' | 'CAPITAL' | 'MAP' | 'SILHOUETTE' | 'MIXED';
+type Category = 'FLAG' | 'CAPITAL' | 'MAP' | 'SILHOUETTE' | 'MONUMENT' | 'MIXED';
 
 const categories: { id: Category; icon: string; labelKey: string }[] = [
   { id: 'FLAG', icon: '🏳️', labelKey: 'categories.flags' },
   { id: 'CAPITAL', icon: '🏛️', labelKey: 'categories.capitals' },
   { id: 'MAP', icon: '🗺️', labelKey: 'categories.maps' },
   { id: 'SILHOUETTE', icon: '🖼️', labelKey: 'categories.silhouettes' },
+  { id: 'MONUMENT', icon: '🗿', labelKey: 'categories.monuments' },
   { id: 'MIXED', icon: '🎲', labelKey: 'categories.mixed' },
 ];
 
@@ -139,7 +140,7 @@ export function MenuPage() {
         <p className="mb-2 px-1 text-xs font-medium uppercase tracking-wider text-gray-500 sm:px-0">
           {t('menu.selectCategory')}
         </p>
-        <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:grid sm:grid-cols-5 sm:overflow-visible sm:px-0">
+        <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:grid sm:grid-cols-6 sm:overflow-visible sm:px-0">
           {categories.map((cat) => (
             <Button
               key={cat.id}

@@ -3,6 +3,12 @@ import { triggerHaptic } from '../hooks/useHaptics';
 
 interface OptionButtonProps {
   option: string;
+  /**
+   * Etiqueta a mostrar (puede diferir de `option` cuando se localiza el display).
+   * El valor crudo en `option` se sigue usando para el callback y la comparación
+   * con la respuesta correcta — esta prop no rompe el contrato de selección.
+   */
+  displayLabel?: string;
   index: number;
   onClick: () => void;
   disabled: boolean;
@@ -16,6 +22,7 @@ const optionLetters = ['A', 'B', 'C', 'D'];
 
 export const OptionButton = React.memo(function OptionButton({
   option,
+  displayLabel,
   index,
   onClick,
   disabled,
@@ -24,6 +31,7 @@ export const OptionButton = React.memo(function OptionButton({
   isCorrect,
   showResult,
 }: OptionButtonProps) {
+  const renderedLabel = displayLabel ?? option;
   const baseClasses =
     'option-button-shell pressable w-full rounded-2xl text-left transition-all duration-200 flex items-stretch gap-2.5 overflow-hidden border px-3 py-2 option-button-base sm:px-3.5 sm:py-2.5';
 
@@ -98,7 +106,7 @@ export const OptionButton = React.memo(function OptionButton({
 
       <div className="flex min-w-0 flex-1 items-center">
         <span className={`option-button-label min-w-0 flex-1 text-[0.82rem] font-medium leading-[1.2] sm:text-[0.92rem] md:text-[1rem] ${eliminated ? 'line-through opacity-60' : ''}`}>
-          {option}
+          {renderedLabel}
         </span>
       </div>
     </button>

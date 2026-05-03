@@ -4,6 +4,7 @@ import { useGesture } from '../hooks/useGesture';
 import { triggerHaptic } from '../hooks/useHaptics';
 import { useImageWithFallback } from '../hooks/useImageWithFallback';
 import { useTranslation } from 'react-i18next';
+import { getOptionDisplayLabel } from '../utils/monumentOptions';
 
 interface FlashCardProps {
   question: Question;
@@ -17,14 +18,18 @@ interface FlashCardProps {
 const VISUAL_ALT: Record<string, string> = {
   FLAG: 'Bandera',
   SILHOUETTE: 'Silueta',
+  MONUMENT: 'Monumento',
 };
 
 export function FlashCard({ question, onAnswer, disabled, disabledOptions = [], feedback, onImageError }: FlashCardProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [optionA, optionB] = useMemo(() => {
     const opts = question.options.slice(0, 2);
     return [opts[0] ?? '', opts[1] ?? ''];
   }, [question]);
+
+  const displayA = getOptionDisplayLabel(question, optionA, i18n.language);
+  const displayB = getOptionDisplayLabel(question, optionB, i18n.language);
 
   const rawImageUrl =
     question.imageUrl ||
@@ -65,12 +70,14 @@ export function FlashCard({ question, onAnswer, disabled, disabledOptions = [], 
           <img
             src={imageUrl}
             alt={`${VISUAL_ALT[question.category] ?? 'Imagen'}`}
-            className={`absolute inset-0 h-full w-full object-contain p-6${question.category === 'SILHOUETTE' ? ' filter invert drop-shadow-[0_0_14px_rgba(148,163,184,0.45)]' : ''}`}
+            className={`absolute inset-0 h-full w-full ${
+              question.category === 'MONUMENT' ? 'object-cover' : 'object-contain p-6'
+            }${question.category === 'SILHOUETTE' ? ' filter invert drop-shadow-[0_0_14px_rgba(148,163,184,0.45)]' : ''}`}
             draggable={false}
             onError={handleImageError}
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-6xl">🌍</div>
+          <div className="flex h-full items-center justify-center text-6xl">{question.category === 'MONUMENT' ? '🗿' : '🌍'}</div>
         )}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-3 text-center text-xs text-gray-200">
           {t('flash.swipeHint')}
@@ -83,19 +90,19 @@ export function FlashCard({ question, onAnswer, disabled, disabledOptions = [], 
           onClick={() => handleAnswer(optionA)}
           disabled={disabled || disabledOptions.includes(optionA)}
           className="pressable min-h-16 rounded-2xl border-2 border-gray-700 bg-gray-800 px-3 py-4 text-base font-semibold text-white shadow-md active:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-60"
-          aria-label={`Opción A: ${optionA}`}
+          aria-label={`Opción A: ${displayA}`}
         >
           <span className="mr-2 text-xs text-gray-400">←</span>
-          {optionA}
+          {displayA}
         </button>
         <button
           type="button"
           onClick={() => handleAnswer(optionB)}
           disabled={disabled || disabledOptions.includes(optionB)}
           className="pressable min-h-16 rounded-2xl border-2 border-gray-700 bg-gray-800 px-3 py-4 text-base font-semibold text-white shadow-md active:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-60"
-          aria-label={`Opción B: ${optionB}`}
+          aria-label={`Opción B: ${displayB}`}
         >
-          {optionB}
+          {displayB}
           <span className="ml-2 text-xs text-gray-400">→</span>
         </button>
       </div>

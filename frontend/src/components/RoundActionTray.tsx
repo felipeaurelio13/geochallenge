@@ -17,6 +17,8 @@ type RoundActionTrayProps = {
   showResultBadge?: boolean;
   isCorrect?: boolean;
   resultHint?: string;
+  /** Atribución opcional (e.g. crédito de imagen) mostrada solo en showResult. */
+  resultAttribution?: ReactNode;
   summarySlot?: ReactNode;
 };
 
@@ -45,6 +47,7 @@ export function RoundActionTray({
   showResultBadge = false,
   isCorrect = false,
   resultHint,
+  resultAttribution,
   summarySlot,
 }: RoundActionTrayProps) {
   const wrapperClassName =
@@ -91,6 +94,12 @@ export function RoundActionTray({
             )}
 
             {resultHint && <p className="text-center text-xs leading-snug text-gray-300">{resultHint}</p>}
+
+            {resultAttribution && (
+              <div className="text-center text-[0.65rem] leading-snug text-gray-400/80 sm:text-xs">
+                {resultAttribution}
+              </div>
+            )}
 
             {nextLabel && onNext && (
               <button

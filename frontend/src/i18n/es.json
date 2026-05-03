@@ -94,7 +94,8 @@
     "flags": "Banderas",
     "capitals": "Capitales",
     "maps": "Mapas",
-    "silhouettes": "Siluetas"
+    "silhouettes": "Siluetas",
+    "monuments": "Monumentos"
   },
   "game": {
     "loading": "Cargando preguntas...",
@@ -108,6 +109,11 @@
     "questionCapital": "¿Cuál es la capital de {{country}}?",
     "questionMap": "¿Dónde está {{capital}}?",
     "questionSilhouette": "¿Qué país representa esta silueta?",
+    "questionMonumentIdentify": "¿Qué monumento es este?",
+    "questionMonumentCountry": "¿En qué país está este monumento?",
+    "monumentUnavailable": "Imagen no disponible",
+    "monumentAttribution": "Foto: {{author}} · {{license}}",
+    "monumentAttributionSource": "Wikimedia Commons",
     "silhouetteUnavailable": "Silueta no disponible",
     "flagUnavailable": "Bandera no disponible",
     "clickMap": "Haz clic en el mapa para seleccionar la ubicación",

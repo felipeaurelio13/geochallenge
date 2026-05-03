@@ -12,6 +12,7 @@ import {
   MechanicsHud,
 } from '../components';
 import { FullScreenError } from '../components/molecules/FullScreenError';
+import { MonumentAttribution } from '../components/MonumentAttribution';
 import { Question } from '../types';
 import { GAME_CONSTANTS } from '../constants/game';
 import { useHaptics } from '../hooks';
@@ -335,6 +336,11 @@ export function ChallengeGamePage() {
           submitLabel={t('game.submit')}
           selectionAssistiveText={t('game.selectionReadyShortHint')}
           nextLabel={isSubmitting ? t('common.loading') : isLastQuestion ? t('game.seeResults') : t('game.next')}
+          resultAttribution={
+            currentQuestion && currentQuestion.category === 'MONUMENT'
+              ? <MonumentAttribution question={currentQuestion} />
+              : undefined
+          }
           onSubmit={handleSubmitAnswer}
           onNext={handleNextQuestion}
           summarySlot={

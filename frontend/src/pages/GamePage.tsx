@@ -14,6 +14,7 @@ import {
   MechanicsHud,
 } from '../components';
 import { FullScreenError } from '../components/molecules/FullScreenError';
+import { MonumentAttribution } from '../components/MonumentAttribution';
 import { Category, GameFilters, MechanicUsage, Question, hasActiveFilters } from '../types';
 import { GAME_CONSTANTS } from '../constants/game';
 import { useHaptics } from '../hooks';
@@ -551,6 +552,11 @@ export function GamePage() {
           nextLabel={streakGameOver ? t('game.seeResults') : shouldUseStreakFlow ? t('game.next') : isLastQuestion ? t('game.seeResults') : t('game.next')}
           resultLabel={lastAnswerCorrect ? t('game.correct') : t('game.incorrect')}
           resultHint={streakGameOver ? t('game.streakBroken') : undefined}
+          resultAttribution={
+            currentQuestion && currentQuestion.category === 'MONUMENT'
+              ? <MonumentAttribution question={currentQuestion} />
+              : undefined
+          }
           selectionAssistiveText={hasSelection && !showResult ? t('game.selectionReadyShortHint') : undefined}
           showResultBadge
           isCorrect={lastAnswerCorrect}

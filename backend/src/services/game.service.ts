@@ -174,7 +174,7 @@ export async function getQuestionsForGame(
     questions = await prisma.question.findMany({
       where: {
         ...baseWhere,
-        category: { in: [Category.FLAG, Category.CAPITAL, Category.MAP, Category.SILHOUETTE] },
+        category: { in: [Category.FLAG, Category.CAPITAL, Category.MAP, Category.SILHOUETTE, Category.MONUMENT] },
       },
     });
   }
@@ -206,7 +206,7 @@ export async function getAvailableQuestionsCount(
     ...buildFilterWhere(filters),
     ...(category && category !== Category.MIXED && { category }),
     ...((category === Category.MIXED || !category) && {
-      category: { in: [Category.FLAG, Category.CAPITAL, Category.MAP, Category.SILHOUETTE] },
+      category: { in: [Category.FLAG, Category.CAPITAL, Category.MAP, Category.SILHOUETTE, Category.MONUMENT] },
     }),
   };
 
@@ -218,7 +218,7 @@ export async function getAvailableQuestionsCount(
  * MAP no es compatible (requiere mapa interactivo), hace fallback a FLAG + SILHOUETTE.
  */
 export async function getQuestionsForFlashGame(category?: Category, filters?: QuestionFilters): Promise<GameQuestion[]> {
-  const visualCategories = [Category.FLAG, Category.SILHOUETTE];
+  const visualCategories = [Category.FLAG, Category.SILHOUETTE, Category.MONUMENT];
   const flashCategories =
     category && category !== Category.MIXED && category !== Category.MAP
       ? [category]
@@ -340,12 +340,32 @@ function normalizeUniquenessPart(value: string | undefined | null): string {
 }
 
 export function buildQuestionUniquenessKey(question: Pick<GameQuestion, 'category' | 'imageUrl' | 'questionData' | 'correctAnswer'>): string {
+  // Para MONUMENT, ancla la unicidad al slug del monumento (no a la variante de prompt),
+  // así el modo racha no repite el mismo monumento con preguntas distintas.
+  if (question.category === Category.MONUMENT) {
+    const slug = extractMonumentSlug(question.questionData);
+    return [
+      normalizeUniquenessPart(question.category),
+      normalizeUniquenessPart(slug || question.imageUrl),
+    ].join('|');
+  }
+
   return [
     normalizeUniquenessPart(question.category),
     normalizeUniquenessPart(question.imageUrl),
     normalizeUniquenessPart(question.questionData),
     normalizeUniquenessPart(question.correctAnswer),
   ].join('|');
+}
+
+function extractMonumentSlug(questionData: string | undefined | null): string | null {
+  if (!questionData) return null;
+  try {
+    const parsed = JSON.parse(questionData) as { slug?: string };
+    return parsed.slug ?? null;
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -365,6 +385,17 @@ function generateQuestionText(question: any): string {
       return `¿Dónde se encuentra ${question.questionData}?`;
     case Category.SILHOUETTE:
       return `¿Qué país representa esta silueta?`;
+    case Category.MONUMENT: {
+      try {
+        const parsed = JSON.parse(question.questionData) as { variant?: 'identify' | 'country' };
+        if (parsed.variant === 'country') {
+          return '¿En qué país está este monumento?';
+        }
+      } catch {
+        // sigue al default identify
+      }
+      return '¿Qué monumento es este?';
+    }
     default:
       return question.questionData;
   }

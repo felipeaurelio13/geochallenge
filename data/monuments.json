@@ -1,0 +1,909 @@
+{
+  "_meta": {
+    "version": 1,
+    "description": "Catálogo curado de monumentos y lugares famosos. Las URLs usan el patrón Special:FilePath de Wikimedia Commons (redirección estable). La atribución debe verificarse manualmente contra cada archivo fuente antes de deploy productivo (ver sección de verificación del plan).",
+    "imageUrlPattern": "https://commons.wikimedia.org/wiki/Special:FilePath/{Filename}?width=800"
+  },
+  "monuments": [
+    {
+      "slug": "eiffel-tower",
+      "name": {
+        "en": "Eiffel Tower",
+        "es": "Torre Eiffel"
+      },
+      "country": "France",
+      "continent": "Europe",
+      "latitude": 48.8584,
+      "longitude": 2.2945,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg?width=800",
+      "attribution": {
+        "author": "Benh LIEU SONG",
+        "license": "Public domain",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tour_Eiffel_Wikimedia_Commons_(cropped).jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "colosseum",
+      "name": {
+        "en": "Colosseum",
+        "es": "Coliseo Romano"
+      },
+      "country": "Italy",
+      "continent": "Europe",
+      "latitude": 41.8902,
+      "longitude": 12.4922,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Colosseo_2020.jpg?width=800",
+      "attribution": {
+        "author": "FeaturedPics",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Colosseo_2020.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "machu-picchu",
+      "name": {
+        "en": "Machu Picchu",
+        "es": "Machu Picchu"
+      },
+      "country": "Peru",
+      "continent": "South America",
+      "latitude": -13.1631,
+      "longitude": -72.545,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Machu_Picchu%2C_2023_%28012%29.jpg?width=800",
+      "attribution": {
+        "author": "Draceane",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Machu_Picchu,_2023_(012).jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "christ-the-redeemer",
+      "name": {
+        "en": "Christ the Redeemer",
+        "es": "Cristo Redentor"
+      },
+      "country": "Brazil",
+      "continent": "South America",
+      "latitude": -22.9519,
+      "longitude": -43.2105,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Christ_the_Redeemer_-_Cristo_Redentor.jpg?width=800",
+      "attribution": {
+        "author": "Arne Müseler",
+        "license": "CC BY-SA 3.0 de",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Christ_the_Redeemer_-_Cristo_Redentor.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "statue-of-liberty",
+      "name": {
+        "en": "Statue of Liberty",
+        "es": "Estatua de la Libertad"
+      },
+      "country": "United States",
+      "continent": "North America",
+      "latitude": 40.6892,
+      "longitude": -74.0445,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Front_view_of_Statue_of_Liberty_%28cropped%29.jpg?width=800",
+      "attribution": {
+        "author": "AskALotl",
+        "license": "CC0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Front_view_of_Statue_of_Liberty_(cropped).jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "taj-mahal",
+      "name": {
+        "en": "Taj Mahal",
+        "es": "Taj Mahal"
+      },
+      "country": "India",
+      "continent": "Asia",
+      "latitude": 27.1751,
+      "longitude": 78.0421,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Taj_Mahal_%28Edited%29.jpeg?width=800",
+      "attribution": {
+        "author": "Yann; edited by Jim Carter",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Taj_Mahal_(Edited).jpeg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "pyramids-of-giza",
+      "name": {
+        "en": "Pyramids of Giza",
+        "es": "Pirámides de Giza"
+      },
+      "country": "Egypt",
+      "continent": "Africa",
+      "latitude": 29.9792,
+      "longitude": 31.1342,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Pyramids_of_the_Giza_Necropolis.jpg?width=800",
+      "attribution": {
+        "author": "KennyOMG",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pyramids_of_the_Giza_Necropolis.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "big-ben",
+      "name": {
+        "en": "Big Ben",
+        "es": "Big Ben"
+      },
+      "country": "United Kingdom",
+      "continent": "Europe",
+      "latitude": 51.5007,
+      "longitude": -0.1246,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Elizabeth_Tower%2C_June_2022.jpg?width=800",
+      "attribution": {
+        "author": "Dave Bezaire",
+        "license": "CC BY-SA 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Elizabeth_Tower,_June_2022.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "sagrada-familia",
+      "name": {
+        "en": "Sagrada Familia",
+        "es": "Sagrada Familia"
+      },
+      "country": "Spain",
+      "continent": "Europe",
+      "latitude": 41.4036,
+      "longitude": 2.1744,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/%CE%A3%CE%B1%CE%B3%CF%81%CE%AC%CE%B4%CE%B1_%CE%A6%CE%B1%CE%BC%CE%AF%CE%BB%CE%B9%CE%B1_2941.jpg?width=800",
+      "attribution": {
+        "author": "C messier",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:%CE%A3%CE%B1%CE%B3%CF%81%CE%AC%CE%B4%CE%B1_%CE%A6%CE%B1%CE%BC%CE%AF%CE%BB%CE%B9%CE%B1_2941.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "acropolis-athens",
+      "name": {
+        "en": "Acropolis of Athens",
+        "es": "Acrópolis de Atenas"
+      },
+      "country": "Greece",
+      "continent": "Europe",
+      "latitude": 37.9715,
+      "longitude": 23.7267,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/1029_Acropolis_of_Athens_in_Greece_at_night_Photo_by_Giles_Laurent.jpg?width=800",
+      "attribution": {
+        "author": "Giles Laurent",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:1029_Acropolis_of_Athens_in_Greece_at_night_Photo_by_Giles_Laurent.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "stonehenge",
+      "name": {
+        "en": "Stonehenge",
+        "es": "Stonehenge"
+      },
+      "country": "United Kingdom",
+      "continent": "Europe",
+      "latitude": 51.1789,
+      "longitude": -1.8262,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Stonehenge2007_07_30.jpg?width=800",
+      "attribution": {
+        "author": "garethwiscombe",
+        "license": "CC BY 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Stonehenge2007_07_30.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "sydney-opera-house",
+      "name": {
+        "en": "Sydney Opera House",
+        "es": "Ópera de Sídney"
+      },
+      "country": "Australia",
+      "continent": "Oceania",
+      "latitude": -33.8568,
+      "longitude": 151.2153,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Sydney_Australia._%2821339175489%29.jpg?width=800",
+      "attribution": {
+        "author": "Bernard Spragg. NZ from Christchurch, New Zealand",
+        "license": "CC0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sydney_Australia._(21339175489).jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "burj-khalifa",
+      "name": {
+        "en": "Burj Khalifa",
+        "es": "Burj Khalifa"
+      },
+      "country": "United Arab Emirates",
+      "continent": "Asia",
+      "latitude": 25.1972,
+      "longitude": 55.2744,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Burj_Khalifa_%28worlds_tallest_building%29_and_the_Dubai_skyline_%2825781049892%29.jpg?width=800",
+      "attribution": {
+        "author": "imran shahabuddin",
+        "license": "CC BY 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Burj_Khalifa_(worlds_tallest_building)_and_the_Dubai_skyline_(25781049892).jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "brandenburg-gate",
+      "name": {
+        "en": "Brandenburg Gate",
+        "es": "Puerta de Brandeburgo"
+      },
+      "country": "Germany",
+      "continent": "Europe",
+      "latitude": 52.5163,
+      "longitude": 13.3777,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Brandenburger_Tor_abends.jpg?width=800",
+      "attribution": {
+        "author": "Thomas Wolf, www.foto-tw.de",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Brandenburger_Tor_abends.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "mount-rushmore",
+      "name": {
+        "en": "Mount Rushmore",
+        "es": "Monte Rushmore"
+      },
+      "country": "United States",
+      "continent": "North America",
+      "latitude": 43.8791,
+      "longitude": -103.4591,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Mount_Rushmore_detail_view_%28100MP%29.jpg?width=800",
+      "attribution": {
+        "author": "Thomas Wolf, www.foto-tw.de",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Mount_Rushmore_detail_view_(100MP).jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "golden-gate-bridge",
+      "name": {
+        "en": "Golden Gate Bridge",
+        "es": "Puente Golden Gate"
+      },
+      "country": "United States",
+      "continent": "North America",
+      "latitude": 37.8199,
+      "longitude": -122.4783,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Golden_Gate_Bridge_as_seen_from_Battery_East.jpg?width=800",
+      "attribution": {
+        "author": "Frank Schulenburg",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Golden_Gate_Bridge_as_seen_from_Battery_East.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "leaning-tower-of-pisa",
+      "name": {
+        "en": "Leaning Tower of Pisa",
+        "es": "Torre de Pisa"
+      },
+      "country": "Italy",
+      "continent": "Europe",
+      "latitude": 43.723,
+      "longitude": 10.3966,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Italy_-_Pisa_-_Leaning_Tower.jpg?width=800",
+      "attribution": {
+        "author": "Arne Müseler",
+        "license": "CC BY-SA 3.0 de",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Italy_-_Pisa_-_Leaning_Tower.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "mount-fuji",
+      "name": {
+        "en": "Mount Fuji",
+        "es": "Monte Fuji"
+      },
+      "country": "Japan",
+      "continent": "Asia",
+      "latitude": 35.3606,
+      "longitude": 138.7274,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/View_of_Mount_Fuji_from_%C5%8Cwakudani_20211202.jpg?width=800",
+      "attribution": {
+        "author": "Suicasmo",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:View_of_Mount_Fuji_from_%C5%8Cwakudani_20211202.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "great-wall-of-china",
+      "name": {
+        "en": "Great Wall of China",
+        "es": "Gran Muralla China"
+      },
+      "country": "China",
+      "continent": "Asia",
+      "latitude": 40.4319,
+      "longitude": 116.5704,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/The_Great_Wall_of_China_at_Jinshanling-edit.jpg?width=800",
+      "attribution": {
+        "author": "Severin.stalder",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:The_Great_Wall_of_China_at_Jinshanling-edit.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "moai-easter-island",
+      "name": {
+        "en": "Moai of Easter Island",
+        "es": "Moái de Isla de Pascua"
+      },
+      "country": "Chile",
+      "continent": "South America",
+      "latitude": -27.1127,
+      "longitude": -109.3497,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/AhuTongariki.JPG?width=800",
+      "attribution": {
+        "author": "Ian Sewell",
+        "license": "CC BY 2.5",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:AhuTongariki.JPG"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "kremlin-saint-basil",
+      "name": {
+        "en": "Saint Basil's Cathedral",
+        "es": "Catedral de San Basilio"
+      },
+      "country": "Russia",
+      "continent": "Europe",
+      "latitude": 55.7525,
+      "longitude": 37.6231,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Saint_Basil%27s_Cathedral_in_Moscow.jpg?width=800",
+      "attribution": {
+        "author": "Tsy1980",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Saint_Basil%27s_Cathedral_in_Moscow.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "neuschwanstein-castle",
+      "name": {
+        "en": "Neuschwanstein Castle",
+        "es": "Castillo de Neuschwanstein"
+      },
+      "country": "Germany",
+      "continent": "Europe",
+      "latitude": 47.5576,
+      "longitude": 10.7498,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Schloss_Neuschwanstein_2013.jpg?width=800",
+      "attribution": {
+        "author": "Thomas Wolf, www.foto-tw.de",
+        "license": "CC BY-SA 3.0 de",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Schloss_Neuschwanstein_2013.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "petra",
+      "name": {
+        "en": "Petra",
+        "es": "Petra"
+      },
+      "country": "Jordan",
+      "continent": "Asia",
+      "latitude": 30.3285,
+      "longitude": 35.4444,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Al_Deir_Petra.JPG?width=800",
+      "attribution": {
+        "author": "Azurfrog",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Al_Deir_Petra.JPG"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "angkor-wat",
+      "name": {
+        "en": "Angkor Wat",
+        "es": "Angkor Wat"
+      },
+      "country": "Cambodia",
+      "continent": "Asia",
+      "latitude": 13.4125,
+      "longitude": 103.867,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Buddhist_monks_in_front_of_the_Angkor_Wat.jpg?width=800",
+      "attribution": {
+        "author": "sam garza",
+        "license": "CC BY 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Buddhist_monks_in_front_of_the_Angkor_Wat.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "chichen-itza",
+      "name": {
+        "en": "Chichén Itzá",
+        "es": "Chichén Itzá"
+      },
+      "country": "Mexico",
+      "continent": "North America",
+      "latitude": 20.6843,
+      "longitude": -88.5678,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Chichen_Itza_3.jpg?width=800",
+      "attribution": {
+        "author": "Daniel Schwen",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Chichen_Itza_3.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "alhambra",
+      "name": {
+        "en": "Alhambra",
+        "es": "La Alhambra"
+      },
+      "country": "Spain",
+      "continent": "Europe",
+      "latitude": 37.1761,
+      "longitude": -3.5881,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Dawn_Charles_V_Palace_Alhambra_Granada_Andalusia_Spain.jpg?width=800",
+      "attribution": {
+        "author": "Jebulon",
+        "license": "CC0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Dawn_Charles_V_Palace_Alhambra_Granada_Andalusia_Spain.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "hagia-sophia",
+      "name": {
+        "en": "Hagia Sophia",
+        "es": "Santa Sofía"
+      },
+      "country": "Turkey",
+      "continent": "Asia",
+      "latitude": 41.0086,
+      "longitude": 28.9802,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Hagia_Sophia_%28228968325%29.jpeg?width=800",
+      "attribution": {
+        "author": "Adli Wahid",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hagia_Sophia_(228968325).jpeg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "mont-saint-michel",
+      "name": {
+        "en": "Mont Saint-Michel",
+        "es": "Mont Saint-Michel"
+      },
+      "country": "France",
+      "continent": "Europe",
+      "latitude": 48.6361,
+      "longitude": -1.5115,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Mont-Saint-Michel_vu_du_ciel.jpg?width=800",
+      "attribution": {
+        "author": "Amaustan",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Mont-Saint-Michel_vu_du_ciel.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "forbidden-city",
+      "name": {
+        "en": "Forbidden City",
+        "es": "Ciudad Prohibida"
+      },
+      "country": "China",
+      "continent": "Asia",
+      "latitude": 39.9163,
+      "longitude": 116.3972,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/The_Forbidden_City_-_View_from_Coal_Hill.jpg?width=800",
+      "attribution": {
+        "author": "Pixelflake",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:The_Forbidden_City_-_View_from_Coal_Hill.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "kinkaku-ji",
+      "name": {
+        "en": "Kinkaku-ji",
+        "es": "Pabellón Dorado de Kioto"
+      },
+      "country": "Japan",
+      "continent": "Asia",
+      "latitude": 35.0394,
+      "longitude": 135.7292,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Golden_Pavilion_Kinkaku-ji_water_mirror_2024.jpg?width=800",
+      "attribution": {
+        "author": "Nacaru",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Golden_Pavilion_Kinkaku-ji_water_mirror_2024.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "louvre-pyramid",
+      "name": {
+        "en": "Louvre Pyramid",
+        "es": "Pirámide del Louvre"
+      },
+      "country": "France",
+      "continent": "Europe",
+      "latitude": 48.8606,
+      "longitude": 2.3376,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Louvre_Courtyard%2C_Looking_West.jpg?width=800",
+      "attribution": {
+        "author": "Benh LIEU SONG (Flickr)",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Louvre_Courtyard,_Looking_West.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "saint-peters-basilica",
+      "name": {
+        "en": "Saint Peter's Basilica",
+        "es": "Basílica de San Pedro"
+      },
+      "country": "Vatican City",
+      "continent": "Europe",
+      "latitude": 41.9022,
+      "longitude": 12.4533,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Basilica_di_San_Pietro_in_Vaticano_September_2015-1a.jpg?width=800",
+      "attribution": {
+        "author": "Alvesgaspar",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Basilica_di_San_Pietro_in_Vaticano_September_2015-1a.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "blue-mosque-istanbul",
+      "name": {
+        "en": "Sultan Ahmed Mosque",
+        "es": "Mezquita Azul"
+      },
+      "country": "Turkey",
+      "continent": "Asia",
+      "latitude": 41.0054,
+      "longitude": 28.9768,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Istanbul_%2834223582516%29_%28cropped%29.jpg?width=800",
+      "attribution": {
+        "author": "Pedro Szekely from Los Angeles, USA",
+        "license": "CC BY-SA 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Istanbul_(34223582516)_(cropped).jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "tower-bridge",
+      "name": {
+        "en": "Tower Bridge",
+        "es": "Puente de la Torre"
+      },
+      "country": "United Kingdom",
+      "continent": "Europe",
+      "latitude": 51.5055,
+      "longitude": -0.0754,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Tower_Bridge_at_Dawn.jpg?width=800",
+      "attribution": {
+        "author": "Fuzzypiggy",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tower_Bridge_at_Dawn.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "arc-de-triomphe",
+      "name": {
+        "en": "Arc de Triomphe",
+        "es": "Arco del Triunfo"
+      },
+      "country": "France",
+      "continent": "Europe",
+      "latitude": 48.8738,
+      "longitude": 2.295,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Arc_de_Triomphe%2C_Paris_21_October_2010.jpg?width=800",
+      "attribution": {
+        "author": "Jiuguang Wang",
+        "license": "CC BY-SA 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Arc_de_Triomphe,_Paris_21_October_2010.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "white-house",
+      "name": {
+        "en": "The White House",
+        "es": "La Casa Blanca"
+      },
+      "country": "United States",
+      "continent": "North America",
+      "latitude": 38.8977,
+      "longitude": -77.0365,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/White_House_north_and_south_sides.jpg?width=800",
+      "attribution": {
+        "author": "(top)Cezary p(bottom)MattWade",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:White_House_north_and_south_sides.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "potala-palace",
+      "name": {
+        "en": "Potala Palace",
+        "es": "Palacio Potala"
+      },
+      "country": "China",
+      "continent": "Asia",
+      "latitude": 29.6575,
+      "longitude": 91.117,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Potala_Palace_HQ.jpg?width=800",
+      "attribution": {
+        "author": "Lhasa Government",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Potala_Palace_HQ.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "abu-simbel",
+      "name": {
+        "en": "Abu Simbel",
+        "es": "Templos de Abu Simbel"
+      },
+      "country": "Egypt",
+      "continent": "Africa",
+      "latitude": 22.3372,
+      "longitude": 31.6258,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Ramsis%2C_Aswan_Governorate%2C_Egypt_-_panoramio.jpg?width=800",
+      "attribution": {
+        "author": "youssef_alam",
+        "license": "CC BY 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ramsis,_Aswan_Governorate,_Egypt_-_panoramio.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "iguazu-falls",
+      "name": {
+        "en": "Iguazu Falls",
+        "es": "Cataratas del Iguazú"
+      },
+      "country": "Argentina",
+      "continent": "South America",
+      "latitude": -25.6953,
+      "longitude": -54.4367,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Iguazu_Cataratas2.jpg?width=800",
+      "attribution": {
+        "author": "Enaldo Valadares",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Iguazu_Cataratas2.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "uluru",
+      "name": {
+        "en": "Uluru (Ayers Rock)",
+        "es": "Uluru (Monte Ayers)"
+      },
+      "country": "Australia",
+      "continent": "Oceania",
+      "latitude": -25.3444,
+      "longitude": 131.0369,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/ULURU.jpg?width=800",
+      "attribution": {
+        "author": "Ek2030372672",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:ULURU.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "borobudur",
+      "name": {
+        "en": "Borobudur",
+        "es": "Borobudur"
+      },
+      "country": "Indonesia",
+      "continent": "Asia",
+      "latitude": -7.6079,
+      "longitude": 110.2038,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Pradaksina.jpg?width=800",
+      "attribution": {
+        "author": "Heri nugroho",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pradaksina.jpg"
+      },
+      "difficulty": "HARD"
+    },
+    {
+      "slug": "meteora",
+      "name": {
+        "en": "Meteora Monasteries",
+        "es": "Monasterios de Meteora"
+      },
+      "country": "Greece",
+      "continent": "Europe",
+      "latitude": 39.7217,
+      "longitude": 21.6306,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Meteora%27s_monastery_2.jpg?width=800",
+      "attribution": {
+        "author": "Stathis floros",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Meteora%27s_monastery_2.jpg"
+      },
+      "difficulty": "HARD"
+    },
+    {
+      "slug": "lalibela",
+      "name": {
+        "en": "Lalibela Rock-Hewn Churches",
+        "es": "Iglesias talladas en roca de Lalibela"
+      },
+      "country": "Ethiopia",
+      "continent": "Africa",
+      "latitude": 12.0316,
+      "longitude": 39.0413,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Lalibela%2C_san_giorgio%2C_esterno_24.jpg?width=800",
+      "attribution": {
+        "author": "Sailko",
+        "license": "CC BY 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lalibela,_san_giorgio,_esterno_24.jpg"
+      },
+      "difficulty": "HARD"
+    },
+    {
+      "slug": "bagan",
+      "name": {
+        "en": "Bagan",
+        "es": "Bagan"
+      },
+      "country": "Myanmar",
+      "continent": "Asia",
+      "latitude": 21.1717,
+      "longitude": 94.8585,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Bagan%2C_Burma.jpg?width=800",
+      "attribution": {
+        "author": "Corto Maltese 1999",
+        "license": "CC BY 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bagan,_Burma.jpg"
+      },
+      "difficulty": "HARD"
+    },
+    {
+      "slug": "plitvice-lakes",
+      "name": {
+        "en": "Plitvice Lakes",
+        "es": "Lagos de Plitvice"
+      },
+      "country": "Croatia",
+      "continent": "Europe",
+      "latitude": 44.8654,
+      "longitude": 15.582,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/View_in_Plitvice_Lakes_National_Park.jpg?width=800",
+      "attribution": {
+        "author": "Zysko serhii",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:View_in_Plitvice_Lakes_National_Park.jpg"
+      },
+      "difficulty": "HARD"
+    },
+    {
+      "slug": "santorini",
+      "name": {
+        "en": "Santorini (Oia)",
+        "es": "Santorini (Oía)"
+      },
+      "country": "Greece",
+      "continent": "Europe",
+      "latitude": 36.4618,
+      "longitude": 25.3753,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/2011_Dimos_Thiras.png?width=800",
+      "attribution": {
+        "author": "Pitichinaccio",
+        "license": "CC BY 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:2011_Dimos_Thiras.png"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "victoria-falls",
+      "name": {
+        "en": "Victoria Falls",
+        "es": "Cataratas Victoria"
+      },
+      "country": "Zambia",
+      "continent": "Africa",
+      "latitude": -17.9243,
+      "longitude": 25.8572,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Cataratas_Victoria%2C_Zambia-Zimbabue%2C_2018-07-27%2C_DD_04.jpg?width=800",
+      "attribution": {
+        "author": "Diego Delso",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Cataratas_Victoria,_Zambia-Zimbabue,_2018-07-27,_DD_04.jpg"
+      },
+      "difficulty": "HARD"
+    },
+    {
+      "slug": "edinburgh-castle",
+      "name": {
+        "en": "Edinburgh Castle",
+        "es": "Castillo de Edimburgo"
+      },
+      "country": "United Kingdom",
+      "continent": "Europe",
+      "latitude": 55.9486,
+      "longitude": -3.1999,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/City_of_Edinburgh_-_Edinburgh_Castle_-_20140421004403.jpg?width=800",
+      "attribution": {
+        "author": "Enric",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:City_of_Edinburgh_-_Edinburgh_Castle_-_20140421004403.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "marina-bay-sands",
+      "name": {
+        "en": "Marina Bay Sands",
+        "es": "Marina Bay Sands"
+      },
+      "country": "Singapore",
+      "continent": "Asia",
+      "latitude": 1.2834,
+      "longitude": 103.8607,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Marina_Bay_Sands_%28I%29.jpg?width=800",
+      "attribution": {
+        "author": "This Photo was taken by Supanut Arunoprayote. Feel free to use any of my images, but please mention me as the author and may send me a message. (สามารถใช้ภาพได้อิสระ แต่กรุณาใส่เครดิตผู้ถ่ายและอาจส่งข้อความบอกกล่าวด้วย) Please do not upload an updated image here without consultation with the Author. The author would like to make corrections only at his own source. This ensures that the changes are preserved.Please if you think that any changes should be required, please inform the author.Otherwise you can upload a new image with a new name. Please use one of the templates derivative or extract.",
+        "license": "CC BY 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Marina_Bay_Sands_(I).jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "table-mountain",
+      "name": {
+        "en": "Table Mountain",
+        "es": "Montaña de la Mesa"
+      },
+      "country": "South Africa",
+      "continent": "Africa",
+      "latitude": -33.9628,
+      "longitude": 18.4098,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Table_Mountain_DanieVDM.jpg?width=800",
+      "attribution": {
+        "author": "Danie van der Merwe from Cape Town, South Africa",
+        "license": "CC BY 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Table_Mountain_DanieVDM.jpg"
+      },
+      "difficulty": "MEDIUM"
+    }
+  ]
+}

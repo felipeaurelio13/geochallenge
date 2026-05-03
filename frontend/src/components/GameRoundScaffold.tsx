@@ -1,8 +1,10 @@
 import { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { QuestionCard } from './QuestionCard';
 import { OptionButton } from './OptionButton';
 import { UniversalGameLayout } from './UniversalGameLayout';
 import { Question } from '../types';
+import { getOptionDisplayLabel } from '../utils/monumentOptions';
 
 type GameRoundScaffoldProps = {
   header: ReactNode;
@@ -43,8 +45,9 @@ export function GameRoundScaffold({
   optionsGridClassName = 'game-options-grid',
   onImageError,
 }: GameRoundScaffoldProps) {
+  const { i18n } = useTranslation();
   const isCapitalQuestion = !isMapQuestion && question.category === 'CAPITAL';
-  const hasMediaQuestion = !isMapQuestion && (question.category === 'FLAG' || question.category === 'SILHOUETTE');
+  const hasMediaQuestion = !isMapQuestion && (question.category === 'FLAG' || question.category === 'SILHOUETTE' || question.category === 'MONUMENT');
 
   const content = (
     <div className="game-round-content mx-auto flex h-full w-full max-w-4xl min-h-0 flex-col">
@@ -75,6 +78,7 @@ export function GameRoundScaffold({
             <OptionButton
               key={option}
               option={option}
+              displayLabel={getOptionDisplayLabel(question, option, i18n.language)}
               index={index}
               onClick={() => onOptionSelect(option)}
               disabled={showResult || disableOptions || hiddenOptionIndexes.includes(index)}
