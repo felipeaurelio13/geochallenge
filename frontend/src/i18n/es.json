@@ -276,10 +276,13 @@
     "loadingNeighbors": "Cargando posiciones cercanas…",
     "noNeighborsData": "No hay datos de vecinos disponibles.",
     "global": "Global",
+    "season": "Mes",
+    "scopeAriaLabel": "Cambiar tipo de ranking",
     "filteredBySearch": "Filtrado por búsqueda",
     "filteredResults": "Resultados filtrados",
     "yourPosition": "Tu posición",
     "globalStats": "Estadísticas globales",
+    "seasonStats": "Estadísticas del mes",
     "otherPlayers": "Otros jugadores"
   },
   "profile": {

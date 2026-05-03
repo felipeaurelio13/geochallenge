@@ -149,6 +149,8 @@ export interface GameResult {
 }
 
 // Leaderboard types
+export type LeaderboardScope = 'global' | 'season';
+
 export interface LeaderboardEntry {
   rank: number;
   userId: string;

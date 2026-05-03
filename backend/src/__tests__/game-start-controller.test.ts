@@ -30,6 +30,7 @@ vi.mock('../services/game.service.js', () => ({
 
 vi.mock('../services/leaderboard.service.js', () => ({
   updateLeaderboardScore: vi.fn(),
+  updateSeasonLeaderboardScore: vi.fn(),
 }));
 
 vi.mock('../config/env.js', () => ({

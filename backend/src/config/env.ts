@@ -83,4 +83,8 @@ export const config = {
       (process.env.NODE_ENV === 'test' ? 'local-test-auth-bypass' : ''),
     defaultEmail: process.env.TEST_AUTH_BYPASS_EMAIL || 'test-runner@geochallenge.local',
   },
+
+  // Token para endpoints administrativos (rebuild de leaderboards, etc).
+  // Si no está seteado, los endpoints admin responden 404.
+  adminToken: process.env.ADMIN_TOKEN || '',
 };

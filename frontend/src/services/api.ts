@@ -4,6 +4,7 @@ import type {
   Question,
   GameResult,
   LeaderboardEntry,
+  LeaderboardScope,
   Category,
   GameType,
   GameConfig,
@@ -234,7 +235,7 @@ class ApiService {
   }
 
   // Leaderboard endpoints
-  async getLeaderboard(limit?: number, scope: 'global' | 'weekly' | 'friends' = 'global') {
+  async getLeaderboard(limit?: number, scope: LeaderboardScope = 'global') {
     const response = await this.client.get<{
       leaderboard: LeaderboardEntry[];
       totalPlayers: number;
@@ -243,9 +244,10 @@ class ApiService {
       season?: string | null;
       window?: string | null;
       generatedAt?: string;
+      scope: LeaderboardScope;
       queryMeta?: {
-        requestedScope: 'global' | 'weekly' | 'friends';
-        effectiveScope: 'global' | 'weekly' | 'friends';
+        requestedScope: LeaderboardScope;
+        effectiveScope: LeaderboardScope;
         fallbackApplied: boolean;
       };
       userRank: { rank: number; score: number } | null;
@@ -255,11 +257,12 @@ class ApiService {
     return response.data;
   }
 
-  async getMyRank() {
+  async getMyRank(scope: LeaderboardScope = 'global') {
     const response = await this.client.get<{
       userRank: LeaderboardEntry | null;
       neighbors: LeaderboardEntry[];
-    }>('/leaderboard/me');
+      scope: LeaderboardScope;
+    }>('/leaderboard/me', { params: { scope } });
     return response.data;
   }
 

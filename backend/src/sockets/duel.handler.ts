@@ -642,11 +642,11 @@ async function endDuel(
 
   // Guardar resultados en la base de datos usando una transacción
   try {
-    const leaderboardUpdates: Array<{ userId: string; totalScore: number; isHighScore: boolean }> = [];
+    const leaderboardUpdates: Array<{ userId: string; totalScore: number }> = [];
 
     await prisma.$transaction(async (tx) => {
       for (const player of duel.players) {
-        const { totalScore, isHighScore } = await saveGameResult(
+        const { totalScore } = await saveGameResult(
           player.userId,
           player.answers,
           duel.category,
@@ -662,7 +662,7 @@ async function endDuel(
           },
         });
 
-        leaderboardUpdates.push({ userId: player.userId, totalScore, isHighScore });
+        leaderboardUpdates.push({ userId: player.userId, totalScore });
       }
 
       // Registrar el duelo completo para historial head-to-head
@@ -679,15 +679,10 @@ async function endDuel(
     });
 
     // El historial de duelos no debe depender de disponibilidad de leaderboard/Redis.
-    for (const { userId, totalScore, isHighScore } of leaderboardUpdates) {
-      try {
-        if (isHighScore) {
-          await updateLeaderboardScore(userId, totalScore);
-        }
-        await updateSeasonLeaderboardScore(userId, totalScore);
-      } catch (error) {
-        console.warn(`[duel] No se pudo actualizar leaderboard para ${userId}:`, error);
-      }
+    // updateLeaderboardScore / updateSeasonLeaderboardScore son idempotentes y nunca lanzan.
+    for (const { userId, totalScore } of leaderboardUpdates) {
+      await updateLeaderboardScore(userId, totalScore);
+      await updateSeasonLeaderboardScore(userId, totalScore);
     }
   } catch (error) {
     console.error(`Error guardando resultados del duelo ${duel.id}:`, error);

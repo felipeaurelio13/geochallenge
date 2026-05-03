@@ -7,7 +7,7 @@ import { Server as SocketIOServer } from 'socket.io';
 import { config } from './config/env.js';
 import { connectDatabase, disconnectDatabase, prisma } from './config/database.js';
 import { getRedis, disconnectRedis } from './config/redis.js';
-import { syncLeaderboardFromDatabase, syncSeasonLeaderboardFromDatabase } from './services/leaderboard.service.js';
+import { rebuildAllLeaderboards } from './services/leaderboard.service.js';
 
 // Controllers
 import authController from './controllers/auth.controller.js';
@@ -99,14 +99,25 @@ async function start() {
 🔗 Frontend URL: ${config.frontend.url}
       `);
 
-      void Promise.all([
-        syncLeaderboardFromDatabase()
-          .then((n) => console.log(`✅ Leaderboard global synced: ${n} users loaded into Redis`))
-          .catch((err) => console.error('⚠️  Global leaderboard sync failed (non-fatal):', err)),
-        syncSeasonLeaderboardFromDatabase()
-          .then((n) => console.log(`✅ Season leaderboard synced: ${n} users loaded into Redis`))
-          .catch((err) => console.error('⚠️  Season leaderboard sync failed (non-fatal):', err)),
-      ]);
+      // Rebuild retroactivo en cada arranque:
+      //   1. Recomputa User.highScore desde GameResult (corrige desincronizaciones históricas).
+      //   2. Repuebla Redis global desde DB.
+      //   3. Repuebla Redis para CADA temporada con actividad.
+      // Es idempotente y rápido (groupBy + updateMany solo cuando hay diff). Para deshabilitarlo
+      // (e.g. debugging), setear DISABLE_LEADERBOARD_AUTOREBUILD=true.
+      if (process.env.DISABLE_LEADERBOARD_AUTOREBUILD === 'true') {
+        console.log('ℹ️  Leaderboard auto-rebuild disabled by env flag');
+      } else {
+        void rebuildAllLeaderboards()
+          .then((r) => {
+            console.log(
+              `✅ Leaderboards rebuilt: highScores+${r.highScoresUpdated}, global=${r.globalLoaded}, seasons=[${r.seasonsLoaded
+                .map((s) => `${s.seasonId}:${s.loaded}`)
+                .join(', ')}]`
+            );
+          })
+          .catch((err) => console.error('⚠️  Leaderboard rebuild failed (non-fatal):', err));
+      }
     });
   } catch (error) {
     console.error('Failed to start server:', error);

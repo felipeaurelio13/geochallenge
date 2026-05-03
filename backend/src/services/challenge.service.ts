@@ -324,9 +324,7 @@ export class ChallengeService {
             },
           });
 
-          if (isHighScore) {
-            await updateLeaderboardScore(p.userId, newScore);
-          }
+          await updateLeaderboardScore(p.userId, newScore);
           await updateSeasonLeaderboardScore(p.userId, newScore);
         })
       );

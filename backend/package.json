@@ -17,7 +17,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "tsc --noEmit",
-    "validate:images": "tsx src/scripts/validate-images.ts"
+    "validate:images": "tsx src/scripts/validate-images.ts",
+    "rebuild:leaderboards": "tsx src/scripts/rebuild-leaderboards.ts"
   },
   "keywords": [
     "geochallenge",

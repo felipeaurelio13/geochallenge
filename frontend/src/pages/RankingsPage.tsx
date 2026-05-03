@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
+import type { LeaderboardScope } from '../types';
 import { useApi, useDebounce } from '../hooks';
 import { LoadingSpinner } from '../components';
 import { PageHeader } from '../components/molecules/PageHeader';
@@ -24,9 +25,10 @@ type RankingsResponse = {
   avgScore?: number | null;
   userRank: number | null;
   userScore: number | null;
+  scope: LeaderboardScope;
+  season?: string | null;
 };
 
-const USE_BACKEND_RANK = import.meta.env.VITE_RANKING_USE_BACKEND_RANK === 'true';
 const RANKING_NEIGHBORS_ENABLED = import.meta.env.VITE_RANKING_NEIGHBORS_ENABLED === 'true';
 
 const PODIUM_COLORS = {
@@ -118,40 +120,42 @@ export function RankingsPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [search, setSearch] = useState('');
+  const [scope, setScope] = useState<LeaderboardScope>('global');
   const debouncedSearch = useDebounce(search, 200);
   const [deferredUserRank, setDeferredUserRank] = useState<number | null>(null);
   const [deferredUserScore, setDeferredUserScore] = useState<number | null>(null);
   const [neighborEntries, setNeighborEntries] = useState<LeaderboardEntry[]>([]);
   const [neighborsLoading, setNeighborsLoading] = useState(false);
 
-  const fetchRankings = useCallback(async () => {
-    const leaderboardData = await api.getLeaderboard(50);
+  const fetchRankings = useCallback(async (): Promise<RankingsResponse> => {
+    const data = await api.getLeaderboard(50, scope);
 
     return {
-      leaderboard: leaderboardData.leaderboard.map((entry, index) => ({
-        rank:
-          USE_BACKEND_RANK && typeof entry.rank === 'number' && Number.isFinite(entry.rank)
-            ? entry.rank
-            : index + 1,
+      leaderboard: data.leaderboard.map((entry) => ({
+        // El rank siempre viene del backend (fuente de verdad).
+        // Si por alguna razón faltara, calculamos como fallback.
+        rank: typeof entry.rank === 'number' && Number.isFinite(entry.rank) ? entry.rank : 0,
         userId: entry.userId,
         username: entry.username,
         score: entry.score,
-        isCurrentUser: entry.username === user?.username,
+        isCurrentUser: !!user?.username && entry.username === user.username,
       })),
-      totalPlayers: leaderboardData.totalPlayers,
-      topScore: leaderboardData.topScore,
-      avgScore: leaderboardData.avgScore,
-      userRank: leaderboardData.userRank?.rank ?? null,
-      userScore: leaderboardData.userRank?.score ?? null,
+      totalPlayers: data.totalPlayers,
+      topScore: data.topScore,
+      avgScore: data.avgScore,
+      userRank: data.userRank?.rank ?? null,
+      userScore: data.userRank?.score ?? null,
+      scope: data.scope ?? scope,
+      season: data.season ?? null,
     };
-  }, [user?.username]);
+  }, [scope, user?.username]);
 
   const useApiOptions = useMemo(
     () => ({
-      cacheKey: `rankings-${user?.username ?? 'anonymous'}`,
+      cacheKey: `rankings-${scope}-${user?.username ?? 'anonymous'}`,
       ttlMs: 60_000,
     }),
-    [user?.username]
+    [scope, user?.username]
   );
 
   const { data, error, isLoading, run, invalidate } = useApi<RankingsResponse>(fetchRankings, useApiOptions);
@@ -160,26 +164,26 @@ export function RankingsPage() {
     void run();
   }, [run]);
 
+  // Reset neighbors al cambiar de scope para no mostrar stale data
   useEffect(() => {
-    if (!data) {
-      return;
-    }
+    setDeferredUserRank(null);
+    setDeferredUserScore(null);
+    setNeighborEntries([]);
+  }, [scope]);
+
+  useEffect(() => {
+    if (!data) return;
 
     const shouldLoadRankContext = !!user && (RANKING_NEIGHBORS_ENABLED || data.userRank === null);
-
-    if (!shouldLoadRankContext) {
-      return;
-    }
+    if (!shouldLoadRankContext) return;
 
     let cancelled = false;
     setNeighborsLoading(true);
 
     void api
-      .getMyRank()
+      .getMyRank(scope)
       .then((rankContext) => {
-        if (cancelled) {
-          return;
-        }
+        if (cancelled) return;
 
         if (data.userRank === null) {
           setDeferredUserRank(rankContext.userRank?.rank ?? null);
@@ -191,24 +195,17 @@ export function RankingsPage() {
         }
       })
       .catch(() => {
-        if (cancelled) {
-          return;
-        }
-
-        if (RANKING_NEIGHBORS_ENABLED) {
-          setNeighborEntries([]);
-        }
+        if (cancelled) return;
+        if (RANKING_NEIGHBORS_ENABLED) setNeighborEntries([]);
       })
       .finally(() => {
-        if (!cancelled) {
-          setNeighborsLoading(false);
-        }
+        if (!cancelled) setNeighborsLoading(false);
       });
 
     return () => {
       cancelled = true;
     };
-  }, [data, user?.username]);
+  }, [data, scope, user]);
 
   const resolvedUserRank = data?.userRank ?? deferredUserRank;
   const resolvedUserScore = data?.userScore ?? deferredUserScore;
@@ -216,11 +213,7 @@ export function RankingsPage() {
   const filteredLeaderboard = useMemo(() => {
     const source = data?.leaderboard ?? [];
     const normalizedSearch = debouncedSearch.trim().toLowerCase();
-
-    if (!normalizedSearch) {
-      return source;
-    }
-
+    if (!normalizedSearch) return source;
     return source.filter((entry) => entry.username.toLowerCase().includes(normalizedSearch));
   }, [data?.leaderboard, debouncedSearch]);
 
@@ -239,7 +232,6 @@ export function RankingsPage() {
     return filteredLeaderboard.filter((e) => e.rank > 3);
   }, [filteredLeaderboard, isSearching]);
 
-  // Reorder top3 for podium: 2nd, 1st, 3rd
   const podiumOrder = useMemo(() => {
     const first = top3.find((e) => e.rank === 1);
     const second = top3.find((e) => e.rank === 2);
@@ -247,11 +239,39 @@ export function RankingsPage() {
     return [second, first, third].filter(Boolean) as LeaderboardEntry[];
   }, [top3]);
 
+  const statsTitle = scope === 'season' ? t('rankings.seasonStats') : t('rankings.globalStats');
+
   return (
     <div className="h-full min-h-0 overflow-y-auto bg-[var(--color-bg-app)]">
       <PageHeader title={`🏆 ${t('rankings.title')}`} backTo="/menu" backLabel={`← ${t('common.back')}`} />
 
       <main className="max-w-2xl mx-auto px-4 py-6 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] sm:px-6">
+        {/* Scope toggle Global / Mes */}
+        <div
+          role="tablist"
+          aria-label={t('rankings.scopeAriaLabel', { defaultValue: 'Cambiar tipo de ranking' })}
+          className="mb-5 inline-flex w-full overflow-hidden rounded-xl border border-gray-700 bg-gray-800/60 p-1"
+        >
+          {(['global', 'season'] as const).map((s) => {
+            const isActive = scope === s;
+            return (
+              <button
+                key={s}
+                role="tab"
+                aria-selected={isActive}
+                onClick={() => setScope(s)}
+                className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
+                  isActive ? 'bg-primary text-white shadow' : 'text-gray-300 hover:text-white'
+                }`}
+              >
+                {t(`rankings.${s}`)}
+                {s === 'season' && data?.season && isActive && (
+                  <span className="ml-2 text-xs font-normal text-white/80">{data.season}</span>
+                )}
+              </button>
+            );
+          })}
+        </div>
 
         {/* My rank card — only when outside top 50 */}
         {resolvedUserRank && resolvedUserRank > 50 && (
@@ -434,7 +454,7 @@ export function RankingsPage() {
             {filteredLeaderboard.length > 0 && (
               <div className="mt-8 rounded-2xl border border-gray-700/60 bg-gray-800/60 overflow-hidden">
                 <div className="px-5 py-4 border-b border-gray-700/60">
-                  <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-400">{t('rankings.globalStats')}</h3>
+                  <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-400">{statsTitle}</h3>
                 </div>
                 <div className="grid grid-cols-3 divide-x divide-gray-700/60">
                   <div className="px-4 py-4 text-center">

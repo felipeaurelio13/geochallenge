@@ -20,12 +20,16 @@ vi.mock('react-i18next', () => ({
         'common.back': 'Volver',
         'common.search': 'Buscar',
         'common.retry': 'Reintentar',
+        'common.clear': 'Limpiar búsqueda',
         'rankings.title': 'Rankings',
         'rankings.loading': 'Cargando ranking...',
         'rankings.empty': 'Aún no hay jugadores en el ranking',
         'rankings.noSearchResults': 'No hay resultados para esta búsqueda',
         'rankings.searchPlaceholder': options?.defaultValue ?? 'Buscar jugador...',
+        'rankings.scopeAriaLabel': 'Cambiar tipo de ranking',
         'rankings.you': 'Tú',
+        'rankings.global': 'Global',
+        'rankings.season': 'Mes',
         'rankings.stats': 'Estadísticas',
         'rankings.totalPlayers': 'Jugadores',
         'rankings.topScore': 'Mejor puntuación',
@@ -33,6 +37,7 @@ vi.mock('react-i18next', () => ({
         'rankings.filteredResults': 'Resultados filtrados',
         'rankings.otherPlayers': 'Otros jugadores',
         'rankings.globalStats': 'Estadísticas globales',
+        'rankings.seasonStats': 'Estadísticas del mes',
       };
 
       return translations[key] ?? key;
@@ -48,8 +53,8 @@ vi.mock('../context/AuthContext', () => ({
 
 vi.mock('../services/api', () => ({
   api: {
-    getLeaderboard: () => mocks.getLeaderboardMock(),
-    getMyRank: () => mocks.getMyRankMock(),
+    getLeaderboard: (limit?: number, scope?: 'global' | 'season') => mocks.getLeaderboardMock(limit, scope),
+    getMyRank: (scope?: 'global' | 'season') => mocks.getMyRankMock(scope),
   },
 }));
 
@@ -58,9 +63,8 @@ describe('RankingsPage', () => {
     vi.clearAllMocks();
     mocks.getLeaderboardMock.mockReset();
     mocks.getMyRankMock.mockReset();
-    vi.stubEnv('VITE_RANKING_USE_BACKEND_RANK', 'true');
     vi.stubEnv('VITE_RANKING_NEIGHBORS_ENABLED', 'false');
-    mocks.getMyRankMock.mockResolvedValue({ userRank: null, neighbors: [] });
+    mocks.getMyRankMock.mockResolvedValue({ userRank: null, neighbors: [], scope: 'global' });
   });
 
   afterEach(() => {
@@ -81,6 +85,7 @@ describe('RankingsPage', () => {
       topScore: 1200,
       avgScore: 950,
       userRank: { rank: 1, score: 1200 },
+      scope: 'global',
     });
 
     const { container } = render(<RankingsPage />);
@@ -89,6 +94,7 @@ describe('RankingsPage', () => {
     await waitFor(() => {
       expect(mocks.getLeaderboardMock).toHaveBeenCalledTimes(1);
     });
+    expect(mocks.getLeaderboardMock).toHaveBeenCalledWith(50, 'global');
     expect(screen.getByText('🥈')).toBeInTheDocument();
     expect(screen.getByText('(Tú)')).toBeInTheDocument();
 
@@ -101,7 +107,7 @@ describe('RankingsPage', () => {
     expect(screen.getByText('(Tú)')).toHaveClass('text-primary');
   });
 
-  it('usa rank provisto por backend y no index + 1', async () => {
+  it('siempre usa el rank provisto por el backend (no recalcula con index)', async () => {
     vi.resetModules();
     const { RankingsPage } = await import('../pages/RankingsPage');
 
@@ -114,6 +120,7 @@ describe('RankingsPage', () => {
       topScore: 1200,
       avgScore: 1150,
       userRank: { rank: 11, score: 1200 },
+      scope: 'global',
     });
 
     render(<RankingsPage />);
@@ -121,6 +128,44 @@ describe('RankingsPage', () => {
     expect(await screen.findByText('#11')).toBeInTheDocument();
     expect(screen.getByText('#15')).toBeInTheDocument();
     expect(screen.queryByText('🥇')).not.toBeInTheDocument();
+  });
+
+  it('cambia a scope season cuando el usuario clickea el tab Mes', async () => {
+    vi.resetModules();
+    const { RankingsPage } = await import('../pages/RankingsPage');
+
+    mocks.getLeaderboardMock
+      .mockResolvedValueOnce({
+        leaderboard: [{ rank: 1, userId: 'u-1', username: 'neo', score: 1000 }],
+        totalPlayers: 1,
+        topScore: 1000,
+        avgScore: 1000,
+        userRank: { rank: 1, score: 1000 },
+        scope: 'global',
+      })
+      .mockResolvedValueOnce({
+        leaderboard: [{ rank: 1, userId: 'u-1', username: 'neo', score: 500 }],
+        totalPlayers: 1,
+        topScore: 500,
+        avgScore: 500,
+        userRank: { rank: 1, score: 500 },
+        scope: 'season',
+        season: '2026-05',
+      });
+
+    render(<RankingsPage />);
+
+    expect(await screen.findByText('🥇')).toBeInTheDocument();
+    expect(mocks.getLeaderboardMock).toHaveBeenCalledWith(50, 'global');
+
+    const seasonTab = screen.getByRole('tab', { name: /Mes/ });
+    fireEvent.click(seasonTab);
+
+    await waitFor(() => {
+      expect(mocks.getLeaderboardMock).toHaveBeenCalledWith(50, 'season');
+    });
+    expect(await screen.findByText('Estadísticas del mes')).toBeInTheDocument();
+    expect(screen.getByText('2026-05')).toBeInTheDocument();
   });
 
   it('permite búsqueda con resultado y sin resultado sin romper métricas globales', async () => {
@@ -136,6 +181,7 @@ describe('RankingsPage', () => {
       topScore: 7777,
       avgScore: 1234,
       userRank: { rank: 4, score: 1200 },
+      scope: 'global',
     });
 
     render(<RankingsPage />);
@@ -164,6 +210,7 @@ describe('RankingsPage', () => {
       topScore: 1200,
       avgScore: 1200,
       userRank: { rank: 1, score: 1200 },
+      scope: 'global',
     });
 
     vi.doMock('../hooks', async () => {
@@ -194,6 +241,7 @@ describe('RankingsPage', () => {
               avgScore: response.avgScore,
               userRank: response.userRank?.rank ?? null,
               userScore: response.userRank?.score ?? null,
+              scope: response.scope,
             });
             setError(null);
             setIsLoading(false);
