@@ -1,4 +1,5 @@
 import { createBrowserRouter, RouterProvider, Navigate, Outlet } from 'react-router-dom';
+import { buttonVariants } from './components/atoms/Button';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { GameProvider } from './context/GameContext';
 import {
@@ -59,15 +60,12 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 // Router error fallback
 function RouteErrorFallback() {
   return (
-    <div className="h-full min-h-0 bg-gray-900 flex items-center justify-center px-4">
+    <div className="h-full min-h-0 bg-[var(--color-bg-app)] flex items-center justify-center px-4">
       <div className="text-center">
         <div className="text-6xl mb-4">:(</div>
         <h2 className="text-2xl font-bold text-white mb-2">Algo salio mal</h2>
-        <p className="text-gray-400 mb-6">Ha ocurrido un error inesperado</p>
-        <a
-          href={toAppPath('/menu')}
-          className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/80 transition-colors inline-block"
-        >
+        <p className="text-[var(--color-text-muted)] mb-6">Ha ocurrido un error inesperado</p>
+        <a href={toAppPath('/menu')} className={buttonVariants({ variant: 'primary', size: 'lg' })}>
           Volver al menu
         </a>
       </div>

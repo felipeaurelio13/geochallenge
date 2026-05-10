@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Button } from '../atoms/Button';
 
 type ModalContextValue = {
   onClose?: () => void;
@@ -101,16 +102,16 @@ function Title({ children }: { children: React.ReactNode }) {
 }
 
 function Panel({ children }: { children: React.ReactNode }) {
-  return <div className="w-full max-w-md rounded-2xl border border-gray-700 bg-gray-900 p-4 shadow-xl">{children}</div>;
+  return <div className="w-full max-w-md rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-xl">{children}</div>;
 }
 
 function CloseButton({ children }: { children?: React.ReactNode }) {
   const { onClose } = useContext(ModalContext);
   const { t } = useTranslation();
   return (
-    <button type="button" className="rounded-lg border border-gray-700 px-3 py-2 text-sm text-gray-200" onClick={onClose}>
+    <Button type="button" variant="secondary" size="sm" onClick={onClose}>
       {children ?? t('common.close')}
-    </button>
+    </Button>
   );
 }
 

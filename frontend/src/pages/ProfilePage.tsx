@@ -241,7 +241,7 @@ export function ProfilePage() {
 
   if (!user) {
     return (
-      <div className="h-full min-h-0 bg-gray-900 flex items-center justify-center">
+      <div className="h-full min-h-0 bg-[var(--color-bg-app)] flex items-center justify-center">
         <LoadingSpinner size="lg" />
       </div>
     );
@@ -272,14 +272,14 @@ export function ProfilePage() {
         <div className="text-center mb-6">
           <UserAvatar username={user.username} size="xl" className="mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-white">{user.username}</h2>
-          <p className="text-gray-400">{user.email}</p>
+          <p className="text-[var(--color-text-muted)]">{user.email}</p>
         </div>
 
         {error && <Alert type="error" className="mb-4">{error}</Alert>}
         {success && <Alert type="success" className="mb-4">{success}</Alert>}
 
         {/* Tab bar */}
-        <div className="flex rounded-xl bg-gray-800 p-1 mb-6">
+        <div className="flex rounded-xl bg-[var(--color-surface-muted)] p-1 mb-6">
           {TABS.map((tab) => (
             <button
               key={tab.key}
@@ -287,7 +287,7 @@ export function ProfilePage() {
               className={`flex-1 rounded-lg py-2 text-sm font-medium transition-colors ${
                 activeTab === tab.key
                   ? 'bg-primary text-white'
-                  : 'text-gray-400 hover:text-white'
+                  : 'text-[var(--color-text-muted)] hover:text-white'
               }`}
             >
               {tab.label}
@@ -298,7 +298,7 @@ export function ProfilePage() {
         {/* ── Resumen tab ── */}
         {activeTab === 'summary' && (
           <>
-            <div className="bg-gray-800 rounded-xl p-6 mb-6">
+            <div className="bg-[var(--color-surface)] rounded-xl p-6 mb-6">
               <h3 className="text-lg font-semibold text-white mb-4">{t('profile.statistics')}</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <StatCard value={user.highScore} label={t('stats.highScore')} color="primary" />
@@ -308,16 +308,18 @@ export function ProfilePage() {
               </div>
             </div>
 
-            <div className="bg-gray-800 rounded-xl p-6">
+            <div className="bg-[var(--color-surface)] rounded-xl p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-white">{t('profile.settings')}</h3>
                 {!isEditing && (
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => setIsEditing(true)}
-                    className="min-h-10 rounded-lg px-3 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/10 hover:text-primary/80"
+                    className="text-primary hover:bg-primary/10"
                   >
                     {t('profile.edit')}
-                  </button>
+                  </Button>
                 )}
               </div>
 
@@ -333,7 +335,7 @@ export function ProfilePage() {
                       maxLength={20}
                     />
                   ) : (
-                    <div className="px-4 py-3 bg-gray-900 rounded-lg text-white">{user.username}</div>
+                    <div className="px-4 py-3 bg-[var(--color-surface-muted)] rounded-lg text-[var(--color-text-primary)]">{user.username}</div>
                   )}
                 </div>
 
@@ -354,7 +356,7 @@ export function ProfilePage() {
                       ))}
                     </div>
                   ) : (
-                    <div className="px-4 py-3 bg-gray-900 rounded-lg text-white">
+                    <div className="px-4 py-3 bg-[var(--color-surface-muted)] rounded-lg text-[var(--color-text-primary)]">
                       {preferredLanguage === 'es' ? t('profile.languageEs') : t('profile.languageEn')}
                     </div>
                   )}
@@ -362,13 +364,13 @@ export function ProfilePage() {
 
                 <div>
                   <FormLabel>{t('auth.email')}</FormLabel>
-                  <div className="px-4 py-3 bg-gray-900 rounded-lg text-gray-400">{user.email}</div>
+                  <div className="px-4 py-3 bg-[var(--color-surface-muted)] rounded-lg text-[var(--color-text-muted)]">{user.email}</div>
                 </div>
 
                 {user.createdAt && (
                   <div>
                     <FormLabel>{t('profile.memberSince')}</FormLabel>
-                    <div className="px-4 py-3 bg-gray-900 rounded-lg text-gray-400">
+                    <div className="px-4 py-3 bg-[var(--color-surface-muted)] rounded-lg text-[var(--color-text-muted)]">
                       {new Date(user.createdAt).toLocaleDateString()}
                     </div>
                   </div>
@@ -377,36 +379,41 @@ export function ProfilePage() {
 
               {isEditing && (
                 <div className="flex gap-3 mt-6">
-                  <button
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    fullWidth
                     onClick={handleSave}
                     disabled={isLoading}
-                    className="flex-1 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary/80 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                    className="flex items-center justify-center gap-2"
                   >
                     {isLoading ? <LoadingSpinner size="sm" /> : t('common.save')}
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="lg"
+                    fullWidth
                     onClick={handleCancel}
                     disabled={isLoading}
-                    className="flex-1 py-3 bg-gray-700 text-white font-bold rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50"
                   >
                     {t('common.cancel')}
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>
 
-            <div className="bg-gray-800 rounded-xl p-6 mt-6">
+            <div className="bg-[var(--color-surface)] rounded-xl p-6 mt-6">
               <h3 className="text-lg font-semibold text-white mb-4">
                 {t('profile.gamePreferences', 'Preferencias de juego')}
               </h3>
 
               <div className="space-y-3">
-                <label className="pressable flex cursor-pointer items-center justify-between rounded-lg border border-gray-700 bg-gray-900 px-4 py-3 hover:border-gray-600">
+                <label className="pressable flex cursor-pointer items-center justify-between rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-4 py-3 hover:border-gray-500">
                   <div className="pr-4">
                     <div className="text-sm font-medium text-white">
                       {t('profile.hapticsLabel', 'Vibración háptica')}
                     </div>
-                    <div className="text-xs text-gray-400">
+                    <div className="text-xs text-[var(--color-text-muted)]">
                       {t('profile.hapticsDescription', 'Feedback táctil en toques, aciertos y errores')}
                     </div>
                   </div>
@@ -434,25 +441,25 @@ export function ProfilePage() {
             {/* W / D / L summary cards */}
             {activePeriodStats ? (
               <div className="grid grid-cols-3 gap-3">
-                <div className="bg-gray-800 rounded-xl p-4 text-center">
+                <div className="bg-[var(--color-surface)] rounded-xl p-4 text-center">
                   <div className="text-2xl font-bold text-green-400">{activePeriodStats.wins}</div>
-                  <div className="text-xs text-gray-400 mt-1">{t('duelHistory.stats.wins')}</div>
+                  <div className="text-xs text-[var(--color-text-muted)] mt-1">{t('duelHistory.stats.wins')}</div>
                 </div>
-                <div className="bg-gray-800 rounded-xl p-4 text-center">
-                  <div className="text-2xl font-bold text-gray-400">{activePeriodStats.draws}</div>
-                  <div className="text-xs text-gray-400 mt-1">{t('duelHistory.stats.draws')}</div>
+                <div className="bg-[var(--color-surface)] rounded-xl p-4 text-center">
+                  <div className="text-2xl font-bold text-[var(--color-text-secondary)]">{activePeriodStats.draws}</div>
+                  <div className="text-xs text-[var(--color-text-muted)] mt-1">{t('duelHistory.stats.draws')}</div>
                 </div>
-                <div className="bg-gray-800 rounded-xl p-4 text-center">
+                <div className="bg-[var(--color-surface)] rounded-xl p-4 text-center">
                   <div className="text-2xl font-bold text-red-400">{activePeriodStats.losses}</div>
-                  <div className="text-xs text-gray-400 mt-1">{t('duelHistory.stats.losses')}</div>
+                  <div className="text-xs text-[var(--color-text-muted)] mt-1">{t('duelHistory.stats.losses')}</div>
                 </div>
               </div>
             ) : (
               <div className="grid grid-cols-3 gap-3">
                 {[0, 1, 2].map((i) => (
-                  <div key={i} className="bg-gray-800 rounded-xl p-4 text-center animate-pulse">
-                    <div className="h-7 bg-gray-700 rounded mb-2 mx-auto w-10" />
-                    <div className="h-3 bg-gray-700 rounded mx-auto w-14" />
+                  <div key={i} className="bg-[var(--color-surface)] rounded-xl p-4 text-center animate-pulse">
+                    <div className="h-7 bg-[var(--color-surface-muted)] rounded mb-2 mx-auto w-10" />
+                    <div className="h-3 bg-[var(--color-surface-muted)] rounded mx-auto w-14" />
                   </div>
                 ))}
               </div>
@@ -467,7 +474,7 @@ export function ProfilePage() {
                   className={`flex-1 rounded-lg py-2 text-xs font-medium transition-colors ${
                     duelPeriod === p.key
                       ? 'bg-primary text-white'
-                      : 'bg-gray-800 text-gray-400 hover:text-white'
+                      : 'bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:text-white'
                   }`}
                 >
                   {p.label}
@@ -476,17 +483,17 @@ export function ProfilePage() {
             </div>
 
             {/* Match list */}
-            <div className="bg-gray-800 rounded-xl overflow-hidden">
+            <div className="bg-[var(--color-surface)] rounded-xl overflow-hidden">
               {duelLoading && duelMatches.length === 0 ? (
                 <div className="flex justify-center py-10">
                   <LoadingSpinner size="md" />
                 </div>
               ) : duelMatches.length === 0 ? (
-                <p className="text-center text-gray-500 py-10 text-sm">
+                <p className="text-center text-[var(--color-text-muted)] py-10 text-sm">
                   {t('duelHistory.noMatches')}
                 </p>
               ) : (
-                <ul className="divide-y divide-gray-700">
+                <ul className="divide-y divide-[var(--color-border)]">
                   {duelMatches.map((m) => (
                     <li key={m.id} className="flex items-center gap-3 px-4 py-3">
                       <UserAvatar username={m.opponentUsername} size="sm" />
@@ -494,7 +501,7 @@ export function ProfilePage() {
                         <div className="text-sm font-medium text-white truncate">
                           {m.opponentUsername}
                         </div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-[var(--color-text-muted)]">
                           {new Date(m.createdAt).toLocaleDateString()}
                           {m.category && (
                             <span className="ml-2 capitalize">{m.category.toLowerCase()}</span>
@@ -508,12 +515,12 @@ export function ProfilePage() {
                               ? 'bg-green-500/20 text-green-400'
                               : m.result === 'loss'
                               ? 'bg-red-500/20 text-red-400'
-                              : 'bg-gray-700 text-gray-400'
+                              : 'bg-[var(--color-surface-muted)] text-[var(--color-text-muted)]'
                           }`}
                         >
                           {t(`duelHistory.result.${m.result}`)}
                         </span>
-                        <div className="text-xs text-gray-400">
+                        <div className="text-xs text-[var(--color-text-muted)]">
                           {m.myScore} – {m.opponentScore}
                         </div>
                       </div>
@@ -528,7 +535,7 @@ export function ProfilePage() {
               <button
                 onClick={handleLoadMore}
                 disabled={duelLoading}
-                className="w-full py-3 bg-gray-800 text-gray-400 hover:text-white rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
+                className="w-full py-3 bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:text-white rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
               >
                 {duelLoading ? <LoadingSpinner size="sm" /> : t('duelHistory.loadMore')}
               </button>
@@ -539,17 +546,17 @@ export function ProfilePage() {
         {/* ── Historial tab ── */}
         {activeTab === 'history' && (
           <div className="space-y-4">
-            <div className="bg-gray-800 rounded-xl overflow-hidden">
+            <div className="bg-[var(--color-surface)] rounded-xl overflow-hidden">
               {historyLoading && historyEntries === null ? (
                 <div className="flex justify-center py-10">
                   <LoadingSpinner size="md" />
                 </div>
               ) : !historyEntries || historyEntries.length === 0 ? (
-                <p className="text-center text-gray-500 py-10 text-sm px-4">
+                <p className="text-center text-[var(--color-text-muted)] py-10 text-sm px-4">
                   {t('gameHistory.empty')}
                 </p>
               ) : (
-                <ul className="divide-y divide-gray-700">
+                <ul className="divide-y divide-[var(--color-border)]">
                   {historyEntries.map((entry) => {
                     const accuracy = entry.totalQuestions > 0
                       ? Math.round((entry.correctCount / entry.totalQuestions) * 100)
@@ -572,12 +579,12 @@ export function ProfilePage() {
                           <div className="text-sm font-medium text-white truncate">
                             {t(`gameHistory.modes.${entry.gameMode}`, entry.gameMode)}
                             {categoryLabel && (
-                              <span className="ml-2 text-xs font-normal text-gray-400">
+                              <span className="ml-2 text-xs font-normal text-[var(--color-text-muted)]">
                                 · {categoryLabel}
                               </span>
                             )}
                           </div>
-                          <div className="text-xs text-gray-500">
+                          <div className="text-xs text-[var(--color-text-muted)]">
                             {new Date(entry.createdAt).toLocaleDateString()}
                             <span className="mx-1.5">·</span>
                             {t('gameHistory.accuracy', {
@@ -612,28 +619,30 @@ export function ProfilePage() {
                   ← {t('common.back')}
                 </button>
 
-                <div className="bg-gray-800 rounded-xl p-4">
+                <div className="bg-[var(--color-surface)] rounded-xl p-4">
                   <div className="flex items-center gap-3 mb-4">
                     <UserAvatar username={selectedOpponent.opponent.username} size="md" />
                     <div className="flex-1 min-w-0">
                       <div className="font-semibold text-white truncate">
                         {selectedOpponent.opponent.username}
                       </div>
-                      <div className="text-xs text-gray-400 truncate">
+                      <div className="text-xs text-[var(--color-text-muted)] truncate">
                         {t('duelHistory.vsRecord', { name: selectedOpponent.opponent.username })}
                       </div>
                     </div>
                   </div>
 
-                  <button
-                    type="button"
+                  <Button
+                    variant="primary"
+                    size="md"
+                    fullWidth
                     onClick={() => navigate(`/duel?category=${challengeCategory}`)}
-                    className="pressable mb-4 flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-primary/80"
+                    className="pressable mb-4 flex items-center justify-center gap-2"
                   >
                     <span aria-hidden="true">⚔️</span>
                     <span>{t('duelHistory.challengeAgain')}</span>
-                  </button>
-                  <p className="-mt-3 mb-4 text-center text-[11px] text-gray-500">
+                  </Button>
+                  <p className="-mt-3 mb-4 text-center text-[11px] text-[var(--color-text-muted)]">
                     {t('duelHistory.challengeHint', {
                       category: t(CATEGORY_LABEL_KEY[challengeCategory] || 'categories.mixed'),
                     })}
@@ -645,12 +654,12 @@ export function ProfilePage() {
                       const s = selectedOpponent.periods[p.key];
                       return (
                         <div key={p.key} className="flex items-center gap-3">
-                          <span className="text-xs text-gray-500 w-14 shrink-0">{p.label}</span>
+                          <span className="text-xs text-[var(--color-text-muted)] w-14 shrink-0">{p.label}</span>
                           <div className="flex gap-1 flex-1">
                             <span className="flex-1 text-center py-1 rounded text-xs font-bold bg-green-500/15 text-green-400">
                               {s.wins}V
                             </span>
-                            <span className="flex-1 text-center py-1 rounded text-xs font-bold bg-gray-700 text-gray-400">
+                            <span className="flex-1 text-center py-1 rounded text-xs font-bold bg-[var(--color-surface-muted)] text-[var(--color-text-muted)]">
                               {s.draws}E
                             </span>
                             <span className="flex-1 text-center py-1 rounded text-xs font-bold bg-red-500/15 text-red-400">
@@ -665,15 +674,15 @@ export function ProfilePage() {
 
                 {/* Recent matches */}
                 {selectedOpponent.recentMatches.length > 0 && (
-                  <div className="bg-gray-800 rounded-xl overflow-hidden">
+                  <div className="bg-[var(--color-surface)] rounded-xl overflow-hidden">
                     <h4 className="px-4 pt-4 pb-2 text-sm font-semibold text-white">
                       Últimas partidas
                     </h4>
-                    <ul className="divide-y divide-gray-700">
+                    <ul className="divide-y divide-[var(--color-border)]">
                       {selectedOpponent.recentMatches.map((m) => (
                         <li key={m.id} className="flex items-center gap-3 px-4 py-3">
                           <div className="flex-1 min-w-0">
-                            <div className="text-xs text-gray-500">
+                            <div className="text-xs text-[var(--color-text-muted)]">
                               {new Date(m.createdAt).toLocaleDateString()}
                               {m.category && (
                                 <span className="ml-2 capitalize">{m.category.toLowerCase()}</span>
@@ -687,12 +696,12 @@ export function ProfilePage() {
                                   ? 'bg-green-500/20 text-green-400'
                                   : m.result === 'loss'
                                   ? 'bg-red-500/20 text-red-400'
-                                  : 'bg-gray-700 text-gray-400'
+                                  : 'bg-[var(--color-surface-muted)] text-[var(--color-text-muted)]'
                               }`}
                             >
                               {t(`duelHistory.result.${m.result}`)}
                             </span>
-                            <div className="text-xs text-gray-400">
+                            <div className="text-xs text-[var(--color-text-muted)]">
                               {m.myScore} – {m.opponentScore}
                             </div>
                           </div>
@@ -712,7 +721,7 @@ export function ProfilePage() {
                   onChange={(e) => setH2hSearch(e.target.value)}
                 />
 
-                <div className="bg-gray-800 rounded-xl overflow-hidden">
+                <div className="bg-[var(--color-surface)] rounded-xl overflow-hidden">
                   <h4 className="px-4 pt-4 pb-2 text-sm font-semibold text-white">
                     {t('duelHistory.recentOpponents')}
                   </h4>
@@ -722,29 +731,29 @@ export function ProfilePage() {
                       <LoadingSpinner size="md" />
                     </div>
                   ) : opponents.length === 0 ? (
-                    <p className="text-center text-gray-500 py-8 text-sm px-4">
+                    <p className="text-center text-[var(--color-text-muted)] py-8 text-sm px-4">
                       {t('duelHistory.noOpponents')}
                     </p>
                   ) : (
-                    <ul className="divide-y divide-gray-700">
+                    <ul className="divide-y divide-[var(--color-border)]">
                       {opponents.map((opp) => (
                         <li key={opp.id}>
                           <button
                             onClick={() => handleSelectOpponent(opp.id)}
                             disabled={h2hLoading}
-                            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-700 transition-colors text-left disabled:opacity-50"
+                            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[var(--color-surface-muted)] transition-colors text-left disabled:opacity-50"
                           >
                             <UserAvatar username={opp.username} size="sm" />
                             <div className="flex-1 min-w-0">
                               <div className="text-sm font-medium text-white truncate">
                                 {opp.username}
                               </div>
-                              <div className="text-xs text-gray-500">
+                              <div className="text-xs text-[var(--color-text-muted)]">
                                 {opp.totalMatches}{' '}
                                 {opp.totalMatches === 1 ? 'duelo' : 'duelos'}
                               </div>
                             </div>
-                            <span className="text-gray-500 text-lg">›</span>
+                            <span className="text-[var(--color-text-muted)] text-lg">›</span>
                           </button>
                         </li>
                       ))}

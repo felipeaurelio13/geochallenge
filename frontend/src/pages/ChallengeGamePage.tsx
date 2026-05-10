@@ -222,7 +222,7 @@ export function ChallengeGamePage() {
 
   if (loading) {
     return (
-      <div className="h-full min-h-0 bg-gray-900 flex items-center justify-center">
+      <div className="h-full min-h-0 bg-[var(--color-bg-app)] flex items-center justify-center">
         <LoadingSpinner size="lg" text={t('game.loading')} />
       </div>
     );
@@ -253,7 +253,7 @@ export function ChallengeGamePage() {
 
   if (!currentQuestion) {
     return (
-      <div className="h-full min-h-0 bg-gray-900 flex items-center justify-center">
+      <div className="h-full min-h-0 bg-[var(--color-bg-app)] flex items-center justify-center">
         <LoadingSpinner size="lg" />
       </div>
     );
@@ -261,13 +261,13 @@ export function ChallengeGamePage() {
 
   return (
     <GameRoundScaffold
-      rootClassName="bg-gray-900"
+      rootClassName="bg-[var(--color-bg-app)]"
       header={
-        <header className="sticky top-0 z-30 border-b border-gray-700 bg-gray-800/95 px-3 pb-2 pt-2 backdrop-blur sm:px-4">
+        <header className="sticky top-0 z-30 border-b border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 pb-2 pt-2 backdrop-blur sm:px-4">
           <div className="mx-auto flex w-full max-w-4xl items-center justify-between gap-3">
             <button
               onClick={() => navigate('/challenges')}
-              className="rounded-xl border border-gray-600 bg-gray-900/50 px-3 py-2 text-sm font-medium text-gray-100 transition-colors hover:border-primary/60 hover:text-white"
+              className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm font-medium text-[var(--color-text-primary)] transition-colors hover:border-primary/60 hover:text-white"
             >
               ← {t('game.exit')}
             </button>
@@ -276,7 +276,7 @@ export function ChallengeGamePage() {
               📨 {t('challenges.challengeMode')}
             </div>
 
-            <div className="min-w-chip rounded-xl bg-gray-900/60 px-3 py-2">
+            <div className="min-w-chip rounded-xl bg-[var(--color-surface)] px-3 py-2">
               <ScoreDisplay score={score} previousScore={previousScore} showAnimation={showResult} />
             </div>
 
@@ -352,7 +352,7 @@ export function ChallengeGamePage() {
                 onUseFocusTime={handleUseFocusTime}
               />
             ) : (
-              <div className="flex items-center justify-between rounded-xl border border-gray-700 bg-gray-800/70 px-3 py-2 text-sm text-gray-200 sm:max-w-xs">
+              <div className="flex items-center justify-between rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 py-2 text-sm text-[var(--color-text-secondary)] sm:max-w-xs">
                 <span>{t('game.questionOf', { current: currentIndex + 1, total: questions.length })}</span>
                 <span className="ml-3 rounded-full bg-green-500/20 px-2 py-0.5 text-xs font-semibold text-green-200">
                   {correctAnswers}/{results.length || currentIndex + Number(showResult)}

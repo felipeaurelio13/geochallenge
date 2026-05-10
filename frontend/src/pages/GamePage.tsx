@@ -420,7 +420,7 @@ export function GamePage() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="h-full min-h-0 bg-gray-900 flex items-center justify-center">
+      <div className="h-full min-h-0 bg-[var(--color-bg-app)] flex items-center justify-center">
         <LoadingSpinner size="lg" text={t('game.loading')} />
       </div>
     );
@@ -441,7 +441,7 @@ export function GamePage() {
   // No question loaded yet
   if (!currentQuestion) {
     return (
-      <div className="h-full min-h-0 bg-gray-900 flex items-center justify-center">
+      <div className="h-full min-h-0 bg-[var(--color-bg-app)] flex items-center justify-center">
         <LoadingSpinner size="lg" text={t('game.preparing')} />
       </div>
     );
@@ -450,7 +450,7 @@ export function GamePage() {
   return (
     <GameRoundScaffold
       header={
-        <header className="sticky top-0 z-30 border-b border-gray-700 bg-gray-800/95 px-3 pb-2 pt-3 backdrop-blur sm:px-4 sm:pb-3 sm:pt-4">
+        <header className="sticky top-0 z-30 border-b border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 pb-2 pt-3 backdrop-blur sm:px-4 sm:pb-3 sm:pt-4">
           <div className="max-w-4xl mx-auto grid grid-cols-[auto_1fr_auto] items-center gap-2.5 sm:gap-4">
             <button
               onClick={() => {
@@ -464,7 +464,7 @@ export function GamePage() {
                   navigate('/menu');
                 }
               }}
-              className="min-h-10 rounded-lg border border-gray-600 px-3 py-2 text-xs sm:text-sm text-gray-200 hover:text-white hover:border-gray-400 transition-colors"
+              className="min-h-10 rounded-lg border border-[var(--color-border)] px-3 py-2 text-xs sm:text-sm text-[var(--color-text-secondary)] hover:text-white hover:border-gray-400 transition-colors"
               aria-label={t('game.exit')}
             >
               ✕ {t('game.exit')}
@@ -478,7 +478,7 @@ export function GamePage() {
                 lastResult={results[results.length - 1] ?? null}
               />
               {hasActiveFilters(gameFilters) && (
-                <p className="mt-0.5 text-xs text-gray-500">
+                <p className="mt-0.5 text-xs text-[var(--color-text-muted)]">
                   {[
                     gameFilters.continent && t(`filters.continents.${gameFilters.continent.replace(' ', '_')}`),
                     gameFilters.isInsular && t('filters.insular'),
@@ -505,7 +505,7 @@ export function GamePage() {
         </header>
       }
       progress={
-        <div className="bg-gray-800/70 px-3 py-1 sm:px-4 sm:py-1.5">
+        <div className="bg-[var(--color-surface-muted)] px-3 py-1 sm:px-4 sm:py-1.5">
           <div className="max-w-4xl mx-auto overflow-x-hidden">
             <ProgressBar
               current={currentIndex + 1}
