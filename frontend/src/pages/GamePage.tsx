@@ -109,7 +109,7 @@ export function GamePage() {
   const mechanicsAllowed = new Set(mechanicsConfig?.allowed ?? []);
 
   useEffect(() => {
-    setGlobalTimeRemaining(timeRemaining);
+    setGlobalTimeRemaining(Math.max(0, timeRemaining));
   }, [setGlobalTimeRemaining, timeRemaining]);
 
   useEffect(() => {

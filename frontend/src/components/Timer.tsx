@@ -23,9 +23,11 @@ export function Timer({ duration, timeRemaining, onTick, onComplete, isActive }:
   const { t } = useTranslation();
   const prefersReducedMotion = useUiStore((state) => state.prefersReducedMotion);
   const intervalRef = useRef<number | null>(null);
+  const timeRemainingRef = useRef(timeRemaining);
   const onTickRef = useRef(onTick);
   const onCompleteRef = useRef(onComplete);
 
+  useEffect(() => { timeRemainingRef.current = timeRemaining; }, [timeRemaining]);
   useEffect(() => { onTickRef.current = onTick; }, [onTick]);
   useEffect(() => { onCompleteRef.current = onComplete; }, [onComplete]);
 
@@ -39,7 +41,11 @@ export function Timer({ duration, timeRemaining, onTick, onComplete, isActive }:
     }
 
     intervalRef.current = window.setInterval(() => {
-      onTickRef.current(timeRemaining - 1);
+      const newTime = timeRemainingRef.current - 1;
+      onTickRef.current(newTime);
+      if (newTime <= 0) {
+        onCompleteRef.current();
+      }
     }, 1000);
 
     return () => {
@@ -47,7 +53,7 @@ export function Timer({ duration, timeRemaining, onTick, onComplete, isActive }:
         clearInterval(intervalRef.current);
       }
     };
-  }, [isActive, timeRemaining]);
+  }, [isActive]);
 
   useEffect(() => {
     if (timeRemaining <= 0 && isActive) {
