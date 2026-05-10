@@ -259,9 +259,14 @@ router.post('/answer', optionalAuth, async (req: AuthRequest, res: Response) => 
     const validation = answerSchema.safeParse(req.body);
 
     if (!validation.success) {
+      console.error('Answer validation failed:', {
+        body: req.body,
+        errors: validation.error.errors,
+      });
       res.status(400).json({
         error: 'Datos inválidos',
         details: validation.error.errors,
+        debug: process.env.NODE_ENV !== 'production' ? { timeRemaining: req.body.timeRemaining } : undefined,
       });
       return;
     }
