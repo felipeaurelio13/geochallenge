@@ -128,18 +128,31 @@ export function ResultsPage() {
             </div>
           </div>
 
-          <div className={`mt-6 grid gap-3 sm:gap-4 ${isStreakMode ? 'grid-cols-2' : 'grid-cols-3'}`}>
-            <article className="min-w-0 rounded-xl border border-gray-700 bg-gray-900/95 p-3 sm:p-4">
-              <div className="text-2xl font-bold text-green-400">{correctAnswers}</div>
-              <div className="mt-2 flex justify-center min-w-0">
-                <AnswerStatusBadge
-                  status="correct"
-                  label={t('results.correct')}
-                  className="w-full justify-center text-2xs-token sm:text-xs"
-                />
-              </div>
-            </article>
-            {!isStreakMode && (
+          {isStreakMode ? (
+            <div className="mt-6 flex justify-center">
+              <article className="min-w-0 w-36 rounded-xl border border-gray-700 bg-gray-900/95 p-3 text-center sm:p-4">
+                <div className="text-2xl font-bold text-green-400">{correctAnswers}</div>
+                <div className="mt-2 flex justify-center min-w-0">
+                  <AnswerStatusBadge
+                    status="correct"
+                    label={t('results.correct')}
+                    className="justify-center text-2xs-token sm:text-xs"
+                  />
+                </div>
+              </article>
+            </div>
+          ) : (
+            <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4">
+              <article className="min-w-0 rounded-xl border border-gray-700 bg-gray-900/95 p-3 sm:p-4">
+                <div className="text-2xl font-bold text-green-400">{correctAnswers}</div>
+                <div className="mt-2 flex justify-center min-w-0">
+                  <AnswerStatusBadge
+                    status="correct"
+                    label={t('results.correct')}
+                    className="w-full justify-center text-2xs-token sm:text-xs"
+                  />
+                </div>
+              </article>
               <article className="min-w-0 rounded-xl border border-gray-700 bg-gray-900/95 p-3 sm:p-4">
                 <div className="text-2xl font-bold text-red-400">{incorrectAnswers}</div>
                 <div className="mt-2 flex justify-center min-w-0">
@@ -150,12 +163,8 @@ export function ResultsPage() {
                   />
                 </div>
               </article>
-            )}
-            <article className="min-w-0 rounded-xl border border-gray-700 bg-gray-900/95 p-3 sm:p-4">
-              <div className="text-2xl font-bold text-white">{percentage}%</div>
-              <div className="text-xs text-gray-400">{t('results.accuracy')}</div>
-            </article>
-          </div>
+            </div>
+          )}
 
           {pointsBreakdown.length > 0 && (
             <div className="mt-6 rounded-2xl border border-gray-700 bg-gray-900/75 p-4 text-left">
