@@ -19,9 +19,9 @@ export function ChallengeResultsPage() {
 
   if (!resultState || !id) {
     return (
-      <div className="h-full min-h-0 bg-gray-900 flex items-center justify-center px-4">
-        <div className="w-full max-w-md rounded-2xl border border-gray-700 bg-gray-800 p-5 text-center sm:p-6">
-          <p className="text-sm text-gray-300">{t('challenges.resultsUnavailable')}</p>
+      <div className="h-full min-h-0 bg-[var(--color-bg-app)] flex items-center justify-center px-4">
+        <div className="w-full max-w-md rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 text-center sm:p-6">
+          <p className="text-sm text-[var(--color-text-secondary)]">{t('challenges.resultsUnavailable')}</p>
           <Button
             onClick={() => navigate('/challenges')}
             variant="primary"
@@ -40,16 +40,16 @@ export function ChallengeResultsPage() {
   const accuracy = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
 
   return (
-    <div className="h-full min-h-0 bg-gray-900 px-4 py-8 text-white">
+    <div className="h-full min-h-0 bg-[var(--color-bg-app)] px-4 py-8 text-white">
       <div className="mx-auto w-full max-w-md space-y-4">
-        <header className="rounded-2xl border border-gray-700 bg-gray-800 p-5 text-center sm:p-6">
+        <header className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 text-center sm:p-6">
           <p className="text-xs uppercase tracking-wide text-primary">{t('challenges.challengeMode')}</p>
           <h1 className="mt-2 text-2xl font-bold">{t('results.gameOver')}</h1>
-          <p className="mt-2 text-sm text-gray-300">{t('challenges.resultsSubtitle')}</p>
+          <p className="mt-2 text-sm text-[var(--color-text-secondary)]">{t('challenges.resultsSubtitle')}</p>
         </header>
 
-        <section className="rounded-2xl border border-gray-700 bg-gray-800 p-5 sm:p-6">
-          <p className="text-sm text-gray-400">{t('challenges.yourScore')}</p>
+        <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 sm:p-6">
+          <p className="text-sm text-[var(--color-text-muted)]">{t('challenges.yourScore')}</p>
           <p className="mt-1 text-4xl font-bold text-primary">{score.toLocaleString()}</p>
 
           <div className="mt-5 grid grid-cols-3 gap-2 text-center text-xs sm:gap-3 sm:text-sm">

@@ -7,7 +7,7 @@ type BadgeProps = {
 };
 
 const toneClasses = {
-  neutral: 'border-gray-700 bg-gray-800 text-gray-200',
+  neutral: 'border-[var(--color-border)] bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)]',
   primary: 'border-primary/40 bg-primary/10 text-primary',
   success: 'border-green-500/40 bg-green-500/10 text-green-300',
   danger: 'border-red-500/50 bg-red-500/10 text-red-200',

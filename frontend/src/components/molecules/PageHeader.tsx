@@ -12,7 +12,7 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, backTo = '/menu', backLabel = '←', actions, sticky = false, className = '' }: PageHeaderProps) {
   return (
-    <header className={`bg-gray-800 border-b border-gray-700 ${sticky ? 'sticky top-0 z-10 backdrop-blur-sm bg-gray-800/95' : ''} ${className}`}>
+    <header className={`bg-[var(--color-surface-muted)] border-b border-[var(--color-border)] ${sticky ? 'sticky top-0 z-10 backdrop-blur-sm' : ''} ${className}`}>
       <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
         <Link to={backTo} className="text-gray-400 hover:text-white transition-colors text-sm">
           {backLabel}

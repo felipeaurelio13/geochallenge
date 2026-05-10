@@ -15,9 +15,9 @@ interface StatCardProps {
 
 export function StatCard({ value, label, color = 'primary', className = '' }: StatCardProps) {
   return (
-    <div className={`text-center p-4 bg-gray-900 rounded-lg ${className}`}>
+    <div className={`text-center p-4 bg-[var(--color-surface)] rounded-lg ${className}`}>
       <div className={`text-2xl font-bold ${colorClasses[color]}`}>{typeof value === 'number' ? value.toLocaleString() : value}</div>
-      <div className="text-sm text-gray-400">{label}</div>
+      <div className="text-sm text-[var(--color-text-muted)]">{label}</div>
     </div>
   );
 }

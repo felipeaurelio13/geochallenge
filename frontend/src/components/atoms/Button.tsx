@@ -13,8 +13,8 @@ const variantClasses: Record<ButtonVariant, string> = {
   primary:
     'bg-primary text-white border border-primary/80 shadow-lg shadow-primary/20 hover:bg-primary/90 focus:ring-primary/70',
   secondary:
-    'bg-gray-900 text-gray-100 border border-gray-700 hover:border-gray-500 hover:bg-gray-800 focus:ring-gray-500',
-  ghost: 'bg-transparent text-gray-200 border border-transparent hover:bg-gray-800/70 focus:ring-gray-500',
+    'bg-[var(--color-surface)] text-[var(--color-text-secondary)] border border-[var(--color-border)] hover:border-gray-500 hover:bg-[var(--color-surface-muted)] focus:ring-gray-500',
+  ghost: 'bg-transparent text-[var(--color-text-secondary)] border border-transparent hover:bg-gray-800/70 focus:ring-gray-500',
   danger: 'bg-red-500/15 text-red-200 border border-red-500/60 hover:bg-red-500/25 focus:ring-red-400/70',
 };
 

@@ -277,7 +277,7 @@ export function FlashGamePage() {
 
   if (status === 'loading') {
     return (
-      <div className="h-full min-h-0 bg-gray-900 flex items-center justify-center">
+      <div className="h-full min-h-0 bg-[var(--color-bg-app)] flex items-center justify-center">
         <LoadingSpinner size="lg" text={t('flash.loading')} />
       </div>
     );
@@ -296,20 +296,20 @@ export function FlashGamePage() {
 
   if (status === 'intro') {
     return (
-      <div className="h-full min-h-0 bg-gray-900 px-4 py-6 pt-[calc(env(safe-area-inset-top)+1.5rem)]">
+      <div className="h-full min-h-0 bg-[var(--color-bg-app)] px-4 py-6 pt-[calc(env(safe-area-inset-top)+1.5rem)]">
         <div className="mx-auto max-w-md">
-          <div className="rounded-3xl border border-gray-700 bg-gray-800/95 p-6 text-center shadow-2xl">
+          <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 text-center shadow-2xl">
             <div className="text-7xl" aria-hidden="true">⚡</div>
             <h1 className="mt-3 text-3xl font-black text-white">{t('flash.title')}</h1>
-            <p className="mt-2 text-gray-300">{t('flash.intro')}</p>
-            <ul className="mt-4 space-y-2 text-left text-sm text-gray-300">
+            <p className="mt-2 text-[var(--color-text-secondary)]">{t('flash.intro')}</p>
+            <ul className="mt-4 space-y-2 text-left text-sm text-[var(--color-text-secondary)]">
               <li>⏱️ {t('flash.rule60s')}</li>
               <li>👉 {t('flash.ruleSwipe')}</li>
               <li>🔥 {t('flash.ruleCombo')}</li>
               <li>❌ {t('flash.ruleMiss')}</li>
             </ul>
             {hasActiveFilters(gameFilters) && (
-              <p className="mt-3 text-xs text-gray-400">
+              <p className="mt-3 text-xs text-[var(--color-text-muted)]">
                 🎚️{' '}
                 {[
                   gameFilters.continent && t(`filters.continents.${gameFilters.continent.replace(' ', '_')}`),
@@ -343,32 +343,32 @@ export function FlashGamePage() {
     const qpm = answered; // per-60s already
 
     return (
-      <div className="h-full min-h-0 overflow-y-auto bg-gray-900 px-4 py-6 pt-[calc(env(safe-area-inset-top)+1.5rem)]">
+      <div className="h-full min-h-0 overflow-y-auto bg-[var(--color-bg-app)] px-4 py-6 pt-[calc(env(safe-area-inset-top)+1.5rem)]">
         <div className="mx-auto max-w-md">
-          <div className="rounded-3xl border border-gray-700 bg-gray-800/95 p-6 text-center shadow-2xl">
+          <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 text-center shadow-2xl">
             <div className="text-6xl" aria-hidden="true">⚡</div>
             <h1 className="mt-2 text-2xl font-black text-white">{t('flash.finished')}</h1>
-            <div className="mt-5 rounded-2xl border border-primary/40 bg-gray-900/80 p-5">
+            <div className="mt-5 rounded-2xl border border-primary/40 bg-[var(--color-surface-muted)] p-5">
               <p className="text-xs font-semibold uppercase tracking-wide text-primary/80">
                 {t('flash.score')}
               </p>
               <p className="mt-1 text-5xl font-black text-white">{score.toLocaleString()}</p>
             </div>
             <div className="mt-4 grid grid-cols-3 gap-3 text-sm">
-              <div className="rounded-xl border border-gray-700 bg-gray-900/80 p-3">
+              <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] p-3">
                 <div className="text-2xl font-bold text-amber-400">{maxCombo}</div>
-                <div className="text-xs text-gray-400">{t('flash.maxCombo')}</div>
+                <div className="text-xs text-[var(--color-text-muted)]">{t('flash.maxCombo')}</div>
               </div>
-              <div className="rounded-xl border border-gray-700 bg-gray-900/80 p-3">
+              <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] p-3">
                 <div className="text-2xl font-bold text-green-400">{correct}</div>
-                <div className="text-xs text-gray-400">{t('flash.correct')}</div>
+                <div className="text-xs text-[var(--color-text-muted)]">{t('flash.correct')}</div>
               </div>
-              <div className="rounded-xl border border-gray-700 bg-gray-900/80 p-3">
+              <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] p-3">
                 <div className="text-2xl font-bold text-white">{accuracy}%</div>
-                <div className="text-xs text-gray-400">{t('flash.accuracy')}</div>
+                <div className="text-xs text-[var(--color-text-muted)]">{t('flash.accuracy')}</div>
               </div>
             </div>
-            <p className="mt-3 text-sm text-gray-400">{t('flash.answered', { count: qpm })}</p>
+            <p className="mt-3 text-sm text-[var(--color-text-muted)]">{t('flash.answered', { count: qpm })}</p>
 
             <Button
               onClick={() => {
@@ -405,21 +405,21 @@ export function FlashGamePage() {
 
   // playing
   return (
-    <div className="flex h-full min-h-0 flex-col bg-gray-900 px-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-[calc(env(safe-area-inset-top)+0.5rem)] sm:px-4">
+    <div className="flex h-full min-h-0 flex-col bg-[var(--color-bg-app)] px-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-[calc(env(safe-area-inset-top)+0.5rem)] sm:px-4">
       <div className="mx-auto flex w-full max-w-md flex-col gap-3">
         <div className="flex items-center justify-between gap-2">
           <button
             onClick={() => {
               if (window.confirm(t('game.confirmExit'))) navigate('/menu');
             }}
-            className="pressable min-h-10 rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-gray-200"
+            className="pressable min-h-10 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 py-2 text-sm text-[var(--color-text-secondary)]"
             aria-label={t('game.exit')}
           >
             ✕
           </button>
           <StreakCombo combo={combo} multiplier={multiplier} label="Combo" />
           <div
-            className="tabular-nums rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm font-semibold text-white"
+            className="tabular-nums rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 py-2 text-sm font-semibold text-white"
             aria-live="off"
           >
             {timeRemaining}s
@@ -435,7 +435,7 @@ export function FlashGamePage() {
           />
         )}
 
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-800" aria-hidden="true">
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--color-surface-muted)]" aria-hidden="true">
           <div
             className={`h-full transition-[width] duration-1000 ease-linear ${
               progressPercent > 50
@@ -448,11 +448,11 @@ export function FlashGamePage() {
           />
         </div>
 
-        <div className="flex items-center justify-between text-sm text-gray-300">
+        <div className="flex items-center justify-between text-sm text-[var(--color-text-secondary)]">
           <span>
             ⚡ <span className="tabular-nums font-bold text-white">{score}</span>
           </span>
-          <span className="tabular-nums text-gray-400">#{answered + 1}</span>
+          <span className="tabular-nums text-[var(--color-text-muted)]">#{answered + 1}</span>
         </div>
       </div>
 

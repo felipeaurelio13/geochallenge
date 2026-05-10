@@ -185,7 +185,7 @@ export function ChallengesPage() {
   const getCategoryLabel = (category: string) => t(`categories.${categoryKeyByValue[category] ?? 'mixed'}`);
 
   return (
-    <div className="h-full min-h-0 bg-gray-900">
+    <div className="h-full min-h-0 bg-[var(--color-bg-app)]">
       <PageHeader
         title={t('challenges.title')}
         backTo="/menu"
@@ -198,10 +198,10 @@ export function ChallengesPage() {
         }
       />
 
-      <div className="bg-gray-800/50 border-b border-gray-700 px-4">
+      <div className="bg-[var(--color-surface)] border-b border-[var(--color-border)] px-4">
         <div className="max-w-4xl mx-auto grid grid-cols-3 gap-2 py-2 text-sm">
           {(['mine', 'joinable', 'completed'] as TabType[]).map((tab) => (
-            <button key={tab} onClick={() => setActiveTab(tab)} className={`py-2 rounded-lg ${activeTab === tab ? 'bg-primary text-white' : 'text-gray-400 bg-gray-800'}`}>
+            <button key={tab} onClick={() => setActiveTab(tab)} className={`py-2 rounded-lg ${activeTab === tab ? 'bg-primary text-white' : 'text-[var(--color-text-muted)] bg-[var(--color-surface-muted)]'}`}>
               {t(`challenges.tabs.${tab}`)}
             </button>
           ))}
@@ -212,7 +212,7 @@ export function ChallengesPage() {
         {fetchError && <Alert type="error">{fetchError}</Alert>}
         <section className="rounded-xl border border-primary/30 bg-primary/10 p-4">
           <p className="text-sm font-semibold text-white">{t('challenges.createMultiplayerTitle')}</p>
-          <p className="mt-1 text-xs text-gray-300 sm:text-sm">{t('challenges.createMultiplayerHint')}</p>
+          <p className="mt-1 text-xs text-[var(--color-text-secondary)] sm:text-sm">{t('challenges.createMultiplayerHint')}</p>
           <Button
             onClick={() => setShowCreateModal(true)}
             className="mt-3 sm:w-auto"
@@ -241,11 +241,11 @@ export function ChallengesPage() {
               const creatorLabel = `${t('challenges.from')} ${challenge.creator.username}`;
 
               return (
-                <article key={challenge.id} className="bg-gray-800 rounded-xl p-4 border border-gray-700">
+                <article key={challenge.id} className="bg-[var(--color-surface)] rounded-xl p-4 border border-[var(--color-border)]">
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <h3 className="font-semibold text-white">{creatorLabel}</h3>
-                      <p className="text-xs text-gray-400 mt-1">
+                      <p className="text-xs text-[var(--color-text-muted)] mt-1">
                         {challenge.categories.map(getCategoryLabel).join(', ')} · {challenge.participantsCount}/{challenge.maxPlayers} · {challenge.answerTimeSeconds}s
                       </p>
                       {challenge.filters && hasActiveFilters(challenge.filters) && (
@@ -253,18 +253,18 @@ export function ChallengesPage() {
                           {buildFilterSummary(challenge.filters, t)}
                         </p>
                       )}
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-[var(--color-text-muted)] mt-1">
                         {challenge.isJoinable
                           ? t('challenges.availableSlots', { count: availableSlots })
                           : t('challenges.fullLobby')}
                       </p>
                     </div>
-                    <span className="text-xs px-2 py-1 rounded bg-gray-700 text-gray-200">{getStatusLabel(challenge.status)}</span>
+                    <span className="text-xs px-2 py-1 rounded bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)]">{getStatusLabel(challenge.status)}</span>
                   </div>
 
                   <div className="mt-3 flex flex-wrap gap-2 text-xs">
                     {challenge.participants.map((p) => (
-                      <span key={p.userId} className="px-2 py-1 rounded bg-gray-700 text-gray-200">
+                      <span key={p.userId} className="px-2 py-1 rounded bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)]">
                         {p.user.username}: {p.score ?? '-'}
                       </span>
                     ))}
@@ -298,15 +298,15 @@ export function ChallengesPage() {
           {error && <Alert type="error">{error}</Alert>}
           <form onSubmit={handleCreate} className="mt-4 space-y-4">
             <div>
-              <label className="text-sm text-gray-300 block mb-2">{t('challenges.categories')}</label>
-              <p className="text-xs text-gray-400 mb-2">{t('challenges.categoriesHint')}</p>
+              <label className="text-sm text-[var(--color-text-secondary)] block mb-2">{t('challenges.categories')}</label>
+              <p className="text-xs text-[var(--color-text-muted)] mb-2">{t('challenges.categoriesHint')}</p>
               <div className="grid grid-cols-2 gap-2">
                 {categories.map((category) => (
                   <button
                     key={category}
                     type="button"
                     onClick={() => toggleCategory(category)}
-                    className={`px-2 py-2 rounded-lg text-sm border ${createCategories.includes(category) ? 'bg-primary/20 border-primary text-white' : 'border-gray-600 text-gray-300'}`}
+                    className={`px-2 py-2 rounded-lg text-sm border ${createCategories.includes(category) ? 'bg-primary/20 border-primary text-white' : 'border-[var(--color-border)] text-[var(--color-text-secondary)]'}`}
                   >
                     {getCategoryLabel(category)}
                   </button>
@@ -315,15 +315,15 @@ export function ChallengesPage() {
             </div>
 
             <div>
-              <label className="text-sm text-gray-300 block mb-2">{t('challenges.maxPlayers')}</label>
-              <p className="text-xs text-gray-400 mb-2">{t('challenges.maxPlayersHint')}</p>
+              <label className="text-sm text-[var(--color-text-secondary)] block mb-2">{t('challenges.maxPlayers')}</label>
+              <p className="text-xs text-[var(--color-text-muted)] mb-2">{t('challenges.maxPlayersHint')}</p>
               <div className="grid grid-cols-4 gap-2">
                 {playerOptions.map((playerCount) => (
                   <button
                     key={playerCount}
                     type="button"
                     onClick={() => setCreateMaxPlayers(playerCount)}
-                    className={`py-2 rounded-lg text-sm ${createMaxPlayers === playerCount ? 'bg-primary text-white' : 'bg-gray-700 text-gray-200'}`}
+                    className={`py-2 rounded-lg text-sm ${createMaxPlayers === playerCount ? 'bg-primary text-white' : 'bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)]'}`}
                   >
                     {playerCount}
                   </button>
@@ -332,18 +332,18 @@ export function ChallengesPage() {
             </div>
 
             <div>
-              <label className="text-sm text-gray-300 block mb-2">{t('challenges.answerTime')}</label>
-              <p className="text-xs text-gray-400 mb-2">{t('challenges.answerTimeHint')}</p>
+              <label className="text-sm text-[var(--color-text-secondary)] block mb-2">{t('challenges.answerTime')}</label>
+              <p className="text-xs text-[var(--color-text-muted)] mb-2">{t('challenges.answerTimeHint')}</p>
               <div className="grid grid-cols-3 gap-2">
                 {[10, 20, 30].map((time) => (
-                  <button key={time} type="button" onClick={() => setCreateTime(time as 10 | 20 | 30)} className={`py-2 rounded-lg ${createTime === time ? 'bg-primary text-white' : 'bg-gray-700 text-gray-300'}`}>
+                  <button key={time} type="button" onClick={() => setCreateTime(time as 10 | 20 | 30)} className={`py-2 rounded-lg ${createTime === time ? 'bg-primary text-white' : 'bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)]'}`}>
                     {time}s
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="rounded-lg border border-gray-700 bg-gray-900/40 p-3 text-xs text-gray-300">
+            <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-muted)] p-3 text-xs text-[var(--color-text-secondary)]">
               {t('challenges.summary', {
                 categories: createCategories.map(getCategoryLabel).join(', '),
                 maxPlayers: createMaxPlayers,
@@ -352,7 +352,7 @@ export function ChallengesPage() {
             </div>
 
             {hasActiveFilters(challengeFilters) && (
-              <div className="rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 text-xs text-gray-300">
+              <div className="rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 text-xs text-[var(--color-text-secondary)]">
                 {t('challenges.activeFilters', {
                   summary: buildFilterSummary(challengeFilters, t),
                 })}

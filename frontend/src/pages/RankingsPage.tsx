@@ -68,12 +68,12 @@ function PodiumBlock({ entry, topScore, youLabel }: { entry: LeaderboardEntry; t
     <div className="flex flex-col items-center gap-2 flex-1 min-w-0">
       <span className={`text-2xl ${entry.rank === 1 ? 'animate-bounce' : ''}`}>{config.crown}</span>
       <div
-        className={`w-14 h-14 rounded-full border-2 ${config.border} flex items-center justify-center bg-gray-800 shadow-lg ${config.glow} shadow-lg`}
+        className={`w-14 h-14 rounded-full border-2 ${config.border} flex items-center justify-center bg-[var(--color-surface)] shadow-lg ${config.glow} shadow-lg`}
         title={entry.username}
       >
         <span className="text-xl font-black">{entry.username.charAt(0).toUpperCase()}</span>
       </div>
-      <span className={`text-xs font-bold truncate max-w-full px-1 ${entry.rank === 1 ? 'text-yellow-300' : 'text-gray-200'}`}>
+      <span className={`text-xs font-bold truncate max-w-full px-1 ${entry.rank === 1 ? 'text-yellow-300' : 'text-[var(--color-text-secondary)]'}`}>
         {entry.username}
         {entry.isCurrentUser && (
           <span className="ml-1 text-xs font-normal text-primary">({youLabel})</span>
@@ -92,7 +92,7 @@ function PodiumBlock({ entry, topScore, youLabel }: { entry: LeaderboardEntry; t
 function ScoreBar({ entry, topScore }: { entry: LeaderboardEntry; topScore: number }) {
   const pct = topScore > 0 ? Math.max(4, (entry.score / topScore) * 100) : 4;
   return (
-    <div className="flex-1 h-1.5 bg-gray-700 rounded-full overflow-hidden">
+    <div className="flex-1 h-1.5 bg-[var(--color-surface-muted)] rounded-full overflow-hidden">
       <div
         className={`h-full rounded-full transition-all duration-500 ${entry.isCurrentUser ? 'bg-primary' : 'bg-indigo-500'}`}
         style={{ width: `${pct}%` }}
@@ -106,7 +106,7 @@ function getRankBadgeStyle(rank: number, isCurrentUser?: boolean) {
   if (rank === 1) return 'bg-gradient-to-r from-yellow-500/20 to-yellow-700/20 border-yellow-500/60';
   if (rank === 2) return 'bg-gradient-to-r from-slate-400/20 to-slate-600/20 border-slate-400/60';
   if (rank === 3) return 'bg-gradient-to-r from-amber-600/20 to-amber-800/20 border-amber-600/60';
-  return 'bg-gray-800/80 border-gray-700';
+  return 'bg-[var(--color-surface)] border-[var(--color-border)]';
 }
 
 function getRankLabel(rank: number) {
@@ -250,7 +250,7 @@ export function RankingsPage() {
         <div
           role="tablist"
           aria-label={t('rankings.scopeAriaLabel', { defaultValue: 'Cambiar tipo de ranking' })}
-          className="mb-5 inline-flex w-full overflow-hidden rounded-xl border border-gray-700 bg-gray-800/60 p-1"
+          className="mb-5 inline-flex w-full overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-1"
         >
           {(['global', 'season'] as const).map((s) => {
             const isActive = scope === s;
@@ -261,7 +261,7 @@ export function RankingsPage() {
                 aria-selected={isActive}
                 onClick={() => setScope(s)}
                 className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
-                  isActive ? 'bg-primary text-white shadow' : 'text-gray-300 hover:text-white'
+                  isActive ? 'bg-primary text-white shadow' : 'text-[var(--color-text-secondary)] hover:text-white'
                 }`}
               >
                 {t(`rankings.${s}`)}
@@ -281,33 +281,33 @@ export function RankingsPage() {
                 {user?.username?.charAt(0).toUpperCase()}
               </div>
               <div>
-                <p className="text-xs text-gray-400 uppercase tracking-wide">{t('rankings.yourPosition')}</p>
+                <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wide">{t('rankings.yourPosition')}</p>
                 <p className="text-white font-semibold">{user?.username}</p>
               </div>
             </div>
             <div className="text-right">
               <p className="text-2xl font-black text-primary">#{resolvedUserRank}</p>
-              <p className="text-sm text-gray-400">{resolvedUserScore?.toLocaleString()} pts</p>
+              <p className="text-sm text-[var(--color-text-muted)]">{resolvedUserScore?.toLocaleString()} pts</p>
             </div>
           </div>
         )}
 
         {/* Nearby context */}
         {!isLoading && !error && RANKING_NEIGHBORS_ENABLED && (
-          <section className="mb-6 rounded-2xl border border-gray-700 bg-gray-800/60 p-4" aria-live="polite">
-            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">{t('rankings.nearbyContext')}</h2>
+          <section className="mb-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4" aria-live="polite">
+            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">{t('rankings.nearbyContext')}</h2>
             {neighborsLoading ? (
-              <p className="text-sm text-gray-400">{t('rankings.loadingNeighbors')}</p>
+              <p className="text-sm text-[var(--color-text-muted)]">{t('rankings.loadingNeighbors')}</p>
             ) : neighborEntries.length === 0 ? (
-              <p className="text-sm text-gray-400">{t('rankings.noNeighborsData')}</p>
+              <p className="text-sm text-[var(--color-text-muted)]">{t('rankings.noNeighborsData')}</p>
             ) : (
               <ul className="space-y-2">
                 {neighborEntries.map((entry) => (
                   <li
                     key={entry.userId ? `${entry.userId}-${entry.rank}` : `${entry.username}-${entry.rank}`}
-                    className="flex items-center justify-between rounded-xl border border-gray-700 bg-gray-900 px-3 py-2"
+                    className="flex items-center justify-between rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 py-2"
                   >
-                    <span className="text-sm text-gray-200">#{entry.rank} {entry.username}</span>
+                    <span className="text-sm text-[var(--color-text-secondary)]">#{entry.rank} {entry.username}</span>
                     <span className="text-sm font-semibold text-white">{entry.score.toLocaleString()} pts</span>
                   </li>
                 ))}
@@ -330,7 +330,7 @@ export function RankingsPage() {
             <button
               onClick={() => setSearch('')}
               aria-label={t('common.clear', { defaultValue: 'Limpiar búsqueda' })}
-              className="absolute inset-y-0 right-0 flex min-w-[44px] items-center justify-center rounded-r-xl text-gray-400 transition-colors hover:text-white"
+              className="absolute inset-y-0 right-0 flex min-w-[44px] items-center justify-center rounded-r-xl text-[var(--color-text-muted)] transition-colors hover:text-white"
             >
               ✕
             </button>
@@ -385,7 +385,7 @@ export function RankingsPage() {
                 {restEntries.length > 0 && (
                   <div className="space-y-2">
                     {!isSearching && (
-                      <p className="text-xs uppercase tracking-wider text-gray-500 mb-3 px-1">{t('rankings.otherPlayers')}</p>
+                      <p className="text-xs uppercase tracking-wider text-[var(--color-text-muted)] mb-3 px-1">{t('rankings.otherPlayers')}</p>
                     )}
                     {restEntries.map((entry) => (
                       <div
@@ -393,7 +393,7 @@ export function RankingsPage() {
                         className={`px-4 py-3 rounded-xl border transition-all duration-150 active:scale-[0.99] active:brightness-95 ${getRankBadgeStyle(entry.rank, entry.isCurrentUser)}`}
                       >
                         <div className="flex items-center gap-3">
-                          <span className={`font-bold min-w-[2.5rem] text-center ${entry.rank <= 3 ? 'text-2xl' : 'text-sm text-gray-400'}`}>
+                          <span className={`font-bold min-w-[2.5rem] text-center ${entry.rank <= 3 ? 'text-2xl' : 'text-sm text-[var(--color-text-muted)]'}`}>
                             {getRankLabel(entry.rank)}
                           </span>
                           <div className="flex-1 min-w-0">
@@ -405,7 +405,7 @@ export function RankingsPage() {
                                 )}
                               </span>
                               <span className="text-sm font-bold text-white whitespace-nowrap">
-                                {entry.score.toLocaleString()} <span className="text-xs text-gray-400 font-normal">pts</span>
+                                {entry.score.toLocaleString()} <span className="text-xs text-[var(--color-text-muted)] font-normal">pts</span>
                               </span>
                             </div>
                             <ScoreBar entry={entry} topScore={topScore} />
@@ -437,7 +437,7 @@ export function RankingsPage() {
                                   )}
                                 </span>
                                 <span className="text-sm font-bold text-white whitespace-nowrap">
-                                  {entry.score.toLocaleString()} <span className="text-xs text-gray-400 font-normal">pts</span>
+                                  {entry.score.toLocaleString()} <span className="text-xs text-[var(--color-text-muted)] font-normal">pts</span>
                                 </span>
                               </div>
                               <ScoreBar entry={entry} topScore={topScore} />
@@ -452,18 +452,18 @@ export function RankingsPage() {
 
             {/* Stats panel */}
             {filteredLeaderboard.length > 0 && (
-              <div className="mt-8 rounded-2xl border border-gray-700/60 bg-gray-800/60 overflow-hidden">
-                <div className="px-5 py-4 border-b border-gray-700/60">
-                  <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-400">{statsTitle}</h3>
+              <div className="mt-8 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden">
+                <div className="px-5 py-4 border-b border-[var(--color-border)]">
+                  <h3 className="text-sm font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">{statsTitle}</h3>
                 </div>
-                <div className="grid grid-cols-3 divide-x divide-gray-700/60">
+                <div className="grid grid-cols-3 divide-x divide-[var(--color-border)]">
                   <div className="px-4 py-4 text-center">
                     <div className="text-2xl font-black text-primary">{(data?.totalPlayers ?? 0).toLocaleString()}</div>
-                    <div className="text-xs text-gray-400 mt-1">{t('rankings.totalPlayers')}</div>
+                    <div className="text-xs text-[var(--color-text-muted)] mt-1">{t('rankings.totalPlayers')}</div>
                   </div>
                   <div className="px-4 py-4 text-center">
                     <div className="text-2xl font-black text-yellow-400">{(data?.topScore ?? 0).toLocaleString()}</div>
-                    <div className="text-xs text-gray-400 mt-1">{t('rankings.topScore')}</div>
+                    <div className="text-xs text-[var(--color-text-muted)] mt-1">{t('rankings.topScore')}</div>
                   </div>
                   <div className="px-4 py-4 text-center">
                     <div className="text-2xl font-black text-white">
@@ -471,12 +471,12 @@ export function RankingsPage() {
                         ? Math.round(data.avgScore).toLocaleString()
                         : '—'}
                     </div>
-                    <div className="text-xs text-gray-400 mt-1">{t('rankings.avgScore')}</div>
+                    <div className="text-xs text-[var(--color-text-muted)] mt-1">{t('rankings.avgScore')}</div>
                   </div>
                 </div>
                 {isSearching && (
-                  <div className="px-5 py-3 border-t border-gray-700/60 bg-gray-900/40">
-                    <p className="text-xs text-gray-400">
+                  <div className="px-5 py-3 border-t border-[var(--color-border)] bg-[var(--color-surface-muted)]">
+                    <p className="text-xs text-[var(--color-text-muted)]">
                       {t('rankings.filteredResults')}: <span className="font-semibold text-white">{filteredLeaderboard.length}</span>
                     </p>
                   </div>

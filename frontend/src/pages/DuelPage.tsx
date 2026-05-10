@@ -435,20 +435,20 @@ export function DuelPage() {
   // Searching state
   if (duelState === 'searching') {
     return (
-      <div className="h-full min-h-0 bg-gray-900 flex items-center justify-center px-4">
+      <div className="h-full min-h-0 bg-[var(--color-bg-app)] flex items-center justify-center px-4">
         <div className="text-center w-full max-w-sm">
           <div className="text-6xl mb-6 animate-pulse">⚔️</div>
           <h1 className="text-2xl font-bold text-white mb-2">
             {t('duel.searching')}
           </h1>
-          <p className="text-gray-400 mb-6">{t('duel.waitingForOpponent')}</p>
+          <p className="text-[var(--color-text-muted)] mb-6">{t('duel.waitingForOpponent')}</p>
           {connectionBanner}
           <div className="mb-6">
             <LoadingSpinner size="lg" />
           </div>
-          <p className="text-gray-500 mb-3">{formatSearchTime(searchTime)}</p>
+          <p className="text-[var(--color-text-muted)] mb-3">{formatSearchTime(searchTime)}</p>
 
-          <div className="mb-6 rounded-xl border border-gray-700 bg-gray-800/80 px-4 py-3 text-left text-sm">
+          <div className="mb-6 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-left text-sm">
             <p className="text-primary font-semibold mb-1">
               {t('duel.queueCategory', {
                 category: t(
@@ -467,7 +467,7 @@ export function DuelPage() {
               })}
             </p>
             {(duelFilters.continent || duelFilters.isInsular || duelFilters.isLandlocked || duelFilters.difficulty) && (
-              <p className="mt-0.5 text-xs text-gray-400">
+              <p className="mt-0.5 text-xs text-[var(--color-text-muted)]">
                 {[
                   duelFilters.continent && t(`filters.continents.${duelFilters.continent.replace(' ', '_')}`),
                   duelFilters.isInsular && t('filters.insular'),
@@ -476,8 +476,8 @@ export function DuelPage() {
                 ].filter(Boolean).join(' · ')}
               </p>
             )}
-            <p className="text-gray-300 mt-1">{t('duel.averageWaitHint')}</p>
-            <p className="text-gray-400 mt-1">{t('duel.cancelHint')}</p>
+            <p className="text-[var(--color-text-secondary)] mt-1">{t('duel.averageWaitHint')}</p>
+            <p className="text-[var(--color-text-muted)] mt-1">{t('duel.cancelHint')}</p>
           </div>
 
           {searchTimedOut && (
@@ -501,7 +501,7 @@ export function DuelPage() {
   // Matched state
   if (duelState === 'matched' && opponent) {
     return (
-      <div className="h-full min-h-0 bg-gray-900 flex items-center justify-center px-4">
+      <div className="h-full min-h-0 bg-[var(--color-bg-app)] flex items-center justify-center px-4">
         <div className="text-center">
           {connectionBanner}
           <h1 className="text-2xl font-bold text-white mb-8">
@@ -518,7 +518,7 @@ export function DuelPage() {
               <p className="text-white font-semibold">{opponent.username}</p>
             </div>
           </div>
-          <p className="text-gray-400 animate-pulse">{t('duel.starting')}</p>
+          <p className="text-[var(--color-text-muted)] animate-pulse">{t('duel.starting')}</p>
         </div>
       </div>
     );
@@ -530,8 +530,8 @@ export function DuelPage() {
     const isTie = duelResult.myScore === duelResult.opponentScore;
 
     return (
-      <div className="h-full min-h-0 bg-gray-900 flex items-center justify-center px-4">
-        <div className="max-w-md w-full bg-gray-800 rounded-xl p-8 text-center">
+      <div className="h-full min-h-0 bg-[var(--color-bg-app)] flex items-center justify-center px-4">
+        <div className="max-w-md w-full bg-[var(--color-surface)] rounded-xl p-8 text-center">
           {connectionBanner}
           <div className="text-6xl mb-4">
             {isTie ? '🤝' : isWinner ? '🏆' : '😢'}
@@ -549,14 +549,14 @@ export function DuelPage() {
               <div className="text-3xl font-bold text-primary">
                 {duelResult.myScore}
               </div>
-              <div className="text-gray-400">{user?.username}</div>
+              <div className="text-[var(--color-text-muted)]">{user?.username}</div>
             </div>
-            <div className="text-2xl text-gray-500">vs</div>
+            <div className="text-2xl text-[var(--color-text-muted)]">vs</div>
             <div className="text-center">
               <div className="text-3xl font-bold text-red-400">
                 {duelResult.opponentScore}
               </div>
-              <div className="text-gray-400">{duelResult.opponentName}</div>
+              <div className="text-[var(--color-text-muted)]">{duelResult.opponentName}</div>
             </div>
           </div>
 
@@ -591,7 +591,7 @@ export function DuelPage() {
   // Playing state
   if (!currentQuestion) {
     return (
-      <div className="h-full min-h-0 bg-gray-900 flex flex-col items-center justify-center px-4">
+      <div className="h-full min-h-0 bg-[var(--color-bg-app)] flex flex-col items-center justify-center px-4">
         {connectionBanner}
         <LoadingSpinner size="lg" text={t('duel.loadingQuestion')} />
       </div>
@@ -601,9 +601,9 @@ export function DuelPage() {
   const isMapQuestion = currentQuestion.category === 'MAP';
   return (
     <GameRoundScaffold
-      rootClassName="bg-gray-900"
+      rootClassName="bg-[var(--color-bg-app)]"
       header={
-        <header className="sticky top-0 z-30 border-b border-gray-700 bg-gray-800/95 px-3 py-2 pt-2 backdrop-blur sm:px-4">
+        <header className="sticky top-0 z-30 border-b border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 py-2 pt-2 backdrop-blur sm:px-4">
           <div className="max-w-4xl mx-auto flex items-center justify-between">
             <div className="flex items-center gap-2">
               <UserAvatar username={user?.username ?? ''} size="sm" />
@@ -627,7 +627,7 @@ export function DuelPage() {
       }
       progress={
         <div className="bg-gray-800/65 px-3 py-1.5 text-center sm:px-4">
-          <span className="text-gray-300 text-sm">
+          <span className="text-[var(--color-text-secondary)] text-sm">
             {t('game.questionOf', { current: questionNumber, total: totalQuestions })}
           </span>
           {isSyncingRound && (

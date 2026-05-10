@@ -14,8 +14,11 @@ export function HomePage() {
         {t('common.skipToMainAction')}
       </a>
 
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(34,197,94,0.2),_transparent_45%)]" />
-      <Card className="relative mx-auto w-full max-w-sm px-5 py-8 text-center backdrop-blur sm:px-8 sm:py-10">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,_rgba(34,197,94,0.28),_transparent_55%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_100%,_rgba(59,130,246,0.18),_transparent_50%)]" />
+      </div>
+      <Card className="relative mx-auto w-full max-w-sm px-5 py-8 text-center backdrop-blur shadow-2xl shadow-black/40 sm:px-8 sm:py-10">
         <Icon symbol="🌍" className="mb-4 text-6xl" />
 
         <h1 className="text-4xl font-bold leading-tight tracking-tight sm:text-5xl">
