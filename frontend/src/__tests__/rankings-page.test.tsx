@@ -99,10 +99,10 @@ describe('RankingsPage', () => {
     expect(screen.getByText('(Tú)')).toBeInTheDocument();
 
     expect(container.firstChild).toHaveClass('h-full', 'min-h-0', 'bg-[var(--color-bg-app)]');
-    expect(container.querySelector('header')).toHaveClass('bg-gray-800', 'border-b', 'border-gray-700');
+    expect(container.querySelector('header')).toHaveClass('bg-[var(--color-surface-muted)]', 'border-b', 'border-[var(--color-border)]');
 
     const search = screen.getByLabelText('Buscar');
-    expect(search).toHaveClass('bg-gray-800', 'text-white', 'placeholder-gray-500');
+    expect(search).toHaveClass('bg-[var(--color-surface-muted)]', 'text-[var(--color-text-primary)]', 'placeholder-[var(--color-text-muted)]');
 
     expect(screen.getByText('(Tú)')).toHaveClass('text-primary');
   });
