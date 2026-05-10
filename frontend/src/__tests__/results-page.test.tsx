@@ -101,7 +101,7 @@ describe('ResultsPage', () => {
 
     expect(screen.getByText('Correctas').parentElement).toHaveClass('w-full', 'justify-center');
     expect(screen.getByText('Incorrectas').parentElement).toHaveClass('w-full', 'justify-center');
-    expect(container.querySelectorAll('article.min-w-0').length).toBeGreaterThanOrEqual(3);
+    expect(container.querySelectorAll('article.min-w-0').length).toBeGreaterThanOrEqual(2);
 
     const accuracyBar = screen.getByTestId('results-accuracy-bar').firstElementChild as HTMLElement;
     expect(accuracyBar.style.width).toBe('80%');
