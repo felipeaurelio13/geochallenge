@@ -87,7 +87,8 @@
     "gameModes": "Modos de juego",
     "flash": "Flash",
     "flashDesc": "60s · tap o swipe · combo x10",
-    "flashBadge": "Nuevo · Mobile"
+    "flashBadge": "Nuevo · Mobile",
+    "flashNoMap": "El modo Flash no admite mapas — elige otra categoría"
   },
   "categories": {
     "mixed": "Mixto",

@@ -4,6 +4,7 @@ interface GameModeCardProps {
   description: string;
   onClick: () => void;
   disabled?: boolean;
+  disabledHint?: string;
   className?: string;
 }
 
@@ -13,6 +14,7 @@ export function GameModeCard({
   description,
   onClick,
   disabled = false,
+  disabledHint,
   className = '',
 }: GameModeCardProps) {
   return (
@@ -20,6 +22,8 @@ export function GameModeCard({
       type="button"
       onClick={onClick}
       disabled={disabled}
+      title={disabled ? disabledHint : undefined}
+      aria-disabled={disabled || undefined}
       className={`pressable rounded-2xl border border-gray-700 bg-gray-900/80 py-2.5 px-3 text-left transition-all hover:border-primary/35 hover:bg-gray-800/90 hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed sm:py-3 sm:px-4 ${className}`}
     >
       <h3 className="flex items-center gap-2 text-base font-bold text-white sm:text-lg">
@@ -27,7 +31,7 @@ export function GameModeCard({
         {title}
       </h3>
       <p className="mt-0.5 text-xs leading-snug text-gray-400 sm:text-[0.82rem]">
-        {description}
+        {disabled && disabledHint ? disabledHint : description}
       </p>
     </button>
   );

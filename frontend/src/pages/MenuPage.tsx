@@ -9,8 +9,9 @@ import { UserAvatar } from '../components/atoms/UserAvatar';
 import { CategorySelector } from '../components/molecules/CategorySelector';
 import { GameModeCard } from '../components/molecules/GameModeCard';
 import { FilterDrawer } from '../components/molecules/FilterDrawer';
-import { hasActiveFilters, filtersToParams } from '../types';
+import { hasActiveFilters, filtersToParams, type Difficulty, type GameFilters } from '../types';
 import { api } from '../services/api';
+import { CONTINENT_IDS, DIFFICULTY_IDS } from '../constants/filters';
 
 type Category = 'FLAG' | 'CAPITAL' | 'MAP' | 'SILHOUETTE' | 'MONUMENT' | 'MIXED';
 
@@ -78,14 +79,37 @@ export function MenuPage() {
         setCanPlaySelection(base.canPlay);
         setRequiredQuestions(base.required);
 
-        const [insular, landlocked] = await Promise.all([
-          api.getGameAvailability(selectedCategory, undefined, { isInsular: true }),
-          api.getGameAvailability(selectedCategory, undefined, { isLandlocked: true }),
-        ]);
+        const probeFilters: GameFilters[] = [
+          { ...filters, isInsular: true },
+          { ...filters, isLandlocked: true },
+          ...CONTINENT_IDS.map((c) => ({ ...filters, continent: c })),
+          ...DIFFICULTY_IDS.map((d) => ({ ...filters, difficulty: d as Difficulty })),
+        ];
+
+        const results = await Promise.all(
+          probeFilters.map((f) =>
+            api
+              .getGameAvailability(selectedCategory, undefined, f)
+              .then((r) => r.canPlay)
+              .catch(() => true)
+          )
+        );
         if (!mounted) return;
+
+        const insularPlayable = results[0];
+        const landlockedPlayable = results[1];
+        const continentResults = results.slice(2, 2 + CONTINENT_IDS.length);
+        const difficultyResults = results.slice(2 + CONTINENT_IDS.length);
+
         setDisabledOptions({
-          isInsular: !insular.canPlay,
-          isLandlocked: !landlocked.canPlay,
+          isInsular: !filters.isInsular && !insularPlayable,
+          isLandlocked: !filters.isLandlocked && !landlockedPlayable,
+          continents: CONTINENT_IDS.filter(
+            (c, i) => c !== filters.continent && !continentResults[i]
+          ),
+          difficulties: DIFFICULTY_IDS.filter(
+            (d, i) => d !== filters.difficulty && !difficultyResults[i]
+          ),
         });
       } catch {
         if (!mounted) return;
@@ -183,6 +207,8 @@ export function MenuPage() {
             title={t('menu.flash')}
             description={t('menu.flashDesc')}
             onClick={() => go(`/game/flash`, { category: selectedCategory })}
+            disabled={selectedCategory === 'MAP'}
+            disabledHint={selectedCategory === 'MAP' ? t('menu.flashNoMap') : undefined}
           />
           <GameModeCard
             icon="🎯"

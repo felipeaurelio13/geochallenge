@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { GameFilters } from '../../types';
+import { CONTINENTS, DIFFICULTIES } from '../../constants/filters';
 
 interface FilterDrawerProps {
   filters: GameFilters;
@@ -13,21 +14,6 @@ interface FilterDrawerProps {
     isLandlocked?: boolean;
   };
 }
-
-const CONTINENTS = [
-  { id: 'Africa', icon: '🌍' },
-  { id: 'Europe', icon: '🇪🇺' },
-  { id: 'Asia', icon: '🌏' },
-  { id: 'North America', icon: '🌎' },
-  { id: 'South America', icon: '🌎' },
-  { id: 'Oceania', icon: '🌊' },
-];
-
-const DIFFICULTIES = [
-  { id: 'EASY', icon: '😊' },
-  { id: 'MEDIUM', icon: '🎯' },
-  { id: 'HARD', icon: '🔥' },
-] as const;
 
 export function FilterDrawer({ filters, onChange, onClose, disabledOptions }: FilterDrawerProps) {
   const { t } = useTranslation();
