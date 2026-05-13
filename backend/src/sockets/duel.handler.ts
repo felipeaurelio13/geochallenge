@@ -183,9 +183,15 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
     const selectedCategory = normalizeCategory(data?.category);
 
     // Verificar si ya está en un duelo
-    if (playerDuels.has(user.userId)) {
-      socket.emit('duel:error', { message: 'Ya estás en un duelo activo' });
-      return;
+    const existingDuelId = playerDuels.get(user.userId);
+    if (existingDuelId) {
+      const existingDuel = activeDuels.get(existingDuelId);
+      if (existingDuel && existingDuel.status !== 'finished') {
+        socket.emit('duel:error', { message: 'Ya estás en un duelo activo' });
+        return;
+      }
+      // Stale entry: el duelo ya no existe o está finished. Limpiar y dejar pasar.
+      playerDuels.delete(user.userId);
     }
 
     // Agregar a la cola
@@ -640,6 +646,15 @@ async function endDuel(
     results: finalResults,
   });
 
+  // Liberar el estado in-memory ANTES de la persistencia.
+  // Los clientes ya recibieron duel:finished; el duelo ya no es "activo".
+  // Si esperamos a que termine Prisma + Redis, el guard de duel:queue rechaza
+  // intentos legítimos de re-encolarse con "Ya estás en un duelo activo".
+  readyTimeouts.delete(duel.id);
+  playerDuels.delete(duel.players[0].userId);
+  playerDuels.delete(duel.players[1].userId);
+  activeDuels.delete(duel.id);
+
   // Guardar resultados en la base de datos usando una transacción
   try {
     const leaderboardUpdates: Array<{ userId: string; totalScore: number }> = [];
@@ -687,10 +702,4 @@ async function endDuel(
   } catch (error) {
     console.error(`Error guardando resultados del duelo ${duel.id}:`, error);
   }
-
-  // Limpiar
-  readyTimeouts.delete(duel.id);
-  playerDuels.delete(duel.players[0].userId);
-  playerDuels.delete(duel.players[1].userId);
-  activeDuels.delete(duel.id);
 }
