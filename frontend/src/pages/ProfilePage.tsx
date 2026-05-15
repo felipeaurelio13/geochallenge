@@ -19,6 +19,8 @@ import type {
   DuelOpponent,
   HeadToHeadData,
   DuelPeriod,
+  CategoryStat,
+  EarnedAchievement,
 } from '../types';
 
 type ProfileTab = 'summary' | 'duels' | 'h2h' | 'history';
@@ -84,6 +86,10 @@ export function ProfilePage() {
   const [historyEntries, setHistoryEntries] = useState<GameHistoryEntry[] | null>(null);
   const [historyLoading, setHistoryLoading] = useState(false);
 
+  // Category stats and achievements
+  const [categoryStats, setCategoryStats] = useState<CategoryStat[] | null>(null);
+  const [achievements, setAchievements] = useState<EarnedAchievement[] | null>(null);
+
   const debouncedSearch = useDebounce(h2hSearch, 300);
 
   const { mutate, isLoading } = useApi(api.updateProfile);
@@ -122,6 +128,16 @@ export function ProfilePage() {
     }
   }, []);
 
+  const loadStatsAndAchievements = useCallback(async () => {
+    try {
+      const [stats, ach] = await Promise.all([api.getCategoryStats(), api.getAchievements()]);
+      setCategoryStats(stats);
+      setAchievements(ach);
+    } catch {
+      // non-critical
+    }
+  }, []);
+
   const loadOpponents = useCallback(async (search: string) => {
     setOpponentsLoading(true);
     try {
@@ -133,6 +149,12 @@ export function ProfilePage() {
       setOpponentsLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    if (activeTab === 'summary' && categoryStats === null) {
+      loadStatsAndAchievements();
+    }
+  }, [activeTab, categoryStats, loadStatsAndAchievements]);
 
   useEffect(() => {
     if (activeTab === 'duels' && !duelStats) {
@@ -307,6 +329,69 @@ export function ProfilePage() {
                 <StatCard value={`${winRate}%`} label={t('stats.winRate')} color="yellow" />
               </div>
             </div>
+
+            {/* Category performance */}
+            {categoryStats && categoryStats.length > 0 && (
+              <div className="bg-[var(--color-surface)] rounded-xl p-6 mb-6">
+                <h3 className="text-lg font-semibold text-white mb-4">{t('profile.categoryPerformance', 'Rendimiento por categoría')}</h3>
+                <div className="space-y-3">
+                  {categoryStats
+                    .filter((s) => s.totalQuestions > 0)
+                    .sort((a, b) => b.accuracy - a.accuracy)
+                    .map((stat) => {
+                      const labelKey = `categories.${stat.category.toLowerCase()}s`;
+                      const label = t(labelKey, stat.category);
+                      const CATEGORY_ICONS: Record<string, string> = {
+                        FLAG: '🚩', CAPITAL: '🏛️', MAP: '🗺️',
+                        SILHOUETTE: '🌑', MONUMENT: '🗿', MIXED: '🎯',
+                      };
+                      return (
+                        <div key={stat.category}>
+                          <div className="mb-1 flex items-center justify-between text-sm">
+                            <span className="flex items-center gap-1.5 text-[var(--color-text-secondary)]">
+                              <span>{CATEGORY_ICONS[stat.category] ?? '🎯'}</span>
+                              {label}
+                            </span>
+                            <span className="font-semibold text-white">{stat.accuracy}%</span>
+                          </div>
+                          <div className="h-2 rounded-full bg-[var(--color-surface-muted)]">
+                            <div
+                              className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-emerald-500 transition-all duration-500"
+                              style={{ width: `${stat.accuracy}%` }}
+                            />
+                          </div>
+                          <div className="mt-0.5 text-right text-xs text-[var(--color-text-muted)]">
+                            {stat.correctCount}/{stat.totalQuestions}
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              </div>
+            )}
+
+            {/* Achievements */}
+            {achievements && achievements.length > 0 && (
+              <div className="bg-[var(--color-surface)] rounded-xl p-6 mb-6">
+                <h3 className="text-lg font-semibold text-white mb-4">{t('profile.achievements', 'Logros')}</h3>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                  {achievements.map((ach) => (
+                    <div
+                      key={ach.key}
+                      className="flex flex-col items-center gap-1 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] p-3 text-center"
+                    >
+                      <span className="text-3xl">{ach.icon}</span>
+                      <span className="text-xs font-semibold text-white">
+                        {i18n.language === 'en' ? ach.nameEn : ach.nameEs}
+                      </span>
+                      <span className="text-[0.65rem] text-[var(--color-text-muted)]">
+                        {new Date(ach.earnedAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="bg-[var(--color-surface)] rounded-xl p-6">
               <div className="flex items-center justify-between mb-4">

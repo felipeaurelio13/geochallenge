@@ -238,6 +238,19 @@ export function MenuPage() {
         </div>
       </section>
 
+      {/* Daily Challenge Banner */}
+      <Link
+        to="/daily"
+        className="mt-4 flex items-center gap-4 rounded-2xl border border-cyan-700/60 bg-gradient-to-r from-cyan-950/60 to-emerald-950/60 px-4 py-3 text-white transition-all hover:border-cyan-500/60 hover:from-cyan-900/40 hover:to-emerald-900/40 pressable"
+      >
+        <span className="text-3xl leading-none">📅</span>
+        <div className="flex-1 min-w-0">
+          <div className="font-bold text-cyan-300">{t('menu.dailyChallenge', 'Reto del día')}</div>
+          <div className="text-xs text-cyan-500/80">{t('menu.dailyChallengeDesc', '10 preguntas · mismas para todos · un intento')}</div>
+        </div>
+        <span className="text-cyan-400 text-lg">→</span>
+      </Link>
+
       <section className="mt-4" aria-label={t('menu.quickActions')}>
         <SectionTitle variant="label" className="mb-2 px-1 sm:px-0">
           {t('menu.quickActions')}

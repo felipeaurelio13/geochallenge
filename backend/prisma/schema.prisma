@@ -17,6 +17,8 @@ model User {
   gamesPlayed       Int         @default(0)
   wins              Int         @default(0)
   losses            Int         @default(0)
+  dailyStreak       Int         @default(0)
+  lastDailyDate     String?
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
 
@@ -27,6 +29,7 @@ model User {
   duelMatchesAsP1    DuelMatch[] @relation("DuelMatchAsP1")
   duelMatchesAsP2    DuelMatch[] @relation("DuelMatchAsP2")
   duelMatchesWon     DuelMatch[] @relation("DuelMatchAsWinner")
+  achievements       UserAchievement[]
 
   @@map("users")
 }
@@ -157,4 +160,32 @@ enum ChallengeStatus {
   COMPLETED
   EXPIRED
   DECLINED
+}
+
+model Achievement {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  nameEs      String
+  nameEn      String
+  descEs      String
+  descEn      String
+  icon        String
+
+  earnedBy    UserAchievement[]
+
+  @@map("achievements")
+}
+
+model UserAchievement {
+  id            String      @id @default(cuid())
+  userId        String
+  achievementId String
+  earnedAt      DateTime    @default(now())
+  meta          Json?
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
+  @@map("user_achievements")
 }

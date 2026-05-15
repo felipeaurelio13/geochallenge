@@ -17,9 +17,17 @@ import {
   getDuelMatchStats,
   getDuelOpponents,
   getDuelHeadToHead,
+  getCategoryStats,
   AnswerResult,
   QuestionFilters,
 } from '../services/game.service.js';
+import { getRedis } from '../config/redis.js';
+import { prisma } from '../config/database.js';
+import {
+  evaluateAchievementsAfterGame,
+  evaluateAchievementsAfterDaily,
+  getUserAchievements,
+} from '../services/achievement.service.js';
 import { updateLeaderboardScore, updateSeasonLeaderboardScore } from '../services/leaderboard.service.js';
 import { config } from '../config/env.js';
 
@@ -338,6 +346,17 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
     const correctCount = results.filter((r) => r.isCorrect).length;
     const accuracy = Math.round((correctCount / results.length) * 100);
 
+    // Evaluar achievements (sin bloquear la respuesta)
+    const streakLength = gameType === 'streak' ? correctCount : undefined;
+    const newAchievements = await evaluateAchievementsAfterGame({
+      userId: req.user!.userId,
+      correctCount,
+      totalQuestions: results.length,
+      score: totalScore,
+      streakLength,
+      isStreakMode: gameType === 'streak',
+    }).catch(() => []);
+
     res.json({
       message: 'Partida finalizada',
       gameId,
@@ -347,6 +366,7 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
       accuracy,
       isHighScore,
       details: results,
+      newAchievements,
     });
   } catch (error) {
     console.error('Error al finalizar partida:', error);
@@ -436,6 +456,206 @@ router.get('/duel-h2h/:opponentId', authenticateJWT, async (req: AuthRequest, re
     res.json(data);
   } catch (error) {
     console.error('Error al obtener head-to-head:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+/**
+ * GET /api/game/achievements
+ * Logros del usuario
+ */
+router.get('/achievements', authenticateJWT, async (req: AuthRequest, res: Response) => {
+  try {
+    const achievements = await getUserAchievements(req.user!.userId);
+    res.json({ achievements });
+  } catch (error) {
+    console.error('Error al obtener logros:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+/**
+ * GET /api/game/category-stats
+ * Precisión del usuario por categoría (sólo partidas SINGLE y STREAK).
+ */
+router.get('/category-stats', authenticateJWT, async (req: AuthRequest, res: Response) => {
+  try {
+    const stats = await getCategoryStats(req.user!.userId);
+    res.json({ stats });
+  } catch (error) {
+    console.error('Error al obtener estadísticas por categoría:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// ─── Daily Challenge ───────────────────────────────────────────────────────────
+
+const DAILY_QUESTION_COUNT = 10;
+const DAILY_TTL_SECONDS = 60 * 60 * 50; // 50h — survives past midnight safely
+
+function getTodayKey(): string {
+  return new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+}
+
+function seededShuffle<T>(arr: T[], seed: number): T[] {
+  const a = [...arr];
+  let s = seed;
+  for (let i = a.length - 1; i > 0; i--) {
+    s = ((s * 1664525) + 1013904223) & 0xffffffff;
+    const j = Math.abs(s) % (i + 1);
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/**
+ * GET /api/game/daily
+ * Retorna las preguntas del reto del día (mismas para todos los usuarios).
+ * Si el usuario ya jugó hoy, retorna sus resultados previos.
+ */
+router.get('/daily', optionalAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const today = getTodayKey();
+    const redis = getRedis();
+    const cacheKey = `daily:questions:${today}`;
+    const userId = req.user?.userId;
+
+    // Check if user already played today
+    if (userId) {
+      const playedKey = `daily:played:${userId}:${today}`;
+      const existing = await redis.get(playedKey);
+      if (existing) {
+        const result = JSON.parse(existing);
+        res.json({ alreadyPlayed: true, result, today });
+        return;
+      }
+    }
+
+    // Get or generate today's questions
+    let questionIds: string[] = [];
+    const cached = await redis.get(cacheKey);
+    if (cached) {
+      questionIds = JSON.parse(cached);
+    } else {
+      const seed = parseInt(today.replace(/-/g, ''), 10);
+      const allIds = await prisma.question.findMany({
+        where: {
+          isAvailable: true,
+          category: { in: ['FLAG', 'CAPITAL', 'SILHOUETTE', 'MONUMENT'] },
+        },
+        select: { id: true },
+      });
+      const shuffled = seededShuffle(allIds.map((q) => q.id), seed);
+      questionIds = shuffled.slice(0, DAILY_QUESTION_COUNT);
+      await redis.set(cacheKey, JSON.stringify(questionIds), 'EX', DAILY_TTL_SECONDS);
+    }
+
+    const questions = await prisma.question.findMany({
+      where: { id: { in: questionIds } },
+    });
+
+    // Preserve the daily order
+    const ordered = questionIds
+      .map((id) => questions.find((q) => q.id === id))
+      .filter(Boolean) as typeof questions;
+
+    const formatted = ordered.map((q) => ({
+      id: q.id,
+      category: q.category,
+      questionText: q.questionData,
+      options: q.options,
+      correctAnswer: q.correctAnswer,
+      imageUrl: q.imageUrl,
+      continent: q.continent,
+      subregion: q.subregion,
+      isInsular: q.isInsular,
+      isLandlocked: q.isLandlocked,
+      populationTier: q.populationTier,
+      areaTier: q.areaTier,
+    }));
+
+    res.json({ questions: formatted, today, alreadyPlayed: false });
+  } catch (error) {
+    console.error('Error al obtener el reto del día:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+const dailySubmitSchema = z.object({
+  score: z.number().int().min(0),
+  correctCount: z.number().int().min(0),
+  totalQuestions: z.number().int().min(1),
+});
+
+/**
+ * POST /api/game/daily/submit
+ * Guarda el resultado del reto del día del usuario.
+ */
+router.post('/daily/submit', authenticateJWT, async (req: AuthRequest, res: Response) => {
+  try {
+    const parsed = dailySubmitSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: 'Datos inválidos' });
+      return;
+    }
+    const { score, correctCount, totalQuestions } = parsed.data;
+    const today = getTodayKey();
+    const redis = getRedis();
+    const playedKey = `daily:played:${req.user!.userId}:${today}`;
+
+    const alreadySaved = await redis.get(playedKey);
+    if (alreadySaved) {
+      res.json({ message: 'Ya enviado', result: JSON.parse(alreadySaved) });
+      return;
+    }
+
+    // Update daily streak in DB
+    const userId = req.user!.userId;
+    const userRow = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { highScore: true, dailyStreak: true, lastDailyDate: true },
+    });
+
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayKey = yesterday.toISOString().slice(0, 10);
+
+    const newStreak =
+      userRow?.lastDailyDate === yesterdayKey
+        ? (userRow.dailyStreak ?? 0) + 1
+        : 1;
+
+    const updateData: Record<string, unknown> = {
+      dailyStreak: newStreak,
+      lastDailyDate: today,
+      gamesPlayed: { increment: 1 },
+    };
+    if (userRow && score > (userRow.highScore ?? 0)) {
+      updateData.highScore = score;
+    }
+
+    await prisma.user.update({ where: { id: userId }, data: updateData });
+
+    const result = { score, correctCount, totalQuestions, dailyStreak: newStreak, playedAt: new Date().toISOString() };
+    await redis.set(playedKey, JSON.stringify(result), 'EX', DAILY_TTL_SECONDS);
+
+    // Save as GameResult for history
+    await prisma.gameResult.create({
+      data: { userId, score, correctCount, totalQuestions, gameMode: 'SINGLE', category: 'MIXED' },
+    });
+
+    // Update leaderboard
+    await Promise.all([
+      updateLeaderboardScore(userId, score),
+      updateSeasonLeaderboardScore(userId, score),
+    ]).catch(() => {});
+
+    // Evaluate achievements
+    const newAchievements = await evaluateAchievementsAfterDaily(userId, newStreak).catch(() => []);
+
+    res.json({ result, newAchievements, message: 'Resultado guardado' });
+  } catch (error) {
+    console.error('Error al guardar resultado diario:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });

@@ -73,6 +73,39 @@ export interface Question {
   imageUrl?: string;
   latitude?: number;
   longitude?: number;
+  continent?: string;
+  subregion?: string;
+  isInsular?: boolean;
+  isLandlocked?: boolean;
+  populationTier?: string;
+  areaTier?: string;
+}
+
+export interface CategoryStat {
+  category: string;
+  totalGames: number;
+  correctCount: number;
+  totalQuestions: number;
+  accuracy: number;
+  bestScore: number;
+}
+
+export interface DailyResult {
+  score: number;
+  correctCount: number;
+  totalQuestions: number;
+  dailyStreak?: number;
+  playedAt: string;
+}
+
+export interface EarnedAchievement {
+  key: string;
+  nameEs: string;
+  nameEn: string;
+  descEs: string;
+  descEn: string;
+  icon: string;
+  earnedAt: string;
 }
 
 export interface Answer {

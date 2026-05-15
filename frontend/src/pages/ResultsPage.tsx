@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useGame } from '../context/GameContext';
@@ -6,13 +6,18 @@ import { api } from '../services/api';
 import { LoadingSpinner, ShareButton } from '../components';
 import { AnswerStatusBadge } from '../components/AnswerStatusBadge';
 import { Button } from '../components/atoms/Button';
+import { useStreakShareImage } from '../hooks/useStreakShareImage';
 
 export function ResultsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const isStreakMode = searchParams.get('gameType') === 'streak';
+  const category = searchParams.get('category') ?? 'MIXED';
   const { state, resetGame } = useGame();
+  const { share: shareStreakImage, status: streakShareStatus } = useStreakShareImage();
+  const [streakShareFeedback, setStreakShareFeedback] = useState<string>('');
+  const feedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { score, questions, results } = state;
   const correctAnswers = results.filter((r) => r.isCorrect).length;
@@ -89,6 +94,21 @@ export function ResultsPage() {
     if (percentage >= 30) return t('results.keepPracticing');
     return t('results.tryAgain');
   };
+
+  const handleShareStreak = useCallback(async () => {
+    const today = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const result = await shareStreakImage({
+      correctCount: correctAnswers,
+      category,
+      date: today,
+      score,
+    });
+    if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
+    if (result === 'shared') setStreakShareFeedback(t('share.shared', '¡Compartido!'));
+    else if (result === 'downloaded') setStreakShareFeedback(t('share.downloaded', 'Imagen guardada'));
+    else if (result === 'error') setStreakShareFeedback(t('share.error', 'No se pudo compartir'));
+    feedbackTimer.current = setTimeout(() => setStreakShareFeedback(''), 3000);
+  }, [shareStreakImage, correctAnswers, category, score, t]);
 
   const handlePlayAgain = () => {
     resetGame();
@@ -209,12 +229,29 @@ export function ResultsPage() {
         <section className="mt-5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 sm:p-5">
           <p className="text-sm text-[var(--color-text-secondary)]">{t('results.shareScore')}</p>
           <div className="mt-3">
-            <ShareButton
-              payload={{
-                title: t('app.name'),
-                text: shareText,
-              }}
-            />
+            {isStreakMode ? (
+              <div>
+                <Button
+                  onClick={handleShareStreak}
+                  disabled={streakShareStatus === 'sharing'}
+                  variant="primary"
+                  size="lg"
+                  fullWidth
+                >
+                  📸 {streakShareStatus === 'sharing' ? `${t('common.loading')}...` : t('results.shareStreakButton', 'Compartir mi racha')}
+                </Button>
+                <p className="mt-2 min-h-5 text-xs text-green-300" aria-live="polite">
+                  {streakShareFeedback}
+                </p>
+              </div>
+            ) : (
+              <ShareButton
+                payload={{
+                  title: t('app.name'),
+                  text: shareText,
+                }}
+              />
+            )}
           </div>
         </section>
 

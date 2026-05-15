@@ -17,6 +17,7 @@ import {
   ChallengeGamePage,
   ChallengeResultsPage,
 } from './pages';
+import { DailyChallengePage } from './pages/DailyChallengePage';
 import {
   ErrorBoundary,
   ServerWakeUp,
@@ -155,6 +156,10 @@ export const appRoutes = [
       {
         path: '/challenges/:id/results',
         element: <ProtectedRoute><ChallengeResultsPage /></ProtectedRoute>,
+      },
+      {
+        path: '/daily',
+        element: <ProtectedRoute><DailyChallengePage /></ProtectedRoute>,
       },
       {
         path: '*',
