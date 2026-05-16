@@ -20,6 +20,7 @@ import { GAME_CONSTANTS } from '../constants/game';
 import { useHaptics } from '../hooks';
 import { areMechanicsV2Enabled } from '../config/featureFlags';
 import { trackUxEvent } from '../utils/uxTelemetry';
+import { generateFunFact } from '../utils/funFacts';
 
 const MapInteractive = lazy(() =>
   import('../components/MapInteractive').then((m) => ({ default: m.MapInteractive }))
@@ -45,7 +46,7 @@ function buildQuestionUniquenessKey(question: Question): string {
 }
 
 export function GamePage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const category = searchParams.get('category') || 'MIXED';
@@ -87,6 +88,7 @@ export function GamePage() {
   const [streakGameOver, setStreakGameOver] = useState(false);
   const [pendingMechanicUsage, setPendingMechanicUsage] = useState<MechanicUsage | undefined>(undefined);
   const [disabledOptionIndexes, setDisabledOptionIndexes] = useState<number[]>([]);
+  const [funFact, setFunFact] = useState<string | null>(null);
   const [mechanicsAvailable, setMechanicsAvailable] = useState({
     intel5050: 1,
     focusTime: 1,
@@ -337,6 +339,9 @@ export function GamePage() {
 
       setLastAnswerCorrect(result.isCorrect);
       setShowResult(true);
+      if (gameType !== 'flash') {
+        setFunFact(generateFunFact(currentQuestion, i18n.language === 'en' ? 'en' : 'es'));
+      }
     } catch (err: any) {
       console.error('Error submitting answer:', err);
       setError(err.message || t('game.error'));
@@ -387,6 +392,7 @@ export function GamePage() {
       setSelectedAnswer(null);
       setMapLocation(null);
       setShowResult(false);
+      setFunFact(null);
       setTimeRemaining(roundDuration);
       setGlobalTimeRemaining(roundDuration);
       setDisabledOptionIndexes([]);
@@ -551,7 +557,7 @@ export function GamePage() {
           submitLabel={t('game.submit')}
           nextLabel={streakGameOver ? t('game.seeResults') : shouldUseStreakFlow ? t('game.next') : isLastQuestion ? t('game.seeResults') : t('game.next')}
           resultLabel={lastAnswerCorrect ? t('game.correct') : t('game.incorrect')}
-          resultHint={streakGameOver ? t('game.streakBroken') : undefined}
+          resultHint={streakGameOver ? t('game.streakBroken') : (funFact ?? undefined)}
           resultAttribution={
             currentQuestion && currentQuestion.category === 'MONUMENT'
               ? <MonumentAttribution question={currentQuestion} />

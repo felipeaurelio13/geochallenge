@@ -15,6 +15,12 @@ export interface GameQuestion {
   imageUrl?: string;
   latitude?: number;
   longitude?: number;
+  continent?: string;
+  subregion?: string;
+  isInsular?: boolean;
+  isLandlocked?: boolean;
+  populationTier?: string;
+  areaTier?: string;
 }
 
 export interface QuestionFilters {
@@ -194,6 +200,12 @@ export async function getQuestionsForGame(
     imageUrl: q.imageUrl || undefined,
     latitude: q.category === Category.MAP ? q.latitude || undefined : undefined,
     longitude: q.category === Category.MAP ? q.longitude || undefined : undefined,
+    continent: q.continent || undefined,
+    subregion: q.subregion || undefined,
+    isInsular: q.isInsular ?? undefined,
+    isLandlocked: q.isLandlocked ?? undefined,
+    populationTier: q.populationTier || undefined,
+    areaTier: q.areaTier || undefined,
   }));
 }
 
@@ -258,6 +270,10 @@ export async function getQuestionsForFlashGame(category?: Category, filters?: Qu
       difficulty: q.difficulty,
       questionData: q.questionData,
       imageUrl: q.imageUrl || undefined,
+      continent: q.continent || undefined,
+      subregion: q.subregion || undefined,
+      isInsular: q.isInsular ?? undefined,
+      isLandlocked: q.isLandlocked ?? undefined,
     };
   });
 }
@@ -842,4 +858,40 @@ export async function getDuelHeadToHead(
   });
 
   return { opponent, periods: { week, month, year, all }, recentMatches };
+}
+
+export interface CategoryStat {
+  category: string;
+  totalGames: number;
+  correctCount: number;
+  totalQuestions: number;
+  accuracy: number;
+  bestScore: number;
+}
+
+export async function getCategoryStats(userId: string): Promise<CategoryStat[]> {
+  const rows = await prisma.gameResult.findMany({
+    where: { userId, gameMode: { in: ['SINGLE', 'STREAK'] } },
+    select: { category: true, correctCount: true, totalQuestions: true, score: true },
+  });
+
+  const byCategory: Record<string, { correct: number; total: number; games: number; best: number }> = {};
+
+  for (const r of rows) {
+    const key = r.category ?? 'MIXED';
+    if (!byCategory[key]) byCategory[key] = { correct: 0, total: 0, games: 0, best: 0 };
+    byCategory[key].correct += r.correctCount;
+    byCategory[key].total += r.totalQuestions;
+    byCategory[key].games += 1;
+    byCategory[key].best = Math.max(byCategory[key].best, r.score);
+  }
+
+  return Object.entries(byCategory).map(([category, d]) => ({
+    category,
+    totalGames: d.games,
+    correctCount: d.correct,
+    totalQuestions: d.total,
+    accuracy: d.total > 0 ? Math.round((d.correct / d.total) * 100) : 0,
+    bestScore: d.best,
+  }));
 }

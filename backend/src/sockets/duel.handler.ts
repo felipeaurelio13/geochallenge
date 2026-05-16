@@ -1,5 +1,6 @@
 import { Server as SocketIOServer, Socket } from 'socket.io';
 import { Category, GameMode } from '@prisma/client';
+import { getRedis } from '../config/redis.js';
 import {
   getQuestionsForGame,
   validateAnswer,
@@ -143,6 +144,23 @@ const processingAnswers = new Set<string>();
 
 // Store ready-check timeout references for cleanup on disconnect
 const readyTimeouts = new Map<string, ReturnType<typeof setTimeout>>();
+
+// Grace period timers: userId -> timer that fires endDuel if player doesn't reconnect
+const disconnectTimers = new Map<string, ReturnType<typeof setTimeout>>();
+const DISCONNECT_GRACE_MS = 20_000;
+
+async function persistPlayerDuel(userId: string, duelId: string | null): Promise<void> {
+  try {
+    const redis = getRedis();
+    if (duelId) {
+      await redis.set(`duel:player:${userId}`, duelId, 'EX', 3600);
+    } else {
+      await redis.del(`duel:player:${userId}`);
+    }
+  } catch {
+    // Redis failure is non-fatal — in-memory state still works
+  }
+}
 
 // Simple per-socket event rate limiter
 const eventCounts = new Map<string, { count: number; resetAt: number }>();
@@ -342,23 +360,86 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
   });
 
   // Desconexión durante duelo
+  // Resume a duel after reconnection: emit current state to the reconnecting player
+  socket.on('duel:resume', () => {
+    const duelId = playerDuels.get(user.userId);
+    if (!duelId) return;
+
+    // Cancel any pending disconnect timer for this player
+    const pendingTimer = disconnectTimers.get(user.userId);
+    if (pendingTimer) {
+      clearTimeout(pendingTimer);
+      disconnectTimers.delete(user.userId);
+    }
+
+    const duel = activeDuels.get(duelId);
+    if (!duel || duel.status === 'finished') return;
+
+    // Update socket ID so future events route correctly
+    const playerRecord = duel.players.find((p) => p.userId === user.userId);
+    if (playerRecord) playerRecord.socketId = socket.id;
+
+    socket.join(duelId);
+
+    // Notify opponent of reconnect
+    const opponent = duel.players.find((p) => p.userId !== user.userId);
+    if (opponent) {
+      io.to(opponent.socketId).emit('duel:opponent-reconnected');
+    }
+
+    // Send current game state
+    const currentQ = duel.questions[duel.currentQuestionIndex];
+    socket.emit('duel:state', {
+      duelId,
+      status: duel.status,
+      currentQuestionIndex: duel.currentQuestionIndex,
+      question: currentQ
+        ? {
+            id: currentQ.id,
+            category: currentQ.category,
+            questionText: currentQ.questionText,
+            options: currentQ.options,
+          }
+        : null,
+      scores: duel.players.map((p) => ({ userId: p.userId, score: p.score })),
+    });
+  });
+
   socket.on('disconnect', () => {
     const duelId = playerDuels.get(user.userId);
     if (duelId) {
-      // Clean up ready-check timeout for this duel
-      const readyTimeout = readyTimeouts.get(duelId);
-      if (readyTimeout) {
-        clearTimeout(readyTimeout);
-        readyTimeouts.delete(duelId);
-      }
-
       const duel = activeDuels.get(duelId);
       if (duel && duel.status !== 'finished') {
         const currentPlayer = duel.players.find((p) => p.userId === user.userId);
-        if (!currentPlayer || currentPlayer.socketId === socket.id) {
-          // El otro jugador gana por abandono
-          const winner = duel.players.find((p) => p.userId !== user.userId);
-          endDuel(io, duel, winner?.userId || null, 'opponent_disconnected');
+
+        // Only act if this socket is the currently registered socket for the player.
+        // A stale disconnect from an old socket should not terminate the duel.
+        if (currentPlayer && currentPlayer.socketId !== socket.id) {
+          // Stale disconnect — ignore
+        } else {
+          // Notify opponent and start grace period
+          const opponent = duel.players.find((p) => p.userId !== user.userId);
+          if (opponent) {
+            io.to(opponent.socketId).emit('duel:opponent-disconnected');
+          }
+
+          const timer = setTimeout(() => {
+            disconnectTimers.delete(user.userId);
+            const liveDuel = activeDuels.get(duelId);
+            if (liveDuel && liveDuel.status !== 'finished') {
+              const winner = liveDuel.players.find((p) => p.userId !== user.userId);
+              endDuel(io, liveDuel, winner?.userId || null, 'opponent_disconnected');
+            }
+          }, DISCONNECT_GRACE_MS);
+
+          disconnectTimers.set(user.userId, timer);
+
+          // Clean up ready-check timeout
+          const readyTimeout = readyTimeouts.get(duelId);
+          if (readyTimeout) {
+            clearTimeout(readyTimeout);
+            readyTimeouts.delete(duelId);
+          }
         }
       }
     }
@@ -422,6 +503,8 @@ async function createDuel(
   activeDuels.set(duelId, duel);
   playerDuels.set(player1.userId, duelId);
   playerDuels.set(player2.userId, duelId);
+  persistPlayerDuel(player1.userId, duelId);
+  persistPlayerDuel(player2.userId, duelId);
 
   // Unir sockets a la sala del duelo
   const socket1 = io.sockets.sockets.get(player1.socketId);
@@ -651,8 +734,12 @@ async function endDuel(
   // Si esperamos a que termine Prisma + Redis, el guard de duel:queue rechaza
   // intentos legítimos de re-encolarse con "Ya estás en un duelo activo".
   readyTimeouts.delete(duel.id);
-  playerDuels.delete(duel.players[0].userId);
-  playerDuels.delete(duel.players[1].userId);
+  for (const p of duel.players) {
+    disconnectTimers.get(p.userId) && clearTimeout(disconnectTimers.get(p.userId)!);
+    disconnectTimers.delete(p.userId);
+    playerDuels.delete(p.userId);
+    persistPlayerDuel(p.userId, null);
+  }
   activeDuels.delete(duel.id);
 
   // Guardar resultados en la base de datos usando una transacción

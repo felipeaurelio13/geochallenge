@@ -65,6 +65,8 @@
     "rateLimitError": "Demasiados intentos. Intenta de nuevo en {{minutes}} min."
   },
   "menu": {
+    "dailyChallenge": "Reto del día",
+    "dailyChallengeDesc": "10 preguntas · mismas para todos · un intento",
     "welcome": "¡Hola, {{name}}!",
     "chooseMode": "Elige un modo de juego",
     "singlePlayer": "Un Jugador",
@@ -157,6 +159,7 @@
     "shortGameCancelled": "Partida cancelada. Prueba con otra categoría o configuración para obtener más preguntas."
   },
   "results": {
+    "shareStreakButton": "Compartir mi racha",
     "gameOver": "¡Partida terminada!",
     "excellent": "¡Excelente!",
     "great": "¡Muy bien!",
@@ -289,6 +292,8 @@
   "profile": {
     "title": "Mi Perfil",
     "statistics": "Estadísticas",
+    "categoryPerformance": "Rendimiento por categoría",
+    "achievements": "Logros",
     "settings": "Configuración",
     "edit": "Editar",
     "language": "Idioma",
@@ -306,7 +311,16 @@
   "share": {
     "shared": "¡Compartido!",
     "copied": "Copiado al portapapeles",
+    "downloaded": "Imagen guardada",
     "error": "No se pudo compartir"
+  },
+  "daily": {
+    "alreadyPlayed": "Ya jugaste hoy",
+    "comeBackTomorrow": "Vuelve mañana para el siguiente reto",
+    "streak": "Racha",
+    "days": "días",
+    "complete": "¡Reto del día completado!",
+    "finish": "Ver resultado"
   },
   "install": {
     "title": "Instala GeoChallenge",

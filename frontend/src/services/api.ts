@@ -15,6 +15,9 @@ import type {
   HeadToHeadData,
   DuelPeriod,
   GameFilters,
+  CategoryStat,
+  DailyResult,
+  EarnedAchievement,
 } from '../types';
 import { filtersToParams } from '../types';
 import { testAuthBypass } from '../utils/testAuthBypass';
@@ -301,6 +304,35 @@ class ApiService {
   async getDuelH2H(opponentId: string) {
     const response = await this.client.get<HeadToHeadData>(`/game/duel-h2h/${opponentId}`);
     return response.data;
+  }
+
+  async getCategoryStats() {
+    const response = await this.client.get<{ stats: CategoryStat[] }>('/game/category-stats');
+    return response.data.stats;
+  }
+
+  async getDaily() {
+    const response = await this.client.get<{
+      questions: Question[];
+      today: string;
+      alreadyPlayed: boolean;
+      result?: DailyResult;
+    }>('/game/daily');
+    return response.data;
+  }
+
+  async submitDaily(data: { score: number; correctCount: number; totalQuestions: number }) {
+    const response = await this.client.post<{
+      result: DailyResult;
+      newAchievements: string[];
+      message: string;
+    }>('/game/daily/submit', data);
+    return response.data;
+  }
+
+  async getAchievements() {
+    const response = await this.client.get<{ achievements: EarnedAchievement[] }>('/game/achievements');
+    return response.data.achievements;
   }
 }
 

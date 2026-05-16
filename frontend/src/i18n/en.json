@@ -65,6 +65,8 @@
     "rateLimitError": "Too many attempts. Try again in {{minutes}} min."
   },
   "menu": {
+    "dailyChallenge": "Daily Challenge",
+    "dailyChallengeDesc": "10 questions · same for everyone · one attempt",
     "welcome": "Hello, {{name}}!",
     "chooseMode": "Choose a game mode",
     "singlePlayer": "Single Player",
@@ -157,6 +159,7 @@
     "shortGameCancelled": "Game cancelled. Try another category or setup to get more questions."
   },
   "results": {
+    "shareStreakButton": "Share my streak",
     "gameOver": "Game Over!",
     "excellent": "Excellent!",
     "great": "Great job!",
@@ -289,6 +292,8 @@
   "profile": {
     "title": "My Profile",
     "statistics": "Statistics",
+    "categoryPerformance": "Performance by category",
+    "achievements": "Achievements",
     "settings": "Settings",
     "edit": "Edit",
     "language": "Language",
@@ -306,7 +311,16 @@
   "share": {
     "shared": "Shared!",
     "copied": "Copied to clipboard",
+    "downloaded": "Image saved",
     "error": "Could not share"
+  },
+  "daily": {
+    "alreadyPlayed": "You already played today",
+    "comeBackTomorrow": "Come back tomorrow for the next challenge",
+    "streak": "Streak",
+    "days": "days",
+    "complete": "Daily Challenge complete!",
+    "finish": "See results"
   },
   "install": {
     "title": "Install GeoChallenge",
