@@ -94,7 +94,7 @@ export function DailyChallengePage() {
     }
   }
 
-  async function handleShare(correct: number, total: number) {
+  async function handleShare(correct: number) {
     const today = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
     const result = await shareImage({ correctCount: correct, category: 'DAILY', date: today });
     if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
@@ -139,7 +139,7 @@ export function DailyChallengePage() {
             <div className="mt-3 text-sm text-cyan-400">🔥 {t('daily.streak', 'Racha')}: {previousResult.dailyStreak} {t('daily.days', 'días')}</div>
           )}
         </div>
-        <Button onClick={() => handleShare(previousResult.correctCount, previousResult.totalQuestions)} disabled={shareStatus === 'sharing'} variant="primary" size="lg">
+        <Button onClick={() => handleShare(previousResult.correctCount)} disabled={shareStatus === 'sharing'} variant="primary" size="lg">
           📸 {t('results.shareStreakButton', 'Compartir resultado')}
         </Button>
         {shareFeedback && <p className="text-xs text-green-300">{shareFeedback}</p>}
@@ -169,7 +169,7 @@ export function DailyChallengePage() {
           </div>
         )}
         <Button
-          onClick={() => result && handleShare(result.correctCount, result.totalQuestions)}
+          onClick={() => result && handleShare(result.correctCount)}
           disabled={shareStatus === 'sharing'}
           variant="primary"
           size="lg"

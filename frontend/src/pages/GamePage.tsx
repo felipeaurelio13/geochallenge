@@ -339,9 +339,7 @@ export function GamePage() {
 
       setLastAnswerCorrect(result.isCorrect);
       setShowResult(true);
-      if (gameType !== 'flash') {
-        setFunFact(generateFunFact(currentQuestion, i18n.language === 'en' ? 'en' : 'es'));
-      }
+      setFunFact(generateFunFact(currentQuestion, i18n.language === 'en' ? 'en' : 'es'));
     } catch (err: any) {
       console.error('Error submitting answer:', err);
       setError(err.message || t('game.error'));
