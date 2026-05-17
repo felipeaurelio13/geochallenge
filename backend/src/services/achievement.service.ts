@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { prisma } from '../config/database.js';
 
 export type AchievementKey =
@@ -45,7 +46,11 @@ async function grantIfNew(
   if (await alreadyEarned(userId, achievementId)) return false;
 
   await prisma.userAchievement.create({
-    data: { userId, achievementId, meta: meta ?? undefined },
+    data: {
+      userId,
+      achievementId,
+      ...(meta ? { meta: meta as Prisma.InputJsonValue } : {}),
+    },
   });
   return true;
 }

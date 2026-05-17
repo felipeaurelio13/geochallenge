@@ -871,7 +871,7 @@ export interface CategoryStat {
 
 export async function getCategoryStats(userId: string): Promise<CategoryStat[]> {
   const rows = await prisma.gameResult.findMany({
-    where: { userId, gameMode: { in: ['SINGLE', 'STREAK'] } },
+    where: { userId, gameMode: 'SINGLE' },
     select: { category: true, correctCount: true, totalQuestions: true, score: true },
   });
 
