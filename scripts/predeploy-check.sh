@@ -39,13 +39,35 @@ red()    { printf '\033[31m%s\033[0m\n' "$*" >&2; }
 green()  { printf '\033[32m%s\033[0m\n' "$*" >&2; }
 yellow() { printf '\033[33m%s\033[0m\n' "$*" >&2; }
 
-# ¿Qué se movió?
-FRONTEND_CHANGED=$(git status --porcelain -- frontend 2>/dev/null || true)
-BACKEND_CHANGED=$(git status --porcelain -- backend 2>/dev/null || true)
-DATA_CHANGED=$(git status --porcelain -- data 2>/dev/null || true)
-PRISMA_CHANGED=$(git status --porcelain -- backend/prisma 2>/dev/null || true)
+# ¿Qué se movió? — verifica TANTO cambios sin commitear COMO commits adelante del upstream.
+# Esto evita que el Stop hook salte en silencio cuando todo ya fue commitado pero no pusheado.
+UPSTREAM=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null || echo "origin/master")
+# Si el upstream no existe localmente (branch nueva), caer a origin/master o origin/main.
+if ! git rev-parse --verify "$UPSTREAM" >/dev/null 2>&1; then
+  if git rev-parse --verify "origin/master" >/dev/null 2>&1; then
+    UPSTREAM="origin/master"
+  elif git rev-parse --verify "origin/main" >/dev/null 2>&1; then
+    UPSTREAM="origin/main"
+  else
+    UPSTREAM=""
+  fi
+fi
 
-# Working tree limpio en zonas relevantes → silencio total.
+changed_in() {
+  # Cambios sin commitear
+  git status --porcelain -- "$@" 2>/dev/null
+  # Cambios en commits que aún no llegaron al upstream
+  if [ -n "$UPSTREAM" ]; then
+    git diff --name-only "${UPSTREAM}...HEAD" -- "$@" 2>/dev/null
+  fi
+}
+
+FRONTEND_CHANGED=$(changed_in frontend)
+BACKEND_CHANGED=$(changed_in backend)
+DATA_CHANGED=$(changed_in data)
+PRISMA_CHANGED=$(changed_in backend/prisma)
+
+# Sin cambios en zonas relevantes → silencio total.
 if [ -z "$FRONTEND_CHANGED$BACKEND_CHANGED$DATA_CHANGED" ]; then
   exit 0
 fi
@@ -89,7 +111,8 @@ fi
 
 # ── 4) schema.prisma sin migración ────────────────────────────────────────────
 if echo "$PRISMA_CHANGED" | grep -q 'schema\.prisma'; then
-  if ! git status --porcelain -- backend/prisma/migrations 2>/dev/null | grep -q .; then
+  MIGRATIONS_CHANGED=$(changed_in backend/prisma/migrations)
+  if [ -z "$MIGRATIONS_CHANGED" ]; then
     red "✗ schema.prisma cambió pero no hay migración nueva en backend/prisma/migrations."
     red "  Acción: cd backend && npx prisma migrate dev --name <descripcion>"
     errors=$((errors+1))
