@@ -6,6 +6,7 @@ import { FlashCard, LoadingSpinner, MechanicsHud, StreakCombo } from '../compone
 import { FullScreenError } from '../components/molecules/FullScreenError';
 import { Button } from '../components/atoms/Button';
 import { useHaptics } from '../hooks';
+import { useUiStore } from '../store/useUiStore';
 import { hasActiveFilters, type Question, type GameFilters } from '../types';
 import { areMechanicsV2Enabled } from '../config/featureFlags';
 import { trackUxEvent } from '../utils/uxTelemetry';
@@ -35,6 +36,7 @@ export function FlashGamePage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const haptics = useHaptics();
+  const prefersReducedMotion = useUiStore((s) => s.prefersReducedMotion);
   const category = searchParams.get('category') ?? undefined;
 
   const gameFilters = useMemo<GameFilters>(() => {
@@ -297,10 +299,10 @@ export function FlashGamePage() {
   if (status === 'intro') {
     return (
       <div className="h-full min-h-0 bg-[var(--color-bg-app)] px-4 py-6 pt-[calc(env(safe-area-inset-top)+1.5rem)]">
-        <div className="mx-auto max-w-md">
+        <div className="mx-auto max-w-md animate-fade-in">
           <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 text-center shadow-2xl">
             <div className="text-7xl" aria-hidden="true">⚡</div>
-            <h1 className="mt-3 text-3xl font-black text-white">{t('flash.title')}</h1>
+            <h1 className="mt-3 text-3xl font-black text-[var(--color-text-primary)]">{t('flash.title')}</h1>
             <p className="mt-2 text-[var(--color-text-secondary)]">{t('flash.intro')}</p>
             <ul className="mt-4 space-y-2 text-left text-sm text-[var(--color-text-secondary)]">
               <li>⏱️ {t('flash.rule60s')}</li>
@@ -344,10 +346,10 @@ export function FlashGamePage() {
 
     return (
       <div className="h-full min-h-0 overflow-y-auto bg-[var(--color-bg-app)] px-4 py-6 pt-[calc(env(safe-area-inset-top)+1.5rem)]">
-        <div className="mx-auto max-w-md">
+        <div className="mx-auto max-w-md animate-scale-in">
           <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 text-center shadow-2xl">
             <div className="text-6xl" aria-hidden="true">⚡</div>
-            <h1 className="mt-2 text-2xl font-black text-white">{t('flash.finished')}</h1>
+            <h1 className="mt-2 text-2xl font-black text-[var(--color-text-primary)]">{t('flash.finished')}</h1>
             <div className="mt-5 rounded-2xl border border-primary/40 bg-[var(--color-surface-muted)] p-5">
               <p className="text-xs font-semibold uppercase tracking-wide text-primary/80">
                 {t('flash.score')}
@@ -419,7 +421,13 @@ export function FlashGamePage() {
           </button>
           <StreakCombo combo={combo} multiplier={multiplier} label="Combo" />
           <div
-            className="tabular-nums rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 py-2 text-sm font-semibold text-white"
+            className={`tabular-nums rounded-lg border px-3 py-2 text-sm font-bold transition-colors duration-300 ${
+              progressPercent > 50
+                ? 'border-[var(--color-border)] bg-[var(--color-surface-muted)] text-white'
+                : progressPercent > 25
+                  ? 'border-yellow-600/60 bg-yellow-950/30 text-yellow-300'
+                  : `border-red-600/60 bg-red-950/30 text-red-300 ${!prefersReducedMotion ? 'animate-pulse' : ''}`
+            }`}
             aria-live="off"
           >
             {timeRemaining}s

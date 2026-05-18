@@ -468,7 +468,7 @@ export function GamePage() {
                   navigate('/menu');
                 }
               }}
-              className="min-h-10 rounded-lg border border-[var(--color-border)] px-3 py-2 text-xs sm:text-sm text-[var(--color-text-secondary)] hover:text-white hover:border-gray-400 transition-colors"
+              className="pressable min-h-10 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 py-2 text-xs sm:text-sm text-[var(--color-text-secondary)] hover:border-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors"
               aria-label={t('game.exit')}
             >
               ✕ {t('game.exit')}

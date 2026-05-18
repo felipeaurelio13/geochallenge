@@ -68,6 +68,11 @@ export default {
       animation: {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'bounce-slow': 'bounce 2s infinite',
+        'bounce-subtle': 'bounce-subtle 0.8s ease-out',
+        'fade-in': 'fade-in 0.18s ease-out both',
+        'scale-in': 'scale-in 0.25s cubic-bezier(0.2, 1.2, 0.3, 1) both',
+        'slide-up': 'slide-up 0.2s ease-out both',
+        'ping-once': 'ping 0.9s cubic-bezier(0, 0, 0.2, 1) 1 forwards',
       },
     },
   },

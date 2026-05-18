@@ -38,7 +38,7 @@ export const OptionButton = React.memo(function OptionButton({
   const defaultStateClasses =
     'bg-[var(--color-surface-muted)] border-[var(--color-border)] text-[var(--color-text-primary)] hover:border-[var(--color-primary-400)] hover:bg-[var(--color-surface)] cursor-pointer';
   const selectedStateClasses =
-    'bg-[var(--color-primary-900)]/80 border-[var(--color-primary-400)] text-[var(--color-text-primary)] ring-1 ring-[var(--color-primary-400)]/60 shadow-md shadow-[var(--color-primary-900)]/30';
+    'bg-primary/15 border-primary/70 text-[var(--color-text-primary)] ring-1 ring-primary/40 shadow-md shadow-primary/15';
   const disabledStateClasses =
     'bg-[var(--color-surface-muted)] border-[var(--color-border)] text-[var(--color-text-muted)] cursor-not-allowed';
   const lockedStateClasses =
@@ -97,7 +97,7 @@ export const OptionButton = React.memo(function OptionButton({
             : eliminated
               ? 'bg-[var(--color-border)] text-[var(--color-text-muted)]'
             : selected
-                ? 'bg-[var(--color-primary-100)] text-[var(--color-primary-800)]'
+                ? 'bg-primary/80 text-white'
                 : 'bg-[var(--color-border)] text-[var(--color-text-secondary)]'
         }`}
       >

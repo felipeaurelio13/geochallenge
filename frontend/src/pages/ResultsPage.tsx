@@ -122,11 +122,11 @@ export function ResultsPage() {
 
   return (
     <div className="h-full min-h-0 overflow-y-auto bg-[var(--color-bg-app)] px-4 py-5 pt-[calc(env(safe-area-inset-top)+1.25rem)] pb-[calc(env(safe-area-inset-bottom)+1.25rem)] sm:px-6 sm:py-8">
-      <main className="mx-auto w-full max-w-xl" aria-label="results-summary">
+      <main className="mx-auto w-full max-w-xl animate-fade-in" aria-label="results-summary">
         <section className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 text-center shadow-2xl shadow-black/30 sm:p-8">
-          <div className="text-6xl sm:text-7xl mb-3" aria-hidden="true">{getPerformanceEmoji()}</div>
+          <div className="text-6xl sm:text-7xl mb-3 animate-scale-in" aria-hidden="true">{getPerformanceEmoji()}</div>
 
-          <h1 className="text-3xl font-bold text-white sm:text-4xl">{t('results.gameOver')}</h1>
+          <h1 className="text-3xl font-bold text-[var(--color-text-primary)] sm:text-4xl">{t('results.gameOver')}</h1>
           <p className="mt-2 text-lg text-[var(--color-text-secondary)] sm:text-xl">{getPerformanceMessage()}</p>
 
           <div className="mt-6 rounded-2xl border border-primary/35 bg-[var(--color-surface-muted)] p-5">
