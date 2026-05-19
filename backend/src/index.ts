@@ -41,14 +41,15 @@ app.use(
   })
 );
 app.use(express.json({ limit: '1mb' }));
-app.use(globalLimiter);
 
-// Lightweight ping for keep-alive (no DB/Redis round-trip)
+// Lightweight ping for keep-alive (no DB/Redis round-trip).
+// NO rate-limit: BackendKeepAlive en el cliente lo invoca periódicamente
+// y consumiría cupo del jugador.
 app.get('/ping', (_req, res) => {
   res.json({ status: 'ok' });
 });
 
-// Health check (with dependency verification)
+// Health check (with dependency verification). Sin rate-limit por la misma razón.
 app.get('/health', async (_req, res) => {
   try {
     await prisma.$queryRaw`SELECT 1`;
@@ -59,6 +60,10 @@ app.get('/health', async (_req, res) => {
     res.status(503).json({ status: 'degraded', error: error.message, timestamp: new Date().toISOString() });
   }
 });
+
+// Rate limit aplica sólo a las rutas /api (no a /ping ni /health, para que
+// keep-alives no consuman el cupo y dejen al usuario sin poder jugar).
+app.use('/api', globalLimiter);
 
 // API Routes
 app.use('/api/auth', authController);

@@ -11,9 +11,14 @@ export function calculateRetryAfterSeconds(resetTime?: Date, now = Date.now()): 
   return Math.max(1, remainingSeconds);
 }
 
+// 100 req / 15min era ~7 rpm: una sesión normal (login + menu probing +
+// 2 partidas de racha) consumía todo el cupo y dejaba al usuario sin poder
+// jugar más, con 429 en /auth/me cascadeando a logout (ver AuthContext).
+// 1000 req / 15min ≈ 66 rpm permite gameplay activo sin abrir la puerta a
+// abuso real (que igual se atajaría con authLimiter en /api/auth).
 export const globalLimiter = rateLimit({
   windowMs: FIFTEEN_MINUTES_IN_MS,
-  max: 100,
+  max: 1000,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Demasiadas solicitudes, intenta de nuevo más tarde' },

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
 import { useLocalStorage } from '../hooks';
 import { api } from '../services/api';
 import { socketService } from '../services/socket';
@@ -63,6 +64,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             isLoading: false,
             isAuthenticated: true,
           });
+          return;
+        }
+
+        // Sólo deslogear si el backend respondió explícitamente 401
+        // (token inválido/expirado). Errores transitorios — 429 por rate-limit,
+        // 5xx, timeouts, sin red — NO deben tirar la sesión: ese cascade
+        // dejaba al usuario en el ciclo "loguéate → error desconocido →
+        // loguéate" cuando el servidor estaba bajo carga o el rate-limit se
+        // disparaba por keep-alives.
+        const isAuthFailure = axios.isAxiosError(error) && error.response?.status === 401;
+        if (!isAuthFailure && authToken) {
+          // Conserva el token: la próxima recarga / acción reintentará.
+          setState((prev) => ({ ...prev, isLoading: false }));
           return;
         }
 
