@@ -22,14 +22,8 @@ type RoundActionTrayProps = {
   summarySlot?: ReactNode;
 };
 
-const MODE_CONTAINER_CLASS: Record<NonNullable<RoundActionTrayProps['mode']>, string> = {
-  single:
-    'w-full border-t border-gray-700/80 bg-gradient-to-t from-gray-950 via-gray-900/96 to-gray-900/65 px-3 pb-[calc(env(safe-area-inset-bottom)+0.65rem)] pt-[clamp(0.45rem,1.2dvh,0.65rem)] backdrop-blur sm:px-4',
-  duel:
-    'w-full border-t border-gray-700/80 bg-gradient-to-t from-gray-950 via-gray-900/96 to-gray-900/65 px-3 pb-[calc(env(safe-area-inset-bottom)+0.65rem)] pt-[clamp(0.45rem,1.2dvh,0.65rem)] backdrop-blur sm:px-4',
-  challenge:
-    'w-full border-t border-gray-700/80 bg-gradient-to-t from-gray-950 via-gray-900/96 to-gray-900/65 px-3 pb-[calc(env(safe-area-inset-bottom)+0.65rem)] pt-[clamp(0.45rem,1.2dvh,0.65rem)] backdrop-blur sm:px-4',
-};
+const CONTAINER_CLASS =
+  'w-full border-t border-[var(--color-border)]/70 bg-gradient-to-t from-[var(--color-bg-shell)]/95 via-[var(--color-surface)]/96 to-[var(--color-surface)]/70 px-3 pb-[calc(env(safe-area-inset-bottom)+0.65rem)] pt-[clamp(0.45rem,1.2dvh,0.65rem)] backdrop-blur sm:px-4';
 
 export function RoundActionTray({
   mode = 'single',
@@ -53,10 +47,10 @@ export function RoundActionTray({
   const wrapperClassName =
     mode === 'challenge'
       ? 'mx-auto flex w-full max-w-4xl flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between'
-      : 'mx-auto flex w-full max-w-4xl flex-col gap-1 rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-slate-900/96 via-gray-900/96 to-emerald-950/45 p-[clamp(0.35rem,1.1dvh,0.5rem)] shadow-xl shadow-cyan-950/30 sm:flex-row sm:items-center sm:justify-between';
+      : 'mx-auto flex w-full max-w-4xl flex-col gap-1 rounded-2xl border border-[var(--color-border)]/50 bg-[var(--color-surface-muted)]/85 p-[clamp(0.35rem,1.1dvh,0.5rem)] shadow-lg sm:flex-row sm:items-center sm:justify-between';
 
   return (
-    <div className={MODE_CONTAINER_CLASS[mode]} data-testid="mobile-action-tray">
+    <div className={CONTAINER_CLASS} data-testid="mobile-action-tray">
       <div className={wrapperClassName}>
         {summarySlot}
 
@@ -66,7 +60,7 @@ export function RoundActionTray({
               type="button"
               onClick={onSubmit}
               disabled={!canSubmit}
-              className="w-full sm:w-auto rounded-2xl border border-emerald-200/35 bg-gradient-to-r from-cyan-500 via-sky-500 to-emerald-500 px-6 py-1.5 text-sm font-bold text-slate-950 shadow-lg shadow-cyan-900/45 transition-all duration-150 hover:from-cyan-400 hover:via-sky-400 hover:to-emerald-400 hover:shadow-cyan-700/55 active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-cyan-200/80 disabled:cursor-not-allowed disabled:border-sky-300/25 disabled:bg-slate-600/95 disabled:bg-none disabled:text-slate-100/85 disabled:shadow-none disabled:opacity-90 sm:text-base"
+              className="w-full sm:w-auto rounded-2xl border border-primary/50 bg-primary px-6 py-1.5 text-sm font-bold text-white shadow-lg shadow-primary/20 transition-all duration-150 hover:bg-primary/90 hover:shadow-primary/30 active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:cursor-not-allowed disabled:border-[var(--color-border)] disabled:bg-[var(--color-surface-muted)] disabled:text-[var(--color-text-muted)] disabled:shadow-none disabled:opacity-70 sm:text-base"
             >
               {submitLabel}
             </button>
@@ -106,7 +100,7 @@ export function RoundActionTray({
                 type="button"
                 onClick={onNext}
                 disabled={isSubmitting}
-                className="w-full rounded-2xl px-6 py-2 bg-primary text-white text-sm sm:text-base font-bold shadow-md shadow-primary/30 hover:bg-primary/85 active:scale-[0.99] transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/70 disabled:cursor-wait disabled:opacity-70"
+                className="w-full rounded-2xl border border-[var(--color-border)]/60 bg-[var(--color-surface)] px-6 py-2 text-sm sm:text-base font-semibold text-[var(--color-text-primary)] shadow-sm hover:bg-[var(--color-surface-muted)] active:scale-[0.99] transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:cursor-wait disabled:opacity-70"
               >
                 {nextLabel}
               </button>

@@ -26,14 +26,14 @@ function MechanicButton({
       type="button"
       onClick={onClick}
       disabled={disabled || !onClick}
-      className="min-h-11 rounded-xl border border-gray-700 bg-gray-900/90 px-3 py-2 text-left text-gray-100 transition-colors hover:border-gray-500 hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60"
+      className="min-h-11 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]/90 px-3 py-2 text-left text-[var(--color-text-primary)] transition-all duration-150 hover:border-primary/50 hover:bg-[var(--color-surface-muted)] disabled:cursor-not-allowed disabled:opacity-50 pressable"
       aria-label={`${label} (${count})`}
     >
       <div className="flex items-center gap-2">
         <span aria-hidden="true" className="text-base">{icon}</span>
         <div className="min-w-0">
           <p className="text-xs font-semibold leading-tight">{label}</p>
-          <p className="text-[0.68rem] leading-tight text-gray-400">x{count}</p>
+          <p className="text-[0.68rem] leading-tight text-[var(--color-text-muted)]">x{count}</p>
         </div>
       </div>
     </button>

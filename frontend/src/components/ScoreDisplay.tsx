@@ -58,7 +58,7 @@ export function ScoreDisplay({ score, previousScore = 0, showAnimation = true, l
 
   return (
     <div className="text-center" aria-live="polite">
-      <div className="text-score-label uppercase tracking-wide text-gray-400 mb-1">{t('game.score')}</div>
+      <div className="text-score-label uppercase tracking-wide text-[var(--color-text-muted)] mb-1">{t('game.score')}</div>
       <div
         className={`text-2xl sm:text-3xl font-bold transition-transform duration-200 ${
           isAnimating ? 'scale-110 text-primary' : 'text-white'
@@ -67,7 +67,7 @@ export function ScoreDisplay({ score, previousScore = 0, showAnimation = true, l
         {displayScore.toLocaleString()}
       </div>
       {showAnimation && !prefersReducedMotion && pointsGained > 0 && isAnimating && (
-        <div className="text-green-400 text-xs sm:text-sm font-semibold animate-bounce-subtle">
+        <div className="text-green-400 text-xs sm:text-sm font-semibold animate-slide-up">
           {scoreBreakdownText
             ? t('game.scoreBreakdownSummary', { points: pointsGained, breakdown: scoreBreakdownText })
             : `+${pointsGained}`}

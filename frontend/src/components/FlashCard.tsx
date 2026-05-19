@@ -53,16 +53,16 @@ export function FlashCard({ question, onAnswer, disabled, disabledOptions = [], 
 
   const feedbackClass =
     feedback === 'correct'
-      ? 'border-green-400 ring-4 ring-green-400/40'
+      ? 'border-green-400 ring-4 ring-green-400/40 bg-green-950/30'
       : feedback === 'incorrect'
-        ? 'border-red-400 ring-4 ring-red-400/40'
-        : 'border-gray-700';
+        ? 'border-red-400 ring-4 ring-red-400/40 bg-red-950/30'
+        : 'border-[var(--color-border)]';
 
   return (
     <div className="flex h-full w-full flex-col gap-4">
       <div
         {...swipeHandlers}
-        className={`relative flex-1 min-h-0 overflow-hidden rounded-3xl border-2 bg-gray-900 shadow-xl transition-all ${feedbackClass}`}
+        className={`relative flex-1 min-h-0 overflow-hidden rounded-3xl border-2 bg-[var(--color-surface)] shadow-xl transition-all duration-150 ${feedbackClass}`}
         role="img"
         aria-label={`${VISUAL_ALT[question.category] ?? 'Imagen'} a identificar`}
       >
@@ -89,21 +89,21 @@ export function FlashCard({ question, onAnswer, disabled, disabledOptions = [], 
           type="button"
           onClick={() => handleAnswer(optionA)}
           disabled={disabled || disabledOptions.includes(optionA)}
-          className="pressable min-h-16 rounded-2xl border-2 border-gray-700 bg-gray-800 px-3 py-4 text-base font-semibold text-white shadow-md active:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-60"
+          className="pressable min-h-16 rounded-2xl border-2 border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 py-4 text-base font-semibold text-[var(--color-text-primary)] shadow-md transition-colors hover:border-primary/50 hover:bg-[var(--color-surface)] active:bg-[var(--color-surface)] disabled:cursor-not-allowed disabled:opacity-60"
           aria-label={`Opción A: ${displayA}`}
         >
-          <span className="mr-2 text-xs text-gray-400">←</span>
+          <span className="mr-2 text-xs text-[var(--color-text-muted)]">←</span>
           {displayA}
         </button>
         <button
           type="button"
           onClick={() => handleAnswer(optionB)}
           disabled={disabled || disabledOptions.includes(optionB)}
-          className="pressable min-h-16 rounded-2xl border-2 border-gray-700 bg-gray-800 px-3 py-4 text-base font-semibold text-white shadow-md active:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-60"
+          className="pressable min-h-16 rounded-2xl border-2 border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 py-4 text-base font-semibold text-[var(--color-text-primary)] shadow-md transition-colors hover:border-primary/50 hover:bg-[var(--color-surface)] active:bg-[var(--color-surface)] disabled:cursor-not-allowed disabled:opacity-60"
           aria-label={`Opción B: ${displayB}`}
         >
           {displayB}
-          <span className="ml-2 text-xs text-gray-400">→</span>
+          <span className="ml-2 text-xs text-[var(--color-text-muted)]">→</span>
         </button>
       </div>
     </div>

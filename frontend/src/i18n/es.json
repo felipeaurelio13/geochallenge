@@ -189,6 +189,8 @@
     "waitingForOpponent": "Esperando al oponente...",
     "cancel": "Cancelar",
     "opponentFound": "¡Oponente encontrado!",
+    "matchFound": "Rival encontrado",
+    "goodGame": "¡Buen juego! Intenta de nuevo.",
     "starting": "Comenzando...",
     "loadingQuestion": "Cargando pregunta...",
     "youWin": "¡Ganaste!",

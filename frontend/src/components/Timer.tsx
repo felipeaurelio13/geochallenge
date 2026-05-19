@@ -72,9 +72,11 @@ export function Timer({ duration, timeRemaining, onTick, onComplete, isActive }:
   const strokeDashoffset = 283 - (283 * percentage) / 100;
   const timerColor = getTimerColorToken(percentage);
 
+  const isUrgent = timeRemaining > 0 && timeRemaining <= URGENCY_THRESHOLD_SECONDS && isActive;
+
   return (
     <div
-      className="relative h-14 w-14 sm:h-16 sm:w-16 md:h-20 md:w-20"
+      className={`relative h-14 w-14 sm:h-16 sm:w-16 md:h-20 md:w-20 ${isUrgent && !prefersReducedMotion ? 'timer-urgent' : ''}`}
       role="timer"
       aria-live="off"
       aria-label={t('game.timeRemaining', { seconds: Math.max(0, timeRemaining) })}

@@ -189,6 +189,8 @@
     "waitingForOpponent": "Waiting for opponent...",
     "cancel": "Cancel",
     "opponentFound": "Opponent found!",
+    "matchFound": "Match found",
+    "goodGame": "Good game! Try again.",
     "starting": "Starting...",
     "loadingQuestion": "Loading question...",
     "youWin": "You win!",

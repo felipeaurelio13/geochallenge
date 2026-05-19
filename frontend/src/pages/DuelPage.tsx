@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, lazy, Suspense, useRef, useMemo } fro
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
+import { useUiStore } from '../store/useUiStore';
 import { socketService } from '../services/socket';
 import {
   Timer,
@@ -87,6 +88,7 @@ export function DuelPage() {
   const duelStateRef = useRef<DuelState>('searching');
   const hasSubmittedCurrentQuestionRef = useRef(false);
   const duelMechanicsFeatureEnabled = areMechanicsV2Enabled('duel');
+  const prefersReducedMotion = useUiStore((s) => s.prefersReducedMotion);
   const duelCategory = parseDuelCategory(searchParams.get('category'));
   const hasSelection = Boolean(selectedAnswer || mapLocation);
 
@@ -436,19 +438,28 @@ export function DuelPage() {
   if (duelState === 'searching') {
     return (
       <div className="h-full min-h-0 bg-[var(--color-bg-app)] flex items-center justify-center px-4">
-        <div className="text-center w-full max-w-sm">
-          <div className="text-6xl mb-6 animate-pulse">⚔️</div>
-          <h1 className="text-2xl font-bold text-white mb-2">
+        <div className="text-center w-full max-w-sm animate-fade-in">
+          <div className="relative inline-flex items-center justify-center mb-6">
+            {!prefersReducedMotion && (
+              <>
+                <span className="absolute inline-flex h-24 w-24 rounded-full bg-primary/10 animate-ping" />
+                <span className="absolute inline-flex h-16 w-16 rounded-full bg-primary/15 animate-ping [animation-delay:0.3s]" />
+              </>
+            )}
+            <span className="relative text-6xl">⚔️</span>
+          </div>
+
+          <h1 className="text-2xl font-bold text-[var(--color-text-primary)] mb-1">
             {t('duel.searching')}
           </h1>
-          <p className="text-[var(--color-text-muted)] mb-6">{t('duel.waitingForOpponent')}</p>
+          <p className="text-[var(--color-text-muted)] mb-5">{t('duel.waitingForOpponent')}</p>
           {connectionBanner}
-          <div className="mb-6">
-            <LoadingSpinner size="lg" />
-          </div>
-          <p className="text-[var(--color-text-muted)] mb-3">{formatSearchTime(searchTime)}</p>
 
-          <div className="mb-6 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-left text-sm">
+          <div className="mb-4 tabular-nums text-3xl font-bold text-[var(--color-text-secondary)]">
+            {formatSearchTime(searchTime)}
+          </div>
+
+          <div className="mb-5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-left text-sm">
             <p className="text-primary font-semibold mb-1">
               {t('duel.queueCategory', {
                 category: t(
@@ -502,23 +513,37 @@ export function DuelPage() {
   if (duelState === 'matched' && opponent) {
     return (
       <div className="h-full min-h-0 bg-[var(--color-bg-app)] flex items-center justify-center px-4">
-        <div className="text-center">
+        <div className="text-center animate-scale-in">
           {connectionBanner}
-          <h1 className="text-2xl font-bold text-white mb-8">
+          <p className="text-xs font-semibold uppercase tracking-widest text-primary/80 mb-2">
             {t('duel.opponentFound')}
+          </p>
+          <h1 className="text-3xl font-black text-[var(--color-text-primary)] mb-8">
+            {t('duel.matchFound', 'Rival encontrado')}
           </h1>
-          <div className="flex items-center justify-center gap-8 mb-8">
+          <div className="flex items-center justify-center gap-6 mb-8">
             <div className="text-center">
-              <UserAvatar username={user?.username ?? ''} size="lg" className="mb-2" />
-              <p className="text-white font-semibold">{user?.username}</p>
+              <div className="relative inline-block mb-2">
+                <UserAvatar username={user?.username ?? ''} size="lg" className="ring-2 ring-primary/60" />
+              </div>
+              <p className="text-[var(--color-text-primary)] font-semibold text-sm">{user?.username}</p>
             </div>
-            <div className="text-4xl animate-pulse">⚔️</div>
+
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-2xl font-black text-[var(--color-text-muted)]">VS</span>
+              <div className="h-px w-8 bg-[var(--color-border)]" />
+            </div>
+
             <div className="text-center">
-              <UserAvatar username={opponent.username} size="lg" color="bg-red-500" className="mb-2" />
-              <p className="text-white font-semibold">{opponent.username}</p>
+              <div className="relative inline-block mb-2">
+                <UserAvatar username={opponent.username} size="lg" color="bg-red-500" className="ring-2 ring-red-400/60" />
+              </div>
+              <p className="text-[var(--color-text-primary)] font-semibold text-sm">{opponent.username}</p>
             </div>
           </div>
-          <p className="text-[var(--color-text-muted)] animate-pulse">{t('duel.starting')}</p>
+          <p className={`text-sm text-[var(--color-text-muted)] ${!prefersReducedMotion ? 'animate-pulse' : ''}`}>
+            {t('duel.starting')}
+          </p>
         </div>
       </div>
     );
@@ -531,36 +556,43 @@ export function DuelPage() {
 
     return (
       <div className="h-full min-h-0 bg-[var(--color-bg-app)] flex items-center justify-center px-4">
-        <div className="max-w-md w-full bg-[var(--color-surface)] rounded-xl p-8 text-center">
+        <div className={`max-w-md w-full rounded-2xl border p-6 sm:p-8 text-center animate-scale-in ${
+          isWinner
+            ? 'border-yellow-500/40 bg-gradient-to-b from-yellow-950/40 to-[var(--color-surface)]'
+            : isTie
+              ? 'border-[var(--color-border)] bg-[var(--color-surface)]'
+              : 'border-[var(--color-border)] bg-[var(--color-surface)]'
+        }`}>
           {connectionBanner}
-          <div className="text-6xl mb-4">
-            {isTie ? '🤝' : isWinner ? '🏆' : '😢'}
+
+          <div className={`text-6xl mb-3 ${isWinner && !prefersReducedMotion ? 'animate-bounce' : ''}`}>
+            {isTie ? '🤝' : isWinner ? '🏆' : '💪'}
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">
-            {isTie
-              ? t('duel.tie')
-              : isWinner
-              ? t('duel.youWin')
-              : t('duel.youLose')}
+
+          <h1 className={`text-3xl font-black mb-1 ${isWinner ? 'text-yellow-400' : isTie ? 'text-[var(--color-text-primary)]' : 'text-[var(--color-text-primary)]'}`}>
+            {isTie ? t('duel.tie') : isWinner ? t('duel.youWin') : t('duel.youLose')}
           </h1>
+          {!isTie && !isWinner && (
+            <p className="text-sm text-[var(--color-text-muted)] mb-4">{t('duel.goodGame', '¡Buen juego! Intenta de nuevo.')}</p>
+          )}
 
-          <div className="flex justify-center gap-8 my-8">
+          <div className="my-6 grid grid-cols-[1fr_auto_1fr] items-center gap-4">
             <div className="text-center">
-              <div className="text-3xl font-bold text-primary">
-                {duelResult.myScore}
+              <div className={`text-3xl font-black ${isWinner ? 'text-yellow-400' : 'text-primary'}`}>
+                {duelResult.myScore.toLocaleString()}
               </div>
-              <div className="text-[var(--color-text-muted)]">{user?.username}</div>
+              <div className="mt-1 text-xs text-[var(--color-text-muted)] truncate max-w-full">{user?.username}</div>
             </div>
-            <div className="text-2xl text-[var(--color-text-muted)]">vs</div>
+            <div className="text-sm font-bold text-[var(--color-text-muted)]">vs</div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-red-400">
-                {duelResult.opponentScore}
+              <div className={`text-3xl font-black ${!isWinner && !isTie ? 'text-yellow-400' : 'text-red-400'}`}>
+                {duelResult.opponentScore.toLocaleString()}
               </div>
-              <div className="text-[var(--color-text-muted)]">{duelResult.opponentName}</div>
+              <div className="mt-1 text-xs text-[var(--color-text-muted)] truncate max-w-full">{duelResult.opponentName}</div>
             </div>
           </div>
 
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2.5">
             <Button
               onClick={() => {
                 setDuelState('searching');

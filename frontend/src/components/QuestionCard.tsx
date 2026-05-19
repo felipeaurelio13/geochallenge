@@ -155,17 +155,17 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
   return (
     <div
       aria-label={t('game.questionOf', { current: questionNumber, total: totalQuestions })}
-      className={`question-card rounded-3xl border border-gray-700 bg-gray-800/95 shadow-xl shadow-black/25 ${compact ? 'px-4 py-2 sm:px-5 sm:py-3' : 'px-4 py-4 sm:px-6 sm:py-6'} ${isCompactMediaMode ? 'question-card--with-media' : ''}`}
+      className={`question-card rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface-muted)]/95 shadow-xl shadow-black/25 ${compact ? 'px-4 py-2 sm:px-5 sm:py-3' : 'px-4 py-4 sm:px-6 sm:py-6'} ${isCompactMediaMode ? 'question-card--with-media' : ''}`}
     >
       <div className="text-center">
         {showQuestionImage && (
           <div className={compact ? 'mb-1' : 'mb-6'}>
             <div className={`mx-auto flex items-center justify-center rounded-xl ${
               question.category === 'SILHOUETTE'
-                ? 'border border-slate-700/60 bg-slate-950/90 p-3'
+                ? 'border border-[var(--color-border)]/60 bg-[var(--color-bg-shell)]/90 p-3'
                 : question.category === 'MONUMENT'
-                  ? 'border border-gray-700/70 bg-black/40'
-                  : 'border border-gray-600/70 bg-black/15 px-2'
+                  ? 'border border-[var(--color-border)]/70 bg-black/40'
+                  : 'border border-[var(--color-border)]/60 bg-black/15 px-2'
             } ${getImageContainerClassName()}`}>
               <img
                 src={normalizedImageUrl}
