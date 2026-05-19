@@ -64,8 +64,8 @@ describe('RoundActionTray', () => {
 
     const submitButton = screen.getByRole('button', { name: 'Confirmar' });
     expect(submitButton).toBeDisabled();
-    expect(submitButton.className).toContain('disabled:bg-slate-600/95');
-    expect(submitButton.className).toContain('disabled:text-slate-100/85');
+    expect(submitButton.className).toContain('disabled:opacity-70');
+    expect(submitButton.className).toContain('disabled:cursor-not-allowed');
     expect(submitButton.className).toContain('py-1.5');
   });
 
