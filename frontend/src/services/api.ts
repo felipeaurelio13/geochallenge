@@ -225,6 +225,7 @@ class ApiService {
       coordinates?: { lat: number; lng: number };
     }[];
     category?: Category;
+    gameType?: GameType;
   }) {
     const response = await this.client.post<GameResult>('/game/finish', data);
     return response.data;

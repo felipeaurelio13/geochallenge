@@ -18,9 +18,11 @@ import {
   getDuelOpponents,
   getDuelHeadToHead,
   getCategoryStats,
+  generateQuestionText,
   AnswerResult,
   QuestionFilters,
 } from '../services/game.service.js';
+import { shuffleArray } from '../utils/scoring.js';
 import { getRedis } from '../config/redis.js';
 import { prisma } from '../config/database.js';
 import {
@@ -562,10 +564,11 @@ router.get('/daily', optionalAuth, async (req: AuthRequest, res: Response) => {
     const formatted = ordered.map((q) => ({
       id: q.id,
       category: q.category,
-      questionText: q.questionData,
-      options: q.options,
+      questionText: generateQuestionText(q),
+      options: shuffleArray(q.options),
       correctAnswer: q.correctAnswer,
       imageUrl: q.imageUrl,
+      questionData: q.questionData,
       continent: q.continent,
       subregion: q.subregion,
       isInsular: q.isInsular,

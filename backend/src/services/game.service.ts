@@ -387,16 +387,14 @@ function extractMonumentSlug(questionData: string | undefined | null): string | 
 /**
  * Genera el texto de la pregunta según la categoría
  */
-function generateQuestionText(question: any): string {
+export function generateQuestionText(question: any): string {
   switch (question.category) {
     case Category.FLAG:
       return `¿A qué país pertenece esta bandera?`;
     case Category.CAPITAL:
-      if (Math.random() > 0.5) {
-        return `¿Cuál es la capital de ${question.questionData}?`;
-      } else {
-        return `${question.correctAnswer} es la capital de...`;
-      }
+      // questionData = país, options = capitales, correctAnswer = capital.
+      // Mantenemos un único phrasing consistente con el shape sembrado.
+      return `¿Cuál es la capital de ${question.questionData}?`;
     case Category.MAP:
       return `¿Dónde se encuentra ${question.questionData}?`;
     case Category.SILHOUETTE:

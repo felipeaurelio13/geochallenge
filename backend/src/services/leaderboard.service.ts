@@ -49,12 +49,21 @@ async function attachUsernames(
     select: { id: true, username: true },
   });
   const userMap = new Map(users.map((u) => [u.id, u.username]));
-  return entries.map((entry, index) => ({
-    rank: baseRank + index,
-    userId: entry.userId,
-    username: userMap.get(entry.userId) || 'Usuario desconocido',
-    score: entry.score,
-  }));
+  // Filtra entradas huérfanas (userId en Redis sin User en DB) y recalcula ranks
+  // densamente. Sin esto, un Redis con userIds obsoletos mostraría filas
+  // "Usuario desconocido" en el podio.
+  const resolved: LeaderboardEntry[] = [];
+  for (const entry of entries) {
+    const username = userMap.get(entry.userId);
+    if (!username) continue;
+    resolved.push({
+      rank: baseRank + resolved.length,
+      userId: entry.userId,
+      username,
+      score: entry.score,
+    });
+  }
+  return resolved;
 }
 
 // --- Postgres fallbacks (used when Redis is unavailable) ---

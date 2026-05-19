@@ -288,6 +288,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     const result = await api.finishGame({
       answers,
       category: config?.category,
+      gameType: config?.gameType,
     });
 
     return result;
