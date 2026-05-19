@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { GamePage } from '../pages/GamePage';
 
@@ -43,11 +44,13 @@ const mocks = vi.hoisted(() => ({
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigateMock,
   useSearchParams: () => [new URLSearchParams(mockedSearchParams)],
+  Link: ({ children, to }: { children: React.ReactNode; to: string }) => <a href={to}>{children}</a>,
 }));
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => key,
+    i18n: { language: 'es' },
   }),
 }));
 
