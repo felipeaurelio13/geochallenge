@@ -511,9 +511,39 @@ function seededShuffle<T>(arr: T[], seed: number): T[] {
 }
 
 /**
+ * Fallback cuando Redis no responde: reconstruye el resultado del reto diario
+ * desde DB. User.lastDailyDate marca si el usuario jugó hoy; el GameResult más
+ * reciente del día recupera el detalle de score/aciertos.
+ */
+async function getDailyResultFromDb(userId: string, today: string) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { lastDailyDate: true, dailyStreak: true },
+  });
+  if (user?.lastDailyDate !== today) return null;
+  const last = await prisma.gameResult.findFirst({
+    where: { userId, createdAt: { gte: new Date(`${today}T00:00:00.000Z`) } },
+    orderBy: { createdAt: 'desc' },
+    select: { score: true, correctCount: true, totalQuestions: true, createdAt: true },
+  });
+  return {
+    score: last?.score ?? 0,
+    correctCount: last?.correctCount ?? 0,
+    totalQuestions: last?.totalQuestions ?? DAILY_QUESTION_COUNT,
+    dailyStreak: user.dailyStreak ?? undefined,
+    playedAt: (last?.createdAt ?? new Date()).toISOString(),
+  };
+}
+
+/**
  * GET /api/game/daily
  * Retorna las preguntas del reto del día (mismas para todos los usuarios).
  * Si el usuario ya jugó hoy, retorna sus resultados previos.
+ *
+ * Redis es sólo una optimización: seededShuffle es determinista sobre la fecha,
+ * así que las preguntas se regeneran sin caché, y el gate "ya jugó hoy" cae a
+ * User.lastDailyDate. El reto diario sobrevive una caída de Redis en vez de
+ * tirar un 500 que deja al jugador sin poder jugar.
  */
 router.get('/daily', optionalAuth, async (req: AuthRequest, res: Response) => {
   try {
@@ -521,24 +551,39 @@ router.get('/daily', optionalAuth, async (req: AuthRequest, res: Response) => {
     const redis = getRedis();
     const cacheKey = `daily:questions:${today}`;
     const userId = req.user?.userId;
+    let redisDown = false;
 
-    // Check if user already played today
+    // ¿Ya jugó hoy? Redis es el camino rápido; DB es el fallback.
     if (userId) {
       const playedKey = `daily:played:${userId}:${today}`;
-      const existing = await redis.get(playedKey);
-      if (existing) {
-        const result = JSON.parse(existing);
-        res.json({ alreadyPlayed: true, result, today });
-        return;
+      try {
+        const existing = await redis.get(playedKey);
+        if (existing) {
+          res.json({ alreadyPlayed: true, result: JSON.parse(existing), today });
+          return;
+        }
+      } catch {
+        redisDown = true;
+        const played = await getDailyResultFromDb(userId, today);
+        if (played) {
+          res.json({ alreadyPlayed: true, result: played, today });
+          return;
+        }
       }
     }
 
-    // Get or generate today's questions
+    // Preguntas del día: caché si Redis responde, generación determinista si no.
     let questionIds: string[] = [];
-    const cached = await redis.get(cacheKey);
-    if (cached) {
-      questionIds = JSON.parse(cached);
-    } else {
+    if (!redisDown) {
+      try {
+        const cached = await redis.get(cacheKey);
+        if (cached) questionIds = JSON.parse(cached);
+      } catch {
+        redisDown = true;
+      }
+    }
+
+    if (questionIds.length === 0) {
       const seed = parseInt(today.replace(/-/g, ''), 10);
       const allIds = await prisma.question.findMany({
         where: {
@@ -549,7 +594,13 @@ router.get('/daily', optionalAuth, async (req: AuthRequest, res: Response) => {
       });
       const shuffled = seededShuffle(allIds.map((q) => q.id), seed);
       questionIds = shuffled.slice(0, DAILY_QUESTION_COUNT);
-      await redis.set(cacheKey, JSON.stringify(questionIds), 'EX', DAILY_TTL_SECONDS);
+      if (!redisDown) {
+        try {
+          await redis.set(cacheKey, JSON.stringify(questionIds), 'EX', DAILY_TTL_SECONDS);
+        } catch {
+          // caché best-effort: la generación determinista cubre el caso
+        }
+      }
     }
 
     const questions = await prisma.question.findMany({
@@ -604,20 +655,42 @@ router.post('/daily/submit', authenticateJWT, async (req: AuthRequest, res: Resp
     const { score, correctCount, totalQuestions } = parsed.data;
     const today = getTodayKey();
     const redis = getRedis();
-    const playedKey = `daily:played:${req.user!.userId}:${today}`;
+    const userId = req.user!.userId;
+    const playedKey = `daily:played:${userId}:${today}`;
 
-    const alreadySaved = await redis.get(playedKey);
-    if (alreadySaved) {
-      res.json({ message: 'Ya enviado', result: JSON.parse(alreadySaved) });
-      return;
+    // Idempotencia: Redis es el camino rápido. Si Redis está caído, la guardia
+    // es User.lastDailyDate === today (verificada justo abajo).
+    try {
+      const alreadySaved = await redis.get(playedKey);
+      if (alreadySaved) {
+        res.json({ message: 'Ya enviado', result: JSON.parse(alreadySaved) });
+        return;
+      }
+    } catch {
+      // Redis caído: seguimos con la guardia de DB.
     }
 
     // Update daily streak in DB
-    const userId = req.user!.userId;
     const userRow = await prisma.user.findUnique({
       where: { id: userId },
       select: { highScore: true, dailyStreak: true, lastDailyDate: true },
     });
+
+    // Reenvío del mismo día (p.ej. Redis caído saltó la idempotencia anterior):
+    // no recontar la partida ni resetear la racha.
+    if (userRow?.lastDailyDate === today) {
+      res.json({
+        message: 'Ya enviado',
+        result: {
+          score,
+          correctCount,
+          totalQuestions,
+          dailyStreak: userRow.dailyStreak ?? 1,
+          playedAt: new Date().toISOString(),
+        },
+      });
+      return;
+    }
 
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
@@ -640,7 +713,11 @@ router.post('/daily/submit', authenticateJWT, async (req: AuthRequest, res: Resp
     await prisma.user.update({ where: { id: userId }, data: updateData });
 
     const result = { score, correctCount, totalQuestions, dailyStreak: newStreak, playedAt: new Date().toISOString() };
-    await redis.set(playedKey, JSON.stringify(result), 'EX', DAILY_TTL_SECONDS);
+    try {
+      await redis.set(playedKey, JSON.stringify(result), 'EX', DAILY_TTL_SECONDS);
+    } catch {
+      // best-effort: User.lastDailyDate ya quedó persistido como fuente de verdad
+    }
 
     // Save as GameResult for history
     await prisma.gameResult.create({
