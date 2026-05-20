@@ -1,0 +1,16 @@
+# Caddy — HTTPS automático (Let's Encrypt) + reverse proxy.
+# {$DOMAIN} se sustituye con la variable de entorno DOMAIN (ver docker-compose.yml).
+{$DOMAIN} {
+	encode zstd gzip
+
+	# API REST y WebSocket (Socket.IO) van al backend.
+	# Caddy maneja el upgrade a WebSocket de forma transparente.
+	@backend path /api/* /socket.io/* /health /ping
+	reverse_proxy @backend backend:3001
+
+	# Resto: SPA estática (build de Vite). try_files cae a index.html
+	# para que el routing del lado del cliente funcione en refresh/deep-link.
+	root * /srv
+	try_files {path} /index.html
+	file_server
+}

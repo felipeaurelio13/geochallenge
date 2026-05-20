@@ -1,0 +1,89 @@
+# GeoChallenge — stack completo para un VPS (Oracle Cloud Always Free, Hetzner, etc.)
+# Backend + Postgres + Redis + Caddy (HTTPS automático). Todo en una sola máquina,
+# sin depender de free tiers que se duermen o se borran.
+#
+#   cp .env.example .env   # y rellena los valores
+#   docker compose up -d --build
+#
+# Guía completa: DEPLOY-ORACLE.md
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: geochallenge
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?define POSTGRES_PASSWORD en .env}
+      POSTGRES_DB: geochallenge
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U geochallenge -d geochallenge"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: "3001"
+      DATABASE_URL: postgresql://geochallenge:${POSTGRES_PASSWORD}@postgres:5432/geochallenge
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:?define JWT_SECRET en .env}
+      JWT_EXPIRES_IN: "7d"
+      FRONTEND_URL: https://${DOMAIN:?define DOMAIN en .env}
+    expose:
+      - "3001"
+
+  # One-shot: compila el frontend y copia el build al volumen que sirve Caddy.
+  # Arranca, copia y termina (no es un servicio de larga duración).
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        VITE_API_URL: /api
+        VITE_SOCKET_URL: https://${DOMAIN:?define DOMAIN en .env}
+    volumes:
+      - frontend_dist:/dist
+    command: sh -c "rm -rf /dist/* && cp -r /app/dist/. /dist/ && echo 'frontend build copiado al volumen'"
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_started
+      frontend:
+        condition: service_completed_successfully
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:?define DOMAIN en .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - frontend_dist:/srv:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  postgres_data:
+  redis_data:
+  frontend_dist:
+  caddy_data:
+  caddy_config:
