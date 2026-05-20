@@ -50,14 +50,27 @@ app.get('/ping', (_req, res) => {
 });
 
 // Health check (with dependency verification). Sin rate-limit por la misma razón.
+// El ping a Redis se acota a 1.5s: el keep-alive del cliente invoca /health a
+// menudo, y un /health lento satura el pool de 6 conexiones del navegador y
+// bloquea requests reales (p.ej. el ranking deja de cargar).
 app.get('/health', async (_req, res) => {
+  let pingTimer: ReturnType<typeof setTimeout> | undefined;
   try {
     await prisma.$queryRaw`SELECT 1`;
     const redis = getRedis();
-    await redis.ping();
+    const pingPromise = redis.ping();
+    pingPromise.catch(() => {}); // si gana el timeout, evita unhandledRejection
+    await Promise.race([
+      pingPromise,
+      new Promise((_resolve, reject) => {
+        pingTimer = setTimeout(() => reject(new Error('redis ping timeout')), 1500);
+      }),
+    ]);
     res.json({ status: 'ok', db: 'ok', redis: 'ok', timestamp: new Date().toISOString() });
   } catch (error: any) {
     res.status(503).json({ status: 'degraded', error: error.message, timestamp: new Date().toISOString() });
+  } finally {
+    clearTimeout(pingTimer);
   }
 });
 
