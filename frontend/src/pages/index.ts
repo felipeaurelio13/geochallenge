@@ -12,3 +12,4 @@ export { ChallengesPage } from './ChallengesPage';
 export { ChallengeGamePage } from './ChallengeGamePage';
 
 export { ChallengeResultsPage } from './ChallengeResultsPage';
+export { SurvivalPage } from './SurvivalPage';

@@ -16,6 +16,7 @@ import {
   ChallengesPage,
   ChallengeGamePage,
   ChallengeResultsPage,
+  SurvivalPage,
 } from './pages';
 import { DailyChallengePage } from './pages/DailyChallengePage';
 import {
@@ -160,6 +161,10 @@ export const appRoutes = [
       {
         path: '/daily',
         element: <ProtectedRoute><DailyChallengePage /></ProtectedRoute>,
+      },
+      {
+        path: '/survival',
+        element: <ProtectedRoute><SurvivalPage /></ProtectedRoute>,
       },
       {
         path: '*',

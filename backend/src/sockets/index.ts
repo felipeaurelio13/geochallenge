@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { config } from '../config/env.js';
 import { JwtPayload } from '../middleware/auth.js';
 import { setupDuelHandlers, MatchmakingQueue } from './duel.handler.js';
+import { setupSurvivalHandlers } from './survival.handler.js';
 
 // Extend Socket type to include user info
 declare module 'socket.io' {
@@ -52,6 +53,9 @@ export function setupSocketHandlers(io: SocketIOServer) {
 
     // Setup duel handlers
     setupDuelHandlers(io, socket, matchmakingQueue);
+
+    // Setup survival handlers
+    setupSurvivalHandlers(io, socket);
 
     // Handler de desconexión
     socket.on('disconnect', (reason) => {
