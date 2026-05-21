@@ -95,6 +95,13 @@ if [ -n "$FRONTEND_CHANGED$DATA_CHANGED" ]; then
     tail -30 "$LOG_DIR/predeploy-frontend.log" >&2
     errors=$((errors+1))
   fi
+
+  yellow "→ frontend: vitest run"
+  if ! (cd frontend && npm run test) >"$LOG_DIR/predeploy-tests.log" 2>&1; then
+    red "✗ frontend tests fallaron (últimas 30 líneas, log completo: $LOG_DIR/predeploy-tests.log):"
+    tail -30 "$LOG_DIR/predeploy-tests.log" >&2
+    errors=$((errors+1))
+  fi
 fi
 
 # ── 3) Build backend ──────────────────────────────────────────────────────────
