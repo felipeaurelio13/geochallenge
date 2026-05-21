@@ -165,9 +165,11 @@ describe('MenuPage', () => {
     const singleModeButton = screen.getByRole('button', { name: /un jugador[\s\S]*juega solo/i });
     expect(singleModeButton.className).toContain('py-2.5');
 
-    const streakButton = screen.getByRole('button', { name: /racha[\s\S]*sigue hasta fallar/i });
-    expect(streakButton.className).toContain('col-span-2');
-    expect(streakButton.className).toContain('lg:col-span-1');
+    const modesSection = screen.getByRole('region', { name: /modos de juego/i });
+    const modeButtons = Array.from(modesSection.querySelectorAll('button'));
+    const lastModeButton = modeButtons[modeButtons.length - 1];
+    expect(lastModeButton.className).toContain('col-span-2');
+    expect(lastModeButton.className).toContain('lg:col-span-1');
 
     expect(screen.queryByText(/¡hola.*explorar hoy/i)).not.toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Modos de juego' })).not.toBeInTheDocument();
