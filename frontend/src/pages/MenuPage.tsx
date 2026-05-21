@@ -233,6 +233,12 @@ export function MenuPage() {
             title={t('menu.streak')}
             description={t('menu.streakDesc')}
             onClick={() => go(`/game/single`, { category: selectedCategory, mode: 'streak' })}
+          />
+          <GameModeCard
+            icon="☠️"
+            title={t('menu.survival')}
+            description={t('menu.survivalDesc')}
+            onClick={() => go(`/survival`, { category: selectedCategory })}
             className="col-span-2 lg:col-span-1"
           />
         </div>

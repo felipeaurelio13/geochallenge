@@ -214,6 +214,55 @@ export interface DuelResult {
   isWinner: boolean;
 }
 
+// Survival types
+export interface SurvivalPlayerInfo {
+  userId: string;
+  username: string;
+  lives: number;
+  streak: number;
+  score: number;
+  eliminated?: boolean;
+  eliminatedRound?: number | null;
+}
+
+export interface SurvivalPlayerResult {
+  userId: string;
+  username: string;
+  isCorrect: boolean;
+  isTimeout: boolean;
+  livesChange: number;
+  newLives: number;
+  lifeEarnedReason?: string;
+  eliminatedThisRound: boolean;
+  score: number;
+  streak: number;
+}
+
+export interface SurvivalRanking {
+  userId: string;
+  username: string;
+  finalRank: number;
+  score: number;
+  correctCount: number;
+  eliminatedRound: number | null;
+}
+
+export interface SurvivalState {
+  status: 'idle' | 'queued' | 'filling' | 'countdown' | 'playing' | 'spectating' | 'finished';
+  matchId: string | null;
+  category: Category | null;
+  players: SurvivalPlayerInfo[];
+  fillTimeRemaining: number;
+  countdown: number;
+  currentRound: number;
+  currentQuestion: Question | null;
+  difficulty: Difficulty | null;
+  timeLimit: number;
+  rankings: SurvivalRanking[];
+  totalRounds: number;
+  finishReason: string | null;
+}
+
 // API Response types
 export interface ApiResponse<T> {
   data?: T;

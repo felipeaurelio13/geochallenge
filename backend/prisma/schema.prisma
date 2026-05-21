@@ -30,6 +30,7 @@ model User {
   duelMatchesAsP2    DuelMatch[] @relation("DuelMatchAsP2")
   duelMatchesWon     DuelMatch[] @relation("DuelMatchAsWinner")
   achievements       UserAchievement[]
+  survivalParticipations SurvivalParticipant[]
 
   @@map("users")
 }
@@ -133,6 +134,7 @@ enum GameMode {
   SINGLE
   DUEL
   CHALLENGE
+  SURVIVAL
 }
 
 model DuelMatch {
@@ -152,6 +154,37 @@ model DuelMatch {
   @@index([player1Id, createdAt])
   @@index([player2Id, createdAt])
   @@map("duel_matches")
+}
+
+model SurvivalMatch {
+  id           String   @id @default(cuid())
+  category     Category?
+  totalRounds  Int
+  peakPlayers  Int
+  createdAt    DateTime @default(now())
+
+  participants SurvivalParticipant[]
+
+  @@index([createdAt])
+  @@map("survival_matches")
+}
+
+model SurvivalParticipant {
+  id             String        @id @default(cuid())
+  matchId        String
+  userId         String
+  finalRank      Int
+  eliminatedRound Int?
+  finalScore     Int
+  correctCount   Int
+  livesEarned    Int           @default(0)
+
+  match SurvivalMatch @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  user  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([matchId])
+  @@map("survival_participants")
 }
 
 enum ChallengeStatus {
