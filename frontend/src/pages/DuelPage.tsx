@@ -82,6 +82,7 @@ export function DuelPage() {
     focusTime: 0,
     streakShield: 0,
   });
+  const [hasSubmittedThisQuestion, setHasSubmittedThisQuestion] = useState(false);
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scoreRef = useRef(0);
   const opponentRef = useRef<{ id: string; username: string } | null>(null);
@@ -200,6 +201,7 @@ export function DuelPage() {
       setDisabledOptionIndexes([]);
       setPendingMechanicUsage(undefined);
       hasSubmittedCurrentQuestionRef.current = false;
+      setHasSubmittedThisQuestion(false);
       setConnectionNotice(null);
       setShowRetryAction(false);
       setDuelState('playing');
@@ -326,25 +328,43 @@ export function DuelPage() {
     }
   }, [duelState, showResult]);
 
-  // Submit answer
+  // Submit answer — used for MAP confirm button and timer expiry (non-MAP: no-op if already auto-submitted)
   const handleSubmitAnswer = () => {
     if (!currentQuestion || showResult || isSyncingRound || hasSubmittedCurrentQuestionRef.current) return;
 
-    const isMapQuestion = currentQuestion.category === 'MAP';
-    let answer: string;
-    let coordinates: { lat: number; lng: number } | undefined;
-
-    if (isMapQuestion) {
-      coordinates = mapLocation || undefined;
-      answer = mapLocation ? `${mapLocation.lat},${mapLocation.lng}` : '0,0';
+    if (currentQuestion.category === 'MAP') {
+      const coordinates = mapLocation || undefined;
+      const answer = mapLocation ? `${mapLocation.lat},${mapLocation.lng}` : '0,0';
+      hasSubmittedCurrentQuestionRef.current = true;
+      socketService.submitDuelAnswer(currentQuestion.id, answer, timeRemaining, coordinates, pendingMechanicUsage);
+      setPendingMechanicUsage(undefined);
+      setDuelState('waiting');
     } else {
-      answer = selectedAnswer || '';
+      // Timer expiry path: user never clicked any option
+      hasSubmittedCurrentQuestionRef.current = true;
+      setHasSubmittedThisQuestion(true);
+      socketService.submitDuelAnswer(currentQuestion.id, selectedAnswer || '', timeRemaining, undefined, pendingMechanicUsage);
+      setPendingMechanicUsage(undefined);
     }
+  };
 
+  // Auto-submit on option selection (non-MAP). Called with the new option value directly
+  // to avoid reading stale selectedAnswer state.
+  const handleAutoSubmitAnswer = (option: string) => {
+    if (!currentQuestion || showResult || isSyncingRound) return;
     hasSubmittedCurrentQuestionRef.current = true;
-    socketService.submitDuelAnswer(currentQuestion.id, answer, timeRemaining, coordinates, pendingMechanicUsage);
+    setHasSubmittedThisQuestion(true);
+    socketService.submitDuelAnswer(currentQuestion.id, option, timeRemaining, undefined, pendingMechanicUsage);
     setPendingMechanicUsage(undefined);
-    setDuelState('waiting');
+  };
+
+  // Option selection handler: auto-submits for non-MAP, plain select for MAP
+  const handleOptionSelectDuel = (option: string) => {
+    if (showResult || isSyncingRound) return;
+    setSelectedAnswer(option);
+    if (currentQuestion?.category !== 'MAP' && option !== selectedAnswer) {
+      handleAutoSubmitAnswer(option);
+    }
   };
 
   const handleUseIntel5050 = () => {
@@ -699,17 +719,18 @@ export function DuelPage() {
         </Suspense>
       }
       selectedAnswer={selectedAnswer}
-      onOptionSelect={setSelectedAnswer}
+      onOptionSelect={handleOptionSelectDuel}
       showResult={showResult}
       hiddenOptionIndexes={disabledOptionIndexes}
-      disableOptions={duelState === 'waiting'}
+      disableOptions={showResult || isSyncingRound}
       optionsGridClassName="game-options-grid"
       actionTray={
         <RoundActionTray
           mode="duel"
           showResult={showResult}
           canSubmit={hasSelection && !isSyncingRound}
-          isWaiting={duelState === 'waiting'}
+          isWaiting={isMapQuestion ? duelState === 'waiting' : hasSubmittedThisQuestion}
+          autoSubmit={!isMapQuestion}
           submitLabel={t('game.submit')}
           selectionAssistiveText={t('game.selectionReadyShortHint')}
           waitingLabel={t('duel.waitingForOpponent')}

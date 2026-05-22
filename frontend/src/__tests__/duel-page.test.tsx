@@ -209,7 +209,7 @@ describe('DuelPage socket flow', () => {
     expect(tray).toHaveClass('bottom-0');
   });
 
-  it('prioriza confirmar sin mostrar CTA secundario al elegir respuesta', async () => {
+  it('auto-confirma la respuesta al seleccionar una opción y muestra espera', async () => {
     render(<DuelPage />);
 
     act(() => {
@@ -230,7 +230,11 @@ describe('DuelPage socket flow', () => {
 
     fireEvent.click(await screen.findByRole('button', { name: 'Santiago' }));
 
-    expect(screen.getByRole('button', { name: 'game.submit' })).toBeEnabled();
+    // La respuesta se envía automáticamente al seleccionar
+    expect(mocks.submitDuelAnswerMock).toHaveBeenCalledWith('dq1', 'Santiago', expect.any(Number), undefined, undefined);
+    // El tray muestra "esperando oponente" en lugar del botón de confirmar
+    expect(screen.getByText('duel.waitingForOpponent')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'game.submit' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'game.clearSelection' })).not.toBeInTheDocument();
   });
 
@@ -336,7 +340,7 @@ describe('DuelPage socket flow', () => {
     expect(await screen.findByText('duel.reconnectedSearching')).toBeInTheDocument();
   });
 
-  it('al reconectar en ronda muestra sincronización y evita doble submit', async () => {
+  it('al reconectar en ronda muestra sincronización y bloquea selección de opciones', async () => {
     render(<DuelPage />);
 
     act(() => {
@@ -355,7 +359,9 @@ describe('DuelPage socket flow', () => {
       );
     });
 
+    // Click Santiago → auto-submit ocurre
     fireEvent.click(await screen.findByRole('button', { name: 'Santiago' }));
+    expect(mocks.submitDuelAnswerMock).toHaveBeenCalledTimes(1);
 
     act(() => {
       mocks.handlers.get('connect')?.forEach((cb) => cb());
@@ -363,9 +369,10 @@ describe('DuelPage socket flow', () => {
 
     expect(await screen.findByText('duel.reconnectedSyncing')).toBeInTheDocument();
 
-    const submitButton = screen.getByRole('button', { name: 'game.submit' });
-    expect(submitButton).toBeDisabled();
-    fireEvent.click(submitButton);
-    expect(mocks.submitDuelAnswerMock).not.toHaveBeenCalled();
+    // Las opciones están deshabilitadas por isSyncingRound — no se puede enviar otra respuesta
+    const limaButton = screen.getByRole('button', { name: 'Lima' });
+    expect(limaButton).toBeDisabled();
+    fireEvent.click(limaButton);
+    expect(mocks.submitDuelAnswerMock).toHaveBeenCalledTimes(1); // sigue siendo 1
   });
 });
