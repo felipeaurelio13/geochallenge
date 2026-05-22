@@ -75,6 +75,7 @@ interface ActiveSurvivalMatch {
   currentRound: number;
   resolvingRound?: number;
   fillTimerId?: ReturnType<typeof setTimeout>;
+  fillStartedAt: number;
   countdownIntervalId?: ReturnType<typeof setInterval>;
   disconnectTimers: Map<string, ReturnType<typeof setTimeout>>;
 }
@@ -158,6 +159,7 @@ async function createMatch(
     questions: allQuestions,
     usedQuestionIds: usedIds,
     currentRound: 1,
+    fillStartedAt: Date.now(),
     disconnectTimers: new Map(),
   };
 
@@ -480,6 +482,8 @@ export function setupSurvivalHandlers(io: SocketIOServer, socket: Socket): void 
         socket.emit('survival:error', { message: 'Ya estás en una partida activa' });
         return;
       }
+      // Match no longer active — clear stale entry so the player can queue again
+      playerMatches.delete(user.userId);
     }
 
     const category = normalizeCategory(data?.category);
@@ -507,6 +511,23 @@ export function setupSurvivalHandlers(io: SocketIOServer, socket: Socket): void 
         });
         playerMatches.set(user.userId, match.id);
         socket.join(match.id);
+
+        // Sync the joining player to the current filling state before broadcasting
+        const fillTimeRemaining = Math.max(
+          0,
+          Math.round((FILL_WINDOW_MS - (Date.now() - match.fillStartedAt)) / 1000)
+        );
+        socket.emit('survival:matched', {
+          matchId: match.id,
+          category: match.category,
+          fillTimeRemaining,
+          maxPlayers: MAX_PLAYERS,
+          players: match.players.map((p) => ({
+            userId: p.userId,
+            username: p.username,
+            lives: p.lives,
+          })),
+        });
 
         io.to(match.id).emit('survival:player-joined', {
           player: { userId: user.userId, username: user.username, lives: STARTING_LIVES },
@@ -637,7 +658,10 @@ export function setupSurvivalHandlers(io: SocketIOServer, socket: Socket): void 
     const matchId = playerMatches.get(user.userId);
     if (!matchId) return;
     const match = activeMatches.get(matchId);
-    if (!match || match.status === 'finished') return;
+    if (!match || match.status === 'finished') {
+      playerMatches.delete(user.userId);
+      return;
+    }
 
     const timer = match.disconnectTimers.get(user.userId);
     if (timer) {
