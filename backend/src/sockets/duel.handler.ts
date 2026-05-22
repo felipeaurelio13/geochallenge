@@ -30,7 +30,7 @@ interface QueuedPlayer {
   filters?: QuestionFilters;
 }
 
-const DUEL_CATEGORIES: Category[] = ['MAP', 'FLAG', 'CAPITAL', 'SILHOUETTE', 'MIXED'];
+const DUEL_CATEGORIES: Category[] = ['MAP', 'FLAG', 'CAPITAL', 'SILHOUETTE', 'MONUMENT', 'MIXED'];
 
 function isCompatibleCategory(categoryA: Category, categoryB: Category): boolean {
   return categoryA === categoryB;
@@ -238,6 +238,16 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
   socket.on('duel:cancel', () => {
     queue.removePlayer(user.userId);
     socket.emit('duel:cancelled', { message: 'Búsqueda cancelada' });
+  });
+
+  // Abandono voluntario de duelo activo (el jugador navegó fuera de la página)
+  socket.on('duel:leave', async () => {
+    const duelId = playerDuels.get(user.userId);
+    if (!duelId) return;
+    const duel = activeDuels.get(duelId);
+    if (!duel || duel.status === 'finished') return;
+    const opponent = duel.players.find((p) => p.userId !== user.userId);
+    await endDuel(io, duel, opponent?.userId ?? null, 'opponent_disconnected');
   });
 
   // Jugador listo para empezar
