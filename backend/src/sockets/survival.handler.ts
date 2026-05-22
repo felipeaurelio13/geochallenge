@@ -180,6 +180,7 @@ async function createMatch(
       username: p.username,
       lives: p.lives,
     })),
+    imageUrls: allQuestions.map((q) => q.imageUrl).filter((url): url is string => !!url),
   });
 
   match.fillTimerId = setTimeout(async () => {

@@ -12,3 +12,4 @@ export * from './useWebShare';
 export * from './useWindowSize';
 export * from './useImageWithFallback';
 export * from './useGameFilters';
+export * from './useImagePreloader';

@@ -5,7 +5,7 @@ import { api } from '../services/api';
 import { FlashCard, LoadingSpinner, MechanicsHud, StreakCombo } from '../components';
 import { FullScreenError } from '../components/molecules/FullScreenError';
 import { Button } from '../components/atoms/Button';
-import { useHaptics } from '../hooks';
+import { useHaptics, useImagePreloader } from '../hooks';
 import { useUiStore } from '../store/useUiStore';
 import { hasActiveFilters, type Question, type GameFilters } from '../types';
 import { areMechanicsV2Enabled } from '../config/featureFlags';
@@ -53,6 +53,8 @@ export function FlashGamePage() {
   const [status, setStatus] = useState<Status>('loading');
   const [error, setError] = useState<string | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
+  const flashImageUrls = useMemo(() => questions.map((q) => q.imageUrl ?? ''), [questions]);
+  useImagePreloader(flashImageUrls); // preload masivo en background durante la pantalla intro
   const [currentIndex, setCurrentIndex] = useState(0);
   const [durationSeconds, setDurationSeconds] = useState(FALLBACK_DURATION_SECONDS);
   const [timeRemaining, setTimeRemaining] = useState(FALLBACK_DURATION_SECONDS);
