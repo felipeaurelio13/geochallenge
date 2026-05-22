@@ -17,6 +17,7 @@ const mocks = vi.hoisted(() => {
         current.filter((handler) => handler !== cb)
       );
     }),
+    emit: vi.fn(),
   };
 
   return {

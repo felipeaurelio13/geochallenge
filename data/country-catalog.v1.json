@@ -1439,7 +1439,7 @@
       "subregion": "Southern Europe",
       "populationTier": "small",
       "areaTier": "micro",
-      "flagComplexity": "moderate"
+      "flagComplexity": "moderate",
       "hasSilhouette": false
     },
     {
@@ -1728,7 +1728,7 @@
       "subregion": "Micronesia",
       "populationTier": "micro",
       "areaTier": "micro",
-      "flagComplexity": "moderate"
+      "flagComplexity": "moderate",
       "hasSilhouette": false
     },
     {
@@ -1793,7 +1793,7 @@
       "subregion": "Micronesia",
       "populationTier": "micro",
       "areaTier": "micro",
-      "flagComplexity": "moderate"
+      "flagComplexity": "moderate",
       "hasSilhouette": false
     },
     {
@@ -2146,7 +2146,7 @@
       "subregion": "Western Asia",
       "populationTier": "small",
       "areaTier": "micro",
-      "flagComplexity": "moderate"
+      "flagComplexity": "moderate",
       "hasSilhouette": false
     },
     {
@@ -2931,7 +2931,7 @@
       "subregion": "Polynesia",
       "populationTier": "micro",
       "areaTier": "micro",
-      "flagComplexity": "moderate"
+      "flagComplexity": "moderate",
       "hasSilhouette": false
     },
     {

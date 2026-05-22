@@ -36,7 +36,7 @@ interface DuelResult {
 
 const { TIME_PER_QUESTION } = GAME_CONSTANTS;
 const SEARCH_TIMEOUT_SECONDS = 120;
-const DUEL_CATEGORIES: Category[] = ['FLAG', 'CAPITAL', 'MAP', 'SILHOUETTE', 'MIXED'];
+const DUEL_CATEGORIES: Category[] = ['FLAG', 'CAPITAL', 'MAP', 'SILHOUETTE', 'MONUMENT', 'MIXED'];
 
 function parseDuelCategory(value: string | null): Category {
   if (!value) {
@@ -185,6 +185,10 @@ export function DuelPage() {
     };
 
     const handleQuestion = (data: any) => {
+      if (data.question?.imageUrl) {
+        const img = new window.Image();
+        img.src = data.question.imageUrl;
+      }
       setCurrentQuestion(data.question);
       setQuestionNumber((data.questionIndex ?? 0) + 1);
       setTotalQuestions(data.totalQuestions);
@@ -291,7 +295,12 @@ export function DuelPage() {
     return () => {
       clearInterval(searchTimer);
       if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
-      socketService.cancelDuelQueue();
+      const stateOnCleanup = duelStateRef.current;
+      if (stateOnCleanup === 'matched' || stateOnCleanup === 'playing' || stateOnCleanup === 'waiting') {
+        socketService.socket?.emit('duel:leave');
+      } else if (stateOnCleanup === 'searching') {
+        socketService.cancelDuelQueue();
+      }
       socketService.socket?.off('duel:matched', handleMatched);
       socketService.socket?.off('duel:opponent', handleOpponent);
       socketService.socket?.off('duel:question', handleQuestion);
@@ -472,6 +481,8 @@ export function DuelPage() {
                       ? 'maps'
                       : duelCategory === 'SILHOUETTE'
                       ? 'silhouettes'
+                      : duelCategory === 'MONUMENT'
+                      ? 'monuments'
                       : 'mixed'
                   }`
                 ),
