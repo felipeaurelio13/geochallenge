@@ -2,7 +2,7 @@
   "_meta": {
     "version": 1,
     "description": "Catálogo curado de monumentos y lugares famosos. Las URLs usan el patrón Special:FilePath de Wikimedia Commons (redirección estable). La atribución debe verificarse manualmente contra cada archivo fuente antes de deploy productivo (ver sección de verificación del plan).",
-    "imageUrlPattern": "https://commons.wikimedia.org/wiki/Special:FilePath/{Filename}?width=800"
+    "imageUrlPattern": "https://commons.wikimedia.org/wiki/Special:FilePath/{Filename}?width=400"
   },
   "monuments": [
     {
@@ -15,7 +15,7 @@
       "continent": "Europe",
       "latitude": 48.8584,
       "longitude": 2.2945,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg?width=400",
       "attribution": {
         "author": "Benh LIEU SONG",
         "license": "Public domain",
@@ -33,7 +33,7 @@
       "continent": "Europe",
       "latitude": 41.8902,
       "longitude": 12.4922,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Colosseo_2020.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Colosseo_2020.jpg?width=400",
       "attribution": {
         "author": "FeaturedPics",
         "license": "CC BY-SA 4.0",
@@ -51,7 +51,7 @@
       "continent": "South America",
       "latitude": -13.1631,
       "longitude": -72.545,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Machu_Picchu%2C_2023_%28012%29.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Machu_Picchu%2C_2023_%28012%29.jpg?width=400",
       "attribution": {
         "author": "Draceane",
         "license": "CC BY-SA 4.0",
@@ -69,7 +69,7 @@
       "continent": "South America",
       "latitude": -22.9519,
       "longitude": -43.2105,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Christ_the_Redeemer_-_Cristo_Redentor.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Christ_the_Redeemer_-_Cristo_Redentor.jpg?width=400",
       "attribution": {
         "author": "Arne Müseler",
         "license": "CC BY-SA 3.0 de",
@@ -87,7 +87,7 @@
       "continent": "North America",
       "latitude": 40.6892,
       "longitude": -74.0445,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Front_view_of_Statue_of_Liberty_%28cropped%29.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Front_view_of_Statue_of_Liberty_%28cropped%29.jpg?width=400",
       "attribution": {
         "author": "AskALotl",
         "license": "CC0",
@@ -105,7 +105,7 @@
       "continent": "Asia",
       "latitude": 27.1751,
       "longitude": 78.0421,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Taj_Mahal_%28Edited%29.jpeg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Taj_Mahal_%28Edited%29.jpeg?width=400",
       "attribution": {
         "author": "Yann; edited by Jim Carter",
         "license": "CC BY-SA 4.0",
@@ -123,7 +123,7 @@
       "continent": "Africa",
       "latitude": 29.9792,
       "longitude": 31.1342,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Pyramids_of_the_Giza_Necropolis.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Pyramids_of_the_Giza_Necropolis.jpg?width=400",
       "attribution": {
         "author": "KennyOMG",
         "license": "CC BY-SA 4.0",
@@ -141,7 +141,7 @@
       "continent": "Europe",
       "latitude": 51.5007,
       "longitude": -0.1246,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Elizabeth_Tower%2C_June_2022.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Elizabeth_Tower%2C_June_2022.jpg?width=400",
       "attribution": {
         "author": "Dave Bezaire",
         "license": "CC BY-SA 2.0",
@@ -159,7 +159,7 @@
       "continent": "Europe",
       "latitude": 41.4036,
       "longitude": 2.1744,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/%CE%A3%CE%B1%CE%B3%CF%81%CE%AC%CE%B4%CE%B1_%CE%A6%CE%B1%CE%BC%CE%AF%CE%BB%CE%B9%CE%B1_2941.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/%CE%A3%CE%B1%CE%B3%CF%81%CE%AC%CE%B4%CE%B1_%CE%A6%CE%B1%CE%BC%CE%AF%CE%BB%CE%B9%CE%B1_2941.jpg?width=400",
       "attribution": {
         "author": "C messier",
         "license": "CC BY-SA 4.0",
@@ -177,7 +177,7 @@
       "continent": "Europe",
       "latitude": 37.9715,
       "longitude": 23.7267,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/1029_Acropolis_of_Athens_in_Greece_at_night_Photo_by_Giles_Laurent.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/1029_Acropolis_of_Athens_in_Greece_at_night_Photo_by_Giles_Laurent.jpg?width=400",
       "attribution": {
         "author": "Giles Laurent",
         "license": "CC BY-SA 4.0",
@@ -195,7 +195,7 @@
       "continent": "Europe",
       "latitude": 51.1789,
       "longitude": -1.8262,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Stonehenge2007_07_30.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Stonehenge2007_07_30.jpg?width=400",
       "attribution": {
         "author": "garethwiscombe",
         "license": "CC BY 2.0",
@@ -213,7 +213,7 @@
       "continent": "Oceania",
       "latitude": -33.8568,
       "longitude": 151.2153,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Sydney_Australia._%2821339175489%29.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Sydney_Australia._%2821339175489%29.jpg?width=400",
       "attribution": {
         "author": "Bernard Spragg. NZ from Christchurch, New Zealand",
         "license": "CC0",
@@ -231,7 +231,7 @@
       "continent": "Asia",
       "latitude": 25.1972,
       "longitude": 55.2744,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Burj_Khalifa_%28worlds_tallest_building%29_and_the_Dubai_skyline_%2825781049892%29.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Burj_Khalifa_%28worlds_tallest_building%29_and_the_Dubai_skyline_%2825781049892%29.jpg?width=400",
       "attribution": {
         "author": "imran shahabuddin",
         "license": "CC BY 2.0",
@@ -249,7 +249,7 @@
       "continent": "Europe",
       "latitude": 52.5163,
       "longitude": 13.3777,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Brandenburger_Tor_abends.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Brandenburger_Tor_abends.jpg?width=400",
       "attribution": {
         "author": "Thomas Wolf, www.foto-tw.de",
         "license": "CC BY-SA 3.0",
@@ -267,7 +267,7 @@
       "continent": "North America",
       "latitude": 43.8791,
       "longitude": -103.4591,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Mount_Rushmore_detail_view_%28100MP%29.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Mount_Rushmore_detail_view_%28100MP%29.jpg?width=400",
       "attribution": {
         "author": "Thomas Wolf, www.foto-tw.de",
         "license": "CC BY-SA 3.0",
@@ -285,7 +285,7 @@
       "continent": "North America",
       "latitude": 37.8199,
       "longitude": -122.4783,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Golden_Gate_Bridge_as_seen_from_Battery_East.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Golden_Gate_Bridge_as_seen_from_Battery_East.jpg?width=400",
       "attribution": {
         "author": "Frank Schulenburg",
         "license": "CC BY-SA 4.0",
@@ -303,7 +303,7 @@
       "continent": "Europe",
       "latitude": 43.723,
       "longitude": 10.3966,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Italy_-_Pisa_-_Leaning_Tower.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Italy_-_Pisa_-_Leaning_Tower.jpg?width=400",
       "attribution": {
         "author": "Arne Müseler",
         "license": "CC BY-SA 3.0 de",
@@ -321,7 +321,7 @@
       "continent": "Asia",
       "latitude": 35.3606,
       "longitude": 138.7274,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/View_of_Mount_Fuji_from_%C5%8Cwakudani_20211202.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/View_of_Mount_Fuji_from_%C5%8Cwakudani_20211202.jpg?width=400",
       "attribution": {
         "author": "Suicasmo",
         "license": "CC BY-SA 4.0",
@@ -339,7 +339,7 @@
       "continent": "Asia",
       "latitude": 40.4319,
       "longitude": 116.5704,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/The_Great_Wall_of_China_at_Jinshanling-edit.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/The_Great_Wall_of_China_at_Jinshanling-edit.jpg?width=400",
       "attribution": {
         "author": "Severin.stalder",
         "license": "CC BY-SA 3.0",
@@ -357,7 +357,7 @@
       "continent": "South America",
       "latitude": -27.1127,
       "longitude": -109.3497,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/AhuTongariki.JPG?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/AhuTongariki.JPG?width=400",
       "attribution": {
         "author": "Ian Sewell",
         "license": "CC BY 2.5",
@@ -375,7 +375,7 @@
       "continent": "Europe",
       "latitude": 55.7525,
       "longitude": 37.6231,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Saint_Basil%27s_Cathedral_in_Moscow.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Saint_Basil%27s_Cathedral_in_Moscow.jpg?width=400",
       "attribution": {
         "author": "Tsy1980",
         "license": "CC BY-SA 4.0",
@@ -393,7 +393,7 @@
       "continent": "Europe",
       "latitude": 47.5576,
       "longitude": 10.7498,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Schloss_Neuschwanstein_2013.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Schloss_Neuschwanstein_2013.jpg?width=400",
       "attribution": {
         "author": "Thomas Wolf, www.foto-tw.de",
         "license": "CC BY-SA 3.0 de",
@@ -411,7 +411,7 @@
       "continent": "Asia",
       "latitude": 30.3285,
       "longitude": 35.4444,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Al_Deir_Petra.JPG?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Al_Deir_Petra.JPG?width=400",
       "attribution": {
         "author": "Azurfrog",
         "license": "CC BY-SA 3.0",
@@ -429,7 +429,7 @@
       "continent": "Asia",
       "latitude": 13.4125,
       "longitude": 103.867,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Buddhist_monks_in_front_of_the_Angkor_Wat.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Buddhist_monks_in_front_of_the_Angkor_Wat.jpg?width=400",
       "attribution": {
         "author": "sam garza",
         "license": "CC BY 2.0",
@@ -447,7 +447,7 @@
       "continent": "North America",
       "latitude": 20.6843,
       "longitude": -88.5678,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Chichen_Itza_3.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Chichen_Itza_3.jpg?width=400",
       "attribution": {
         "author": "Daniel Schwen",
         "license": "CC BY-SA 4.0",
@@ -465,7 +465,7 @@
       "continent": "Europe",
       "latitude": 37.1761,
       "longitude": -3.5881,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Dawn_Charles_V_Palace_Alhambra_Granada_Andalusia_Spain.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Dawn_Charles_V_Palace_Alhambra_Granada_Andalusia_Spain.jpg?width=400",
       "attribution": {
         "author": "Jebulon",
         "license": "CC0",
@@ -483,7 +483,7 @@
       "continent": "Asia",
       "latitude": 41.0086,
       "longitude": 28.9802,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Hagia_Sophia_%28228968325%29.jpeg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Hagia_Sophia_%28228968325%29.jpeg?width=400",
       "attribution": {
         "author": "Adli Wahid",
         "license": "CC BY-SA 3.0",
@@ -501,7 +501,7 @@
       "continent": "Europe",
       "latitude": 48.6361,
       "longitude": -1.5115,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Mont-Saint-Michel_vu_du_ciel.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Mont-Saint-Michel_vu_du_ciel.jpg?width=400",
       "attribution": {
         "author": "Amaustan",
         "license": "CC BY-SA 4.0",
@@ -519,7 +519,7 @@
       "continent": "Asia",
       "latitude": 39.9163,
       "longitude": 116.3972,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/The_Forbidden_City_-_View_from_Coal_Hill.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/The_Forbidden_City_-_View_from_Coal_Hill.jpg?width=400",
       "attribution": {
         "author": "Pixelflake",
         "license": "CC BY-SA 3.0",
@@ -537,7 +537,7 @@
       "continent": "Asia",
       "latitude": 35.0394,
       "longitude": 135.7292,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Golden_Pavilion_Kinkaku-ji_water_mirror_2024.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Golden_Pavilion_Kinkaku-ji_water_mirror_2024.jpg?width=400",
       "attribution": {
         "author": "Nacaru",
         "license": "CC BY-SA 4.0",
@@ -555,7 +555,7 @@
       "continent": "Europe",
       "latitude": 48.8606,
       "longitude": 2.3376,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Louvre_Courtyard%2C_Looking_West.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Louvre_Courtyard%2C_Looking_West.jpg?width=400",
       "attribution": {
         "author": "Benh LIEU SONG (Flickr)",
         "license": "CC BY-SA 4.0",
@@ -573,7 +573,7 @@
       "continent": "Europe",
       "latitude": 41.9022,
       "longitude": 12.4533,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Basilica_di_San_Pietro_in_Vaticano_September_2015-1a.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Basilica_di_San_Pietro_in_Vaticano_September_2015-1a.jpg?width=400",
       "attribution": {
         "author": "Alvesgaspar",
         "license": "CC BY-SA 4.0",
@@ -591,7 +591,7 @@
       "continent": "Asia",
       "latitude": 41.0054,
       "longitude": 28.9768,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Istanbul_%2834223582516%29_%28cropped%29.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Istanbul_%2834223582516%29_%28cropped%29.jpg?width=400",
       "attribution": {
         "author": "Pedro Szekely from Los Angeles, USA",
         "license": "CC BY-SA 2.0",
@@ -609,7 +609,7 @@
       "continent": "Europe",
       "latitude": 51.5055,
       "longitude": -0.0754,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Tower_Bridge_at_Dawn.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Tower_Bridge_at_Dawn.jpg?width=400",
       "attribution": {
         "author": "Fuzzypiggy",
         "license": "CC BY-SA 3.0",
@@ -627,7 +627,7 @@
       "continent": "Europe",
       "latitude": 48.8738,
       "longitude": 2.295,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Arc_de_Triomphe%2C_Paris_21_October_2010.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Arc_de_Triomphe%2C_Paris_21_October_2010.jpg?width=400",
       "attribution": {
         "author": "Jiuguang Wang",
         "license": "CC BY-SA 2.0",
@@ -645,7 +645,7 @@
       "continent": "North America",
       "latitude": 38.8977,
       "longitude": -77.0365,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/White_House_north_and_south_sides.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/White_House_north_and_south_sides.jpg?width=400",
       "attribution": {
         "author": "(top)Cezary p(bottom)MattWade",
         "license": "CC BY-SA 4.0",
@@ -663,7 +663,7 @@
       "continent": "Asia",
       "latitude": 29.6575,
       "longitude": 91.117,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Potala_Palace_HQ.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Potala_Palace_HQ.jpg?width=400",
       "attribution": {
         "author": "Lhasa Government",
         "license": "CC BY-SA 4.0",
@@ -681,7 +681,7 @@
       "continent": "Africa",
       "latitude": 22.3372,
       "longitude": 31.6258,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Ramsis%2C_Aswan_Governorate%2C_Egypt_-_panoramio.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Ramsis%2C_Aswan_Governorate%2C_Egypt_-_panoramio.jpg?width=400",
       "attribution": {
         "author": "youssef_alam",
         "license": "CC BY 3.0",
@@ -699,7 +699,7 @@
       "continent": "South America",
       "latitude": -25.6953,
       "longitude": -54.4367,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Iguazu_Cataratas2.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Iguazu_Cataratas2.jpg?width=400",
       "attribution": {
         "author": "Enaldo Valadares",
         "license": "CC BY-SA 3.0",
@@ -717,7 +717,7 @@
       "continent": "Oceania",
       "latitude": -25.3444,
       "longitude": 131.0369,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/ULURU.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/ULURU.jpg?width=400",
       "attribution": {
         "author": "Ek2030372672",
         "license": "CC BY-SA 4.0",
@@ -735,7 +735,7 @@
       "continent": "Asia",
       "latitude": -7.6079,
       "longitude": 110.2038,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Pradaksina.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Pradaksina.jpg?width=400",
       "attribution": {
         "author": "Heri nugroho",
         "license": "CC BY-SA 4.0",
@@ -753,7 +753,7 @@
       "continent": "Europe",
       "latitude": 39.7217,
       "longitude": 21.6306,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Meteora%27s_monastery_2.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Meteora%27s_monastery_2.jpg?width=400",
       "attribution": {
         "author": "Stathis floros",
         "license": "CC BY-SA 4.0",
@@ -771,7 +771,7 @@
       "continent": "Africa",
       "latitude": 12.0316,
       "longitude": 39.0413,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Lalibela%2C_san_giorgio%2C_esterno_24.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Lalibela%2C_san_giorgio%2C_esterno_24.jpg?width=400",
       "attribution": {
         "author": "Sailko",
         "license": "CC BY 3.0",
@@ -789,7 +789,7 @@
       "continent": "Asia",
       "latitude": 21.1717,
       "longitude": 94.8585,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Bagan%2C_Burma.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Bagan%2C_Burma.jpg?width=400",
       "attribution": {
         "author": "Corto Maltese 1999",
         "license": "CC BY 2.0",
@@ -807,7 +807,7 @@
       "continent": "Europe",
       "latitude": 44.8654,
       "longitude": 15.582,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/View_in_Plitvice_Lakes_National_Park.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/View_in_Plitvice_Lakes_National_Park.jpg?width=400",
       "attribution": {
         "author": "Zysko serhii",
         "license": "CC BY-SA 4.0",
@@ -825,7 +825,7 @@
       "continent": "Europe",
       "latitude": 36.4618,
       "longitude": 25.3753,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Thira_%28Santorini%29%2C_Greece%2C_Sunset_Seen_From_The_Caldera%2C_Oia_District_%28cropped%29.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Thira_%28Santorini%29%2C_Greece%2C_Sunset_Seen_From_The_Caldera%2C_Oia_District_%28cropped%29.jpg?width=400",
       "attribution": {
         "author": "Giles Laurent",
         "license": "CC BY-SA 4.0",
@@ -843,7 +843,7 @@
       "continent": "Africa",
       "latitude": -17.9243,
       "longitude": 25.8572,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Cataratas_Victoria%2C_Zambia-Zimbabue%2C_2018-07-27%2C_DD_04.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Cataratas_Victoria%2C_Zambia-Zimbabue%2C_2018-07-27%2C_DD_04.jpg?width=400",
       "attribution": {
         "author": "Diego Delso",
         "license": "CC BY-SA 4.0",
@@ -861,7 +861,7 @@
       "continent": "Europe",
       "latitude": 55.9486,
       "longitude": -3.1999,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/City_of_Edinburgh_-_Edinburgh_Castle_-_20140421004403.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/City_of_Edinburgh_-_Edinburgh_Castle_-_20140421004403.jpg?width=400",
       "attribution": {
         "author": "Enric",
         "license": "CC BY-SA 4.0",
@@ -879,7 +879,7 @@
       "continent": "Asia",
       "latitude": 1.2834,
       "longitude": 103.8607,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Marina_Bay_Sands_%28I%29.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Marina_Bay_Sands_%28I%29.jpg?width=400",
       "attribution": {
         "author": "This Photo was taken by Supanut Arunoprayote. Feel free to use any of my images, but please mention me as the author and may send me a message. (สามารถใช้ภาพได้อิสระ แต่กรุณาใส่เครดิตผู้ถ่ายและอาจส่งข้อความบอกกล่าวด้วย) Please do not upload an updated image here without consultation with the Author. The author would like to make corrections only at his own source. This ensures that the changes are preserved.Please if you think that any changes should be required, please inform the author.Otherwise you can upload a new image with a new name. Please use one of the templates derivative or extract.",
         "license": "CC BY 4.0",
@@ -897,7 +897,7 @@
       "continent": "Africa",
       "latitude": -33.9628,
       "longitude": 18.4098,
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Table_Mountain_DanieVDM.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Table_Mountain_DanieVDM.jpg?width=400",
       "attribution": {
         "author": "Danie van der Merwe from Cape Town, South Africa",
         "license": "CC BY 2.0",
@@ -916,7 +916,7 @@
       "latitude": -3.0758,
       "longitude": 37.3533,
       "difficulty": "EASY",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Kilimanjaro_from_Amboseli.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Kilimanjaro_from_Amboseli.jpg?width=400",
       "attribution": {
         "author": "Sergey Pesterev",
         "license": "CC BY-SA 4.0",
@@ -934,7 +934,7 @@
       "latitude": 29.9753,
       "longitude": 31.1376,
       "difficulty": "EASY",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Sphinx_with_the_third_pyramid.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Sphinx_with_the_third_pyramid.jpg?width=400",
       "attribution": {
         "author": "Hesham Ebaid",
         "license": "CC0",
@@ -952,7 +952,7 @@
       "latitude": 33.6086,
       "longitude": -7.6328,
       "difficulty": "MEDIUM",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Sunshine_on_mosque_Hassan_II_in_Casablanca%2C_Morocco_-_Flickr_-_Milamber%27s_portfolio.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Sunshine_on_mosque_Hassan_II_in_Casablanca%2C_Morocco_-_Flickr_-_Milamber%27s_portfolio.jpg?width=400",
       "attribution": {
         "author": "Milamber's portfolio",
         "license": "CC BY 2.0",
@@ -970,7 +970,7 @@
       "latitude": 25.7188,
       "longitude": 32.6573,
       "difficulty": "MEDIUM",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Temple_de_Louxor_68.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Temple_de_Louxor_68.jpg?width=400",
       "attribution": {
         "author": "René Hourdry",
         "license": "CC BY-SA 4.0",
@@ -988,7 +988,7 @@
       "latitude": -2.3333,
       "longitude": 34.8333,
       "difficulty": "MEDIUM",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Serengeti-Landscape-2012.JPG?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Serengeti-Landscape-2012.JPG?width=400",
       "attribution": {
         "author": "Bjørn Christian Tørrissen",
         "license": "CC BY-SA 3.0",
@@ -1006,7 +1006,7 @@
       "latitude": 31.6258,
       "longitude": -7.9891,
       "difficulty": "MEDIUM",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Djemaa_el_Fna.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Djemaa_el_Fna.jpg?width=400",
       "attribution": {
         "author": "Boris Macek",
         "license": "CC BY-SA 3.0",
@@ -1024,7 +1024,7 @@
       "latitude": -34.3568,
       "longitude": 18.474,
       "difficulty": "MEDIUM",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Playa_Dias%2C_Cape_Point%2C_Sud%C3%A1frica%2C_2018-07-23%2C_DD_103.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Playa_Dias%2C_Cape_Point%2C_Sud%C3%A1frica%2C_2018-07-23%2C_DD_103.jpg?width=400",
       "attribution": {
         "author": "Diego Delso",
         "license": "CC BY-SA 4.0",
@@ -1042,7 +1042,7 @@
       "latitude": -20.2506,
       "longitude": 44.4181,
       "difficulty": "HARD",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Adansonia_grandidieri_Pat_Hooper.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Adansonia_grandidieri_Pat_Hooper.jpg?width=400",
       "attribution": {
         "author": "Pat Hooper",
         "license": "CC BY-SA 2.0",
@@ -1060,7 +1060,7 @@
       "latitude": 13.9054,
       "longitude": -4.5556,
       "difficulty": "HARD",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Djenne_great_mud_mosque.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Djenne_great_mud_mosque.jpg?width=400",
       "attribution": {
         "author": "Ruud Zwart",
         "license": "CC BY-SA 3.0",
@@ -1078,7 +1078,7 @@
       "latitude": -6.1639,
       "longitude": 39.1894,
       "difficulty": "HARD",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Zanzibar_sultan_palace.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Zanzibar_sultan_palace.jpg?width=400",
       "attribution": {
         "author": "Mbz1",
         "license": "CC BY-SA 3.0",
@@ -1096,7 +1096,7 @@
       "latitude": 27.9881,
       "longitude": 86.925,
       "difficulty": "EASY",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Mt._Everest_from_Gokyo_Ri_November_5%2C_2012.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Mt._Everest_from_Gokyo_Ri_November_5%2C_2012.jpg?width=400",
       "attribution": {
         "author": "Rdevany",
         "license": "CC BY-SA 3.0",
@@ -1114,7 +1114,7 @@
       "latitude": 13.7437,
       "longitude": 100.4889,
       "difficulty": "EASY",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%98%E0%B8%B2%E0%B8%99%E0%B8%97%E0%B8%A3%E0%B8%87%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%87%E0%B8%84%E0%B9%8C%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%AD%E0%B8%A3%E0%B8%B8%E0%B8%932.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/%E0%B9%80%E0%B8%88%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B9%8C%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%98%E0%B8%B2%E0%B8%99%E0%B8%97%E0%B8%A3%E0%B8%87%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%87%E0%B8%84%E0%B9%8C%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%AD%E0%B8%A3%E0%B8%B8%E0%B8%932.jpg?width=400",
       "attribution": {
         "author": "Mastertongapollo",
         "license": "CC BY-SA 4.0",
@@ -1132,7 +1132,7 @@
       "latitude": 34.2961,
       "longitude": 132.3197,
       "difficulty": "MEDIUM",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Itsukushima_Shrine_Torii_Gate_%2813890465459%29.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Itsukushima_Shrine_Torii_Gate_%2813890465459%29.jpg?width=400",
       "attribution": {
         "author": "redlegsfan21",
         "license": "CC BY-SA 2.0",
@@ -1150,7 +1150,7 @@
       "latitude": 20.9101,
       "longitude": 107.1839,
       "difficulty": "MEDIUM",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Ha_Long_Bay_in_2019.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Ha_Long_Bay_in_2019.jpg?width=400",
       "attribution": {
         "author": "Taewangkorea",
         "license": "CC BY-SA 4.0",
@@ -1168,7 +1168,7 @@
       "latitude": 29.9354,
       "longitude": 52.8916,
       "difficulty": "HARD",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Gate_of_All_Nations%2C_Persepolis.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Gate_of_All_Nations%2C_Persepolis.jpg?width=400",
       "attribution": {
         "author": "Alborzagros",
         "license": "CC BY-SA 3.0",
@@ -1186,7 +1186,7 @@
       "latitude": 16.9303,
       "longitude": 121.0586,
       "difficulty": "HARD",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Banaue-terrace.JPG?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Banaue-terrace.JPG?width=400",
       "attribution": {
         "author": "Roundtheworld",
         "license": "Public domain",
@@ -1204,7 +1204,7 @@
       "latitude": 40.7484,
       "longitude": -73.9857,
       "difficulty": "EASY",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/View_of_Empire_State_Building_from_Rockefeller_Center_New_York_City_dllu.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/View_of_Empire_State_Building_from_Rockefeller_Center_New_York_City_dllu.jpg?width=400",
       "attribution": {
         "author": "Dllu",
         "license": "CC BY-SA 4.0",
@@ -1222,7 +1222,7 @@
       "latitude": 43.0828,
       "longitude": -79.0742,
       "difficulty": "EASY",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/3Falls_Niagara.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/3Falls_Niagara.jpg?width=400",
       "attribution": {
         "author": "Saffron Blaze",
         "license": "CC BY-SA 3.0",
@@ -1240,7 +1240,7 @@
       "latitude": 34.1341,
       "longitude": -118.3215,
       "difficulty": "EASY",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Hollywood_Sign_%28Zuschnitt%29.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Hollywood_Sign_%28Zuschnitt%29.jpg?width=400",
       "attribution": {
         "author": "Thomas Wolf",
         "license": "CC BY-SA 3.0",
@@ -1258,7 +1258,7 @@
       "latitude": 36.1069,
       "longitude": -112.1129,
       "difficulty": "EASY",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Canyon_River_Tree_%28165872763%29.jpeg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Canyon_River_Tree_%28165872763%29.jpeg?width=400",
       "attribution": {
         "author": "Lennart Sikkema",
         "license": "CC BY 3.0",
@@ -1276,7 +1276,7 @@
       "latitude": 43.6426,
       "longitude": -79.3871,
       "difficulty": "EASY",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Toronto_-_ON_-_Toronto_Harbourfront7.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Toronto_-_ON_-_Toronto_Harbourfront7.jpg?width=400",
       "attribution": {
         "author": "Wladyslaw",
         "license": "CC BY-SA 3.0",
@@ -1294,7 +1294,7 @@
       "latitude": 36.1126,
       "longitude": -115.1767,
       "difficulty": "MEDIUM",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Bellagio_Las_Vegas_December_2013_panorama.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Bellagio_Las_Vegas_December_2013_panorama.jpg?width=400",
       "attribution": {
         "author": "King of Hearts",
         "license": "CC BY-SA 3.0",
@@ -1312,7 +1312,7 @@
       "latitude": 38.8893,
       "longitude": -77.0502,
       "difficulty": "MEDIUM",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Aerial_view_of_Lincoln_Memorial_-_east_side_EDIT.jpeg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Aerial_view_of_Lincoln_Memorial_-_east_side_EDIT.jpeg?width=400",
       "attribution": {
         "author": "Carol M. Highsmith",
         "license": "Public domain",
@@ -1330,7 +1330,7 @@
       "latitude": 40.7061,
       "longitude": -73.9969,
       "difficulty": "MEDIUM",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Brooklyn_Bridge_Manhattan.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Brooklyn_Bridge_Manhattan.jpg?width=400",
       "attribution": {
         "author": "Suiseiseki",
         "license": "CC BY-SA 3.0",
@@ -1348,7 +1348,7 @@
       "latitude": 47.6205,
       "longitude": -122.3493,
       "difficulty": "MEDIUM",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Space_Needle_2011-07-04.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Space_Needle_2011-07-04.jpg?width=400",
       "attribution": {
         "author": "Jordon Kalilich",
         "license": "Public domain",
@@ -1366,7 +1366,7 @@
       "latitude": 19.6925,
       "longitude": -98.8438,
       "difficulty": "HARD",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Teotihuac%C3%A1n-5973.JPG?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Teotihuac%C3%A1n-5973.JPG?width=400",
       "attribution": {
         "author": "Ricardo David Sánchez",
         "license": "CC BY-SA 3.0",
@@ -1384,7 +1384,7 @@
       "latitude": -22.9492,
       "longitude": -43.1545,
       "difficulty": "EASY",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Rio_de_Janeiro_from_Sugarloaf_mountain%2C_May_2004.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Rio_de_Janeiro_from_Sugarloaf_mountain%2C_May_2004.jpg?width=400",
       "attribution": {
         "author": "Breogan67",
         "license": "CC BY-SA 3.0",
@@ -1402,7 +1402,7 @@
       "latitude": -20.1338,
       "longitude": -67.4891,
       "difficulty": "EASY",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Reflection_on_the_Salar_de_Uyuni%2C_bolivia.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Reflection_on_the_Salar_de_Uyuni%2C_bolivia.jpg?width=400",
       "attribution": {
         "author": "Christopher Crouzet",
         "license": "CC BY-SA 4.0",
@@ -1420,7 +1420,7 @@
       "latitude": 5.97,
       "longitude": -62.5356,
       "difficulty": "EASY",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/SaltoAngel1.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/SaltoAngel1.jpg?width=400",
       "attribution": {
         "author": "Rich Childs",
         "license": "CC BY 2.0",
@@ -1438,7 +1438,7 @@
       "latitude": -0.9538,
       "longitude": -90.9656,
       "difficulty": "MEDIUM",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Lobo_marino_%28Zalophus_californianus_wollebaeki%29%2C_Punta_Pitt%2C_isla_de_San_Crist%C3%B3bal%2C_islas_Gal%C3%A1pagos%2C_Ecuador%2C_2015-07-24%2C_DD_11.JPG?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Lobo_marino_%28Zalophus_californianus_wollebaeki%29%2C_Punta_Pitt%2C_isla_de_San_Crist%C3%B3bal%2C_islas_Gal%C3%A1pagos%2C_Ecuador%2C_2015-07-24%2C_DD_11.JPG?width=400",
       "attribution": {
         "author": "Diego Delso",
         "license": "CC BY-SA 4.0",
@@ -1456,7 +1456,7 @@
       "latitude": -50.9423,
       "longitude": -73.4068,
       "difficulty": "MEDIUM",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Torres_del_Paine_y_cuernos_del_Paine%2C_montaje.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Torres_del_Paine_y_cuernos_del_Paine%2C_montaje.jpg?width=400",
       "attribution": {
         "author": "Karen Chan, Miguel.v, Jorge Morales Piderit",
         "license": "CC BY 4.0",
@@ -1474,7 +1474,7 @@
       "latitude": 10.3997,
       "longitude": -75.5144,
       "difficulty": "MEDIUM",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Cartagena%2C_view_from_old_city_walls.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Cartagena%2C_view_from_old_city_walls.jpg?width=400",
       "attribution": {
         "author": "Leon petrosyan",
         "license": "CC BY-SA 4.0",
@@ -1492,7 +1492,7 @@
       "latitude": -14.739,
       "longitude": -75.13,
       "difficulty": "MEDIUM",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/L%C3%ADneas_de_Nazca%2C_Nazca%2C_Per%C3%BA%2C_2015-07-29%2C_DD_49.JPG?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/L%C3%ADneas_de_Nazca%2C_Nazca%2C_Per%C3%BA%2C_2015-07-29%2C_DD_49.JPG?width=400",
       "attribution": {
         "author": "Diego Delso",
         "license": "CC BY-SA 4.0",
@@ -1510,7 +1510,7 @@
       "latitude": -0.6803,
       "longitude": -78.4378,
       "difficulty": "MEDIUM",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Cotopaxi_volcano_2008-06-27T1322.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Cotopaxi_volcano_2008-06-27T1322.jpg?width=400",
       "attribution": {
         "author": "Gerard Prins",
         "license": "CC BY-SA 3.0",
@@ -1528,7 +1528,7 @@
       "latitude": -50.4833,
       "longitude": -73.05,
       "difficulty": "HARD",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Perito_Moreno_Glacier_2023.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Perito_Moreno_Glacier_2023.jpg?width=400",
       "attribution": {
         "author": "Fernando",
         "license": "CC BY-SA 4.0",
@@ -1546,7 +1546,7 @@
       "latitude": -24.5,
       "longitude": -69.25,
       "difficulty": "HARD",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Atacama.png?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Atacama.png?width=400",
       "attribution": {
         "author": "NASA",
         "license": "Public domain",
@@ -1564,7 +1564,7 @@
       "latitude": -15.75,
       "longitude": -69.5,
       "difficulty": "HARD",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Amanecer_en_el_lago_Titicaca%2C_Puno%2C_Per%C3%BA%2C_2015-08-01%2C_DD_01.JPG?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Amanecer_en_el_lago_Titicaca%2C_Puno%2C_Per%C3%BA%2C_2015-08-01%2C_DD_01.JPG?width=400",
       "attribution": {
         "author": "Diego Delso",
         "license": "CC BY-SA 4.0",
@@ -1582,7 +1582,7 @@
       "latitude": -33.8523,
       "longitude": 151.2108,
       "difficulty": "EASY",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Sydney_Harbour_Bridge-16_October_2025.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Sydney_Harbour_Bridge-16_October_2025.jpg?width=400",
       "attribution": {
         "author": "Servite et contribuere",
         "license": "CC0",
@@ -1600,7 +1600,7 @@
       "latitude": -18.2871,
       "longitude": 147.6992,
       "difficulty": "EASY",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/ISS-45_StoryOfWater%2C_Great_Barrier_Reef%2C_Australia.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/ISS-45_StoryOfWater%2C_Great_Barrier_Reef%2C_Australia.jpg?width=400",
       "attribution": {
         "author": "NASA/Kjell Lindgren",
         "license": "Public domain",
@@ -1618,7 +1618,7 @@
       "latitude": -38.6663,
       "longitude": 143.1044,
       "difficulty": "MEDIUM",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/The_Twelve_Apostles_2011.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/The_Twelve_Apostles_2011.jpg?width=400",
       "attribution": {
         "author": "Michael J Fromholtz",
         "license": "CC BY-SA 4.0",
@@ -1636,7 +1636,7 @@
       "latitude": -33.8915,
       "longitude": 151.2767,
       "difficulty": "MEDIUM",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Bondi_from_above.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Bondi_from_above.jpg?width=400",
       "attribution": {
         "author": "Nick Ang",
         "license": "CC BY-SA 4.0",
@@ -1654,7 +1654,7 @@
       "latitude": -38.68,
       "longitude": 143.4,
       "difficulty": "MEDIUM",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/2009-0825-GreatOceanRoadsign.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/2009-0825-GreatOceanRoadsign.jpg?width=400",
       "attribution": {
         "author": "Bobak Ha'Eri",
         "license": "CC BY 3.0",
@@ -1672,7 +1672,7 @@
       "latitude": -44.671,
       "longitude": 167.9244,
       "difficulty": "MEDIUM",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Milford_Sound_%28New_Zealand%29.JPG?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Milford_Sound_%28New_Zealand%29.JPG?width=400",
       "attribution": {
         "author": "Maros Mraz",
         "license": "CC BY-SA 3.0",
@@ -1690,7 +1690,7 @@
       "latitude": -43.595,
       "longitude": 170.1418,
       "difficulty": "MEDIUM",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Mt_Sefton_massif%2C_Aoraki_-_Mount_Cook_National_Park%2C_New_Zealand.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Mt_Sefton_massif%2C_Aoraki_-_Mount_Cook_National_Park%2C_New_Zealand.jpg?width=400",
       "attribution": {
         "author": "Michal Klajban",
         "license": "CC BY-SA 4.0",
@@ -1708,7 +1708,7 @@
       "latitude": -36.8485,
       "longitude": 174.7621,
       "difficulty": "HARD",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Sky_Tower_Auckland_01.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Sky_Tower_Auckland_01.jpg?width=400",
       "attribution": {
         "author": "Krzysztof Golik",
         "license": "CC BY-SA 4.0",
@@ -1726,7 +1726,7 @@
       "latitude": -39.1568,
       "longitude": 175.6322,
       "difficulty": "HARD",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Le_Ngauruhoe_et_le_Ruapehu_vus_du_sommet_du_Tongariro.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Le_Ngauruhoe_et_le_Ruapehu_vus_du_sommet_du_Tongariro.jpg?width=400",
       "attribution": {
         "author": "Eusebius",
         "license": "CC BY 3.0",
@@ -1744,7 +1744,7 @@
       "latitude": -20.2833,
       "longitude": 149.0389,
       "difficulty": "HARD",
-      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Whitehaven_Beach%2C_Whitsunday_Island%2C_Queensland.jpg?width=800",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Whitehaven_Beach%2C_Whitsunday_Island%2C_Queensland.jpg?width=400",
       "attribution": {
         "author": "Slug69",
         "license": "CC BY-SA 2.0",
