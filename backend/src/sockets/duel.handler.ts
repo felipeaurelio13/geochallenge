@@ -283,7 +283,7 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
     };
     coordinates?: { lat: number; lng: number };
   }) => {
-    if (isRateLimited(socket.id, 'duel:answer', 30)) {
+    if (isRateLimited(socket.id, 'duel:answer', 60)) {
       socket.emit('duel:error', { message: 'Demasiadas solicitudes, intenta más tarde' });
       return;
     }
@@ -301,12 +301,17 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
     const currentQuestion = duel.questions[duel.currentQuestionIndex];
     if (data.questionId !== currentQuestion.id) return;
 
-    // Verificar que no haya respondido ni esté respondiendo ya esta pregunta
-    if (
-      player.answers.length >= duel.currentQuestionIndex + 1 ||
-      player.pendingQuestionIndex === duel.currentQuestionIndex
-    ) {
-      return;
+    // Si hay una validación en vuelo para esta pregunta, esperar
+    if (player.pendingQuestionIndex === duel.currentQuestionIndex) return;
+
+    // Si ya respondió, permitir cambio solo si el round aún no se está resolviendo
+    if (player.answers.length >= duel.currentQuestionIndex + 1) {
+      if (duel.resolvingQuestionIndex === duel.currentQuestionIndex) return;
+      if (duel.players.every((p) => p.answers.length > duel.currentQuestionIndex)) return;
+      // Reemplazar respuesta anterior: descontar puntos y quitar del array
+      const prevAnswer = player.answers[duel.currentQuestionIndex];
+      player.score -= prevAnswer.points;
+      player.answers.splice(duel.currentQuestionIndex, 1);
     }
 
     // Mutex lock to prevent race conditions on concurrent answer submissions
@@ -641,7 +646,8 @@ function sendQuestion(io: SocketIOServer, duel: ActiveDuel) {
       ) {
         // Agregar respuestas vacías para quienes no respondieron
         for (const player of currentDuel.players) {
-          if (player.answers.length <= questionIndex) {
+          // Skip players with a re-submission in flight (pendingQuestionIndex set)
+          if (player.answers.length <= questionIndex && player.pendingQuestionIndex !== questionIndex) {
             player.pendingQuestionIndex = undefined;
             player.answers.push(createUnansweredResult(question.id));
           }

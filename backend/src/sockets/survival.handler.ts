@@ -258,7 +258,8 @@ function sendQuestion(io: SocketIOServer, match: ActiveSurvivalMatch): void {
     if (!m || m.status !== 'playing' || m.currentRound !== round || m.resolvingRound === round) return;
 
     for (const player of getActivePlayers(m)) {
-      if (player.answers.length < round) {
+      // Skip players with a re-submission in flight (pendingRound set)
+      if (player.answers.length < round && player.pendingRound !== round) {
         player.pendingRound = undefined;
         player.answers.push(null);
       }
@@ -606,7 +607,7 @@ export function setupSurvivalHandlers(io: SocketIOServer, socket: Socket): void 
       timeRemaining: number;
       coordinates?: { lat: number; lng: number };
     }) => {
-      if (isRateLimited(socket.id, 'survival:answer', 60)) return;
+      if (isRateLimited(socket.id, 'survival:answer', 120)) return;
 
       const matchId = playerMatches.get(user.userId);
       if (!matchId) return;
@@ -619,7 +620,16 @@ export function setupSurvivalHandlers(io: SocketIOServer, socket: Socket): void 
       const round = match.currentRound;
       const question = match.questions[round - 1];
       if (!question || data.questionId !== question.id) return;
-      if (player.answers.length >= round || player.pendingRound === round) return;
+      // Si hay validación en vuelo para esta ronda, esperar
+      if (player.pendingRound === round) return;
+
+      // Si ya respondió, permitir cambio solo si la ronda aún no se resuelve
+      if (player.answers.length >= round) {
+        if (match.resolvingRound === round) return;
+        if (getActivePlayers(match).every((p) => p.answers.length >= round)) return;
+        // Score en survival se computa en resolveRound, no incrementalmente — solo sacar la respuesta anterior
+        player.answers.splice(round - 1, 1);
+      }
 
       const lockKey = `${matchId}-${user.userId}-${round}`;
       if (processingAnswers.has(lockKey)) return;

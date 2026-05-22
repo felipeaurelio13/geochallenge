@@ -7,6 +7,8 @@ type RoundActionTrayProps = {
   canSubmit: boolean;
   isWaiting?: boolean;
   isSubmitting?: boolean;
+  /** When true, hides the confirm button (answer auto-submits on option click). */
+  autoSubmit?: boolean;
   submitLabel: string;
   nextLabel?: string;
   waitingLabel?: string;
@@ -31,6 +33,7 @@ export function RoundActionTray({
   canSubmit,
   isWaiting = false,
   isSubmitting = false,
+  autoSubmit = false,
   submitLabel,
   nextLabel,
   waitingLabel,
@@ -54,7 +57,7 @@ export function RoundActionTray({
       <div className={wrapperClassName}>
         {summarySlot}
 
-        {!showResult && !isWaiting && (
+        {!showResult && !isWaiting && !autoSubmit && (
           <div className="flex flex-1 flex-col justify-center gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
             <button
               type="button"

@@ -124,6 +124,7 @@ export function SurvivalPage() {
   const fillTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const searchTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const hasAnsweredRef = useRef(false);
+  const [hasSubmittedThisRound, setHasSubmittedThisRound] = useState(false);
 
   // ── Socket events ──────────────────────────────────────────────────────────
 
@@ -212,6 +213,7 @@ export function SurvivalPage() {
       setLifeGainedNotice(null);
       setMyLastAnswerCorrect(false);
       hasAnsweredRef.current = false;
+      setHasSubmittedThisRound(false);
       setPlayers(data.players);
     });
 
@@ -382,6 +384,7 @@ export function SurvivalPage() {
     setMapLocation({ lat, lng });
   }, []);
 
+  // MAP confirm and timer expiry — one-shot, guarded by hasAnsweredRef
   const handleSubmitAnswer = useCallback(() => {
     if (hasAnsweredRef.current || !matchId || !currentQuestion) return;
     const answer = currentQuestion.category === 'MAP' ? 'MAP_ANSWER' : (selectedAnswer ?? '');
@@ -389,6 +392,7 @@ export function SurvivalPage() {
     if (currentQuestion.category === 'MAP' && !mapLocation) return;
 
     hasAnsweredRef.current = true;
+    setHasSubmittedThisRound(true);
     socketService.socket?.emit('survival:answer', {
       questionId: currentQuestion.id,
       answer,
@@ -397,12 +401,24 @@ export function SurvivalPage() {
     });
   }, [matchId, currentQuestion, selectedAnswer, mapLocation, timeRemaining]);
 
+  // Option selection: auto-submits for non-MAP, re-submission allowed while round is open
   const handleOptionSelect = useCallback(
     (option: string) => {
-      if (hasAnsweredRef.current || showResult) return;
+      if (showResult || status === 'spectating') return;
       setSelectedAnswer(option);
+      if (currentQuestion?.category !== 'MAP' && option !== selectedAnswer) {
+        if (!matchId || !currentQuestion) return;
+        hasAnsweredRef.current = true;
+        setHasSubmittedThisRound(true);
+        socketService.socket?.emit('survival:answer', {
+          questionId: currentQuestion.id,
+          answer: option,
+          timeRemaining,
+          coordinates: undefined,
+        });
+      }
     },
-    [showResult]
+    [showResult, status, currentQuestion, matchId, selectedAnswer, timeRemaining]
   );
 
   // ── Render helpers ─────────────────────────────────────────────────────────
@@ -635,7 +651,6 @@ export function SurvivalPage() {
 
   const isSpectating = status === 'spectating';
   const isMapQuestion = currentQuestion.category === 'MAP';
-  const hasSelection = isMapQuestion ? Boolean(mapLocation) : Boolean(selectedAnswer);
   const difficultyLabel = difficulty ? t(`survival.difficulty.${difficulty.toLowerCase()}`) : '';
 
   return (
@@ -731,11 +746,12 @@ export function SurvivalPage() {
         <RoundActionTray
           mode="duel"
           showResult={showResult}
-          canSubmit={hasSelection && !hasAnsweredRef.current}
-          isWaiting={false}
+          canSubmit={isMapQuestion ? Boolean(mapLocation) : false}
+          isWaiting={hasSubmittedThisRound}
+          autoSubmit={!isMapQuestion}
           submitLabel={t('game.submit', 'Confirmar')}
           selectionAssistiveText={t('game.selectionReadyShortHint', '')}
-          waitingLabel=""
+          waitingLabel={t('survival.waiting')}
           resultLabel={myLastAnswerCorrect ? t('game.correct', '✓ Correcto') : t('game.incorrect', '✗ Incorrecto')}
           resultAttribution={
             currentQuestion.category === 'MONUMENT'
