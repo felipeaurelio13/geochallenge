@@ -1,23 +1,21 @@
 import { useCallback, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents, Circle, useMap } from 'react-leaflet';
-import { Icon, latLngBounds } from 'leaflet';
+import { DivIcon, latLngBounds } from 'leaflet';
 import { useTranslation } from 'react-i18next';
 import 'leaflet/dist/leaflet.css';
 
-const defaultIcon = new Icon({
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-});
+function pinSvg(color: string): string {
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 41" width="25" height="41"><path fill="${color}" stroke="white" stroke-width="1.5" d="M12.5 1C7.25 1 3 5.35 3 10.7C3 18.2 12.5 40 12.5 40C12.5 40 22 18.2 22 10.7C22 5.35 17.75 1 12.5 1Z"/><circle cx="12.5" cy="10.5" r="4" fill="white"/></svg>`;
+}
 
-const correctIcon = new Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-});
+const ICON_BASE = {
+  className: '',
+  iconSize: [25, 41] as [number, number],
+  iconAnchor: [12, 41] as [number, number],
+};
+
+const defaultIcon = new DivIcon({ ...ICON_BASE, html: pinSvg('#2563EB') });
+const correctIcon = new DivIcon({ ...ICON_BASE, html: pinSvg('#16a34a') });
 
 interface MapInteractiveProps {
   onLocationSelect: (lat: number, lng: number) => void;

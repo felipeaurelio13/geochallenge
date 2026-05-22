@@ -8,6 +8,19 @@
 	@backend path /api/* /socket.io/* /health /ping
 	reverse_proxy @backend backend:3001
 
+	# Assets de Vite: nombres con hash de contenido → inmutables por 1 año.
+	header /assets/* Cache-Control "public, max-age=31536000, immutable"
+
+	# Assets estáticos raíz (iconos PWA, fuentes): 1 día sin hash en nombre.
+	@static_root {
+		path *.png *.svg *.ico *.woff2 *.webmanifest
+		not path /index.html
+	}
+	header @static_root Cache-Control "public, max-age=86400"
+
+	# SPA entry point: revalidar siempre para que el SW actualizado llegue.
+	header /index.html Cache-Control "no-cache"
+
 	# Resto: SPA estática (build de Vite). try_files cae a index.html
 	# para que el routing del lado del cliente funcione en refresh/deep-link.
 	root * /srv

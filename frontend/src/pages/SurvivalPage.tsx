@@ -195,6 +195,10 @@ export function SurvivalPage() {
       timeLimit: number;
       players: SurvivalPlayerInfo[];
     }) => {
+      if (data.question?.imageUrl) {
+        const img = new window.Image();
+        img.src = data.question.imageUrl;
+      }
       setStatus('playing');
       setCurrentRound(data.round);
       setCurrentQuestion(data.question);

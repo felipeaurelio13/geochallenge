@@ -307,6 +307,14 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     setState((prev) => ({ ...prev, timeRemaining: Math.max(0, time) }));
   }, []);
 
+  useEffect(() => {
+    const nextQ = state.questions[state.currentIndex + 1];
+    if (nextQ?.imageUrl) {
+      const img = new window.Image();
+      img.src = nextQ.imageUrl;
+    }
+  }, [state.currentIndex, state.questions]);
+
   return (
     <GameContext.Provider
       value={{
