@@ -40,9 +40,9 @@ function parseSurvivalCategory(value: string | null): Category {
 }
 
 function getDifficultyColor(diff: Difficulty | null): string {
-  if (diff === 'EASY') return 'text-green-400 border-green-700 bg-green-950/40';
-  if (diff === 'MEDIUM') return 'text-yellow-400 border-yellow-700 bg-yellow-950/40';
-  if (diff === 'HARD') return 'text-red-400 border-red-700 bg-red-950/40';
+  if (diff === 'EASY') return 'text-green-400 border-green-700 bg-green-950';
+  if (diff === 'MEDIUM') return 'text-yellow-400 border-yellow-700 bg-yellow-950';
+  if (diff === 'HARD') return 'text-red-400 border-red-700 bg-red-950';
   return 'text-gray-400 border-gray-700 bg-gray-900';
 }
 
@@ -407,7 +407,7 @@ export function SurvivalPage() {
     if (rank === 1) return <span className="text-2xl">🏆</span>;
     if (rank === 2) return <span className="text-2xl">🥈</span>;
     if (rank === 3) return <span className="text-2xl">🥉</span>;
-    return <span className="text-lg text-gray-500">#{rank}</span>;
+    return <span className="text-lg text-app-subtle">#{rank}</span>;
   }
 
   const backButton = (
@@ -427,11 +427,11 @@ export function SurvivalPage() {
         <div className="w-full max-w-sm flex flex-col items-center gap-5 text-center">
           <div className="text-6xl">☠️</div>
           <div>
-            <h1 className="text-2xl font-bold text-white">{t('survival.title')}</h1>
-            <p className="mt-1 text-sm text-gray-400">{t('survival.subtitle')}</p>
+            <h1 className="text-2xl font-bold text-app-text">{t('survival.title')}</h1>
+            <p className="mt-1 text-sm text-app-secondary">{t('survival.subtitle')}</p>
           </div>
 
-          <div className="w-full rounded-2xl border border-gray-800 bg-gray-900/60 p-4 text-left text-sm text-gray-300 space-y-2">
+          <div className="w-full rounded-2xl border border-app-border bg-app-surface p-4 text-left text-sm text-app-text space-y-2">
             {[
               ['❤️', t('survival.ruleOneLive')],
               ['📈', t('survival.ruleDifficulty')],
@@ -448,16 +448,16 @@ export function SurvivalPage() {
 
           {notice && <p className="text-sm text-amber-400">{notice}</p>}
 
-          <div className="flex items-center gap-2 text-xs text-gray-500">
-            <span className="rounded border border-green-800 bg-green-950/40 px-2 py-0.5 text-green-400">
+          <div className="flex items-center gap-2 text-xs text-app-subtle">
+            <span className="rounded border border-green-800 bg-green-950 px-2 py-0.5 text-green-400">
               {t('survival.difficulty.easy')} 15s
             </span>
-            <span className="text-gray-600">→</span>
-            <span className="rounded border border-yellow-800 bg-yellow-950/40 px-2 py-0.5 text-yellow-400">
+            <span className="text-app-subtle">→</span>
+            <span className="rounded border border-yellow-800 bg-yellow-950 px-2 py-0.5 text-yellow-400">
               {t('survival.difficulty.medium')} 12s
             </span>
-            <span className="text-gray-600">→</span>
-            <span className="rounded border border-red-800 bg-red-950/40 px-2 py-0.5 text-red-400">
+            <span className="text-app-subtle">→</span>
+            <span className="rounded border border-red-800 bg-red-950 px-2 py-0.5 text-red-400">
               {t('survival.difficulty.hard')} 9s
             </span>
           </div>
@@ -467,7 +467,7 @@ export function SurvivalPage() {
           </Button>
           <button
             onClick={() => navigate(toAppPath('/menu'))}
-            className="text-xs text-gray-500 hover:text-gray-300"
+            className="text-xs text-app-subtle hover:text-app-text"
           >
             ← {t('survival.backToMenu')}
           </button>
@@ -484,8 +484,8 @@ export function SurvivalPage() {
           <span className="text-5xl relative">☠️</span>
         </div>
         <div>
-          <h2 className="text-xl font-bold text-white">{t('survival.searching')}</h2>
-          <p className="mt-1 text-sm text-gray-400 tabular-nums">{searchTime}s</p>
+          <h2 className="text-xl font-bold text-app-text">{t('survival.searching')}</h2>
+          <p className="mt-1 text-sm text-app-secondary tabular-nums">{searchTime}s</p>
         </div>
         {searchTimedOut && (
           <p className="text-sm text-amber-400">{t('survival.notEnoughPlayers')}</p>
@@ -501,20 +501,20 @@ export function SurvivalPage() {
     return (
       <div className="h-full min-h-0 bg-[var(--color-bg-app)] flex flex-col items-center justify-center px-4 gap-5 text-center">
         <div>
-          <h2 className="text-xl font-bold text-white">{t('survival.roomFound')}</h2>
-          <p className="text-sm text-gray-400">
+          <h2 className="text-xl font-bold text-app-text">{t('survival.roomFound')}</h2>
+          <p className="text-sm text-app-secondary">
             {t('survival.waitingForPlayers', { current: players.length, max: maxPlayers })}
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="h-1.5 w-28 overflow-hidden rounded-full bg-gray-800">
+          <div className="h-1.5 w-28 overflow-hidden rounded-full bg-app-border">
             <div
               className="h-full rounded-full bg-primary transition-all duration-1000"
               style={{ width: `${Math.max(0, ((15 - fillTimeRemaining) / 15) * 100)}%` }}
             />
           </div>
-          <span className="text-sm tabular-nums text-gray-400">{fillTimeRemaining}s</span>
+          <span className="text-sm tabular-nums text-app-secondary">{fillTimeRemaining}s</span>
         </div>
 
         <div className="flex flex-wrap justify-center gap-3">
@@ -522,11 +522,11 @@ export function SurvivalPage() {
             <div
               key={p.userId}
               className={`flex flex-col items-center gap-1 rounded-xl border px-4 py-3 ${
-                p.userId === user?.id ? 'border-primary/60 bg-primary/10' : 'border-gray-700 bg-gray-900/60'
+                p.userId === user?.id ? 'border-primary/60 bg-primary/10' : 'border-app-border bg-app-surface'
               }`}
             >
               <span className="text-2xl">👤</span>
-              <span className="text-xs text-white">{p.username}</span>
+              <span className="text-xs text-app-text">{p.username}</span>
               {p.userId === user?.id && (
                 <span className="text-xs text-primary">{t('survival.you')}</span>
               )}
@@ -535,10 +535,10 @@ export function SurvivalPage() {
           {Array.from({ length: maxPlayers - players.length }).map((_, i) => (
             <div
               key={`empty-${i}`}
-              className="flex flex-col items-center gap-1 rounded-xl border border-dashed border-gray-700 px-4 py-3 opacity-40"
+              className="flex flex-col items-center gap-1 rounded-xl border border-dashed border-app-border px-4 py-3 opacity-40"
             >
               <span className="text-2xl">❓</span>
-              <span className="text-xs text-gray-500">{t('survival.waiting')}</span>
+              <span className="text-xs text-app-subtle">{t('survival.waiting')}</span>
             </div>
           ))}
         </div>
@@ -553,8 +553,8 @@ export function SurvivalPage() {
   if (status === 'countdown') {
     return (
       <div className="h-full min-h-0 bg-[var(--color-bg-app)] flex flex-col items-center justify-center gap-4 text-center">
-        <h2 className="text-base text-gray-400">{t('survival.gameStarting')}</h2>
-        <div className="text-9xl font-black text-white tabular-nums">{countdown}</div>
+        <h2 className="text-base text-app-secondary">{t('survival.gameStarting')}</h2>
+        <div className="text-9xl font-black text-app-text tabular-nums">{countdown}</div>
       </div>
     );
   }
@@ -568,10 +568,10 @@ export function SurvivalPage() {
         <div className="w-full max-w-sm flex flex-col items-center gap-5 text-center">
           <div className="text-5xl">{isWinner ? '🏆' : '💀'}</div>
           <div>
-            <h2 className="text-2xl font-bold text-white">
+            <h2 className="text-2xl font-bold text-app-text">
               {isWinner ? t('survival.youWon') : t('survival.gameOver')}
             </h2>
-            <p className="mt-1 text-sm text-gray-400">
+            <p className="mt-1 text-sm text-app-secondary">
               {t('survival.survivedRounds', { rounds: totalRounds })}
             </p>
           </div>
@@ -583,25 +583,25 @@ export function SurvivalPage() {
                 className={`flex items-center gap-3 rounded-xl border px-4 py-3 ${
                   r.userId === user?.id
                     ? 'border-primary/50 bg-primary/10'
-                    : 'border-gray-800 bg-gray-900/60'
+                    : 'border-app-border bg-app-surface'
                 }`}
               >
                 <div className="w-8 flex justify-center">{renderRankBadge(r.finalRank)}</div>
                 <div className="flex-1 text-left min-w-0">
-                  <div className="text-sm font-semibold text-white truncate">
+                  <div className="text-sm font-semibold text-app-text truncate">
                     {r.username}
                     {r.userId === user?.id && (
                       <span className="ml-1 text-xs text-primary">{t('survival.you')}</span>
                     )}
                   </div>
-                  <div className="text-xs text-gray-400">
+                  <div className="text-xs text-app-secondary">
                     {r.correctCount} {t('survival.correct')}
                     {r.eliminatedRound != null && (
                       <> · {t('survival.eliminatedRound', { round: r.eliminatedRound })}</>
                     )}
                   </div>
                 </div>
-                <div className="text-sm font-bold text-white shrink-0">{r.score} pts</div>
+                <div className="text-sm font-bold text-app-text shrink-0">{r.score} pts</div>
               </div>
             ))}
           </div>
