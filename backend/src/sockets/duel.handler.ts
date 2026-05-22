@@ -536,6 +536,7 @@ async function createDuel(
     timePerQuestion: config.game.timePerQuestion,
     category: category || 'MIXED',
     mechanics: getMechanicsConfigForMode('duel'),
+    imageUrls: questions.map((q) => q.imageUrl).filter((url): url is string => !!url),
   });
 
   // Enviar info del oponente a cada jugador

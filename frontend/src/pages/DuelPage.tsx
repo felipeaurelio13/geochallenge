@@ -17,7 +17,7 @@ import { Button } from '../components/atoms/Button';
 import { MonumentAttribution } from '../components/MonumentAttribution';
 import { Category, GameFilters, MechanicUsage, Question } from '../types';
 import { GAME_CONSTANTS } from '../constants/game';
-import { useHaptics } from '../hooks';
+import { useHaptics, useImagePreloader } from '../hooks';
 import { areMechanicsV2Enabled } from '../config/featureFlags';
 import { trackUxEvent } from '../utils/uxTelemetry';
 
@@ -83,6 +83,7 @@ export function DuelPage() {
     streakShield: 0,
   });
   const [hasSubmittedThisQuestion, setHasSubmittedThisQuestion] = useState(false);
+  const [duelImageUrls, setDuelImageUrls] = useState<string[]>([]);
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scoreRef = useRef(0);
   const opponentRef = useRef<{ id: string; username: string } | null>(null);
@@ -92,6 +93,7 @@ export function DuelPage() {
   const prefersReducedMotion = useUiStore((s) => s.prefersReducedMotion);
   const duelCategory = parseDuelCategory(searchParams.get('category'));
   const hasSelection = Boolean(selectedAnswer || mapLocation);
+  useImagePreloader(duelImageUrls, 0); // skip=0: aún no hay ninguna imagen mostrándose
 
   const duelFilters = useMemo<GameFilters>(() => {
     const f: GameFilters = {};
@@ -174,6 +176,9 @@ export function DuelPage() {
           streakShield: 0,
         });
       }
+      if (data.imageUrls?.length) {
+        setDuelImageUrls(data.imageUrls);
+      }
       setDuelState('matched');
       clearInterval(searchTimer);
       if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
@@ -186,10 +191,6 @@ export function DuelPage() {
     };
 
     const handleQuestion = (data: any) => {
-      if (data.question?.imageUrl) {
-        const img = new window.Image();
-        img.src = data.question.imageUrl;
-      }
       setCurrentQuestion(data.question);
       setQuestionNumber((data.questionIndex ?? 0) + 1);
       setTotalQuestions(data.totalQuestions);

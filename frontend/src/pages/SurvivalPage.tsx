@@ -14,7 +14,7 @@ import {
   SurvivalPlayerResult,
   SurvivalRanking,
 } from '../types';
-import { useHaptics } from '../hooks';
+import { useHaptics, useImagePreloader } from '../hooks';
 import { toAppPath } from '../utils/routing';
 
 const MapInteractive = lazy(() =>
@@ -120,6 +120,8 @@ export function SurvivalPage() {
   const [notice, setNotice] = useState<string | null>(null);
   const [lifeGainedNotice, setLifeGainedNotice] = useState<string | null>(null);
   const [myLastAnswerCorrect, setMyLastAnswerCorrect] = useState(false);
+  const [survivalImageUrls, setSurvivalImageUrls] = useState<string[]>([]);
+  useImagePreloader(survivalImageUrls, 0); // skip=0: aún no hay ninguna imagen mostrándose
 
   const fillTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const searchTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -145,11 +147,15 @@ export function SurvivalPage() {
       fillTimeRemaining: number;
       maxPlayers: number;
       players: SurvivalPlayerInfo[];
+      imageUrls?: string[];
     }) => {
       setMatchId(data.matchId);
       setMaxPlayers(data.maxPlayers);
       setFillTimeRemaining(data.fillTimeRemaining);
       setPlayers(data.players);
+      if (data.imageUrls?.length) {
+        setSurvivalImageUrls(data.imageUrls);
+      }
       setStatus('filling');
 
       if (fillTimerRef.current) clearInterval(fillTimerRef.current);
@@ -196,10 +202,6 @@ export function SurvivalPage() {
       timeLimit: number;
       players: SurvivalPlayerInfo[];
     }) => {
-      if (data.question?.imageUrl) {
-        const img = new window.Image();
-        img.src = data.question.imageUrl;
-      }
       setStatus('playing');
       setCurrentRound(data.round);
       setCurrentQuestion(data.question);

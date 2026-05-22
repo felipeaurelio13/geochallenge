@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { api } from '../services/api';
 import type {
   GameState,
@@ -13,6 +13,7 @@ import type {
 } from '../types';
 import { hasActiveFilters } from '../types';
 import { cacheQuestions, getCachedQuestions, enqueuePendingSession } from '../hooks/useOfflineQuestions';
+import { useImagePreloader } from '../hooks/useImagePreloader';
 
 interface GameContextType {
   state: GameState;
@@ -307,13 +308,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     setState((prev) => ({ ...prev, timeRemaining: Math.max(0, time) }));
   }, []);
 
-  useEffect(() => {
-    const nextQ = state.questions[state.currentIndex + 1];
-    if (nextQ?.imageUrl) {
-      const img = new window.Image();
-      img.src = nextQ.imageUrl;
-    }
-  }, [state.currentIndex, state.questions]);
+  const allImageUrls = useMemo(
+    () => state.questions.map((q) => q.imageUrl ?? ''),
+    [state.questions]
+  );
+  useImagePreloader(allImageUrls); // skip=1 default: Q1 ya carga via eager img tag
 
   return (
     <GameContext.Provider
