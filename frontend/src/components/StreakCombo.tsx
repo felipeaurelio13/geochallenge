@@ -35,7 +35,7 @@ export function StreakCombo({
     ? 'from-amber-400 to-orange-500 border-amber-300 text-amber-950'
     : isActive
       ? 'from-primary to-blue-500 border-primary/50 text-white'
-      : 'from-gray-700 to-gray-800 border-gray-600 text-gray-300';
+      : 'from-app-muted to-app-surface border-app-border text-app-subtle';
 
   return (
     <div

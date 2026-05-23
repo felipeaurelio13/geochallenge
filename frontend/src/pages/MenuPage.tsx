@@ -139,7 +139,7 @@ export function MenuPage() {
             <>
               <Link
                 to="/profile"
-                className="flex min-h-11 items-center gap-2 rounded-lg border border-gray-800 bg-gray-900 px-2.5 py-1.5 text-gray-200 transition-colors hover:border-gray-600 hover:text-white"
+                className="flex min-h-11 items-center gap-2 rounded-lg border border-app-border bg-app-surface px-2.5 py-1.5 text-app-secondary transition-colors hover:border-app-border hover:text-app-text"
               >
                 <UserAvatar username={user?.username || ''} size="xs" />
                 <span className="hidden max-w-20 truncate text-xs sm:inline sm:text-sm">
@@ -178,8 +178,8 @@ export function MenuPage() {
           onClick={() => setDrawerOpen(true)}
           className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
             filtersActive
-              ? 'border-primary/60 bg-primary/15 text-white'
-              : 'border-gray-700 bg-gray-900/80 text-gray-400 hover:border-gray-500 hover:text-gray-200'
+              ? 'border-primary/60 bg-primary/15 text-primary'
+              : 'border-app-border bg-app-surface/80 text-app-subtle hover:border-app-border hover:text-app-secondary'
           }`}
         >
           <span>🎚️</span>
@@ -189,7 +189,7 @@ export function MenuPage() {
         {filtersActive && (
           <button
             onClick={clearFilters}
-            className="rounded-full border border-gray-700 bg-gray-900/80 px-2 py-1.5 text-xs text-gray-400 hover:text-red-400"
+            className="rounded-full border border-app-border bg-app-surface/80 px-2 py-1.5 text-xs text-app-subtle hover:text-red-400"
             title={t('filters.clearAll')}
           >
             ✕
@@ -247,7 +247,7 @@ export function MenuPage() {
       {/* Daily Challenge Banner */}
       <Link
         to="/daily"
-        className="mt-4 flex items-center gap-4 rounded-2xl border border-cyan-700/60 bg-gradient-to-r from-cyan-950/60 to-emerald-950/60 px-4 py-3 text-white transition-all hover:border-cyan-500/60 hover:from-cyan-900/40 hover:to-emerald-900/40 pressable"
+        className="mt-4 flex items-center gap-4 rounded-2xl border border-cyan-600/40 bg-gradient-to-r from-cyan-900/20 to-emerald-900/20 px-4 py-3 text-app-text transition-all hover:border-cyan-500/60 hover:from-cyan-800/30 hover:to-emerald-800/30 pressable"
       >
         <span className="text-3xl leading-none">📅</span>
         <div className="flex-1 min-w-0">
@@ -264,22 +264,22 @@ export function MenuPage() {
         <div className="grid grid-cols-2 gap-2">
           <Link
             to="/rankings"
-            className="pressable flex items-center gap-3 rounded-xl border border-gray-700 bg-gray-900/80 px-4 py-3 text-gray-100 transition-colors hover:border-primary/60 hover:bg-primary/10"
+            className="pressable flex items-center gap-3 rounded-xl border border-app-border bg-app-surface/80 px-4 py-3 text-app-secondary transition-colors hover:border-primary/60 hover:bg-primary/10"
           >
             <span className="text-2xl leading-none">🏆</span>
             <div className="min-w-0 flex-1">
-              <div className="text-sm font-semibold text-white">{t('menu.rankings')}</div>
-              <div className="truncate text-xs text-gray-400">{t('menu.rankingsDesc')}</div>
+              <div className="text-sm font-semibold text-app-text">{t('menu.rankings')}</div>
+              <div className="truncate text-xs text-app-subtle">{t('menu.rankingsDesc')}</div>
             </div>
           </Link>
           <Link
             to="/profile"
-            className="pressable flex items-center gap-3 rounded-xl border border-gray-700 bg-gray-900/80 px-4 py-3 text-gray-100 transition-colors hover:border-primary/60 hover:bg-primary/10"
+            className="pressable flex items-center gap-3 rounded-xl border border-app-border bg-app-surface/80 px-4 py-3 text-app-secondary transition-colors hover:border-primary/60 hover:bg-primary/10"
           >
             <span className="text-2xl leading-none">📊</span>
             <div className="min-w-0 flex-1">
-              <div className="text-sm font-semibold text-white">{t('menu.yourStats')}</div>
-              <div className="truncate text-xs text-gray-400">{t('menu.yourStatsDesc')}</div>
+              <div className="text-sm font-semibold text-app-text">{t('menu.yourStats')}</div>
+              <div className="truncate text-xs text-app-subtle">{t('menu.yourStatsDesc')}</div>
             </div>
           </Link>
         </div>

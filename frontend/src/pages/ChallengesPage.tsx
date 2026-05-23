@@ -211,7 +211,7 @@ export function ChallengesPage() {
       <main className="max-w-4xl mx-auto px-4 py-4 space-y-4">
         {fetchError && <Alert type="error">{fetchError}</Alert>}
         <section className="rounded-xl border border-primary/30 bg-primary/10 p-4">
-          <p className="text-sm font-semibold text-white">{t('challenges.createMultiplayerTitle')}</p>
+          <p className="text-sm font-semibold text-primary">{t('challenges.createMultiplayerTitle')}</p>
           <p className="mt-1 text-xs text-[var(--color-text-secondary)] sm:text-sm">{t('challenges.createMultiplayerHint')}</p>
           <Button
             onClick={() => setShowCreateModal(true)}
@@ -244,7 +244,7 @@ export function ChallengesPage() {
                 <article key={challenge.id} className="bg-[var(--color-surface)] rounded-xl p-4 border border-[var(--color-border)]">
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <h3 className="font-semibold text-white">{creatorLabel}</h3>
+                      <h3 className="font-semibold text-app-text">{creatorLabel}</h3>
                       <p className="text-xs text-[var(--color-text-muted)] mt-1">
                         {challenge.categories.map(getCategoryLabel).join(', ')} · {challenge.participantsCount}/{challenge.maxPlayers} · {challenge.answerTimeSeconds}s
                       </p>
@@ -306,7 +306,7 @@ export function ChallengesPage() {
                     key={category}
                     type="button"
                     onClick={() => toggleCategory(category)}
-                    className={`px-2 py-2 rounded-lg text-sm border ${createCategories.includes(category) ? 'bg-primary/20 border-primary text-white' : 'border-[var(--color-border)] text-[var(--color-text-secondary)]'}`}
+                    className={`px-2 py-2 rounded-lg text-sm border ${createCategories.includes(category) ? 'bg-primary/20 border-primary text-primary' : 'border-[var(--color-border)] text-[var(--color-text-secondary)]'}`}
                   >
                     {getCategoryLabel(category)}
                   </button>

@@ -3,7 +3,7 @@ const colorClasses = {
   green: 'text-green-400',
   red: 'text-red-400',
   yellow: 'text-yellow-400',
-  white: 'text-white',
+  white: 'text-app-text',
 } as const;
 
 interface StatCardProps {

@@ -24,12 +24,12 @@ export function InstallPromptBanner() {
       aria-label={t('install.title', 'Instala la app')}
       className="fixed inset-x-0 bottom-0 z-40 px-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pointer-events-none"
     >
-      <div className="pointer-events-auto mx-auto max-w-md rounded-2xl border border-gray-700 bg-gray-900/95 p-3 shadow-2xl shadow-black/50 backdrop-blur">
+      <div className="pointer-events-auto mx-auto max-w-md rounded-2xl border border-app-border bg-app-surface/95 p-3 shadow-2xl shadow-black/50 backdrop-blur">
         <div className="flex items-start gap-3">
           <div className="text-2xl" aria-hidden="true">📲</div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-white">{t('install.title', 'Instala GeoChallenge')}</p>
-            <p className="mt-0.5 text-xs text-gray-300">
+            <p className="text-sm font-semibold text-app-text">{t('install.title', 'Instala GeoChallenge')}</p>
+            <p className="mt-0.5 text-xs text-app-secondary">
               {isIOS && !hasNativePrompt
                 ? t('install.iosHint', 'Toca Compartir y luego "Añadir a pantalla de inicio".')
                 : t('install.hint', 'Juega más rápido. Se abre como app, sin barra del navegador.')}
@@ -48,7 +48,7 @@ export function InstallPromptBanner() {
               <button
                 type="button"
                 onClick={dismiss}
-                className="pressable min-h-10 rounded-lg border border-gray-700 px-3 py-2 text-sm text-gray-300"
+                className="pressable min-h-10 rounded-lg border border-app-border px-3 py-2 text-sm text-app-secondary"
               >
                 {t('install.dismiss', 'Ahora no')}
               </button>

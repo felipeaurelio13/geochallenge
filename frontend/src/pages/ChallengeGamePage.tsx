@@ -267,7 +267,7 @@ export function ChallengeGamePage() {
           <div className="mx-auto flex w-full max-w-4xl items-center justify-between gap-3">
             <button
               onClick={() => navigate('/challenges')}
-              className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm font-medium text-[var(--color-text-primary)] transition-colors hover:border-primary/60 hover:text-white"
+              className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm font-medium text-[var(--color-text-primary)] transition-colors hover:border-primary/60 hover:text-app-text"
             >
               ← {t('game.exit')}
             </button>
@@ -291,7 +291,7 @@ export function ChallengeGamePage() {
         </header>
       }
       progress={
-        <div className="bg-gray-800/65 px-3 py-1.5 sm:px-4">
+        <div className="bg-app-muted/65 px-3 py-1.5 sm:px-4">
           <div className="max-w-4xl mx-auto overflow-x-hidden">
             <ProgressBar
               current={currentIndex + 1}

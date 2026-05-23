@@ -261,7 +261,7 @@ export function RankingsPage() {
                 aria-selected={isActive}
                 onClick={() => setScope(s)}
                 className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
-                  isActive ? 'bg-primary text-white shadow' : 'text-[var(--color-text-secondary)] hover:text-white'
+                  isActive ? 'bg-primary text-white shadow' : 'text-[var(--color-text-secondary)] hover:text-app-text'
                 }`}
               >
                 {t(`rankings.${s}`)}
@@ -282,7 +282,7 @@ export function RankingsPage() {
               </div>
               <div>
                 <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wide">{t('rankings.yourPosition')}</p>
-                <p className="text-white font-semibold">{user?.username}</p>
+                <p className="text-app-text font-semibold">{user?.username}</p>
               </div>
             </div>
             <div className="text-right">
@@ -308,7 +308,7 @@ export function RankingsPage() {
                     className="flex items-center justify-between rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 py-2"
                   >
                     <span className="text-sm text-[var(--color-text-secondary)]">#{entry.rank} {entry.username}</span>
-                    <span className="text-sm font-semibold text-white">{entry.score.toLocaleString()} pts</span>
+                    <span className="text-sm font-semibold text-app-text">{entry.score.toLocaleString()} pts</span>
                   </li>
                 ))}
               </ul>
@@ -330,7 +330,7 @@ export function RankingsPage() {
             <button
               onClick={() => setSearch('')}
               aria-label={t('common.clear', { defaultValue: 'Limpiar búsqueda' })}
-              className="absolute inset-y-0 right-0 flex min-w-[44px] items-center justify-center rounded-r-xl text-[var(--color-text-muted)] transition-colors hover:text-white"
+              className="absolute inset-y-0 right-0 flex min-w-[44px] items-center justify-center rounded-r-xl text-[var(--color-text-muted)] transition-colors hover:text-app-text"
             >
               ✕
             </button>
@@ -398,13 +398,13 @@ export function RankingsPage() {
                           </span>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between gap-2 mb-1">
-                              <span className="font-semibold text-white truncate">
+                              <span className="font-semibold text-app-text truncate">
                                 {entry.username}
                                 {entry.isCurrentUser && (
                                   <span className="ml-2 text-xs font-normal text-primary">({t('rankings.you')})</span>
                                 )}
                               </span>
-                              <span className="text-sm font-bold text-white whitespace-nowrap">
+                              <span className="text-sm font-bold text-app-text whitespace-nowrap">
                                 {entry.score.toLocaleString()} <span className="text-xs text-[var(--color-text-muted)] font-normal">pts</span>
                               </span>
                             </div>
@@ -430,13 +430,13 @@ export function RankingsPage() {
                             <span className="text-2xl font-bold min-w-[2.5rem] text-center">{getRankLabel(entry.rank)}</span>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between gap-2 mb-1">
-                                <span className="font-semibold text-white truncate">
+                                <span className="font-semibold text-app-text truncate">
                                   {entry.username}
                                   {entry.isCurrentUser && (
                                     <span className="ml-2 text-xs font-normal text-primary">({t('rankings.you')})</span>
                                   )}
                                 </span>
-                                <span className="text-sm font-bold text-white whitespace-nowrap">
+                                <span className="text-sm font-bold text-app-text whitespace-nowrap">
                                   {entry.score.toLocaleString()} <span className="text-xs text-[var(--color-text-muted)] font-normal">pts</span>
                                 </span>
                               </div>
@@ -466,7 +466,7 @@ export function RankingsPage() {
                     <div className="text-xs text-[var(--color-text-muted)] mt-1">{t('rankings.topScore')}</div>
                   </div>
                   <div className="px-4 py-4 text-center">
-                    <div className="text-2xl font-black text-white">
+                    <div className="text-2xl font-black text-app-text">
                       {typeof data?.avgScore === 'number' && Number.isFinite(data.avgScore)
                         ? Math.round(data.avgScore).toLocaleString()
                         : '—'}
@@ -477,7 +477,7 @@ export function RankingsPage() {
                 {isSearching && (
                   <div className="px-5 py-3 border-t border-[var(--color-border)] bg-[var(--color-surface-muted)]">
                     <p className="text-xs text-[var(--color-text-muted)]">
-                      {t('rankings.filteredResults')}: <span className="font-semibold text-white">{filteredLeaderboard.length}</span>
+                      {t('rankings.filteredResults')}: <span className="font-semibold text-app-text">{filteredLeaderboard.length}</span>
                     </p>
                   </div>
                 )}

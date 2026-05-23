@@ -119,7 +119,7 @@ export function DailyChallengePage() {
   if (pageState === 'error') {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-4 bg-[var(--color-bg-app)] p-6 text-center">
-        <p className="text-white">{t('error.unexpected')}</p>
+        <p className="text-app-text">{t('error.unexpected')}</p>
         <Button onClick={() => navigate('/menu')} variant="secondary">{t('common.backToMenu')}</Button>
       </div>
     );
@@ -130,10 +130,10 @@ export function DailyChallengePage() {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-6 bg-[var(--color-bg-app)] px-6 py-8 text-center">
         <div className="text-6xl">📅</div>
-        <h1 className="text-2xl font-bold text-white">{t('daily.alreadyPlayed', 'Ya jugaste hoy')}</h1>
+        <h1 className="text-2xl font-bold text-app-text">{t('daily.alreadyPlayed', 'Ya jugaste hoy')}</h1>
         <p className="text-[var(--color-text-secondary)]">{t('daily.comeBackTomorrow', 'Vuelve mañana para el siguiente reto')}</p>
         <div className="w-full max-w-sm rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
-          <div className="text-4xl font-black text-white">{previousResult.correctCount}/{previousResult.totalQuestions}</div>
+          <div className="text-4xl font-black text-app-text">{previousResult.correctCount}/{previousResult.totalQuestions}</div>
           <div className="mt-1 text-[var(--color-text-secondary)]">{pct}% {t('results.accuracy')}</div>
           {previousResult.dailyStreak && previousResult.dailyStreak > 1 && (
             <div className="mt-3 text-sm text-cyan-400">🔥 {t('daily.streak', 'Racha')}: {previousResult.dailyStreak} {t('daily.days', 'días')}</div>
@@ -155,10 +155,10 @@ export function DailyChallengePage() {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-6 bg-[var(--color-bg-app)] px-6 py-8 text-center">
         <div className="text-6xl">{emoji}</div>
-        <h1 className="text-2xl font-bold text-white">{t('daily.complete', '¡Reto del día completado!')}</h1>
+        <h1 className="text-2xl font-bold text-app-text">{t('daily.complete', '¡Reto del día completado!')}</h1>
         {result && (
           <div className="w-full max-w-sm rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
-            <div className="text-5xl font-black text-white">{result.correctCount}/{result.totalQuestions}</div>
+            <div className="text-5xl font-black text-app-text">{result.correctCount}/{result.totalQuestions}</div>
             <div className="mt-1 text-[var(--color-text-secondary)]">{pct}% {t('results.accuracy')}</div>
             {result.dailyStreak && result.dailyStreak > 1 && (
               <div className="mt-3 flex items-center justify-center gap-2 text-sm text-cyan-400">
@@ -192,7 +192,7 @@ export function DailyChallengePage() {
       <header className="flex items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-surface-muted)] px-4 py-3">
         <button
           onClick={() => { if (window.confirm(t('game.confirmExit'))) navigate('/menu'); }}
-          className="text-xs text-[var(--color-text-secondary)] hover:text-white"
+          className="text-xs text-[var(--color-text-secondary)] hover:text-app-text"
         >
           ✕ {t('game.exit')}
         </button>
@@ -201,7 +201,7 @@ export function DailyChallengePage() {
           <div className="text-xs text-[var(--color-text-muted)]">{currentIndex + 1} / {questions.length}</div>
         </div>
         <div className="flex items-center gap-1 text-sm">
-          <span className={`font-mono font-bold ${timeLeft <= 5 ? 'text-red-400' : 'text-white'}`}>{timeLeft}s</span>
+          <span className={`font-mono font-bold ${timeLeft <= 5 ? 'text-red-400' : 'text-app-text'}`}>{timeLeft}s</span>
         </div>
       </header>
 
@@ -224,7 +224,7 @@ export function DailyChallengePage() {
             />
           </div>
         )}
-        <h2 className="mb-4 text-center text-lg font-semibold text-white">
+        <h2 className="mb-4 text-center text-lg font-semibold text-app-text">
           {currentQuestion.questionText}
         </h2>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">

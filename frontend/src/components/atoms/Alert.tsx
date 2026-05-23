@@ -1,10 +1,10 @@
 import React from 'react';
 
 const typeStyles = {
-  error: 'border-red-500/50 bg-red-900/40 text-red-200',
-  success: 'border-green-500/50 bg-green-900/40 text-green-200',
-  warning: 'border-yellow-500/50 bg-yellow-500/10 text-yellow-100',
-  info: 'border-sky-500/50 bg-sky-500/10 text-sky-100',
+  error: 'border-red-500/50 bg-red-500/10 text-[var(--color-error-500)]',
+  success: 'border-green-500/50 bg-green-500/10 text-[var(--color-success-600)]',
+  warning: 'border-yellow-500/50 bg-yellow-500/10 text-yellow-600',
+  info: 'border-sky-500/50 bg-sky-500/10 text-sky-600',
 } as const;
 
 interface AlertProps {

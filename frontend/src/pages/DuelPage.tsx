@@ -449,14 +449,14 @@ export function DuelPage() {
         {showRetryAction && (
           <button
             onClick={retryDuelFlow}
-            className="rounded-md bg-white/15 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/25"
+            className="rounded-md border border-app-border bg-app-muted px-3 py-1.5 text-xs font-semibold text-app-text hover:bg-app-surface"
           >
             {t('duel.retry')}
           </button>
         )}
         <button
           onClick={() => navigate('/menu')}
-          className="rounded-md bg-black/20 px-3 py-1.5 text-xs font-semibold text-white hover:bg-black/30"
+          className="rounded-md border border-app-border bg-app-muted px-3 py-1.5 text-xs font-semibold text-app-text hover:bg-app-surface"
         >
           {t('common.backToMenu')}
         </button>
@@ -690,7 +690,7 @@ export function DuelPage() {
         </header>
       }
       progress={
-        <div className="bg-gray-800/65 px-3 py-1.5 text-center sm:px-4">
+        <div className="bg-app-muted/65 px-3 py-1.5 text-center sm:px-4">
           <span className="text-[var(--color-text-secondary)] text-sm">
             {t('game.questionOf', { current: questionNumber, total: totalQuestions })}
           </span>

@@ -40,7 +40,7 @@ export function ChallengeResultsPage() {
   const accuracy = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
 
   return (
-    <div className="h-full min-h-0 bg-[var(--color-bg-app)] px-4 py-8 text-white">
+    <div className="h-full min-h-0 bg-[var(--color-bg-app)] px-4 py-8 text-app-text">
       <div className="mx-auto w-full max-w-md space-y-4">
         <header className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 text-center sm:p-6">
           <p className="text-xs uppercase tracking-wide text-primary">{t('challenges.challengeMode')}</p>

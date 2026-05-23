@@ -53,7 +53,7 @@ export function ProgressBar({ current, total, results, showCurrentResult = false
                   : status === 'incorrect'
                     ? 'border-red-400 bg-red-500 text-white'
                     : status === 'current'
-                      ? 'border-primary/70 bg-primary/25 text-white ring-1 ring-primary/50'
+                      ? 'border-primary/70 bg-primary/25 text-primary ring-1 ring-primary/50'
                       : 'border-[var(--color-border)] bg-[var(--color-surface-muted)] text-[var(--color-text-muted)]'
               }`}
               aria-current={status === 'current' ? 'step' : undefined}

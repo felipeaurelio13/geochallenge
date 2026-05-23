@@ -75,8 +75,8 @@ export function RoundActionTray({
         )}
 
         {isWaiting && (
-          <div className="w-full rounded-2xl border border-gray-700 bg-gray-800/95 p-2 text-center backdrop-blur-sm shadow-sm shadow-black/30">
-            <p className="text-sm text-gray-200">{waitingLabel}</p>
+          <div className="w-full rounded-2xl border border-app-border bg-app-surface/95 p-2 text-center backdrop-blur-sm shadow-sm shadow-black/30">
+            <p className="text-sm text-app-secondary">{waitingLabel}</p>
           </div>
         )}
 

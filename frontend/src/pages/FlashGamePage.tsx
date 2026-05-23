@@ -356,7 +356,7 @@ export function FlashGamePage() {
               <p className="text-xs font-semibold uppercase tracking-wide text-primary/80">
                 {t('flash.score')}
               </p>
-              <p className="mt-1 text-5xl font-black text-white">{score.toLocaleString()}</p>
+              <p className="mt-1 text-5xl font-black text-app-text">{score.toLocaleString()}</p>
             </div>
             <div className="mt-4 grid grid-cols-3 gap-3 text-sm">
               <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] p-3">
@@ -368,7 +368,7 @@ export function FlashGamePage() {
                 <div className="text-xs text-[var(--color-text-muted)]">{t('flash.correct')}</div>
               </div>
               <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] p-3">
-                <div className="text-2xl font-bold text-white">{accuracy}%</div>
+                <div className="text-2xl font-bold text-app-text">{accuracy}%</div>
                 <div className="text-xs text-[var(--color-text-muted)]">{t('flash.accuracy')}</div>
               </div>
             </div>
@@ -425,7 +425,7 @@ export function FlashGamePage() {
           <div
             className={`tabular-nums rounded-lg border px-3 py-2 text-sm font-bold transition-colors duration-300 ${
               progressPercent > 50
-                ? 'border-[var(--color-border)] bg-[var(--color-surface-muted)] text-white'
+                ? 'border-[var(--color-border)] bg-[var(--color-surface-muted)] text-app-text'
                 : progressPercent > 25
                   ? 'border-yellow-600/60 bg-yellow-950/30 text-yellow-300'
                   : `border-red-600/60 bg-red-950/30 text-red-300 ${!prefersReducedMotion ? 'animate-pulse' : ''}`
@@ -460,7 +460,7 @@ export function FlashGamePage() {
 
         <div className="flex items-center justify-between text-sm text-[var(--color-text-secondary)]">
           <span>
-            ⚡ <span className="tabular-nums font-bold text-white">{score}</span>
+            ⚡ <span className="tabular-nums font-bold text-app-text">{score}</span>
           </span>
           <span className="tabular-nums text-[var(--color-text-muted)]">#{answered + 1}</span>
         </div>

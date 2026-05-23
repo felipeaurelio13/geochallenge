@@ -131,14 +131,14 @@ export function ResultsPage() {
 
           <div className="mt-6 rounded-2xl border border-primary/35 bg-[var(--color-surface-muted)] p-5">
             <p className="text-sm font-medium uppercase tracking-wide text-primary/80">{t('game.score')}</p>
-            <div className="mt-1 text-5xl font-black text-white sm:text-6xl">{score.toLocaleString()}</div>
+            <div className="mt-1 text-5xl font-black text-app-text sm:text-6xl">{score.toLocaleString()}</div>
             <div className="mt-1 text-[var(--color-text-muted)]">{t('results.points')}</div>
           </div>
 
           <div className="mt-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] p-4 text-left">
             <div className="mb-2 flex items-center justify-between text-sm text-[var(--color-text-secondary)]">
               <span>{t('results.accuracy')}</span>
-              <span className="font-semibold text-white">{percentage}%</span>
+              <span className="font-semibold text-app-text">{percentage}%</span>
             </div>
             <div className="h-2.5 rounded-full bg-[var(--color-surface)] p-0.5" data-testid="results-accuracy-bar">
               <div
@@ -190,7 +190,7 @@ export function ResultsPage() {
             <div className="mt-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] p-4 text-left">
               <div className="mb-2 flex items-center justify-between text-sm text-[var(--color-text-secondary)]">
                 <span>{t('results.pointsBreakdownTitle')}</span>
-                {topPointsSource && <span className="font-semibold text-white">{topPointsSource.label}</span>}
+                {topPointsSource && <span className="font-semibold text-app-text">{topPointsSource.label}</span>}
               </div>
               <div className="space-y-2">
                 {pointsBreakdown.map((item) => (
@@ -198,7 +198,7 @@ export function ResultsPage() {
                     key={item.key}
                     className={`flex items-center justify-between rounded-lg border px-3 py-2 text-sm ${
                       topPointsSource?.key === item.key
-                        ? 'border-primary/50 bg-primary/10 text-white'
+                        ? 'border-primary/50 bg-primary/10 text-primary'
                         : 'border-[var(--color-border)] bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)]'
                     }`}
                   >
