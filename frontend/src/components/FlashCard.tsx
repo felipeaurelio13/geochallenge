@@ -19,6 +19,7 @@ const VISUAL_ALT: Record<string, string> = {
   FLAG: 'Bandera',
   SILHOUETTE: 'Silueta',
   MONUMENT: 'Monumento',
+  MOVIE_SCENE: 'Escena de película',
 };
 
 export function FlashCard({ question, onAnswer, disabled, disabledOptions = [], feedback, onImageError }: FlashCardProps) {
@@ -71,13 +72,13 @@ export function FlashCard({ question, onAnswer, disabled, disabledOptions = [], 
             src={imageUrl}
             alt={`${VISUAL_ALT[question.category] ?? 'Imagen'}`}
             className={`absolute inset-0 h-full w-full ${
-              question.category === 'MONUMENT' ? 'object-cover' : 'object-contain p-6'
+              (question.category === 'MONUMENT' || question.category === 'MOVIE_SCENE') ? 'object-cover' : 'object-contain p-6'
             }${question.category === 'SILHOUETTE' ? ' filter invert drop-shadow-[0_0_14px_rgba(148,163,184,0.45)]' : ''}`}
             draggable={false}
             onError={handleImageError}
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-6xl">{question.category === 'MONUMENT' ? '🗿' : '🌍'}</div>
+          <div className="flex h-full items-center justify-center text-6xl">{question.category === 'MONUMENT' ? '🗿' : question.category === 'MOVIE_SCENE' ? '🎬' : '🌍'}</div>
         )}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-3 text-center text-xs text-gray-200">
           {t('flash.swipeHint')}

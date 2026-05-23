@@ -30,7 +30,7 @@ interface QueuedPlayer {
   filters?: QuestionFilters;
 }
 
-const DUEL_CATEGORIES: Category[] = ['MAP', 'FLAG', 'CAPITAL', 'SILHOUETTE', 'MONUMENT', 'MIXED'];
+const DUEL_CATEGORIES: Category[] = ['MAP', 'FLAG', 'CAPITAL', 'SILHOUETTE', 'MONUMENT', 'MOVIE_SCENE', 'MIXED'];
 
 function isCompatibleCategory(categoryA: Category, categoryB: Category): boolean {
   return categoryA === categoryB;

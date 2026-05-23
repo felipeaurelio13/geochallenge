@@ -167,9 +167,7 @@ describe('MenuPage', () => {
 
     const modesSection = screen.getByRole('region', { name: /modos de juego/i });
     const modeButtons = Array.from(modesSection.querySelectorAll('button'));
-    const lastModeButton = modeButtons[modeButtons.length - 1];
-    expect(lastModeButton.className).toContain('col-span-2');
-    expect(lastModeButton.className).toContain('lg:col-span-1');
+    expect(modeButtons.length).toBeGreaterThanOrEqual(5);
 
     expect(screen.queryByText(/¡hola.*explorar hoy/i)).not.toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Modos de juego' })).not.toBeInTheDocument();

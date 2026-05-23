@@ -1,0 +1,38 @@
+import { readFileSync } from 'fs';
+import { join } from 'path';
+
+export type SceneDifficulty = 'EASY' | 'MEDIUM' | 'HARD';
+
+export interface SceneAttribution {
+  author: string;
+  license: string;
+  sourceUrl: string;
+}
+
+export interface MovieSceneRecord {
+  slug: string;
+  movie: { en: string; es: string };
+  country: string;
+  city: string;
+  continent: string;
+  latitude: number;
+  longitude: number;
+  imageUrl: string;
+  attribution: SceneAttribution;
+  difficulty: SceneDifficulty;
+}
+
+interface MovieSceneCatalogPayload {
+  _meta?: { version?: number };
+  scenes: MovieSceneRecord[];
+}
+
+const CATALOG_PATH = join(__dirname, '../../../data/movie-scenes.json');
+
+export function loadMovieSceneCatalog(): MovieSceneRecord[] {
+  const payload = JSON.parse(readFileSync(CATALOG_PATH, 'utf-8')) as MovieSceneCatalogPayload;
+  if (!Array.isArray(payload.scenes)) {
+    throw new Error('Formato inválido en data/movie-scenes.json (falta el array "scenes")');
+  }
+  return payload.scenes;
+}
