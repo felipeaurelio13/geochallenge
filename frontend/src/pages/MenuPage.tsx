@@ -235,32 +235,7 @@ export function MenuPage() {
       )}
 
 
-      {selectedCategory === 'MOVIE_SCENE' && (
-        <section className="mt-3 rounded-2xl border border-rose-500/35 bg-gradient-to-r from-rose-900/25 to-purple-900/20 px-4 py-3">
-          <div className="flex items-start gap-3">
-            <span className="text-2xl leading-none">🎬</span>
-            <div className="min-w-0 flex-1">
-              <h2 className="text-sm font-semibold text-rose-200">{t('menu.movieSceneModuleTitle')}</h2>
-              <p className="mt-1 text-xs text-rose-100/80">{t('menu.movieSceneModuleDesc')}</p>
-            </div>
-          </div>
-          <div className="mt-3 flex gap-2">
-            <button
-              onClick={() => go('/game/single', { category: 'MOVIE_SCENE' })}
-              className="rounded-lg border border-rose-400/40 bg-rose-500/20 px-3 py-1.5 text-xs font-semibold text-rose-100 transition-colors hover:bg-rose-500/30"
-            >
-              {t('menu.movieScenePlayNow')}
-            </button>
-            <button
-              onClick={() => go('/duel', { category: 'MOVIE_SCENE' })}
-              className="rounded-lg border border-rose-500/30 bg-black/20 px-3 py-1.5 text-xs font-semibold text-rose-100/90 transition-colors hover:bg-black/30"
-            >
-              {t('menu.movieSceneDuelCta')}
-            </button>
-          </div>
-        </section>
-      )}
-
+      
       <section className="mt-3" aria-label={t('menu.gameModes')}>
         <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 sm:gap-2">
           <GameModeCard

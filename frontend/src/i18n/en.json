@@ -92,11 +92,7 @@
     "flashBadge": "New · Mobile",
     "flashNoMap": "Flash mode does not support maps — pick another category",
     "survival": "Survival",
-    "survivalDesc": "1 life · progressive difficulty · last one standing wins",
-    "movieSceneModuleTitle": "Movie module: iconic scenes",
-    "movieSceneModuleDesc": "Guess the country or city where each iconic scene was filmed.",
-    "movieScenePlayNow": "Play now",
-    "movieSceneDuelCta": "Movie duel"
+    "survivalDesc": "1 life · progressive difficulty · last one standing wins"
   },
   "survival": {
     "title": "Survival",
