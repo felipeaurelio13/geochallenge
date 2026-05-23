@@ -61,7 +61,7 @@ export function ScoreDisplay({ score, previousScore = 0, showAnimation = true, l
       <div className="text-score-label uppercase tracking-wide text-[var(--color-text-muted)] mb-1">{t('game.score')}</div>
       <div
         className={`text-2xl sm:text-3xl font-bold transition-transform duration-200 ${
-          isAnimating ? 'scale-110 text-primary' : 'text-white'
+          isAnimating ? 'scale-110 text-primary' : 'text-app-text'
         }`}
       >
         {displayScore.toLocaleString()}

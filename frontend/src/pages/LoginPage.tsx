@@ -75,7 +75,7 @@ export function LoginPage() {
       title={t('auth.login')}
       footer={
         <div className="mt-4 text-center">
-          <Link to="/" className="text-sm text-gray-400 transition-colors hover:text-white">
+          <Link to="/" className="text-sm text-app-subtle transition-colors hover:text-app-text">
             ← {t('common.back')}
           </Link>
         </div>

@@ -65,7 +65,7 @@ function RouteErrorFallback() {
     <div className="h-full min-h-0 bg-[var(--color-bg-app)] flex items-center justify-center px-4">
       <div className="text-center">
         <div className="text-6xl mb-4">:(</div>
-        <h2 className="text-2xl font-bold text-white mb-2">Algo salio mal</h2>
+        <h2 className="text-2xl font-bold text-app-text mb-2">Algo salio mal</h2>
         <p className="text-[var(--color-text-muted)] mb-6">Ha ocurrido un error inesperado</p>
         <a href={toAppPath('/menu')} className={buttonVariants({ variant: 'primary', size: 'lg' })}>
           Volver al menu

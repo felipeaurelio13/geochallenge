@@ -14,10 +14,10 @@ export function PageHeader({ title, backTo = '/menu', backLabel = '←', actions
   return (
     <header className={`bg-[var(--color-surface-muted)] border-b border-[var(--color-border)] ${sticky ? 'sticky top-0 z-10 backdrop-blur-sm' : ''} ${className}`}>
       <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
-        <Link to={backTo} className="text-gray-400 hover:text-white transition-colors text-sm">
+        <Link to={backTo} className="text-app-subtle hover:text-app-text transition-colors text-sm">
           {backLabel}
         </Link>
-        <h1 className="text-lg font-bold text-white">{title}</h1>
+        <h1 className="text-lg font-bold text-app-text">{title}</h1>
         <div className="min-w-[2rem] flex justify-end">{actions}</div>
       </div>
     </header>

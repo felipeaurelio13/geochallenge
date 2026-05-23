@@ -18,7 +18,7 @@ export function FullScreenError({ emoji = '😢', title, message, backTo = '/men
     <div className="h-full min-h-0 bg-[var(--color-bg-app)] flex items-center justify-center px-4">
       <div className="text-center">
         <div className="text-6xl mb-4">{emoji}</div>
-        <h2 className="text-2xl font-bold text-white mb-2">{title || t('error.title')}</h2>
+        <h2 className="text-2xl font-bold text-app-text mb-2">{title || t('error.title')}</h2>
         {message && <p className="text-[var(--color-text-muted)] mb-6">{message}</p>}
         <div className="flex flex-col gap-3 items-center">
           {onRetry && (

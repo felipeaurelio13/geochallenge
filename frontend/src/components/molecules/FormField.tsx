@@ -33,7 +33,7 @@ function Label({ children, className = '' }: { children: React.ReactNode; classN
   const context = useContext(FormFieldContext);
 
   return (
-    <label htmlFor={context?.fieldId} className={`block text-sm font-medium text-gray-200 ${className}`.trim()}>
+    <label htmlFor={context?.fieldId} className={`block text-sm font-medium text-app-secondary ${className}`.trim()}>
       {children}
     </label>
   );

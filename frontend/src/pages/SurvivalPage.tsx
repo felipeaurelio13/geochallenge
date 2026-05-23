@@ -43,7 +43,7 @@ function getDifficultyColor(diff: Difficulty | null): string {
   if (diff === 'EASY') return 'text-green-400 border-green-700 bg-green-950';
   if (diff === 'MEDIUM') return 'text-yellow-400 border-yellow-700 bg-yellow-950';
   if (diff === 'HARD') return 'text-red-400 border-red-700 bg-red-950';
-  return 'text-gray-400 border-gray-700 bg-gray-900';
+  return 'text-app-subtle border-app-border bg-app-surface';
 }
 
 function LivesDisplay({ lives, max = MAX_LIVES }: { lives: number; max?: number }) {
@@ -71,20 +71,20 @@ function PlayerCard({
     <div
       className={`flex flex-col items-center gap-1 rounded-xl border px-2 py-2 transition-all ${
         player.eliminated
-          ? 'border-gray-800 bg-gray-900/30 opacity-40'
+          ? 'border-app-border bg-app-surface/30 opacity-40'
           : answered
           ? 'border-green-700/50 bg-green-950/20'
           : isMe
           ? 'border-primary/60 bg-primary/10'
-          : 'border-gray-700 bg-gray-900/60'
+          : 'border-app-border bg-app-surface/60'
       }`}
     >
-      <span className="max-w-[5rem] truncate text-xs font-semibold text-white">
+      <span className="max-w-[5rem] truncate text-xs font-semibold text-app-text">
         {player.username}
         {isMe && <span className="text-primary"> ★</span>}
       </span>
       <LivesDisplay lives={player.eliminated ? 0 : player.lives} />
-      <span className="text-xs text-gray-400">{player.score}</span>
+      <span className="text-xs text-app-subtle">{player.score}</span>
     </div>
   );
 }
@@ -428,7 +428,7 @@ export function SurvivalPage() {
   const backButton = (
     <button
       onClick={() => navigate(toAppPath('/menu'))}
-      className="flex items-center gap-1.5 rounded-lg border border-gray-700 bg-gray-900/80 px-3 py-1.5 text-xs text-gray-300 hover:text-white"
+      className="flex items-center gap-1.5 rounded-lg border border-app-border bg-app-surface/80 px-3 py-1.5 text-xs text-app-secondary hover:text-app-text"
     >
       ← {t('survival.backToMenu')}
     </button>
@@ -651,11 +651,11 @@ export function SurvivalPage() {
     <GameRoundScaffold
       rootClassName="bg-[var(--color-bg-app)]"
       header={
-        <header className="sticky top-0 z-30 border-b border-gray-800/80 bg-gray-950/95 px-3 py-2 backdrop-blur">
+        <header className="sticky top-0 z-30 border-b border-app-border/80 bg-app-surface/95 px-3 py-2 backdrop-blur">
           <div className="mx-auto flex max-w-4xl items-center justify-between gap-3">
             {/* Left: round + difficulty */}
             <div className="flex items-center gap-2">
-              <span className="text-xs font-medium text-gray-400">
+              <span className="text-xs font-medium text-app-subtle">
                 {t('survival.round')} {currentRound}
               </span>
               {difficulty && (

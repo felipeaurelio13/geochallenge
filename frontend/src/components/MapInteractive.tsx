@@ -200,9 +200,9 @@ export function MapInteractive({
           <p className="text-sm font-medium text-primary">{t('game.locationSelected')}</p>
         )}
         {showResult && distance !== null && (
-          <div className="rounded-2xl border border-gray-700 bg-gray-800/75 px-4 py-4 shadow-sm shadow-black/25">
-            <p className="text-[clamp(1.1rem,3.8vw,2rem)] leading-tight text-white">
-              {t('game.distance')}: <span className="font-bold text-white">{distance} km</span>
+          <div className="rounded-2xl border border-app-border bg-app-muted/75 px-4 py-4 shadow-sm shadow-black/25">
+            <p className="text-[clamp(1.1rem,3.8vw,2rem)] leading-tight text-app-text">
+              {t('game.distance')}: <span className="font-bold text-app-text">{distance} km</span>
             </p>
             {distance < 50 && (
               <p className="mt-2 text-xl font-medium text-green-400">{t('game.excellent')}</p>

@@ -11,7 +11,7 @@ export function EmptyState({ emoji = '📭', message, action, className = '' }: 
   return (
     <div className={`text-center py-12 ${className}`}>
       {emoji && <div className="text-4xl mb-4">{emoji}</div>}
-      <p className="text-gray-400 mb-4">{message}</p>
+      <p className="text-app-subtle mb-4">{message}</p>
       {action}
     </div>
   );

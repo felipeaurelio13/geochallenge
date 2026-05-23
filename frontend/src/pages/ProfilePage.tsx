@@ -293,7 +293,7 @@ export function ProfilePage() {
       <main className="max-w-2xl mx-auto px-4 py-6 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] sm:px-6 sm:py-8">
         <div className="text-center mb-6">
           <UserAvatar username={user.username} size="xl" className="mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-white">{user.username}</h2>
+          <h2 className="text-2xl font-bold text-app-text">{user.username}</h2>
           <p className="text-[var(--color-text-muted)]">{user.email}</p>
         </div>
 
@@ -309,7 +309,7 @@ export function ProfilePage() {
               className={`flex-1 rounded-lg py-2 text-sm font-medium transition-colors ${
                 activeTab === tab.key
                   ? 'bg-primary text-white'
-                  : 'text-[var(--color-text-muted)] hover:text-white'
+                  : 'text-[var(--color-text-muted)] hover:text-app-text'
               }`}
             >
               {tab.label}
@@ -321,7 +321,7 @@ export function ProfilePage() {
         {activeTab === 'summary' && (
           <>
             <div className="bg-[var(--color-surface)] rounded-xl p-6 mb-6">
-              <h3 className="text-lg font-semibold text-white mb-4">{t('profile.statistics')}</h3>
+              <h3 className="text-lg font-semibold text-app-text mb-4">{t('profile.statistics')}</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <StatCard value={user.highScore} label={t('stats.highScore')} color="primary" />
                 <StatCard value={user.gamesPlayed} label={t('stats.gamesPlayed')} color="white" />
@@ -333,7 +333,7 @@ export function ProfilePage() {
             {/* Category performance */}
             {categoryStats && categoryStats.length > 0 && (
               <div className="bg-[var(--color-surface)] rounded-xl p-6 mb-6">
-                <h3 className="text-lg font-semibold text-white mb-4">{t('profile.categoryPerformance', 'Rendimiento por categoría')}</h3>
+                <h3 className="text-lg font-semibold text-app-text mb-4">{t('profile.categoryPerformance', 'Rendimiento por categoría')}</h3>
                 <div className="space-y-3">
                   {categoryStats
                     .filter((s) => s.totalQuestions > 0)
@@ -352,7 +352,7 @@ export function ProfilePage() {
                               <span>{CATEGORY_ICONS[stat.category] ?? '🎯'}</span>
                               {label}
                             </span>
-                            <span className="font-semibold text-white">{stat.accuracy}%</span>
+                            <span className="font-semibold text-app-text">{stat.accuracy}%</span>
                           </div>
                           <div className="h-2 rounded-full bg-[var(--color-surface-muted)]">
                             <div
@@ -373,7 +373,7 @@ export function ProfilePage() {
             {/* Achievements */}
             {achievements && achievements.length > 0 && (
               <div className="bg-[var(--color-surface)] rounded-xl p-6 mb-6">
-                <h3 className="text-lg font-semibold text-white mb-4">{t('profile.achievements', 'Logros')}</h3>
+                <h3 className="text-lg font-semibold text-app-text mb-4">{t('profile.achievements', 'Logros')}</h3>
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                   {achievements.map((ach) => (
                     <div
@@ -381,7 +381,7 @@ export function ProfilePage() {
                       className="flex flex-col items-center gap-1 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] p-3 text-center"
                     >
                       <span className="text-3xl">{ach.icon}</span>
-                      <span className="text-xs font-semibold text-white">
+                      <span className="text-xs font-semibold text-app-text">
                         {i18n.language === 'en' ? ach.nameEn : ach.nameEs}
                       </span>
                       <span className="text-[0.65rem] text-[var(--color-text-muted)]">
@@ -395,7 +395,7 @@ export function ProfilePage() {
 
             <div className="bg-[var(--color-surface)] rounded-xl p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-white">{t('profile.settings')}</h3>
+                <h3 className="text-lg font-semibold text-app-text">{t('profile.settings')}</h3>
                 {!isEditing && (
                   <Button
                     variant="ghost"
@@ -488,14 +488,14 @@ export function ProfilePage() {
             </div>
 
             <div className="bg-[var(--color-surface)] rounded-xl p-6 mt-6">
-              <h3 className="text-lg font-semibold text-white mb-4">
+              <h3 className="text-lg font-semibold text-app-text mb-4">
                 {t('profile.gamePreferences', 'Preferencias de juego')}
               </h3>
 
               <div className="space-y-3">
                 <label className="pressable flex cursor-pointer items-center justify-between rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-4 py-3 hover:border-gray-500">
                   <div className="pr-4">
-                    <div className="text-sm font-medium text-white">
+                    <div className="text-sm font-medium text-app-text">
                       {t('profile.hapticsLabel', 'Vibración háptica')}
                     </div>
                     <div className="text-xs text-[var(--color-text-muted)]">
@@ -510,7 +510,7 @@ export function ProfilePage() {
                     aria-label={t('profile.hapticsLabel', 'Vibración háptica')}
                   />
                   <div className="relative flex-shrink-0" aria-hidden="true">
-                    <div className={`h-6 w-11 rounded-full transition-colors duration-200 ${hapticsEnabled ? 'bg-primary' : 'bg-gray-600'}`} />
+                    <div className={`h-6 w-11 rounded-full transition-colors duration-200 ${hapticsEnabled ? 'bg-primary' : 'bg-app-muted'}`} />
                     <div className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform duration-200 ${hapticsEnabled ? 'translate-x-5' : 'translate-x-0.5'}`} />
                   </div>
                 </label>
@@ -559,7 +559,7 @@ export function ProfilePage() {
                   className={`flex-1 rounded-lg py-2 text-xs font-medium transition-colors ${
                     duelPeriod === p.key
                       ? 'bg-primary text-white'
-                      : 'bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:text-white'
+                      : 'bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:text-app-text'
                   }`}
                 >
                   {p.label}
@@ -583,7 +583,7 @@ export function ProfilePage() {
                     <li key={m.id} className="flex items-center gap-3 px-4 py-3">
                       <UserAvatar username={m.opponentUsername} size="sm" />
                       <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium text-white truncate">
+                        <div className="text-sm font-medium text-app-text truncate">
                           {m.opponentUsername}
                         </div>
                         <div className="text-xs text-[var(--color-text-muted)]">
@@ -620,7 +620,7 @@ export function ProfilePage() {
               <button
                 onClick={handleLoadMore}
                 disabled={duelLoading}
-                className="w-full py-3 bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:text-white rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
+                className="w-full py-3 bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:text-app-text rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
               >
                 {duelLoading ? <LoadingSpinner size="sm" /> : t('duelHistory.loadMore')}
               </button>
@@ -661,7 +661,7 @@ export function ProfilePage() {
                           {GAME_MODE_ICONS[entry.gameMode] ?? '🎮'}
                         </span>
                         <div className="flex-1 min-w-0">
-                          <div className="text-sm font-medium text-white truncate">
+                          <div className="text-sm font-medium text-app-text truncate">
                             {t(`gameHistory.modes.${entry.gameMode}`, entry.gameMode)}
                             {categoryLabel && (
                               <span className="ml-2 text-xs font-normal text-[var(--color-text-muted)]">
@@ -708,7 +708,7 @@ export function ProfilePage() {
                   <div className="flex items-center gap-3 mb-4">
                     <UserAvatar username={selectedOpponent.opponent.username} size="md" />
                     <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-white truncate">
+                      <div className="font-semibold text-app-text truncate">
                         {selectedOpponent.opponent.username}
                       </div>
                       <div className="text-xs text-[var(--color-text-muted)] truncate">
@@ -760,7 +760,7 @@ export function ProfilePage() {
                 {/* Recent matches */}
                 {selectedOpponent.recentMatches.length > 0 && (
                   <div className="bg-[var(--color-surface)] rounded-xl overflow-hidden">
-                    <h4 className="px-4 pt-4 pb-2 text-sm font-semibold text-white">
+                    <h4 className="px-4 pt-4 pb-2 text-sm font-semibold text-app-text">
                       Últimas partidas
                     </h4>
                     <ul className="divide-y divide-[var(--color-border)]">
@@ -830,7 +830,7 @@ export function ProfilePage() {
                           >
                             <UserAvatar username={opp.username} size="sm" />
                             <div className="flex-1 min-w-0">
-                              <div className="text-sm font-medium text-white truncate">
+                              <div className="text-sm font-medium text-app-text truncate">
                                 {opp.username}
                               </div>
                               <div className="text-xs text-[var(--color-text-muted)]">

@@ -15,14 +15,14 @@ export function AuthPageTemplate({ title, children, footer }: AuthPageTemplatePr
       <div className="mb-5 text-center">
         <Link to="/" className="inline-flex flex-col items-center gap-2">
           <Icon symbol="🌍" className="text-4xl" />
-          <h1 className="text-2xl font-bold text-white">
+          <h1 className="text-2xl font-bold text-app-text">
             <span className="text-primary">Geo</span>Challenge
           </h1>
         </Link>
       </div>
 
       <Card className="p-5 sm:p-8">
-        <h2 className="mb-6 text-center text-2xl font-bold text-white">{title}</h2>
+        <h2 className="mb-6 text-center text-2xl font-bold text-app-text">{title}</h2>
         {children}
       </Card>
 

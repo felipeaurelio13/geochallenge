@@ -45,8 +45,8 @@ export function ServerWakeUp({ children }: ServerWakeUpProps) {
   return (
     <div className="h-full min-h-0 bg-[var(--color-bg-app)] flex flex-col items-center justify-center px-6 text-center">
       <div className="text-6xl mb-6 animate-bounce">🌍</div>
-      <h2 className="text-2xl font-bold text-white mb-3">Despertando el servidor...</h2>
-      <p className="text-gray-400 mb-6 max-w-sm">
+      <h2 className="text-2xl font-bold text-app-text mb-3">Despertando el servidor...</h2>
+      <p className="text-app-subtle mb-6 max-w-sm">
         El servidor gratuito se duerme tras unos minutos de inactividad.
         Esto solo toma unos segundos.
       </p>

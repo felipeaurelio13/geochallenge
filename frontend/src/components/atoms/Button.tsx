@@ -14,8 +14,8 @@ const variantClasses: Record<ButtonVariant, string> = {
     'bg-primary text-white border border-primary/80 shadow-lg shadow-primary/20 hover:bg-primary/90 focus:ring-primary/70',
   secondary:
     'bg-[var(--color-surface)] text-[var(--color-text-secondary)] border border-[var(--color-border)] hover:border-gray-500 hover:bg-[var(--color-surface-muted)] focus:ring-gray-500',
-  ghost: 'bg-transparent text-[var(--color-text-secondary)] border border-transparent hover:bg-gray-800/70 focus:ring-gray-500',
-  danger: 'bg-red-500/15 text-red-200 border border-red-500/60 hover:bg-red-500/25 focus:ring-red-400/70',
+  ghost: 'bg-transparent text-[var(--color-text-secondary)] border border-transparent hover:bg-app-muted/70 focus:ring-gray-500',
+  danger: 'bg-red-500/15 text-[var(--color-error-500)] border border-red-500/60 hover:bg-red-500/25 focus:ring-red-400/70',
 };
 
 const sizeClasses: Record<ButtonSize, string> = {

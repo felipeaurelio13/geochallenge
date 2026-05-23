@@ -61,12 +61,12 @@ export function FilterDrawer({ filters, onChange, onClose, disabledOptions }: Fi
       />
 
       {/* Panel */}
-      <div className="relative z-10 rounded-t-2xl border border-gray-700 bg-gray-900 px-4 pb-8 pt-4 shadow-2xl">
+      <div className="relative z-10 rounded-t-2xl border border-app-border bg-app-surface px-4 pb-8 pt-4 shadow-2xl">
         {/* Handle */}
-        <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-gray-600" />
+        <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-app-muted" />
 
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-base font-semibold text-white">{t('filters.title')}</h2>
+          <h2 className="text-base font-semibold text-app-text">{t('filters.title')}</h2>
           {hasAny && (
             <button
               onClick={clearAll}
@@ -79,7 +79,7 @@ export function FilterDrawer({ filters, onChange, onClose, disabledOptions }: Fi
 
         {/* Continent */}
         <div className="mb-5">
-          <p className="mb-2 text-xs font-medium uppercase tracking-wider text-gray-500">
+          <p className="mb-2 text-xs font-medium uppercase tracking-wider text-app-subtle">
             {t('filters.region')}
           </p>
           <div className="flex flex-wrap gap-2">
@@ -90,8 +90,8 @@ export function FilterDrawer({ filters, onChange, onClose, disabledOptions }: Fi
                 disabled={disabledOptions?.continents?.includes(c.id)}
                 className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${
                   filters.continent === c.id
-                    ? 'border-primary/70 bg-primary/20 text-white'
-                    : 'border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-40'
+                    ? 'border-primary/70 bg-primary/20 text-primary'
+                    : 'border-app-border bg-app-muted text-app-secondary hover:border-app-border hover:text-app-text disabled:cursor-not-allowed disabled:opacity-40'
                 }`}
               >
                 <span>{c.icon}</span>
@@ -103,7 +103,7 @@ export function FilterDrawer({ filters, onChange, onClose, disabledOptions }: Fi
 
         {/* Geographic type */}
         <div className="mb-5">
-          <p className="mb-2 text-xs font-medium uppercase tracking-wider text-gray-500">
+          <p className="mb-2 text-xs font-medium uppercase tracking-wider text-app-subtle">
             {t('filters.geoType')}
           </p>
           <div className="flex gap-2">
@@ -112,8 +112,8 @@ export function FilterDrawer({ filters, onChange, onClose, disabledOptions }: Fi
               disabled={disabledOptions?.isInsular}
               className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${
                 filters.isInsular
-                  ? 'border-primary/70 bg-primary/20 text-white'
-                  : 'border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-40'
+                  ? 'border-primary/70 bg-primary/20 text-primary'
+                  : 'border-app-border bg-app-muted text-app-secondary hover:border-app-border hover:text-app-text disabled:cursor-not-allowed disabled:opacity-40'
               }`}
             >
               <span>🏝️</span>
@@ -124,8 +124,8 @@ export function FilterDrawer({ filters, onChange, onClose, disabledOptions }: Fi
               disabled={disabledOptions?.isLandlocked}
               className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${
                 filters.isLandlocked
-                  ? 'border-primary/70 bg-primary/20 text-white'
-                  : 'border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-40'
+                  ? 'border-primary/70 bg-primary/20 text-primary'
+                  : 'border-app-border bg-app-muted text-app-secondary hover:border-app-border hover:text-app-text disabled:cursor-not-allowed disabled:opacity-40'
               }`}
             >
               <span>🔒</span>
@@ -136,7 +136,7 @@ export function FilterDrawer({ filters, onChange, onClose, disabledOptions }: Fi
 
         {/* Difficulty */}
         <div className="mb-6">
-          <p className="mb-2 text-xs font-medium uppercase tracking-wider text-gray-500">
+          <p className="mb-2 text-xs font-medium uppercase tracking-wider text-app-subtle">
             {t('filters.difficulty')}
           </p>
           <div className="flex gap-2">
@@ -147,8 +147,8 @@ export function FilterDrawer({ filters, onChange, onClose, disabledOptions }: Fi
                 disabled={disabledOptions?.difficulties?.includes(d.id)}
                 className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${
                   filters.difficulty === d.id
-                    ? 'border-primary/70 bg-primary/20 text-white'
-                    : 'border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-40'
+                    ? 'border-primary/70 bg-primary/20 text-primary'
+                    : 'border-app-border bg-app-muted text-app-secondary hover:border-app-border hover:text-app-text disabled:cursor-not-allowed disabled:opacity-40'
                 }`}
               >
                 <span>{d.icon}</span>

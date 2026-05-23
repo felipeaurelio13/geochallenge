@@ -73,11 +73,11 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
     const difficulty = question.difficulty?.toUpperCase() || 'MEDIUM';
     switch (difficulty) {
       case 'EASY':
-        return 'border border-green-500/30 bg-green-500/15 text-green-200';
+        return 'border border-green-500/30 bg-green-500/15 text-[var(--color-success-600)]';
       case 'HARD':
-        return 'border border-red-500/30 bg-red-500/15 text-red-200';
+        return 'border border-red-500/30 bg-red-500/15 text-[var(--color-error-500)]';
       default:
-        return 'border border-amber-500/30 bg-amber-500/15 text-amber-200';
+        return 'border border-amber-500/30 bg-amber-500/15 text-amber-600';
     }
   };
 
@@ -150,7 +150,7 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
           ? 'text-[clamp(1.1rem,4.2vw,1.4rem)] sm:text-[1.6rem]'
           : 'text-[clamp(1.05rem,4vw,1.28rem)] sm:text-[1.5rem]'
       : 'text-[clamp(1.2rem,4.5vw,1.8rem)] sm:text-4xl'
-  } font-bold text-white break-words ${question.category === 'MAP' ? 'leading-snug' : 'leading-tight'}`;
+  } font-bold text-app-text break-words ${question.category === 'MAP' ? 'leading-snug' : 'leading-tight'}`;
 
   return (
     <div
@@ -191,16 +191,16 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
         {/* Error fallback shown only when no replacement handler is wired (e.g. offline/challenge mode) */}
         {hasImageError && !onImageError && question.category === 'FLAG' && (
           <div className={compact ? 'mb-1' : 'mb-6'}>
-            <div className="media-box media-box--compact mx-auto flex flex-col items-center justify-center gap-2 rounded-xl border border-gray-600/70 bg-black/15 px-2">
+            <div className="media-box media-box--compact mx-auto flex flex-col items-center justify-center gap-2 rounded-xl border border-app-border/70 bg-app-muted/50 px-2">
               <span className="text-4xl opacity-30">🏳️</span>
-              <p className="text-xs text-slate-500">{t('game.flagUnavailable', 'Bandera no disponible')}</p>
+              <p className="text-xs text-app-subtle">{t('game.flagUnavailable', 'Bandera no disponible')}</p>
             </div>
           </div>
         )}
 
         {hasImageError && !onImageError && question.category === 'SILHOUETTE' && (
           <div className={compact ? 'mb-1' : 'mb-6'}>
-            <div className="media-box media-box--silhouette mx-auto flex flex-col items-center justify-center gap-2 rounded-xl border border-slate-700/60 bg-slate-950/90 p-3">
+            <div className="media-box media-box--silhouette mx-auto flex flex-col items-center justify-center gap-2 rounded-xl border border-app-border/60 bg-app-surface/90 p-3">
               <span className="text-4xl opacity-30">🌐</span>
               <p className="text-xs text-slate-500">{t('game.silhouetteUnavailable', 'Silueta no disponible')}</p>
             </div>
@@ -209,9 +209,9 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
 
         {hasImageError && !onImageError && question.category === 'MONUMENT' && (
           <div className={compact ? 'mb-1' : 'mb-6'}>
-            <div className="mx-auto flex aspect-[16/9] w-full max-w-xl flex-col items-center justify-center gap-2 rounded-xl border border-gray-700/70 bg-black/40 p-4">
+            <div className="mx-auto flex aspect-[16/9] w-full max-w-xl flex-col items-center justify-center gap-2 rounded-xl border border-app-border/70 bg-black/40 p-4">
               <span className="text-5xl opacity-40">🗿</span>
-              <p className="text-xs text-slate-400">{t('game.monumentUnavailable', 'Imagen no disponible')}</p>
+              <p className="text-xs text-app-subtle">{t('game.monumentUnavailable', 'Imagen no disponible')}</p>
             </div>
           </div>
         )}
