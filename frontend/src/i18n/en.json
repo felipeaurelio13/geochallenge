@@ -497,6 +497,6 @@
       "MEDIUM": "Medium",
       "HARD": "Hard"
     },
-    "unavailableCombination": "This filter combination does not have enough questions (minimum {{required}})."
+    "unavailableCombination": "This filter combination does not have enough questions ({{available}} available, minimum {{required}})."
   }
 }
