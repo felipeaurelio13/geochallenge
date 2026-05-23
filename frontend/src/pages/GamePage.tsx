@@ -564,6 +564,7 @@ export function GamePage() {
           selectionAssistiveText={hasSelection && !showResult ? t('game.selectionReadyShortHint') : undefined}
           showResultBadge
           isCorrect={lastAnswerCorrect}
+          correctAnswer={showResult && !lastAnswerCorrect ? currentQuestion.correctAnswer : undefined}
           onSubmit={handleSubmitAnswer}
           onNext={handleNextQuestion}
           summarySlot={

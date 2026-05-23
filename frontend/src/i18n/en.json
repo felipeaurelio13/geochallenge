@@ -167,6 +167,7 @@
     "submit": "Submit",
     "correct": "Correct!",
     "incorrect": "Incorrect",
+    "correctAnswerWas": "The correct answer was",
     "correctLabel": "Correct",
     "incorrectLabel": "Incorrect",
     "next": "Next",

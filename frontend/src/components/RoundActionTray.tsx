@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AnswerStatusBadge } from './AnswerStatusBadge';
 
 type RoundActionTrayProps = {
@@ -18,6 +19,7 @@ type RoundActionTrayProps = {
   onNext?: () => void;
   showResultBadge?: boolean;
   isCorrect?: boolean;
+  correctAnswer?: string;
   resultHint?: string;
   /** Atribución opcional (e.g. crédito de imagen) mostrada solo en showResult. */
   resultAttribution?: ReactNode;
@@ -43,10 +45,12 @@ export function RoundActionTray({
   onNext,
   showResultBadge = false,
   isCorrect = false,
+  correctAnswer,
   resultHint,
   resultAttribution,
   summarySlot,
 }: RoundActionTrayProps) {
+  const { t } = useTranslation();
   const wrapperClassName =
     mode === 'challenge'
       ? 'mx-auto flex w-full max-w-4xl flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between'
@@ -88,6 +92,18 @@ export function RoundActionTray({
                 label={resultLabel}
                 className="text-sm"
               />
+            )}
+
+            {!isCorrect && correctAnswer && (
+              <div className="flex items-start gap-2 w-full rounded-xl border border-green-500/30 bg-green-500/10 px-3 py-2 text-left">
+                <span className="mt-0.5 shrink-0 text-green-400 text-sm" aria-hidden>✓</span>
+                <p className="text-sm leading-snug text-green-200 min-w-0">
+                  <span className="block text-[0.65rem] uppercase tracking-wide text-green-400/70 mb-0.5">
+                    {t('game.correctAnswerWas')}
+                  </span>
+                  <span className="font-semibold break-words">{correctAnswer}</span>
+                </p>
+              </div>
             )}
 
             {resultHint && <p className="text-center text-xs leading-snug text-gray-300">{resultHint}</p>}

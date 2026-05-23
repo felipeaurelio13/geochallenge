@@ -743,6 +743,7 @@ export function DuelPage() {
           }
           showResultBadge
           isCorrect={lastAnswerCorrect}
+          correctAnswer={showResult && !lastAnswerCorrect ? currentQuestion?.correctAnswer : undefined}
           onSubmit={handleSubmitAnswer}
           summarySlot={
             mechanicsEnabled ? (

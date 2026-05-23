@@ -771,6 +771,7 @@ export function SurvivalPage() {
           }
           showResultBadge
           isCorrect={myLastAnswerCorrect}
+          correctAnswer={showResult && !myLastAnswerCorrect ? currentQuestion.correctAnswer : undefined}
           onSubmit={handleSubmitAnswer}
         />
       }
