@@ -82,6 +82,7 @@ export function MenuPage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [canPlaySelection, setCanPlaySelection] = useState(true);
   const [requiredQuestions, setRequiredQuestions] = useState(10);
+  const [availableQuestions, setAvailableQuestions] = useState<number | null>(null);
   const [disabledOptions, setDisabledOptions] = useState<{
     continents?: string[];
     difficulties?: string[];
@@ -112,6 +113,7 @@ export function MenuPage() {
         if (!mounted) return;
         setCanPlaySelection(base.canPlay);
         setRequiredQuestions(base.required);
+        setAvailableQuestions(base.available);
 
         const probeFilters: GameFilters[] = [
           { ...filters, isInsular: true },
@@ -148,6 +150,7 @@ export function MenuPage() {
       } catch {
         if (!mounted) return;
         setCanPlaySelection(true);
+        setAvailableQuestions(null);
       }
     };
     run();
@@ -231,7 +234,12 @@ export function MenuPage() {
         )}
       </div>
       {!canPlaySelection && (
-        <p className="mt-2 text-xs text-amber-300">{t('filters.unavailableCombination', { required: requiredQuestions })}</p>
+        <p className="mt-2 text-xs text-amber-300">
+          {t('filters.unavailableCombination', {
+            required: requiredQuestions,
+            available: availableQuestions ?? 0,
+          })}
+        </p>
       )}
 
 
