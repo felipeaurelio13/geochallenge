@@ -146,4 +146,22 @@ describe('ChallengesPage', () => {
       });
     });
   });
+
+  it('acepta MOVIE_SCENE como categoría inicial al crear desafío', async () => {
+    mocks.searchParams = new URLSearchParams('category=MOVIE_SCENE&openCreate=1');
+
+    render(<ChallengesPage />);
+
+    expect(await screen.findByText('challenges.createTitle')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'challenges.send' }));
+
+    await waitFor(() => {
+      expect(mocks.apiPost).toHaveBeenCalledWith('/challenges', {
+        categories: ['MOVIE_SCENE'],
+        maxPlayers: 2,
+        answerTimeSeconds: 20,
+      });
+    });
+  });
 });
