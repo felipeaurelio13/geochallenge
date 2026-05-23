@@ -537,15 +537,12 @@ export async function recomputeAllHighScoresFromHistory(): Promise<{
  * Lista todas las temporadas (YYYY-MM) que tienen al menos un GameResult registrado.
  */
 export async function listSeasonsWithActivity(): Promise<string[]> {
-  const dates = await prisma.gameResult.findMany({
-    select: { createdAt: true },
-    orderBy: { createdAt: 'asc' },
-  });
-  const seasons = new Set<string>();
-  for (const d of dates) {
-    seasons.add(getCurrentSeasonId(d.createdAt));
-  }
-  return Array.from(seasons).sort();
+  const rows = await prisma.$queryRaw<{ season: string }[]>`
+    SELECT DISTINCT TO_CHAR("createdAt" AT TIME ZONE 'UTC', 'YYYY-MM') AS season
+    FROM game_results
+    ORDER BY season ASC
+  `;
+  return rows.map((r) => r.season);
 }
 
 /**

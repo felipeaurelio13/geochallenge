@@ -24,35 +24,14 @@ export interface EarnedAchievement {
   meta?: Record<string, unknown> | null;
 }
 
-async function getAchievementId(key: string): Promise<string | null> {
-  const ach = await prisma.achievement.findUnique({ where: { key }, select: { id: true } });
-  return ach?.id ?? null;
-}
+// Achievement table has exactly 10 fixed rows seeded in the migration; never changes at runtime.
+// Cache key→id mapping once per process lifetime to avoid re-querying on every game finish.
+const achievementIdCache = new Map<string, string>();
 
-async function alreadyEarned(userId: string, achievementId: string): Promise<boolean> {
-  const existing = await prisma.userAchievement.findUnique({
-    where: { userId_achievementId: { userId, achievementId } },
-  });
-  return !!existing;
-}
-
-async function grantIfNew(
-  userId: string,
-  key: string,
-  meta?: Record<string, unknown>
-): Promise<boolean> {
-  const achievementId = await getAchievementId(key);
-  if (!achievementId) return false;
-  if (await alreadyEarned(userId, achievementId)) return false;
-
-  await prisma.userAchievement.create({
-    data: {
-      userId,
-      achievementId,
-      ...(meta ? { meta: meta as Prisma.InputJsonValue } : {}),
-    },
-  });
-  return true;
+async function ensureCache(): Promise<void> {
+  if (achievementIdCache.size > 0) return;
+  const rows = await prisma.achievement.findMany({ select: { id: true, key: true } });
+  for (const r of rows) achievementIdCache.set(r.key, r.id);
 }
 
 export interface GameCompletedContext {
@@ -69,54 +48,81 @@ export interface GameCompletedContext {
 export async function evaluateAchievementsAfterGame(
   ctx: GameCompletedContext
 ): Promise<AchievementKey[]> {
-  const earned: AchievementKey[] = [];
+  await ensureCache();
 
-  const tryGrant = async (key: AchievementKey, meta?: Record<string, unknown>) => {
-    const granted = await grantIfNew(ctx.userId, key, meta);
-    if (granted) earned.push(key);
-  };
+  const [gameCount, earnedRows] = await Promise.all([
+    prisma.gameResult.count({ where: { userId: ctx.userId } }),
+    prisma.userAchievement.findMany({
+      where: { userId: ctx.userId },
+      select: { achievementId: true },
+    }),
+  ]);
 
-  // First game ever
-  const gameCount = await prisma.gameResult.count({ where: { userId: ctx.userId } });
-  if (gameCount <= 1) await tryGrant('FIRST_GAME');
+  const earnedSet = new Set(earnedRows.map((r) => r.achievementId));
 
-  // Perfect game
+  const candidates: { key: AchievementKey; meta?: Record<string, unknown> }[] = [];
+
+  if (gameCount <= 1) candidates.push({ key: 'FIRST_GAME' });
+
   if (ctx.correctCount === ctx.totalQuestions && ctx.totalQuestions >= 5) {
-    await tryGrant('PERFECT_GAME');
+    candidates.push({ key: 'PERFECT_GAME' });
   }
 
-  // High score 1000+
-  if (ctx.score >= 1000) await tryGrant('HIGH_SCORE_1K', { score: ctx.score });
+  if (ctx.score >= 1000) candidates.push({ key: 'HIGH_SCORE_1K', meta: { score: ctx.score } });
 
-  // Streak milestones
   if (ctx.isStreakMode && ctx.streakLength !== undefined) {
-    if (ctx.streakLength >= 10) await tryGrant('STREAK_10', { streak: ctx.streakLength });
-    if (ctx.streakLength >= 25) await tryGrant('STREAK_25', { streak: ctx.streakLength });
-    if (ctx.streakLength >= 50) await tryGrant('STREAK_50', { streak: ctx.streakLength });
+    if (ctx.streakLength >= 10) candidates.push({ key: 'STREAK_10', meta: { streak: ctx.streakLength } });
+    if (ctx.streakLength >= 25) candidates.push({ key: 'STREAK_25', meta: { streak: ctx.streakLength } });
+    if (ctx.streakLength >= 50) candidates.push({ key: 'STREAK_50', meta: { streak: ctx.streakLength } });
   }
 
-  // Duel win
-  if (ctx.isDuel && ctx.isWin) await tryGrant('FIRST_WIN');
+  if (ctx.isDuel && ctx.isWin) candidates.push({ key: 'FIRST_WIN' });
 
-  return earned;
+  return grantNewAchievements(ctx.userId, candidates, earnedSet);
 }
 
 export async function evaluateAchievementsAfterDaily(
   userId: string,
   dailyStreak: number
 ): Promise<AchievementKey[]> {
-  const earned: AchievementKey[] = [];
+  await ensureCache();
 
-  const tryGrant = async (key: AchievementKey, meta?: Record<string, unknown>) => {
-    const granted = await grantIfNew(userId, key, meta);
-    if (granted) earned.push(key);
-  };
+  const earnedRows = await prisma.userAchievement.findMany({
+    where: { userId },
+    select: { achievementId: true },
+  });
+  const earnedSet = new Set(earnedRows.map((r) => r.achievementId));
 
-  if (dailyStreak >= 1) await tryGrant('DAILY_FIRST');
-  if (dailyStreak >= 7) await tryGrant('DAILY_7', { streak: dailyStreak });
-  if (dailyStreak >= 30) await tryGrant('DAILY_30', { streak: dailyStreak });
+  const candidates: { key: AchievementKey; meta?: Record<string, unknown> }[] = [];
+  if (dailyStreak >= 1) candidates.push({ key: 'DAILY_FIRST' });
+  if (dailyStreak >= 7) candidates.push({ key: 'DAILY_7', meta: { streak: dailyStreak } });
+  if (dailyStreak >= 30) candidates.push({ key: 'DAILY_30', meta: { streak: dailyStreak } });
 
-  return earned;
+  return grantNewAchievements(userId, candidates, earnedSet);
+}
+
+async function grantNewAchievements(
+  userId: string,
+  candidates: { key: AchievementKey; meta?: Record<string, unknown> }[],
+  earnedSet: Set<string>
+): Promise<AchievementKey[]> {
+  const newGrants = candidates.filter((c) => {
+    const achievementId = achievementIdCache.get(c.key);
+    return achievementId !== undefined && !earnedSet.has(achievementId);
+  });
+
+  if (newGrants.length === 0) return [];
+
+  await prisma.userAchievement.createMany({
+    data: newGrants.map((c) => ({
+      userId,
+      achievementId: achievementIdCache.get(c.key)!,
+      ...(c.meta ? { meta: c.meta as Prisma.InputJsonValue } : {}),
+    })),
+    skipDuplicates: true,
+  });
+
+  return newGrants.map((c) => c.key);
 }
 
 export async function getUserAchievements(userId: string): Promise<EarnedAchievement[]> {
