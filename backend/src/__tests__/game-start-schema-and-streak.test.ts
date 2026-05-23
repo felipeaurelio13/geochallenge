@@ -2,14 +2,16 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Category } from '@prisma/client';
 import { startGameSchema } from '../controllers/game.controller';
 
-const { findManyMock } = vi.hoisted(() => ({
+const { findManyMock, countMock } = vi.hoisted(() => ({
   findManyMock: vi.fn(),
+  countMock: vi.fn(),
 }));
 
 vi.mock('../config/database.js', () => ({
   prisma: {
     question: {
       findMany: findManyMock,
+      count: countMock,
     },
   },
 }));
@@ -53,6 +55,7 @@ describe('startGameSchema', () => {
 describe('getQuestionsForStreakGame', () => {
   beforeEach(() => {
     findManyMock.mockReset();
+    countMock.mockReset();
   });
 
   it('reutiliza getQuestionsForGame y respeta excludeIds para evitar repetidas inmediatas', async () => {
@@ -146,5 +149,26 @@ describe('getQuestionsForStreakGame', () => {
 
     expect(questionKeys).not.toContain('flag|https://flags.example/ar.svg|argentina|argentina');
     expect(new Set(questionKeys).size).toBe(questions.length);
+  });
+
+  it('ignora filtros geográficos para categoría MOVIE_SCENE al contar disponibilidad', async () => {
+    countMock.mockResolvedValue(12);
+
+    const { getAvailableQuestionsCount } = await import('../services/game.service.js');
+    const available = await getAvailableQuestionsCount(Category.MOVIE_SCENE, {
+      continent: 'EUROPE',
+      isInsular: true,
+      isLandlocked: false,
+      difficulty: 'HARD',
+    });
+
+    expect(available).toBe(12);
+    expect(countMock).toHaveBeenCalledWith({
+      where: {
+        category: Category.MOVIE_SCENE,
+        difficulty: 'HARD',
+        isAvailable: true,
+      },
+    });
   });
 });

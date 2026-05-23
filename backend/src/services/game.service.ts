@@ -40,6 +40,17 @@ function buildFilterWhere(filters?: QuestionFilters): object {
   };
 }
 
+function getCompatibleFilters(category?: Category, filters?: QuestionFilters): QuestionFilters | undefined {
+  if (!filters) return undefined;
+
+  if (category === Category.MOVIE_SCENE) {
+    const { difficulty } = filters;
+    return difficulty ? { difficulty } : undefined;
+  }
+
+  return filters;
+}
+
 export type GameMechanicKey = 'intel5050' | 'focusTime' | 'streakShield';
 
 export interface MechanicsConfig {
@@ -165,7 +176,8 @@ export async function getQuestionsForGame(
   excludeIds: string[] = [],
   filters?: QuestionFilters
 ): Promise<GameQuestion[]> {
-  const baseWhere = { isAvailable: true, id: { notIn: excludeIds }, ...buildFilterWhere(filters) };
+  const compatibleFilters = getCompatibleFilters(category, filters);
+  const baseWhere = { isAvailable: true, id: { notIn: excludeIds }, ...buildFilterWhere(compatibleFilters) };
 
   // Buscar preguntas en la base de datos
   let questions = await prisma.question.findMany({
@@ -213,9 +225,10 @@ export async function getAvailableQuestionsCount(
   category?: Category,
   filters?: QuestionFilters
 ): Promise<number> {
+  const compatibleFilters = getCompatibleFilters(category, filters);
   const where = {
     isAvailable: true,
-    ...buildFilterWhere(filters),
+    ...buildFilterWhere(compatibleFilters),
     ...(category && category !== Category.MIXED && { category }),
     ...((category === Category.MIXED || !category) && {
       category: { in: [Category.FLAG, Category.CAPITAL, Category.MAP, Category.SILHOUETTE, Category.MONUMENT, Category.MOVIE_SCENE] },
@@ -230,6 +243,7 @@ export async function getAvailableQuestionsCount(
  * MAP no es compatible (requiere mapa interactivo), hace fallback a FLAG + SILHOUETTE.
  */
 export async function getQuestionsForFlashGame(category?: Category, filters?: QuestionFilters): Promise<GameQuestion[]> {
+  const compatibleFilters = getCompatibleFilters(category, filters);
   const visualCategories = [Category.FLAG, Category.SILHOUETTE, Category.MONUMENT, Category.MOVIE_SCENE];
   const flashCategories =
     category && category !== Category.MIXED && category !== Category.MAP
@@ -240,7 +254,7 @@ export async function getQuestionsForFlashGame(category?: Category, filters?: Qu
     where: {
       category: { in: flashCategories },
       isAvailable: true,
-      ...buildFilterWhere(filters),
+      ...buildFilterWhere(compatibleFilters),
     },
   });
 
