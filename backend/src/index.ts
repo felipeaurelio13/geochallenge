@@ -8,6 +8,7 @@ import { config } from './config/env.js';
 import { connectDatabase, disconnectDatabase, prisma } from './config/database.js';
 import { getRedis, disconnectRedis } from './config/redis.js';
 import { rebuildAllLeaderboards } from './services/leaderboard.service.js';
+import { ensureMovieSceneQuestions } from './scripts/ensureMovieSceneQuestions.js';
 
 // Controllers
 import authController from './controllers/auth.controller.js';
@@ -103,6 +104,9 @@ async function start() {
   try {
     // Connect to database
     await connectDatabase();
+
+    // Auto-seed any missing question categories (idempotent, non-destructive)
+    await ensureMovieSceneQuestions();
 
     // Initialize Redis
     getRedis();
