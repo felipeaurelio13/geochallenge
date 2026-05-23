@@ -547,7 +547,11 @@ export function GamePage() {
       showResult={showResult}
       hiddenOptionIndexes={disabledOptionIndexes}
       optionsGridClassName="game-options-grid"
-      onImageError={() => replaceCurrentQuestion(gameFilters)}
+      onImageError={
+        currentQuestion?.category === 'FLAG' || currentQuestion?.category === 'SILHOUETTE'
+          ? () => replaceCurrentQuestion(gameFilters)
+          : undefined
+      }
       actionTray={
         <RoundActionTray
           mode="single"
