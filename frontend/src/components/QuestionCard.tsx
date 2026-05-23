@@ -70,9 +70,16 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
         const lang = resolveSceneLanguage(i18n.language);
         const movieName = payload ? (getLocalizedMovieName(payload.slug, lang) ?? '') : '';
         const variant = payload?.variant ?? 'country';
+        if (movieName) {
+          return variant === 'city'
+            ? t('game.questionMovieSceneCity', { movie: movieName })
+            : t('game.questionMovieSceneCountry', { movie: movieName });
+        }
+        // Fallback: backend already includes the movie name in questionText
+        if (question.questionText?.trim()) return question.questionText;
         return variant === 'city'
-          ? t('game.questionMovieSceneCity', { movie: movieName })
-          : t('game.questionMovieSceneCountry', { movie: movieName });
+          ? t('game.questionMovieSceneCity', { movie: '' })
+          : t('game.questionMovieSceneCountry', { movie: '' });
       }
       default:
         return getFallbackQuestionText();
