@@ -33,6 +33,17 @@ describe('startGameSchema', () => {
     expect(parsed.questionCount).toBe(10);
   });
 
+  it('no fuerza filtros booleanos en false cuando no vienen en query', () => {
+    const parsed = startGameSchema.parse({
+      category: 'MOVIE_SCENE',
+      questionCount: '10',
+    });
+
+    expect(parsed.isInsular).toBeUndefined();
+    expect(parsed.isLandlocked).toBeUndefined();
+    expect(parsed.acceptShortGame).toBeUndefined();
+  });
+
   it('normaliza excludeIds desde query string csv', () => {
     const parsed = startGameSchema.parse({
       gameType: 'streak',

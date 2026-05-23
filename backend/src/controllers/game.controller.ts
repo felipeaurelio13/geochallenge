@@ -36,6 +36,11 @@ import { config } from '../config/env.js';
 const router = Router();
 const gameTypeSchema = z.enum(['single', 'streak', 'flash']);
 
+const optionalBooleanFromQuery = z.preprocess((v) => {
+  if (v === undefined || v === null || v === '') return undefined;
+  return v === 'true' || v === true;
+}, z.boolean().optional());
+
 const excludeIdsSchema = z.preprocess(
   (value) => {
     if (typeof value === 'string') {
@@ -60,8 +65,8 @@ const difficultySchema = z.enum(['EASY', 'MEDIUM', 'HARD']);
 
 const questionFiltersSchema = z.object({
   continent: z.string().optional(),
-  isInsular: z.preprocess((v) => v === 'true' || v === true, z.boolean()).optional(),
-  isLandlocked: z.preprocess((v) => v === 'true' || v === true, z.boolean()).optional(),
+  isInsular: optionalBooleanFromQuery,
+  isLandlocked: optionalBooleanFromQuery,
   difficulty: difficultySchema.optional(),
 });
 
@@ -82,10 +87,10 @@ export const startGameSchema = z.object({
   excludeQuestionKeys: excludeIdsSchema.optional().default([]),
   // Filters
   continent: z.string().optional(),
-  isInsular: z.preprocess((v) => v === 'true' || v === true, z.boolean()).optional(),
-  isLandlocked: z.preprocess((v) => v === 'true' || v === true, z.boolean()).optional(),
+  isInsular: optionalBooleanFromQuery,
+  isLandlocked: optionalBooleanFromQuery,
   difficulty: difficultySchema.optional(),
-  acceptShortGame: z.preprocess((v) => v === 'true' || v === true, z.boolean()).optional(),
+  acceptShortGame: optionalBooleanFromQuery,
 });
 
 const answerSchema = z.object({
@@ -187,8 +192,8 @@ router.get('/start', optionalAuth, async (req: AuthRequest, res: Response) => {
 const flashStartSchema = z.object({
   category: z.nativeEnum(Category).optional(),
   continent: z.string().optional(),
-  isInsular: z.preprocess((v) => v === 'true' || v === true, z.boolean()).optional(),
-  isLandlocked: z.preprocess((v) => v === 'true' || v === true, z.boolean()).optional(),
+  isInsular: optionalBooleanFromQuery,
+  isLandlocked: optionalBooleanFromQuery,
   difficulty: difficultySchema.optional(),
 });
 
@@ -196,8 +201,8 @@ const availabilitySchema = z.object({
   category: z.nativeEnum(Category).optional().default(Category.MIXED),
   questionCount: z.coerce.number().min(1).max(20).optional().default(config.game.questionsPerGame),
   continent: z.string().optional(),
-  isInsular: z.preprocess((v) => v === 'true' || v === true, z.boolean()).optional(),
-  isLandlocked: z.preprocess((v) => v === 'true' || v === true, z.boolean()).optional(),
+  isInsular: optionalBooleanFromQuery,
+  isLandlocked: optionalBooleanFromQuery,
   difficulty: difficultySchema.optional(),
 });
 
