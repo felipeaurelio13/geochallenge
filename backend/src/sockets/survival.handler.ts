@@ -382,11 +382,11 @@ async function endGame(
   if (match.status === 'finished') return;
   match.status = 'finished';
 
-  // Ensure all remaining active players have rank 1 (draw or winner)
+  // Rank remaining active players by score: highest score gets rank 1
   const remaining = getActivePlayers(match);
-  if (remaining.length >= 1) {
-    remaining.forEach((p) => { p.finalRank = 1; });
-  }
+  remaining
+    .sort((a, b) => b.score - a.score)
+    .forEach((p, i) => { p.finalRank = i + 1; });
 
   const rankings = [...match.players]
     .sort((a, b) => (a.finalRank ?? 99) - (b.finalRank ?? 99) || b.score - a.score)
