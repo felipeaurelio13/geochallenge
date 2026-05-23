@@ -202,6 +202,9 @@ export function MenuPage() {
         <SectionTitle variant="label" className="mb-2 px-1 sm:px-0">
           {t('menu.selectCategory')}
         </SectionTitle>
+        <p className="mb-2 px-1 text-xs text-app-subtle sm:px-0">
+          {t('menu.categoryHelper', 'Elige cómo quieres practicar hoy. Puedes cambiar esta categoría en cualquier momento.')}
+        </p>
         <CategorySelector
           categories={categories.map((cat) => ({ id: cat.id, icon: cat.icon, label: t(cat.labelKey), accentClass: cat.accentClass }))}
           selected={selectedCategory}
@@ -245,6 +248,12 @@ export function MenuPage() {
 
       
       <section className="mt-3" aria-label={t('menu.gameModes')}>
+        <p className="mb-2 px-1 text-xs text-app-subtle sm:px-0">
+          {t(
+            'menu.modeHelper',
+            'Después elige el ritmo de partida: rápido, competitivo o para entrenar con calma.'
+          )}
+        </p>
         <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 sm:gap-2">
           <GameModeCard
             icon="⚡"
@@ -317,6 +326,9 @@ export function MenuPage() {
         <SectionTitle variant="label" className="mb-2 px-1 sm:px-0">
           {t('menu.quickActions')}
         </SectionTitle>
+        <p className="mb-2 px-1 text-xs text-app-subtle sm:px-0">
+          {t('menu.quickActionsHelper', 'Si prefieres, entra directo a tus stats o al ranking global.')}
+        </p>
         <div className="grid grid-cols-2 gap-2">
           <Link
             to="/rankings"
