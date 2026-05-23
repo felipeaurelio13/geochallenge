@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "version": 2,
+    "version": 3,
     "description": "Filming locations of famous movies. Images show the real location where the scene was shot.",
     "imageUrlPattern": "https://commons.wikimedia.org/wiki/Special:FilePath/{Filename}?width=800"
   },
@@ -952,6 +952,861 @@
         "author": "Brijesh Vijayakumar",
         "license": "CC BY-SA 2.0",
         "sourceUrl": "https://commons.wikimedia.org/wiki/File:Goa_beach.jpg"
+      },
+      "difficulty": "HARD"
+    },
+    {
+      "slug": "roman-holiday-rome",
+      "movie": {
+        "en": "Roman Holiday (1953)",
+        "es": "Vacaciones en Roma (1953)"
+      },
+      "country": "Italy",
+      "city": "Rome",
+      "continent": "Europe",
+      "latitude": 41.9009,
+      "longitude": 12.4833,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Fontana_di_Trevi.jpg?width=800",
+      "attribution": {
+        "author": "Jakub Hałun",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Fontana_di_Trevi.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "talented-mr-ripley-positano",
+      "movie": {
+        "en": "The Talented Mr. Ripley (1999)",
+        "es": "El talentoso Mr. Ripley (1999)"
+      },
+      "country": "Italy",
+      "city": "Positano",
+      "continent": "Europe",
+      "latitude": 40.628,
+      "longitude": 14.4848,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Positano_amalfi_2013.jpg?width=800",
+      "attribution": {
+        "author": "Berthold Werner",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Positano_amalfi_2013.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "harry-potter-alnwick",
+      "movie": {
+        "en": "Harry Potter and the Philosopher's Stone (2001)",
+        "es": "Harry Potter y la piedra filosofal (2001)"
+      },
+      "country": "United Kingdom",
+      "city": "Alnwick",
+      "continent": "Europe",
+      "latitude": 55.4156,
+      "longitude": -1.7082,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Alnwick_Castle.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Alnwick_Castle.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "in-bruges",
+      "movie": {
+        "en": "In Bruges (2008)",
+        "es": "Escondidos en Brujas (2008)"
+      },
+      "country": "Belgium",
+      "city": "Bruges",
+      "continent": "Europe",
+      "latitude": 51.2093,
+      "longitude": 3.2247,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Belfort_Brugge.jpg?width=800",
+      "attribution": {
+        "author": "Marc Ryckaert",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Belfort_Brugge.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "girl-dragon-tattoo-stockholm",
+      "movie": {
+        "en": "The Girl with the Dragon Tattoo (2011)",
+        "es": "Los hombres que no amaban a las mujeres (2011)"
+      },
+      "country": "Sweden",
+      "city": "Stockholm",
+      "continent": "Europe",
+      "latitude": 59.3258,
+      "longitude": 18.0706,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Stockholm_gamla_stan.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Stockholm_gamla_stan.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "grand-budapest-hotel-goerlitz",
+      "movie": {
+        "en": "The Grand Budapest Hotel (2014)",
+        "es": "El Gran Hotel Budapest (2014)"
+      },
+      "country": "Germany",
+      "city": "Görlitz",
+      "continent": "Europe",
+      "latitude": 51.1553,
+      "longitude": 14.9879,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/G%C3%B6rlitz_Kaufhaus.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Görlitz_Kaufhaus.jpg"
+      },
+      "difficulty": "HARD"
+    },
+    {
+      "slug": "blade-runner-2049-budapest",
+      "movie": {
+        "en": "Blade Runner 2049 (2017)",
+        "es": "Blade Runner 2049 (2017)"
+      },
+      "country": "Hungary",
+      "city": "Budapest",
+      "continent": "Europe",
+      "latitude": 47.5065,
+      "longitude": 19.0464,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Hungarian_Parliament_Building.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hungarian_Parliament_Building.jpg"
+      },
+      "difficulty": "HARD"
+    },
+    {
+      "slug": "star-wars-last-jedi-dubrovnik",
+      "movie": {
+        "en": "Star Wars: The Last Jedi (2017)",
+        "es": "Star Wars: Los últimos Jedi (2017)"
+      },
+      "country": "Croatia",
+      "city": "Dubrovnik",
+      "continent": "Europe",
+      "latitude": 42.6507,
+      "longitude": 18.0944,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Dubrovnik_Old_Town.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Dubrovnik_Old_Town.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "walter-mitty-iceland",
+      "movie": {
+        "en": "The Secret Life of Walter Mitty (2013)",
+        "es": "La increíble vida de Walter Mitty (2013)"
+      },
+      "country": "Iceland",
+      "city": "Vik",
+      "continent": "Europe",
+      "latitude": 63.6156,
+      "longitude": -19.9886,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Seljalandsfoss.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Seljalandsfoss.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "once-dublin",
+      "movie": {
+        "en": "Once (2006)",
+        "es": "Once (2006)"
+      },
+      "country": "Ireland",
+      "city": "Dublin",
+      "continent": "Europe",
+      "latitude": 53.3399,
+      "longitude": -6.2613,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Grafton_Street_Dublin.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Grafton_Street_Dublin.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "last-samurai-himeji",
+      "movie": {
+        "en": "The Last Samurai (2003)",
+        "es": "El último samurái (2003)"
+      },
+      "country": "Japan",
+      "city": "Himeji",
+      "continent": "Asia",
+      "latitude": 34.8394,
+      "longitude": 134.6939,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Himeji_Castle_keep.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Himeji_Castle_keep.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "memoirs-of-a-geisha-kyoto",
+      "movie": {
+        "en": "Memoirs of a Geisha (2005)",
+        "es": "Memorias de una geisha (2005)"
+      },
+      "country": "Japan",
+      "city": "Kyoto",
+      "continent": "Asia",
+      "latitude": 34.9671,
+      "longitude": 135.7727,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Fushimi_Inari-taisha.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Fushimi_Inari-taisha.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "tomb-raider-angkor-wat",
+      "movie": {
+        "en": "Lara Croft: Tomb Raider (2001)",
+        "es": "Lara Croft: Tomb Raider (2001)"
+      },
+      "country": "Cambodia",
+      "city": "Siem Reap",
+      "continent": "Asia",
+      "latitude": 13.4125,
+      "longitude": 103.8667,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Angkor_Wat_temple.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Angkor_Wat_temple.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "crazy-rich-asians-singapore",
+      "movie": {
+        "en": "Crazy Rich Asians (2018)",
+        "es": "Locamente millonarios (2018)"
+      },
+      "country": "Singapore",
+      "city": "Singapore",
+      "continent": "Asia",
+      "latitude": 1.2834,
+      "longitude": 103.8607,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Marina_Bay_Sands.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Marina_Bay_Sands.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "everest-nepal",
+      "movie": {
+        "en": "Everest (2015)",
+        "es": "Everest (2015)"
+      },
+      "country": "Nepal",
+      "city": "Namche Bazaar",
+      "continent": "Asia",
+      "latitude": 27.8042,
+      "longitude": 86.7136,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Mount_Everest.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Mount_Everest.jpg"
+      },
+      "difficulty": "HARD"
+    },
+    {
+      "slug": "apocalypse-now-philippines",
+      "movie": {
+        "en": "Apocalypse Now (1979)",
+        "es": "Apocalypse Now (1979)"
+      },
+      "country": "Philippines",
+      "city": "Pagsanjan",
+      "continent": "Asia",
+      "latitude": 14.2737,
+      "longitude": 121.4603,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Chocolate_Hills_Overview.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Chocolate_Hills_Overview.jpg"
+      },
+      "difficulty": "HARD"
+    },
+    {
+      "slug": "karate-kid-beijing",
+      "movie": {
+        "en": "The Karate Kid (2010)",
+        "es": "Karate Kid (2010)"
+      },
+      "country": "China",
+      "city": "Beijing",
+      "continent": "Asia",
+      "latitude": 40.4319,
+      "longitude": 116.5704,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Great_Wall_of_China%2C_Mutianyu_2.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Great_Wall_of_China,_Mutianyu_2.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "indochine-halong-bay",
+      "movie": {
+        "en": "Indochine (1992)",
+        "es": "Indochina (1992)"
+      },
+      "country": "Vietnam",
+      "city": "Ha Long",
+      "continent": "Asia",
+      "latitude": 20.9101,
+      "longitude": 107.1839,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Ha_Long_Bay.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ha_Long_Bay.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "man-with-golden-gun-phang-nga",
+      "movie": {
+        "en": "The Man with the Golden Gun (1974)",
+        "es": "El hombre de la pistola de oro (1974)"
+      },
+      "country": "Thailand",
+      "city": "Phang Nga",
+      "continent": "Asia",
+      "latitude": 8.2765,
+      "longitude": 98.4912,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Phang_Nga_Bay.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Phang_Nga_Bay.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "syriana-dubai",
+      "movie": {
+        "en": "Syriana (2005)",
+        "es": "Syriana (2005)"
+      },
+      "country": "United Arab Emirates",
+      "city": "Dubai",
+      "continent": "Asia",
+      "latitude": 25.1972,
+      "longitude": 55.2744,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Burj_Khalifa.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Burj_Khalifa.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "english-patient-tozeur",
+      "movie": {
+        "en": "The English Patient (1996)",
+        "es": "El paciente inglés (1996)"
+      },
+      "country": "Tunisia",
+      "city": "Tozeur",
+      "continent": "Africa",
+      "latitude": 33.9197,
+      "longitude": 8.1335,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Tozeur_Oasis.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tozeur_Oasis.jpg"
+      },
+      "difficulty": "HARD"
+    },
+    {
+      "slug": "blood-diamond-cape-town",
+      "movie": {
+        "en": "Blood Diamond (2006)",
+        "es": "Diamante de sangre (2006)"
+      },
+      "country": "South Africa",
+      "city": "Cape Town",
+      "continent": "Africa",
+      "latitude": -33.9249,
+      "longitude": 18.4241,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Table_Mountain%2C_Cape_Town.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Table_Mountain,_Cape_Town.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "constant-gardener-nairobi",
+      "movie": {
+        "en": "The Constant Gardener (2005)",
+        "es": "El jardinero fiel (2005)"
+      },
+      "country": "Kenya",
+      "city": "Nairobi",
+      "continent": "Africa",
+      "latitude": -1.2921,
+      "longitude": 36.8219,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Nairobi_City_Centre.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Nairobi_City_Centre.jpg"
+      },
+      "difficulty": "HARD"
+    },
+    {
+      "slug": "casablanca-morocco",
+      "movie": {
+        "en": "Casablanca (1942)",
+        "es": "Casablanca (1942)"
+      },
+      "country": "Morocco",
+      "city": "Casablanca",
+      "continent": "Africa",
+      "latitude": 33.5882,
+      "longitude": -7.6114,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Hassan_II_Mosque.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hassan_II_Mosque.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "the-mummy-luxor",
+      "movie": {
+        "en": "The Mummy (1999)",
+        "es": "La momia (1999)"
+      },
+      "country": "Egypt",
+      "city": "Luxor",
+      "continent": "Africa",
+      "latitude": 25.6872,
+      "longitude": 32.6396,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Luxor_temple.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Luxor_temple.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "jurassic-park-kauai",
+      "movie": {
+        "en": "Jurassic Park (1993)",
+        "es": "Jurassic Park (1993)"
+      },
+      "country": "United States",
+      "city": "Kauai",
+      "continent": "North America",
+      "latitude": 22.0964,
+      "longitude": -159.5261,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Napali_coast_summer.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Napali_coast_summer.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "the-shining-timberline",
+      "movie": {
+        "en": "The Shining (1980)",
+        "es": "El resplandor (1980)"
+      },
+      "country": "United States",
+      "city": "Timberline Lodge",
+      "continent": "North America",
+      "latitude": 45.3306,
+      "longitude": -121.7096,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Timberline_Lodge_Mt_Hood.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Timberline_Lodge_Mt_Hood.jpg"
+      },
+      "difficulty": "HARD"
+    },
+    {
+      "slug": "thelma-louise-monument-valley",
+      "movie": {
+        "en": "Thelma & Louise (1991)",
+        "es": "Thelma & Louise (1991)"
+      },
+      "country": "United States",
+      "city": "Moab",
+      "continent": "North America",
+      "latitude": 36.9828,
+      "longitude": -110.1101,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Monument_Valley.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Monument_Valley.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "forrest-gump-savannah",
+      "movie": {
+        "en": "Forrest Gump (1994)",
+        "es": "Forrest Gump (1994)"
+      },
+      "country": "United States",
+      "city": "Savannah",
+      "continent": "North America",
+      "latitude": 32.0809,
+      "longitude": -81.0912,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Forsyth_Park_Fountain.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Forsyth_Park_Fountain.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "sleepless-in-seattle",
+      "movie": {
+        "en": "Sleepless in Seattle (1993)",
+        "es": "Algo para recordar (1993)"
+      },
+      "country": "United States",
+      "city": "Seattle",
+      "continent": "North America",
+      "latitude": 47.6205,
+      "longitude": -122.3493,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Space_Needle_2011-07-04.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Space_Needle_2011-07-04.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "doctor-no-jamaica",
+      "movie": {
+        "en": "Dr. No (1962)",
+        "es": "Dr. No (1962)"
+      },
+      "country": "Jamaica",
+      "city": "Oracabessa",
+      "continent": "North America",
+      "latitude": 18.4002,
+      "longitude": -76.9671,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Dunn%27s_River_Falls.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Dunn%27s_River_Falls.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "once-upon-a-time-in-mexico-guanajuato",
+      "movie": {
+        "en": "Once Upon a Time in Mexico (2003)",
+        "es": "Érase una vez en México (2003)"
+      },
+      "country": "Mexico",
+      "city": "Guanajuato",
+      "continent": "North America",
+      "latitude": 21.019,
+      "longitude": -101.2574,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Guanajuato_city_view.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Guanajuato_city_view.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "into-the-wild-alaska",
+      "movie": {
+        "en": "Into the Wild (2007)",
+        "es": "Hacia rutas salvajes (2007)"
+      },
+      "country": "United States",
+      "city": "Healy",
+      "continent": "North America",
+      "latitude": 63.1148,
+      "longitude": -150.8717,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Denali_National_Park.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Denali_National_Park.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "the-mission-iguazu",
+      "movie": {
+        "en": "The Mission (1986)",
+        "es": "La misión (1986)"
+      },
+      "country": "Argentina",
+      "city": "Puerto Iguazú",
+      "continent": "South America",
+      "latitude": -25.6953,
+      "longitude": -54.4367,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Iguazu_falls_Garganta_del_Diablo.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Iguazu_falls_Garganta_del_Diablo.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "secret-in-their-eyes-buenos-aires",
+      "movie": {
+        "en": "The Secret in Their Eyes (2009)",
+        "es": "El secreto de sus ojos (2009)"
+      },
+      "country": "Argentina",
+      "city": "Buenos Aires",
+      "continent": "South America",
+      "latitude": -34.6118,
+      "longitude": -58.396,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Buenos_Aires_-_Puerto_Madero.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Buenos_Aires_-_Puerto_Madero.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "no-santiago-chile",
+      "movie": {
+        "en": "No (2012)",
+        "es": "No (2012)"
+      },
+      "country": "Chile",
+      "city": "Santiago",
+      "continent": "South America",
+      "latitude": -33.4489,
+      "longitude": -70.6693,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Santiago_de_Chile_Skyline.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Santiago_de_Chile_Skyline.jpg"
+      },
+      "difficulty": "HARD"
+    },
+    {
+      "slug": "love-in-time-of-cholera-cartagena",
+      "movie": {
+        "en": "Love in the Time of Cholera (2007)",
+        "es": "El amor en los tiempos del cólera (2007)"
+      },
+      "country": "Colombia",
+      "city": "Cartagena",
+      "continent": "South America",
+      "latitude": 10.391,
+      "longitude": -75.4794,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Cartagena_de_Indias.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Cartagena_de_Indias.jpg"
+      },
+      "difficulty": "HARD"
+    },
+    {
+      "slug": "cast-away-fiji",
+      "movie": {
+        "en": "Cast Away (2000)",
+        "es": "Náufrago (2000)"
+      },
+      "country": "Fiji",
+      "city": "Monuriki Island",
+      "continent": "Oceania",
+      "latitude": -17.6074,
+      "longitude": 177.1872,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Monuriki.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Monuriki.jpg"
+      },
+      "difficulty": "HARD"
+    },
+    {
+      "slug": "crocodile-dundee-uluru",
+      "movie": {
+        "en": "Crocodile Dundee (1986)",
+        "es": "Cocodrilo Dundee (1986)"
+      },
+      "country": "Australia",
+      "city": "Uluru",
+      "continent": "Oceania",
+      "latitude": -25.3444,
+      "longitude": 130.9,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Uluru%2C_Ayers_Rock.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Uluru,_Ayers_Rock.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "the-matrix-sydney",
+      "movie": {
+        "en": "The Matrix (1999)",
+        "es": "Matrix (1999)"
+      },
+      "country": "Australia",
+      "city": "Sydney",
+      "continent": "Oceania",
+      "latitude": -33.8568,
+      "longitude": 151.2153,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Sydney_Opera_House_-_Dec_2008.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sydney_Opera_House_-_Dec_2008.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "the-piano-karekare",
+      "movie": {
+        "en": "The Piano (1993)",
+        "es": "El piano (1993)"
+      },
+      "country": "New Zealand",
+      "city": "Karekare",
+      "continent": "Oceania",
+      "latitude": -36.9887,
+      "longitude": 174.4645,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Karekare_Beach_NZ.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Karekare_Beach_NZ.jpg"
+      },
+      "difficulty": "HARD"
+    },
+    {
+      "slug": "goldeneye-switzerland",
+      "movie": {
+        "en": "GoldenEye (1995)",
+        "es": "GoldenEye (1995)"
+      },
+      "country": "Switzerland",
+      "city": "Locarno",
+      "continent": "Europe",
+      "latitude": 46.2882,
+      "longitude": 8.7756,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Contra_Dam.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Contra_Dam.jpg"
+      },
+      "difficulty": "HARD"
+    },
+    {
+      "slug": "captain-corellis-mandolin-kefalonia",
+      "movie": {
+        "en": "Captain Corelli's Mandolin (2001)",
+        "es": "El mandolín del capitán Corelli (2001)"
+      },
+      "country": "Greece",
+      "city": "Kefalonia",
+      "continent": "Europe",
+      "latitude": 38.321,
+      "longitude": 20.508,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Myrtos_beach_Cephalonia.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Myrtos_beach_Cephalonia.jpg"
+      },
+      "difficulty": "HARD"
+    },
+    {
+      "slug": "doctor-zhivago-soria",
+      "movie": {
+        "en": "Doctor Zhivago (1965)",
+        "es": "Doctor Zhivago (1965)"
+      },
+      "country": "Spain",
+      "city": "Soria",
+      "continent": "Europe",
+      "latitude": 41.7638,
+      "longitude": -2.4683,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Laguna_negra_de_Urbion.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Laguna_negra_de_Urbion.jpg"
+      },
+      "difficulty": "HARD"
+    },
+    {
+      "slug": "life-of-pi-taipei",
+      "movie": {
+        "en": "Life of Pi (2012)",
+        "es": "La vida de Pi (2012)"
+      },
+      "country": "Taiwan",
+      "city": "Taipei",
+      "continent": "Asia",
+      "latitude": 25.0478,
+      "longitude": 121.5319,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Taipei_101.jpg?width=800",
+      "attribution": {
+        "author": "Wikimedia Commons contributors",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Taipei_101.jpg"
       },
       "difficulty": "HARD"
     }

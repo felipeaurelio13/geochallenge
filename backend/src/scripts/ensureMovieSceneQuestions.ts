@@ -1,6 +1,7 @@
 /**
  * Ensures MOVIE_SCENE questions exist in the database.
- * Safe to call on every startup — does nothing if questions already present.
+ * Safe to call on every startup — idempotent and incremental.
+ * Adds only scenes that are not yet in the DB (detected by slug).
  * Called from index.ts after the DB connection is established.
  */
 import { PrismaClient, Category, Difficulty } from '@prisma/client';
@@ -51,20 +52,38 @@ function getCityDistractors(
 
 export async function ensureMovieSceneQuestions(): Promise<void> {
   try {
-    const existing = await prisma.question.count({
+    const scenes = loadMovieSceneCatalog();
+
+    // Determine which slugs are already seeded
+    const existingRows = await prisma.question.findMany({
       where: { category: Category.MOVIE_SCENE },
+      select: { questionData: true },
     });
 
-    if (existing > 0) {
-      console.log(`ℹ️  MOVIE_SCENE: ${existing} preguntas ya existen, skip auto-seed.`);
+    const existingSlugs = new Set<string>();
+    for (const row of existingRows) {
+      try {
+        const parsed = JSON.parse(row.questionData) as { slug?: string };
+        if (parsed.slug) existingSlugs.add(parsed.slug);
+      } catch { /* skip malformed */ }
+    }
+
+    const missingScenes = scenes.filter((s) => !existingSlugs.has(s.slug));
+
+    if (missingScenes.length === 0) {
+      console.log(`ℹ️  MOVIE_SCENE: ${existingRows.length} preguntas ya existen (catálogo completo), skip.`);
       return;
     }
 
-    console.log('🎬 MOVIE_SCENE: no hay preguntas, iniciando auto-seed...');
+    if (existingRows.length === 0) {
+      console.log(`🎬 MOVIE_SCENE: no hay preguntas, iniciando auto-seed (${scenes.length} escenas)...`);
+    } else {
+      console.log(`🎬 MOVIE_SCENE: catálogo ampliado — añadiendo ${missingScenes.length} escenas nuevas (${existingSlugs.size} ya existían)...`);
+    }
 
-    const scenes = loadMovieSceneCatalog();
     const { countries } = getSeedCountries(loadCountryCatalog(), false);
 
+    // Build city list from full catalog for distractor generation (not just missing scenes)
     const cityList = scenes.map((s) => ({
       slug: s.slug,
       city: s.city,
@@ -89,7 +108,7 @@ export async function ensureMovieSceneQuestions(): Promise<void> {
       flagComplexity: string | null;
     }[] = [];
 
-    for (const scene of scenes) {
+    for (const scene of missingScenes) {
       const country = countries.find((c) => c.name === scene.country);
       if (!country) {
         console.warn(`⚠️  País no encontrado para escena ${scene.slug}: ${scene.country}`);
@@ -138,12 +157,12 @@ export async function ensureMovieSceneQuestions(): Promise<void> {
     }
 
     if (questions.length === 0) {
-      console.warn('⚠️  MOVIE_SCENE auto-seed: ninguna pregunta generada (catálogo vacío o países no encontrados).');
+      console.warn('⚠️  MOVIE_SCENE auto-seed: ninguna pregunta generada (países no encontrados en catálogo).');
       return;
     }
 
     await prisma.question.createMany({ data: questions });
-    console.log(`✅ MOVIE_SCENE: ${questions.length} preguntas creadas automáticamente.`);
+    console.log(`✅ MOVIE_SCENE: ${questions.length} preguntas nuevas creadas (total ahora: ${existingRows.length + questions.length}).`);
   } catch (err) {
     // Non-fatal: log and continue startup. The category will show "not enough questions"
     // until the next restart or manual seed, but it won't crash the server.
