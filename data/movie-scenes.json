@@ -1,13 +1,16 @@
 {
   "_meta": {
-    "version": 1,
+    "version": 2,
     "description": "Filming locations of famous movies. Images show the real location where the scene was shot.",
     "imageUrlPattern": "https://commons.wikimedia.org/wiki/Special:FilePath/{Filename}?width=800"
   },
   "scenes": [
     {
       "slug": "gladiator-rome",
-      "movie": { "en": "Gladiator (2000)", "es": "Gladiator (2000)" },
+      "movie": {
+        "en": "Gladiator (2000)",
+        "es": "Gladiator (2000)"
+      },
       "country": "Italy",
       "city": "Rome",
       "continent": "Europe",
@@ -23,7 +26,10 @@
     },
     {
       "slug": "indiana-jones-petra",
-      "movie": { "en": "Indiana Jones and the Last Crusade (1989)", "es": "Indiana Jones y la Última Cruzada (1989)" },
+      "movie": {
+        "en": "Indiana Jones and the Last Crusade (1989)",
+        "es": "Indiana Jones y la Última Cruzada (1989)"
+      },
       "country": "Jordan",
       "city": "Petra",
       "continent": "Asia",
@@ -39,7 +45,10 @@
     },
     {
       "slug": "lord-of-the-rings-hobbiton",
-      "movie": { "en": "The Lord of the Rings (2001)", "es": "El Señor de los Anillos (2001)" },
+      "movie": {
+        "en": "The Lord of the Rings (2001)",
+        "es": "El Señor de los Anillos (2001)"
+      },
       "country": "New Zealand",
       "city": "Matamata",
       "continent": "Oceania",
@@ -55,7 +64,10 @@
     },
     {
       "slug": "star-wars-tunisia",
-      "movie": { "en": "Star Wars: A New Hope (1977)", "es": "Star Wars: Una nueva esperanza (1977)" },
+      "movie": {
+        "en": "Star Wars: A New Hope (1977)",
+        "es": "Star Wars: Una nueva esperanza (1977)"
+      },
       "country": "Tunisia",
       "city": "Matmata",
       "continent": "Africa",
@@ -71,7 +83,10 @@
     },
     {
       "slug": "amelie-paris",
-      "movie": { "en": "Amélie (2001)", "es": "Amélie (2001)" },
+      "movie": {
+        "en": "Amélie (2001)",
+        "es": "Amélie (2001)"
+      },
       "country": "France",
       "city": "Paris",
       "continent": "Europe",
@@ -87,7 +102,10 @@
     },
     {
       "slug": "mamma-mia-skopelos",
-      "movie": { "en": "Mamma Mia! (2008)", "es": "Mamma Mia! (2008)" },
+      "movie": {
+        "en": "Mamma Mia! (2008)",
+        "es": "Mamma Mia! (2008)"
+      },
       "country": "Greece",
       "city": "Skopelos",
       "continent": "Europe",
@@ -103,7 +121,10 @@
     },
     {
       "slug": "mission-impossible-prague",
-      "movie": { "en": "Mission: Impossible (1996)", "es": "Misión: Imposible (1996)" },
+      "movie": {
+        "en": "Mission: Impossible (1996)",
+        "es": "Misión: Imposible (1996)"
+      },
       "country": "Czech Republic",
       "city": "Prague",
       "continent": "Europe",
@@ -119,7 +140,10 @@
     },
     {
       "slug": "casino-royale-karlovy-vary",
-      "movie": { "en": "Casino Royale (2006)", "es": "Casino Royale (2006)" },
+      "movie": {
+        "en": "Casino Royale (2006)",
+        "es": "Casino Royale (2006)"
+      },
       "country": "Czech Republic",
       "city": "Karlovy Vary",
       "continent": "Europe",
@@ -135,7 +159,10 @@
     },
     {
       "slug": "dark-knight-chicago",
-      "movie": { "en": "The Dark Knight (2008)", "es": "El Caballero Oscuro (2008)" },
+      "movie": {
+        "en": "The Dark Knight (2008)",
+        "es": "El Caballero Oscuro (2008)"
+      },
       "country": "United States",
       "city": "Chicago",
       "continent": "North America",
@@ -151,7 +178,10 @@
     },
     {
       "slug": "the-beach-koh-phi-phi",
-      "movie": { "en": "The Beach (2000)", "es": "La Playa (2000)" },
+      "movie": {
+        "en": "The Beach (2000)",
+        "es": "La Playa (2000)"
+      },
       "country": "Thailand",
       "city": "Koh Phi Phi",
       "continent": "Asia",
@@ -167,7 +197,10 @@
     },
     {
       "slug": "spectre-mexico-city",
-      "movie": { "en": "Spectre (2015)", "es": "Spectre (2015)" },
+      "movie": {
+        "en": "Spectre (2015)",
+        "es": "Spectre (2015)"
+      },
       "country": "Mexico",
       "city": "Mexico City",
       "continent": "North America",
@@ -183,7 +216,10 @@
     },
     {
       "slug": "motorcycle-diaries-cusco",
-      "movie": { "en": "The Motorcycle Diaries (2004)", "es": "Diarios de motocicleta (2004)" },
+      "movie": {
+        "en": "The Motorcycle Diaries (2004)",
+        "es": "Diarios de motocicleta (2004)"
+      },
       "country": "Peru",
       "city": "Cusco",
       "continent": "South America",
@@ -199,7 +235,10 @@
     },
     {
       "slug": "city-of-god-rio",
-      "movie": { "en": "City of God (2002)", "es": "Ciudad de Dios (2002)" },
+      "movie": {
+        "en": "City of God (2002)",
+        "es": "Ciudad de Dios (2002)"
+      },
       "country": "Brazil",
       "city": "Rio de Janeiro",
       "continent": "South America",
@@ -215,7 +254,10 @@
     },
     {
       "slug": "brave-scotland",
-      "movie": { "en": "Brave (2012)", "es": "Valiente (2012)" },
+      "movie": {
+        "en": "Brave (2012)",
+        "es": "Valiente (2012)"
+      },
       "country": "United Kingdom",
       "city": "Highlands",
       "continent": "Europe",
@@ -231,7 +273,10 @@
     },
     {
       "slug": "doctor-strange-morocco",
-      "movie": { "en": "Doctor Strange (2016)", "es": "Doctor Strange (2016)" },
+      "movie": {
+        "en": "Doctor Strange (2016)",
+        "es": "Doctor Strange (2016)"
+      },
       "country": "Morocco",
       "city": "Fes",
       "continent": "Africa",
@@ -247,7 +292,10 @@
     },
     {
       "slug": "eat-pray-love-bali",
-      "movie": { "en": "Eat Pray Love (2010)", "es": "Come, Reza, Ama (2010)" },
+      "movie": {
+        "en": "Eat Pray Love (2010)",
+        "es": "Come, Reza, Ama (2010)"
+      },
       "country": "Indonesia",
       "city": "Ubud",
       "continent": "Asia",
@@ -263,7 +311,10 @@
     },
     {
       "slug": "lawrence-of-arabia-wadi-rum",
-      "movie": { "en": "Lawrence of Arabia (1962)", "es": "Lawrence de Arabia (1962)" },
+      "movie": {
+        "en": "Lawrence of Arabia (1962)",
+        "es": "Lawrence de Arabia (1962)"
+      },
       "country": "Jordan",
       "city": "Wadi Rum",
       "continent": "Asia",
@@ -279,7 +330,10 @@
     },
     {
       "slug": "before-sunrise-vienna",
-      "movie": { "en": "Before Sunrise (1995)", "es": "Antes del amanecer (1995)" },
+      "movie": {
+        "en": "Before Sunrise (1995)",
+        "es": "Antes del amanecer (1995)"
+      },
       "country": "Austria",
       "city": "Vienna",
       "continent": "Europe",
@@ -295,7 +349,10 @@
     },
     {
       "slug": "lost-in-translation-tokyo",
-      "movie": { "en": "Lost in Translation (2003)", "es": "Perdidos en Tokio (2003)" },
+      "movie": {
+        "en": "Lost in Translation (2003)",
+        "es": "Perdidos en Tokio (2003)"
+      },
       "country": "Japan",
       "city": "Tokyo",
       "continent": "Asia",
@@ -311,7 +368,10 @@
     },
     {
       "slug": "slumdog-millionaire-mumbai",
-      "movie": { "en": "Slumdog Millionaire (2008)", "es": "¿Quién quiere ser millonario? (2008)" },
+      "movie": {
+        "en": "Slumdog Millionaire (2008)",
+        "es": "¿Quién quiere ser millonario? (2008)"
+      },
       "country": "India",
       "city": "Mumbai",
       "continent": "Asia",
@@ -327,7 +387,10 @@
     },
     {
       "slug": "la-la-land-los-angeles",
-      "movie": { "en": "La La Land (2016)", "es": "La ciudad de las estrellas (2016)" },
+      "movie": {
+        "en": "La La Land (2016)",
+        "es": "La ciudad de las estrellas (2016)"
+      },
       "country": "United States",
       "city": "Los Angeles",
       "continent": "North America",
@@ -343,7 +406,10 @@
     },
     {
       "slug": "schindlers-list-krakow",
-      "movie": { "en": "Schindler's List (1993)", "es": "La lista de Schindler (1993)" },
+      "movie": {
+        "en": "Schindler's List (1993)",
+        "es": "La lista de Schindler (1993)"
+      },
       "country": "Poland",
       "city": "Kraków",
       "continent": "Europe",
@@ -359,7 +425,10 @@
     },
     {
       "slug": "the-revenant-canada",
-      "movie": { "en": "The Revenant (2015)", "es": "El Renacido (2015)" },
+      "movie": {
+        "en": "The Revenant (2015)",
+        "es": "El Renacido (2015)"
+      },
       "country": "Canada",
       "city": "Kananaskis",
       "continent": "North America",
@@ -375,7 +444,10 @@
     },
     {
       "slug": "black-panther-busan",
-      "movie": { "en": "Black Panther (2018)", "es": "Pantera Negra (2018)" },
+      "movie": {
+        "en": "Black Panther (2018)",
+        "es": "Pantera Negra (2018)"
+      },
       "country": "South Korea",
       "city": "Busan",
       "continent": "Asia",
@@ -391,7 +463,10 @@
     },
     {
       "slug": "bridge-of-spies-berlin",
-      "movie": { "en": "Bridge of Spies (2015)", "es": "El puente de los espías (2015)" },
+      "movie": {
+        "en": "Bridge of Spies (2015)",
+        "es": "El puente de los espías (2015)"
+      },
       "country": "Germany",
       "city": "Berlin",
       "continent": "Europe",
@@ -404,6 +479,481 @@
         "sourceUrl": "https://commons.wikimedia.org/wiki/File:Glienicker_Bruecke.jpg"
       },
       "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "skyfall-istanbul",
+      "movie": {
+        "en": "Skyfall (2012)",
+        "es": "Skyfall (2012)"
+      },
+      "country": "Turkey",
+      "city": "Istanbul",
+      "continent": "Asia",
+      "latitude": 41.0082,
+      "longitude": 28.9784,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Istanbul_asv2020-02_img39_Hagia_Sophia.jpg?width=800",
+      "attribution": {
+        "author": "Arild Vågen",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Istanbul_asv2020-02_img39_Hagia_Sophia.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "inception-paris",
+      "movie": {
+        "en": "Inception (2010)",
+        "es": "El origen (2010)"
+      },
+      "country": "France",
+      "city": "Paris",
+      "continent": "Europe",
+      "latitude": 48.8584,
+      "longitude": 2.2945,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Tour_Eiffel_Wikimedia_Commons.jpg?width=800",
+      "attribution": {
+        "author": "Benh LIEU SONG",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tour_Eiffel_Wikimedia_Commons.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "bourne-tangier",
+      "movie": {
+        "en": "The Bourne Ultimatum (2007)",
+        "es": "El ultimátum de Bourne (2007)"
+      },
+      "country": "Morocco",
+      "city": "Tangier",
+      "continent": "Africa",
+      "latitude": 35.7595,
+      "longitude": -5.834,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Tangier_Morocco.jpg?width=800",
+      "attribution": {
+        "author": "Abdel Tifir",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tangier_Morocco.jpg"
+      },
+      "difficulty": "HARD"
+    },
+    {
+      "slug": "harry-potter-london",
+      "movie": {
+        "en": "Harry Potter and the Philosopher's Stone (2001)",
+        "es": "Harry Potter y la piedra filosofal (2001)"
+      },
+      "country": "United Kingdom",
+      "city": "London",
+      "continent": "Europe",
+      "latitude": 51.5074,
+      "longitude": -0.1278,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Westminster_from_the_dome_on_Methodist_Central_Hall.jpg?width=800",
+      "attribution": {
+        "author": "Colin",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Westminster_from_the_dome_on_Methodist_Central_Hall.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "notting-hill-london",
+      "movie": {
+        "en": "Notting Hill (1999)",
+        "es": "Notting Hill (1999)"
+      },
+      "country": "United Kingdom",
+      "city": "London",
+      "continent": "Europe",
+      "latitude": 51.5099,
+      "longitude": -0.1967,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Portobello_Road_Market.jpg?width=800",
+      "attribution": {
+        "author": "Christine Matthews",
+        "license": "CC BY-SA 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Portobello_Road_Market.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "midnight-paris",
+      "movie": {
+        "en": "Midnight in Paris (2011)",
+        "es": "Medianoche en París (2011)"
+      },
+      "country": "France",
+      "city": "Paris",
+      "continent": "Europe",
+      "latitude": 48.8606,
+      "longitude": 2.3376,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Louvre_Museum_Wikimedia_Commons.jpg?width=800",
+      "attribution": {
+        "author": "Benh LIEU SONG",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Louvre_Museum_Wikimedia_Commons.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "lost-translation-tokyo",
+      "movie": {
+        "en": "Lost in Translation (2003)",
+        "es": "Perdidos en Tokio (2003)"
+      },
+      "country": "Japan",
+      "city": "Tokyo",
+      "continent": "Asia",
+      "latitude": 35.6762,
+      "longitude": 139.6503,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Tokyo_Montage_2015.jpg?width=800",
+      "attribution": {
+        "author": "Morio",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tokyo_Montage_2015.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "laputa-havana",
+      "movie": {
+        "en": "Fast and Furious 8 (2017)",
+        "es": "Rápidos y Furiosos 8 (2017)"
+      },
+      "country": "Cuba",
+      "city": "Havana",
+      "continent": "North America",
+      "latitude": 23.1136,
+      "longitude": -82.3666,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Havana_Capitolio.jpg?width=800",
+      "attribution": {
+        "author": "Ludovic Péron",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Havana_Capitolio.jpg"
+      },
+      "difficulty": "HARD"
+    },
+    {
+      "slug": "romancing-stone-cartagena",
+      "movie": {
+        "en": "Romancing the Stone (1984)",
+        "es": "Tras el corazón verde (1984)"
+      },
+      "country": "Colombia",
+      "city": "Cartagena",
+      "continent": "South America",
+      "latitude": 10.391,
+      "longitude": -75.4794,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Cartagena_Colombia.jpg?width=800",
+      "attribution": {
+        "author": "Pedro Szekely",
+        "license": "CC BY-SA 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Cartagena_Colombia.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "vicky-cristina-barcelona",
+      "movie": {
+        "en": "Vicky Cristina Barcelona (2008)",
+        "es": "Vicky Cristina Barcelona (2008)"
+      },
+      "country": "Spain",
+      "city": "Barcelona",
+      "continent": "Europe",
+      "latitude": 41.3851,
+      "longitude": 2.1734,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Barcelona_Skyline.jpg?width=800",
+      "attribution": {
+        "author": "Diliff",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Barcelona_Skyline.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "mission-impossible-dubai",
+      "movie": {
+        "en": "Mission: Impossible – Ghost Protocol (2011)",
+        "es": "Misión imposible: Protocolo fantasma (2011)"
+      },
+      "country": "United Arab Emirates",
+      "city": "Dubai",
+      "continent": "Asia",
+      "latitude": 25.1972,
+      "longitude": 55.2744,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Burj_Khalifa.jpg?width=800",
+      "attribution": {
+        "author": "Donaldytong",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Burj_Khalifa.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "slumdog-mumbai",
+      "movie": {
+        "en": "Slumdog Millionaire (2008)",
+        "es": "¿Quién quiere ser millonario? (2008)"
+      },
+      "country": "India",
+      "city": "Mumbai",
+      "continent": "Asia",
+      "latitude": 19.076,
+      "longitude": 72.8777,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Mumbai_Skyline_at_night.jpg?width=800",
+      "attribution": {
+        "author": "Nichalp",
+        "license": "CC BY-SA 2.5",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Mumbai_Skyline_at_night.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "tenet-amalfi",
+      "movie": {
+        "en": "Tenet (2020)",
+        "es": "Tenet (2020)"
+      },
+      "country": "Italy",
+      "city": "Amalfi",
+      "continent": "Europe",
+      "latitude": 40.634,
+      "longitude": 14.6027,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Amalfi_Coast.jpg?width=800",
+      "attribution": {
+        "author": "Mstyslav Chernov",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Amalfi_Coast.jpg"
+      },
+      "difficulty": "HARD"
+    },
+    {
+      "slug": "james-bond-venice",
+      "movie": {
+        "en": "Casino Royale (2006)",
+        "es": "Casino Royale (2006)"
+      },
+      "country": "Italy",
+      "city": "Venice",
+      "continent": "Europe",
+      "latitude": 45.4408,
+      "longitude": 12.3155,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Venice_Canal.jpg?width=800",
+      "attribution": {
+        "author": "Jean-Pierre Dalbéra",
+        "license": "CC BY 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Venice_Canal.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "doctor-strange-kathmandu",
+      "movie": {
+        "en": "Doctor Strange (2016)",
+        "es": "Doctor Strange (2016)"
+      },
+      "country": "Nepal",
+      "city": "Kathmandu",
+      "continent": "Asia",
+      "latitude": 27.7172,
+      "longitude": 85.324,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Kathmandu_Durbar_Square.jpg?width=800",
+      "attribution": {
+        "author": "Vyacheslav Argenberg",
+        "license": "CC BY 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Kathmandu_Durbar_Square.jpg"
+      },
+      "difficulty": "HARD"
+    },
+    {
+      "slug": "the-tourist-venice",
+      "movie": {
+        "en": "The Tourist (2010)",
+        "es": "El turista (2010)"
+      },
+      "country": "Italy",
+      "city": "Venice",
+      "continent": "Europe",
+      "latitude": 45.4372,
+      "longitude": 12.3346,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Piazza_San_Marco.jpg?width=800",
+      "attribution": {
+        "author": "Berthold Werner",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Piazza_San_Marco.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "bourne-athens",
+      "movie": {
+        "en": "The Bourne Identity (2002)",
+        "es": "Identidad desconocida (2002)"
+      },
+      "country": "Greece",
+      "city": "Athens",
+      "continent": "Europe",
+      "latitude": 37.9838,
+      "longitude": 23.7275,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Acropolis_of_Athens.jpg?width=800",
+      "attribution": {
+        "author": "A.Savin",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Acropolis_of_Athens.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "mamma-mia-2-skiathos",
+      "movie": {
+        "en": "Mamma Mia! Here We Go Again (2018)",
+        "es": "Mamma Mia! Vamos otra vez (2018)"
+      },
+      "country": "Greece",
+      "city": "Skiathos",
+      "continent": "Europe",
+      "latitude": 39.162,
+      "longitude": 23.4902,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Skiathos_Town.jpg?width=800",
+      "attribution": {
+        "author": "C messier",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Skiathos_Town.jpg"
+      },
+      "difficulty": "HARD"
+    },
+    {
+      "slug": "godfather-sicily",
+      "movie": {
+        "en": "The Godfather (1972)",
+        "es": "El Padrino (1972)"
+      },
+      "country": "Italy",
+      "city": "Sicily",
+      "continent": "Europe",
+      "latitude": 37.5999,
+      "longitude": 14.0154,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Sicily_landscape.jpg?width=800",
+      "attribution": {
+        "author": "Berthold Werner",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sicily_landscape.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "sound-of-music-salzburg",
+      "movie": {
+        "en": "The Sound of Music (1965)",
+        "es": "La novicia rebelde (1965)"
+      },
+      "country": "Austria",
+      "city": "Salzburg",
+      "continent": "Europe",
+      "latitude": 47.8095,
+      "longitude": 13.055,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Salzburg_old_town.jpg?width=800",
+      "attribution": {
+        "author": "Taxiarchos228",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Salzburg_old_town.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "skyfall-shanghai",
+      "movie": {
+        "en": "Skyfall (2012)",
+        "es": "Skyfall (2012)"
+      },
+      "country": "China",
+      "city": "Shanghai",
+      "continent": "Asia",
+      "latitude": 31.2304,
+      "longitude": 121.4737,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Shanghai_skyline.jpg?width=800",
+      "attribution": {
+        "author": "J. Patrick Fischer",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Shanghai_skyline.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "to-catch-a-thief-nice",
+      "movie": {
+        "en": "To Catch a Thief (1955)",
+        "es": "Atrapa a un ladrón (1955)"
+      },
+      "country": "France",
+      "city": "Nice",
+      "continent": "Europe",
+      "latitude": 43.7102,
+      "longitude": 7.262,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Nice_France.jpg?width=800",
+      "attribution": {
+        "author": "Tangopaso",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Nice_France.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "moulin-rouge-paris",
+      "movie": {
+        "en": "Moulin Rouge! (2001)",
+        "es": "Moulin Rouge! (2001)"
+      },
+      "country": "France",
+      "city": "Paris",
+      "continent": "Europe",
+      "latitude": 48.8841,
+      "longitude": 2.3324,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Moulin_Rouge_Paris.jpg?width=800",
+      "attribution": {
+        "author": "DXR",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Moulin_Rouge_Paris.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "quantum-of-solace-panama",
+      "movie": {
+        "en": "Quantum of Solace (2008)",
+        "es": "Quantum of Solace (2008)"
+      },
+      "country": "Panama",
+      "city": "Panama City",
+      "continent": "North America",
+      "latitude": 8.9824,
+      "longitude": -79.5199,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Panama_City_skyline.jpg?width=800",
+      "attribution": {
+        "author": "Mariordo",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Panama_City_skyline.jpg"
+      },
+      "difficulty": "HARD"
+    },
+    {
+      "slug": "bourne-goa",
+      "movie": {
+        "en": "The Bourne Supremacy (2004)",
+        "es": "El mito de Bourne (2004)"
+      },
+      "country": "India",
+      "city": "Goa",
+      "continent": "Asia",
+      "latitude": 15.2993,
+      "longitude": 74.124,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Goa_beach.jpg?width=800",
+      "attribution": {
+        "author": "Brijesh Vijayakumar",
+        "license": "CC BY-SA 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Goa_beach.jpg"
+      },
+      "difficulty": "HARD"
     }
   ]
 }

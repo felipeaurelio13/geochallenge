@@ -234,6 +234,8 @@ export function MenuPage() {
         <p className="mt-2 text-xs text-amber-300">{t('filters.unavailableCombination', { required: requiredQuestions })}</p>
       )}
 
+
+      
       <section className="mt-3" aria-label={t('menu.gameModes')}>
         <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 sm:gap-2">
           <GameModeCard
