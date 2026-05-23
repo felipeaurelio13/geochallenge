@@ -15,9 +15,9 @@ import { prisma } from '../config/database.js';
 
 const MAX_PLAYERS = 4;
 const MIN_PLAYERS = 2;
-const MAX_LIVES = 3;
-const STARTING_LIVES = 1;
-const STREAK_FOR_LIFE = 5;
+const MAX_LIVES = 4;
+const STARTING_LIVES = 2;
+const STREAK_FOR_LIFE = 4;
 const FILL_WINDOW_MS = 15_000;
 const COUNTDOWN_SECONDS = 3;
 const QUESTION_RESULT_DELAY_MS = 3_000;
@@ -293,25 +293,12 @@ function resolveRound(io: SocketIOServer, match: ActiveSurvivalMatch, round: num
       player.streak++;
       player.score += answer!.points;
 
-      let gained = 0;
-      const reasons: string[] = [];
-
       if (player.streak >= STREAK_FOR_LIFE) {
-        gained++;
-        player.streak = 0;
-        reasons.push('streak');
-      }
-      if (difficulty === 'HARD') {
-        gained++;
-        reasons.push('hard_answer');
-      }
-
-      if (gained > 0) {
         const before = player.lives;
-        player.lives = Math.min(player.lives + gained, MAX_LIVES);
+        player.lives = Math.min(player.lives + 1, MAX_LIVES);
         livesChange = player.lives - before;
         player.livesEarned += livesChange;
-        if (reasons.length > 0) lifeEarnedReason = reasons.join('_and_');
+        if (livesChange > 0) lifeEarnedReason = 'streak';
       }
     } else {
       player.streak = 0;
