@@ -92,7 +92,11 @@
     "flashBadge": "Nuevo · Mobile",
     "flashNoMap": "El modo Flash no admite mapas — elige otra categoría",
     "survival": "Survival",
-    "survivalDesc": "1 vida · dificultad progresiva · último en pie gana"
+    "survivalDesc": "1 vida · dificultad progresiva · último en pie gana",
+    "movieSceneModuleTitle": "Módulo Cine: escenas famosas",
+    "movieSceneModuleDesc": "Identifica en qué país o ciudad se filmó cada escena icónica.",
+    "movieScenePlayNow": "Jugar ahora",
+    "movieSceneDuelCta": "Duelo de cine"
   },
   "survival": {
     "title": "Survival",
