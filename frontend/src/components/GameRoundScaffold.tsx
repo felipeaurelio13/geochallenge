@@ -47,7 +47,7 @@ export function GameRoundScaffold({
 }: GameRoundScaffoldProps) {
   const { i18n } = useTranslation();
   const isCapitalQuestion = !isMapQuestion && question.category === 'CAPITAL';
-  const hasMediaQuestion = !isMapQuestion && (question.category === 'FLAG' || question.category === 'SILHOUETTE' || question.category === 'MONUMENT');
+  const hasMediaQuestion = !isMapQuestion && (question.category === 'FLAG' || question.category === 'SILHOUETTE' || question.category === 'MONUMENT' || question.category === 'MOVIE_SCENE');
 
   const content = (
     <div className="game-round-content mx-auto flex h-full w-full max-w-4xl min-h-0 flex-col">

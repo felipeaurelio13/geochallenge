@@ -3,6 +3,21 @@ import { config } from '../config/env.js';
 import { Category, Difficulty, GameMode, Prisma } from '@prisma/client';
 import { haversineDistance } from '../utils/haversine.js';
 import { calculateScore, calculateMapScore, calculateTimeBonus, shuffleArray, selectRandom } from '../utils/scoring.js';
+import { loadMovieSceneCatalog } from '../utils/movieSceneCatalog.js';
+
+// Lazy-loaded cache: slug → { en, es }
+let _movieNameCache: Map<string, { en: string; es: string }> | null = null;
+function getMovieNameMap(): Map<string, { en: string; es: string }> {
+  if (!_movieNameCache) {
+    try {
+      const scenes = loadMovieSceneCatalog();
+      _movieNameCache = new Map(scenes.map((s) => [s.slug, s.movie]));
+    } catch {
+      _movieNameCache = new Map();
+    }
+  }
+  return _movieNameCache;
+}
 
 export interface GameQuestion {
   id: string;
@@ -445,14 +460,22 @@ export function generateQuestionText(question: any): string {
     }
     case Category.MOVIE_SCENE: {
       try {
-        const parsed = JSON.parse(question.questionData) as { variant?: 'country' | 'city' };
-        if (parsed.variant === 'city') {
-          return '¿En qué ciudad fue filmada esta escena?';
+        const parsed = JSON.parse(question.questionData) as { variant?: 'country' | 'city'; slug?: string };
+        const variant = parsed.variant ?? 'country';
+        const movieMap = getMovieNameMap();
+        const movie = parsed.slug ? movieMap.get(parsed.slug) : undefined;
+        const movieName = movie?.es || movie?.en || '';
+        if (variant === 'city') {
+          return movieName
+            ? `¿En qué ciudad fue filmada esta escena de ${movieName}?`
+            : '¿En qué ciudad fue filmada esta escena?';
         }
+        return movieName
+          ? `¿En qué país fue filmada esta escena de ${movieName}?`
+          : '¿En qué país fue filmada esta escena?';
       } catch {
-        // default to country variant
+        return '¿En qué país fue filmada esta escena?';
       }
-      return '¿En qué país fue filmada esta escena?';
     }
     default:
       return question.questionData;
