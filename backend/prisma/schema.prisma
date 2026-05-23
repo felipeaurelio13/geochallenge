@@ -122,6 +122,7 @@ enum Category {
   CAPITAL
   SILHOUETTE
   MONUMENT
+  MOVIE_SCENE
   MIXED
 }
 

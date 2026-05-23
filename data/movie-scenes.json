@@ -1,0 +1,409 @@
+{
+  "_meta": {
+    "version": 1,
+    "description": "Filming locations of famous movies. Images show the real location where the scene was shot.",
+    "imageUrlPattern": "https://commons.wikimedia.org/wiki/Special:FilePath/{Filename}?width=800"
+  },
+  "scenes": [
+    {
+      "slug": "gladiator-rome",
+      "movie": { "en": "Gladiator (2000)", "es": "Gladiator (2000)" },
+      "country": "Italy",
+      "city": "Rome",
+      "continent": "Europe",
+      "latitude": 41.8902,
+      "longitude": 12.4922,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Colosseo_2020.jpg?width=800",
+      "attribution": {
+        "author": "FeaturedPics",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Colosseo_2020.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "indiana-jones-petra",
+      "movie": { "en": "Indiana Jones and the Last Crusade (1989)", "es": "Indiana Jones y la Última Cruzada (1989)" },
+      "country": "Jordan",
+      "city": "Petra",
+      "continent": "Asia",
+      "latitude": 30.3285,
+      "longitude": 35.4444,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/The_Treasury_Petra.jpg?width=800",
+      "attribution": {
+        "author": "Graeme Churchard",
+        "license": "CC BY 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:The_Treasury_Petra.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "lord-of-the-rings-hobbiton",
+      "movie": { "en": "The Lord of the Rings (2001)", "es": "El Señor de los Anillos (2001)" },
+      "country": "New Zealand",
+      "city": "Matamata",
+      "continent": "Oceania",
+      "latitude": -37.8723,
+      "longitude": 175.6842,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Hobbiton_movie_set_(7178980592).jpg?width=800",
+      "attribution": {
+        "author": "Gareth Williams",
+        "license": "CC BY 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hobbiton_movie_set_(7178980592).jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "star-wars-tunisia",
+      "movie": { "en": "Star Wars: A New Hope (1977)", "es": "Star Wars: Una nueva esperanza (1977)" },
+      "country": "Tunisia",
+      "city": "Matmata",
+      "continent": "Africa",
+      "latitude": 33.5448,
+      "longitude": 9.9696,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Hotel_Sidi_Driss_Matmata.jpg?width=800",
+      "attribution": {
+        "author": "Jerzy Strzelecki",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hotel_Sidi_Driss_Matmata.jpg"
+      },
+      "difficulty": "HARD"
+    },
+    {
+      "slug": "amelie-paris",
+      "movie": { "en": "Amélie (2001)", "es": "Amélie (2001)" },
+      "country": "France",
+      "city": "Paris",
+      "continent": "Europe",
+      "latitude": 48.8867,
+      "longitude": 2.3431,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Sacre_Coeur_3_crop.jpg?width=800",
+      "attribution": {
+        "author": "Dne",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sacre_Coeur_3_crop.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "mamma-mia-skopelos",
+      "movie": { "en": "Mamma Mia! (2008)", "es": "Mamma Mia! (2008)" },
+      "country": "Greece",
+      "city": "Skopelos",
+      "continent": "Europe",
+      "latitude": 39.1167,
+      "longitude": 23.7,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Agios_Ioannis_Kastri_Skopelos.jpg?width=800",
+      "attribution": {
+        "author": "Zde",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Agios_Ioannis_Kastri_Skopelos.jpg"
+      },
+      "difficulty": "HARD"
+    },
+    {
+      "slug": "mission-impossible-prague",
+      "movie": { "en": "Mission: Impossible (1996)", "es": "Misión: Imposible (1996)" },
+      "country": "Czech Republic",
+      "city": "Prague",
+      "continent": "Europe",
+      "latitude": 50.0755,
+      "longitude": 14.4378,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Prague_charles_bridge_2.jpg?width=800",
+      "attribution": {
+        "author": "Jorge Royan",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Prague_charles_bridge_2.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "casino-royale-karlovy-vary",
+      "movie": { "en": "Casino Royale (2006)", "es": "Casino Royale (2006)" },
+      "country": "Czech Republic",
+      "city": "Karlovy Vary",
+      "continent": "Europe",
+      "latitude": 50.2304,
+      "longitude": 12.871,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Karlovy_Vary_-_Grandhotel_Pupp_2.jpg?width=800",
+      "attribution": {
+        "author": "Pudelek",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Karlovy_Vary_-_Grandhotel_Pupp_2.jpg"
+      },
+      "difficulty": "HARD"
+    },
+    {
+      "slug": "dark-knight-chicago",
+      "movie": { "en": "The Dark Knight (2008)", "es": "El Caballero Oscuro (2008)" },
+      "country": "United States",
+      "city": "Chicago",
+      "continent": "North America",
+      "latitude": 41.8827,
+      "longitude": -87.6233,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Chicago_lakefront_skyline_from_adler.jpg?width=800",
+      "attribution": {
+        "author": "Daniel Schwen",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Chicago_lakefront_skyline_from_adler.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "the-beach-koh-phi-phi",
+      "movie": { "en": "The Beach (2000)", "es": "La Playa (2000)" },
+      "country": "Thailand",
+      "city": "Koh Phi Phi",
+      "continent": "Asia",
+      "latitude": 7.7407,
+      "longitude": 98.7784,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Phi_Phi_Island-Thailand3.jpg?width=800",
+      "attribution": {
+        "author": "Stefan Fussan",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Phi_Phi_Island-Thailand3.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "spectre-mexico-city",
+      "movie": { "en": "Spectre (2015)", "es": "Spectre (2015)" },
+      "country": "Mexico",
+      "city": "Mexico City",
+      "continent": "North America",
+      "latitude": 19.4326,
+      "longitude": -99.1332,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Palacio_de_Bellas_Artes%2C_M%C3%A9xico_DF.jpg?width=800",
+      "attribution": {
+        "author": "Neonbubble",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Palacio_de_Bellas_Artes,_México_DF.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "motorcycle-diaries-cusco",
+      "movie": { "en": "The Motorcycle Diaries (2004)", "es": "Diarios de motocicleta (2004)" },
+      "country": "Peru",
+      "city": "Cusco",
+      "continent": "South America",
+      "latitude": -13.5319,
+      "longitude": -71.9675,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Cusco_-_Per%C3%BA_%2819%29.jpg?width=800",
+      "attribution": {
+        "author": "Pedro Szekely",
+        "license": "CC BY-SA 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Cusco_-_Perú_(19).jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "city-of-god-rio",
+      "movie": { "en": "City of God (2002)", "es": "Ciudad de Dios (2002)" },
+      "country": "Brazil",
+      "city": "Rio de Janeiro",
+      "continent": "South America",
+      "latitude": -22.9068,
+      "longitude": -43.1729,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Cristo_Redentor_-_Rio_de_Janeiro%2C_Brasil.jpg?width=800",
+      "attribution": {
+        "author": "Fernando Stankuns",
+        "license": "CC BY-SA 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Cristo_Redentor_-_Rio_de_Janeiro,_Brasil.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "brave-scotland",
+      "movie": { "en": "Brave (2012)", "es": "Valiente (2012)" },
+      "country": "United Kingdom",
+      "city": "Highlands",
+      "continent": "Europe",
+      "latitude": 57.1223,
+      "longitude": -4.7124,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Eilean_Donan_castle%2C_Loch_Duich.jpg?width=800",
+      "attribution": {
+        "author": "Dave Conner",
+        "license": "CC BY 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Eilean_Donan_castle,_Loch_Duich.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "doctor-strange-morocco",
+      "movie": { "en": "Doctor Strange (2016)", "es": "Doctor Strange (2016)" },
+      "country": "Morocco",
+      "city": "Fes",
+      "continent": "Africa",
+      "latitude": 34.0181,
+      "longitude": -5.0078,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Fes_-_Panorama_%281%29.jpg?width=800",
+      "attribution": {
+        "author": "Bertrand Devouard",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Fes_-_Panorama_(1).jpg"
+      },
+      "difficulty": "HARD"
+    },
+    {
+      "slug": "eat-pray-love-bali",
+      "movie": { "en": "Eat Pray Love (2010)", "es": "Come, Reza, Ama (2010)" },
+      "country": "Indonesia",
+      "city": "Ubud",
+      "continent": "Asia",
+      "latitude": -8.5069,
+      "longitude": 115.2625,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Rice_fields_in_Bali.jpg?width=800",
+      "attribution": {
+        "author": "Kersti Nebelsiek",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Rice_fields_in_Bali.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "lawrence-of-arabia-wadi-rum",
+      "movie": { "en": "Lawrence of Arabia (1962)", "es": "Lawrence de Arabia (1962)" },
+      "country": "Jordan",
+      "city": "Wadi Rum",
+      "continent": "Asia",
+      "latitude": 29.573,
+      "longitude": 35.4218,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Wadi_Rum_protected_area.jpg?width=800",
+      "attribution": {
+        "author": "Christopher Michel",
+        "license": "CC BY 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Wadi_Rum_protected_area.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "before-sunrise-vienna",
+      "movie": { "en": "Before Sunrise (1995)", "es": "Antes del amanecer (1995)" },
+      "country": "Austria",
+      "city": "Vienna",
+      "continent": "Europe",
+      "latitude": 48.2082,
+      "longitude": 16.3738,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Vienna_-_Naschmarkt_-_2928.jpg?width=800",
+      "attribution": {
+        "author": "Jorge Royan",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Vienna_-_Naschmarkt_-_2928.jpg"
+      },
+      "difficulty": "HARD"
+    },
+    {
+      "slug": "lost-in-translation-tokyo",
+      "movie": { "en": "Lost in Translation (2003)", "es": "Perdidos en Tokio (2003)" },
+      "country": "Japan",
+      "city": "Tokyo",
+      "continent": "Asia",
+      "latitude": 35.6762,
+      "longitude": 139.6503,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Shinjuku_night.jpg?width=800",
+      "attribution": {
+        "author": "Morio",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Shinjuku_night.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "slumdog-millionaire-mumbai",
+      "movie": { "en": "Slumdog Millionaire (2008)", "es": "¿Quién quiere ser millonario? (2008)" },
+      "country": "India",
+      "city": "Mumbai",
+      "continent": "Asia",
+      "latitude": 19.076,
+      "longitude": 72.8777,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Mumbai_03-2016_30_Gateway_of_India.jpg?width=800",
+      "attribution": {
+        "author": "Marcin Konsek",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Mumbai_03-2016_30_Gateway_of_India.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "la-la-land-los-angeles",
+      "movie": { "en": "La La Land (2016)", "es": "La ciudad de las estrellas (2016)" },
+      "country": "United States",
+      "city": "Los Angeles",
+      "continent": "North America",
+      "latitude": 34.1185,
+      "longitude": -118.3004,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Griffith_Observatory_from_above.jpg?width=800",
+      "attribution": {
+        "author": "King of Hearts",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Griffith_Observatory_from_above.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "schindlers-list-krakow",
+      "movie": { "en": "Schindler's List (1993)", "es": "La lista de Schindler (1993)" },
+      "country": "Poland",
+      "city": "Kraków",
+      "continent": "Europe",
+      "latitude": 50.0647,
+      "longitude": 19.945,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Krakow_-_Kazimierz_-_Szeroka_Street.jpg?width=800",
+      "attribution": {
+        "author": "Zygmunt Put",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Krakow_-_Kazimierz_-_Szeroka_Street.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "the-revenant-canada",
+      "movie": { "en": "The Revenant (2015)", "es": "El Renacido (2015)" },
+      "country": "Canada",
+      "city": "Kananaskis",
+      "continent": "North America",
+      "latitude": 50.9312,
+      "longitude": -115.1545,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Kananaskis_Country.jpg?width=800",
+      "attribution": {
+        "author": "Tobias Alt",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Kananaskis_Country.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "black-panther-busan",
+      "movie": { "en": "Black Panther (2018)", "es": "Pantera Negra (2018)" },
+      "country": "South Korea",
+      "city": "Busan",
+      "continent": "Asia",
+      "latitude": 35.1795,
+      "longitude": 129.0756,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Gwangalli_beach_and_Gwangan_Bridge.jpg?width=800",
+      "attribution": {
+        "author": "Steve46814",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Gwangalli_beach_and_Gwangan_Bridge.jpg"
+      },
+      "difficulty": "HARD"
+    },
+    {
+      "slug": "bridge-of-spies-berlin",
+      "movie": { "en": "Bridge of Spies (2015)", "es": "El puente de los espías (2015)" },
+      "country": "Germany",
+      "city": "Berlin",
+      "continent": "Europe",
+      "latitude": 52.5163,
+      "longitude": 13.3777,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Glienicker_Bruecke.jpg?width=800",
+      "attribution": {
+        "author": "Sebastian Rittau",
+        "license": "CC BY-SA 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Glienicker_Bruecke.jpg"
+      },
+      "difficulty": "MEDIUM"
+    }
+  ]
+}

@@ -180,7 +180,7 @@ export async function getQuestionsForGame(
     questions = await prisma.question.findMany({
       where: {
         ...baseWhere,
-        category: { in: [Category.FLAG, Category.CAPITAL, Category.MAP, Category.SILHOUETTE, Category.MONUMENT] },
+        category: { in: [Category.FLAG, Category.CAPITAL, Category.MAP, Category.SILHOUETTE, Category.MONUMENT, Category.MOVIE_SCENE] },
       },
     });
   }
@@ -218,7 +218,7 @@ export async function getAvailableQuestionsCount(
     ...buildFilterWhere(filters),
     ...(category && category !== Category.MIXED && { category }),
     ...((category === Category.MIXED || !category) && {
-      category: { in: [Category.FLAG, Category.CAPITAL, Category.MAP, Category.SILHOUETTE, Category.MONUMENT] },
+      category: { in: [Category.FLAG, Category.CAPITAL, Category.MAP, Category.SILHOUETTE, Category.MONUMENT, Category.MOVIE_SCENE] },
     }),
   };
 
@@ -230,7 +230,7 @@ export async function getAvailableQuestionsCount(
  * MAP no es compatible (requiere mapa interactivo), hace fallback a FLAG + SILHOUETTE.
  */
 export async function getQuestionsForFlashGame(category?: Category, filters?: QuestionFilters): Promise<GameQuestion[]> {
-  const visualCategories = [Category.FLAG, Category.SILHOUETTE, Category.MONUMENT];
+  const visualCategories = [Category.FLAG, Category.SILHOUETTE, Category.MONUMENT, Category.MOVIE_SCENE];
   const flashCategories =
     category && category !== Category.MIXED && category !== Category.MAP
       ? [category]
@@ -366,12 +366,31 @@ export function buildQuestionUniquenessKey(question: Pick<GameQuestion, 'categor
     ].join('|');
   }
 
+  // Para MOVIE_SCENE, ancla la unicidad al slug de la escena (no a la variante de prompt).
+  if (question.category === Category.MOVIE_SCENE) {
+    const slug = extractMovieSceneSlug(question.questionData);
+    return [
+      normalizeUniquenessPart(question.category),
+      normalizeUniquenessPart(slug || question.imageUrl),
+    ].join('|');
+  }
+
   return [
     normalizeUniquenessPart(question.category),
     normalizeUniquenessPart(question.imageUrl),
     normalizeUniquenessPart(question.questionData),
     normalizeUniquenessPart(question.correctAnswer),
   ].join('|');
+}
+
+function extractMovieSceneSlug(questionData: string | undefined | null): string | null {
+  if (!questionData) return null;
+  try {
+    const parsed = JSON.parse(questionData) as { slug?: string };
+    return parsed.slug ?? null;
+  } catch {
+    return null;
+  }
 }
 
 function extractMonumentSlug(questionData: string | undefined | null): string | null {
@@ -409,6 +428,17 @@ export function generateQuestionText(question: any): string {
         // sigue al default identify
       }
       return '¿Qué monumento es este?';
+    }
+    case Category.MOVIE_SCENE: {
+      try {
+        const parsed = JSON.parse(question.questionData) as { variant?: 'country' | 'city' };
+        if (parsed.variant === 'city') {
+          return '¿En qué ciudad fue filmada esta escena?';
+        }
+      } catch {
+        // default to country variant
+      }
+      return '¿En qué país fue filmada esta escena?';
     }
     default:
       return question.questionData;

@@ -13,6 +13,7 @@ import {
 } from '../components';
 import { FullScreenError } from '../components/molecules/FullScreenError';
 import { MonumentAttribution } from '../components/MonumentAttribution';
+import { MovieSceneAttribution } from '../components/MovieSceneAttribution';
 import { Question } from '../types';
 import { GAME_CONSTANTS } from '../constants/game';
 import { useHaptics } from '../hooks';
@@ -339,6 +340,8 @@ export function ChallengeGamePage() {
           resultAttribution={
             currentQuestion && currentQuestion.category === 'MONUMENT'
               ? <MonumentAttribution question={currentQuestion} />
+              : currentQuestion && currentQuestion.category === 'MOVIE_SCENE'
+              ? <MovieSceneAttribution question={currentQuestion} />
               : undefined
           }
           onSubmit={handleSubmitAnswer}

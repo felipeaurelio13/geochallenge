@@ -4,6 +4,7 @@ import { join } from 'path';
 import { config } from './config/env';
 import { getSeedCountries, loadCountryCatalog, type CountryRecord } from './utils/countryCatalog';
 import { loadMonumentCatalog, type MonumentRecord } from './utils/monumentCatalog';
+import { loadMovieSceneCatalog, type MovieSceneRecord } from './utils/movieSceneCatalog';
 
 const prisma = new PrismaClient();
 
@@ -201,6 +202,61 @@ async function main() {
     monumentCount += 2;
   }
 
+  // Generar preguntas de escenas de películas (dos variantes: país / ciudad)
+  console.log('🎬 Generando preguntas de escenas de películas...');
+  const movieScenes = loadMovieSceneCatalog();
+  let movieSceneCount = 0;
+
+  for (const scene of movieScenes) {
+    const country = countries.find((c) => c.name === scene.country);
+    if (!country) {
+      console.warn(`⚠️  País no encontrado para escena ${scene.slug}: ${scene.country}`);
+      continue;
+    }
+
+    // Variante 'country': ¿en qué país fue filmada esta escena?
+    const countryDistractors = getDistractors(country, countries, 3);
+    questions.push({
+      category: Category.MOVIE_SCENE,
+      questionData: JSON.stringify({ slug: scene.slug, variant: 'country' }),
+      options: shuffleArray([scene.country, ...countryDistractors]),
+      correctAnswer: scene.country,
+      imageUrl: scene.imageUrl,
+      latitude: scene.latitude,
+      longitude: scene.longitude,
+      continent: scene.continent,
+      difficulty: scene.difficulty as Difficulty,
+      isInsular: country.isInsular ?? null,
+      isLandlocked: country.isLandlocked ?? null,
+      subregion: country.subregion ?? null,
+      populationTier: country.populationTier ?? null,
+      areaTier: country.areaTier ?? null,
+      flagComplexity: country.flagComplexity ?? null,
+    });
+
+    // Variante 'city': ¿en qué ciudad fue filmada esta escena?
+    const cityDistractors = getMovieSceneCityDistractors(scene, movieScenes, 3);
+    questions.push({
+      category: Category.MOVIE_SCENE,
+      questionData: JSON.stringify({ slug: scene.slug, variant: 'city' }),
+      options: shuffleArray([scene.city, ...cityDistractors]),
+      correctAnswer: scene.city,
+      imageUrl: scene.imageUrl,
+      latitude: scene.latitude,
+      longitude: scene.longitude,
+      continent: scene.continent,
+      difficulty: scene.difficulty as Difficulty,
+      isInsular: country.isInsular ?? null,
+      isLandlocked: country.isLandlocked ?? null,
+      subregion: country.subregion ?? null,
+      populationTier: country.populationTier ?? null,
+      areaTier: country.areaTier ?? null,
+      flagComplexity: country.flagComplexity ?? null,
+    });
+
+    movieSceneCount += 2;
+  }
+
   // Insertar todas las preguntas
   console.log(`\n📝 Insertando ${questions.length} preguntas en la base de datos...`);
 
@@ -216,6 +272,7 @@ async function main() {
    - Preguntas de mapa: ${mapCount} (ciudades de ${countries.length} países)
    - Preguntas de siluetas: ${countriesWithSilhouette.length} (${countries.length - countriesWithSilhouette.length} sin silueta en CDN)
    - Preguntas de monumentos: ${monumentCount} (${monuments.length} monumentos × 2 variantes)
+   - Preguntas de escenas de películas: ${movieSceneCount} (${movieScenes.length} escenas × 2 variantes)
    - Total: ${questions.length}
    - Banderas extendidas incluidas: ${countrySelection.extendedCountriesIncluded}
    - Banderas extendidas excluidas (modo estable): ${countrySelection.extendedCountriesExcluded}
@@ -397,6 +454,24 @@ function getCityDifficulty(cityName: string, countryName: string): Difficulty {
     return Difficulty.HARD;
   }
   return Difficulty.MEDIUM;
+}
+
+/**
+ * Distractores de ciudades para escenas de películas: prefiere mismo continente.
+ */
+function getMovieSceneCityDistractors(
+  scene: MovieSceneRecord,
+  allScenes: MovieSceneRecord[],
+  count: number
+): string[] {
+  const sameContinent = allScenes.filter(
+    (s) => s.continent === scene.continent && s.slug !== scene.slug
+  );
+  const others = allScenes.filter(
+    (s) => s.continent !== scene.continent && s.slug !== scene.slug
+  );
+  const candidates = [...shuffleArray(sameContinent), ...shuffleArray(others)];
+  return candidates.slice(0, count).map((s) => s.city);
 }
 
 /**

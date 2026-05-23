@@ -588,7 +588,7 @@ router.get('/daily', optionalAuth, async (req: AuthRequest, res: Response) => {
       const allIds = await prisma.question.findMany({
         where: {
           isAvailable: true,
-          category: { in: ['FLAG', 'CAPITAL', 'SILHOUETTE', 'MONUMENT'] },
+          category: { in: ['FLAG', 'CAPITAL', 'SILHOUETTE', 'MONUMENT', 'MOVIE_SCENE'] },
         },
         select: { id: true },
       });

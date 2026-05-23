@@ -13,7 +13,7 @@ import { hasActiveFilters, filtersToParams, type Difficulty, type GameFilters } 
 import { api } from '../services/api';
 import { CONTINENT_IDS, DIFFICULTY_IDS } from '../constants/filters';
 
-type Category = 'FLAG' | 'CAPITAL' | 'MAP' | 'SILHOUETTE' | 'MONUMENT' | 'MIXED';
+type Category = 'FLAG' | 'CAPITAL' | 'MAP' | 'SILHOUETTE' | 'MONUMENT' | 'MOVIE_SCENE' | 'MIXED';
 
 const categories: { id: Category; icon: string; labelKey: string; accentClass: string }[] = [
   { id: 'FLAG', icon: '🏳️', labelKey: 'categories.flags', accentClass: 'border-blue-500/50 bg-blue-500/15 text-blue-400' },
@@ -21,6 +21,7 @@ const categories: { id: Category; icon: string; labelKey: string; accentClass: s
   { id: 'MAP', icon: '🗺️', labelKey: 'categories.maps', accentClass: 'border-teal-500/50 bg-teal-500/15 text-teal-400' },
   { id: 'SILHOUETTE', icon: '🖼️', labelKey: 'categories.silhouettes', accentClass: 'border-violet-500/50 bg-violet-500/15 text-violet-400' },
   { id: 'MONUMENT', icon: '🗿', labelKey: 'categories.monuments', accentClass: 'border-amber-500/50 bg-amber-500/15 text-amber-400' },
+  { id: 'MOVIE_SCENE', icon: '🎬', labelKey: 'categories.movieScenes', accentClass: 'border-rose-500/50 bg-rose-500/15 text-rose-400' },
   { id: 'MIXED', icon: '🎲', labelKey: 'categories.mixed', accentClass: 'border-slate-400/50 bg-slate-400/15 text-slate-300' },
 ];
 

@@ -3,6 +3,7 @@ import { Question } from '../types';
 import { useImageWithFallback } from '../hooks/useImageWithFallback';
 import { useTranslation } from 'react-i18next';
 import { parseMonumentQuestionData } from '../data/monuments';
+import { parseMovieSceneQuestionData, getLocalizedMovieName, resolveSceneLanguage } from '../data/movieScenes';
 
 interface QuestionCardProps {
   question: Question;
@@ -13,7 +14,7 @@ interface QuestionCardProps {
 }
 
 export function QuestionCard({ question, questionNumber, totalQuestions, compact = false, onImageError }: QuestionCardProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const getQuestionDataValue = (): string => {
     if (!question.questionData) return '';
@@ -64,6 +65,15 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
           ? t('game.questionMonumentCountry')
           : t('game.questionMonumentIdentify');
       }
+      case 'MOVIE_SCENE': {
+        const payload = parseMovieSceneQuestionData(question.questionData);
+        const lang = resolveSceneLanguage(i18n.language);
+        const movieName = payload ? (getLocalizedMovieName(payload.slug, lang) ?? '') : '';
+        const variant = payload?.variant ?? 'country';
+        return variant === 'city'
+          ? t('game.questionMovieSceneCity', { movie: movieName })
+          : t('game.questionMovieSceneCountry', { movie: movieName });
+      }
       default:
         return getFallbackQuestionText();
     }
@@ -110,7 +120,7 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
   const showQuestionImage =
     Boolean(normalizedImageUrl) &&
     !hasImageError &&
-    (question.category === 'FLAG' || question.category === 'SILHOUETTE' || question.category === 'MONUMENT');
+    (question.category === 'FLAG' || question.category === 'SILHOUETTE' || question.category === 'MONUMENT' || question.category === 'MOVIE_SCENE');
 
   const isCompactMediaMode = compact && showQuestionImage;
 
@@ -119,7 +129,7 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
       return 'media-box media-box--compact relative w-full max-w-md';
     }
 
-    if (question.category === 'MONUMENT') {
+    if (question.category === 'MONUMENT' || question.category === 'MOVIE_SCENE') {
       return compact
         ? 'media-box media-box--compact relative w-full max-w-xl aspect-[16/9] overflow-hidden'
         : 'media-box relative w-full max-w-xl aspect-[16/9] overflow-hidden';
@@ -135,7 +145,7 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
       return 'h-full w-full object-contain object-center';
     }
 
-    if (question.category === 'MONUMENT') {
+    if (question.category === 'MONUMENT' || question.category === 'MOVIE_SCENE') {
       return 'h-full w-full object-cover object-center';
     }
 
@@ -163,7 +173,7 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
             <div className={`mx-auto flex items-center justify-center rounded-xl ${
               question.category === 'SILHOUETTE'
                 ? 'border border-[var(--color-border)]/60 bg-[var(--color-bg-shell)]/90 p-3'
-                : question.category === 'MONUMENT'
+                : question.category === 'MONUMENT' || question.category === 'MOVIE_SCENE'
                   ? 'border border-[var(--color-border)]/70 bg-black/40'
                   : 'border border-[var(--color-border)]/60 bg-black/15 px-2'
             } ${getImageContainerClassName()}`}>
@@ -171,13 +181,13 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
                 src={normalizedImageUrl}
                 alt={t('game.questionImageAlt', { category: question.category.toLowerCase() })}
                 loading="eager"
-                width={question.category === 'FLAG' ? 360 : question.category === 'MONUMENT' ? 640 : 220}
-                height={question.category === 'FLAG' ? 190 : question.category === 'MONUMENT' ? 360 : 220}
+                width={question.category === 'FLAG' ? 360 : (question.category === 'MONUMENT' || question.category === 'MOVIE_SCENE') ? 640 : 220}
+                height={question.category === 'FLAG' ? 190 : (question.category === 'MONUMENT' || question.category === 'MOVIE_SCENE') ? 360 : 220}
                 className={`mx-auto ${getImageClassName()}`}
                 onError={handleImageError}
               />
 
-              {(question.category === 'FLAG' || question.category === 'MONUMENT') && question.difficulty && (
+              {(question.category === 'FLAG' || question.category === 'MONUMENT' || question.category === 'MOVIE_SCENE') && question.difficulty && (
                 <span
                   className={`absolute right-2 top-2 inline-block rounded-full px-2 py-0.5 text-[0.62rem] font-semibold sm:text-[0.68rem] ${getDifficultyClass()}`}
                 >
@@ -216,10 +226,19 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
           </div>
         )}
 
+        {hasImageError && !onImageError && question.category === 'MOVIE_SCENE' && (
+          <div className={compact ? 'mb-1' : 'mb-6'}>
+            <div className="mx-auto flex aspect-[16/9] w-full max-w-xl flex-col items-center justify-center gap-2 rounded-xl border border-app-border/70 bg-black/40 p-4">
+              <span className="text-5xl opacity-40">🎬</span>
+              <p className="text-xs text-app-subtle">{t('game.movieSceneUnavailable', 'Imagen no disponible')}</p>
+            </div>
+          </div>
+        )}
+
         <div className={`flex ${compact ? 'flex-row items-start justify-center gap-1.5 text-left' : 'flex-col items-center'} ${question.category === 'CAPITAL' ? 'w-full justify-center text-center' : ''}`}>
           <h2 className={headingClassName}>{getQuestionText()}</h2>
 
-          {question.difficulty && question.category !== 'FLAG' && question.category !== 'MONUMENT' && (
+          {question.difficulty && question.category !== 'FLAG' && question.category !== 'MONUMENT' && question.category !== 'MOVIE_SCENE' && (
             <div className={compact ? 'mt-0.5 shrink-0' : 'mt-5'}>
               <span className={`inline-block rounded-full ${compact ? 'px-2.5 py-0.5 text-[0.65rem] sm:text-xs' : 'px-3.5 py-1 text-xs sm:text-sm'} font-semibold ${getDifficultyClass()}`}>
                 {t(getDifficultyKey())}
