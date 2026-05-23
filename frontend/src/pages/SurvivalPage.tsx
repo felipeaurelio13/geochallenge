@@ -22,7 +22,7 @@ const MapInteractive = lazy(() =>
 );
 
 const SURVIVAL_CATEGORIES: Category[] = ['FLAG', 'CAPITAL', 'MAP', 'SILHOUETTE', 'MONUMENT', 'MIXED'];
-const MAX_LIVES = 3;
+const MAX_LIVES = 4;
 const SEARCH_TIMEOUT_SECONDS = 120;
 
 type PageStatus =
@@ -249,14 +249,7 @@ export function SurvivalPage() {
       );
 
       if (myResult?.lifeEarnedReason) {
-        const reason = myResult.lifeEarnedReason;
-        if (reason.includes('streak') && reason.includes('hard_answer')) {
-          setLifeGainedNotice(t('survival.lifeEarnedBoth'));
-        } else if (reason.includes('streak')) {
-          setLifeGainedNotice(t('survival.lifeEarnedStreak'));
-        } else {
-          setLifeGainedNotice(t('survival.lifeEarnedHard'));
-        }
+        setLifeGainedNotice(t('survival.lifeEarnedStreak'));
         haptics.success();
       } else if (myResult?.isCorrect) {
         haptics.success();
@@ -458,7 +451,6 @@ export function SurvivalPage() {
               ['❤️', t('survival.ruleOneLive')],
               ['📈', t('survival.ruleDifficulty')],
               ['🔥', t('survival.ruleStreak')],
-              ['⚡', t('survival.ruleHard')],
               ['👑', t('survival.ruleWin')],
             ].map(([icon, text]) => (
               <div key={icon} className="flex items-start gap-2">
