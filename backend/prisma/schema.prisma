@@ -153,6 +153,7 @@ model DuelMatch {
 
   @@index([player1Id, createdAt])
   @@index([player2Id, createdAt])
+  @@index([player1Id, player2Id])
   @@map("duel_matches")
 }
 

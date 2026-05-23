@@ -162,10 +162,10 @@ async function persistPlayerDuel(userId: string, duelId: string | null): Promise
   }
 }
 
-// Simple per-socket event rate limiter
+// Per-user event rate limiter (keyed by userId so reconnections don't reset the counter)
 const eventCounts = new Map<string, { count: number; resetAt: number }>();
-function isRateLimited(socketId: string, event: string, maxPerMinute: number = 30): boolean {
-  const key = `${socketId}:${event}`;
+function isRateLimited(userId: string, event: string, maxPerMinute: number = 30): boolean {
+  const key = `${userId}:${event}`;
   const now = Date.now();
   const entry = eventCounts.get(key);
   if (!entry || now > entry.resetAt) {
@@ -193,7 +193,7 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
 
   // Unirse a la cola de matchmaking
   socket.on('duel:queue', async (data?: { category?: Category; filters?: QuestionFilters }) => {
-    if (isRateLimited(socket.id, 'duel:queue', 10)) {
+    if (isRateLimited(user.userId, 'duel:queue', 10)) {
       socket.emit('duel:error', { message: 'Demasiadas solicitudes, intenta más tarde' });
       return;
     }
@@ -283,7 +283,7 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
     };
     coordinates?: { lat: number; lng: number };
   }) => {
-    if (isRateLimited(socket.id, 'duel:answer', 60)) {
+    if (isRateLimited(user.userId, 'duel:answer', 60)) {
       socket.emit('duel:error', { message: 'Demasiadas solicitudes, intenta más tarde' });
       return;
     }
@@ -459,9 +459,9 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
       }
     }
 
-    // Clean up rate limiter entries for this socket
+    // Clean up rate limiter entries for this user
     for (const key of eventCounts.keys()) {
-      if (key.startsWith(`${socket.id}:`)) {
+      if (key.startsWith(`${user.userId}:`)) {
         eventCounts.delete(key);
       }
     }
@@ -635,26 +635,36 @@ function sendQuestion(io: SocketIOServer, duel: ActiveDuel) {
 
     // Timer para forzar fin de pregunta si no responden
     setTimeout(() => {
-      const currentDuel = activeDuels.get(duel.id);
-      if (
-        currentDuel &&
-        shouldAutoCloseQuestion(
-          currentDuel.status,
-          questionIndex,
-          currentDuel.currentQuestionIndex,
-          currentDuel.resolvingQuestionIndex
-        )
-      ) {
-        // Agregar respuestas vacías para quienes no respondieron
-        for (const player of currentDuel.players) {
-          // Skip players with a re-submission in flight (pendingQuestionIndex set)
-          if (player.answers.length <= questionIndex && player.pendingQuestionIndex !== questionIndex) {
-            player.pendingQuestionIndex = undefined;
-            player.answers.push(createUnansweredResult(question.id));
+      void (async () => {
+        try {
+          const currentDuel = activeDuels.get(duel.id);
+          if (
+            currentDuel &&
+            shouldAutoCloseQuestion(
+              currentDuel.status,
+              questionIndex,
+              currentDuel.currentQuestionIndex,
+              currentDuel.resolvingQuestionIndex
+            )
+          ) {
+            // Agregar respuestas vacías para quienes no respondieron
+            for (const player of currentDuel.players) {
+              // Skip players with a re-submission in flight (pendingQuestionIndex set)
+              if (player.answers.length <= questionIndex && player.pendingQuestionIndex !== questionIndex) {
+                player.pendingQuestionIndex = undefined;
+                player.answers.push(createUnansweredResult(question.id));
+              }
+            }
+            await showQuestionResult(io, currentDuel, questionIndex);
+          }
+        } catch (err) {
+          console.error(`Error auto-closing question ${questionIndex} for duel ${duel.id}:`, err);
+          const currentDuel = activeDuels.get(duel.id);
+          if (currentDuel && currentDuel.status !== 'finished') {
+            io.to(duel.id).emit('duel:error', { message: 'Error procesando pregunta' });
           }
         }
-        showQuestionResult(io, currentDuel, questionIndex);
-      }
+      })();
     }, (config.game.timePerQuestion + 2) * 1000); // +2 segundos de buffer
   } catch (error) {
     console.error(`Error sending question for duel ${duel.id}:`, error);
@@ -769,7 +779,8 @@ async function endDuel(
           player.userId,
           player.answers,
           duel.category,
-          GameMode.DUEL
+          GameMode.DUEL,
+          tx
         );
 
         // Actualizar wins/losses

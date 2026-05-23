@@ -1,6 +1,6 @@
 import { prisma } from '../config/database.js';
 import { config } from '../config/env.js';
-import { Category, Difficulty, GameMode } from '@prisma/client';
+import { Category, Difficulty, GameMode, Prisma } from '@prisma/client';
 import { haversineDistance } from '../utils/haversine.js';
 import { calculateScore, calculateMapScore, calculateTimeBonus, shuffleArray, selectRandom } from '../utils/scoring.js';
 
@@ -555,45 +555,47 @@ export async function saveGameResult(
   userId: string,
   answers: AnswerResult[],
   category?: Category,
-  gameMode: GameMode = GameMode.SINGLE
+  gameMode: GameMode = GameMode.SINGLE,
+  txClient?: Prisma.TransactionClient
 ): Promise<{ gameId: string; totalScore: number; isHighScore: boolean }> {
   const totalScore = answers.reduce((sum, a) => sum + a.points, 0);
   const correctCount = answers.filter((a) => a.isCorrect).length;
 
-  // Crear resultado de partida
-  const gameResult = await prisma.gameResult.create({
-    data: {
-      userId,
-      score: totalScore,
-      correctCount,
-      totalQuestions: answers.length,
-      category,
-      gameMode,
-      details: answers as any,
-    },
-  });
+  const save = async (db: Prisma.TransactionClient) => {
+    const gameResult = await db.gameResult.create({
+      data: {
+        userId,
+        score: totalScore,
+        correctCount,
+        totalQuestions: answers.length,
+        category,
+        gameMode,
+        details: answers as unknown as Prisma.InputJsonValue,
+      },
+    });
 
-  // Actualizar estadísticas del usuario
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { highScore: true, gamesPlayed: true },
-  });
+    const user = await db.user.findUnique({
+      where: { id: userId },
+      select: { highScore: true, gamesPlayed: true },
+    });
 
-  const isHighScore = totalScore > (user?.highScore || 0);
+    const isHighScore = totalScore > (user?.highScore || 0);
 
-  await prisma.user.update({
-    where: { id: userId },
-    data: {
-      gamesPlayed: { increment: 1 },
-      ...(isHighScore && { highScore: totalScore }),
-    },
-  });
+    await db.user.update({
+      where: { id: userId },
+      data: {
+        gamesPlayed: { increment: 1 },
+        ...(isHighScore && { highScore: totalScore }),
+      },
+    });
 
-  return {
-    gameId: gameResult.id,
-    totalScore,
-    isHighScore,
+    return { gameId: gameResult.id, totalScore, isHighScore };
   };
+
+  if (txClient) {
+    return save(txClient);
+  }
+  return prisma.$transaction(save);
 }
 
 /**
@@ -742,6 +744,7 @@ export async function getDuelOpponents(
   search?: string
 ): Promise<{ id: string; username: string; totalMatches: number }[]> {
   const trimmed = search?.trim();
+  if (trimmed && trimmed.length > 50) return [];
   const usernameFilter = trimmed
     ? { contains: trimmed, mode: 'insensitive' as const }
     : undefined;

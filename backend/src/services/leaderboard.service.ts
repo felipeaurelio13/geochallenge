@@ -3,6 +3,8 @@ import { prisma } from '../config/database.js';
 
 const LEADERBOARD_KEY = 'leaderboard:global';
 const SEASON_LEADERBOARD_KEY_PREFIX = 'leaderboard:season';
+const STATS_AVG_KEY = 'leaderboard:stats:avg:global';
+const STATS_AVG_TTL = 3600; // 1 hour
 
 export type LeaderboardScope = 'global' | 'season';
 
@@ -292,20 +294,21 @@ export async function getLeaderboardStats(): Promise<LeaderboardStats> {
       return getGlobalStatsFromDb();
     }
     const topResults = await redis.zrevrange(LEADERBOARD_KEY, 0, 0, 'WITHSCORES');
-    const allScores = await redis.zrevrange(LEADERBOARD_KEY, 0, -1, 'WITHSCORES');
+    const topScore = topResults.length >= 2 ? parseFloat(topResults[1]) : null;
+
+    const cachedAvg = await redis.get(STATS_AVG_KEY);
     let avgScore: number | null = null;
-    if (totalPlayers > 0 && allScores.length > 0) {
-      let sum = 0;
-      for (let i = 1; i < allScores.length; i += 2) {
-        sum += parseFloat(allScores[i]);
+    if (cachedAvg !== null) {
+      avgScore = parseFloat(cachedAvg);
+    } else {
+      const dbStats = await getGlobalStatsFromDb();
+      avgScore = dbStats.avgScore;
+      if (avgScore !== null) {
+        await redis.set(STATS_AVG_KEY, avgScore.toString(), 'EX', STATS_AVG_TTL);
       }
-      avgScore = sum / totalPlayers;
     }
-    return {
-      totalPlayers,
-      topScore: topResults.length >= 2 ? parseFloat(topResults[1]) : null,
-      avgScore,
-    };
+
+    return { totalPlayers, topScore, avgScore };
   } catch {
     console.warn('[leaderboard] Redis unavailable, falling back to DB for stats');
     return getGlobalStatsFromDb();
@@ -323,20 +326,22 @@ export async function getSeasonLeaderboardStats(
       return getSeasonStatsFromDb(seasonId);
     }
     const topResults = await redis.zrevrange(seasonKey, 0, 0, 'WITHSCORES');
-    const allScores = await redis.zrevrange(seasonKey, 0, -1, 'WITHSCORES');
+    const topScore = topResults.length >= 2 ? parseFloat(topResults[1]) : null;
+
+    const seasonAvgKey = `leaderboard:stats:avg:${seasonId}`;
+    const cachedAvg = await redis.get(seasonAvgKey);
     let avgScore: number | null = null;
-    if (totalPlayers > 0 && allScores.length > 0) {
-      let sum = 0;
-      for (let i = 1; i < allScores.length; i += 2) {
-        sum += parseFloat(allScores[i]);
+    if (cachedAvg !== null) {
+      avgScore = parseFloat(cachedAvg);
+    } else {
+      const dbStats = await getSeasonStatsFromDb(seasonId);
+      avgScore = dbStats.avgScore;
+      if (avgScore !== null) {
+        await redis.set(seasonAvgKey, avgScore.toString(), 'EX', STATS_AVG_TTL);
       }
-      avgScore = sum / totalPlayers;
     }
-    return {
-      totalPlayers,
-      topScore: topResults.length >= 2 ? parseFloat(topResults[1]) : null,
-      avgScore,
-    };
+
+    return { totalPlayers, topScore, avgScore };
   } catch {
     console.warn('[leaderboard] Redis unavailable, falling back to DB for season stats');
     return getSeasonStatsFromDb(seasonId);
