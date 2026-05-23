@@ -126,6 +126,7 @@ export function SurvivalPage() {
   const fillTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const searchTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const hasAnsweredRef = useRef(false);
+  const answerDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [hasSubmittedThisRound, setHasSubmittedThisRound] = useState(false);
 
   // ── Socket events ──────────────────────────────────────────────────────────
@@ -214,6 +215,10 @@ export function SurvivalPage() {
       setMapLocation(null);
       setLifeGainedNotice(null);
       setMyLastAnswerCorrect(false);
+      if (answerDebounceRef.current) {
+        clearTimeout(answerDebounceRef.current);
+        answerDebounceRef.current = null;
+      }
       hasAnsweredRef.current = false;
       setHasSubmittedThisRound(false);
       setPlayers(data.players);
@@ -328,6 +333,7 @@ export function SurvivalPage() {
       socket.off('survival:finished');
       socket.off('survival:error');
       socket.off('survival:dequeued');
+      if (answerDebounceRef.current) clearTimeout(answerDebounceRef.current);
     };
   }, [t, user?.id, haptics]);
 
@@ -381,6 +387,10 @@ export function SurvivalPage() {
 
   // MAP confirm and timer expiry — one-shot, guarded by hasAnsweredRef
   const handleSubmitAnswer = useCallback(() => {
+    if (answerDebounceRef.current) {
+      clearTimeout(answerDebounceRef.current);
+      answerDebounceRef.current = null;
+    }
     if (hasAnsweredRef.current || !matchId || !currentQuestion) return;
     const answer = currentQuestion.category === 'MAP' ? 'MAP_ANSWER' : (selectedAnswer ?? '');
     if (!answer && currentQuestion.category !== 'MAP') return;
@@ -396,24 +406,31 @@ export function SurvivalPage() {
     });
   }, [matchId, currentQuestion, selectedAnswer, mapLocation, timeRemaining]);
 
-  // Option selection: auto-submits for non-MAP, re-submission allowed while round is open
+  // Option selection: debounces 300ms before emitting so a rapid answer change
+  // sends only the last-selected option (avoids the processingAnswers lock race).
   const handleOptionSelect = useCallback(
     (option: string) => {
       if (showResult || status === 'spectating') return;
       setSelectedAnswer(option);
-      if (currentQuestion?.category !== 'MAP' && option !== selectedAnswer) {
+      if (currentQuestion?.category !== 'MAP') {
         if (!matchId || !currentQuestion) return;
-        hasAnsweredRef.current = true;
-        setHasSubmittedThisRound(true);
-        socketService.socket?.emit('survival:answer', {
-          questionId: currentQuestion.id,
-          answer: option,
-          timeRemaining,
-          coordinates: undefined,
-        });
+        if (answerDebounceRef.current) clearTimeout(answerDebounceRef.current);
+        const capturedQuestion = currentQuestion;
+        const capturedTime = timeRemaining;
+        answerDebounceRef.current = setTimeout(() => {
+          answerDebounceRef.current = null;
+          hasAnsweredRef.current = true;
+          setHasSubmittedThisRound(true);
+          socketService.socket?.emit('survival:answer', {
+            questionId: capturedQuestion.id,
+            answer: option,
+            timeRemaining: capturedTime,
+            coordinates: undefined,
+          });
+        }, 300);
       }
     },
-    [showResult, status, currentQuestion, matchId, selectedAnswer, timeRemaining]
+    [showResult, status, currentQuestion, matchId, timeRemaining]
   );
 
   // ── Render helpers ─────────────────────────────────────────────────────────
