@@ -2,6 +2,7 @@ interface CategoryItem {
   id: string;
   icon: string;
   label: string;
+  accentClass?: string;
 }
 
 interface CategorySelectorProps {
@@ -21,7 +22,7 @@ export function CategorySelector({ categories, selected, onSelect }: CategorySel
           aria-pressed={selected === cat.id}
           className={`pressable menu-category-selector flex-none flex flex-col items-center justify-center w-[72px] min-h-[4.5rem] rounded-xl px-1 py-2.5 border transition-colors sm:w-auto sm:flex-1 ${
             selected === cat.id
-              ? 'border-primary/50 bg-primary/15 text-primary shadow-sm'
+              ? (cat.accentClass ?? 'border-primary/50 bg-primary/15 text-primary') + ' shadow-sm'
               : 'border-app-border bg-app-surface/80 text-app-secondary hover:border-app-border hover:text-app-text hover:bg-app-muted/60'
           }`}
         >

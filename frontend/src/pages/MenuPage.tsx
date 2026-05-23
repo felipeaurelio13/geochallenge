@@ -15,14 +15,47 @@ import { CONTINENT_IDS, DIFFICULTY_IDS } from '../constants/filters';
 
 type Category = 'FLAG' | 'CAPITAL' | 'MAP' | 'SILHOUETTE' | 'MONUMENT' | 'MIXED';
 
-const categories: { id: Category; icon: string; labelKey: string }[] = [
-  { id: 'FLAG', icon: '🏳️', labelKey: 'categories.flags' },
-  { id: 'CAPITAL', icon: '🏛️', labelKey: 'categories.capitals' },
-  { id: 'MAP', icon: '🗺️', labelKey: 'categories.maps' },
-  { id: 'SILHOUETTE', icon: '🖼️', labelKey: 'categories.silhouettes' },
-  { id: 'MONUMENT', icon: '🗿', labelKey: 'categories.monuments' },
-  { id: 'MIXED', icon: '🎲', labelKey: 'categories.mixed' },
+const categories: { id: Category; icon: string; labelKey: string; accentClass: string }[] = [
+  { id: 'FLAG', icon: '🏳️', labelKey: 'categories.flags', accentClass: 'border-blue-500/50 bg-blue-500/15 text-blue-400' },
+  { id: 'CAPITAL', icon: '🏛️', labelKey: 'categories.capitals', accentClass: 'border-green-500/50 bg-green-500/15 text-green-400' },
+  { id: 'MAP', icon: '🗺️', labelKey: 'categories.maps', accentClass: 'border-teal-500/50 bg-teal-500/15 text-teal-400' },
+  { id: 'SILHOUETTE', icon: '🖼️', labelKey: 'categories.silhouettes', accentClass: 'border-violet-500/50 bg-violet-500/15 text-violet-400' },
+  { id: 'MONUMENT', icon: '🗿', labelKey: 'categories.monuments', accentClass: 'border-amber-500/50 bg-amber-500/15 text-amber-400' },
+  { id: 'MIXED', icon: '🎲', labelKey: 'categories.mixed', accentClass: 'border-slate-400/50 bg-slate-400/15 text-slate-300' },
 ];
+
+const GAME_MODE_ACCENTS = {
+  flash: {
+    border: 'border-amber-500/30',
+    icon: 'text-amber-400',
+    hover: 'hover:border-amber-500/45 hover:bg-amber-500/10',
+  },
+  single: {
+    border: 'border-blue-500/30',
+    icon: 'text-blue-400',
+    hover: 'hover:border-blue-500/45 hover:bg-blue-500/10',
+  },
+  duel: {
+    border: 'border-orange-500/30',
+    icon: 'text-orange-400',
+    hover: 'hover:border-orange-500/45 hover:bg-orange-500/10',
+  },
+  challenge: {
+    border: 'border-violet-500/30',
+    icon: 'text-violet-400',
+    hover: 'hover:border-violet-500/45 hover:bg-violet-500/10',
+  },
+  streak: {
+    border: 'border-orange-600/30',
+    icon: 'text-orange-500',
+    hover: 'hover:border-orange-600/45 hover:bg-orange-600/10',
+  },
+  survival: {
+    border: 'border-rose-600/30',
+    icon: 'text-rose-500',
+    hover: 'hover:border-rose-600/45 hover:bg-rose-600/10',
+  },
+};
 
 const categorySerializer = {
   parse: (value: string): Category => {
@@ -166,7 +199,7 @@ export function MenuPage() {
           {t('menu.selectCategory')}
         </SectionTitle>
         <CategorySelector
-          categories={categories.map((cat) => ({ id: cat.id, icon: cat.icon, label: t(cat.labelKey) }))}
+          categories={categories.map((cat) => ({ id: cat.id, icon: cat.icon, label: t(cat.labelKey), accentClass: cat.accentClass }))}
           selected={selectedCategory}
           onSelect={(id) => setSelectedCategory(id as Category)}
         />
@@ -201,7 +234,7 @@ export function MenuPage() {
       )}
 
       <section className="mt-3" aria-label={t('menu.gameModes')}>
-        <div className="grid grid-cols-2 gap-1.5 sm:gap-2 lg:grid-cols-5">
+        <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 sm:gap-2">
           <GameModeCard
             icon="⚡"
             title={t('menu.flash')}
@@ -209,37 +242,42 @@ export function MenuPage() {
             onClick={() => go(`/game/flash`, { category: selectedCategory })}
             disabled={selectedCategory === 'MAP'}
             disabledHint={selectedCategory === 'MAP' ? t('menu.flashNoMap') : undefined}
+            accent={GAME_MODE_ACCENTS.flash}
           />
           <GameModeCard
             icon="🎯"
             title={t('menu.singlePlayer')}
             description={t('menu.singlePlayerDesc')}
             onClick={() => go(`/game/single`, { category: selectedCategory })}
+            accent={GAME_MODE_ACCENTS.single}
           />
           <GameModeCard
             icon="⚔️"
             title={t('menu.duel')}
             description={t('menu.duelDesc')}
             onClick={() => go(`/duel`, { category: selectedCategory })}
+            accent={GAME_MODE_ACCENTS.duel}
           />
           <GameModeCard
             icon="🏁"
             title={t('menu.challenge')}
             description={t('menu.challengeDesc')}
             onClick={() => go(`/challenges`, { category: selectedCategory, openCreate: '1' })}
+            accent={GAME_MODE_ACCENTS.challenge}
           />
           <GameModeCard
             icon="🔥"
             title={t('menu.streak')}
             description={t('menu.streakDesc')}
             onClick={() => go(`/game/single`, { category: selectedCategory, mode: 'streak' })}
+            accent={GAME_MODE_ACCENTS.streak}
           />
           <GameModeCard
             icon="☠️"
             title={t('menu.survival')}
             description={t('menu.survivalDesc')}
             onClick={() => go(`/survival`, { category: selectedCategory })}
-            className="col-span-2 lg:col-span-1"
+            accent={GAME_MODE_ACCENTS.survival}
           />
         </div>
       </section>
@@ -247,14 +285,21 @@ export function MenuPage() {
       {/* Daily Challenge Banner */}
       <Link
         to="/daily"
-        className="mt-4 flex items-center gap-4 rounded-2xl border border-cyan-600/40 bg-gradient-to-r from-cyan-900/20 to-emerald-900/20 px-4 py-3 text-app-text transition-all hover:border-cyan-500/60 hover:from-cyan-800/30 hover:to-emerald-800/30 pressable"
+        className="mt-4 flex items-center gap-4 rounded-2xl border border-cyan-600/40 bg-gradient-to-r from-cyan-900/20 to-emerald-900/20 px-4 py-3.5 text-app-text transition-all hover:border-cyan-500/60 hover:from-cyan-800/30 hover:to-emerald-800/30 pressable"
       >
-        <span className="text-3xl leading-none">📅</span>
+        <span className="shrink-0 text-3xl leading-none">📅</span>
         <div className="flex-1 min-w-0">
-          <div className="font-bold text-cyan-300">{t('menu.dailyChallenge', 'Reto del día')}</div>
-          <div className="text-xs text-cyan-500/80">{t('menu.dailyChallengeDesc', '10 preguntas · mismas para todos · un intento')}</div>
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-cyan-300">{t('menu.dailyChallenge', 'Reto del día')}</span>
+            <span className="rounded-full border border-cyan-500/50 bg-cyan-500/15 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-cyan-300">
+              {t('menu.dailyChallengeNew', 'Nuevo')}
+            </span>
+          </div>
+          <div className="mt-0.5 text-xs text-cyan-500/80">{t('menu.dailyChallengeDesc', '10 preguntas · mismas para todos · un intento')}</div>
         </div>
-        <span className="text-cyan-400 text-lg">→</span>
+        <span className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-cyan-500/20 text-cyan-300 text-base font-bold">
+          →
+        </span>
       </Link>
 
       <section className="mt-4" aria-label={t('menu.quickActions')}>
