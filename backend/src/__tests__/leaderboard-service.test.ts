@@ -63,6 +63,7 @@ const redisMock = vi.hoisted(() => {
 });
 
 const prismaMock = vi.hoisted(() => ({
+  $queryRaw: vi.fn(),
   user: {
     findMany: vi.fn(),
     findUnique: vi.fn(),
@@ -256,11 +257,10 @@ describe('recomputeAllHighScoresFromHistory', () => {
 
 describe('listSeasonsWithActivity', () => {
   it('extrae seasons únicos YYYY-MM ordenados', async () => {
-    prismaMock.gameResult.findMany.mockResolvedValueOnce([
-      { createdAt: new Date(Date.UTC(2025, 0, 5)) },
-      { createdAt: new Date(Date.UTC(2025, 0, 25)) },
-      { createdAt: new Date(Date.UTC(2025, 2, 1)) },
-      { createdAt: new Date(Date.UTC(2026, 4, 10)) },
+    prismaMock.$queryRaw.mockResolvedValueOnce([
+      { season: '2025-01' },
+      { season: '2025-03' },
+      { season: '2026-05' },
     ]);
 
     const seasons = await listSeasonsWithActivity();
@@ -275,9 +275,7 @@ describe('rebuildAllLeaderboards', () => {
       .mockResolvedValueOnce([{ userId: 'u1', _max: { score: 2000 } }]); // first season sync
     prismaMock.user.updateMany.mockResolvedValueOnce({ count: 1 });
     prismaMock.user.findMany.mockResolvedValueOnce([{ id: 'u1', highScore: 2000 }]);
-    prismaMock.gameResult.findMany.mockResolvedValueOnce([
-      { createdAt: new Date(Date.UTC(2026, 4, 1)) },
-    ]);
+    prismaMock.$queryRaw.mockResolvedValueOnce([{ season: '2026-05' }]);
 
     const result = await rebuildAllLeaderboards();
     expect(result.highScoresUpdated).toBe(1);
