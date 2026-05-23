@@ -12,10 +12,11 @@ import {
   GameRoundScaffold,
   RoundActionTray,
   MechanicsHud,
+  StreakCombo,
 } from '../components';
 import { FullScreenError } from '../components/molecules/FullScreenError';
 import { MonumentAttribution } from '../components/MonumentAttribution';
-import { Category, GameFilters, MechanicUsage, Question, hasActiveFilters } from '../types';
+import { AnswerResult, Category, GameFilters, MechanicUsage, Question, hasActiveFilters } from '../types';
 import { GAME_CONSTANTS } from '../constants/game';
 import { useHaptics } from '../hooks';
 import { areMechanicsV2Enabled } from '../config/featureFlags';
@@ -95,6 +96,7 @@ export function GamePage() {
     streakShield: 0,
   });
   const [previousScore, setPreviousScore] = useState(0);
+  const [lastResult, setLastResult] = useState<AnswerResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const currentQuestion: Question | null = questions[currentIndex] || null;
@@ -109,6 +111,16 @@ export function GamePage() {
   const mechanicsConfig = state.config?.mechanics;
   const mechanicsRuntimeEnabled = mechanicsFeatureEnabled && Boolean(mechanicsConfig?.enabled);
   const mechanicsAllowed = new Set(mechanicsConfig?.allowed ?? []);
+
+  const currentStreak = useMemo(() => {
+    if (!shouldUseStreakFlow) return 0;
+    let streak = 0;
+    for (let i = results.length - 1; i >= 0; i--) {
+      if (results[i].isCorrect) streak++;
+      else break;
+    }
+    return streak;
+  }, [results, shouldUseStreakFlow]);
 
   useEffect(() => {
     setGlobalTimeRemaining(Math.max(0, timeRemaining));
@@ -338,6 +350,7 @@ export function GamePage() {
       }
 
       setLastAnswerCorrect(result.isCorrect);
+      setLastResult(result);
       setShowResult(true);
       setFunFact(generateFunFact(currentQuestion, i18n.language === 'en' ? 'en' : 'es'));
     } catch (err: any) {
@@ -391,6 +404,7 @@ export function GamePage() {
       setMapLocation(null);
       setShowResult(false);
       setFunFact(null);
+      setLastResult(null);
       setTimeRemaining(roundDuration);
       setGlobalTimeRemaining(roundDuration);
       setDisabledOptionIndexes([]);
@@ -451,6 +465,26 @@ export function GamePage() {
     );
   }
 
+  const scoreBreakdownSlot =
+    showResult && lastResult && lastResult.points > 0 ? (
+      <div className="flex flex-wrap justify-center gap-x-2 gap-y-0.5 text-xs text-[var(--color-text-secondary)]">
+        {(lastResult.basePoints ?? 0) > 0 && (
+          <span className="text-green-400 font-semibold">
+            +{lastResult.basePoints} {t('game.scoreBreakdownBase')}
+          </span>
+        )}
+        {(lastResult.timeBonus ?? 0) > 0 && (
+          <span>+{lastResult.timeBonus} {t('game.scoreBreakdownTime')}</span>
+        )}
+        {(lastResult.comboBonus ?? 0) > 0 && (
+          <span>+{lastResult.comboBonus} {t('game.scoreBreakdownCombo')}</span>
+        )}
+        {(lastResult.accuracyBonus ?? 0) > 0 && (
+          <span>+{lastResult.accuracyBonus} {t('game.scoreBreakdownAccuracy')}</span>
+        )}
+      </div>
+    ) : null;
+
   return (
     <GameRoundScaffold
       header={
@@ -474,13 +508,20 @@ export function GamePage() {
               ✕ {t('game.exit')}
             </button>
 
-            <div className="text-center">
+            <div className="flex flex-col items-center gap-1">
               <ScoreDisplay
                 score={score}
                 previousScore={previousScore}
                 showAnimation={showResult}
                 lastResult={results[results.length - 1] ?? null}
               />
+              {shouldUseStreakFlow && currentStreak > 1 && (
+                <StreakCombo
+                  combo={currentStreak}
+                  label={t('menu.streak')}
+                  className="text-sm"
+                />
+              )}
               {hasActiveFilters(gameFilters) && (
                 <p className="mt-0.5 text-xs text-[var(--color-text-muted)]">
                   {[
@@ -561,6 +602,7 @@ export function GamePage() {
               ? <MonumentAttribution question={currentQuestion} />
               : undefined
           }
+          scoreBreakdown={scoreBreakdownSlot}
           selectionAssistiveText={hasSelection && !showResult ? t('game.selectionReadyShortHint') : undefined}
           showResultBadge
           isCorrect={lastAnswerCorrect}

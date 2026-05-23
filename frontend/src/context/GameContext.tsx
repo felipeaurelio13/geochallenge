@@ -18,6 +18,7 @@ import { useImagePreloader } from '../hooks/useImagePreloader';
 interface GameContextType {
   state: GameState;
   streakAlive: boolean;
+  lastGameNewAchievements: string[];
   startGame: (category?: Category, questionCount?: number, gameType?: GameType, filters?: GameFilters, acceptShortGame?: boolean) => Promise<void>;
   appendQuestions: (questions: Question[]) => void;
   setStreakAlive: (isAlive: boolean) => void;
@@ -56,6 +57,7 @@ const GameContext = createContext<GameContextType | null>(null);
 export function GameProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<GameState>(initialState);
   const [streakAlive, setStreakAlive] = useState(true);
+  const [lastGameNewAchievements, setLastGameNewAchievements] = useState<string[]>([]);
   const timerRef = useRef<number | null>(null);
   const stateRef = useRef(state);
 
@@ -292,6 +294,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       gameType: config?.gameType,
     });
 
+    setLastGameNewAchievements(result.newAchievements ?? []);
     return result;
   }, []);
 
@@ -301,6 +304,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       timerRef.current = null;
     }
     setStreakAlive(true);
+    setLastGameNewAchievements([]);
     setState(initialState);
   }, []);
 
@@ -319,6 +323,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       value={{
         state,
         streakAlive,
+        lastGameNewAchievements,
         startGame,
         appendQuestions,
         setStreakAlive,

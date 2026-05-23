@@ -21,6 +21,8 @@ type RoundActionTrayProps = {
   resultHint?: string;
   /** Atribución opcional (e.g. crédito de imagen) mostrada solo en showResult. */
   resultAttribution?: ReactNode;
+  /** Desglose de puntos mostrado en el estado de resultado. */
+  scoreBreakdown?: ReactNode;
   summarySlot?: ReactNode;
 };
 
@@ -45,6 +47,7 @@ export function RoundActionTray({
   isCorrect = false,
   resultHint,
   resultAttribution,
+  scoreBreakdown,
   summarySlot,
 }: RoundActionTrayProps) {
   const wrapperClassName =
@@ -89,6 +92,8 @@ export function RoundActionTray({
                 className="text-sm"
               />
             )}
+
+            {scoreBreakdown && <div className="animate-fade-in">{scoreBreakdown}</div>}
 
             {resultHint && <p className="text-center text-xs leading-snug text-gray-300">{resultHint}</p>}
 

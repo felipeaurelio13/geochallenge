@@ -220,7 +220,8 @@
     "basePoints": "Base",
     "timeBonus": "Speed",
     "comboBonus": "Streak",
-    "accuracyBonus": "Map accuracy"
+    "accuracyBonus": "Map accuracy",
+    "newAchievements": "New achievements unlocked!"
   },
   "duel": {
     "searching": "Searching for opponent...",

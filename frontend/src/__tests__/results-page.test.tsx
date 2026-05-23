@@ -69,6 +69,7 @@ vi.mock('../context/GameContext', () => ({
   useGame: () => ({
     state: mocks.gameState,
     resetGame: mocks.resetGameMock,
+    lastGameNewAchievements: [],
   }),
 }));
 

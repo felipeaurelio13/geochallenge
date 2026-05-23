@@ -179,6 +179,7 @@ export interface GameResult {
   accuracy: number;
   isHighScore: boolean;
   details: AnswerResult[];
+  newAchievements?: string[];
 }
 
 // Leaderboard types

@@ -220,7 +220,8 @@
     "basePoints": "Base",
     "timeBonus": "Velocidad",
     "comboBonus": "Racha",
-    "accuracyBonus": "Precisión mapa"
+    "accuracyBonus": "Precisión mapa",
+    "newAchievements": "¡Nuevos logros desbloqueados!"
   },
   "duel": {
     "searching": "Buscando oponente...",

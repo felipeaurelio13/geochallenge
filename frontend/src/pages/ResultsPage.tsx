@@ -7,14 +7,15 @@ import { LoadingSpinner, ShareButton } from '../components';
 import { AnswerStatusBadge } from '../components/AnswerStatusBadge';
 import { Button } from '../components/atoms/Button';
 import { useStreakShareImage } from '../hooks/useStreakShareImage';
+import type { EarnedAchievement } from '../types';
 
 export function ResultsPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const isStreakMode = searchParams.get('gameType') === 'streak';
   const category = searchParams.get('category') ?? 'MIXED';
-  const { state, resetGame } = useGame();
+  const { state, resetGame, lastGameNewAchievements } = useGame();
   const { share: shareStreakImage, status: streakShareStatus } = useStreakShareImage();
   const [streakShareFeedback, setStreakShareFeedback] = useState<string>('');
   const feedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -24,6 +25,7 @@ export function ResultsPage() {
 
   const [userRank, setUserRank] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+  const [newAchievementsData, setNewAchievementsData] = useState<EarnedAchievement[]>([]);
 
   useEffect(() => {
     const fetchRank = async () => {
@@ -39,6 +41,15 @@ export function ResultsPage() {
 
     fetchRank();
   }, []);
+
+  useEffect(() => {
+    if (!lastGameNewAchievements.length) return;
+    api.getAchievements()
+      .then((all) => {
+        setNewAchievementsData(all.filter((a) => lastGameNewAchievements.includes(a.key)));
+      })
+      .catch(() => {});
+  }, [lastGameNewAchievements]);
 
   const totalQuestions = results.length || 1;
   const percentage = Math.round((correctAnswers / totalQuestions) * 100);
@@ -204,6 +215,29 @@ export function ResultsPage() {
                   >
                     <span>{item.label}</span>
                     <span className="font-semibold">+{item.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {newAchievementsData.length > 0 && (
+            <div className="mt-6 rounded-2xl border border-amber-600/40 bg-gradient-to-br from-amber-900/25 to-orange-900/25 p-4 animate-scale-in">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-amber-400">
+                {t('results.newAchievements')}
+              </p>
+              <div className="space-y-2">
+                {newAchievementsData.map((ach) => (
+                  <div key={ach.key} className="flex items-center gap-3 rounded-lg bg-amber-900/20 px-3 py-2">
+                    <span className="text-2xl" aria-hidden="true">{ach.icon}</span>
+                    <div>
+                      <p className="text-sm font-bold text-amber-100">
+                        {i18n.language === 'en' ? ach.nameEn : ach.nameEs}
+                      </p>
+                      <p className="text-xs text-amber-300/70">
+                        {i18n.language === 'en' ? ach.descEn : ach.descEs}
+                      </p>
+                    </div>
                   </div>
                 ))}
               </div>
