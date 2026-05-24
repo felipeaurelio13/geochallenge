@@ -73,10 +73,10 @@ export function GameRoundScaffold({
         <div className="min-h-0 flex-1 overflow-hidden">{mapContent}</div>
       ) : (
         <div className="game-options-wrap min-h-0 w-full flex-1 overflow-hidden">
-          <div className={optionsGridClassName}>
+          <div key={questionNumber} className={optionsGridClassName}>
             {question.options.map((option, index) => (
             <OptionButton
-              key={option}
+              key={`${questionNumber}-${index}`}
               option={option}
               displayLabel={getOptionDisplayLabel(question, option, i18n.language)}
               index={index}
