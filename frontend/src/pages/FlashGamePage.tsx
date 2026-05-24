@@ -475,7 +475,11 @@ export function FlashGamePage() {
             disabled={feedback !== null}
             feedback={feedback}
             disabledOptions={disabledOption ? [disabledOption] : []}
-            onImageError={handleFlashImageError}
+            onImageError={
+              currentQuestion?.category === 'FLAG' || currentQuestion?.category === 'SILHOUETTE'
+                ? handleFlashImageError
+                : undefined
+            }
           />
         )}
       </div>
