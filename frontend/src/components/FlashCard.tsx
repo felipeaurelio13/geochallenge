@@ -5,6 +5,7 @@ import { triggerHaptic } from '../hooks/useHaptics';
 import { useImageWithFallback } from '../hooks/useImageWithFallback';
 import { useTranslation } from 'react-i18next';
 import { getOptionDisplayLabel } from '../utils/monumentOptions';
+import { parseCinemaGeoQuestionData } from '../data/movieScenes';
 
 interface FlashCardProps {
   question: Question;
@@ -19,7 +20,7 @@ const VISUAL_ALT: Record<string, string> = {
   FLAG: 'Bandera',
   SILHOUETTE: 'Silueta',
   MONUMENT: 'Monumento',
-  MOVIE_SCENE: 'Escena de película',
+  MOVIE_SCENE: 'Cine & Geografía',
 };
 
 export function FlashCard({ question, onAnswer, disabled, disabledOptions = [], feedback, onImageError }: FlashCardProps) {
@@ -77,8 +78,25 @@ export function FlashCard({ question, onAnswer, disabled, disabledOptions = [], 
             draggable={false}
             onError={handleImageError}
           />
-        ) : (
-          <div className="flex h-full items-center justify-center text-6xl">{question.category === 'MONUMENT' ? '🗿' : question.category === 'MOVIE_SCENE' ? '🎬' : '🌍'}</div>
+        ) : question.category === 'MOVIE_SCENE' ? (() => {
+          const cgPayload = parseCinemaGeoQuestionData(question.questionData);
+          if (cgPayload && (cgPayload.visualStrategy === 'movie_card' || cgPayload.visualStrategy === 'generic_cinema')) {
+            return (
+              <div className="flex h-full flex-col items-center justify-center gap-2 bg-gradient-to-br from-rose-950/60 to-gray-900/80 px-4 text-center">
+                <span className="text-5xl">🎬</span>
+                {cgPayload.movieTitle && (
+                  <p className="text-sm font-bold text-rose-200">{cgPayload.movieTitle}</p>
+                )}
+                {cgPayload.movieYear > 0 && (
+                  <p className="text-xs text-rose-300/60">{cgPayload.movieYear}</p>
+                )}
+              </div>
+            );
+          }
+          // strategy=none or legacy: neutral fallback
+          return <div className="flex h-full items-center justify-center text-6xl">🎬</div>;
+        })() : (
+          <div className="flex h-full items-center justify-center text-6xl">{question.category === 'MONUMENT' ? '🗿' : '🌍'}</div>
         )}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-3 text-center text-xs text-gray-200">
           {t('flash.swipeHint')}

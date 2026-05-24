@@ -1,0 +1,3 @@
+-- No schema changes.
+-- MOVIE_SCENE enum value is retained as legacy identifier.
+-- Product-facing category is "Cinema & Geography" (see schema.prisma comment).

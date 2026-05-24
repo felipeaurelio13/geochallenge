@@ -58,22 +58,35 @@ export async function ensureMovieSceneQuestions(): Promise<void> {
     // 2 variants per scene (country + city)
     const expectedCount = scenes.length * 2;
 
-    const existingRows = await prisma.question.findMany({
+    const allMovieSceneRows = await prisma.question.findMany({
       where: { category: Category.MOVIE_SCENE },
       select: { id: true, questionData: true, imageUrl: true, options: true, correctAnswer: true, difficulty: true, latitude: true, longitude: true },
     });
 
-    // If count mismatches, the catalog changed or data is stale — wipe and re-seed
-    if (existingRows.length > 0 && existingRows.length !== expectedCount) {
+    // Separate legacy format {slug, variant} from Cinema & Geography format {id, prompt, ...}.
+    // Only count and manage legacy rows here; cinema-geo questions are seeded separately by ensureCinemaGeoQuestions.
+    let legacyRows = allMovieSceneRows.filter((row) => {
+      try {
+        const p = JSON.parse(row.questionData) as { slug?: string; prompt?: unknown };
+        return typeof p.slug === 'string' && !p.prompt;
+      } catch {
+        return false;
+      }
+    });
+
+    // If legacy count mismatches, the catalog changed or data is stale — wipe legacy rows and re-seed
+    if (legacyRows.length > 0 && legacyRows.length !== expectedCount) {
       console.log(
-        `🔄 MOVIE_SCENE: catálogo cambió (esperado ${expectedCount}, encontrado ${existingRows.length}). Limpiando y re-seeding...`
+        `🔄 MOVIE_SCENE: catálogo cambió (esperado ${expectedCount}, encontrado ${legacyRows.length}). Limpiando y re-seeding...`
       );
-      await prisma.question.deleteMany({ where: { category: Category.MOVIE_SCENE } });
-      existingRows.length = 0;
+      await prisma.question.deleteMany({
+        where: { category: Category.MOVIE_SCENE, id: { in: legacyRows.map((r) => r.id) } },
+      });
+      legacyRows = [];
     }
 
-    const existingByVariant = new Map<string, (typeof existingRows)[number]>();
-    for (const row of existingRows) {
+    const existingByVariant = new Map<string, (typeof allMovieSceneRows)[number]>();
+    for (const row of legacyRows) {
       try {
         const parsed = JSON.parse(row.questionData) as { slug?: string; variant?: string };
         if (parsed.slug && parsed.variant) existingByVariant.set(`${parsed.slug}:${parsed.variant}`, row);
@@ -83,7 +96,7 @@ export async function ensureMovieSceneQuestions(): Promise<void> {
     }
 
     console.log(
-      `🎬 MOVIE_SCENE: verificando catálogo (${scenes.length} escenas, ${existingRows.length} preguntas existentes)...`
+      `🎬 MOVIE_SCENE: verificando catálogo (${scenes.length} escenas, ${legacyRows.length} preguntas existentes)...`
     );
 
     const { countries } = getSeedCountries(loadCountryCatalog(), false);
@@ -202,7 +215,7 @@ export async function ensureMovieSceneQuestions(): Promise<void> {
     }
 
     console.log(
-      `✅ MOVIE_SCENE: creadas ${createdCount}, actualizadas ${updatedCount} (total ahora: ${existingRows.length + createdCount}).`
+      `✅ MOVIE_SCENE: creadas ${createdCount}, actualizadas ${updatedCount} (total ahora: ${legacyRows.length + createdCount}).`
     );
   } catch (err) {
     // Non-fatal: log and continue startup. The category will show "not enough questions"

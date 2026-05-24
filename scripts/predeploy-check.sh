@@ -116,6 +116,20 @@ if [ -n "$BACKEND_CHANGED$DATA_CHANGED$PRISMA_CHANGED" ]; then
   fi
 fi
 
+# ── 3b) cinema-geo: validate editorial dataset ───────────────────────────────
+# Runs when data/ or backend/ changed. Exits 0 if all questions are needs_sources
+# (valid editorial state). Exits non-zero only on schema/structural failures.
+if [ -n "$BACKEND_CHANGED$DATA_CHANGED" ]; then
+  if [ -f "data/cinema/cinema-geo-questions.json" ]; then
+    yellow "→ cinema-geo: validate dataset"
+    if ! (cd backend && npm run validate:cinema-geo) >"$LOG_DIR/predeploy-cinema-geo.log" 2>&1; then
+      red "✗ validate:cinema-geo falló (últimas 30 líneas, log completo: $LOG_DIR/predeploy-cinema-geo.log):"
+      tail -30 "$LOG_DIR/predeploy-cinema-geo.log" >&2
+      errors=$((errors+1))
+    fi
+  fi
+fi
+
 # ── 4) schema.prisma sin migración ────────────────────────────────────────────
 if echo "$PRISMA_CHANGED" | grep -q 'schema\.prisma'; then
   MIGRATIONS_CHANGED=$(changed_in backend/prisma/migrations)
