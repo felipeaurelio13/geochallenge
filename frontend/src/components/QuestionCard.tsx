@@ -247,7 +247,7 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
           if (cgPayload.visualStrategy === 'movie_card' || cgPayload.visualStrategy === 'generic_cinema') {
             return (
               <div className={compact ? 'mb-1' : 'mb-6'}>
-                <div className={`mx-auto flex flex-col items-center justify-center gap-2 rounded-xl border border-rose-500/30 bg-gradient-to-br from-rose-950/60 to-gray-900/80 p-4 ${compact ? 'aspect-[16/9] w-full max-w-xl' : 'aspect-[16/9] w-full max-w-xl'} relative overflow-hidden`}>
+                <div className="mx-auto flex aspect-[16/9] w-full max-w-xl flex-col items-center justify-center gap-2 rounded-xl border border-rose-500/30 bg-gradient-to-br from-rose-950/60 to-gray-900/80 p-4 relative overflow-hidden">
                   <span className="text-4xl">🎬</span>
                   {cgPayload.movieTitle && (
                     <p className="px-4 text-center text-sm font-bold text-rose-200 sm:text-base">{cgPayload.movieTitle}</p>

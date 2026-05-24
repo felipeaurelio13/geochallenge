@@ -38,12 +38,8 @@ export async function ensureCinemaGeoQuestions(): Promise<void> {
   try {
     const approved = loadCinemaGeoCatalog(); // already filtered to approved only
 
-    if (approved.length === 0) {
-      console.log('🎬 cinema-geo: 0 preguntas approved — nada que sembrar.');
-      return;
-    }
-
-    // Find existing cinema-geo rows: MOVIE_SCENE questions whose questionData has a 'prompt' field
+    // Find existing cinema-geo rows: MOVIE_SCENE questions whose questionData has a 'prompt' field.
+    // Always load these — even when approved.length === 0 — so de-approved rows can be cleaned up.
     const allMovieSceneRows = await prisma.question.findMany({
       where: { category: Category.MOVIE_SCENE },
       select: { id: true, questionData: true, options: true, correctAnswer: true, difficulty: true, imageUrl: true },
@@ -59,6 +55,18 @@ export async function ensureCinemaGeoQuestions(): Promise<void> {
       } catch {
         /* skip malformed or legacy-format rows */
       }
+    }
+
+    if (approved.length === 0) {
+      if (existingById.size > 0) {
+        // All cinema-geo questions were de-approved — remove them from DB
+        const rowIds = [...existingById.values()].map((r) => r.id);
+        await prisma.question.deleteMany({ where: { id: { in: rowIds } } });
+        console.log(`🗑️  cinema-geo: ${existingById.size} pregunta(s) ya no approved — eliminadas de DB.`);
+      } else {
+        console.log('🎬 cinema-geo: 0 preguntas approved — nada que sembrar.');
+      }
+      return;
     }
 
     console.log(`🎬 cinema-geo: verificando ${approved.length} preguntas approved (${existingById.size} existentes en DB)...`);
