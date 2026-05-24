@@ -1,7 +1,8 @@
 /**
  * Ensures MOVIE_SCENE questions exist in the database.
  * Safe to call on every startup — idempotent and incremental.
- * Adds only scenes that are not yet in the DB (detected by slug).
+ * If the catalog size changes (entries added/removed), wipes all MOVIE_SCENE
+ * questions and re-seeds from scratch so stale/corrupted options are corrected.
  * Called from index.ts after the DB connection is established.
  */
 import { PrismaClient, Category, Difficulty } from '@prisma/client';
@@ -37,14 +38,15 @@ function getCountryDistractors(
 function getCityDistractors(
   slug: string,
   continent: string,
+  correctCity: string,
   allCities: { slug: string; city: string; continent: string }[],
   count: number
 ): string[] {
   const sameContinent = allCities.filter(
-    (s) => s.continent === continent && s.slug !== slug
+    (s) => s.continent === continent && s.slug !== slug && s.city !== correctCity
   );
   const others = allCities.filter(
-    (s) => s.continent !== continent && s.slug !== slug
+    (s) => s.continent !== continent && s.slug !== slug && s.city !== correctCity
   );
   const candidates = [...shuffleArray(sameContinent), ...shuffleArray(others)];
   return candidates.slice(0, count).map((s) => s.city);
@@ -53,12 +55,22 @@ function getCityDistractors(
 export async function ensureMovieSceneQuestions(): Promise<void> {
   try {
     const scenes = loadMovieSceneCatalog();
+    // 2 variants per scene (country + city)
+    const expectedCount = scenes.length * 2;
 
-    // Determine which slugs are already seeded
     const existingRows = await prisma.question.findMany({
       where: { category: Category.MOVIE_SCENE },
       select: { questionData: true },
     });
+
+    // If count mismatches, the catalog changed or data is stale — wipe and re-seed
+    if (existingRows.length > 0 && existingRows.length !== expectedCount) {
+      console.log(
+        `🔄 MOVIE_SCENE: catálogo cambió (esperado ${expectedCount}, encontrado ${existingRows.length}). Limpiando y re-seeding...`
+      );
+      await prisma.question.deleteMany({ where: { category: Category.MOVIE_SCENE } });
+      existingRows.length = 0;
+    }
 
     const existingSlugs = new Set<string>();
     for (const row of existingRows) {
@@ -117,10 +129,12 @@ export async function ensureMovieSceneQuestions(): Promise<void> {
 
       // country variant
       const countryDistractors = getCountryDistractors(country, countries, 3);
+      const countryOptions = shuffleArray([scene.country, ...countryDistractors])
+        .filter((v, i, arr) => arr.indexOf(v) === i); // guard against duplicates
       questions.push({
         category: Category.MOVIE_SCENE,
         questionData: JSON.stringify({ slug: scene.slug, variant: 'country' }),
-        options: shuffleArray([scene.country, ...countryDistractors]),
+        options: countryOptions,
         correctAnswer: scene.country,
         imageUrl: scene.imageUrl,
         latitude: scene.latitude,
@@ -135,12 +149,14 @@ export async function ensureMovieSceneQuestions(): Promise<void> {
         flagComplexity: country.flagComplexity ?? null,
       });
 
-      // city variant
-      const cityDistractors = getCityDistractors(scene.slug, scene.continent, cityList, 3);
+      // city variant — pass correctCity so it is never used as a distractor
+      const cityDistractors = getCityDistractors(scene.slug, scene.continent, scene.city, cityList, 3);
+      const cityOptions = shuffleArray([scene.city, ...cityDistractors])
+        .filter((v, i, arr) => arr.indexOf(v) === i); // guard against duplicates
       questions.push({
         category: Category.MOVIE_SCENE,
         questionData: JSON.stringify({ slug: scene.slug, variant: 'city' }),
-        options: shuffleArray([scene.city, ...cityDistractors]),
+        options: cityOptions,
         correctAnswer: scene.city,
         imageUrl: scene.imageUrl,
         latitude: scene.latitude,
