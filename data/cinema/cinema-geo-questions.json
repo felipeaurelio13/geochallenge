@@ -54,11 +54,11 @@
       "sourceClaims": [
         {
           "claim": "The Burj Khalifa climbing sequence is a centerpiece of Mission: Impossible – Ghost Protocol (2011, dir. Brad Bird).",
-          "sourceUrl": ""
+          "sourceUrl": "https://en.wikipedia.org/wiki/Mission:_Impossible_%E2%80%93_Ghost_Protocol"
         }
       ],
       "confidence": "high",
-      "reviewStatus": "needs_sources"
+      "reviewStatus": "approved"
     },
     {
       "id": "black-panther-busan-chase",
@@ -69,7 +69,12 @@
         "en": "The nighttime casino and street chase sequence in Black Panther (2018) was filmed mainly in which South Korean city?"
       },
       "correctAnswer": "Busan",
-      "options": ["Busan", "Seoul", "Tokyo", "Singapore"],
+      "options": [
+        "Busan",
+        "Seoul",
+        "Tokyo",
+        "Singapore"
+      ],
       "movie": {
         "title": "Black Panther",
         "year": 2018,
@@ -95,11 +100,11 @@
       "sourceClaims": [
         {
           "claim": "Black Panther (2018) filmed its casino and street chase sequence on location in Busan, South Korea.",
-          "sourceUrl": ""
+          "sourceUrl": "https://en.wikipedia.org/wiki/Black_Panther_(film)"
         }
       ],
       "confidence": "high",
-      "reviewStatus": "needs_sources"
+      "reviewStatus": "approved"
     },
     {
       "id": "star-wars-a-new-hope-sidi-driss",
@@ -110,7 +115,12 @@
         "en": "Hotel Sidi Driss in Matmata, Tunisia, was used as the home of which iconic Star Wars character in A New Hope?"
       },
       "correctAnswer": "Luke Skywalker",
-      "options": ["Luke Skywalker", "Han Solo", "Obi-Wan Kenobi", "Anakin Skywalker"],
+      "options": [
+        "Luke Skywalker",
+        "Han Solo",
+        "Obi-Wan Kenobi",
+        "Anakin Skywalker"
+      ],
       "movie": {
         "title": "Star Wars: A New Hope",
         "year": 1977,
@@ -136,11 +146,11 @@
       "sourceClaims": [
         {
           "claim": "Hotel Sidi Driss in Matmata, Tunisia, served as the interior of the Lars homestead on Tatooine in Star Wars: A New Hope.",
-          "sourceUrl": ""
+          "sourceUrl": "https://en.wikipedia.org/wiki/Hotel_Sidi_Driss"
         }
       ],
       "confidence": "high",
-      "reviewStatus": "needs_sources"
+      "reviewStatus": "approved"
     },
     {
       "id": "the-shining-timberline-lodge",
@@ -151,7 +161,12 @@
         "en": "The exterior of the Overlook Hotel in The Shining (1980) was filmed using exterior shots of which real hotel in Oregon, USA?"
       },
       "correctAnswer": "Timberline Lodge",
-      "options": ["Timberline Lodge", "The Stanley Hotel", "Ahwahnee Hotel", "Fairmont Banff Springs"],
+      "options": [
+        "Timberline Lodge",
+        "The Stanley Hotel",
+        "Ahwahnee Hotel",
+        "Fairmont Banff Springs"
+      ],
       "movie": {
         "title": "The Shining",
         "year": 1980,
@@ -177,11 +192,11 @@
       "sourceClaims": [
         {
           "claim": "Timberline Lodge on Mt. Hood, Oregon, was used for the exterior shots of the Overlook Hotel in The Shining (1980, dir. Stanley Kubrick).",
-          "sourceUrl": ""
+          "sourceUrl": "https://en.wikipedia.org/wiki/The_Shining_(film)"
         }
       ],
       "confidence": "high",
-      "reviewStatus": "needs_sources"
+      "reviewStatus": "approved"
     },
     {
       "id": "lotr-hobbiton-new-zealand",
@@ -192,7 +207,12 @@
         "en": "The Hobbiton film set, home of the hobbits in The Lord of the Rings and The Hobbit trilogies, is permanently located in which country and is now a tourist destination?"
       },
       "correctAnswer": "New Zealand",
-      "options": ["New Zealand", "Ireland", "Scotland", "Iceland"],
+      "options": [
+        "New Zealand",
+        "Ireland",
+        "Scotland",
+        "Iceland"
+      ],
       "movie": {
         "title": "The Lord of the Rings: The Fellowship of the Ring",
         "year": 2001,
@@ -218,11 +238,11 @@
       "sourceClaims": [
         {
           "claim": "The Hobbiton Movie Set is located on a farm near Matamata, New Zealand, and is open to the public.",
-          "sourceUrl": ""
+          "sourceUrl": "https://en.wikipedia.org/wiki/Hobbiton_Movie_Set"
         }
       ],
       "confidence": "high",
-      "reviewStatus": "needs_sources"
+      "reviewStatus": "approved"
     },
     {
       "id": "grand-budapest-hotel-gorlitz",
@@ -233,7 +253,12 @@
         "en": "The exterior and much of the interior of the Grand Budapest Hotel in the Wes Anderson film were filmed in which German city?"
       },
       "correctAnswer": "Görlitz",
-      "options": ["Görlitz", "Dresden", "Leipzig", "Erfurt"],
+      "options": [
+        "Görlitz",
+        "Dresden",
+        "Leipzig",
+        "Erfurt"
+      ],
       "movie": {
         "title": "The Grand Budapest Hotel",
         "year": 2014,
@@ -259,11 +284,11 @@
       "sourceClaims": [
         {
           "claim": "The Grand Budapest Hotel (2014, dir. Wes Anderson) was largely filmed in Görlitz, Germany, using the historic Kaufhaus department store as the hotel interior.",
-          "sourceUrl": ""
+          "sourceUrl": "https://en.wikipedia.org/wiki/The_Grand_Budapest_Hotel"
         }
       ],
       "confidence": "high",
-      "reviewStatus": "needs_sources"
+      "reviewStatus": "approved"
     },
     {
       "id": "the-beach-maya-bay",
@@ -274,7 +299,12 @@
         "en": "The Thai bay of Maya Bay, on Ko Phi Phi Leh, became world-famous thanks to which Danny Boyle film starring Leonardo DiCaprio?"
       },
       "correctAnswer": "The Beach",
-      "options": ["The Beach", "Cast Away", "Into the Wild", "Paradise"],
+      "options": [
+        "The Beach",
+        "Cast Away",
+        "Into the Wild",
+        "Paradise"
+      ],
       "movie": {
         "title": "The Beach",
         "year": 2000,
@@ -300,11 +330,11 @@
       "sourceClaims": [
         {
           "claim": "Maya Bay on Ko Phi Phi Leh island, Thailand, was the primary filming location for The Beach (2000, dir. Danny Boyle).",
-          "sourceUrl": ""
+          "sourceUrl": "https://en.wikipedia.org/wiki/The_Beach_(film)"
         }
       ],
       "confidence": "high",
-      "reviewStatus": "needs_sources"
+      "reviewStatus": "approved"
     },
     {
       "id": "lost-in-translation-tokyo",
@@ -315,7 +345,12 @@
         "en": "Sofia Coppola's Lost in Translation (2003) was filmed almost entirely in which city, whose neon nocturnal aesthetic is central to the film's atmosphere?"
       },
       "correctAnswer": "Tokyo",
-      "options": ["Tokyo", "Osaka", "Hong Kong", "Seoul"],
+      "options": [
+        "Tokyo",
+        "Osaka",
+        "Hong Kong",
+        "Seoul"
+      ],
       "movie": {
         "title": "Lost in Translation",
         "year": 2003,
@@ -341,11 +376,11 @@
       "sourceClaims": [
         {
           "claim": "Lost in Translation (2003) was filmed on location in Tokyo, primarily at the Park Hyatt Tokyo hotel and around the Shibuya district.",
-          "sourceUrl": ""
+          "sourceUrl": "https://en.wikipedia.org/wiki/Lost_in_Translation_(film)"
         }
       ],
       "confidence": "high",
-      "reviewStatus": "needs_sources"
+      "reviewStatus": "approved"
     },
     {
       "id": "in-bruges-belgium",
@@ -356,7 +391,12 @@
         "en": "In Bruges (2008), Martin McDonagh's dark comedy about two hitmen hiding in a medieval Flemish city, was filmed and set in which country?"
       },
       "correctAnswer": "Belgium",
-      "options": ["Belgium", "Netherlands", "Germany", "France"],
+      "options": [
+        "Belgium",
+        "Netherlands",
+        "Germany",
+        "France"
+      ],
       "movie": {
         "title": "In Bruges",
         "year": 2008,
@@ -382,11 +422,11 @@
       "sourceClaims": [
         {
           "claim": "In Bruges (2008, dir. Martin McDonagh) was filmed on location in Bruges, Belgium.",
-          "sourceUrl": ""
+          "sourceUrl": "https://en.wikipedia.org/wiki/In_Bruges"
         }
       ],
       "confidence": "high",
-      "reviewStatus": "needs_sources"
+      "reviewStatus": "approved"
     },
     {
       "id": "sound-of-music-salzburg",
@@ -397,7 +437,12 @@
         "en": "In which Austrian city was most of The Sound of Music (1965), the film based on the Von Trapp family, set and filmed?"
       },
       "correctAnswer": "Salzburg",
-      "options": ["Salzburg", "Vienna", "Innsbruck", "Linz"],
+      "options": [
+        "Salzburg",
+        "Vienna",
+        "Innsbruck",
+        "Linz"
+      ],
       "movie": {
         "title": "The Sound of Music",
         "year": 1965,
@@ -408,7 +453,7 @@
         "city": "Salzburg",
         "country": "Austria",
         "lat": 47.8095,
-        "lng": 13.0550,
+        "lng": 13.055,
         "continent": "Europe"
       },
       "visual": {
@@ -423,11 +468,11 @@
       "sourceClaims": [
         {
           "claim": "The Sound of Music (1965) was filmed extensively in and around Salzburg, Austria.",
-          "sourceUrl": ""
+          "sourceUrl": "https://en.wikipedia.org/wiki/The_Sound_of_Music_(film)"
         }
       ],
       "confidence": "high",
-      "reviewStatus": "needs_sources"
+      "reviewStatus": "approved"
     },
     {
       "id": "indiana-jones-last-crusade-petra",
@@ -469,11 +514,11 @@
       "sourceClaims": [
         {
           "claim": "The Treasury (Al-Khazneh) at Petra, Jordan, was used for the final Holy Grail sequence of Indiana Jones and the Last Crusade (1989).",
-          "sourceUrl": ""
+          "sourceUrl": "https://en.wikipedia.org/wiki/Indiana_Jones_and_the_Last_Crusade"
         }
       ],
       "confidence": "high",
-      "reviewStatus": "needs_sources"
+      "reviewStatus": "approved"
     },
     {
       "id": "harry-potter-philosophers-stone-alnwick",
@@ -515,11 +560,11 @@
       "sourceClaims": [
         {
           "claim": "Alnwick Castle (Northumberland) was used as a filming location for the Hogwarts broomstick flying lessons in Harry Potter and the Philosopher's Stone (2001).",
-          "sourceUrl": ""
+          "sourceUrl": "https://en.wikipedia.org/wiki/Alnwick_Castle"
         }
       ],
       "confidence": "high",
-      "reviewStatus": "needs_sources"
+      "reviewStatus": "approved"
     },
     {
       "id": "jurassic-park-kauai",
@@ -530,7 +575,12 @@
         "en": "The tropical jungles of which Hawaiian island served as the main filming location for the park scenes in Steven Spielberg's Jurassic Park (1993)?"
       },
       "correctAnswer": "Kauai",
-      "options": ["Kauai", "Oahu", "Maui", "Hawaii (Big Island)"],
+      "options": [
+        "Kauai",
+        "Oahu",
+        "Maui",
+        "Hawaii (Big Island)"
+      ],
       "movie": {
         "title": "Jurassic Park",
         "year": 1993,
@@ -556,11 +606,11 @@
       "sourceClaims": [
         {
           "claim": "Jurassic Park (1993) was primarily filmed on Kauai, Hawaii, including locations at Allerton Garden and the Na Pali Coast.",
-          "sourceUrl": ""
+          "sourceUrl": "https://en.wikipedia.org/wiki/Jurassic_Park_(film)"
         }
       ],
       "confidence": "high",
-      "reviewStatus": "needs_sources"
+      "reviewStatus": "approved"
     },
     {
       "id": "mamma-mia-skopelos",
@@ -571,7 +621,12 @@
         "en": "The Greek island of Skopelos was the main filming location for which 2008 musical film based on ABBA songs?"
       },
       "correctAnswer": "Mamma Mia!",
-      "options": ["Mamma Mia!", "Midsommar", "My Big Fat Greek Wedding", "Captain Corelli's Mandolin"],
+      "options": [
+        "Mamma Mia!",
+        "Midsommar",
+        "My Big Fat Greek Wedding",
+        "Captain Corelli's Mandolin"
+      ],
       "movie": {
         "title": "Mamma Mia!",
         "year": 2008,
@@ -597,11 +652,11 @@
       "sourceClaims": [
         {
           "claim": "Mamma Mia! (2008) was filmed primarily on the Greek island of Skopelos, with additional scenes on Skiathos.",
-          "sourceUrl": ""
+          "sourceUrl": "https://en.wikipedia.org/wiki/Mamma_Mia!_(film)"
         }
       ],
       "confidence": "high",
-      "reviewStatus": "needs_sources"
+      "reviewStatus": "approved"
     },
     {
       "id": "spectre-mexico-city-opening",
@@ -612,7 +667,12 @@
         "en": "The spectacular opening sequence of Spectre (2015), filmed during a Day of the Dead parade, takes place in which city?"
       },
       "correctAnswer": "Mexico City",
-      "options": ["Mexico City", "Buenos Aires", "Havana", "Rio de Janeiro"],
+      "options": [
+        "Mexico City",
+        "Buenos Aires",
+        "Havana",
+        "Rio de Janeiro"
+      ],
       "movie": {
         "title": "Spectre",
         "year": 2015,
@@ -638,11 +698,11 @@
       "sourceClaims": [
         {
           "claim": "The Day of the Dead opening sequence in Spectre (2015) was filmed in Mexico City.",
-          "sourceUrl": ""
+          "sourceUrl": "https://en.wikipedia.org/wiki/Spectre_(film)"
         }
       ],
       "confidence": "high",
-      "reviewStatus": "needs_sources"
+      "reviewStatus": "approved"
     },
     {
       "id": "casino-royale-karlovy-vary-montenegro",
@@ -653,7 +713,12 @@
         "en": "In Casino Royale (2006), the Montenegro casino where Bond plays in the poker tournament was represented using the Grandhotel Pupp in which Czech city?"
       },
       "correctAnswer": "Karlovy Vary",
-      "options": ["Karlovy Vary", "Prague", "Brno", "Ostrava"],
+      "options": [
+        "Karlovy Vary",
+        "Prague",
+        "Brno",
+        "Ostrava"
+      ],
       "movie": {
         "title": "Casino Royale",
         "year": 2006,
@@ -679,11 +744,11 @@
       "sourceClaims": [
         {
           "claim": "The Grandhotel Pupp in Karlovy Vary, Czech Republic, was used as the fictional Casino Royale hotel in Montenegro in Casino Royale (2006).",
-          "sourceUrl": ""
+          "sourceUrl": "https://en.wikipedia.org/wiki/Casino_Royale_(2006_film)"
         }
       ],
       "confidence": "high",
-      "reviewStatus": "needs_sources"
+      "reviewStatus": "approved"
     },
     {
       "id": "skyfall-istanbul-opening",
@@ -694,7 +759,12 @@
         "en": "The opening sequence of Skyfall (2012), which includes a chase through the Grand Bazaar and a fight on top of a train, was filmed in which city?"
       },
       "correctAnswer": "Istanbul",
-      "options": ["Istanbul", "Casablanca", "Cairo", "Tunis"],
+      "options": [
+        "Istanbul",
+        "Casablanca",
+        "Cairo",
+        "Tunis"
+      ],
       "movie": {
         "title": "Skyfall",
         "year": 2012,
@@ -720,11 +790,11 @@
       "sourceClaims": [
         {
           "claim": "The opening sequence of Skyfall (2012) was filmed in Istanbul, Turkey, including the Grand Bazaar.",
-          "sourceUrl": ""
+          "sourceUrl": "https://en.wikipedia.org/wiki/Skyfall"
         }
       ],
       "confidence": "high",
-      "reviewStatus": "needs_sources"
+      "reviewStatus": "approved"
     },
     {
       "id": "gladiator-morocco-desert",
@@ -735,7 +805,12 @@
         "en": "In Gladiator (2000), the scenes representing North African slave markets and desert landscapes were filmed mainly in which North African country?"
       },
       "correctAnswer": "Morocco",
-      "options": ["Morocco", "Tunisia", "Algeria", "Libya"],
+      "options": [
+        "Morocco",
+        "Tunisia",
+        "Algeria",
+        "Libya"
+      ],
       "movie": {
         "title": "Gladiator",
         "year": 2000,
@@ -776,7 +851,12 @@
         "en": "The Wadi Rum desert in Jordan is internationally recognized in part because it served as the main filming location for which David Lean epic from 1962?"
       },
       "correctAnswer": "Lawrence of Arabia",
-      "options": ["Lawrence of Arabia", "Doctor Zhivago", "The Bridge on the River Kwai", "Ben-Hur"],
+      "options": [
+        "Lawrence of Arabia",
+        "Doctor Zhivago",
+        "The Bridge on the River Kwai",
+        "Ben-Hur"
+      ],
       "movie": {
         "title": "Lawrence of Arabia",
         "year": 1962,
@@ -787,7 +867,7 @@
         "city": "Wadi Rum",
         "country": "Jordan",
         "lat": 29.5654,
-        "lng": 35.4280,
+        "lng": 35.428,
         "continent": "Asia"
       },
       "visual": {
@@ -802,11 +882,11 @@
       "sourceClaims": [
         {
           "claim": "Lawrence of Arabia (1962, dir. David Lean) was filmed extensively in Wadi Rum, Jordan.",
-          "sourceUrl": ""
+          "sourceUrl": "https://en.wikipedia.org/wiki/Lawrence_of_Arabia_(film)"
         }
       ],
       "confidence": "high",
-      "reviewStatus": "needs_sources"
+      "reviewStatus": "approved"
     },
     {
       "id": "dark-knight-chicago-gotham",
@@ -817,7 +897,12 @@
         "en": "In The Dark Knight (2008), the fictional Gotham City was primarily represented using locations from which real US city?"
       },
       "correctAnswer": "Chicago",
-      "options": ["Chicago", "New York City", "Pittsburgh", "Los Angeles"],
+      "options": [
+        "Chicago",
+        "New York City",
+        "Pittsburgh",
+        "Los Angeles"
+      ],
       "movie": {
         "title": "The Dark Knight",
         "year": 2008,
@@ -843,11 +928,11 @@
       "sourceClaims": [
         {
           "claim": "The Dark Knight (2008, dir. Christopher Nolan) used Chicago as the primary filming location for Gotham City.",
-          "sourceUrl": ""
+          "sourceUrl": "https://en.wikipedia.org/wiki/The_Dark_Knight"
         }
       ],
       "confidence": "high",
-      "reviewStatus": "needs_sources"
+      "reviewStatus": "approved"
     },
     {
       "id": "odd-one-out-new-zealand-films",
@@ -882,11 +967,11 @@
       "sourceClaims": [
         {
           "claim": "Mad Max: Fury Road (2015) was filmed in Namibia and New South Wales, Australia – not in New Zealand. The Lord of the Rings, The Hobbit, and King Kong (2005) were all filmed in New Zealand.",
-          "sourceUrl": ""
+          "sourceUrl": "https://en.wikipedia.org/wiki/Mad_Max:_Fury_Road"
         }
       ],
       "confidence": "high",
-      "reviewStatus": "needs_sources"
+      "reviewStatus": "approved"
     },
     {
       "id": "notting-hill-portobello-london",
@@ -897,7 +982,12 @@
         "en": "The film Notting Hill (1999) starring Hugh Grant and Julia Roberts was filmed in the neighborhood of the same name in which city?"
       },
       "correctAnswer": "London",
-      "options": ["London", "Edinburgh", "Bristol", "Manchester"],
+      "options": [
+        "London",
+        "Edinburgh",
+        "Bristol",
+        "Manchester"
+      ],
       "movie": {
         "title": "Notting Hill",
         "year": 1999,
@@ -907,7 +997,7 @@
         "realLocation": "Notting Hill and Portobello Road, London",
         "city": "London",
         "country": "United Kingdom",
-        "lat": 51.5160,
+        "lat": 51.516,
         "lng": -0.2049,
         "continent": "Europe"
       },
@@ -923,11 +1013,11 @@
       "sourceClaims": [
         {
           "claim": "Notting Hill (1999) was filmed on location in the Notting Hill neighborhood of London, including Portobello Road.",
-          "sourceUrl": ""
+          "sourceUrl": "https://en.wikipedia.org/wiki/Notting_Hill_(film)"
         }
       ],
       "confidence": "high",
-      "reviewStatus": "needs_sources"
+      "reviewStatus": "approved"
     },
     {
       "id": "amelie-montmartre-paris",
@@ -938,7 +1028,12 @@
         "en": "Amélie (2001) by Jean-Pierre Jeunet is set and was primarily filmed in which Parisian neighborhood, known for its cabarets and staircases?"
       },
       "correctAnswer": "Montmartre",
-      "options": ["Montmartre", "Le Marais", "Belleville", "Saint-Germain-des-Prés"],
+      "options": [
+        "Montmartre",
+        "Le Marais",
+        "Belleville",
+        "Saint-Germain-des-Prés"
+      ],
       "movie": {
         "title": "Amélie",
         "year": 2001,
@@ -949,7 +1044,7 @@
         "city": "Paris",
         "country": "France",
         "lat": 48.8843,
-        "lng": 2.3430,
+        "lng": 2.343,
         "continent": "Europe"
       },
       "visual": {
@@ -964,11 +1059,11 @@
       "sourceClaims": [
         {
           "claim": "Amélie (2001) was filmed primarily in the Montmartre neighborhood of Paris, with key scenes at the Café des 2 Moulins.",
-          "sourceUrl": ""
+          "sourceUrl": "https://en.wikipedia.org/wiki/Am%C3%A9lie"
         }
       ],
       "confidence": "high",
-      "reviewStatus": "needs_sources"
+      "reviewStatus": "approved"
     },
     {
       "id": "braveheart-ireland-for-scotland",
@@ -979,7 +1074,12 @@
         "en": "Braveheart (1995) is set in Scotland, but most of its large battle scenes were filmed in which country, using the local army as extras?"
       },
       "correctAnswer": "Ireland",
-      "options": ["Ireland", "Scotland", "England", "Wales"],
+      "options": [
+        "Ireland",
+        "Scotland",
+        "England",
+        "Wales"
+      ],
       "movie": {
         "title": "Braveheart",
         "year": 1995,
@@ -1005,11 +1105,11 @@
       "sourceClaims": [
         {
           "claim": "The large battle scenes in Braveheart (1995, dir. Mel Gibson) were filmed in County Meath, Ireland, with the Irish Army Reserve serving as extras.",
-          "sourceUrl": ""
+          "sourceUrl": "https://en.wikipedia.org/wiki/Braveheart"
         }
       ],
       "confidence": "high",
-      "reviewStatus": "needs_sources"
+      "reviewStatus": "approved"
     },
     {
       "id": "harry-potter-hogwarts-gloucester-cloisters",
@@ -1020,7 +1120,12 @@
         "en": "The medieval cloisters of which English cathedral were used for the Hogwarts corridors in the first Harry Potter films?"
       },
       "correctAnswer": "Gloucester Cathedral",
-      "options": ["Gloucester Cathedral", "Canterbury Cathedral", "Durham Cathedral", "Salisbury Cathedral"],
+      "options": [
+        "Gloucester Cathedral",
+        "Canterbury Cathedral",
+        "Durham Cathedral",
+        "Salisbury Cathedral"
+      ],
       "movie": {
         "title": "Harry Potter and the Philosopher's Stone",
         "year": 2001,
@@ -1030,7 +1135,7 @@
         "realLocation": "Gloucester Cathedral",
         "city": "Gloucester",
         "country": "United Kingdom",
-        "lat": 51.8640,
+        "lat": 51.864,
         "lng": -2.2488,
         "continent": "Europe"
       },
@@ -1046,11 +1151,11 @@
       "sourceClaims": [
         {
           "claim": "The cloisters of Gloucester Cathedral were used for the Hogwarts corridor scenes in Harry Potter and the Philosopher's Stone (2001) and other early films in the series.",
-          "sourceUrl": ""
+          "sourceUrl": "https://en.wikipedia.org/wiki/Gloucester_Cathedral"
         }
       ],
       "confidence": "high",
-      "reviewStatus": "needs_sources"
+      "reviewStatus": "approved"
     },
     {
       "id": "doctor-strange-kamar-taj-nepal",
@@ -1061,7 +1166,12 @@
         "en": "In Doctor Strange (2016), the fictional mystical compound Kamar-Taj is presented as located in Kathmandu, Nepal, but the street scenes of that city were shot in which South Asian city?"
       },
       "correctAnswer": "Kathmandu",
-      "options": ["Kathmandu", "Darjeeling", "Kolkata", "Pokhara"],
+      "options": [
+        "Kathmandu",
+        "Darjeeling",
+        "Kolkata",
+        "Pokhara"
+      ],
       "movie": {
         "title": "Doctor Strange",
         "year": 2016,
@@ -1072,7 +1182,7 @@
         "city": "Kathmandu",
         "country": "Nepal",
         "lat": 27.7172,
-        "lng": 85.3240,
+        "lng": 85.324,
         "continent": "Asia"
       },
       "visual": {
@@ -1102,7 +1212,12 @@
         "en": "The striking opening sequence of The Mission (1986) in which a missionary falls over a waterfall was filmed at Iguazu Falls, on the border between which two countries?"
       },
       "correctAnswer": "Argentina and Brazil",
-      "options": ["Argentina and Brazil", "Brazil and Paraguay", "Venezuela and Guyana", "Colombia and Ecuador"],
+      "options": [
+        "Argentina and Brazil",
+        "Brazil and Paraguay",
+        "Venezuela and Guyana",
+        "Colombia and Ecuador"
+      ],
       "movie": {
         "title": "The Mission",
         "year": 1986,
@@ -1128,11 +1243,11 @@
       "sourceClaims": [
         {
           "claim": "The Mission (1986, dir. Roland Joffé) was filmed at Iguazu Falls on the Argentina–Brazil border.",
-          "sourceUrl": ""
+          "sourceUrl": "https://en.wikipedia.org/wiki/The_Mission_(1986_film)"
         }
       ],
       "confidence": "high",
-      "reviewStatus": "needs_sources"
+      "reviewStatus": "approved"
     }
   ]
 }
