@@ -5,6 +5,7 @@ import type { Question } from '../types';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
+    i18n: { language: 'es' },
     t: (key: string, vars?: Record<string, string | number>) => {
       if (key === 'game.questionCapital') {
         return `¿Cuál es la capital de ${vars?.country ?? ''}?`;
@@ -234,5 +235,104 @@ describe('QuestionCard', () => {
     render(<QuestionCard question={question} questionNumber={3} totalQuestions={10} compact />);
 
     expect(screen.getByRole('heading', { level: 2 })).toHaveClass('text-[clamp(1rem,3.8vw,1.22rem)]', 'leading-snug');
+  });
+
+  // --- Cinema & Geography (new format) ---
+
+  it('muestra el prompt.es de la pregunta Cinema & Geografía como texto del enunciado', () => {
+    const question = {
+      id: 'cg-1',
+      category: 'MOVIE_SCENE',
+      questionText: '',
+      questionData: JSON.stringify({
+        id: 'the-beach-maya-bay',
+        type: 'film_from_iconic_set',
+        prompt: { es: '¿Qué película hizo famosa la bahía Maya Bay?', en: 'Which film made Maya Bay famous?' },
+        movieTitle: 'The Beach',
+        movieYear: 2000,
+        visualStrategy: 'movie_card',
+        assetId: 'the-beach-2000-card',
+      }),
+      options: ['The Beach', 'Cast Away', 'Into the Wild', 'Paradise'],
+      correctAnswer: 'The Beach',
+      difficulty: 'EASY',
+    } as Question;
+
+    render(<QuestionCard question={question} questionNumber={1} totalQuestions={10} />);
+
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('¿Qué película hizo famosa la bahía Maya Bay?');
+  });
+
+  it('renderiza movie_card CSS cuando no hay imageUrl y strategy=movie_card', () => {
+    const question = {
+      id: 'cg-2',
+      category: 'MOVIE_SCENE',
+      questionText: '',
+      questionData: JSON.stringify({
+        id: 'the-shining-timberline',
+        type: 'movie_from_sequence_location',
+        prompt: { es: '¿Qué hotel real se usó para el exterior del Overlook?', en: 'Which real hotel was used for the Overlook exterior?' },
+        movieTitle: 'The Shining',
+        movieYear: 1980,
+        visualStrategy: 'movie_card',
+        assetId: 'the-shining-1980-card',
+      }),
+      options: ['Timberline Lodge', 'The Stanley Hotel', 'Ahwahnee Hotel', 'Fairmont Banff Springs'],
+      correctAnswer: 'Timberline Lodge',
+      difficulty: 'MEDIUM',
+    } as Question;
+
+    const { container } = render(<QuestionCard question={question} questionNumber={1} totalQuestions={10} />);
+
+    // Should show movie title in the card
+    expect(screen.getByText('The Shining')).toBeInTheDocument();
+    expect(screen.getByText('1980')).toBeInTheDocument();
+    // Should NOT render an <img> element (no imageUrl provided)
+    expect(container.querySelector('img')).toBeNull();
+  });
+
+  it('no muestra error cuando strategy=none y no hay imageUrl', () => {
+    const question = {
+      id: 'cg-3',
+      category: 'MOVIE_SCENE',
+      questionText: '',
+      questionData: JSON.stringify({
+        id: 'odd-one-out-nz',
+        type: 'odd_one_out',
+        prompt: { es: '¿Cuál NO fue filmada en Nueva Zelanda?', en: 'Which was NOT filmed in New Zealand?' },
+        movieTitle: 'Various',
+        movieYear: 0,
+        visualStrategy: 'none',
+      }),
+      options: ['Mad Max: Fury Road', 'Lord of the Rings', 'The Hobbit', 'King Kong (2005)'],
+      correctAnswer: 'Mad Max: Fury Road',
+      difficulty: 'MEDIUM',
+    } as Question;
+
+    const { container } = render(<QuestionCard question={question} questionNumber={1} totalQuestions={10} />);
+
+    // No image, no error message — clean UI
+    expect(container.querySelector('img')).toBeNull();
+    expect(screen.queryByText(/no disponible/i)).toBeNull();
+    expect(screen.queryByText(/unavailable/i)).toBeNull();
+    // Prompt text should render
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('¿Cuál NO fue filmada en Nueva Zelanda?');
+  });
+
+  it('sigue funcionando el formato legacy (slug+variant)', () => {
+    const question = {
+      id: 'legacy-1',
+      category: 'MOVIE_SCENE',
+      questionText: '¿En qué país fue filmada esta escena de Gladiator (2000)?',
+      questionData: JSON.stringify({ slug: 'gladiator-rome', variant: 'country' }),
+      options: ['Italy', 'Spain', 'France', 'Greece'],
+      correctAnswer: 'Italy',
+      difficulty: 'EASY',
+    } as Question;
+
+    render(<QuestionCard question={question} questionNumber={1} totalQuestions={10} />);
+
+    // Falls back to questionText when legacy format and movie name is not in catalog mock
+    expect(screen.getByRole('heading', { level: 2 })).toBeInTheDocument();
   });
 });

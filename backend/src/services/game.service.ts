@@ -415,7 +415,10 @@ export function buildQuestionUniquenessKey(question: Pick<GameQuestion, 'categor
 function extractMovieSceneSlug(questionData: string | undefined | null): string | null {
   if (!questionData) return null;
   try {
-    const parsed = JSON.parse(questionData) as { slug?: string };
+    const parsed = JSON.parse(questionData) as { slug?: string; id?: string; prompt?: unknown };
+    // New Cinema & Geography format: use the question id as uniqueness anchor
+    if (parsed.prompt && typeof parsed.id === 'string') return `cinema:${parsed.id}`;
+    // Legacy format: use slug
     return parsed.slug ?? null;
   } catch {
     return null;
@@ -459,11 +462,22 @@ export function generateQuestionText(question: any): string {
       return '¿Qué monumento es este?';
     }
     case Category.MOVIE_SCENE: {
+      // MOVIE_SCENE is a legacy enum name. Product-facing category is "Cinema & Geography":
+      // questions require film-production or cinematic-location knowledge, not generic place recognition.
       try {
-        const parsed = JSON.parse(question.questionData) as { variant?: 'country' | 'city'; slug?: string };
-        const variant = parsed.variant ?? 'country';
+        const parsed = JSON.parse(question.questionData) as Record<string, unknown>;
+
+        // New Cinema & Geography format: questionData embeds a bilingual prompt.
+        if (parsed.prompt && typeof parsed.prompt === 'object') {
+          const promptObj = parsed.prompt as { es?: string; en?: string };
+          return promptObj.es || promptObj.en || '¿Pregunta de Cine & Geografía?';
+        }
+
+        // Legacy format: { slug, variant } — construct question text from catalog.
+        const legacy = parsed as { variant?: 'country' | 'city'; slug?: string };
+        const variant = legacy.variant ?? 'country';
         const movieMap = getMovieNameMap();
-        const movie = parsed.slug ? movieMap.get(parsed.slug) : undefined;
+        const movie = legacy.slug ? movieMap.get(legacy.slug) : undefined;
         const movieName = movie?.es || movie?.en || '';
         if (variant === 'city') {
           return movieName

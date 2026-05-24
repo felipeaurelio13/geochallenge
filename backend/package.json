@@ -19,7 +19,8 @@
     "lint": "tsc --noEmit",
     "validate:images": "tsx src/scripts/validate-images.ts",
     "rebuild:leaderboards": "tsx src/scripts/rebuild-leaderboards.ts",
-    "validate:movie-scenes": "tsx src/scripts/validate-movie-scenes.ts"
+    "validate:movie-scenes": "tsx src/scripts/validate-movie-scenes.ts",
+    "validate:cinema-geo": "tsx src/scripts/validate-cinema-geo.ts"
   },
   "keywords": [
     "geochallenge",

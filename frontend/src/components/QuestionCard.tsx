@@ -3,7 +3,7 @@ import { Question } from '../types';
 import { useImageWithFallback } from '../hooks/useImageWithFallback';
 import { useTranslation } from 'react-i18next';
 import { parseMonumentQuestionData } from '../data/monuments';
-import { parseMovieSceneQuestionData, getLocalizedMovieName, resolveSceneLanguage } from '../data/movieScenes';
+import { parseMovieSceneQuestionData, getLocalizedMovieName, resolveSceneLanguage, parseCinemaGeoQuestionData } from '../data/movieScenes';
 
 interface QuestionCardProps {
   question: Question;
@@ -66,6 +66,13 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
           : t('game.questionMonumentIdentify');
       }
       case 'MOVIE_SCENE': {
+        // Try new Cinema & Geography format first (has embedded bilingual prompt)
+        const cgPayload = parseCinemaGeoQuestionData(question.questionData);
+        if (cgPayload?.prompt) {
+          const lang = resolveSceneLanguage(i18n.language);
+          return lang === 'en' ? (cgPayload.prompt.en || cgPayload.prompt.es) : cgPayload.prompt.es;
+        }
+        // Legacy slug+variant format
         const payload = parseMovieSceneQuestionData(question.questionData);
         const lang = resolveSceneLanguage(i18n.language);
         const movieName = payload ? (getLocalizedMovieName(payload.slug, lang) ?? '') : '';
@@ -233,14 +240,62 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
           </div>
         )}
 
-        {hasImageError && !onImageError && question.category === 'MOVIE_SCENE' && (
-          <div className={compact ? 'mb-1' : 'mb-6'}>
-            <div className="mx-auto flex aspect-[16/9] w-full max-w-xl flex-col items-center justify-center gap-2 rounded-xl border border-app-border/70 bg-black/40 p-4">
-              <span className="text-5xl opacity-40">🎬</span>
-              <p className="text-xs text-app-subtle">{t('game.movieSceneUnavailable', 'Imagen no disponible')}</p>
+        {/* Cinema & Geography: movie_card renders a CSS reference card — NOT an error state */}
+        {question.category === 'MOVIE_SCENE' && !question.imageUrl && !hasImageError && (() => {
+          const cgPayload = parseCinemaGeoQuestionData(question.questionData);
+          if (!cgPayload) return null;
+          if (cgPayload.visualStrategy === 'movie_card' || cgPayload.visualStrategy === 'generic_cinema') {
+            return (
+              <div className={compact ? 'mb-1' : 'mb-6'}>
+                <div className={`mx-auto flex flex-col items-center justify-center gap-2 rounded-xl border border-rose-500/30 bg-gradient-to-br from-rose-950/60 to-gray-900/80 p-4 ${compact ? 'aspect-[16/9] w-full max-w-xl' : 'aspect-[16/9] w-full max-w-xl'} relative overflow-hidden`}>
+                  <span className="text-4xl">🎬</span>
+                  {cgPayload.movieTitle && (
+                    <p className="px-4 text-center text-sm font-bold text-rose-200 sm:text-base">{cgPayload.movieTitle}</p>
+                  )}
+                  {cgPayload.movieYear > 0 && (
+                    <p className="text-xs text-rose-300/60">{cgPayload.movieYear}</p>
+                  )}
+                  {question.difficulty && (
+                    <span className={`absolute right-2 top-2 inline-block rounded-full px-2 py-0.5 text-[0.62rem] font-semibold sm:text-[0.68rem] ${getDifficultyClass()}`}>
+                      {t(getDifficultyKey())}
+                    </span>
+                  )}
+                </div>
+              </div>
+            );
+          }
+          // strategy === 'none': intentionally no visual, show nothing
+          return null;
+        })()}
+
+        {hasImageError && !onImageError && question.category === 'MOVIE_SCENE' && (() => {
+          // For new Cinema & Geography format with movie_card strategy, show the card even on error
+          const cgPayload = parseCinemaGeoQuestionData(question.questionData);
+          if (cgPayload && (cgPayload.visualStrategy === 'movie_card' || cgPayload.visualStrategy === 'generic_cinema')) {
+            return (
+              <div className={compact ? 'mb-1' : 'mb-6'}>
+                <div className={`mx-auto flex flex-col items-center justify-center gap-2 rounded-xl border border-rose-500/30 bg-gradient-to-br from-rose-950/60 to-gray-900/80 p-4 aspect-[16/9] w-full max-w-xl relative overflow-hidden`}>
+                  <span className="text-4xl">🎬</span>
+                  {cgPayload.movieTitle && (
+                    <p className="px-4 text-center text-sm font-bold text-rose-200 sm:text-base">{cgPayload.movieTitle}</p>
+                  )}
+                  {cgPayload.movieYear > 0 && (
+                    <p className="text-xs text-rose-300/60">{cgPayload.movieYear}</p>
+                  )}
+                </div>
+              </div>
+            );
+          }
+          // Legacy format: show the unavailable message
+          return (
+            <div className={compact ? 'mb-1' : 'mb-6'}>
+              <div className="mx-auto flex aspect-[16/9] w-full max-w-xl flex-col items-center justify-center gap-2 rounded-xl border border-app-border/70 bg-black/40 p-4">
+                <span className="text-5xl opacity-40">🎬</span>
+                <p className="text-xs text-app-subtle">{t('game.movieSceneUnavailable', 'Imagen no disponible')}</p>
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         <div className={`flex ${compact ? 'flex-row items-start justify-center gap-1.5 text-left' : 'flex-col items-center'} ${question.category === 'CAPITAL' ? 'w-full justify-center text-center' : ''}`}>
           <h2 className={headingClassName}>{getQuestionText()}</h2>

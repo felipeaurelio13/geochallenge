@@ -64,3 +64,49 @@ export function parseMovieSceneQuestionData(data: unknown): MovieSceneVariantPay
     return null;
   }
 }
+
+// --- Cinema & Geography (new prompt-based format) ---
+
+export type CinemaGeoVisualStrategy = 'none' | 'movie_card' | 'iconic_location' | 'map' | 'generic_cinema';
+
+export interface CinemaGeoPayload {
+  id: string;
+  type: string;
+  prompt: { es: string; en: string };
+  movieTitle: string;
+  movieYear: number;
+  visualStrategy: CinemaGeoVisualStrategy;
+  assetId?: string | null;
+}
+
+/**
+ * Detects and parses the new Cinema & Geography question format.
+ * New format stores a 'prompt' object (with es/en keys) in questionData.
+ * Legacy format stores {slug, variant} — returns null for those.
+ */
+export function parseCinemaGeoQuestionData(data: unknown): CinemaGeoPayload | null {
+  if (!data || typeof data !== 'string') return null;
+  try {
+    const parsed = JSON.parse(data) as Partial<CinemaGeoPayload> & { prompt?: unknown };
+    if (
+      parsed &&
+      typeof parsed.prompt === 'object' &&
+      parsed.prompt !== null &&
+      typeof (parsed.prompt as { es?: unknown }).es === 'string'
+    ) {
+      const p = parsed.prompt as { es: string; en?: string };
+      return {
+        id: parsed.id ?? '',
+        type: parsed.type ?? '',
+        prompt: { es: p.es, en: p.en ?? p.es },
+        movieTitle: parsed.movieTitle ?? '',
+        movieYear: typeof parsed.movieYear === 'number' ? parsed.movieYear : 0,
+        visualStrategy: (parsed.visualStrategy as CinemaGeoVisualStrategy) ?? 'none',
+        assetId: parsed.assetId ?? null,
+      };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
