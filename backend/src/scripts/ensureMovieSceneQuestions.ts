@@ -60,7 +60,7 @@ export async function ensureMovieSceneQuestions(): Promise<void> {
 
     const existingRows = await prisma.question.findMany({
       where: { category: Category.MOVIE_SCENE },
-      select: { questionData: true },
+      select: { id: true, questionData: true, imageUrl: true, options: true, correctAnswer: true, difficulty: true, latitude: true, longitude: true },
     });
 
     // If count mismatches, the catalog changed or data is stale — wipe and re-seed
@@ -72,26 +72,19 @@ export async function ensureMovieSceneQuestions(): Promise<void> {
       existingRows.length = 0;
     }
 
-    const existingSlugs = new Set<string>();
+    const existingByVariant = new Map<string, (typeof existingRows)[number]>();
     for (const row of existingRows) {
       try {
-        const parsed = JSON.parse(row.questionData) as { slug?: string };
-        if (parsed.slug) existingSlugs.add(parsed.slug);
-      } catch { /* skip malformed */ }
+        const parsed = JSON.parse(row.questionData) as { slug?: string; variant?: string };
+        if (parsed.slug && parsed.variant) existingByVariant.set(`${parsed.slug}:${parsed.variant}`, row);
+      } catch {
+        /* skip malformed */
+      }
     }
 
-    const missingScenes = scenes.filter((s) => !existingSlugs.has(s.slug));
-
-    if (missingScenes.length === 0) {
-      console.log(`ℹ️  MOVIE_SCENE: ${existingRows.length} preguntas ya existen (catálogo completo), skip.`);
-      return;
-    }
-
-    if (existingRows.length === 0) {
-      console.log(`🎬 MOVIE_SCENE: no hay preguntas, iniciando auto-seed (${scenes.length} escenas)...`);
-    } else {
-      console.log(`🎬 MOVIE_SCENE: catálogo ampliado — añadiendo ${missingScenes.length} escenas nuevas (${existingSlugs.size} ya existían)...`);
-    }
+    console.log(
+      `🎬 MOVIE_SCENE: verificando catálogo (${scenes.length} escenas, ${existingRows.length} preguntas existentes)...`
+    );
 
     const { countries } = getSeedCountries(loadCountryCatalog(), false);
 
@@ -120,7 +113,7 @@ export async function ensureMovieSceneQuestions(): Promise<void> {
       flagComplexity: string | null;
     }[] = [];
 
-    for (const scene of missingScenes) {
+    for (const scene of scenes) {
       const country = countries.find((c) => c.name === scene.country);
       if (!country) {
         console.warn(`⚠️  País no encontrado para escena ${scene.slug}: ${scene.country}`);
@@ -177,8 +170,40 @@ export async function ensureMovieSceneQuestions(): Promise<void> {
       return;
     }
 
-    await prisma.question.createMany({ data: questions });
-    console.log(`✅ MOVIE_SCENE: ${questions.length} preguntas nuevas creadas (total ahora: ${existingRows.length + questions.length}).`);
+    let createdCount = 0;
+    let updatedCount = 0;
+
+    for (const question of questions) {
+      const parsed = JSON.parse(question.questionData) as { slug: string; variant: string };
+      const existing = existingByVariant.get(`${parsed.slug}:${parsed.variant}`);
+
+      if (!existing) {
+        await prisma.question.create({ data: question });
+        createdCount += 1;
+        continue;
+      }
+
+      const hasChanged =
+        existing.imageUrl !== question.imageUrl ||
+        JSON.stringify(existing.options) !== JSON.stringify(question.options) ||
+        existing.correctAnswer !== question.correctAnswer ||
+        existing.difficulty !== question.difficulty ||
+        existing.latitude !== question.latitude ||
+        existing.longitude !== question.longitude ||
+        existing.questionData !== question.questionData;
+
+      if (!hasChanged) continue;
+
+      await prisma.question.update({
+        where: { id: existing.id },
+        data: question,
+      });
+      updatedCount += 1;
+    }
+
+    console.log(
+      `✅ MOVIE_SCENE: creadas ${createdCount}, actualizadas ${updatedCount} (total ahora: ${existingRows.length + createdCount}).`
+    );
   } catch (err) {
     // Non-fatal: log and continue startup. The category will show "not enough questions"
     // until the next restart or manual seed, but it won't crash the server.
