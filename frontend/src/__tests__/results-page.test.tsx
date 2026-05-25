@@ -107,7 +107,7 @@ describe('ResultsPage', () => {
     expect(accuracyBar.style.width).toBe('80%');
   });
 
-  it('copia mensaje, muestra confirmación inline y bandeja fija de acciones', async () => {
+  it('copia mensaje y muestra confirmación inline; action tray en flujo natural (no sticky)', async () => {
     render(<ResultsPage />);
 
     fireEvent.click(screen.getByRole('button', { name: /compartir resultado/i }));
@@ -117,7 +117,11 @@ describe('ResultsPage', () => {
     });
 
     expect(screen.getByText('Copiado al portapapeles')).toBeInTheDocument();
-    expect(screen.getByTestId('results-action-tray')).toHaveClass('sticky', 'bottom-0');
+    // QA round 3 (issue: action tray sticky se montaba sobre el contenido y el
+    // backdrop-blur dejaba ver algo por detrás al scrollear). Ahora va en flow
+    // natural al final del documento — la página entera es scroll vertical.
+    expect(screen.getByTestId('results-action-tray')).not.toHaveClass('sticky');
+    expect(screen.getByTestId('results-action-tray')).not.toHaveClass('backdrop-blur-sm');
   });
 
   it('deshabilita compartir mientras está en progreso para evitar toques dobles', async () => {

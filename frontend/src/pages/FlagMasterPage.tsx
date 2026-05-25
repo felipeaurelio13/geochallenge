@@ -7,6 +7,7 @@ import { OptionButton } from '../components/OptionButton';
 import { ProgressBar } from '../components/ProgressBar';
 import { Timer } from '../components/Timer';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { ShareButton } from '../components/ShareButton';
 import { FullScreenError } from '../components/molecules/FullScreenError';
 import { PageTemplate } from '../components/templates/PageTemplate';
 import { api } from '../services/api';
@@ -413,22 +414,48 @@ function FlagMasterResults({ result, onPlayAgain }: ResultsProps) {
   const { t } = useTranslation();
   const byTier = useMemo(() => groupByTier(result.rounds), [result.rounds]);
 
+  // Emoji y mensaje según rendimiento — alineado con ResultsPage (Single/Streak)
+  // para que las pantallas de fin se sientan parte de la misma app.
+  const performanceEmoji = (() => {
+    if (result.accuracy >= 90) return '🏆';
+    if (result.accuracy >= 70) return '🎉';
+    if (result.accuracy >= 50) return '🏴';
+    if (result.accuracy >= 30) return '🤔';
+    return '💪';
+  })();
+
+  const shareText = t('flagMaster.shareText', {
+    score: result.totalScore,
+    correct: result.correctCount,
+    total: result.totalQuestions,
+    accuracy: `${result.accuracy}%`,
+    defaultValue: '🏴 Flag Master: {{score}} pts · {{correct}}/{{total}} ({{accuracy}})',
+  });
+
   return (
     <PageTemplate contentClassName="pb-6">
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-3 py-4 sm:px-4">
-        <div className="text-center">
-          <p className="text-sm text-app-subtle">
-            {t('flagMaster.summaryTitle', 'Maestro de Banderas — resultado')}
-          </p>
-          <h1 className="mt-1 text-4xl font-extrabold text-app-text tabular-nums sm:text-5xl">
-            {result.totalScore.toLocaleString()}
+        {/* Header: emoji + h1 + perf message + score card (alineado con
+            ResultsPage para coherencia entre modos). */}
+        <section className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 text-center shadow-2xl shadow-black/30 sm:p-6">
+          <div className="text-6xl mb-3 animate-scale-in" aria-hidden="true">{performanceEmoji}</div>
+          <h1 className="text-3xl font-bold text-[var(--color-text-primary)] sm:text-4xl">
+            {t('flagMaster.summaryTitle', 'Flag Master')}
           </h1>
-          <p className="mt-1 text-sm text-app-subtle">
-            {result.correctCount} / {result.totalQuestions} {t('flagMaster.correctSuffix', 'correctas')} ·{' '}
-            {result.accuracy}%
+          <p className="mt-2 text-sm text-[var(--color-text-secondary)] sm:text-base">
+            {result.correctCount} / {result.totalQuestions} {t('flagMaster.correctSuffix', 'correctas')} · {result.accuracy}%
           </p>
+
+          <div className="mt-5 rounded-2xl border border-primary/35 bg-[var(--color-surface-muted)] p-5">
+            <p className="text-sm font-medium uppercase tracking-wide text-primary/80">{t('game.score', 'Puntuación')}</p>
+            <div className="mt-1 text-5xl font-black text-app-text sm:text-6xl tabular-nums">
+              {result.totalScore.toLocaleString()}
+            </div>
+            <div className="mt-1 text-[var(--color-text-muted)]">{t('results.points', 'puntos')}</div>
+          </div>
+
           {result.isHighScore && (
-            <p className="mt-2 inline-block rounded-full bg-amber-500/15 px-3 py-1 text-xs font-semibold text-amber-300">
+            <p className="mt-4 inline-block rounded-full bg-amber-500/15 border border-amber-500/40 px-3 py-1 text-xs font-semibold text-amber-300">
               🏆 {t('flagMaster.newHighScore', '¡Nuevo récord personal!')}
             </p>
           )}
@@ -437,7 +464,7 @@ function FlagMasterResults({ result, onPlayAgain }: ResultsProps) {
               ⚠️ {result.message || t('flagMaster.degraded', 'Score verificado parcialmente (caché caída).')}
             </p>
           )}
-        </div>
+        </section>
 
         <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-muted)]/80 p-3 sm:p-4">
           <h2 className="mb-2 text-sm font-bold text-app-text">
@@ -492,15 +519,29 @@ function FlagMasterResults({ result, onPlayAgain }: ResultsProps) {
           </div>
         </div>
 
-        <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
-          <Button onClick={onPlayAgain}>{t('flagMaster.playAgain', 'Jugar de nuevo')}</Button>
-          <Link
-            to="/menu"
-            className="inline-flex h-12 items-center justify-center rounded-xl border border-app-border bg-app-surface px-6 text-sm font-semibold text-app-secondary transition-colors hover:border-app-border hover:bg-app-surface/60"
-          >
-            {t('flagMaster.backToMenu', 'Volver al menú')}
-          </Link>
-        </div>
+        {/* Share + actions (paridad con ResultsPage de Single/Streak). */}
+        <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 sm:p-5">
+          <p className="text-sm text-[var(--color-text-secondary)]">
+            {t('results.shareScore', 'Comparte tu puntaje')}
+          </p>
+          <div className="mt-3">
+            <ShareButton payload={{ title: t('app.name', 'GeoChallenge'), text: shareText }} />
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+          <div className="flex flex-col gap-2.5">
+            <Button onClick={onPlayAgain} variant="primary" size="lg" fullWidth>
+              {t('flagMaster.playAgain', 'Jugar de nuevo')}
+            </Button>
+            <Link
+              to="/menu"
+              className="inline-flex h-12 items-center justify-center rounded-xl border border-app-border bg-app-surface px-6 text-sm font-semibold text-app-secondary transition-colors hover:bg-app-surface/60"
+            >
+              {t('flagMaster.backToMenu', 'Volver al menú')}
+            </Link>
+          </div>
+        </section>
       </div>
     </PageTemplate>
   );

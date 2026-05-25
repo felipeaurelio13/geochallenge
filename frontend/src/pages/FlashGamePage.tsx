@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../services/api';
-import { FlashCard, LoadingSpinner, MechanicsHud, StreakCombo } from '../components';
+import { FlashCard, LoadingSpinner, MechanicsHud, ShareButton, StreakCombo } from '../components';
 import { FullScreenError } from '../components/molecules/FullScreenError';
 import { Button } from '../components/atoms/Button';
 import { useHaptics, useImagePreloader } from '../hooks';
@@ -374,6 +374,24 @@ export function FlashGamePage() {
             </div>
             <p className="mt-3 text-sm text-[var(--color-text-muted)]">{t('flash.answered', { count: qpm })}</p>
 
+            {/* Share button — paridad con ResultsPage de Single/Streak. Antes
+                Flash no tenía share; un combo x10 con 60+ correctas en 60s ES
+                presumible, y QA round 3 lo marcó como inconsistencia. */}
+            <div className="mt-5">
+              <ShareButton
+                payload={{
+                  title: t('app.name', 'GeoChallenge'),
+                  text: t('flash.shareText', {
+                    score,
+                    correct,
+                    accuracy: `${accuracy}%`,
+                    maxCombo,
+                    defaultValue: '⚡ Flash: {{score}} pts · combo máx {{maxCombo}} · {{correct}} correctas ({{accuracy}})',
+                  }),
+                }}
+              />
+            </div>
+
             <Button
               onClick={() => {
                 setResults([]);
@@ -388,7 +406,7 @@ export function FlashGamePage() {
               variant="primary"
               size="lg"
               fullWidth
-              className="mt-5"
+              className="mt-4"
             >
               {t('flash.playAgain')}
             </Button>

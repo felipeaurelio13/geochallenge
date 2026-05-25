@@ -255,8 +255,13 @@ export function ResultsPage() {
           </div>
         </section>
 
+        {/* Action tray: antes era `sticky bottom-0 z-10 backdrop-blur-sm` que
+            visualmente se montaba sobre el contenido scrolleable y producía ese
+            efecto "se ve algo pasar por detrás" cuando aún quedaba contenido
+            (breakdown, rank). Ahora va en flujo natural al final de la página,
+            la cual ya es scrolleable verticalmente. Mucho más limpio. */}
         <section
-          className="sticky bottom-0 z-10 mt-5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-sm"
+          className="mt-5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
           data-testid="results-action-tray"
         >
           <div className="flex flex-col gap-2.5">

@@ -381,6 +381,19 @@ export function SurvivalPage() {
     setPlayers([]);
   }, []);
 
+  // Tras el timeout de búsqueda, permitir reintentar sin volver al menú.
+  // Limpia el estado de timeout y vuelve a poner al usuario en queue.
+  const retrySearch = useCallback(() => {
+    socketService.socket?.emit('survival:dequeue');
+    setSearchTime(0);
+    setSearchTimedOut(false);
+    setStatus('idle');
+    // Pequeño delay para que el servidor procese el dequeue antes del nuevo queue.
+    setTimeout(() => {
+      socketService.socket?.emit('survival:queue', { category });
+    }, 100);
+  }, [category]);
+
   const handleLocationSelect = useCallback((lat: number, lng: number) => {
     setMapLocation({ lat, lng });
   }, []);
@@ -508,22 +521,49 @@ export function SurvivalPage() {
   }
 
   if (status === 'queued') {
+    // QA round 3 (ROUND3-005): después de 75s en queue solo se veía el timer
+    // subiendo, sin pista de qué pasaría. Ahora el timeout queda EXPLÍCITO:
+    // - antes de timeout: spinner + counter + Cancel
+    // - en timeout: mensaje claro "no encontramos a nadie" + 2 acciones
+    //   (Reintentar / Volver al menú) en lugar de Cancel ambiguo.
     return (
       <div className="h-full min-h-0 bg-[var(--color-bg-app)] flex flex-col items-center justify-center px-4 gap-5 text-center">
         <div className="relative inline-flex items-center justify-center">
-          <span className="absolute inline-flex h-20 w-20 rounded-full bg-primary/10 animate-ping" />
-          <span className="text-5xl relative">☠️</span>
+          {!searchTimedOut && (
+            <span className="absolute inline-flex h-20 w-20 rounded-full bg-primary/10 animate-ping" />
+          )}
+          <span className="text-5xl relative">{searchTimedOut ? '😴' : '☠️'}</span>
         </div>
-        <div>
-          <h2 className="text-xl font-bold text-app-text">{t('survival.searching')}</h2>
-          <p className="mt-1 text-sm text-app-secondary tabular-nums">{searchTime}s</p>
-        </div>
-        {searchTimedOut && (
-          <p className="text-sm text-amber-400">{t('survival.notEnoughPlayers')}</p>
+        {searchTimedOut ? (
+          <>
+            <div>
+              <h2 className="text-xl font-bold text-app-text">
+                {t('survival.searchTimeout', 'Sin jugadores disponibles')}
+              </h2>
+              <p className="mt-2 max-w-sm text-sm text-app-secondary">
+                {t('survival.notEnoughPlayers', 'No encontramos a nadie en este momento. Intenta de nuevo o juega otro modo.')}
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 w-full max-w-xs">
+              <Button onClick={retrySearch} variant="primary" size="md" fullWidth>
+                {t('survival.findMatch', 'Buscar partida')}
+              </Button>
+              <Button onClick={() => { cancelQueue(); navigate('/menu'); }} variant="ghost" size="md" fullWidth>
+                {t('survival.backToMenu', 'Volver al menú')}
+              </Button>
+            </div>
+          </>
+        ) : (
+          <>
+            <div>
+              <h2 className="text-xl font-bold text-app-text">{t('survival.searching')}</h2>
+              <p className="mt-1 text-sm text-app-secondary tabular-nums">{searchTime}s</p>
+            </div>
+            <Button onClick={cancelQueue} variant="secondary" size="sm">
+              {t('survival.cancel')}
+            </Button>
+          </>
         )}
-        <Button onClick={cancelQueue} variant="secondary" size="sm">
-          {t('survival.cancel')}
-        </Button>
       </div>
     );
   }

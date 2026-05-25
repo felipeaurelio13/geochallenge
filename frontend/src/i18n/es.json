@@ -424,6 +424,8 @@
     "comeBackTomorrow": "Vuelve mañana para el siguiente reto",
     "streak": "Racha",
     "days": "días",
+    "streakStart": "¡día! Vuelve mañana para seguir la racha",
+    "streakDays": "días seguidos",
     "complete": "¡Reto del día completado!",
     "finish": "Ver resultado"
   },

@@ -424,6 +424,8 @@
     "comeBackTomorrow": "Come back tomorrow for the next challenge",
     "streak": "Streak",
     "days": "days",
+    "streakStart": "day! Come back tomorrow to keep your streak",
+    "streakDays": "days in a row",
     "complete": "Daily Challenge complete!",
     "finish": "See results"
   },

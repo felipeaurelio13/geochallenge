@@ -137,8 +137,13 @@ export function DailyChallengePage() {
         <div className="w-full max-w-sm rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
           <div className="text-4xl font-black text-app-text">{previousResult.correctCount}/{previousResult.totalQuestions}</div>
           <div className="mt-1 text-[var(--color-text-secondary)]">{pct}% {t('results.accuracy')}</div>
-          {previousResult.dailyStreak && previousResult.dailyStreak > 1 && (
-            <div className="mt-3 text-sm text-cyan-400">🔥 {t('daily.streak', 'Racha')}: {previousResult.dailyStreak} {t('daily.days', 'días')}</div>
+          {previousResult.dailyStreak !== undefined && previousResult.dailyStreak >= 1 && (
+            <div className="mt-3 rounded-lg bg-cyan-500/10 border border-cyan-500/30 px-3 py-2 text-sm text-cyan-300">
+              🔥 <span className="font-bold tabular-nums">{previousResult.dailyStreak}</span>{' '}
+              {previousResult.dailyStreak === 1
+                ? t('daily.streakStart', '¡día! Vuelve mañana para seguir la racha')
+                : t('daily.streakDays', { count: previousResult.dailyStreak, defaultValue: 'días seguidos' })}
+            </div>
           )}
         </div>
         <Button onClick={() => handleShare(previousResult.correctCount)} disabled={shareStatus === 'sharing'} variant="primary" size="lg">
@@ -162,10 +167,21 @@ export function DailyChallengePage() {
           <div className="w-full max-w-sm rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
             <div className="text-5xl font-black text-app-text">{result.correctCount}/{result.totalQuestions}</div>
             <div className="mt-1 text-[var(--color-text-secondary)]">{pct}% {t('results.accuracy')}</div>
-            {result.dailyStreak && result.dailyStreak > 1 && (
-              <div className="mt-3 flex items-center justify-center gap-2 text-sm text-cyan-400">
-                <span>🔥</span>
-                <span>{t('daily.streak', 'Racha')}: <strong>{result.dailyStreak}</strong> {t('daily.days', 'días')}</span>
+            {/* Racha diaria — motivador de retención clave. Antes solo se mostraba
+              cuando > 1 (silencioso en la primera partida), QA round 3 lo marcó
+              como faltante. Ahora siempre aparece: día 1 invita a volver mañana,
+              días subsiguientes celebran la continuidad. */}
+            {result.dailyStreak !== undefined && result.dailyStreak >= 1 && (
+              <div className="mt-4 rounded-xl border border-cyan-500/30 bg-cyan-500/10 p-3">
+                <div className="flex items-center justify-center gap-2 text-cyan-300">
+                  <span className="text-xl">🔥</span>
+                  <span className="text-2xl font-black tabular-nums">{result.dailyStreak}</span>
+                  <span className="text-sm">
+                    {result.dailyStreak === 1
+                      ? t('daily.streakStart', '¡día! Vuelve mañana para seguir la racha')
+                      : t('daily.streakDays', { count: result.dailyStreak, defaultValue: 'días seguidos' })}
+                  </span>
+                </div>
               </div>
             )}
           </div>
