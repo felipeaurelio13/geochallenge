@@ -90,6 +90,69 @@ export interface CategoryStat {
   bestScore: number;
 }
 
+// ─── Flag Master ─────────────────────────────────────────────────────────────
+
+export type FlagModifier = 'none' | 'grayscale' | 'crop' | 'similar' | 'combined';
+
+export interface FlagMasterRound {
+  id: string;
+  category: 'FLAG';
+  questionText: string;
+  options: string[];
+  correctAnswer: string;
+  difficulty: Difficulty;
+  imageUrl?: string;
+  questionData?: string;
+  continent?: string;
+  flagModifier: FlagModifier;
+  multiplier: number;
+  tier: number; // 1-5
+  similarityGroupId?: string;
+}
+
+export interface FlagMasterStartResponse {
+  gameId: string;
+  totalRounds: number;
+  timePerQuestion: number;
+  basePoints: number;
+  maxTimeBonus: number;
+  rounds: FlagMasterRound[];
+}
+
+export interface FlagMasterRoundResult {
+  questionId: string;
+  isCorrect: boolean;
+  correctAnswer: string;
+  userAnswer: string;
+  modifier: FlagModifier;
+  multiplier: number;
+  basePoints: number;
+  timeBonus: number;
+  modifierBonus: number;
+  points: number;
+  tier: number;
+}
+
+export interface FlagMasterFinishResponse {
+  gameId: string;
+  totalScore: number;
+  correctCount: number;
+  totalQuestions: number;
+  accuracy: number;
+  isHighScore: boolean;
+  newAchievements: string[];
+  rounds: FlagMasterRoundResult[];
+  degraded?: boolean;
+  message?: string;
+}
+
+export interface FlagMasterAvailability {
+  canPlay: boolean;
+  hardAvailable: number;
+  mediumAvailable: number;
+  required: number;
+}
+
 export interface DailyResult {
   score: number;
   correctCount: number;

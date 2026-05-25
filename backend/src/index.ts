@@ -13,6 +13,7 @@ import { ensureCinemaGeoQuestions } from './scripts/ensureCinemaGeoQuestions.js'
 // Controllers
 import authController from './controllers/auth.controller.js';
 import gameController from './controllers/game.controller.js';
+import flagMasterController from './controllers/flagMaster.controller.js';
 import leaderboardController from './controllers/leaderboard.controller.js';
 import challengeController from './controllers/challenge.controller.js';
 import { globalLimiter } from './middleware/rateLimit.js';
@@ -81,6 +82,7 @@ app.use('/api', globalLimiter);
 
 // API Routes
 app.use('/api/auth', authController);
+app.use('/api/game/flag-master', flagMasterController);
 app.use('/api/game', gameController);
 app.use('/api/leaderboard', leaderboardController);
 app.use('/api/challenges', challengeController);

@@ -302,6 +302,28 @@ export function MenuPage() {
         </div>
       </section>
 
+      {/* Flag Master Banner — modo dedicado de banderas con dificultad escalada */}
+      <Link
+        to="/flag-master"
+        className="mt-4 flex items-center gap-4 rounded-2xl border border-red-600/40 bg-gradient-to-r from-red-900/25 to-amber-900/20 px-4 py-3.5 text-app-text transition-all hover:border-red-500/60 hover:from-red-800/35 hover:to-amber-800/30 pressable"
+      >
+        <span className="shrink-0 text-3xl leading-none">🏴</span>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-red-300">{t('menu.flagMaster', 'Maestro de Banderas')}</span>
+            <span className="rounded-full border border-red-500/50 bg-red-500/15 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-red-300">
+              {t('menu.flagMasterBadge', 'Difícil')}
+            </span>
+          </div>
+          <div className="mt-0.5 text-xs text-red-300/80">
+            {t('menu.flagMasterDesc', '10 rondas · sin color, recortes y trampas · multiplicadores hasta x2.5')}
+          </div>
+        </div>
+        <span className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-red-500/20 text-red-300 text-base font-bold">
+          →
+        </span>
+      </Link>
+
       {/* Daily Challenge Banner */}
       <Link
         to="/daily"

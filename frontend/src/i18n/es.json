@@ -95,7 +95,59 @@
     "flashBadge": "Nuevo · Mobile",
     "flashNoMap": "El modo Flash no admite mapas — elige otra categoría",
     "survival": "Survival",
-    "survivalDesc": "1 vida · dificultad progresiva · último en pie gana"
+    "survivalDesc": "1 vida · dificultad progresiva · último en pie gana",
+    "flagMaster": "Maestro de Banderas",
+    "flagMasterBadge": "Difícil",
+    "flagMasterDesc": "10 rondas · sin color, recortes y trampas · multiplicadores hasta x2.5"
+  },
+  "flagMaster": {
+    "question": "¿A qué país pertenece esta bandera?",
+    "preparing": "Preparando 10 banderas difíciles...",
+    "errorTitle": "No se pudo iniciar Flag Master",
+    "errorLoading": "No se pudo iniciar Flag Master",
+    "errorFinishing": "No se pudo guardar el resultado",
+    "retry": "Reintentar",
+    "backToMenu": "Volver al menú",
+    "exit": "Salir",
+    "confirmExit": "¿Seguro? Perderás tu progreso.",
+    "correct": "¡Correcto!",
+    "wrong": "Incorrecto.",
+    "timeout": "Tiempo agotado.",
+    "wasAnswer": "Era",
+    "savingResult": "Guardando resultado...",
+    "summaryTitle": "Maestro de Banderas — resultado",
+    "correctSuffix": "correctas",
+    "newHighScore": "¡Nuevo récord personal!",
+    "degraded": "Score sin bonificadores (caché caída).",
+    "breakdownTitle": "Desglose por tier",
+    "roundsTitle": "Ronda por ronda",
+    "playAgain": "Jugar de nuevo",
+    "imageUnavailable": "Bandera no disponible",
+    "altNormal": "Bandera del país",
+    "altGrayscale": "Bandera en escala de grises",
+    "altCrop": "Bandera recortada",
+    "altCombined": "Bandera recortada y en escala de grises",
+    "tier": {
+      "1": "Calentamiento",
+      "2": "Sin color",
+      "3": "Zoom",
+      "4": "Trampa",
+      "5": "Final"
+    },
+    "modifier": {
+      "none": "sin truco",
+      "grayscale": "sin color",
+      "crop": "zoom",
+      "similar": "trampa",
+      "combined": "todo"
+    },
+    "modifierDesc": {
+      "none": "Sin trucos. Solo banderas difíciles.",
+      "grayscale": "En blanco y negro: nada de color.",
+      "crop": "Solo ves una parte de la bandera.",
+      "similar": "Las 4 opciones son banderas casi iguales.",
+      "combined": "Todo apilado: recorte, sin color y opciones tramposas."
+    }
   },
   "survival": {
     "title": "Survival",

@@ -17,6 +17,7 @@ import {
   ChallengeGamePage,
   ChallengeResultsPage,
   SurvivalPage,
+  FlagMasterPage,
 } from './pages';
 import { DailyChallengePage } from './pages/DailyChallengePage';
 import {
@@ -165,6 +166,10 @@ export const appRoutes = [
       {
         path: '/survival',
         element: <ProtectedRoute><SurvivalPage /></ProtectedRoute>,
+      },
+      {
+        path: '/flag-master',
+        element: <ProtectedRoute><FlagMasterPage /></ProtectedRoute>,
       },
       {
         path: '*',

@@ -18,6 +18,9 @@ import type {
   CategoryStat,
   DailyResult,
   EarnedAchievement,
+  FlagMasterStartResponse,
+  FlagMasterFinishResponse,
+  FlagMasterAvailability,
 } from '../types';
 import { filtersToParams } from '../types';
 import { testAuthBypass } from '../utils/testAuthBypass';
@@ -334,6 +337,31 @@ class ApiService {
   async getAchievements() {
     const response = await this.client.get<{ achievements: EarnedAchievement[] }>('/game/achievements');
     return response.data.achievements;
+  }
+
+  // ─── Flag Master ──────────────────────────────────────────────────────────
+
+  async startFlagMaster() {
+    const response = await this.client.post<FlagMasterStartResponse>('/game/flag-master/start');
+    return response.data;
+  }
+
+  async finishFlagMaster(data: {
+    gameId: string;
+    answers: { questionId: string; answer: string; timeRemaining: number }[];
+  }) {
+    const response = await this.client.post<FlagMasterFinishResponse>(
+      '/game/flag-master/finish',
+      data
+    );
+    return response.data;
+  }
+
+  async getFlagMasterAvailability() {
+    const response = await this.client.get<FlagMasterAvailability>(
+      '/game/flag-master/availability'
+    );
+    return response.data;
   }
 }
 

@@ -95,7 +95,59 @@
     "flashBadge": "New · Mobile",
     "flashNoMap": "Flash mode does not support maps — pick another category",
     "survival": "Survival",
-    "survivalDesc": "1 life · progressive difficulty · last one standing wins"
+    "survivalDesc": "1 life · progressive difficulty · last one standing wins",
+    "flagMaster": "Flag Master",
+    "flagMasterBadge": "Hard",
+    "flagMasterDesc": "10 rounds · no color, cropped, lookalike traps · multipliers up to x2.5"
+  },
+  "flagMaster": {
+    "question": "Which country does this flag belong to?",
+    "preparing": "Loading 10 hard flags...",
+    "errorTitle": "Could not start Flag Master",
+    "errorLoading": "Could not start Flag Master",
+    "errorFinishing": "Could not save the result",
+    "retry": "Retry",
+    "backToMenu": "Back to menu",
+    "exit": "Exit",
+    "confirmExit": "Sure? You will lose your progress.",
+    "correct": "Correct!",
+    "wrong": "Wrong.",
+    "timeout": "Time's up.",
+    "wasAnswer": "It was",
+    "savingResult": "Saving result...",
+    "summaryTitle": "Flag Master — result",
+    "correctSuffix": "correct",
+    "newHighScore": "New personal best!",
+    "degraded": "Score without bonuses (cache down).",
+    "breakdownTitle": "Tier breakdown",
+    "roundsTitle": "Round by round",
+    "playAgain": "Play again",
+    "imageUnavailable": "Flag not available",
+    "altNormal": "Country flag",
+    "altGrayscale": "Flag in grayscale",
+    "altCrop": "Cropped flag",
+    "altCombined": "Cropped flag in grayscale",
+    "tier": {
+      "1": "Warm-up",
+      "2": "No color",
+      "3": "Zoom",
+      "4": "Trap",
+      "5": "Final"
+    },
+    "modifier": {
+      "none": "no trick",
+      "grayscale": "no color",
+      "crop": "zoom",
+      "similar": "trap",
+      "combined": "all"
+    },
+    "modifierDesc": {
+      "none": "No tricks. Just hard flags.",
+      "grayscale": "In black and white: no color.",
+      "crop": "You only see a portion of the flag.",
+      "similar": "All 4 options are nearly identical flags.",
+      "combined": "Everything stacked: cropped, grayscale and tricky options."
+    }
   },
   "survival": {
     "title": "Survival",
