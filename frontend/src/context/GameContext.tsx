@@ -14,6 +14,7 @@ import type {
 import { hasActiveFilters } from '../types';
 import { cacheQuestions, getCachedQuestions, enqueuePendingSession } from '../hooks/useOfflineQuestions';
 import { useImagePreloader } from '../hooks/useImagePreloader';
+import { getQuestionDuration, clampTimeRemainingForScoring } from '../utils/questionTiming';
 
 interface GameContextType {
   state: GameState;
@@ -89,7 +90,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         answers: [],
         results: [],
         score: 0,
-        timeRemaining: 10,
+        timeRemaining: getQuestionDuration(cached[0]?.category, 10),
         config: {
           questionsCount: cached.length,
           timePerQuestion: 10,
@@ -119,7 +120,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         answers: [],
         results: [],
         score: 0,
-        timeRemaining: response.gameConfig.timePerQuestion,
+        timeRemaining: getQuestionDuration(response.questions?.[0]?.category, response.gameConfig.timePerQuestion),
         config: response.gameConfig,
         isOffline: false,
       });
@@ -157,14 +158,23 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       coordinates?: { lat: number; lng: number },
       mechanicUsage?: MechanicUsage
     ): Promise<AnswerResult> => {
-      const { questions, currentIndex, timeRemaining, isOffline } = stateRef.current;
+      const { questions, currentIndex, timeRemaining, isOffline, config } = stateRef.current;
       const currentQuestion = questions[currentIndex];
+      const baseDuration = config?.timePerQuestion ?? 10;
+
+      // Clamp the reported remaining time so CINEMA_GEO's extra read window doesn't inflate
+      // the time bonus on the backend (the first EXTRA_READ_SECONDS are "free read time").
+      const reportedTimeRemaining = clampTimeRemainingForScoring(
+        currentQuestion?.category,
+        timeRemaining,
+        baseDuration,
+      );
 
       // Save answer locally
       const newAnswer: Answer = {
         questionId: currentQuestion.id,
         answer,
-        timeRemaining,
+        timeRemaining: reportedTimeRemaining,
         mechanicUsage,
         coordinates,
       };
@@ -221,11 +231,12 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         return { ...prev, status: 'finished' };
       }
 
+      const baseDuration = prev.config?.timePerQuestion || 10;
       return {
         ...prev,
         status: 'playing',
         currentIndex: nextIndex,
-        timeRemaining: prev.config?.timePerQuestion || 10,
+        timeRemaining: getQuestionDuration(prev.questions[nextIndex]?.category, baseDuration),
       };
     });
   }, []);
@@ -253,7 +264,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         return {
           ...prev,
           questions: updated,
-          timeRemaining: prev.config?.timePerQuestion ?? 10,
+          timeRemaining: getQuestionDuration(replacement.category, prev.config?.timePerQuestion ?? 10),
         };
       });
     } catch {

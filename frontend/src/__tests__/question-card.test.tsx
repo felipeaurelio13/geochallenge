@@ -282,7 +282,7 @@ describe('QuestionCard', () => {
 
     // Movie title and year appear as context (not the answer)
     expect(screen.getByText('The Shining')).toBeInTheDocument();
-    expect(screen.getByText('1980')).toBeInTheDocument();
+    expect(screen.getByText(/1980/)).toBeInTheDocument();
     // v2 never carries an image — no <img> element should be rendered
     expect(container.querySelector('img')).toBeNull();
   });

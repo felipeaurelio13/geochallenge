@@ -20,7 +20,7 @@ const VISUAL_ALT: Record<string, string> = {
   FLAG: 'Bandera',
   SILHOUETTE: 'Silueta',
   MONUMENT: 'Monumento',
-  CINEMA_GEO: 'Cine & Geografía',
+  CINEMA_GEO: 'Pregunta de Cine & Geografía',
 };
 
 export function FlashCard({ question, onAnswer, disabled, disabledOptions = [], feedback, onImageError }: FlashCardProps) {
@@ -80,15 +80,18 @@ export function FlashCard({ question, onAnswer, disabled, disabledOptions = [], 
           />
         ) : question.category === 'CINEMA_GEO' ? (() => {
           const cgPayload = parseCinemaGeoQuestionData(question.questionData);
+          const kindHint = cgPayload?.answerKind === 'country'
+            ? t('flash.cinemaWhereCountry', '¿En qué país se filmó?')
+            : cgPayload?.answerKind === 'city'
+              ? t('flash.cinemaWhereCity', '¿En qué ciudad se filmó?')
+              : t('flash.cinemaWhereVenue', '¿Dónde se filmó?');
           return (
-            <div className="flex h-full flex-col items-center justify-center gap-2 bg-gradient-to-br from-rose-950/60 to-gray-900/80 px-4 text-center">
-              <span className="text-5xl">🎬</span>
+            <div className="flex h-full flex-col items-center justify-center gap-3 bg-gradient-to-br from-rose-950/60 to-gray-900/80 px-4 text-center">
+              <span className="text-4xl">🎬</span>
               {cgPayload?.movieTitle && (
-                <p className="text-sm font-bold text-rose-200">{cgPayload.movieTitle}</p>
+                <p className="text-base font-bold text-rose-200 sm:text-lg">{cgPayload.movieTitle}</p>
               )}
-              {cgPayload && cgPayload.movieYear > 0 && (
-                <p className="text-xs text-rose-300/60">{cgPayload.movieYear}</p>
-              )}
+              <p className="text-sm font-medium text-rose-100/90">{kindHint}</p>
             </div>
           );
         })() : (

@@ -7,6 +7,7 @@ import { Button } from '../components/atoms/Button';
 import { OptionButton } from '../components/OptionButton';
 import { MonumentAttribution } from '../components/MonumentAttribution';
 import { generateFunFact } from '../utils/funFacts';
+import { getQuestionDuration } from '../utils/questionTiming';
 import { useStreakShareImage } from '../hooks/useStreakShareImage';
 import type { Question, DailyResult } from '../types';
 
@@ -52,7 +53,7 @@ export function DailyChallengePage() {
   // Timer per question
   useEffect(() => {
     if (pageState !== 'playing' || showResult) return;
-    setTimeLeft(ANSWER_TIME);
+    setTimeLeft(getQuestionDuration(currentQuestion?.category, ANSWER_TIME));
     timerRef.current = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {

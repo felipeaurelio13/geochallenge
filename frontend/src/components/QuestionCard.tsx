@@ -229,24 +229,25 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
           </div>
         )}
 
-        {/* Cinema & Geography: render the movie context card. The answer is always a place,
-            so showing the movie title is intentional context — not a spoiler. */}
+        {/* Cinema & Geography: compact context chip above the prompt. Frees ~300px of vertical
+            space for the prompt + options. The answer is always a place, so showing the movie
+            title is intentional context — not a spoiler. */}
         {question.category === 'CINEMA_GEO' && cinemaPayload && (
-          <div className={compact ? 'mb-1' : 'mb-6'}>
-            <div className="mx-auto flex aspect-[16/9] w-full max-w-xl flex-col items-center justify-center gap-2 rounded-xl border border-rose-500/30 bg-gradient-to-br from-rose-950/60 to-gray-900/80 p-4 relative overflow-hidden">
-              <span className="text-4xl">🎬</span>
+          <div className={`flex flex-wrap items-center justify-center gap-2 ${compact ? 'mb-2' : 'mb-4'}`}>
+            <span className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-rose-500/30 bg-rose-500/10 px-3 py-1 text-rose-200">
+              <span aria-hidden>🎬</span>
               {cinemaPayload.movieTitle && (
-                <p className="px-4 text-center text-sm font-bold text-rose-200 sm:text-base">{cinemaPayload.movieTitle}</p>
+                <span className="truncate text-xs font-semibold sm:text-sm">{cinemaPayload.movieTitle}</span>
               )}
               {cinemaPayload.movieYear > 0 && (
-                <p className="text-xs text-rose-300/60">{cinemaPayload.movieYear}</p>
+                <span className="text-[0.65rem] text-rose-300/70 sm:text-xs">({cinemaPayload.movieYear})</span>
               )}
-              {question.difficulty && (
-                <span className={`absolute right-2 top-2 inline-block rounded-full px-2 py-0.5 text-[0.62rem] font-semibold sm:text-[0.68rem] ${getDifficultyClass()}`}>
-                  {t(getDifficultyKey())}
-                </span>
-              )}
-            </div>
+            </span>
+            {question.difficulty && (
+              <span className={`inline-block rounded-full px-2.5 py-0.5 text-[0.62rem] font-semibold sm:text-[0.68rem] ${getDifficultyClass()}`}>
+                {t(getDifficultyKey())}
+              </span>
+            )}
           </div>
         )}
 

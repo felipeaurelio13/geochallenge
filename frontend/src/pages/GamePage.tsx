@@ -21,6 +21,7 @@ import { useHaptics } from '../hooks';
 import { areMechanicsV2Enabled } from '../config/featureFlags';
 import { trackUxEvent } from '../utils/uxTelemetry';
 import { generateFunFact } from '../utils/funFacts';
+import { getQuestionDuration } from '../utils/questionTiming';
 
 const MapInteractive = lazy(() =>
   import('../components/MapInteractive').then((m) => ({ default: m.MapInteractive }))
@@ -104,7 +105,8 @@ export function GamePage() {
   const hasSelection = Boolean(selectedAnswer || mapLocation);
   const shouldUseCompactQuestionCard = true;
   const shouldUseStreakFlow = gameType === 'streak';
-  const roundDuration = state.config?.timePerQuestion ?? TIME_PER_QUESTION;
+  const baseDuration = state.config?.timePerQuestion ?? TIME_PER_QUESTION;
+  const roundDuration = getQuestionDuration(currentQuestion?.category, baseDuration);
   const mechanicsFeatureEnabled = areMechanicsV2Enabled(gameType);
   const mechanicsConfig = state.config?.mechanics;
   const mechanicsRuntimeEnabled = mechanicsFeatureEnabled && Boolean(mechanicsConfig?.enabled);

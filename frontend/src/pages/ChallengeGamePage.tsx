@@ -18,6 +18,7 @@ import { GAME_CONSTANTS } from '../constants/game';
 import { useHaptics } from '../hooks';
 import { areMechanicsV2Enabled } from '../config/featureFlags';
 import { trackUxEvent } from '../utils/uxTelemetry';
+import { getQuestionDuration, clampTimeRemainingForScoring } from '../utils/questionTiming';
 
 const MapInteractive = lazy(() =>
   import('../components/MapInteractive').then((m) => ({ default: m.MapInteractive }))
@@ -58,6 +59,7 @@ export function ChallengeGamePage() {
   const isMapQuestion = currentQuestion?.category === 'MAP';
   const hasSelection = Boolean(selectedAnswer || mapLocation);
   const isLastQuestion = currentIndex >= questions.length - 1;
+  const effectiveDuration = getQuestionDuration(currentQuestion?.category, timePerQuestion);
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -90,14 +92,21 @@ export function ChallengeGamePage() {
   const calculatePoints = (correct: boolean, mapDistanceKm?: number) => {
     if (!correct) return 0;
 
+    // Clamp so CINEMA_GEO's extra read window doesn't inflate the time bonus.
+    const scoringTimeRemaining = clampTimeRemainingForScoring(
+      currentQuestion?.category,
+      timeRemaining,
+      timePerQuestion,
+    );
+
     if (typeof mapDistanceKm === 'number') {
       const accuracyFactor = Math.max(0, 1 - mapDistanceKm / MAP_MAX_DISTANCE_KM);
       const accuracyPoints = Math.round(BASE_POINTS * accuracyFactor);
-      const timePoints = Math.round((timeRemaining / timePerQuestion) * MAX_TIME_BONUS * accuracyFactor);
+      const timePoints = Math.round((scoringTimeRemaining / timePerQuestion) * MAX_TIME_BONUS * accuracyFactor);
       return accuracyPoints + timePoints;
     }
 
-    const timeBonus = Math.round((timeRemaining / timePerQuestion) * MAX_TIME_BONUS);
+    const timeBonus = Math.round((scoringTimeRemaining / timePerQuestion) * MAX_TIME_BONUS);
     return BASE_POINTS + timeBonus;
   };
 
@@ -211,11 +220,12 @@ export function ChallengeGamePage() {
         setIsSubmitting(false);
       }
     } else {
-      setCurrentIndex((prev) => prev + 1);
+      const nextIdx = currentIndex + 1;
+      setCurrentIndex(nextIdx);
       setSelectedAnswer(null);
       setMapLocation(null);
       setShowResult(false);
-      setTimeRemaining(timePerQuestion);
+      setTimeRemaining(getQuestionDuration(questions[nextIdx]?.category, timePerQuestion));
       setDisabledOptionIndexes([]);
     }
   };
@@ -281,7 +291,7 @@ export function ChallengeGamePage() {
             </div>
 
             <Timer
-              duration={timePerQuestion}
+              duration={effectiveDuration}
               timeRemaining={timeRemaining}
               onTick={setTimeRemaining}
               onComplete={handleTimeComplete}
