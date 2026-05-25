@@ -30,7 +30,7 @@ export function HomePage() {
             {t('home.welcomeBack', { name: user.username })}
           </p>
         ) : (
-          <p className="mt-2 text-sm text-gray-400">{t('home.subtitle')}</p>
+          <p className="mt-2 text-sm text-app-secondary">{t('home.subtitle')}</p>
         )}
 
         <div id="home-main-actions" className="mt-8 flex flex-col gap-3">
