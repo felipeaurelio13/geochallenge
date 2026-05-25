@@ -5,6 +5,7 @@ import { Category, GameMode, Prisma } from '@prisma/client';
 import { authenticateJWT, AuthRequest } from '../middleware/auth.js';
 import {
   buildFlagMasterRounds,
+  getTierConfigForRound,
   scoreFlagMasterAnswer,
   type FlagMasterRound,
   type FlagMasterRoundResult,
@@ -180,7 +181,7 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
         ...persisted,
         rounds: fallbackResult.rounds,
         degraded: true,
-        message: 'Sesión expirada o caché caído: score sin bonificadores.',
+        message: 'Sesión sin verificar (caché caído): score válido pero sin anti-cheat.',
       });
       return;
     }
@@ -302,10 +303,16 @@ async function scoreWithoutSession(
     const isCorrect =
       !!q &&
       a.answer.toLowerCase().trim() === correctAnswer.toLowerCase().trim();
+    // El tier plan es determinístico por índice de ronda: aún sin Redis podemos
+    // aplicar el multiplicador correcto. Lo único que perdemos sin Redis es la
+    // validación de que las preguntas servidas fueron las que el server emitió;
+    // el cliente podría reordenar para meter preguntas conocidas en tiers altos,
+    // pero ese vector queda registrado en details.degraded para auditoría.
+    const tierConfig = getTierConfigForRound(idx);
     const { basePoints, timeBonus, modifierBonus, points } = scoreFlagMasterAnswer(
       isCorrect,
       a.timeRemaining,
-      1.0,
+      tierConfig.multiplier,
       config.game.basePoints,
       config.game.maxTimeBonus,
       config.game.timePerQuestion
@@ -315,13 +322,13 @@ async function scoreWithoutSession(
       isCorrect,
       correctAnswer,
       userAnswer: a.answer,
-      modifier: 'none',
-      multiplier: 1.0,
+      modifier: tierConfig.modifier,
+      multiplier: tierConfig.multiplier,
       basePoints,
       timeBonus,
       modifierBonus,
       points,
-      tier: idx < 2 ? 1 : idx < 4 ? 2 : idx < 6 ? 3 : idx < 8 ? 4 : 5,
+      tier: tierConfig.tier,
     };
   });
 

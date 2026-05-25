@@ -416,7 +416,7 @@ function FlagMasterResults({ result, onPlayAgain }: ResultsProps) {
           )}
           {result.degraded && (
             <p className="mt-2 text-xs text-amber-300/80">
-              ⚠️ {result.message || t('flagMaster.degraded', 'Score sin bonificadores (caché caída).')}
+              ⚠️ {result.message || t('flagMaster.degraded', 'Score verificado parcialmente (caché caída).')}
             </p>
           )}
         </div>

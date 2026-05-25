@@ -82,8 +82,8 @@ describe('flagMaster.service - tier plan', () => {
   });
 
   it('getTierConfigForRound clampea fuera de rango (defensivo)', () => {
-    expect(getTierConfigForRound(-5)).toEqual({ modifier: 'none', multiplier: 1.0 });
-    expect(getTierConfigForRound(99)).toEqual({ modifier: 'combined', multiplier: 2.5 });
+    expect(getTierConfigForRound(-5)).toEqual({ tier: 1, modifier: 'none', multiplier: 1.0 });
+    expect(getTierConfigForRound(99)).toEqual({ tier: 5, modifier: 'combined', multiplier: 2.5 });
   });
 
   it('isSimilarTier identifica los tiers que usan distractores curados', () => {
@@ -92,6 +92,29 @@ describe('flagMaster.service - tier plan', () => {
     expect(isSimilarTier('crop')).toBe(false);
     expect(isSimilarTier('similar')).toBe(true);
     expect(isSimilarTier('combined')).toBe(true);
+  });
+});
+
+describe('flagMaster.service - getTierConfigForRound (degraded-path source of truth)', () => {
+  it('cada índice 0-9 mapea al tier + multiplicador correctos', () => {
+    const expected: Array<[number, number, string, number]> = [
+      [0, 1, 'none', 1.0],
+      [1, 1, 'none', 1.0],
+      [2, 2, 'grayscale', 1.5],
+      [3, 2, 'grayscale', 1.5],
+      [4, 3, 'crop', 1.5],
+      [5, 3, 'crop', 1.5],
+      [6, 4, 'similar', 1.5],
+      [7, 4, 'similar', 1.5],
+      [8, 5, 'combined', 2.5],
+      [9, 5, 'combined', 2.5],
+    ];
+    for (const [idx, tier, modifier, multiplier] of expected) {
+      const cfg = getTierConfigForRound(idx);
+      expect(cfg.tier).toBe(tier);
+      expect(cfg.modifier).toBe(modifier);
+      expect(cfg.multiplier).toBe(multiplier);
+    }
   });
 });
 

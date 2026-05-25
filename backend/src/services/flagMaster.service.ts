@@ -27,6 +27,7 @@ import {
 export type FlagModifier = 'none' | 'grayscale' | 'crop' | 'similar' | 'combined';
 
 export interface FlagMasterTierConfig {
+  tier: number;
   modifier: FlagModifier;
   multiplier: number;
 }
@@ -113,7 +114,7 @@ export function getFlagMasterTierPlan(): { tier: number; modifier: FlagModifier;
 export function getTierConfigForRound(roundIndex: number): FlagMasterTierConfig {
   const safeIndex = Math.max(0, Math.min(roundIndex, TIER_PLAN.length - 1));
   const slot = TIER_PLAN[safeIndex];
-  return { modifier: slot.modifier, multiplier: slot.multiplier };
+  return { tier: slot.tier, modifier: slot.modifier, multiplier: slot.multiplier };
 }
 
 const TIER_FOR_ROUND = (roundIndex: number) => {
