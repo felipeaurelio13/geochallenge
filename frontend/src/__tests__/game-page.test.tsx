@@ -86,6 +86,7 @@ vi.mock('../components', () => ({
   ProgressBar: () => <div>progress</div>,
   LoadingSpinner: ({ text }: { text?: string }) => <div>{text || 'loading'}</div>,
   MechanicsHud: () => <div>mechanics-hud</div>,
+  StreakCombo: ({ combo }: { combo: number }) => <div data-testid="streak-combo">streak {combo}</div>,
   RoundActionTray: ({ showResult, canSubmit, submitLabel, nextLabel, onSubmit, onNext, resultLabel }: any) => (
     <div data-testid="mobile-action-tray" className="fixed bottom-0">
       {!showResult && <button onClick={onSubmit} disabled={!canSubmit}>{submitLabel}</button>}

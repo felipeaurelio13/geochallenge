@@ -54,7 +54,11 @@ export function GameRoundScaffold({
       <div
         className={[
           'game-question-wrap min-h-0',
-          isCapitalQuestion ? 'game-question-wrap--capital flex flex-1 items-center' : '',
+          // QA round 2 (ROUND2-005): antes CAPITAL usaba `flex-1 items-center`
+          // que centraba la pregunta verticalmente y dejaba ~150px de espacio
+          // muerto arriba y abajo en mobile. Ahora la pregunta se ancla cerca
+          // de las opciones para que queden a tiro de pulgar.
+          isCapitalQuestion ? 'game-question-wrap--capital flex items-start pt-2' : '',
           hasMediaQuestion ? 'game-question-wrap--media' : '',
         ]
           .filter(Boolean)

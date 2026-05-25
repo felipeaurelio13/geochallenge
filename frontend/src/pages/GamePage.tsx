@@ -12,6 +12,7 @@ import {
   GameRoundScaffold,
   RoundActionTray,
   MechanicsHud,
+  StreakCombo,
 } from '../components';
 import { FullScreenError } from '../components/molecules/FullScreenError';
 import { MonumentAttribution } from '../components/MonumentAttribution';
@@ -511,16 +512,32 @@ export function GamePage() {
         </header>
       }
       progress={
-        <div className="bg-[var(--color-surface-muted)] px-3 py-1 sm:px-4 sm:py-1.5">
-          <div className="max-w-4xl mx-auto overflow-x-hidden">
-            <ProgressBar
-              current={currentIndex + 1}
-              total={questions.length}
-              results={results}
-              showCurrentResult={showResult}
-            />
+        // En modo streak, la cantidad de preguntas que llegan del backend es un
+        // batch corto (3) que se rellena al ir respondiendo. La ProgressBar de
+        // 3 dots hacía creer al usuario que el modo era de 3 rondas (QA round 2
+        // ROUND2-003). Reemplazamos por un contador de racha grande y semántico.
+        shouldUseStreakFlow ? (
+          <div className="bg-[var(--color-surface-muted)] px-3 py-2 sm:px-4">
+            <div className="max-w-4xl mx-auto flex items-center justify-center">
+              <StreakCombo
+                combo={results.filter((r) => r.isCorrect).length}
+                label={t('game.streak', 'Racha')}
+                aria-label={t('game.streakLabel', { count: results.filter((r) => r.isCorrect).length, defaultValue: 'Racha actual: {{count}}' })}
+              />
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="bg-[var(--color-surface-muted)] px-3 py-1 sm:px-4 sm:py-1.5">
+            <div className="max-w-4xl mx-auto overflow-x-hidden">
+              <ProgressBar
+                current={currentIndex + 1}
+                total={questions.length}
+                results={results}
+                showCurrentResult={showResult}
+              />
+            </div>
+          </div>
+        )
       }
       question={currentQuestion}
       questionNumber={currentIndex + 1}

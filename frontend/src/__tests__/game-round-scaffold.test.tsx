@@ -82,7 +82,7 @@ describe('GameRoundScaffold', () => {
     expect(optionsWrapper).toHaveClass('flex-1');
     expect(screen.getAllByRole('button')).toHaveLength(4);
   });
-  it('centra verticalmente capitales y mantiene opciones en flujo sin overlay absoluto', () => {
+  it('ancla capitales cerca del top y mantiene opciones en flujo sin overlay absoluto', () => {
     const capitalQuestion = {
       ...question,
       category: 'CAPITAL',
@@ -104,7 +104,10 @@ describe('GameRoundScaffold', () => {
       />
     );
 
-    expect(screen.getByTestId('question-card').parentElement).toHaveClass('flex-1');
+    // Tras QA round 2 (ROUND2-005), CAPITAL ya no se centra verticalmente.
+    // El wrapper se ancla arriba (items-start pt-2) para que las opciones
+    // queden a tiro de pulgar en mobile sin ~150px de dead space.
+    expect(screen.getByTestId('question-card').parentElement).toHaveClass('items-start');
     for (const button of screen.getAllByRole('button')) {
       expect(button.className).not.toContain('absolute');
       expect(button.className).not.toContain('fixed');

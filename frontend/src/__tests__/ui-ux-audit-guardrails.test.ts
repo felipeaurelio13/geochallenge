@@ -33,8 +33,11 @@ describe('UI/UX guardrails audit (mobile-first)', () => {
     expect(unsafe).toEqual([]);
   });
 
-  it('keeps capitals vertically centered and media questions in content-sized mode', () => {
-    expect(gameRoundScaffold).toContain('game-question-wrap--capital flex flex-1 items-center');
+  it('anchors capital questions near the top and keeps media questions content-sized', () => {
+    // QA round 2 (ROUND2-005) reportó ~150px de dead space arriba/abajo cuando
+    // CAPITAL usaba `flex-1 items-center` (vertical center). Ahora se ancla a
+    // arriba (`items-start pt-2`) para acercar pregunta + opciones al pulgar.
+    expect(gameRoundScaffold).toContain('game-question-wrap--capital flex items-start pt-2');
     expect(gameRoundScaffold).toContain('game-question-wrap--media');
   });
 

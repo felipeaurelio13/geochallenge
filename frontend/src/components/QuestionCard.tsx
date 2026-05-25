@@ -2,8 +2,8 @@ import { useMemo } from 'react';
 import { Question } from '../types';
 import { useImageWithFallback } from '../hooks/useImageWithFallback';
 import { useTranslation } from 'react-i18next';
-import { parseMonumentQuestionData } from '../data/monuments';
 import { parseCinemaGeoQuestionData } from '../data/cinemaGeo';
+import { getLocalizedQuestionText } from '../utils/questionText';
 
 interface QuestionCardProps {
   question: Question;
@@ -14,69 +14,13 @@ interface QuestionCardProps {
 }
 
 export function QuestionCard({ question, questionNumber, totalQuestions, compact = false, onImageError }: QuestionCardProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
-  const getQuestionDataValue = (): string => {
-    if (!question.questionData) return '';
-    if (typeof question.questionData === 'string') {
-      const trimmedData = question.questionData.trim();
-
-      if (trimmedData.startsWith('{') && trimmedData.endsWith('}')) {
-        try {
-          const parsedData = JSON.parse(trimmedData) as { country?: string; capital?: string };
-          return parsedData.country || parsedData.capital || '';
-        } catch {
-          // Si no es JSON válido, se usa el valor original.
-        }
-      }
-
-      return question.questionData;
-    }
-    return question.questionData.country || question.questionData.capital || '';
-  };
-
-  const getFallbackQuestionText = () => {
-    const legacyQuestionText = (question as Partial<Question> & { question?: string }).question;
-    const dataValue = getQuestionDataValue();
-
-    if (question.questionText?.trim()) return question.questionText;
-    if (legacyQuestionText?.trim()) return legacyQuestionText;
-    if (question.category === 'CAPITAL') return t('game.questionCapital', { country: dataValue });
-    if (question.category === 'MAP') return t('game.questionMap', { capital: dataValue });
-
-    return dataValue;
-  };
-
-  const getQuestionText = () => {
-    const dataValue = getQuestionDataValue();
-
-    switch (question.category) {
-      case 'FLAG':
-        return t('game.questionFlag');
-      case 'CAPITAL':
-        return t('game.questionCapital', { country: dataValue || getFallbackQuestionText() });
-      case 'MAP':
-        return t('game.questionMap', { capital: dataValue || getFallbackQuestionText() });
-      case 'SILHOUETTE':
-        return t('game.questionSilhouette');
-      case 'MONUMENT': {
-        const variant = parseMonumentQuestionData(question.questionData)?.variant ?? 'identify';
-        return variant === 'country'
-          ? t('game.questionMonumentCountry')
-          : t('game.questionMonumentIdentify');
-      }
-      case 'CINEMA_GEO': {
-        // questionData embeds the bilingual prompt directly. Backend already localizes via i18n
-        // when building questionText; we use it as the source of truth.
-        if (question.questionText?.trim()) return question.questionText;
-        const payload = parseCinemaGeoQuestionData(question.questionData);
-        if (payload) return payload.prompt.es;
-        return t('game.questionCinemaFallback', '¿Dónde se filmó esta escena?');
-      }
-      default:
-        return getFallbackQuestionText();
-    }
-  };
+  // Texto de la pregunta localizado. Antes esta lógica vivía aquí inline y
+  // ramificaba a `question.questionText` (backend → siempre español) para
+  // CINEMA_GEO, produciendo el bug ROUND2-001. Ahora vive en un util compartido
+  // que tanto QuestionCard como DailyChallengePage usan.
+  const getQuestionText = () => getLocalizedQuestionText(question, t, i18n.language);
 
   const getDifficultyClass = () => {
     const difficulty = question.difficulty?.toUpperCase() || 'MEDIUM';

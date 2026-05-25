@@ -287,15 +287,20 @@ describe('QuestionCard', () => {
     expect(container.querySelector('img')).toBeNull();
   });
 
-  it('usa questionText del backend cuando viene seteado (i18n server-side)', () => {
+  it('usa prompt.es del payload (no el questionText del backend) cuando i18n=es — fix ROUND2-001', () => {
+    // Antes este test verificaba que QuestionCard usara `questionText` del
+    // backend (que el backend "supuestamente" localizaba server-side). En la
+    // realidad el backend siempre devolvía español, lo que generaba mezcla
+    // español/inglés en UIs en otro idioma. Ahora la fuente de verdad es el
+    // prompt embebido en questionData, elegido según el i18n del cliente.
     const question = {
       id: 'cg-3',
       category: 'CINEMA_GEO',
-      questionText: 'In which country was the Hobbiton movie set built?',
+      questionText: 'Texto crudo del backend que debe ignorarse',
       questionData: JSON.stringify({
         id: 'lotr-hobbiton',
         answerKind: 'country',
-        prompt: { es: '¿En qué país?', en: 'In which country was the Hobbiton movie set built?' },
+        prompt: { es: '¿En qué país construyeron el set de Hobbiton?', en: 'In which country was the Hobbiton movie set built?' },
         movieTitle: 'The Lord of the Rings',
         movieYear: 2001,
       }),
@@ -304,8 +309,10 @@ describe('QuestionCard', () => {
       difficulty: 'EASY',
     } as Question;
 
+    // El mock de useTranslation devuelve i18n.language = 'es', así que debe
+    // mostrarse el prompt.es, no el questionText ni el prompt.en.
     render(<QuestionCard question={question} questionNumber={1} totalQuestions={10} />);
 
-    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('In which country was the Hobbiton movie set built?');
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('¿En qué país construyeron el set de Hobbiton?');
   });
 });

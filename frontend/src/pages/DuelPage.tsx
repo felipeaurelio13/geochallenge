@@ -445,22 +445,20 @@ export function DuelPage() {
   const connectionBanner = connectionNotice ? (
     <Alert type={connectionNotice.type} className="mb-4 w-full max-w-sm text-left">
       <p className="font-medium">{connectionNotice.message}</p>
-      <div className="mt-3 flex flex-wrap gap-2">
-        {showRetryAction && (
+      {showRetryAction && (
+        <div className="mt-3 flex flex-wrap gap-2">
           <button
             onClick={retryDuelFlow}
             className="rounded-md border border-app-border bg-app-muted px-3 py-1.5 text-xs font-semibold text-app-text hover:bg-app-surface"
           >
             {t('duel.retry')}
           </button>
-        )}
-        <button
-          onClick={() => navigate('/menu')}
-          className="rounded-md border border-app-border bg-app-muted px-3 py-1.5 text-xs font-semibold text-app-text hover:bg-app-surface"
-        >
-          {t('common.backToMenu')}
-        </button>
-      </div>
+        </div>
+      )}
+      {/* "Back to menu" eliminado: cada estado (searching/matched/playing) ya
+          tiene su propio Cancel/Exit. Tener dos acciones de cancelar (una
+          dentro del banner azul y otra abajo como Cancel) generaba dudas en
+          QA round 2 ROUND2-004. */}
     </Alert>
   ) : null;
 

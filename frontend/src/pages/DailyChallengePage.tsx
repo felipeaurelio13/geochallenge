@@ -8,6 +8,7 @@ import { OptionButton } from '../components/OptionButton';
 import { MonumentAttribution } from '../components/MonumentAttribution';
 import { generateFunFact } from '../utils/funFacts';
 import { getQuestionDuration } from '../utils/questionTiming';
+import { getLocalizedQuestionText } from '../utils/questionText';
 import { useStreakShareImage } from '../hooks/useStreakShareImage';
 import type { Question, DailyResult } from '../types';
 
@@ -226,7 +227,7 @@ export function DailyChallengePage() {
           </div>
         )}
         <h2 className="mb-4 text-center text-lg font-semibold text-app-text">
-          {currentQuestion.questionText}
+          {getLocalizedQuestionText(currentQuestion, t, i18n.language)}
         </h2>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {currentQuestion.options.map((opt, idx) => {

@@ -16,11 +16,14 @@ interface FlashCardProps {
   onImageError?: () => void;
 }
 
-const VISUAL_ALT: Record<string, string> = {
-  FLAG: 'Bandera',
-  SILHOUETTE: 'Silueta',
-  MONUMENT: 'Monumento',
-  CINEMA_GEO: 'Pregunta de Cine & Geografía',
+// Mapeo de categoría → clave i18n para el alt text del media. Antes era texto
+// español hardcodeado (QA round 2 ROUND2-002): screen readers en inglés
+// anunciaban "Bandera a identificar" dentro de UI en inglés.
+const ALT_KEY: Record<string, { key: string; fallback: string }> = {
+  FLAG: { key: 'flash.altFlag', fallback: 'Bandera' },
+  SILHOUETTE: { key: 'flash.altSilhouette', fallback: 'Silueta' },
+  MONUMENT: { key: 'flash.altMonument', fallback: 'Monumento' },
+  CINEMA_GEO: { key: 'flash.altCinema', fallback: 'Pregunta de Cine & Geografía' },
 };
 
 export function FlashCard({ question, onAnswer, disabled, disabledOptions = [], feedback, onImageError }: FlashCardProps) {
@@ -66,12 +69,15 @@ export function FlashCard({ question, onAnswer, disabled, disabledOptions = [], 
         {...swipeHandlers}
         className={`relative flex-1 min-h-0 overflow-hidden rounded-3xl border-2 bg-[var(--color-surface)] shadow-xl transition-all duration-150 ${feedbackClass}`}
         role="img"
-        aria-label={`${VISUAL_ALT[question.category] ?? 'Imagen'} a identificar`}
+        aria-label={t(
+          'flash.altIdentify',
+          { kind: t(ALT_KEY[question.category]?.key ?? 'flash.altImage', ALT_KEY[question.category]?.fallback ?? 'Imagen'), defaultValue: '{{kind}} a identificar' }
+        )}
       >
         {imageUrl && !hasImageError ? (
           <img
             src={imageUrl}
-            alt={`${VISUAL_ALT[question.category] ?? 'Imagen'}`}
+            alt={t(ALT_KEY[question.category]?.key ?? 'flash.altImage', ALT_KEY[question.category]?.fallback ?? 'Imagen')}
             className={`absolute inset-0 h-full w-full ${
               question.category === 'MONUMENT' ? 'object-cover' : 'object-contain p-6'
             }${question.category === 'SILHOUETTE' ? ' filter invert drop-shadow-[0_0_14px_rgba(148,163,184,0.45)]' : ''}`}
