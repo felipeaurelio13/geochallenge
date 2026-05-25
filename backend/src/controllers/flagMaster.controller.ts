@@ -177,11 +177,13 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
         fallbackResult,
         { flagMaster: true, degraded: true }
       );
+      // Sin `message` en payload: el frontend traduce desde la clave
+      // `flagMaster.degraded` con el idioma del usuario. Antes mandábamos texto
+      // en español hardcodeado que aparecía dentro de UIs en inglés (QA bug).
       res.json({
         ...persisted,
         rounds: fallbackResult.rounds,
         degraded: true,
-        message: 'Sesión sin verificar (caché caído): score válido pero sin anti-cheat.',
       });
       return;
     }

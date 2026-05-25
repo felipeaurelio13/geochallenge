@@ -302,44 +302,46 @@ export function MenuPage() {
         </div>
       </section>
 
-      {/* Flag Master Banner — modo dedicado de banderas con dificultad escalada */}
+      {/* Flag Master Banner — modo dedicado de banderas con dificultad escalada.
+          Contraste fuerte: gradiente opaco rojo→ámbar, texto blanco. Funciona en
+          light y dark mode sin depender de variables del tema. */}
       <Link
         to="/flag-master"
-        className="mt-4 flex items-center gap-4 rounded-2xl border border-red-600/40 bg-gradient-to-r from-red-900/25 to-amber-900/20 px-4 py-3.5 text-app-text transition-all hover:border-red-500/60 hover:from-red-800/35 hover:to-amber-800/30 pressable"
+        className="mt-4 flex items-center gap-4 rounded-2xl border border-red-500/70 bg-gradient-to-r from-red-700 to-amber-700 px-4 py-3.5 text-white shadow-md shadow-red-900/30 transition-all hover:from-red-600 hover:to-amber-600 hover:shadow-lg pressable"
       >
-        <span className="shrink-0 text-3xl leading-none">🏴</span>
+        <span className="shrink-0 text-3xl leading-none drop-shadow">🏴</span>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-red-300">{t('menu.flagMaster', 'Maestro de Banderas')}</span>
-            <span className="rounded-full border border-red-500/50 bg-red-500/15 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-red-300">
+            <span className="font-bold text-white">{t('menu.flagMaster', 'Maestro de Banderas')}</span>
+            <span className="rounded-full border border-white/40 bg-white/15 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-white">
               {t('menu.flagMasterBadge', 'Difícil')}
             </span>
           </div>
-          <div className="mt-0.5 text-xs text-red-300/80">
+          <div className="mt-0.5 text-xs text-white/85">
             {t('menu.flagMasterDesc', '10 rondas · sin color, recortes y trampas · multiplicadores hasta x2.5')}
           </div>
         </div>
-        <span className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-red-500/20 text-red-300 text-base font-bold">
+        <span className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white text-base font-bold">
           →
         </span>
       </Link>
 
-      {/* Daily Challenge Banner */}
+      {/* Daily Challenge Banner. Mismo principio: gradiente opaco + texto blanco. */}
       <Link
         to="/daily"
-        className="mt-4 flex items-center gap-4 rounded-2xl border border-cyan-600/40 bg-gradient-to-r from-cyan-900/20 to-emerald-900/20 px-4 py-3.5 text-app-text transition-all hover:border-cyan-500/60 hover:from-cyan-800/30 hover:to-emerald-800/30 pressable"
+        className="mt-4 flex items-center gap-4 rounded-2xl border border-cyan-500/70 bg-gradient-to-r from-cyan-700 to-emerald-700 px-4 py-3.5 text-white shadow-md shadow-cyan-900/30 transition-all hover:from-cyan-600 hover:to-emerald-600 hover:shadow-lg pressable"
       >
-        <span className="shrink-0 text-3xl leading-none">📅</span>
+        <span className="shrink-0 text-3xl leading-none drop-shadow">📅</span>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-cyan-300">{t('menu.dailyChallenge', 'Reto del día')}</span>
-            <span className="rounded-full border border-cyan-500/50 bg-cyan-500/15 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-cyan-300">
+            <span className="font-bold text-white">{t('menu.dailyChallenge', 'Reto del día')}</span>
+            <span className="rounded-full border border-white/40 bg-white/15 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-white">
               {t('menu.dailyChallengeNew', 'Nuevo')}
             </span>
           </div>
-          <div className="mt-0.5 text-xs text-cyan-500/80">{t('menu.dailyChallengeDesc', '10 preguntas · mismas para todos · un intento')}</div>
+          <div className="mt-0.5 text-xs text-white/85">{t('menu.dailyChallengeDesc', '10 preguntas · mismas para todos · un intento')}</div>
         </div>
-        <span className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-cyan-500/20 text-cyan-300 text-base font-bold">
+        <span className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white text-base font-bold">
           →
         </span>
       </Link>

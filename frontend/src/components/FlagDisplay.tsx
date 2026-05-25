@@ -59,9 +59,12 @@ export function FlagDisplay({ imageUrl, modifier, questionId, compact = false }:
   const isCropped = modifier === 'crop' || modifier === 'combined';
   const cropOrigin = isCropped ? pickCropOrigin(questionId) : undefined;
 
+  // Background neutro: si la imagen tarda en cargar (o falla al renderizar el
+  // crop sobre una zona blanca de la bandera), el container ya no aparece como
+  // un rectángulo negro. Usa el surface del tema, que sí es claro en light mode.
   const containerClass = compact
-    ? 'relative mx-auto aspect-[1.89/1] w-full max-w-sm overflow-hidden rounded-xl border border-[var(--color-border)]/60 bg-black/15'
-    : 'relative mx-auto aspect-[1.89/1] w-full max-w-md overflow-hidden rounded-xl border border-[var(--color-border)]/60 bg-black/15';
+    ? 'relative mx-auto aspect-[1.89/1] w-full max-w-sm overflow-hidden rounded-xl border border-[var(--color-border)]/60 bg-[var(--color-surface-muted)]'
+    : 'relative mx-auto aspect-[1.89/1] w-full max-w-md overflow-hidden rounded-xl border border-[var(--color-border)]/60 bg-[var(--color-surface-muted)]';
 
   if (!src || hasError) {
     return (

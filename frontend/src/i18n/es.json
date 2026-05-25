@@ -67,6 +67,7 @@
   "menu": {
     "dailyChallenge": "Reto del día",
     "dailyChallengeDesc": "10 preguntas · mismas para todos · un intento",
+    "dailyChallengeNew": "Nuevo",
     "welcome": "¡Hola, {{name}}!",
     "chooseMode": "Elige un modo de juego",
     "singlePlayer": "Un Jugador",
@@ -148,6 +149,10 @@
       "similar": "Las 4 opciones son banderas casi iguales.",
       "combined": "Todo apilado: recorte, sin color y opciones tramposas."
     }
+  },
+  "serverWakeUp": {
+    "title": "Despertando el servidor...",
+    "body": "El servidor gratuito se duerme tras unos minutos de inactividad. Esto solo toma unos segundos."
   },
   "survival": {
     "title": "Survival",

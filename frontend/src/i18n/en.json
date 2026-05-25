@@ -67,6 +67,7 @@
   "menu": {
     "dailyChallenge": "Daily Challenge",
     "dailyChallengeDesc": "10 questions · same for everyone · one attempt",
+    "dailyChallengeNew": "New",
     "welcome": "Hello, {{name}}!",
     "chooseMode": "Choose a game mode",
     "singlePlayer": "Single Player",
@@ -148,6 +149,10 @@
       "similar": "All 4 options are nearly identical flags.",
       "combined": "Everything stacked: cropped, grayscale and tricky options."
     }
+  },
+  "serverWakeUp": {
+    "title": "Waking up the server...",
+    "body": "The free server sleeps after a few minutes of inactivity. This only takes a few seconds."
   },
   "survival": {
     "title": "Survival",

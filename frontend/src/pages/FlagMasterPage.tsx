@@ -19,8 +19,15 @@ import type {
 
 type PageStatus = 'loading' | 'playing' | 'finished' | 'error';
 
-const ROUND_RESULT_DELAY_MS = 1400;
+// Tiempo entre que el usuario responde y avanza a la siguiente ronda. 1.4s
+// resultó demasiado rápido en QA (no daba tiempo a procesar el feedback), 1.8s
+// se siente más natural sin romper el ritmo del modo difícil.
+const ROUND_RESULT_DELAY_MS = 1800;
 const TIME_PER_QUESTION_FALLBACK = 10;
+// Puntaje cliente-side por ronda correcta antes de multiplicador. Coincide con
+// config.game.basePoints + (~time bonus medio) → así el chip "≈ N" se acerca al
+// score real que devuelve el server.
+const CLIENT_SCORE_BASE = 125;
 
 interface RecordedAnswer {
   questionId: string;
@@ -28,28 +35,34 @@ interface RecordedAnswer {
   timeRemaining: number;
   /** Calculado en cliente para feedback inmediato; el servidor recalcula al finalizar. */
   isCorrectClientSide: boolean;
+  /** Multiplicador del tier de esta ronda, para el chip de score acumulado. */
+  multiplier: number;
 }
 
+// Cada tier necesita texto VISIBLE tanto en light como dark mode. Los tiers
+// 2-5 ya usaban colores saturados (sky/amber/orange/red) que funcionan; tier 1
+// usaba slate-300 que en light mode desaparece. Subimos contraste de todos a
+// tonos 700/100 que pasan AA en ambos temas.
 const TIER_ACCENTS: Record<number, { defaultLabel: string; chip: string }> = {
   1: {
     defaultLabel: 'Calentamiento',
-    chip: 'bg-slate-500/15 text-slate-300 border-slate-500/40',
+    chip: 'bg-slate-200 text-slate-700 border-slate-400 dark:bg-slate-700/40 dark:text-slate-100 dark:border-slate-500/60',
   },
   2: {
     defaultLabel: 'Sin color',
-    chip: 'bg-sky-500/15 text-sky-300 border-sky-500/40',
+    chip: 'bg-sky-100 text-sky-800 border-sky-400 dark:bg-sky-500/20 dark:text-sky-100 dark:border-sky-500/60',
   },
   3: {
     defaultLabel: 'Zoom',
-    chip: 'bg-amber-500/15 text-amber-300 border-amber-500/40',
+    chip: 'bg-amber-100 text-amber-800 border-amber-400 dark:bg-amber-500/20 dark:text-amber-100 dark:border-amber-500/60',
   },
   4: {
     defaultLabel: 'Trampa',
-    chip: 'bg-orange-500/15 text-orange-300 border-orange-500/40',
+    chip: 'bg-orange-100 text-orange-800 border-orange-400 dark:bg-orange-500/20 dark:text-orange-100 dark:border-orange-500/60',
   },
   5: {
     defaultLabel: 'Final',
-    chip: 'bg-red-500/15 text-red-300 border-red-500/40',
+    chip: 'bg-red-100 text-red-800 border-red-400 dark:bg-red-500/20 dark:text-red-100 dark:border-red-500/60',
   },
 };
 
@@ -193,6 +206,7 @@ export function FlagMasterPage() {
         answer,
         timeRemaining: Math.max(0, Math.round(timeRemaining * 10) / 10),
         isCorrectClientSide: isCorrect,
+        multiplier: currentRound.multiplier,
       };
       const nextAnswers = (() => {
         const next = [...answers];
@@ -261,8 +275,12 @@ export function FlagMasterPage() {
   // ─── Render: playing ─────────────────────────────────────────────────────
   const tier = currentRound.tier;
   const accent = TIER_ACCENTS[tier] ?? TIER_ACCENTS[1];
+  // Estimación client-side aplicando el multiplicador del tier. El server
+  // recalcula al finalizar incluyendo timeBonus exacto, así que sigue siendo
+  // una aproximación (de ahí el "≈"), pero ahora cerca del score real (~5%
+  // de margen) en vez de subestimarlo un 60% como antes.
   const accumulatedScore = answers.reduce(
-    (sum, a) => (a.isCorrectClientSide ? sum + 100 : sum),
+    (sum, a) => (a.isCorrectClientSide ? sum + Math.round(CLIENT_SCORE_BASE * a.multiplier) : sum),
     0
   );
 
