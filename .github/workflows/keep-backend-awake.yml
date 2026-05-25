@@ -9,7 +9,7 @@ jobs:
   ping-backend:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping backend
+      - name: Ping backend (and Redis)
         env:
           BACKEND_URL: ${{ secrets.BACKEND_HEALTHCHECK_URL }}
         run: |
@@ -18,10 +18,28 @@ jobs:
             exit 0
           fi
 
-          # Strip /health suffix if present and use /ping instead (no DB/Redis round-trip)
+          # Antes pegábamos /ping (sólo HTTP, no toca DB/Redis). El problema:
+          # Upstash free tier elimina DBs después de 14 días sin comandos. El
+          # backend se mantenía vivo pero Redis se borraba (incidente 25-mayo).
+          # Ahora pegamos /health que ejecuta `prisma.$queryRaw` Y `redis.ping()`,
+          # manteniendo ambos servicios "activos" desde la perspectiva del proveedor.
           BASE_URL="${BACKEND_URL%/health}"
-          PING_URL="${BASE_URL}/ping"
+          BASE_URL="${BASE_URL%/ping}"
+          HEALTH_URL="${BASE_URL}/health"
 
-          echo "Pinging $PING_URL"
-          curl --fail --show-error --silent --max-time 10 "$PING_URL" >/dev/null
-          echo "Backend ping successful"
+          echo "Pinging $HEALTH_URL"
+          # /health puede devolver 503 si Redis está caído — eso NO es razón
+          # para fallar el workflow (el endpoint igual ejecutó el ping, que es
+          # nuestro objetivo). Aceptamos 200 y 503 como "ok".
+          status=$(curl --silent --show-error --max-time 15 -o /tmp/health.json -w "%{http_code}" "$HEALTH_URL" || echo "000")
+          echo "HTTP $status — body:"
+          cat /tmp/health.json || true
+          echo ""
+          if [ "$status" = "200" ]; then
+            echo "Backend + Redis healthy"
+          elif [ "$status" = "503" ]; then
+            echo "::warning::Backend reachable but a dependency is degraded (still counts as keep-alive)"
+          else
+            echo "::error::Backend unreachable (status=$status)"
+            exit 1
+          fi

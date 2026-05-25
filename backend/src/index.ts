@@ -142,6 +142,25 @@ async function start() {
           })
           .catch((err) => console.error('⚠️  Leaderboard rebuild failed (non-fatal):', err));
       }
+
+      // Redis keepalive: Upstash free tier elimina databases tras 14 días sin
+      // comandos (incidente 25-mayo: Redis borrado, app cayó a path degradado
+      // hasta que se restauró). Defensa redundante con el cron de GH Actions
+      // (.github/workflows/keep-backend-awake.yml) que ya pegamos /health
+      // cada 5min: si el cron falla por X razón, este interval garantiza
+      // actividad cada 6h directamente desde el backend.
+      const REDIS_KEEPALIVE_MS = 6 * 60 * 60 * 1000; // 6h
+      const keepaliveTimer = setInterval(() => {
+        const redis = getRedis();
+        redis
+          .ping()
+          .then(() => console.log(`[redis-keepalive] PING ok @ ${new Date().toISOString()}`))
+          .catch((err) =>
+            console.error(`[redis-keepalive] PING failed @ ${new Date().toISOString()}: ${err?.message ?? err}`)
+          );
+      }, REDIS_KEEPALIVE_MS);
+      // No bloquear el event loop si el proceso quiere terminar.
+      keepaliveTimer.unref();
     });
   } catch (error) {
     console.error('Failed to start server:', error);
