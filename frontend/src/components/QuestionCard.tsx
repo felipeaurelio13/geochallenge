@@ -234,13 +234,13 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
             title is intentional context — not a spoiler. */}
         {question.category === 'CINEMA_GEO' && cinemaPayload && (
           <div className={`flex flex-wrap items-center justify-center gap-2 ${compact ? 'mb-2' : 'mb-4'}`}>
-            <span className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-rose-500/30 bg-rose-500/10 px-3 py-1 text-rose-200">
+            <span className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-rose-400/60 bg-rose-100 px-3 py-1 text-rose-800 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-100">
               <span aria-hidden>🎬</span>
               {cinemaPayload.movieTitle && (
                 <span className="truncate text-xs font-semibold sm:text-sm">{cinemaPayload.movieTitle}</span>
               )}
               {cinemaPayload.movieYear > 0 && (
-                <span className="text-[0.65rem] text-rose-300/70 sm:text-xs">({cinemaPayload.movieYear})</span>
+                <span className="text-[0.65rem] text-rose-700/80 dark:text-rose-200/70 sm:text-xs">({cinemaPayload.movieYear})</span>
               )}
             </span>
             {question.difficulty && (

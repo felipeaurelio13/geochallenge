@@ -985,6 +985,584 @@
       ],
       "confidence": "high",
       "reviewStatus": "approved"
+    },
+    {
+      "id": "the-matrix-sydney",
+      "answerKind": "city",
+      "difficulty": "MEDIUM",
+      "movie": {
+        "title": "The Matrix",
+        "year": 1999
+      },
+      "answer": {
+        "value": "Sydney",
+        "country": "Australia",
+        "city": "Sydney",
+        "realLocation": "Sydney CBD",
+        "lat": -33.8688,
+        "lng": 151.2093,
+        "continent": "Oceania"
+      },
+      "options": [
+        "Sydney",
+        "Melbourne",
+        "Brisbane",
+        "Auckland"
+      ],
+      "prompt": {
+        "es": "Las escenas urbanas con rascacielos en The Matrix (1999), incluida la persecución del agente Smith, se filmaron principalmente en qué ciudad?",
+        "en": "The urban skyscraper scenes in The Matrix (1999), including the Agent Smith chase, were filmed mainly in which city?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/The_Matrix",
+          "claim": "The Matrix (1999) was filmed in Sydney, Australia."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "slumdog-millionaire-mumbai",
+      "answerKind": "city",
+      "difficulty": "EASY",
+      "movie": {
+        "title": "Slumdog Millionaire",
+        "year": 2008
+      },
+      "answer": {
+        "value": "Mumbai",
+        "country": "India",
+        "city": "Mumbai",
+        "realLocation": "Dharavi slum and Mumbai streets",
+        "lat": 19.076,
+        "lng": 72.8777,
+        "continent": "Asia"
+      },
+      "options": [
+        "Bangalore",
+        "Mumbai",
+        "Delhi",
+        "Kolkata"
+      ],
+      "prompt": {
+        "es": "Slumdog Millionaire (2008) de Danny Boyle se desarrolla y fue filmada principalmente en qué megaciudad india?",
+        "en": "Danny Boyle's Slumdog Millionaire (2008) is set and was filmed mainly in which Indian megacity?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Slumdog_Millionaire",
+          "claim": "Slumdog Millionaire was set and largely filmed in Mumbai."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "the-tourist-venice",
+      "answerKind": "city",
+      "difficulty": "EASY",
+      "movie": {
+        "title": "The Tourist",
+        "year": 2010
+      },
+      "answer": {
+        "value": "Venice",
+        "country": "Italy",
+        "city": "Venice",
+        "realLocation": "Grand Canal and historic center",
+        "lat": 45.4408,
+        "lng": 12.3155,
+        "continent": "Europe"
+      },
+      "options": [
+        "Naples",
+        "Milan",
+        "Venice",
+        "Florence"
+      ],
+      "prompt": {
+        "es": "La persecución por canales y los hoteles históricos en The Tourist (2010), con Angelina Jolie y Johnny Depp, se filmaron en qué ciudad italiana?",
+        "en": "The canal chase and historic hotels in The Tourist (2010), starring Angelina Jolie and Johnny Depp, were filmed in which Italian city?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/The_Tourist_(2010_film)",
+          "claim": "The Tourist was filmed in Venice, Italy."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "tomb-raider-angkor",
+      "answerKind": "country",
+      "difficulty": "MEDIUM",
+      "movie": {
+        "title": "Lara Croft: Tomb Raider",
+        "year": 2001,
+        "franchise": "Tomb Raider"
+      },
+      "answer": {
+        "value": "Cambodia",
+        "country": "Cambodia",
+        "city": "Siem Reap",
+        "realLocation": "Angkor Wat / Ta Prohm temple",
+        "lat": 13.4125,
+        "lng": 103.867,
+        "continent": "Asia"
+      },
+      "options": [
+        "Cambodia",
+        "Laos",
+        "Vietnam",
+        "Thailand"
+      ],
+      "prompt": {
+        "es": "Las ruinas del templo cubiertas de raíces gigantes en Lara Croft: Tomb Raider (2001) se filmaron en Ta Prohm, parte del complejo de Angkor. En qué país está?",
+        "en": "The temple ruins overgrown by giant tree roots in Lara Croft: Tomb Raider (2001) were filmed at Ta Prohm, part of the Angkor complex. In which country is it located?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Lara_Croft:_Tomb_Raider",
+          "claim": "The Angkor scenes of Tomb Raider (2001) were filmed at Ta Prohm in Cambodia."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "city-of-god-rio",
+      "answerKind": "city",
+      "difficulty": "MEDIUM",
+      "movie": {
+        "title": "City of God",
+        "year": 2002
+      },
+      "answer": {
+        "value": "Rio de Janeiro",
+        "country": "Brazil",
+        "city": "Rio de Janeiro",
+        "realLocation": "Cidade de Deus favela",
+        "lat": -22.9068,
+        "lng": -43.1729,
+        "continent": "South America"
+      },
+      "options": [
+        "São Paulo",
+        "Rio de Janeiro",
+        "Brasília",
+        "Salvador"
+      ],
+      "prompt": {
+        "es": "La favela Cidade de Deus que da nombre a la película brasileña de Fernando Meirelles (2002) está en qué ciudad?",
+        "en": "The Cidade de Deus favela that gives the Fernando Meirelles film (2002) its name is located in which city?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/City_of_God_(2002_film)",
+          "claim": "City of God (2002) is set in and around the Cidade de Deus favela in Rio de Janeiro."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "apocalypse-now-philippines",
+      "answerKind": "country",
+      "difficulty": "HARD",
+      "movie": {
+        "title": "Apocalypse Now",
+        "year": 1979
+      },
+      "answer": {
+        "value": "Philippines",
+        "country": "Philippines",
+        "city": "Pagsanjan",
+        "realLocation": "Pagsanjan jungle locations",
+        "lat": 14.272,
+        "lng": 121.4564,
+        "continent": "Asia"
+      },
+      "options": [
+        "Vietnam",
+        "Cambodia",
+        "Philippines",
+        "Thailand"
+      ],
+      "prompt": {
+        "es": "Aunque Apocalypse Now (1979) ambienta la guerra de Vietnam, las junglas y rodaje real se hicieron en qué país asiático?",
+        "en": "Although Apocalypse Now (1979) is set in the Vietnam War, the jungle scenes were actually shot in which Asian country?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Apocalypse_Now",
+          "claim": "Apocalypse Now (1979) was filmed primarily in the Philippines."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "crouching-tiger-bamboo-china",
+      "answerKind": "country",
+      "difficulty": "MEDIUM",
+      "movie": {
+        "title": "Crouching Tiger, Hidden Dragon",
+        "year": 2000
+      },
+      "answer": {
+        "value": "China",
+        "country": "China",
+        "city": "Anji",
+        "realLocation": "Anji bamboo forest",
+        "lat": 30.6396,
+        "lng": 119.6822,
+        "continent": "Asia"
+      },
+      "options": [
+        "Japan",
+        "Vietnam",
+        "Taiwan",
+        "China"
+      ],
+      "prompt": {
+        "es": "La icónica pelea sobre las copas del bosque de bambú en El Tigre y el Dragón (2000) se filmó en un bosque de bambú real en qué país?",
+        "en": "The iconic fight atop the bamboo treetops in Crouching Tiger, Hidden Dragon (2000) was filmed in a real bamboo forest in which country?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Crouching_Tiger,_Hidden_Dragon",
+          "claim": "The bamboo forest fight was filmed in the Anji bamboo forest in Zhejiang, China."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "the-english-patient-tunisia",
+      "answerKind": "country",
+      "difficulty": "HARD",
+      "movie": {
+        "title": "The English Patient",
+        "year": 1996
+      },
+      "answer": {
+        "value": "Tunisia",
+        "country": "Tunisia",
+        "city": "Tozeur",
+        "realLocation": "Sahara desert near Tozeur",
+        "lat": 33.9197,
+        "lng": 8.1335,
+        "continent": "Africa"
+      },
+      "options": [
+        "Morocco",
+        "Tunisia",
+        "Egypt",
+        "Libya"
+      ],
+      "prompt": {
+        "es": "Las escenas del desierto del Sáhara en The English Patient (1996) fueron filmadas principalmente en qué país norteafricano?",
+        "en": "The Sahara desert scenes in The English Patient (1996) were filmed mainly in which North African country?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/The_English_Patient_(film)",
+          "claim": "The desert scenes of The English Patient (1996) were filmed near Tozeur, Tunisia."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "the-revenant-argentina",
+      "answerKind": "country",
+      "difficulty": "MEDIUM",
+      "movie": {
+        "title": "The Revenant",
+        "year": 2015
+      },
+      "answer": {
+        "value": "Argentina",
+        "country": "Argentina",
+        "city": "Ushuaia",
+        "realLocation": "Tierra del Fuego",
+        "lat": -54.8019,
+        "lng": -68.303,
+        "continent": "South America"
+      },
+      "options": [
+        "Argentina",
+        "Canada",
+        "Chile",
+        "Norway"
+      ],
+      "prompt": {
+        "es": "Para las escenas finales nevadas de The Revenant (2015), el equipo de Iñárritu se trasladó al fin del mundo: a qué país sudamericano?",
+        "en": "For the final snowy scenes of The Revenant (2015), Iñárritu's crew moved to the end of the world: which South American country?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/The_Revenant_(2015_film)",
+          "claim": "Final scenes of The Revenant were filmed in Tierra del Fuego, Argentina."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "roman-holiday-rome",
+      "answerKind": "city",
+      "difficulty": "EASY",
+      "movie": {
+        "title": "Roman Holiday",
+        "year": 1953
+      },
+      "answer": {
+        "value": "Rome",
+        "country": "Italy",
+        "city": "Rome",
+        "realLocation": "Spanish Steps, Mouth of Truth, Trevi Fountain",
+        "lat": 41.9028,
+        "lng": 12.4964,
+        "continent": "Europe"
+      },
+      "options": [
+        "Florence",
+        "Venice",
+        "Milan",
+        "Rome"
+      ],
+      "prompt": {
+        "es": "Roman Holiday (1953), con Audrey Hepburn paseando por la Boca de la Verdad y la Fontana de Trevi, se filmó en qué ciudad?",
+        "en": "Roman Holiday (1953), with Audrey Hepburn visiting the Mouth of Truth and Trevi Fountain, was filmed in which city?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Roman_Holiday",
+          "claim": "Roman Holiday (1953) was shot on location in Rome."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "la-la-land-los-angeles",
+      "answerKind": "city",
+      "difficulty": "EASY",
+      "movie": {
+        "title": "La La Land",
+        "year": 2016
+      },
+      "answer": {
+        "value": "Los Angeles",
+        "country": "United States",
+        "city": "Los Angeles",
+        "realLocation": "Griffith Observatory and Angels Flight",
+        "lat": 34.0522,
+        "lng": -118.2437,
+        "continent": "North America"
+      },
+      "options": [
+        "Chicago",
+        "San Francisco",
+        "New York",
+        "Los Angeles"
+      ],
+      "prompt": {
+        "es": "La La Land (2016) es una carta de amor a qué ciudad, con escenas en el Observatorio Griffith y el funicular Angels Flight?",
+        "en": "La La Land (2016) is a love letter to which city, with scenes at Griffith Observatory and the Angels Flight funicular?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/La_La_Land_(film)",
+          "claim": "La La Land (2016) is set and shot in Los Angeles."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "schindlers-list-krakow",
+      "answerKind": "city",
+      "difficulty": "MEDIUM",
+      "movie": {
+        "title": "Schindler's List",
+        "year": 1993
+      },
+      "answer": {
+        "value": "Kraków",
+        "country": "Poland",
+        "city": "Kraków",
+        "realLocation": "Kazimierz district and Płaszów camp area",
+        "lat": 50.0647,
+        "lng": 19.945,
+        "continent": "Europe"
+      },
+      "options": [
+        "Warsaw",
+        "Berlin",
+        "Prague",
+        "Kraków"
+      ],
+      "prompt": {
+        "es": "Spielberg filmó Schindler's List (1993) en blanco y negro en las locaciones reales del barrio judío histórico de qué ciudad polaca?",
+        "en": "Spielberg shot Schindler's List (1993) in black and white at the real locations of the historic Jewish quarter of which Polish city?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Schindler%27s_List",
+          "claim": "Schindler's List was filmed on location in Kraków, Poland."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "the-dark-knight-hong-kong",
+      "answerKind": "city",
+      "difficulty": "MEDIUM",
+      "movie": {
+        "title": "The Dark Knight",
+        "year": 2008,
+        "franchise": "The Dark Knight Trilogy"
+      },
+      "answer": {
+        "value": "Hong Kong",
+        "country": "China",
+        "city": "Hong Kong",
+        "realLocation": "International Finance Centre tower",
+        "lat": 22.2855,
+        "lng": 114.1577,
+        "continent": "Asia"
+      },
+      "options": [
+        "Shanghai",
+        "Hong Kong",
+        "Singapore",
+        "Tokyo"
+      ],
+      "prompt": {
+        "es": "La escena en que Batman secuestra a Lau saltando desde un rascacielos en The Dark Knight (2008) se filmó en qué ciudad asiática?",
+        "en": "The scene where Batman extracts Lau by jumping off a skyscraper in The Dark Knight (2008) was filmed in which Asian city?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/The_Dark_Knight",
+          "claim": "The Lau extraction sequence was filmed at the IFC tower in Hong Kong."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "black-hawk-down-morocco",
+      "answerKind": "country",
+      "difficulty": "HARD",
+      "movie": {
+        "title": "Black Hawk Down",
+        "year": 2001
+      },
+      "answer": {
+        "value": "Morocco",
+        "country": "Morocco",
+        "city": "Rabat",
+        "realLocation": "Salé and Rabat (standing in for Mogadishu)",
+        "lat": 34.0209,
+        "lng": -6.8417,
+        "continent": "Africa"
+      },
+      "options": [
+        "Algeria",
+        "Tunisia",
+        "Morocco",
+        "Egypt"
+      ],
+      "prompt": {
+        "es": "Aunque Black Hawk Down (2001) reconstruye la batalla de Mogadiscio (Somalia), Ridley Scott rodó la película en qué país norteafricano?",
+        "en": "Although Black Hawk Down (2001) reconstructs the Battle of Mogadishu (Somalia), Ridley Scott actually filmed it in which North African country?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Black_Hawk_Down_(film)",
+          "claim": "Black Hawk Down (2001) was filmed in Salé and Rabat, Morocco, doubling for Mogadishu."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "parasite-seoul",
+      "answerKind": "city",
+      "difficulty": "EASY",
+      "movie": {
+        "title": "Parasite",
+        "year": 2019
+      },
+      "answer": {
+        "value": "Seoul",
+        "country": "South Korea",
+        "city": "Seoul",
+        "realLocation": "Seoul (semi-basement and hillside neighborhoods)",
+        "lat": 37.5665,
+        "lng": 126.978,
+        "continent": "Asia"
+      },
+      "options": [
+        "Incheon",
+        "Tokyo",
+        "Busan",
+        "Seoul"
+      ],
+      "prompt": {
+        "es": "Parasite (2019) de Bong Joon-ho, ganadora del Oscar, se desarrolla y fue filmada en qué capital asiática?",
+        "en": "Bong Joon-ho's Oscar-winning Parasite (2019) is set and was filmed in which Asian capital?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Parasite_(2019_film)",
+          "claim": "Parasite (2019) is set in and was filmed in Seoul, South Korea."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "out-of-africa-kenya",
+      "answerKind": "country",
+      "difficulty": "MEDIUM",
+      "movie": {
+        "title": "Out of Africa",
+        "year": 1985
+      },
+      "answer": {
+        "value": "Kenya",
+        "country": "Kenya",
+        "city": "Nairobi",
+        "realLocation": "Ngong Hills and Maasai Mara",
+        "lat": -1.2921,
+        "lng": 36.8219,
+        "continent": "Africa"
+      },
+      "options": [
+        "Uganda",
+        "Ethiopia",
+        "Tanzania",
+        "Kenya"
+      ],
+      "prompt": {
+        "es": "Out of Africa (1985) con Meryl Streep y Robert Redford retrata la vida en una plantación de café cerca de las colinas Ngong, en qué país?",
+        "en": "Out of Africa (1985) with Meryl Streep and Robert Redford portrays life on a coffee plantation near the Ngong Hills, in which country?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Out_of_Africa_(film)",
+          "claim": "Out of Africa is set and was filmed in Kenya, near the Ngong Hills."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
     }
   ]
 }
