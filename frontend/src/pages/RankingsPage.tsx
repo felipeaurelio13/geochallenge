@@ -2,7 +2,12 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
-import type { LeaderboardScope } from '../types';
+import type {
+  LeaderboardScope,
+  LeaderboardModeFilter,
+  LeaderboardCategoryFilter,
+  LeaderboardFilters,
+} from '../types';
 import { useApi, useDebounce } from '../hooks';
 import { LoadingSpinner } from '../components';
 import { PageHeader } from '../components/molecules/PageHeader';
@@ -15,6 +20,8 @@ interface LeaderboardEntry {
   userId?: string;
   username: string;
   score: number;
+  gamesPlayed?: number;
+  bestScore?: number;
   isCurrentUser?: boolean;
 }
 
@@ -27,7 +34,20 @@ type RankingsResponse = {
   userScore: number | null;
   scope: LeaderboardScope;
   season?: string | null;
+  metric?: 'sum' | 'best';
 };
+
+const MODE_OPTIONS: LeaderboardModeFilter[] = ['SINGLE', 'DUEL', 'CHALLENGE', 'SURVIVAL'];
+const CATEGORY_OPTIONS: LeaderboardCategoryFilter[] = [
+  'MAP',
+  'FLAG',
+  'CAPITAL',
+  'SILHOUETTE',
+  'MONUMENT',
+  'CINEMA_GEO',
+  'MIXED',
+];
+const MIN_GAMES_OPTIONS = [1, 3, 5, 10] as const;
 
 const RANKING_NEIGHBORS_ENABLED = import.meta.env.VITE_RANKING_NEIGHBORS_ENABLED === 'true';
 
@@ -116,28 +136,98 @@ function getRankLabel(rank: number) {
   return `#${rank}`;
 }
 
+function EntryMeta({
+  entry,
+  scope,
+  t,
+}: {
+  entry: LeaderboardEntry;
+  scope: LeaderboardScope;
+  t: (k: string) => string;
+}) {
+  const hasGames = typeof entry.gamesPlayed === 'number' && entry.gamesPlayed > 0;
+  const showBest = scope === 'season' && typeof entry.bestScore === 'number' && entry.bestScore > 0;
+  if (!hasGames && !showBest) return null;
+  return (
+    <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[10px] text-[var(--color-text-muted)]">
+      {hasGames && (
+        <span>
+          {t('rankings.columns.games')}: <span className="font-semibold text-[var(--color-text-secondary)]">{entry.gamesPlayed}</span>
+        </span>
+      )}
+      {showBest && (
+        <span>
+          {t('rankings.columns.best')}:{' '}
+          <span className="font-semibold text-[var(--color-text-secondary)]">
+            {entry.bestScore!.toLocaleString()}
+          </span>
+        </span>
+      )}
+    </div>
+  );
+}
+
+function FilterChip({
+  label,
+  active,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={`whitespace-nowrap rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
+        active
+          ? 'border-primary bg-primary text-white shadow-sm'
+          : 'border-[var(--color-border)] bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] hover:text-app-text'
+      }`}
+    >
+      {label}
+    </button>
+  );
+}
+
 export function RankingsPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [search, setSearch] = useState('');
   const [scope, setScope] = useState<LeaderboardScope>('global');
+  const [modeFilter, setModeFilter] = useState<LeaderboardModeFilter | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState<LeaderboardCategoryFilter | null>(null);
+  const [minGames, setMinGames] = useState<number>(1);
   const debouncedSearch = useDebounce(search, 200);
   const [deferredUserRank, setDeferredUserRank] = useState<number | null>(null);
   const [deferredUserScore, setDeferredUserScore] = useState<number | null>(null);
   const [neighborEntries, setNeighborEntries] = useState<LeaderboardEntry[]>([]);
   const [neighborsLoading, setNeighborsLoading] = useState(false);
 
+  const activeFilters = useMemo<LeaderboardFilters>(
+    () => ({
+      mode: modeFilter,
+      category: categoryFilter,
+      minGames,
+    }),
+    [modeFilter, categoryFilter, minGames]
+  );
+
+  const hasActiveFilters = !!modeFilter || !!categoryFilter || minGames > 1;
+
   const fetchRankings = useCallback(async (): Promise<RankingsResponse> => {
-    const data = await api.getLeaderboard(50, scope);
+    const data = await api.getLeaderboard(50, scope, activeFilters);
 
     return {
       leaderboard: data.leaderboard.map((entry) => ({
-        // El rank siempre viene del backend (fuente de verdad).
-        // Si por alguna razón faltara, calculamos como fallback.
         rank: typeof entry.rank === 'number' && Number.isFinite(entry.rank) ? entry.rank : 0,
         userId: entry.userId,
         username: entry.username,
         score: entry.score,
+        gamesPlayed: entry.gamesPlayed,
+        bestScore: entry.bestScore,
         isCurrentUser: !!user?.username && entry.username === user.username,
       })),
       totalPlayers: data.totalPlayers,
@@ -147,15 +237,16 @@ export function RankingsPage() {
       userScore: data.userRank?.score ?? null,
       scope: data.scope ?? scope,
       season: data.season ?? null,
+      metric: data.metric,
     };
-  }, [scope, user?.username]);
+  }, [scope, user?.username, activeFilters]);
 
   const useApiOptions = useMemo(
     () => ({
-      cacheKey: `rankings-${scope}-${user?.username ?? 'anonymous'}`,
+      cacheKey: `rankings-${scope}-${modeFilter ?? 'all'}-${categoryFilter ?? 'all'}-${minGames}-${user?.username ?? 'anonymous'}`,
       ttlMs: 60_000,
     }),
-    [scope, user?.username]
+    [scope, modeFilter, categoryFilter, minGames, user?.username]
   );
 
   const { data, error, isLoading, run, invalidate } = useApi<RankingsResponse>(fetchRankings, useApiOptions);
@@ -164,12 +255,12 @@ export function RankingsPage() {
     void run();
   }, [run]);
 
-  // Reset neighbors al cambiar de scope para no mostrar stale data
+  // Reset neighbors al cambiar de scope o filtros para no mostrar stale data
   useEffect(() => {
     setDeferredUserRank(null);
     setDeferredUserScore(null);
     setNeighborEntries([]);
-  }, [scope]);
+  }, [scope, modeFilter, categoryFilter, minGames]);
 
   useEffect(() => {
     if (!data) return;
@@ -181,7 +272,7 @@ export function RankingsPage() {
     setNeighborsLoading(true);
 
     void api
-      .getMyRank(scope)
+      .getMyRank(scope, activeFilters)
       .then((rankContext) => {
         if (cancelled) return;
 
@@ -205,7 +296,7 @@ export function RankingsPage() {
     return () => {
       cancelled = true;
     };
-  }, [data, scope, user]);
+  }, [data, scope, user, activeFilters]);
 
   const resolvedUserRank = data?.userRank ?? deferredUserRank;
   const resolvedUserScore = data?.userScore ?? deferredUserScore;
@@ -272,6 +363,105 @@ export function RankingsPage() {
             );
           })}
         </div>
+
+        {/* Metric hint */}
+        <div className="mb-3 flex items-center justify-between gap-2 text-xs text-[var(--color-text-muted)]">
+          <span>
+            {scope === 'season' ? t('rankings.metric.sumHint') : t('rankings.metric.bestHint')}
+          </span>
+          <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-2 py-0.5 font-semibold uppercase tracking-wide">
+            {scope === 'season' ? t('rankings.metric.sum') : t('rankings.metric.best')}
+          </span>
+        </div>
+
+        {/* Filters */}
+        <div className="mb-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
+              {t('rankings.filters.title')}
+            </h2>
+            {hasActiveFilters && (
+              <button
+                type="button"
+                onClick={() => {
+                  setModeFilter(null);
+                  setCategoryFilter(null);
+                  setMinGames(1);
+                }}
+                className="text-xs font-semibold text-primary hover:underline"
+              >
+                {t('rankings.filters.clear')}
+              </button>
+            )}
+          </div>
+
+          {/* Mode chips */}
+          <div className="mb-2">
+            <p className="mb-1 text-[10px] uppercase tracking-wide text-[var(--color-text-muted)]">
+              {t('rankings.filters.mode')}
+            </p>
+            <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1">
+              <FilterChip
+                label={t('rankings.filters.all')}
+                active={modeFilter === null}
+                onClick={() => setModeFilter(null)}
+              />
+              {MODE_OPTIONS.map((m) => (
+                <FilterChip
+                  key={m}
+                  label={t(`rankings.modes.${m}`)}
+                  active={modeFilter === m}
+                  onClick={() => setModeFilter(modeFilter === m ? null : m)}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Category chips */}
+          <div className="mb-2">
+            <p className="mb-1 text-[10px] uppercase tracking-wide text-[var(--color-text-muted)]">
+              {t('rankings.filters.category')}
+            </p>
+            <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1">
+              <FilterChip
+                label={t('rankings.filters.all')}
+                active={categoryFilter === null}
+                onClick={() => setCategoryFilter(null)}
+              />
+              {CATEGORY_OPTIONS.map((c) => (
+                <FilterChip
+                  key={c}
+                  label={t(`rankings.categories.${c}`)}
+                  active={categoryFilter === c}
+                  onClick={() => setCategoryFilter(categoryFilter === c ? null : c)}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Min games */}
+          <div>
+            <p className="mb-1 text-[10px] uppercase tracking-wide text-[var(--color-text-muted)]">
+              {t('rankings.filters.minGames')}
+            </p>
+            <div className="flex gap-1.5">
+              {MIN_GAMES_OPTIONS.map((n) => (
+                <FilterChip
+                  key={n}
+                  label={n === 1 ? t('rankings.filters.any') : `≥ ${n}`}
+                  active={minGames === n}
+                  onClick={() => setMinGames(n)}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {!hasActiveFilters && (
+          <p className="mb-4 rounded-lg border border-dashed border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 py-2 text-xs text-[var(--color-text-muted)]">
+            💡 {t('rankings.fairnessNote')}
+          </p>
+        )}
 
         {/* My rank card — only when outside top 50 */}
         {resolvedUserRank && resolvedUserRank > 50 && (
@@ -409,6 +599,7 @@ export function RankingsPage() {
                               </span>
                             </div>
                             <ScoreBar entry={entry} topScore={topScore} />
+                            <EntryMeta entry={entry} scope={scope} t={t} />
                           </div>
                         </div>
                       </div>
@@ -441,6 +632,7 @@ export function RankingsPage() {
                                 </span>
                               </div>
                               <ScoreBar entry={entry} topScore={topScore} />
+                              <EntryMeta entry={entry} scope={scope} t={t} />
                             </div>
                           </div>
                         </div>

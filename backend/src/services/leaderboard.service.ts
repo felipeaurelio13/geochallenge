@@ -1,5 +1,6 @@
 import { getRedis } from '../config/redis.js';
 import { prisma } from '../config/database.js';
+import type { Prisma } from '@prisma/client';
 
 const LEADERBOARD_KEY = 'leaderboard:global';
 const SEASON_LEADERBOARD_KEY_PREFIX = 'leaderboard:season';
@@ -8,11 +9,29 @@ const STATS_AVG_TTL = 3600; // 1 hour
 
 export type LeaderboardScope = 'global' | 'season';
 
+export type LeaderboardModeFilter = 'SINGLE' | 'DUEL' | 'CHALLENGE' | 'SURVIVAL';
+export type LeaderboardCategoryFilter =
+  | 'MAP'
+  | 'FLAG'
+  | 'CAPITAL'
+  | 'SILHOUETTE'
+  | 'MONUMENT'
+  | 'CINEMA_GEO'
+  | 'MIXED';
+
+export interface LeaderboardFilters {
+  mode?: LeaderboardModeFilter;
+  category?: LeaderboardCategoryFilter;
+  minGames?: number;
+}
+
 export interface LeaderboardEntry {
   rank: number;
   userId: string;
   username: string;
   score: number;
+  gamesPlayed?: number;
+  bestScore?: number;
 }
 
 export interface LeaderboardStats {
@@ -40,8 +59,84 @@ function seasonRange(seasonId: string): { startDate: Date; endDate: Date } {
   };
 }
 
+function hasFilters(filters?: LeaderboardFilters): boolean {
+  if (!filters) return false;
+  if (filters.mode) return true;
+  if (filters.category) return true;
+  if (typeof filters.minGames === 'number' && filters.minGames > 1) return true;
+  return false;
+}
+
+function buildGameResultWhere(
+  scope: LeaderboardScope,
+  seasonId: string,
+  filters?: LeaderboardFilters
+): Prisma.GameResultWhereInput {
+  const where: Prisma.GameResultWhereInput = {};
+  if (scope === 'season') {
+    const { startDate, endDate } = seasonRange(seasonId);
+    where.createdAt = { gte: startDate, lt: endDate };
+  }
+  if (filters?.mode) where.gameMode = filters.mode;
+  if (filters?.category) where.category = filters.category;
+  return where;
+}
+
+interface AggregatedRow {
+  userId: string;
+  score: number;
+  bestScore: number;
+  gamesPlayed: number;
+}
+
+/**
+ * Aggregates GameResult rows into a ranked list.
+ * - scope='global'  → score = MAX(score)         (best ever per user)
+ * - scope='season'  → score = SUM(score)         (total in the period)
+ * Both always include bestScore (MAX) and gamesPlayed (COUNT).
+ * minGames filters out users with fewer plays after aggregation.
+ */
+async function aggregateRankedFromDb(opts: {
+  scope: LeaderboardScope;
+  seasonId: string;
+  filters?: LeaderboardFilters;
+  limit?: number;
+}): Promise<AggregatedRow[]> {
+  const { scope, seasonId, filters, limit } = opts;
+  const where = buildGameResultWhere(scope, seasonId, filters);
+  const minGames = Math.max(1, filters?.minGames ?? 1);
+
+  const rows = await prisma.gameResult.groupBy({
+    by: ['userId'],
+    where,
+    _sum: { score: true },
+    _max: { score: true },
+    _count: { _all: true },
+  });
+
+  const aggregated: AggregatedRow[] = [];
+  for (const r of rows) {
+    const sum = r._sum.score ?? 0;
+    const best = r._max.score ?? 0;
+    const games = r._count._all ?? 0;
+    if (games < minGames) continue;
+    const score = scope === 'season' ? sum : best;
+    if (score <= 0) continue;
+    aggregated.push({ userId: r.userId, score, bestScore: best, gamesPlayed: games });
+  }
+
+  aggregated.sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    // Tie-break by gamesPlayed descending (more activity wins ties) then userId for stability
+    if (b.gamesPlayed !== a.gamesPlayed) return b.gamesPlayed - a.gamesPlayed;
+    return a.userId.localeCompare(b.userId);
+  });
+
+  return typeof limit === 'number' ? aggregated.slice(0, limit) : aggregated;
+}
+
 async function attachUsernames(
-  entries: { userId: string; score: number }[],
+  entries: AggregatedRow[],
   baseRank: number
 ): Promise<LeaderboardEntry[]> {
   if (entries.length === 0) return [];
@@ -51,9 +146,6 @@ async function attachUsernames(
     select: { id: true, username: true },
   });
   const userMap = new Map(users.map((u) => [u.id, u.username]));
-  // Filtra entradas huérfanas (userId en Redis sin User en DB) y recalcula ranks
-  // densamente. Sin esto, un Redis con userIds obsoletos mostraría filas
-  // "Usuario desconocido" en el podio.
   const resolved: LeaderboardEntry[] = [];
   for (const entry of entries) {
     const username = userMap.get(entry.userId);
@@ -63,25 +155,29 @@ async function attachUsernames(
       userId: entry.userId,
       username,
       score: entry.score,
+      bestScore: entry.bestScore,
+      gamesPlayed: entry.gamesPlayed,
     });
   }
   return resolved;
 }
 
-// --- Postgres fallbacks (used when Redis is unavailable) ---
+// --- Postgres unfiltered global path (uses User.highScore as canonical "best ever") ---
 
 async function getTopGlobalFromDb(count: number): Promise<LeaderboardEntry[]> {
   const users = await prisma.user.findMany({
     where: { highScore: { gt: 0 } },
     orderBy: [{ highScore: 'desc' }, { id: 'asc' }],
     take: count,
-    select: { id: true, username: true, highScore: true },
+    select: { id: true, username: true, highScore: true, gamesPlayed: true },
   });
   return users.map((u, i) => ({
     rank: i + 1,
     userId: u.id,
     username: u.username,
     score: u.highScore,
+    bestScore: u.highScore,
+    gamesPlayed: u.gamesPlayed,
   }));
 }
 
@@ -113,49 +209,24 @@ async function getGlobalUserRankFromDb(
   return { rank: usersAbove + 1, score: user.highScore };
 }
 
-async function getSeasonAggregatesFromDb(
-  seasonId: string,
-  count?: number
-): Promise<{ userId: string; score: number }[]> {
-  const { startDate, endDate } = seasonRange(seasonId);
-  const results = await prisma.gameResult.groupBy({
-    by: ['userId'],
-    where: { createdAt: { gte: startDate, lt: endDate } },
-    _max: { score: true },
-    orderBy: { _max: { score: 'desc' } },
-    ...(count ? { take: count } : {}),
-  });
-  return results
-    .filter((r) => typeof r._max.score === 'number' && (r._max.score as number) > 0)
-    .map((r) => ({ userId: r.userId, score: r._max.score as number }));
-}
+// --- Filtered / season aggregates from DB ---
 
-async function getTopSeasonFromDb(
-  count: number,
-  seasonId: string
+async function getTopFromDbWithFilters(
+  scope: LeaderboardScope,
+  seasonId: string,
+  filters: LeaderboardFilters | undefined,
+  count: number
 ): Promise<LeaderboardEntry[]> {
-  const aggregates = await getSeasonAggregatesFromDb(seasonId, count);
+  const aggregates = await aggregateRankedFromDb({ scope, seasonId, filters, limit: count });
   return attachUsernames(aggregates, 1);
 }
 
-async function getSeasonUserRankFromDb(
-  userId: string,
-  seasonId: string
-): Promise<{ rank: number | null; score: number | null } | null> {
-  const { startDate, endDate } = seasonRange(seasonId);
-  const userMax = await prisma.gameResult.aggregate({
-    where: { userId, createdAt: { gte: startDate, lt: endDate } },
-    _max: { score: true },
-  });
-  const score = userMax._max.score;
-  if (score === null || score === undefined || score <= 0) return null;
-  const aggregates = await getSeasonAggregatesFromDb(seasonId);
-  const usersAbove = aggregates.filter((a) => a.score > score).length;
-  return { rank: usersAbove + 1, score };
-}
-
-async function getSeasonStatsFromDb(seasonId: string): Promise<LeaderboardStats> {
-  const aggregates = await getSeasonAggregatesFromDb(seasonId);
+async function getStatsFromDbWithFilters(
+  scope: LeaderboardScope,
+  seasonId: string,
+  filters: LeaderboardFilters | undefined
+): Promise<LeaderboardStats> {
+  const aggregates = await aggregateRankedFromDb({ scope, seasonId, filters });
   if (aggregates.length === 0) {
     return { totalPlayers: 0, topScore: null, avgScore: null };
   }
@@ -165,7 +236,23 @@ async function getSeasonStatsFromDb(seasonId: string): Promise<LeaderboardStats>
   return { totalPlayers: total, topScore: top, avgScore: sum / total };
 }
 
+async function getUserRankFromDbWithFilters(
+  scope: LeaderboardScope,
+  seasonId: string,
+  filters: LeaderboardFilters | undefined,
+  userId: string
+): Promise<{ rank: number | null; score: number | null } | null> {
+  const aggregates = await aggregateRankedFromDb({ scope, seasonId, filters });
+  const idx = aggregates.findIndex((a) => a.userId === userId);
+  if (idx === -1) return null;
+  return { rank: idx + 1, score: aggregates[idx].score };
+}
+
 // --- Write operations (idempotent: only write if higher) ---
+// Kept for backward compatibility with existing call sites. The unfiltered
+// global Redis ZSET tracks User.highScore. The season ZSET is no longer
+// consulted on reads (we compute SUM from DB), but writes are retained so
+// any legacy rebuild that still uses it remains coherent.
 
 export async function updateLeaderboardScore(userId: string, score: number): Promise<boolean> {
   if (!Number.isFinite(score) || score <= 0) return false;
@@ -204,22 +291,44 @@ export async function updateSeasonLeaderboardScore(
   }
 }
 
-// --- Read operations (Redis primary, Postgres fallback) ---
+// --- Read operations ---
+// Unfiltered global → Redis ZSET (User.highScore). Anything else → DB aggregate.
 
-export async function getTopLeaderboard(count: number = 50): Promise<LeaderboardEntry[]> {
+export async function getTopLeaderboard(
+  count: number = 50,
+  filters?: LeaderboardFilters
+): Promise<LeaderboardEntry[]> {
   const clamped = Math.min(Math.max(count, 1), 500);
+
+  if (hasFilters(filters)) {
+    return getTopFromDbWithFilters('global', getCurrentSeasonId(), filters, clamped);
+  }
+
   try {
     const redis = getRedis();
     const results = await redis.zrevrange(LEADERBOARD_KEY, 0, clamped - 1, 'WITHSCORES');
     if (results.length === 0) {
-      // Redis empty — fall back to DB (covers cold caches / Redis flushes).
       return getTopGlobalFromDb(clamped);
     }
-    const entries: { userId: string; score: number }[] = [];
+    const entries: AggregatedRow[] = [];
     for (let i = 0; i < results.length; i += 2) {
-      entries.push({ userId: results[i], score: parseFloat(results[i + 1]) });
+      const score = parseFloat(results[i + 1]);
+      entries.push({ userId: results[i], score, bestScore: score, gamesPlayed: 0 });
     }
-    return attachUsernames(entries, 1);
+    const withUsernames = await attachUsernames(entries, 1);
+    // Backfill gamesPlayed from User table for the Redis path
+    if (withUsernames.length > 0) {
+      const ids = withUsernames.map((e) => e.userId);
+      const counts = await prisma.user.findMany({
+        where: { id: { in: ids } },
+        select: { id: true, gamesPlayed: true },
+      });
+      const byId = new Map(counts.map((u) => [u.id, u.gamesPlayed]));
+      for (const e of withUsernames) {
+        e.gamesPlayed = byId.get(e.userId) ?? 0;
+      }
+    }
+    return withUsernames;
   } catch {
     console.warn('[leaderboard] Redis unavailable, falling back to DB for global leaderboard');
     return getTopGlobalFromDb(clamped);
@@ -228,36 +337,25 @@ export async function getTopLeaderboard(count: number = 50): Promise<Leaderboard
 
 export async function getSeasonLeaderboard(
   count: number = 50,
-  seasonId: string = getCurrentSeasonId()
+  seasonId: string = getCurrentSeasonId(),
+  filters?: LeaderboardFilters
 ): Promise<LeaderboardEntry[]> {
   const clamped = Math.min(Math.max(count, 1), 500);
-  try {
-    const redis = getRedis();
-    const seasonKey = getSeasonLeaderboardKey(seasonId);
-    const results = await redis.zrevrange(seasonKey, 0, clamped - 1, 'WITHSCORES');
-    if (results.length === 0) {
-      return getTopSeasonFromDb(clamped, seasonId);
-    }
-    const entries: { userId: string; score: number }[] = [];
-    for (let i = 0; i < results.length; i += 2) {
-      entries.push({ userId: results[i], score: parseFloat(results[i + 1]) });
-    }
-    return attachUsernames(entries, 1);
-  } catch {
-    console.warn('[leaderboard] Redis unavailable, falling back to DB for season leaderboard');
-    return getTopSeasonFromDb(clamped, seasonId);
-  }
+  return getTopFromDbWithFilters('season', seasonId, filters, clamped);
 }
 
 export async function getUserRank(
-  userId: string
+  userId: string,
+  filters?: LeaderboardFilters
 ): Promise<{ rank: number | null; score: number | null } | null> {
+  if (hasFilters(filters)) {
+    return getUserRankFromDbWithFilters('global', getCurrentSeasonId(), filters, userId);
+  }
   try {
     const redis = getRedis();
     const rank = await redis.zrevrank(LEADERBOARD_KEY, userId);
     const score = await redis.zscore(LEADERBOARD_KEY, userId);
     if (rank === null || score === null) {
-      // Not in Redis — check DB to be sure (handles cold cache).
       return getGlobalUserRankFromDb(userId);
     }
     return { rank: rank + 1, score: parseFloat(score) };
@@ -269,24 +367,18 @@ export async function getUserRank(
 
 export async function getSeasonUserRank(
   userId: string,
-  seasonId: string = getCurrentSeasonId()
+  seasonId: string = getCurrentSeasonId(),
+  filters?: LeaderboardFilters
 ): Promise<{ rank: number | null; score: number | null } | null> {
-  try {
-    const redis = getRedis();
-    const seasonKey = getSeasonLeaderboardKey(seasonId);
-    const rank = await redis.zrevrank(seasonKey, userId);
-    const score = await redis.zscore(seasonKey, userId);
-    if (rank === null || score === null) {
-      return getSeasonUserRankFromDb(userId, seasonId);
-    }
-    return { rank: rank + 1, score: parseFloat(score) };
-  } catch {
-    console.warn('[leaderboard] Redis unavailable, falling back to DB for season user rank');
-    return getSeasonUserRankFromDb(userId, seasonId);
-  }
+  return getUserRankFromDbWithFilters('season', seasonId, filters, userId);
 }
 
-export async function getLeaderboardStats(): Promise<LeaderboardStats> {
+export async function getLeaderboardStats(
+  filters?: LeaderboardFilters
+): Promise<LeaderboardStats> {
+  if (hasFilters(filters)) {
+    return getStatsFromDbWithFilters('global', getCurrentSeasonId(), filters);
+  }
   try {
     const redis = getRedis();
     const totalPlayers = await redis.zcard(LEADERBOARD_KEY);
@@ -316,89 +408,72 @@ export async function getLeaderboardStats(): Promise<LeaderboardStats> {
 }
 
 export async function getSeasonLeaderboardStats(
-  seasonId: string = getCurrentSeasonId()
+  seasonId: string = getCurrentSeasonId(),
+  filters?: LeaderboardFilters
 ): Promise<LeaderboardStats> {
-  try {
-    const redis = getRedis();
-    const seasonKey = getSeasonLeaderboardKey(seasonId);
-    const totalPlayers = await redis.zcard(seasonKey);
-    if (totalPlayers === 0) {
-      return getSeasonStatsFromDb(seasonId);
-    }
-    const topResults = await redis.zrevrange(seasonKey, 0, 0, 'WITHSCORES');
-    const topScore = topResults.length >= 2 ? parseFloat(topResults[1]) : null;
-
-    const seasonAvgKey = `leaderboard:stats:avg:${seasonId}`;
-    const cachedAvg = await redis.get(seasonAvgKey);
-    let avgScore: number | null = null;
-    if (cachedAvg !== null) {
-      avgScore = parseFloat(cachedAvg);
-    } else {
-      const dbStats = await getSeasonStatsFromDb(seasonId);
-      avgScore = dbStats.avgScore;
-      if (avgScore !== null) {
-        await redis.set(seasonAvgKey, avgScore.toString(), 'EX', STATS_AVG_TTL);
-      }
-    }
-
-    return { totalPlayers, topScore, avgScore };
-  } catch {
-    console.warn('[leaderboard] Redis unavailable, falling back to DB for season stats');
-    return getSeasonStatsFromDb(seasonId);
-  }
+  return getStatsFromDbWithFilters('season', seasonId, filters);
 }
 
 /**
- * Devuelve el contexto del leaderboard alrededor de un usuario (vecinos arriba/abajo).
- * Cae a Postgres si Redis no está disponible.
+ * Returns leaderboard context around a user (neighbors above/below).
+ * For unfiltered global, uses Redis. For season or filtered, uses DB aggregation.
  */
 export async function getUserLeaderboardContext(
   userId: string,
   surrounding: number = 3,
-  scope: LeaderboardScope = 'global'
+  scope: LeaderboardScope = 'global',
+  filters?: LeaderboardFilters
 ): Promise<{ userRank: LeaderboardEntry | null; neighbors: LeaderboardEntry[] }> {
-  const userRankInfo =
-    scope === 'season' ? await getSeasonUserRank(userId) : await getUserRank(userId);
+  if (scope === 'season' || hasFilters(filters)) {
+    const seasonId = getCurrentSeasonId();
+    const aggregates = await aggregateRankedFromDb({ scope, seasonId, filters });
+    const idx = aggregates.findIndex((a) => a.userId === userId);
+    if (idx === -1) return { userRank: null, neighbors: [] };
+    const start = Math.max(0, idx - surrounding);
+    const end = Math.min(aggregates.length, idx + surrounding + 1);
+    const slice = aggregates.slice(start, end);
+    const neighbors = await attachUsernames(slice, start + 1);
+    const userRank = neighbors.find((n) => n.userId === userId) ?? null;
+    return { userRank, neighbors };
+  }
 
+  const userRankInfo = await getUserRank(userId);
   if (!userRankInfo || userRankInfo.rank === null || userRankInfo.score === null) {
     return { userRank: null, neighbors: [] };
   }
 
   try {
     const redis = getRedis();
-    const key = scope === 'season' ? getSeasonLeaderboardKey(getCurrentSeasonId()) : LEADERBOARD_KEY;
     const rank = userRankInfo.rank;
     const start = Math.max(0, rank - 1 - surrounding);
     const end = rank - 1 + surrounding;
-    const results = await redis.zrevrange(key, start, end, 'WITHSCORES');
+    const results = await redis.zrevrange(LEADERBOARD_KEY, start, end, 'WITHSCORES');
 
     if (results.length === 0) {
-      // Redis vacío: armar contexto desde DB.
-      return contextFromDb(userId, userRankInfo, surrounding, scope);
+      return contextFromGlobalDb(userId, userRankInfo, surrounding);
     }
 
-    const entries: { userId: string; score: number }[] = [];
+    const entries: AggregatedRow[] = [];
     for (let i = 0; i < results.length; i += 2) {
-      entries.push({ userId: results[i], score: parseFloat(results[i + 1]) });
+      const s = parseFloat(results[i + 1]);
+      entries.push({ userId: results[i], score: s, bestScore: s, gamesPlayed: 0 });
     }
     const neighbors = await attachUsernames(entries, start + 1);
     const userRank = neighbors.find((n) => n.userId === userId) ?? null;
     if (!userRank) {
-      // Edge case: el usuario salió del rango exacto, devolver contexto desde DB
-      return contextFromDb(userId, userRankInfo, surrounding, scope);
+      return contextFromGlobalDb(userId, userRankInfo, surrounding);
     }
     return { userRank, neighbors };
   } catch {
     console.warn('[leaderboard] Redis unavailable, building user context from DB');
-    return contextFromDb(userId, userRankInfo, surrounding, scope);
+    return contextFromGlobalDb(userId, userRankInfo, surrounding);
   }
 }
 
-async function contextFromDb(
+async function contextFromGlobalDb(
   userId: string,
   userRankInfo: { rank: number | null; score: number | null },
-  surrounding: number,
-  scope: LeaderboardScope
+  surrounding: number
 ): Promise<{ userRank: LeaderboardEntry | null; neighbors: LeaderboardEntry[] }> {
   const rank = userRankInfo.rank!;
   const score = userRankInfo.score!;
@@ -407,51 +482,58 @@ async function contextFromDb(
   const take = end - start + 1;
   const skip = start - 1;
 
-  const aggregates: { userId: string; score: number }[] =
-    scope === 'season'
-      ? (await getSeasonAggregatesFromDb(getCurrentSeasonId())).slice(skip, skip + take)
-      : (
-          await prisma.user.findMany({
-            where: { highScore: { gt: 0 } },
-            orderBy: [{ highScore: 'desc' }, { id: 'asc' }],
-            skip,
-            take,
-            select: { id: true, highScore: true },
-          })
-        ).map((u) => ({ userId: u.id, score: u.highScore }));
+  const users = await prisma.user.findMany({
+    where: { highScore: { gt: 0 } },
+    orderBy: [{ highScore: 'desc' }, { id: 'asc' }],
+    skip,
+    take,
+    select: { id: true, username: true, highScore: true, gamesPlayed: true },
+  });
 
-  if (aggregates.length === 0) {
-    const user = await prisma.user.findUnique({ where: { id: userId }, select: { username: true } });
+  if (users.length === 0) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { username: true, gamesPlayed: true },
+    });
     const userRank: LeaderboardEntry = {
       rank,
       userId,
       username: user?.username || 'Usuario desconocido',
       score,
+      bestScore: score,
+      gamesPlayed: user?.gamesPlayed ?? 0,
     };
     return { userRank, neighbors: [userRank] };
   }
 
-  const neighbors = await attachUsernames(aggregates, start);
+  const neighbors: LeaderboardEntry[] = users.map((u, i) => ({
+    rank: start + i,
+    userId: u.id,
+    username: u.username,
+    score: u.highScore,
+    bestScore: u.highScore,
+    gamesPlayed: u.gamesPlayed,
+  }));
   const userRank = neighbors.find((n) => n.userId === userId) ?? null;
   if (userRank) return { userRank, neighbors };
 
-  // Insert manualmente al usuario si no salió en la página
-  const user = await prisma.user.findUnique({ where: { id: userId }, select: { username: true } });
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { username: true, gamesPlayed: true },
+  });
   const synthetic: LeaderboardEntry = {
     rank,
     userId,
     username: user?.username || 'Usuario desconocido',
     score,
+    bestScore: score,
+    gamesPlayed: user?.gamesPlayed ?? 0,
   };
   return { userRank: synthetic, neighbors: [...neighbors, synthetic] };
 }
 
 // --- Sync / rebuild operations (retroactive) ---
 
-/**
- * Reconstruye el leaderboard global en Redis desde la fuente de verdad (User.highScore).
- * Sin tope de usuarios: deja Redis idéntico a la DB.
- */
 export async function syncLeaderboardFromDatabase(): Promise<number> {
   try {
     const redis = getRedis();
@@ -477,8 +559,9 @@ export async function syncLeaderboardFromDatabase(): Promise<number> {
 }
 
 /**
- * Reconstruye el leaderboard de una temporada (mes YYYY-MM) usando los GameResult del período.
- * Útil para sincronizar después de un Redis flush o cambios masivos en DB.
+ * Legacy: kept for the admin rebuild endpoint. Writes MAX score per user into
+ * the Redis season ZSET. Reads no longer consult this — kept so manual rebuilds
+ * remain backwards compatible.
  */
 export async function syncSeasonLeaderboardFromDatabase(
   seasonId: string = getCurrentSeasonId()
@@ -486,7 +569,15 @@ export async function syncSeasonLeaderboardFromDatabase(
   try {
     const redis = getRedis();
     const seasonKey = getSeasonLeaderboardKey(seasonId);
-    const aggregates = await getSeasonAggregatesFromDb(seasonId);
+    const { startDate, endDate } = seasonRange(seasonId);
+    const rows = await prisma.gameResult.groupBy({
+      by: ['userId'],
+      where: { createdAt: { gte: startDate, lt: endDate } },
+      _max: { score: true },
+    });
+    const aggregates = rows
+      .filter((r) => typeof r._max.score === 'number' && (r._max.score as number) > 0)
+      .map((r) => ({ userId: r.userId, score: r._max.score as number }));
 
     await redis.del(seasonKey);
     if (aggregates.length === 0) return 0;
@@ -503,13 +594,6 @@ export async function syncSeasonLeaderboardFromDatabase(
   }
 }
 
-/**
- * Recomputa User.highScore desde GameResult para todos los usuarios.
- * Corrige inconsistencias retroactivas: si por bug histórico algún usuario tiene
- * highScore mal seteado, este job lo deja igual al máximo real de sus partidas.
- *
- * Devuelve el número de usuarios actualizados.
- */
 export async function recomputeAllHighScoresFromHistory(): Promise<{
   scanned: number;
   updated: number;
@@ -533,9 +617,6 @@ export async function recomputeAllHighScoresFromHistory(): Promise<{
   return { scanned: grouped.length, updated };
 }
 
-/**
- * Lista todas las temporadas (YYYY-MM) que tienen al menos un GameResult registrado.
- */
 export async function listSeasonsWithActivity(): Promise<string[]> {
   const rows = await prisma.$queryRaw<{ season: string }[]>`
     SELECT DISTINCT TO_CHAR("createdAt" AT TIME ZONE 'UTC', 'YYYY-MM') AS season
@@ -545,12 +626,6 @@ export async function listSeasonsWithActivity(): Promise<string[]> {
   return rows.map((r) => r.season);
 }
 
-/**
- * Rebuild retroactivo completo:
- *   1. Recomputa User.highScore desde GameResult (DB es la fuente de verdad).
- *   2. Resincroniza Redis global desde DB.
- *   3. Resincroniza Redis para cada temporada con actividad.
- */
 export async function rebuildAllLeaderboards(): Promise<{
   highScoresUpdated: number;
   globalLoaded: number;

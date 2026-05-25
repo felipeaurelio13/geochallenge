@@ -395,7 +395,44 @@
     "yourPosition": "Tu posición",
     "globalStats": "Estadísticas globales",
     "seasonStats": "Estadísticas del mes",
-    "otherPlayers": "Otros jugadores"
+    "otherPlayers": "Otros jugadores",
+    "filters": {
+      "title": "Filtros",
+      "mode": "Modo",
+      "category": "Categoría",
+      "minGames": "Mín. partidas",
+      "all": "Todos",
+      "any": "Cualquiera",
+      "active": "Filtros activos",
+      "clear": "Quitar filtros"
+    },
+    "modes": {
+      "SINGLE": "Solo",
+      "DUEL": "Duelo",
+      "CHALLENGE": "Desafío",
+      "SURVIVAL": "Supervivencia"
+    },
+    "categories": {
+      "MAP": "Mapa",
+      "FLAG": "Banderas",
+      "CAPITAL": "Capitales",
+      "SILHOUETTE": "Siluetas",
+      "MONUMENT": "Monumentos",
+      "CINEMA_GEO": "Cine geo",
+      "MIXED": "Mixto"
+    },
+    "metric": {
+      "sum": "Suma del mes",
+      "best": "Mejor de siempre",
+      "sumHint": "Ranking por puntaje total acumulado en el mes",
+      "bestHint": "Ranking por la mejor partida individual"
+    },
+    "columns": {
+      "games": "Partidas",
+      "best": "Mejor",
+      "score": "Puntos"
+    },
+    "fairnessNote": "Compara jugadores en igualdad de condiciones: usa los filtros por modo o categoría."
   },
   "profile": {
     "title": "Mi Perfil",

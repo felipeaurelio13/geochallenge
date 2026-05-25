@@ -242,7 +242,11 @@ class ApiService {
   }
 
   // Leaderboard endpoints
-  async getLeaderboard(limit?: number, scope: LeaderboardScope = 'global') {
+  async getLeaderboard(
+    limit?: number,
+    scope: LeaderboardScope = 'global',
+    filters?: import('../types').LeaderboardFilters
+  ) {
     const response = await this.client.get<{
       leaderboard: LeaderboardEntry[];
       totalPlayers: number;
@@ -252,6 +256,12 @@ class ApiService {
       window?: string | null;
       generatedAt?: string;
       scope: LeaderboardScope;
+      metric?: 'sum' | 'best';
+      filters?: {
+        mode: import('../types').LeaderboardModeFilter | null;
+        category: import('../types').LeaderboardCategoryFilter | null;
+        minGames: number;
+      };
       queryMeta?: {
         requestedScope: LeaderboardScope;
         effectiveScope: LeaderboardScope;
@@ -259,17 +269,33 @@ class ApiService {
       };
       userRank: { rank: number; score: number } | null;
     }>('/leaderboard', {
-      params: { limit, scope },
+      params: {
+        limit,
+        scope,
+        ...(filters?.mode ? { mode: filters.mode } : {}),
+        ...(filters?.category ? { category: filters.category } : {}),
+        ...(filters?.minGames && filters.minGames > 1 ? { minGames: filters.minGames } : {}),
+      },
     });
     return response.data;
   }
 
-  async getMyRank(scope: LeaderboardScope = 'global') {
+  async getMyRank(
+    scope: LeaderboardScope = 'global',
+    filters?: import('../types').LeaderboardFilters
+  ) {
     const response = await this.client.get<{
       userRank: LeaderboardEntry | null;
       neighbors: LeaderboardEntry[];
       scope: LeaderboardScope;
-    }>('/leaderboard/me', { params: { scope } });
+    }>('/leaderboard/me', {
+      params: {
+        scope,
+        ...(filters?.mode ? { mode: filters.mode } : {}),
+        ...(filters?.category ? { category: filters.category } : {}),
+        ...(filters?.minGames && filters.minGames > 1 ? { minGames: filters.minGames } : {}),
+      },
+    });
     return response.data;
   }
 

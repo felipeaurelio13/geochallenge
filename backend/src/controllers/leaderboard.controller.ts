@@ -14,10 +14,59 @@ import {
   syncLeaderboardFromDatabase,
   syncSeasonLeaderboardFromDatabase,
   type LeaderboardScope,
+  type LeaderboardModeFilter,
+  type LeaderboardCategoryFilter,
+  type LeaderboardFilters,
 } from '../services/leaderboard.service.js';
 
 const router = Router();
 const SUPPORTED_LEADERBOARD_SCOPES = ['global', 'season'] as const;
+const SUPPORTED_MODES: readonly LeaderboardModeFilter[] = [
+  'SINGLE',
+  'DUEL',
+  'CHALLENGE',
+  'SURVIVAL',
+];
+const SUPPORTED_CATEGORIES: readonly LeaderboardCategoryFilter[] = [
+  'MAP',
+  'FLAG',
+  'CAPITAL',
+  'SILHOUETTE',
+  'MONUMENT',
+  'CINEMA_GEO',
+  'MIXED',
+];
+
+function parseModeFilter(raw: unknown): LeaderboardModeFilter | undefined {
+  if (typeof raw !== 'string') return undefined;
+  const normalized = raw.trim().toUpperCase();
+  return (SUPPORTED_MODES as readonly string[]).includes(normalized)
+    ? (normalized as LeaderboardModeFilter)
+    : undefined;
+}
+
+function parseCategoryFilter(raw: unknown): LeaderboardCategoryFilter | undefined {
+  if (typeof raw !== 'string') return undefined;
+  const normalized = raw.trim().toUpperCase();
+  return (SUPPORTED_CATEGORIES as readonly string[]).includes(normalized)
+    ? (normalized as LeaderboardCategoryFilter)
+    : undefined;
+}
+
+function parseMinGames(raw: unknown): number | undefined {
+  if (raw === undefined || raw === null || raw === '') return undefined;
+  const parsed = parseInt(String(raw), 10);
+  if (!Number.isFinite(parsed) || parsed <= 1) return undefined;
+  return Math.min(parsed, 1000);
+}
+
+function parseFilters(req: Request): LeaderboardFilters {
+  return {
+    mode: parseModeFilter(req.query.mode),
+    category: parseCategoryFilter(req.query.category),
+    minGames: parseMinGames(req.query.minGames),
+  };
+}
 
 export function resolveLeaderboardScope(rawScope: unknown): {
   requestedScope: LeaderboardScope;
@@ -50,17 +99,22 @@ router.get('/', optionalAuth, async (req: AuthRequest, res: Response) => {
     const scopeResolution = resolveLeaderboardScope(req.query.scope);
     const isSeasonScope = scopeResolution.effectiveScope === 'season';
     const seasonId = getCurrentSeasonId();
+    const filters = parseFilters(req);
 
     const [leaderboard, stats] = await Promise.all([
-      isSeasonScope ? getSeasonLeaderboard(limit, seasonId) : getTopLeaderboard(limit),
-      isSeasonScope ? getSeasonLeaderboardStats(seasonId) : getLeaderboardStats(),
+      isSeasonScope
+        ? getSeasonLeaderboard(limit, seasonId, filters)
+        : getTopLeaderboard(limit, filters),
+      isSeasonScope
+        ? getSeasonLeaderboardStats(seasonId, filters)
+        : getLeaderboardStats(filters),
     ]);
 
     let userRank: { rank: number | null; score: number | null } | null = null;
     if (req.user) {
       userRank = isSeasonScope
-        ? await getSeasonUserRank(req.user.userId, seasonId)
-        : await getUserRank(req.user.userId);
+        ? await getSeasonUserRank(req.user.userId, seasonId, filters)
+        : await getUserRank(req.user.userId, filters);
     }
 
     const response: Record<string, unknown> = {
@@ -71,6 +125,12 @@ router.get('/', optionalAuth, async (req: AuthRequest, res: Response) => {
       userRank: userRank ? { rank: userRank.rank, score: userRank.score } : null,
       generatedAt: new Date().toISOString(),
       scope: scopeResolution.effectiveScope,
+      metric: isSeasonScope ? 'sum' : 'best',
+      filters: {
+        mode: filters.mode ?? null,
+        category: filters.category ?? null,
+        minGames: filters.minGames ?? 1,
+      },
       queryMeta: {
         requestedScope: scopeResolution.requestedScope,
         effectiveScope: scopeResolution.effectiveScope,
@@ -96,10 +156,12 @@ router.get('/', optionalAuth, async (req: AuthRequest, res: Response) => {
 router.get('/me', authenticateJWT, async (req: AuthRequest, res: Response) => {
   try {
     const scopeResolution = resolveLeaderboardScope(req.query.scope);
+    const filters = parseFilters(req);
     const context = await getUserLeaderboardContext(
       req.user!.userId,
       3,
-      scopeResolution.effectiveScope
+      scopeResolution.effectiveScope,
+      filters
     );
 
     if (!context.userRank) {

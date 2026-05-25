@@ -24,8 +24,12 @@ const sizeClasses: Record<ButtonSize, string> = {
   lg: 'min-h-12 px-6 py-3 text-base rounded-xl',
 };
 
+// QA round 3 (design audit): el estado disabled del botón primario se veía
+// como "loading" porque sólo bajábamos opacity-60 — el azul seguía claramente
+// presente. Ahora también desaturamos y removemos shadow para que se lea
+// "inactivo, no clickable" en vez de "casi activo, espera".
 const baseClasses =
-  'font-semibold transition-all duration-150 active:scale-[0.99] focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60 disabled:scale-100';
+  'font-semibold transition-all duration-150 active:scale-[0.99] focus:outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-50 disabled:saturate-50 disabled:shadow-none disabled:scale-100';
 
 /** Build the full class string for a button-styled element (Button, Link, etc.). */
 export function buttonVariants({

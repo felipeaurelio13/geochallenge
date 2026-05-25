@@ -163,24 +163,31 @@ describe('getTopLeaderboard', () => {
   it('devuelve resultados de Redis con usernames y rank empezando en 1', async () => {
     await updateLeaderboardScore('u1', 1000);
     await updateLeaderboardScore('u2', 1500);
-    prismaMock.user.findMany.mockResolvedValueOnce([
-      { id: 'u1', username: 'alice' },
-      { id: 'u2', username: 'bob' },
-    ]);
+    prismaMock.user.findMany
+      .mockResolvedValueOnce([
+        { id: 'u1', username: 'alice' },
+        { id: 'u2', username: 'bob' },
+      ])
+      .mockResolvedValueOnce([
+        { id: 'u1', gamesPlayed: 5 },
+        { id: 'u2', gamesPlayed: 12 },
+      ]);
 
     const top = await getTopLeaderboard(10);
     expect(top).toEqual([
-      { rank: 1, userId: 'u2', username: 'bob', score: 1500 },
-      { rank: 2, userId: 'u1', username: 'alice', score: 1000 },
+      { rank: 1, userId: 'u2', username: 'bob', score: 1500, bestScore: 1500, gamesPlayed: 12 },
+      { rank: 2, userId: 'u1', username: 'alice', score: 1000, bestScore: 1000, gamesPlayed: 5 },
     ]);
   });
 
   it('cae a DB cuando Redis está vacío', async () => {
     prismaMock.user.findMany.mockResolvedValueOnce([
-      { id: 'u9', username: 'carol', highScore: 700 },
+      { id: 'u9', username: 'carol', highScore: 700, gamesPlayed: 3 },
     ]);
     const top = await getTopLeaderboard(10);
-    expect(top).toEqual([{ rank: 1, userId: 'u9', username: 'carol', score: 700 }]);
+    expect(top).toEqual([
+      { rank: 1, userId: 'u9', username: 'carol', score: 700, bestScore: 700, gamesPlayed: 3 },
+    ]);
   });
 });
 
@@ -285,13 +292,83 @@ describe('rebuildAllLeaderboards', () => {
 });
 
 describe('getSeasonLeaderboard', () => {
-  it('cae a DB cuando Redis está vacío', async () => {
+  it('agrega SUM(score) por usuario y devuelve gamesPlayed + bestScore', async () => {
     prismaMock.gameResult.groupBy.mockResolvedValueOnce([
-      { userId: 'u1', _max: { score: 900 } },
+      { userId: 'u1', _sum: { score: 1800 }, _max: { score: 900 }, _count: { _all: 3 } },
+      { userId: 'u2', _sum: { score: 500 }, _max: { score: 500 }, _count: { _all: 1 } },
+    ]);
+    prismaMock.user.findMany.mockResolvedValueOnce([
+      { id: 'u1', username: 'eve' },
+      { id: 'u2', username: 'mallory' },
+    ]);
+
+    const result = await getSeasonLeaderboard(10, '2025-01');
+    expect(result).toEqual([
+      { rank: 1, userId: 'u1', username: 'eve', score: 1800, bestScore: 900, gamesPlayed: 3 },
+      { rank: 2, userId: 'u2', username: 'mallory', score: 500, bestScore: 500, gamesPlayed: 1 },
+    ]);
+  });
+
+  it('aplica minGames después de la agregación', async () => {
+    prismaMock.gameResult.groupBy.mockResolvedValueOnce([
+      { userId: 'u1', _sum: { score: 1800 }, _max: { score: 900 }, _count: { _all: 3 } },
+      { userId: 'u2', _sum: { score: 5000 }, _max: { score: 5000 }, _count: { _all: 1 } },
     ]);
     prismaMock.user.findMany.mockResolvedValueOnce([{ id: 'u1', username: 'eve' }]);
 
-    const result = await getSeasonLeaderboard(10, '2025-01');
-    expect(result).toEqual([{ rank: 1, userId: 'u1', username: 'eve', score: 900 }]);
+    const result = await getSeasonLeaderboard(10, '2025-01', { minGames: 3 });
+    expect(result.map((r) => r.userId)).toEqual(['u1']);
+  });
+
+  it('propaga filtros mode/category al where de Prisma', async () => {
+    prismaMock.gameResult.groupBy.mockResolvedValueOnce([]);
+    await getSeasonLeaderboard(10, '2025-01', { mode: 'SINGLE', category: 'FLAG' });
+    expect(prismaMock.gameResult.groupBy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          gameMode: 'SINGLE',
+          category: 'FLAG',
+          createdAt: expect.any(Object),
+        }),
+      })
+    );
+  });
+});
+
+describe('getTopLeaderboard con filtros', () => {
+  it('cuando hay mode filter, usa DB con MAX (peras-con-peras por modo) y no consulta Redis', async () => {
+    prismaMock.gameResult.groupBy.mockResolvedValueOnce([
+      { userId: 'u1', _sum: { score: 2500 }, _max: { score: 1500 }, _count: { _all: 2 } },
+    ]);
+    prismaMock.user.findMany.mockResolvedValueOnce([{ id: 'u1', username: 'alice' }]);
+
+    const top = await getTopLeaderboard(10, { mode: 'DUEL' });
+    expect(redisMock.zrevrange).not.toHaveBeenCalled();
+    expect(top).toEqual([
+      { rank: 1, userId: 'u1', username: 'alice', score: 1500, bestScore: 1500, gamesPlayed: 2 },
+    ]);
+    expect(prismaMock.gameResult.groupBy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ gameMode: 'DUEL' }),
+      })
+    );
+  });
+
+  it('sin filtros usa Redis ZSET global', async () => {
+    await updateLeaderboardScore('u1', 1500);
+    prismaMock.user.findMany
+      .mockResolvedValueOnce([{ id: 'u1', username: 'alice' }])
+      .mockResolvedValueOnce([{ id: 'u1', gamesPlayed: 7 }]);
+
+    const top = await getTopLeaderboard(10);
+    expect(redisMock.zrevrange).toHaveBeenCalled();
+    expect(top[0]).toEqual({
+      rank: 1,
+      userId: 'u1',
+      username: 'alice',
+      score: 1500,
+      bestScore: 1500,
+      gamesPlayed: 7,
+    });
   });
 });

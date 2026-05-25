@@ -131,7 +131,10 @@ export function DailyChallengePage() {
     const pct = Math.round((previousResult.correctCount / previousResult.totalQuestions) * 100);
     return (
       <div className="flex h-full flex-col items-center justify-center gap-6 bg-[var(--color-bg-app)] px-6 py-8 text-center">
-        <div className="text-6xl">📅</div>
+        {/* 🗓️ (spiral) en vez de 📅 (calendar) — el segundo se renderiza como
+            "JUL 17" hardcoded en muchos OS (QA design audit lo marcó como raro).
+            El spiral es genérico, sin fecha. */}
+        <div className="text-6xl">🗓️</div>
         <h1 className="text-2xl font-bold text-app-text">{t('daily.alreadyPlayed', 'Ya jugaste hoy')}</h1>
         <p className="text-[var(--color-text-secondary)]">{t('daily.comeBackTomorrow', 'Vuelve mañana para el siguiente reto')}</p>
         <div className="w-full max-w-sm rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">

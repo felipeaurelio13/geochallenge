@@ -247,11 +247,29 @@ export interface GameResult {
 // Leaderboard types
 export type LeaderboardScope = 'global' | 'season';
 
+export type LeaderboardModeFilter = 'SINGLE' | 'DUEL' | 'CHALLENGE' | 'SURVIVAL';
+export type LeaderboardCategoryFilter =
+  | 'MAP'
+  | 'FLAG'
+  | 'CAPITAL'
+  | 'SILHOUETTE'
+  | 'MONUMENT'
+  | 'CINEMA_GEO'
+  | 'MIXED';
+
+export interface LeaderboardFilters {
+  mode?: LeaderboardModeFilter | null;
+  category?: LeaderboardCategoryFilter | null;
+  minGames?: number;
+}
+
 export interface LeaderboardEntry {
   rank: number;
   userId: string;
   username: string;
   score: number;
+  gamesPlayed?: number;
+  bestScore?: number;
 }
 
 // Duel types
