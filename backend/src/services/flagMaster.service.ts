@@ -230,27 +230,52 @@ export async function buildFlagMasterRounds(): Promise<FlagMasterRound[]> {
   }
 
   const inGroupCountries = getAllCountriesInGroups();
+  const similarSlots = TIER_PLAN.filter((s) => SIMILAR_TIERS.has(s.modifier)).length;
 
-  const remaining = [...pool];
+  // Partición: separamos los países con grupo de los demás. Así reservamos
+  // las preguntas con grupo para los tiers que LAS NECESITAN (similar/combined),
+  // en lugar de que tiers tempranos (tier 1-3) las consuman aleatoriamente y
+  // luego los tiers 4-5 caigan al fallback genérico.
+  const inGroupPool = pool.filter((q) => inGroupCountries.has(q.correctAnswer));
+  const otherPool = pool.filter((q) => !inGroupCountries.has(q.correctAnswer));
+
+  // Mezclar ambas pools para variedad entre runs (con shuffleArray, el test
+  // determinístico de los slice/shuffle pueden quedar predecibles, pero en prod
+  // este shuffle elige al azar del Set).
+  const shuffledInGroup = shuffleArray(inGroupPool);
+  const shuffledOther = shuffleArray(otherPool);
+
+  // Reserve hasta `similarSlots` preguntas del inGroupPool para los tiers
+  // similares. El resto va al pool general.
+  const reservedForSimilar = shuffledInGroup.slice(0, similarSlots);
+  const leftoverInGroup = shuffledInGroup.slice(similarSlots);
+  const generalPool = [...shuffledOther, ...leftoverInGroup];
+
   const rounds: FlagMasterRound[] = [];
+  let similarIdx = 0;
+  let generalIdx = 0;
 
   for (let i = 0; i < TOTAL_ROUNDS; i += 1) {
     const tierSlot = TIER_PLAN[i];
     const isSimilarTier = SIMILAR_TIERS.has(tierSlot.modifier);
 
-    // Para tiers que requieren distractores similares, preferimos preguntas
-    // cuyo correctAnswer pertenezca a algún grupo de similitud.
-    let selectedIndex = -1;
-    if (isSimilarTier) {
-      selectedIndex = remaining.findIndex((q) => inGroupCountries.has(q.correctAnswer));
-    }
-    if (selectedIndex === -1) {
-      // Fallback: cualquier pregunta restante (al azar).
-      selectedIndex = Math.floor(Math.random() * remaining.length);
+    // Elegir pregunta: tiers similares consumen primero la reserva; si se
+    // agotó (pool con menos de `similarSlots` países en grupo), caen al pool
+    // general.
+    let question: PoolQuestion | undefined;
+    if (isSimilarTier && similarIdx < reservedForSimilar.length) {
+      question = reservedForSimilar[similarIdx++];
+    } else if (generalIdx < generalPool.length) {
+      question = generalPool[generalIdx++];
+    } else if (similarIdx < reservedForSimilar.length) {
+      // Edge: tier no-similar pero pool general ya consumida → usar reserva.
+      question = reservedForSimilar[similarIdx++];
     }
 
-    const question = remaining[selectedIndex];
-    remaining.splice(selectedIndex, 1);
+    if (!question) {
+      // Defensivo: no debería ocurrir porque pool.length >= TOTAL_ROUNDS.
+      throw new Error(`Flag Master: ran out of questions at round ${i + 1}`);
+    }
 
     // Construir opciones según el tier.
     let options: string[];
