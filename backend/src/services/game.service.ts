@@ -3,21 +3,6 @@ import { config } from '../config/env.js';
 import { Category, Difficulty, GameMode, Prisma } from '@prisma/client';
 import { haversineDistance } from '../utils/haversine.js';
 import { calculateScore, calculateMapScore, calculateTimeBonus, shuffleArray, selectRandom } from '../utils/scoring.js';
-import { loadMovieSceneCatalog } from '../utils/movieSceneCatalog.js';
-
-// Lazy-loaded cache: slug → { en, es }
-let _movieNameCache: Map<string, { en: string; es: string }> | null = null;
-function getMovieNameMap(): Map<string, { en: string; es: string }> {
-  if (!_movieNameCache) {
-    try {
-      const scenes = loadMovieSceneCatalog();
-      _movieNameCache = new Map(scenes.map((s) => [s.slug, s.movie]));
-    } catch {
-      _movieNameCache = new Map();
-    }
-  }
-  return _movieNameCache;
-}
 
 export interface GameQuestion {
   id: string;
@@ -55,14 +40,9 @@ function buildFilterWhere(filters?: QuestionFilters): object {
   };
 }
 
-function getCompatibleFilters(category?: Category, filters?: QuestionFilters): QuestionFilters | undefined {
-  if (!filters) return undefined;
-
-  if (category === Category.MOVIE_SCENE) {
-    const { difficulty } = filters;
-    return difficulty ? { difficulty } : undefined;
-  }
-
+function getCompatibleFilters(_category?: Category, filters?: QuestionFilters): QuestionFilters | undefined {
+  // CINEMA_GEO seeds continent/isInsular/isLandlocked from the filming country, so geographic
+  // filters apply uniformly across all categories now.
   return filters;
 }
 
@@ -207,7 +187,7 @@ export async function getQuestionsForGame(
     questions = await prisma.question.findMany({
       where: {
         ...baseWhere,
-        category: { in: [Category.FLAG, Category.CAPITAL, Category.MAP, Category.SILHOUETTE, Category.MONUMENT, Category.MOVIE_SCENE] },
+        category: { in: [Category.FLAG, Category.CAPITAL, Category.MAP, Category.SILHOUETTE, Category.MONUMENT, Category.CINEMA_GEO] },
       },
     });
   }
@@ -246,7 +226,7 @@ export async function getAvailableQuestionsCount(
     ...buildFilterWhere(compatibleFilters),
     ...(category && category !== Category.MIXED && { category }),
     ...((category === Category.MIXED || !category) && {
-      category: { in: [Category.FLAG, Category.CAPITAL, Category.MAP, Category.SILHOUETTE, Category.MONUMENT, Category.MOVIE_SCENE] },
+      category: { in: [Category.FLAG, Category.CAPITAL, Category.MAP, Category.SILHOUETTE, Category.MONUMENT, Category.CINEMA_GEO] },
     }),
   };
 
@@ -259,7 +239,7 @@ export async function getAvailableQuestionsCount(
  */
 export async function getQuestionsForFlashGame(category?: Category, filters?: QuestionFilters): Promise<GameQuestion[]> {
   const compatibleFilters = getCompatibleFilters(category, filters);
-  const visualCategories = [Category.FLAG, Category.SILHOUETTE, Category.MONUMENT, Category.MOVIE_SCENE];
+  const visualCategories = [Category.FLAG, Category.SILHOUETTE, Category.MONUMENT, Category.CINEMA_GEO];
   const flashCategories =
     category && category !== Category.MIXED && category !== Category.MAP
       ? [category]
@@ -395,12 +375,12 @@ export function buildQuestionUniquenessKey(question: Pick<GameQuestion, 'categor
     ].join('|');
   }
 
-  // Para MOVIE_SCENE, ancla la unicidad al slug de la escena (no a la variante de prompt).
-  if (question.category === Category.MOVIE_SCENE) {
-    const slug = extractMovieSceneSlug(question.questionData);
+  // Para CINEMA_GEO, ancla la unicidad al id del catálogo (cada id es una escena única).
+  if (question.category === Category.CINEMA_GEO) {
+    const catalogId = extractCinemaGeoId(question.questionData);
     return [
       normalizeUniquenessPart(question.category),
-      normalizeUniquenessPart(slug || question.imageUrl),
+      normalizeUniquenessPart(catalogId || question.questionData),
     ].join('|');
   }
 
@@ -412,14 +392,11 @@ export function buildQuestionUniquenessKey(question: Pick<GameQuestion, 'categor
   ].join('|');
 }
 
-function extractMovieSceneSlug(questionData: string | undefined | null): string | null {
+function extractCinemaGeoId(questionData: string | undefined | null): string | null {
   if (!questionData) return null;
   try {
-    const parsed = JSON.parse(questionData) as { slug?: string; id?: string; prompt?: unknown };
-    // New Cinema & Geography format: use the question id as uniqueness anchor
-    if (parsed.prompt && typeof parsed.id === 'string') return `cinema:${parsed.id}`;
-    // Legacy format: use slug
-    return parsed.slug ?? null;
+    const parsed = JSON.parse(questionData) as { id?: string };
+    return parsed.id ?? null;
   } catch {
     return null;
   }
@@ -461,34 +438,13 @@ export function generateQuestionText(question: any): string {
       }
       return '¿Qué monumento es este?';
     }
-    case Category.MOVIE_SCENE: {
-      // MOVIE_SCENE is a legacy enum name. Product-facing category is "Cinema & Geography":
-      // questions require film-production or cinematic-location knowledge, not generic place recognition.
+    case Category.CINEMA_GEO: {
+      // Cinema & Geography (v2): every question embeds a bilingual prompt in questionData.
       try {
-        const parsed = JSON.parse(question.questionData) as Record<string, unknown>;
-
-        // New Cinema & Geography format: questionData embeds a bilingual prompt.
-        if (parsed.prompt && typeof parsed.prompt === 'object') {
-          const promptObj = parsed.prompt as { es?: string; en?: string };
-          return promptObj.es || promptObj.en || '¿Pregunta de Cine & Geografía?';
-        }
-
-        // Legacy format: { slug, variant } — construct question text from catalog.
-        const legacy = parsed as { variant?: 'country' | 'city'; slug?: string };
-        const variant = legacy.variant ?? 'country';
-        const movieMap = getMovieNameMap();
-        const movie = legacy.slug ? movieMap.get(legacy.slug) : undefined;
-        const movieName = movie?.es || movie?.en || '';
-        if (variant === 'city') {
-          return movieName
-            ? `¿En qué ciudad fue filmada esta escena de ${movieName}?`
-            : '¿En qué ciudad fue filmada esta escena?';
-        }
-        return movieName
-          ? `¿En qué país fue filmada esta escena de ${movieName}?`
-          : '¿En qué país fue filmada esta escena?';
+        const parsed = JSON.parse(question.questionData) as { prompt?: { es?: string; en?: string } };
+        return parsed.prompt?.es || parsed.prompt?.en || '¿Dónde se filmó esta escena?';
       } catch {
-        return '¿En qué país fue filmada esta escena?';
+        return '¿Dónde se filmó esta escena?';
       }
     }
     default:

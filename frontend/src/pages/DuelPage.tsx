@@ -15,7 +15,6 @@ import { UserAvatar } from '../components/atoms/UserAvatar';
 import { Alert } from '../components/atoms/Alert';
 import { Button } from '../components/atoms/Button';
 import { MonumentAttribution } from '../components/MonumentAttribution';
-import { MovieSceneAttribution } from '../components/MovieSceneAttribution';
 import { Category, GameFilters, MechanicUsage, Question } from '../types';
 import { GAME_CONSTANTS } from '../constants/game';
 import { useHaptics, useImagePreloader } from '../hooks';
@@ -37,7 +36,7 @@ interface DuelResult {
 
 const { TIME_PER_QUESTION } = GAME_CONSTANTS;
 const SEARCH_TIMEOUT_SECONDS = 120;
-const DUEL_CATEGORIES: Category[] = ['FLAG', 'CAPITAL', 'MAP', 'SILHOUETTE', 'MONUMENT', 'MOVIE_SCENE', 'MIXED'];
+const DUEL_CATEGORIES: Category[] = ['FLAG', 'CAPITAL', 'MAP', 'SILHOUETTE', 'MONUMENT', 'CINEMA_GEO', 'MIXED'];
 
 function parseDuelCategory(value: string | null): Category {
   if (!value) {
@@ -505,8 +504,8 @@ export function DuelPage() {
                       ? 'silhouettes'
                       : duelCategory === 'MONUMENT'
                       ? 'monuments'
-                      : duelCategory === 'MOVIE_SCENE'
-                      ? 'movieScenes'
+                      : duelCategory === 'CINEMA_GEO'
+                      ? 'cinemaGeo'
                       : 'mixed'
                   }`
                 ),
@@ -742,8 +741,6 @@ export function DuelPage() {
           resultAttribution={
             currentQuestion && currentQuestion.category === 'MONUMENT'
               ? <MonumentAttribution question={currentQuestion} />
-              : currentQuestion && currentQuestion.category === 'MOVIE_SCENE'
-              ? <MovieSceneAttribution question={currentQuestion} />
               : undefined
           }
           showResultBadge

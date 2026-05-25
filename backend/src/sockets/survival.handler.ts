@@ -32,7 +32,7 @@ const TIME_PER_DIFFICULTY: Record<Difficulty, number> = {
 // Questions fetched per phase upfront
 const PHASE_FETCH_COUNTS = { EASY: 5, MEDIUM: 5, HARD: 15 };
 
-const SURVIVAL_CATEGORIES: Category[] = ['MAP', 'FLAG', 'CAPITAL', 'SILHOUETTE', 'MONUMENT', 'MOVIE_SCENE', 'MIXED'];
+const SURVIVAL_CATEGORIES: Category[] = ['MAP', 'FLAG', 'CAPITAL', 'SILHOUETTE', 'MONUMENT', 'CINEMA_GEO', 'MIXED'];
 
 function getDifficultyForRound(round: number): Difficulty {
   if (round <= 5) return 'EASY';

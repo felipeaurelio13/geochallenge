@@ -140,7 +140,7 @@
     "maps": "Maps",
     "silhouettes": "Silhouettes",
     "monuments": "Monuments",
-    "movieScenes": "Cinema & Geography"
+    "cinemaGeo": "Cinema & Geography"
   },
   "game": {
     "loading": "Loading questions...",
@@ -159,10 +159,7 @@
     "monumentUnavailable": "Image unavailable",
     "monumentAttribution": "Photo: {{author}} · {{license}}",
     "monumentAttributionSource": "Wikimedia Commons",
-    "questionMovieSceneCountry": "In which country was this {{movie}} scene filmed?",
-    "questionMovieSceneCity": "In which city was this {{movie}} scene filmed?",
-    "movieSceneUnavailable": "Image unavailable",
-    "movieSceneAttribution": "Photo: {{author}} · {{license}}",
+    "questionCinemaFallback": "Where was this scene filmed?",
     "silhouetteUnavailable": "Silhouette unavailable",
     "flagUnavailable": "Flag unavailable",
     "clickMap": "Click on the map to select the location",

@@ -19,7 +19,7 @@ export interface AuthState {
 }
 
 // Game types
-export type Category = 'MAP' | 'FLAG' | 'CAPITAL' | 'SILHOUETTE' | 'MONUMENT' | 'MOVIE_SCENE' | 'MIXED';
+export type Category = 'MAP' | 'FLAG' | 'CAPITAL' | 'SILHOUETTE' | 'MONUMENT' | 'CINEMA_GEO' | 'MIXED';
 export type GameType = 'single' | 'streak' | 'flash';
 export type GameplayMode = GameType | 'duel' | 'challenge';
 export type GameMechanicKey = 'intel5050' | 'focusTime' | 'streakShield';

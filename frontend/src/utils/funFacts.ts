@@ -66,7 +66,7 @@ function getCountryName(q: Question): string | null {
 }
 
 export function generateFunFact(q: Question, lang: Lang): string | null {
-  if (q.category === 'MONUMENT' || q.category === 'MOVIE_SCENE') return null;
+  if (q.category === 'MONUMENT' || q.category === 'CINEMA_GEO') return null;
 
   const country = getCountryName(q);
   if (!country) return null;

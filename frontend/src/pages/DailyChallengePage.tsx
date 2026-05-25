@@ -6,7 +6,6 @@ import { LoadingSpinner } from '../components';
 import { Button } from '../components/atoms/Button';
 import { OptionButton } from '../components/OptionButton';
 import { MonumentAttribution } from '../components/MonumentAttribution';
-import { MovieSceneAttribution } from '../components/MovieSceneAttribution';
 import { generateFunFact } from '../utils/funFacts';
 import { useStreakShareImage } from '../hooks/useStreakShareImage';
 import type { Question, DailyResult } from '../types';
@@ -261,12 +260,7 @@ export function DailyChallengePage() {
                 <MonumentAttribution question={currentQuestion} />
               </div>
             )}
-            {currentQuestion.category === 'MOVIE_SCENE' && (
-              <div className="text-center text-[0.65rem] text-gray-400">
-                <MovieSceneAttribution question={currentQuestion} />
-              </div>
-            )}
-            <Button onClick={handleNext} variant="primary" size="lg" fullWidth>
+<Button onClick={handleNext} variant="primary" size="lg" fullWidth>
               {isLastQuestion ? t('daily.finish', 'Ver resultado') : t('game.next')}
             </Button>
           </div>

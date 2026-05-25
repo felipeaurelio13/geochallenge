@@ -237,45 +237,41 @@ describe('QuestionCard', () => {
     expect(screen.getByRole('heading', { level: 2 })).toHaveClass('text-[clamp(1rem,3.8vw,1.22rem)]', 'leading-snug');
   });
 
-  // --- Cinema & Geography (new format) ---
+  // --- Cinema & Geography (v2 unified format) ---
 
   it('muestra el prompt.es de la pregunta Cinema & Geografía como texto del enunciado', () => {
     const question = {
       id: 'cg-1',
-      category: 'MOVIE_SCENE',
+      category: 'CINEMA_GEO',
       questionText: '',
       questionData: JSON.stringify({
-        id: 'the-beach-maya-bay',
-        type: 'film_from_iconic_set',
-        prompt: { es: '¿Qué película hizo famosa la bahía Maya Bay?', en: 'Which film made Maya Bay famous?' },
-        movieTitle: 'The Beach',
-        movieYear: 2000,
-        visualStrategy: 'movie_card',
-        assetId: 'the-beach-2000-card',
+        id: 'mi-burj-khalifa',
+        answerKind: 'city',
+        prompt: { es: '¿En qué ciudad se filmó esta escena de MI?', en: 'In which city was this MI scene filmed?' },
+        movieTitle: 'Mission: Impossible – Ghost Protocol',
+        movieYear: 2011,
       }),
-      options: ['The Beach', 'Cast Away', 'Into the Wild', 'Paradise'],
-      correctAnswer: 'The Beach',
+      options: ['Dubai', 'Doha', 'Abu Dhabi', 'Riyadh'],
+      correctAnswer: 'Dubai',
       difficulty: 'EASY',
     } as Question;
 
     render(<QuestionCard question={question} questionNumber={1} totalQuestions={10} />);
 
-    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('¿Qué película hizo famosa la bahía Maya Bay?');
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('¿En qué ciudad se filmó esta escena de MI?');
   });
 
-  it('renderiza movie_card CSS cuando no hay imageUrl y strategy=movie_card', () => {
+  it('renderiza la movie card con título y año (la respuesta es un lugar, no spoilea)', () => {
     const question = {
       id: 'cg-2',
-      category: 'MOVIE_SCENE',
+      category: 'CINEMA_GEO',
       questionText: '',
       questionData: JSON.stringify({
         id: 'the-shining-timberline',
-        type: 'movie_from_sequence_location',
+        answerKind: 'venue',
         prompt: { es: '¿Qué hotel real se usó para el exterior del Overlook?', en: 'Which real hotel was used for the Overlook exterior?' },
         movieTitle: 'The Shining',
         movieYear: 1980,
-        visualStrategy: 'movie_card',
-        assetId: 'the-shining-1980-card',
       }),
       options: ['Timberline Lodge', 'The Stanley Hotel', 'Ahwahnee Hotel', 'Fairmont Banff Springs'],
       correctAnswer: 'Timberline Lodge',
@@ -284,55 +280,32 @@ describe('QuestionCard', () => {
 
     const { container } = render(<QuestionCard question={question} questionNumber={1} totalQuestions={10} />);
 
-    // Should show movie title in the card
+    // Movie title and year appear as context (not the answer)
     expect(screen.getByText('The Shining')).toBeInTheDocument();
     expect(screen.getByText('1980')).toBeInTheDocument();
-    // Should NOT render an <img> element (no imageUrl provided)
+    // v2 never carries an image — no <img> element should be rendered
     expect(container.querySelector('img')).toBeNull();
   });
 
-  it('no muestra error cuando strategy=none y no hay imageUrl', () => {
+  it('usa questionText del backend cuando viene seteado (i18n server-side)', () => {
     const question = {
       id: 'cg-3',
-      category: 'MOVIE_SCENE',
-      questionText: '',
+      category: 'CINEMA_GEO',
+      questionText: 'In which country was the Hobbiton movie set built?',
       questionData: JSON.stringify({
-        id: 'odd-one-out-nz',
-        type: 'odd_one_out',
-        prompt: { es: '¿Cuál NO fue filmada en Nueva Zelanda?', en: 'Which was NOT filmed in New Zealand?' },
-        movieTitle: 'Various',
-        movieYear: 0,
-        visualStrategy: 'none',
+        id: 'lotr-hobbiton',
+        answerKind: 'country',
+        prompt: { es: '¿En qué país?', en: 'In which country was the Hobbiton movie set built?' },
+        movieTitle: 'The Lord of the Rings',
+        movieYear: 2001,
       }),
-      options: ['Mad Max: Fury Road', 'Lord of the Rings', 'The Hobbit', 'King Kong (2005)'],
-      correctAnswer: 'Mad Max: Fury Road',
-      difficulty: 'MEDIUM',
-    } as Question;
-
-    const { container } = render(<QuestionCard question={question} questionNumber={1} totalQuestions={10} />);
-
-    // No image, no error message — clean UI
-    expect(container.querySelector('img')).toBeNull();
-    expect(screen.queryByText(/no disponible/i)).toBeNull();
-    expect(screen.queryByText(/unavailable/i)).toBeNull();
-    // Prompt text should render
-    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('¿Cuál NO fue filmada en Nueva Zelanda?');
-  });
-
-  it('sigue funcionando el formato legacy (slug+variant)', () => {
-    const question = {
-      id: 'legacy-1',
-      category: 'MOVIE_SCENE',
-      questionText: '¿En qué país fue filmada esta escena de Gladiator (2000)?',
-      questionData: JSON.stringify({ slug: 'gladiator-rome', variant: 'country' }),
-      options: ['Italy', 'Spain', 'France', 'Greece'],
-      correctAnswer: 'Italy',
+      options: ['New Zealand', 'Ireland', 'Scotland', 'Iceland'],
+      correctAnswer: 'New Zealand',
       difficulty: 'EASY',
     } as Question;
 
     render(<QuestionCard question={question} questionNumber={1} totalQuestions={10} />);
 
-    // Falls back to questionText when legacy format and movie name is not in catalog mock
-    expect(screen.getByRole('heading', { level: 2 })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('In which country was the Hobbiton movie set built?');
   });
 });

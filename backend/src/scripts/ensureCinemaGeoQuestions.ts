@@ -1,105 +1,84 @@
 /**
- * MOVIE_SCENE is a legacy enum name.
- * Product-facing category is "Cinema & Geography": questions require film-production
- * or cinematic-location knowledge, not generic place recognition.
- *
  * Ensures approved Cinema & Geography questions exist in the database.
  * Safe to call on every startup — idempotent and incremental.
- * Only seeds questions with reviewStatus === "approved".
- * Does NOT touch legacy MOVIE_SCENE questions (slug+variant format).
- * Called from index.ts after ensureMovieSceneQuestions() completes.
+ *
+ * Schema v2: every question asks "where was this scene filmed?". The answer is always a place
+ * (country/city/venue). The movie title shown in the visual is context, not the answer — no spoiler.
+ *
+ * Geographic metadata (continent/isInsular/isLandlocked/subregion) is sourced from the
+ * country catalog so the question participates correctly in filtered modes.
  */
 import { Category, Difficulty } from '@prisma/client';
 import { prisma } from '../config/database.js';
 import { loadCinemaGeoCatalog, type CinemaGeoQuestion } from '../utils/cinemaGeoCatalog.js';
+import { loadCountryCatalog, getSeedCountries, type CountryRecord } from '../utils/countryCatalog.js';
 
-/** Builds the questionData JSON stored in the DB for a cinema-geo question. */
+/** Builds the questionData JSON stored in the DB. Frontend parses this to render prompt + context. */
 function buildQuestionData(q: CinemaGeoQuestion): string {
   return JSON.stringify({
     id: q.id,
-    type: q.type,
+    answerKind: q.answerKind,
     prompt: q.prompt,
     movieTitle: q.movie.title,
     movieYear: q.movie.year,
-    visualStrategy: q.visual.strategy,
-    assetId: q.visual.assetId ?? null,
   });
 }
 
-/** Resolves imageUrl from visual metadata. Only set for external-image strategies. */
-function resolveImageUrl(q: CinemaGeoQuestion): string | null {
-  if (q.visual.strategy === 'none' || q.visual.strategy === 'movie_card' || q.visual.strategy === 'generic_cinema') {
-    return null;
-  }
-  return q.visual.url ?? null;
+function findCountry(allCountries: CountryRecord[], name: string | undefined): CountryRecord | null {
+  if (!name) return null;
+  return allCountries.find((c) => c.name === name) ?? null;
 }
 
 export async function ensureCinemaGeoQuestions(): Promise<void> {
   try {
-    const approved = loadCinemaGeoCatalog(); // already filtered to approved only
+    const approved = loadCinemaGeoCatalog();
+    const { countries } = getSeedCountries(loadCountryCatalog(), false);
 
-    // Find existing cinema-geo rows: MOVIE_SCENE questions whose questionData has a 'prompt' field.
-    // Always load these — even when approved.length === 0 — so de-approved rows can be cleaned up.
-    const allMovieSceneRows = await prisma.question.findMany({
-      where: { category: Category.MOVIE_SCENE },
-      select: { id: true, questionData: true, options: true, correctAnswer: true, difficulty: true, imageUrl: true },
+    // Load existing CINEMA_GEO rows so we can upsert + prune in one pass.
+    const existingRows = await prisma.question.findMany({
+      where: { category: Category.CINEMA_GEO },
+      select: { id: true, questionData: true, options: true, correctAnswer: true, difficulty: true, latitude: true, longitude: true, continent: true },
     });
 
-    const existingById = new Map<string, (typeof allMovieSceneRows)[number]>();
-    for (const row of allMovieSceneRows) {
+    // Map approved-question id → DB row (parsed from questionData.id)
+    const existingByCatalogId = new Map<string, (typeof existingRows)[number]>();
+    for (const row of existingRows) {
       try {
-        const parsed = JSON.parse(row.questionData) as { id?: string; prompt?: unknown };
-        if (parsed.prompt && typeof parsed.id === 'string') {
-          existingById.set(parsed.id, row);
-        }
+        const parsed = JSON.parse(row.questionData) as { id?: string };
+        if (parsed.id) existingByCatalogId.set(parsed.id, row);
       } catch {
-        /* skip malformed or legacy-format rows */
+        /* row predates v2 — will be pruned below */
       }
     }
 
-    if (approved.length === 0) {
-      if (existingById.size > 0) {
-        // All cinema-geo questions were de-approved — remove them from DB
-        const rowIds = [...existingById.values()].map((r) => r.id);
-        await prisma.question.deleteMany({ where: { id: { in: rowIds } } });
-        console.log(`🗑️  cinema-geo: ${existingById.size} pregunta(s) ya no approved — eliminadas de DB.`);
-      } else {
-        console.log('🎬 cinema-geo: 0 preguntas approved — nada que sembrar.');
-      }
-      return;
-    }
-
-    console.log(`🎬 cinema-geo: verificando ${approved.length} preguntas approved (${existingById.size} existentes en DB)...`);
+    console.log(`🎬 cinema-geo: verificando ${approved.length} preguntas approved (${existingRows.length} existentes en DB)...`);
 
     let createdCount = 0;
     let updatedCount = 0;
 
     for (const q of approved) {
-      const questionData = buildQuestionData(q);
-      const imageUrl = resolveImageUrl(q);
+      const country = findCountry(countries, q.answer.country);
 
       const newRow = {
-        category: Category.MOVIE_SCENE,
-        questionData,
+        category: Category.CINEMA_GEO,
+        questionData: buildQuestionData(q),
         options: q.options,
-        correctAnswer: q.correctAnswer,
-        imageUrl,
-        latitude: q.geoContext.lat ?? null,
-        longitude: q.geoContext.lng ?? null,
-        continent: q.geoContext.continent ?? null,
+        correctAnswer: q.answer.value,
+        imageUrl: null,                                  // v2 has no images — movie card is rendered client-side
+        latitude: q.answer.lat ?? null,
+        longitude: q.answer.lng ?? null,
+        continent: q.answer.continent ?? country?.continent ?? null,
         difficulty: q.difficulty as Difficulty,
         isAvailable: true,
-        // Geographic filters are not used for MOVIE_SCENE; set to null
-        isInsular: null,
-        isLandlocked: null,
-        subregion: null,
-        populationTier: null,
-        areaTier: null,
-        flagComplexity: null,
+        isInsular: country?.isInsular ?? null,
+        isLandlocked: country?.isLandlocked ?? null,
+        subregion: country?.subregion ?? null,
+        populationTier: country?.populationTier ?? null,
+        areaTier: country?.areaTier ?? null,
+        flagComplexity: null,                            // not meaningful for cinema-geo
       };
 
-      const existing = existingById.get(q.id);
-
+      const existing = existingByCatalogId.get(q.id);
       if (!existing) {
         await prisma.question.create({ data: newRow });
         createdCount += 1;
@@ -107,30 +86,38 @@ export async function ensureCinemaGeoQuestions(): Promise<void> {
       }
 
       const hasChanged =
-        existing.questionData !== questionData ||
-        existing.imageUrl !== imageUrl ||
-        JSON.stringify(existing.options) !== JSON.stringify(q.options) ||
-        existing.correctAnswer !== q.correctAnswer ||
-        existing.difficulty !== q.difficulty;
+        existing.questionData !== newRow.questionData ||
+        JSON.stringify(existing.options) !== JSON.stringify(newRow.options) ||
+        existing.correctAnswer !== newRow.correctAnswer ||
+        existing.difficulty !== newRow.difficulty ||
+        existing.latitude !== newRow.latitude ||
+        existing.longitude !== newRow.longitude ||
+        existing.continent !== newRow.continent;
 
-      if (!hasChanged) continue;
-
-      await prisma.question.update({ where: { id: existing.id }, data: newRow });
-      updatedCount += 1;
+      if (hasChanged) {
+        await prisma.question.update({ where: { id: existing.id }, data: newRow });
+        updatedCount += 1;
+      }
     }
 
-    // Remove DB rows for questions that are no longer approved (e.g., downgraded to needs_sources)
+    // Prune: any DB row whose catalog id is no longer in the approved set (de-approved, renamed, or v1 leftover)
     const approvedIds = new Set(approved.map((q) => q.id));
-    const toRemove = [...existingById.keys()].filter((id) => !approvedIds.has(id));
+    const toRemove = existingRows.filter((row) => {
+      try {
+        const parsed = JSON.parse(row.questionData) as { id?: string };
+        return !parsed.id || !approvedIds.has(parsed.id);
+      } catch {
+        return true;                                     // unparseable rows are stale by definition
+      }
+    });
     if (toRemove.length > 0) {
-      const rowIds = toRemove.map((id) => existingById.get(id)!.id);
-      await prisma.question.deleteMany({ where: { id: { in: rowIds } } });
-      console.log(`🗑️  cinema-geo: ${toRemove.length} pregunta(s) ya no approved — eliminadas de DB.`);
+      await prisma.question.deleteMany({ where: { id: { in: toRemove.map((r) => r.id) } } });
+      console.log(`🗑️  cinema-geo: ${toRemove.length} fila(s) obsoleta(s) eliminada(s).`);
     }
 
-    console.log(`✅ cinema-geo: creadas ${createdCount}, actualizadas ${updatedCount} (total en DB: ${existingById.size - toRemove.length + createdCount}).`);
+    console.log(`✅ cinema-geo: creadas ${createdCount}, actualizadas ${updatedCount}, eliminadas ${toRemove.length} (total approved en DB: ${approved.length}).`);
   } catch (err) {
-    // Non-fatal: log and continue startup.
+    // Non-fatal: log and continue startup. The category will show "not enough questions" until fixed.
     console.error('⚠️  cinema-geo auto-seed falló (no-fatal):', err);
   }
 }

@@ -8,7 +8,6 @@ import { config } from './config/env.js';
 import { connectDatabase, disconnectDatabase, prisma } from './config/database.js';
 import { getRedis, disconnectRedis } from './config/redis.js';
 import { rebuildAllLeaderboards } from './services/leaderboard.service.js';
-import { ensureMovieSceneQuestions } from './scripts/ensureMovieSceneQuestions.js';
 import { ensureCinemaGeoQuestions } from './scripts/ensureCinemaGeoQuestions.js';
 
 // Controllers
@@ -106,9 +105,8 @@ async function start() {
     // Connect to database
     await connectDatabase();
 
-    // Auto-seed any missing question categories (idempotent, non-destructive)
-    await ensureMovieSceneQuestions();
-    await ensureCinemaGeoQuestions(); // Cinema & Geography (new-format questions)
+    // Auto-seed Cinema & Geography questions (idempotent, prunes stale rows)
+    await ensureCinemaGeoQuestions();
 
     // Initialize Redis
     getRedis();

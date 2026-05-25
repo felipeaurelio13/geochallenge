@@ -5,7 +5,7 @@ import { triggerHaptic } from '../hooks/useHaptics';
 import { useImageWithFallback } from '../hooks/useImageWithFallback';
 import { useTranslation } from 'react-i18next';
 import { getOptionDisplayLabel } from '../utils/monumentOptions';
-import { parseCinemaGeoQuestionData } from '../data/movieScenes';
+import { parseCinemaGeoQuestionData } from '../data/cinemaGeo';
 
 interface FlashCardProps {
   question: Question;
@@ -20,7 +20,7 @@ const VISUAL_ALT: Record<string, string> = {
   FLAG: 'Bandera',
   SILHOUETTE: 'Silueta',
   MONUMENT: 'Monumento',
-  MOVIE_SCENE: 'Cine & Geografía',
+  CINEMA_GEO: 'Cine & Geografía',
 };
 
 export function FlashCard({ question, onAnswer, disabled, disabledOptions = [], feedback, onImageError }: FlashCardProps) {
@@ -73,28 +73,24 @@ export function FlashCard({ question, onAnswer, disabled, disabledOptions = [], 
             src={imageUrl}
             alt={`${VISUAL_ALT[question.category] ?? 'Imagen'}`}
             className={`absolute inset-0 h-full w-full ${
-              (question.category === 'MONUMENT' || question.category === 'MOVIE_SCENE') ? 'object-cover' : 'object-contain p-6'
+              question.category === 'MONUMENT' ? 'object-cover' : 'object-contain p-6'
             }${question.category === 'SILHOUETTE' ? ' filter invert drop-shadow-[0_0_14px_rgba(148,163,184,0.45)]' : ''}`}
             draggable={false}
             onError={handleImageError}
           />
-        ) : question.category === 'MOVIE_SCENE' ? (() => {
+        ) : question.category === 'CINEMA_GEO' ? (() => {
           const cgPayload = parseCinemaGeoQuestionData(question.questionData);
-          if (cgPayload && (cgPayload.visualStrategy === 'movie_card' || cgPayload.visualStrategy === 'generic_cinema')) {
-            return (
-              <div className="flex h-full flex-col items-center justify-center gap-2 bg-gradient-to-br from-rose-950/60 to-gray-900/80 px-4 text-center">
-                <span className="text-5xl">🎬</span>
-                {cgPayload.movieTitle && (
-                  <p className="text-sm font-bold text-rose-200">{cgPayload.movieTitle}</p>
-                )}
-                {cgPayload.movieYear > 0 && (
-                  <p className="text-xs text-rose-300/60">{cgPayload.movieYear}</p>
-                )}
-              </div>
-            );
-          }
-          // strategy=none or legacy: neutral fallback
-          return <div className="flex h-full items-center justify-center text-6xl">🎬</div>;
+          return (
+            <div className="flex h-full flex-col items-center justify-center gap-2 bg-gradient-to-br from-rose-950/60 to-gray-900/80 px-4 text-center">
+              <span className="text-5xl">🎬</span>
+              {cgPayload?.movieTitle && (
+                <p className="text-sm font-bold text-rose-200">{cgPayload.movieTitle}</p>
+              )}
+              {cgPayload && cgPayload.movieYear > 0 && (
+                <p className="text-xs text-rose-300/60">{cgPayload.movieYear}</p>
+              )}
+            </div>
+          );
         })() : (
           <div className="flex h-full items-center justify-center text-6xl">{question.category === 'MONUMENT' ? '🗿' : '🌍'}</div>
         )}

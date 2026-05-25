@@ -122,9 +122,7 @@ enum Category {
   CAPITAL
   SILHOUETTE
   MONUMENT
-  // MOVIE_SCENE is a legacy enum name. Product-facing category is "Cinema & Geography":
-  // questions require film-production or cinematic-location knowledge, not generic place recognition.
-  MOVIE_SCENE
+  CINEMA_GEO
   MIXED
 }
 

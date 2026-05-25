@@ -151,21 +151,24 @@ describe('getQuestionsForStreakGame', () => {
     expect(new Set(questionKeys).size).toBe(questions.length);
   });
 
-  it('ignora filtros geográficos para categoría MOVIE_SCENE al contar disponibilidad', async () => {
-    countMock.mockResolvedValue(12);
+  it('aplica filtros geográficos a CINEMA_GEO (se siembran desde el país de filmación)', async () => {
+    countMock.mockResolvedValue(7);
 
     const { getAvailableQuestionsCount } = await import('../services/game.service.js');
-    const available = await getAvailableQuestionsCount(Category.MOVIE_SCENE, {
+    const available = await getAvailableQuestionsCount(Category.CINEMA_GEO, {
       continent: 'EUROPE',
       isInsular: true,
       isLandlocked: false,
       difficulty: 'HARD',
     });
 
-    expect(available).toBe(12);
+    expect(available).toBe(7);
     expect(countMock).toHaveBeenCalledWith({
       where: {
-        category: Category.MOVIE_SCENE,
+        category: Category.CINEMA_GEO,
+        continent: 'EUROPE',
+        isInsular: true,
+        isLandlocked: false,
         difficulty: 'HARD',
         isAvailable: true,
       },

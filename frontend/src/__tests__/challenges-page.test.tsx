@@ -147,8 +147,8 @@ describe('ChallengesPage', () => {
     });
   });
 
-  it('acepta MOVIE_SCENE como categoría inicial al crear desafío', async () => {
-    mocks.searchParams = new URLSearchParams('category=MOVIE_SCENE&openCreate=1');
+  it('acepta CINEMA_GEO como categoría inicial al crear desafío', async () => {
+    mocks.searchParams = new URLSearchParams('category=CINEMA_GEO&openCreate=1');
 
     render(<ChallengesPage />);
 
@@ -158,7 +158,7 @@ describe('ChallengesPage', () => {
 
     await waitFor(() => {
       expect(mocks.apiPost).toHaveBeenCalledWith('/challenges', {
-        categories: ['MOVIE_SCENE'],
+        categories: ['CINEMA_GEO'],
         maxPlayers: 2,
         answerTimeSeconds: 20,
       });
