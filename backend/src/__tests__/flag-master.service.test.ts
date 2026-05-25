@@ -237,7 +237,7 @@ describe('flagMaster.service - buildFlagMasterRounds', () => {
     }
   });
 
-  it('completa la pool con MEDIUM si HARD tiene menos de 20 preguntas', async () => {
+  it('completa la pool con MEDIUM si HARD tiene menos de 10 preguntas', async () => {
     const hardOnly = [makeQuestion('Russia'), makeQuestion('Croatia')];
     const medium = Array.from({ length: 10 }, (_, i) =>
       makeQuestion(`Medium${i}`, Difficulty.MEDIUM)
@@ -249,5 +249,31 @@ describe('flagMaster.service - buildFlagMasterRounds', () => {
     const rounds = await buildFlagMasterRounds();
     expect(rounds).toHaveLength(10);
     expect(findManyMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('regresión: si Andorra está en HARD pero Romania/Chad/Moldova no, aún devuelve grupo (los distractores son sólo nombres, no requieren su propia Question)', async () => {
+    // Reproduce el bug observado en producción el 2026-05-25: Andorra estaba
+    // en la pool HARD pero el resto de blue_yellow_red_vert (Romania/Chad/
+    // Moldova) no aparecían como Question en HARD, así que buildSimilarOptions
+    // descartaba el grupo y caía a opciones genéricas. Los distractores son
+    // sólo strings: no necesitan tener una Question propia para mostrarse.
+    const hard = [
+      makeQuestion('Andorra'),
+      ...Array.from({ length: 11 }, (_, i) => makeQuestion(`Filler${i}`)),
+    ];
+
+    findManyMock.mockResolvedValueOnce(hard);
+    const rounds = await buildFlagMasterRounds();
+
+    const andorraRound = rounds.find((r) => r.correctAnswer === 'Andorra');
+    expect(andorraRound).toBeDefined();
+    // Andorra DEBE caer en tier 4 o 5 (es el único país con grupo en el pool)
+    expect([4, 5]).toContain(andorraRound!.tier);
+    expect(andorraRound!.similarityGroupId).toBe('blue_yellow_red_vert');
+    // Las opciones deben ser del grupo: Andorra + 3 de {Romania, Chad, Moldova}
+    const groupSet = new Set(['Andorra', 'Romania', 'Chad', 'Moldova']);
+    for (const opt of andorraRound!.options) {
+      expect(groupSet.has(opt)).toBe(true);
+    }
   });
 });

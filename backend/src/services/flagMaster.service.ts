@@ -182,21 +182,22 @@ interface PoolQuestion {
 /**
  * Construye las opciones para una ronda con distractores similares.
  *
- * Devuelve { options, groupId } si pudo encontrar al menos 3 distractores del
- * mismo grupo de similitud, o null si la pregunta no pertenece a ningún grupo
- * con suficientes pares.
+ * Los distractores son sólo etiquetas (nombres de país que el usuario elige):
+ * NO mostramos sus banderas, por lo que no requieren tener una Question propia
+ * en la pool. Esto permite usar pares clásicos como Chad↔Rumania o Indonesia↔
+ * Mónaco aunque uno de los dos no esté en la difficulty filtrada.
+ *
+ * Devuelve { options, groupId } si el grupo tiene al menos 3 países distintos
+ * al correcto, o null si la pregunta no pertenece a ningún grupo elegible.
  */
 function buildSimilarOptions(
-  correctAnswer: string,
-  countriesInSomeGroup: Set<string>
+  correctAnswer: string
 ): { options: string[]; groupId: string } | null {
   const groups = getSimilarityGroupsFor(correctAnswer);
   if (groups.length === 0) return null;
 
   for (const group of groups) {
-    const candidates = group.countries.filter(
-      (c) => c !== correctAnswer && countriesInSomeGroup.has(c)
-    );
+    const candidates = group.countries.filter((c) => c !== correctAnswer);
     if (candidates.length >= OPTIONS_PER_ROUND - 1) {
       const distractors = selectRandom(candidates, OPTIONS_PER_ROUND - 1);
       return {
@@ -207,15 +208,6 @@ function buildSimilarOptions(
   }
 
   return null;
-}
-
-/**
- * Construye un set con TODOS los nombres de país presentes como respuesta
- * correcta en la pool. Útil para garantizar que los distractores similares
- * existan en el set de banderas disponibles del juego.
- */
-function buildAvailableCountriesSet(pool: PoolQuestion[]): Set<string> {
-  return new Set(pool.map((q) => q.correctAnswer));
 }
 
 /**
@@ -236,11 +228,7 @@ export async function buildFlagMasterRounds(): Promise<FlagMasterRound[]> {
     );
   }
 
-  const availableCountries = buildAvailableCountriesSet(pool);
-  const intersection = new Set<string>();
-  for (const country of getAllCountriesInGroups()) {
-    if (availableCountries.has(country)) intersection.add(country);
-  }
+  const inGroupCountries = getAllCountriesInGroups();
 
   const remaining = [...pool];
   const rounds: FlagMasterRound[] = [];
@@ -250,10 +238,10 @@ export async function buildFlagMasterRounds(): Promise<FlagMasterRound[]> {
     const isSimilarTier = SIMILAR_TIERS.has(tierSlot.modifier);
 
     // Para tiers que requieren distractores similares, preferimos preguntas
-    // cuyo correctAnswer esté en intersection (en algún grupo Y disponible).
+    // cuyo correctAnswer pertenezca a algún grupo de similitud.
     let selectedIndex = -1;
     if (isSimilarTier) {
-      selectedIndex = remaining.findIndex((q) => intersection.has(q.correctAnswer));
+      selectedIndex = remaining.findIndex((q) => inGroupCountries.has(q.correctAnswer));
     }
     if (selectedIndex === -1) {
       // Fallback: cualquier pregunta restante (al azar).
@@ -268,7 +256,7 @@ export async function buildFlagMasterRounds(): Promise<FlagMasterRound[]> {
     let similarityGroupId: string | undefined;
 
     if (isSimilarTier) {
-      const similar = buildSimilarOptions(question.correctAnswer, intersection);
+      const similar = buildSimilarOptions(question.correctAnswer);
       if (similar) {
         options = similar.options;
         similarityGroupId = similar.groupId;
