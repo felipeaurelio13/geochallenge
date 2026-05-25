@@ -1563,6 +1563,1886 @@
       ],
       "confidence": "high",
       "reviewStatus": "approved"
+    },
+    {
+      "id": "midnight-in-paris",
+      "answerKind": "city",
+      "difficulty": "EASY",
+      "movie": {
+        "title": "Midnight in Paris",
+        "year": 2011
+      },
+      "answer": {
+        "value": "Paris",
+        "country": "France",
+        "city": "Paris",
+        "realLocation": "Pont Alexandre III, Shakespeare and Company",
+        "lat": 48.8566,
+        "lng": 2.3522,
+        "continent": "Europe"
+      },
+      "options": [
+        "Paris",
+        "Marseille",
+        "Brussels",
+        "Lyon"
+      ],
+      "prompt": {
+        "es": "Midnight in Paris (2011) de Woody Allen, donde Owen Wilson viaja en el tiempo a los años 20, transcurre y se filmó en qué ciudad?",
+        "en": "Woody Allen's Midnight in Paris (2011), where Owen Wilson time-travels to the 1920s, is set and filmed in which city?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Midnight_in_Paris",
+          "claim": "Midnight in Paris (2011) was shot on location in Paris."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "before-sunrise-vienna",
+      "answerKind": "city",
+      "difficulty": "MEDIUM",
+      "movie": {
+        "title": "Before Sunrise",
+        "year": 1995,
+        "franchise": "Before Trilogy"
+      },
+      "answer": {
+        "value": "Vienna",
+        "country": "Austria",
+        "city": "Vienna",
+        "realLocation": "Vienna streets and U-Bahn",
+        "lat": 48.2082,
+        "lng": 16.3738,
+        "continent": "Europe"
+      },
+      "options": [
+        "Vienna",
+        "Prague",
+        "Munich",
+        "Budapest"
+      ],
+      "prompt": {
+        "es": "El primer encuentro de Jesse y Céline en Before Sunrise (1995) de Richard Linklater transcurre en una sola noche en qué capital europea?",
+        "en": "Jesse and Céline's first encounter in Richard Linklater's Before Sunrise (1995) unfolds over a single night in which European capital?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Before_Sunrise",
+          "claim": "Before Sunrise (1995) is set and filmed in Vienna, Austria."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "before-midnight-greece",
+      "answerKind": "country",
+      "difficulty": "MEDIUM",
+      "movie": {
+        "title": "Before Midnight",
+        "year": 2013,
+        "franchise": "Before Trilogy"
+      },
+      "answer": {
+        "value": "Greece",
+        "country": "Greece",
+        "city": "Kardamyli",
+        "realLocation": "Messenian Mani, Peloponnese",
+        "lat": 36.8869,
+        "lng": 22.2348,
+        "continent": "Europe"
+      },
+      "options": [
+        "Croatia",
+        "Italy",
+        "Turkey",
+        "Greece"
+      ],
+      "prompt": {
+        "es": "Before Midnight (2013), el tercer film con Ethan Hawke y Julie Delpy, transcurre durante unas vacaciones de verano en la península del Peloponeso, en qué país?",
+        "en": "Before Midnight (2013), the third film with Ethan Hawke and Julie Delpy, takes place during a summer holiday in the Peloponnese peninsula, in which country?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Before_Midnight_(2013_film)",
+          "claim": "Before Midnight (2013) was shot in the Mani peninsula of southern Greece."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "trainspotting-edinburgh",
+      "answerKind": "city",
+      "difficulty": "MEDIUM",
+      "movie": {
+        "title": "Trainspotting",
+        "year": 1996
+      },
+      "answer": {
+        "value": "Edinburgh",
+        "country": "United Kingdom",
+        "city": "Edinburgh",
+        "realLocation": "Princes Street and Leith",
+        "lat": 55.9533,
+        "lng": -3.1883,
+        "continent": "Europe"
+      },
+      "options": [
+        "Dublin",
+        "London",
+        "Edinburgh",
+        "Glasgow"
+      ],
+      "prompt": {
+        "es": "Trainspotting (1996), basada en la novela de Irvine Welsh, abre con Renton corriendo por Princes Street, en qué ciudad escocesa?",
+        "en": "Trainspotting (1996), based on the Irvine Welsh novel, opens with Renton sprinting down Princes Street, in which Scottish city?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Trainspotting_(film)",
+          "claim": "Trainspotting (1996) is set in Edinburgh, Scotland."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "the-third-man-vienna",
+      "answerKind": "city",
+      "difficulty": "HARD",
+      "movie": {
+        "title": "The Third Man",
+        "year": 1949
+      },
+      "answer": {
+        "value": "Vienna",
+        "country": "Austria",
+        "city": "Vienna",
+        "realLocation": "Wiener Riesenrad and Vienna sewers",
+        "lat": 48.2082,
+        "lng": 16.3738,
+        "continent": "Europe"
+      },
+      "options": [
+        "Budapest",
+        "Vienna",
+        "Prague",
+        "Berlin"
+      ],
+      "prompt": {
+        "es": "The Third Man (1949), film noir clásico de Carol Reed, transcurre en qué ciudad europea destruida por la posguerra, con su icónica escena en la noria gigante?",
+        "en": "Carol Reed's classic film noir The Third Man (1949) is set in which post-war European city, with its iconic Ferris wheel scene?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/The_Third_Man",
+          "claim": "The Third Man (1949) is set in post-war Vienna."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "wings-of-desire-berlin",
+      "answerKind": "city",
+      "difficulty": "MEDIUM",
+      "movie": {
+        "title": "Wings of Desire",
+        "year": 1987
+      },
+      "answer": {
+        "value": "Berlin",
+        "country": "Germany",
+        "city": "Berlin",
+        "realLocation": "Berlin Wall and Staatsbibliothek",
+        "lat": 52.52,
+        "lng": 13.405,
+        "continent": "Europe"
+      },
+      "options": [
+        "Hamburg",
+        "Munich",
+        "Berlin",
+        "Vienna"
+      ],
+      "prompt": {
+        "es": "Las cielos de los ángeles caídos de Wim Wenders en Wings of Desire / El cielo sobre [...] (1987) sobrevuelan qué ciudad alemana, todavía dividida por el Muro?",
+        "en": "The fallen angels' skies of Wim Wenders' Wings of Desire (1987) hover over which German city, still divided by the Wall?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Wings_of_Desire",
+          "claim": "Wings of Desire (1987) is set in then-divided Berlin."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "run-lola-run-berlin",
+      "answerKind": "city",
+      "difficulty": "MEDIUM",
+      "movie": {
+        "title": "Run Lola Run",
+        "year": 1998
+      },
+      "answer": {
+        "value": "Berlin",
+        "country": "Germany",
+        "city": "Berlin",
+        "realLocation": "Berlin Mitte and Friedrichshain",
+        "lat": 52.52,
+        "lng": 13.405,
+        "continent": "Europe"
+      },
+      "options": [
+        "Berlin",
+        "Hamburg",
+        "Frankfurt",
+        "Cologne"
+      ],
+      "prompt": {
+        "es": "Run Lola Run / Corre Lola corre (1998), donde Franka Potente corre tres veces los mismos 20 minutos, recorre qué ciudad alemana?",
+        "en": "Run Lola Run (1998), where Franka Potente runs the same 20 minutes three times over, traverses which German city?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Run_Lola_Run",
+          "claim": "Run Lola Run (1998) was shot in and around central Berlin."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "the-lives-of-others-berlin",
+      "answerKind": "city",
+      "difficulty": "MEDIUM",
+      "movie": {
+        "title": "The Lives of Others",
+        "year": 2006
+      },
+      "answer": {
+        "value": "Berlin",
+        "country": "Germany",
+        "city": "Berlin",
+        "realLocation": "East Berlin Stasi-era apartments",
+        "lat": 52.52,
+        "lng": 13.405,
+        "continent": "Europe"
+      },
+      "options": [
+        "Leipzig",
+        "Dresden",
+        "Berlin",
+        "Munich"
+      ],
+      "prompt": {
+        "es": "The Lives of Others / La vida de los otros (2006), ganadora del Oscar a mejor película extranjera, retrata la vigilancia de la Stasi en qué ciudad?",
+        "en": "The Lives of Others (2006), Best Foreign Film Oscar winner, depicts Stasi surveillance in which city?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/The_Lives_of_Others",
+          "claim": "The Lives of Others (2006) is set in East Berlin."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "cinema-paradiso-sicily",
+      "answerKind": "country",
+      "difficulty": "MEDIUM",
+      "movie": {
+        "title": "Cinema Paradiso",
+        "year": 1988
+      },
+      "answer": {
+        "value": "Italy",
+        "country": "Italy",
+        "city": "Palazzo Adriano",
+        "realLocation": "Palazzo Adriano, Sicily",
+        "lat": 37.6906,
+        "lng": 13.3897,
+        "continent": "Europe"
+      },
+      "options": [
+        "Italy",
+        "Portugal",
+        "Greece",
+        "Spain"
+      ],
+      "prompt": {
+        "es": "Cinema Paradiso (1988), la entrañable película de Giuseppe Tornatore sobre un cine de pueblo, se filmó en Palazzo Adriano, en qué país europeo?",
+        "en": "Cinema Paradiso (1988), Giuseppe Tornatore's beloved film about a village cinema, was shot in Palazzo Adriano, in which European country?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Cinema_Paradiso",
+          "claim": "Cinema Paradiso (1988) was filmed in Sicily, Italy."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "il-postino-salina",
+      "answerKind": "country",
+      "difficulty": "HARD",
+      "movie": {
+        "title": "Il Postino",
+        "year": 1994
+      },
+      "answer": {
+        "value": "Italy",
+        "country": "Italy",
+        "city": "Salina",
+        "realLocation": "Aeolian Islands (Salina and Procida)",
+        "lat": 38.5731,
+        "lng": 14.8302,
+        "continent": "Europe"
+      },
+      "options": [
+        "Italy",
+        "Croatia",
+        "Greece",
+        "Spain"
+      ],
+      "prompt": {
+        "es": "Il Postino / El cartero (1994), donde un cartero entabla amistad con el poeta Pablo Neruda exiliado en una isla, se filmó en las islas Eolias, en qué país mediterráneo?",
+        "en": "Il Postino (1994), about a postman befriending the exiled poet Pablo Neruda on an island, was shot in the Aeolian Islands, in which Mediterranean country?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Il_Postino:_The_Postman",
+          "claim": "Il Postino was filmed in Salina and Procida, Italy."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "a-room-with-a-view-florence",
+      "answerKind": "city",
+      "difficulty": "MEDIUM",
+      "movie": {
+        "title": "A Room with a View",
+        "year": 1985
+      },
+      "answer": {
+        "value": "Florence",
+        "country": "Italy",
+        "city": "Florence",
+        "realLocation": "Piazza della Signoria and Santa Croce",
+        "lat": 43.7696,
+        "lng": 11.2558,
+        "continent": "Europe"
+      },
+      "options": [
+        "Florence",
+        "Venice",
+        "Rome",
+        "Siena"
+      ],
+      "prompt": {
+        "es": "A Room with a View / Una habitación con vistas (1985), de James Ivory, abre con la joven Lucy Honeychurch hospedada en una pensione con vista a qué ciudad italiana?",
+        "en": "James Ivory's A Room with a View (1985) opens with young Lucy Honeychurch staying at a pensione with a view of which Italian city?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/A_Room_with_a_View_(1985_film)",
+          "claim": "A Room with a View (1985) is set in Florence."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "quantum-of-solace-bregenz",
+      "answerKind": "country",
+      "difficulty": "HARD",
+      "movie": {
+        "title": "Quantum of Solace",
+        "year": 2008,
+        "franchise": "James Bond"
+      },
+      "answer": {
+        "value": "Austria",
+        "country": "Austria",
+        "city": "Bregenz",
+        "realLocation": "Bregenz Festspiele Tosca stage on Lake Constance",
+        "lat": 47.5034,
+        "lng": 9.7471,
+        "continent": "Europe"
+      },
+      "options": [
+        "Austria",
+        "Switzerland",
+        "Italy",
+        "Germany"
+      ],
+      "prompt": {
+        "es": "El espectacular tiroteo durante una representación de Tosca en Quantum of Solace (2008) ocurre en el escenario flotante del Festival de Bregenz, en qué país?",
+        "en": "The spectacular shootout during a Tosca performance in Quantum of Solace (2008) takes place on the floating Bregenz Festival stage, in which country?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Quantum_of_Solace",
+          "claim": "The Tosca opera sequence was filmed at the Bregenz Festspiele in Austria."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "harry-potter-glenfinnan",
+      "answerKind": "country",
+      "difficulty": "MEDIUM",
+      "movie": {
+        "title": "Harry Potter and the Chamber of Secrets",
+        "year": 2002,
+        "franchise": "Harry Potter"
+      },
+      "answer": {
+        "value": "United Kingdom",
+        "country": "United Kingdom",
+        "city": "Glenfinnan",
+        "realLocation": "Glenfinnan Viaduct, Scottish Highlands",
+        "lat": 56.873,
+        "lng": -5.434,
+        "continent": "Europe"
+      },
+      "options": [
+        "United Kingdom",
+        "Switzerland",
+        "Norway",
+        "Ireland"
+      ],
+      "prompt": {
+        "es": "El icónico viaducto de Glenfinnan, por el que cruza el tren de Hogwarts en varias películas de Harry Potter, está en qué país?",
+        "en": "The iconic Glenfinnan Viaduct, crossed by the Hogwarts Express in several Harry Potter films, is in which country?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Glenfinnan_Viaduct",
+          "claim": "The Glenfinnan Viaduct is in the Scottish Highlands, United Kingdom."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "two-popes-rome",
+      "answerKind": "city",
+      "difficulty": "HARD",
+      "movie": {
+        "title": "The Two Popes",
+        "year": 2019
+      },
+      "answer": {
+        "value": "Rome",
+        "country": "Italy",
+        "city": "Rome",
+        "realLocation": "Sistine Chapel replica and Castel Gandolfo",
+        "lat": 41.9028,
+        "lng": 12.4964,
+        "continent": "Europe"
+      },
+      "options": [
+        "Lisbon",
+        "Madrid",
+        "Vienna",
+        "Rome"
+      ],
+      "prompt": {
+        "es": "The Two Popes / Los dos Papas (2019), con Anthony Hopkins y Jonathan Pryce, recrea conversaciones entre Benedicto XVI y Francisco en qué ciudad?",
+        "en": "The Two Popes (2019), with Anthony Hopkins and Jonathan Pryce, recreates conversations between Benedict XVI and Francis in which city?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/The_Two_Popes",
+          "claim": "The Two Popes (2019) is set in Rome (Vatican)."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "spectre-rome-funeral",
+      "answerKind": "city",
+      "difficulty": "MEDIUM",
+      "movie": {
+        "title": "Spectre",
+        "year": 2015,
+        "franchise": "James Bond"
+      },
+      "answer": {
+        "value": "Rome",
+        "country": "Italy",
+        "city": "Rome",
+        "realLocation": "Vatican area and Tiber River",
+        "lat": 41.9028,
+        "lng": 12.4964,
+        "continent": "Europe"
+      },
+      "options": [
+        "Rome",
+        "Venice",
+        "Milan",
+        "Florence"
+      ],
+      "prompt": {
+        "es": "El cortejo fúnebre y la persecución en Aston Martin junto al río en Spectre (2015) se filmaron en qué capital europea?",
+        "en": "The funeral procession and Aston Martin river chase in Spectre (2015) were filmed in which European capital?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Spectre_(2015_film)",
+          "claim": "The Rome funeral and Tiber chase scenes were shot in Rome."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "the-grand-budapest-fictional-zubrowka",
+      "answerKind": "country",
+      "difficulty": "HARD",
+      "movie": {
+        "title": "The Grand Budapest Hotel",
+        "year": 2014
+      },
+      "answer": {
+        "value": "Germany",
+        "country": "Germany",
+        "city": "Görlitz",
+        "realLocation": "Görlitz (fictional Zubrowka)",
+        "lat": 51.1542,
+        "lng": 14.9876,
+        "continent": "Europe"
+      },
+      "options": [
+        "Czech Republic",
+        "Hungary",
+        "Germany",
+        "Austria"
+      ],
+      "prompt": {
+        "es": "Aunque la ficticia república de Zubrowka del Grand Budapest Hotel evoca Europa Central, los exteriores se rodaron en la ciudad de Görlitz, en qué país?",
+        "en": "Although the fictional Republic of Zubrowka of The Grand Budapest Hotel evokes Central Europe, the exteriors were shot in the town of Görlitz, in which country?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/The_Grand_Budapest_Hotel",
+          "claim": "Exteriors and the Kaufhaus interior of the Grand Budapest Hotel were shot in Görlitz, Germany."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "crazy-rich-asians-singapore",
+      "answerKind": "country",
+      "difficulty": "EASY",
+      "movie": {
+        "title": "Crazy Rich Asians",
+        "year": 2018
+      },
+      "answer": {
+        "value": "Singapore",
+        "country": "Singapore",
+        "city": "Singapore",
+        "realLocation": "Marina Bay Sands and Gardens by the Bay",
+        "lat": 1.3521,
+        "lng": 103.8198,
+        "continent": "Asia"
+      },
+      "options": [
+        "Malaysia",
+        "Indonesia",
+        "Thailand",
+        "Singapore"
+      ],
+      "prompt": {
+        "es": "Crazy Rich Asians (2018), con sus tomas de la piscina infinita del Marina Bay Sands y la cena en hawker centers, transcurre en qué país-ciudad?",
+        "en": "Crazy Rich Asians (2018), with its infinity pool at Marina Bay Sands and hawker centre dinners, is set in which city-state?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Crazy_Rich_Asians_(film)",
+          "claim": "Crazy Rich Asians (2018) is set in Singapore."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "eat-pray-love-bali",
+      "answerKind": "country",
+      "difficulty": "MEDIUM",
+      "movie": {
+        "title": "Eat Pray Love",
+        "year": 2010
+      },
+      "answer": {
+        "value": "Indonesia",
+        "country": "Indonesia",
+        "city": "Ubud",
+        "realLocation": "Ubud, Bali",
+        "lat": -8.5069,
+        "lng": 115.2625,
+        "continent": "Asia"
+      },
+      "options": [
+        "Indonesia",
+        "Thailand",
+        "India",
+        "Vietnam"
+      ],
+      "prompt": {
+        "es": "El tramo final de Eat Pray Love (2010), donde Julia Roberts encuentra el amor con Javier Bardem en una isla tropical, se filmó en qué país?",
+        "en": "The final leg of Eat Pray Love (2010), where Julia Roberts finds love with Javier Bardem on a tropical island, was shot in which country?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Eat_Pray_Love",
+          "claim": "The Bali segment was filmed in Ubud, Indonesia."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "drive-my-car-hiroshima",
+      "answerKind": "city",
+      "difficulty": "HARD",
+      "movie": {
+        "title": "Drive My Car",
+        "year": 2021
+      },
+      "answer": {
+        "value": "Hiroshima",
+        "country": "Japan",
+        "city": "Hiroshima",
+        "realLocation": "Hiroshima city and Seto Inland Sea",
+        "lat": 34.3853,
+        "lng": 132.4553,
+        "continent": "Asia"
+      },
+      "options": [
+        "Osaka",
+        "Tokyo",
+        "Kyoto",
+        "Hiroshima"
+      ],
+      "prompt": {
+        "es": "Drive My Car (2021) de Ryusuke Hamaguchi, ganadora del Oscar a mejor película extranjera, transcurre principalmente en qué ciudad japonesa con su memorial de la paz?",
+        "en": "Ryusuke Hamaguchi's Drive My Car (2021), Best International Feature Oscar winner, is set mainly in which Japanese city known for its peace memorial?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Drive_My_Car_(film)",
+          "claim": "Drive My Car (2021) is set primarily in Hiroshima."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "in-the-mood-for-love-hong-kong",
+      "answerKind": "city",
+      "difficulty": "MEDIUM",
+      "movie": {
+        "title": "In the Mood for Love",
+        "year": 2000
+      },
+      "answer": {
+        "value": "Hong Kong",
+        "country": "China",
+        "city": "Hong Kong",
+        "realLocation": "Hong Kong tenement blocks (filmed partly in Bangkok)",
+        "lat": 22.3193,
+        "lng": 114.1694,
+        "continent": "Asia"
+      },
+      "options": [
+        "Hong Kong",
+        "Shanghai",
+        "Taipei",
+        "Macau"
+      ],
+      "prompt": {
+        "es": "In the Mood for Love / Deseando amar (2000) de Wong Kar-wai retrata un amorío contenido en los años 60 en qué ciudad asiática?",
+        "en": "Wong Kar-wai's In the Mood for Love (2000) depicts a restrained 1960s affair in which Asian city?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/In_the_Mood_for_Love",
+          "claim": "In the Mood for Love (2000) is set in 1962 Hong Kong."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "memoirs-of-a-geisha-kyoto",
+      "answerKind": "city",
+      "difficulty": "HARD",
+      "movie": {
+        "title": "Memoirs of a Geisha",
+        "year": 2005
+      },
+      "answer": {
+        "value": "Kyoto",
+        "country": "Japan",
+        "city": "Kyoto",
+        "realLocation": "Kyoto (Gion district inspiration; filmed mostly in California)",
+        "lat": 35.0116,
+        "lng": 135.7681,
+        "continent": "Asia"
+      },
+      "options": [
+        "Tokyo",
+        "Nara",
+        "Osaka",
+        "Kyoto"
+      ],
+      "prompt": {
+        "es": "Memoirs of a Geisha (2005), aunque rodada en gran parte en California, ambienta la historia de Sayuri en el barrio de Gion de qué ciudad japonesa?",
+        "en": "Memoirs of a Geisha (2005), though largely shot in California, sets Sayuri's story in the Gion district of which Japanese city?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Memoirs_of_a_Geisha_(film)",
+          "claim": "Memoirs of a Geisha is set in Kyoto's Gion district."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "the-last-emperor-beijing",
+      "answerKind": "city",
+      "difficulty": "MEDIUM",
+      "movie": {
+        "title": "The Last Emperor",
+        "year": 1987
+      },
+      "answer": {
+        "value": "Beijing",
+        "country": "China",
+        "city": "Beijing",
+        "realLocation": "Forbidden City",
+        "lat": 39.9163,
+        "lng": 116.3972,
+        "continent": "Asia"
+      },
+      "options": [
+        "Beijing",
+        "Hong Kong",
+        "Xi'an",
+        "Shanghai"
+      ],
+      "prompt": {
+        "es": "The Last Emperor / El último emperador (1987) de Bertolucci fue la primera película de Occidente filmada dentro de la Ciudad Prohibida, en qué ciudad?",
+        "en": "Bertolucci's The Last Emperor (1987) was the first Western film shot inside the Forbidden City, in which city?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/The_Last_Emperor",
+          "claim": "The Last Emperor was filmed inside the Forbidden City in Beijing."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "3-idiots-ladakh",
+      "answerKind": "country",
+      "difficulty": "HARD",
+      "movie": {
+        "title": "3 Idiots",
+        "year": 2009
+      },
+      "answer": {
+        "value": "India",
+        "country": "India",
+        "city": "Leh",
+        "realLocation": "Pangong Lake, Ladakh",
+        "lat": 33.7595,
+        "lng": 78.6431,
+        "continent": "Asia"
+      },
+      "options": [
+        "Nepal",
+        "Bhutan",
+        "China",
+        "India"
+      ],
+      "prompt": {
+        "es": "La escena final de 3 Idiots (2009), con sus aguas azul cobalto y la fila de motos en el lago Pangong, se filmó en la región de Ladakh, en qué país?",
+        "en": "The final scene of 3 Idiots (2009), with its cobalt-blue waters and lineup of scooters at Pangong Lake, was filmed in the Ladakh region, in which country?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/3_Idiots",
+          "claim": "The Pangong Lake finale of 3 Idiots was filmed in Ladakh, India."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "forrest-gump-savannah",
+      "answerKind": "country",
+      "difficulty": "MEDIUM",
+      "movie": {
+        "title": "Forrest Gump",
+        "year": 1994
+      },
+      "answer": {
+        "value": "United States",
+        "country": "United States",
+        "city": "Savannah",
+        "realLocation": "Chippewa Square, Savannah, Georgia",
+        "lat": 32.0809,
+        "lng": -81.0912,
+        "continent": "North America"
+      },
+      "options": [
+        "Canada",
+        "United States",
+        "Cuba",
+        "Mexico"
+      ],
+      "prompt": {
+        "es": "La icónica banca donde Forrest Gump cuenta su vida (la del 'caja de chocolates') estaba en Chippewa Square, en qué país?",
+        "en": "The iconic bench where Forrest Gump tells his life story (the 'box of chocolates') was in Chippewa Square, in which country?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Forrest_Gump",
+          "claim": "The Forrest Gump bench was in Chippewa Square, Savannah, Georgia, USA."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "the-godfather-nyc",
+      "answerKind": "city",
+      "difficulty": "EASY",
+      "movie": {
+        "title": "The Godfather",
+        "year": 1972,
+        "franchise": "The Godfather"
+      },
+      "answer": {
+        "value": "New York",
+        "country": "United States",
+        "city": "New York",
+        "realLocation": "Little Italy and Staten Island",
+        "lat": 40.7128,
+        "lng": -74.006,
+        "continent": "North America"
+      },
+      "options": [
+        "New York",
+        "Boston",
+        "Philadelphia",
+        "Chicago"
+      ],
+      "prompt": {
+        "es": "La boda inicial y las calles de Little Italy de El Padrino (1972) se filmaron en barrios reales de qué ciudad estadounidense?",
+        "en": "The opening wedding and Little Italy streets of The Godfather (1972) were shot in real neighborhoods of which American city?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/The_Godfather",
+          "claim": "The Godfather (1972) was filmed in New York City and Staten Island."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "taxi-driver-nyc",
+      "answerKind": "city",
+      "difficulty": "EASY",
+      "movie": {
+        "title": "Taxi Driver",
+        "year": 1976
+      },
+      "answer": {
+        "value": "New York",
+        "country": "United States",
+        "city": "New York",
+        "realLocation": "Times Square and Hell's Kitchen",
+        "lat": 40.7128,
+        "lng": -74.006,
+        "continent": "North America"
+      },
+      "options": [
+        "Boston",
+        "Los Angeles",
+        "Chicago",
+        "New York"
+      ],
+      "prompt": {
+        "es": "Taxi Driver (1976) de Scorsese sigue a Travis Bickle por las calles sórdidas de Times Square en los 70, en qué ciudad?",
+        "en": "Scorsese's Taxi Driver (1976) follows Travis Bickle through the seedy 1970s streets of Times Square, in which city?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Taxi_Driver",
+          "claim": "Taxi Driver (1976) is set and filmed in New York City."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "no-country-for-old-men-texas",
+      "answerKind": "country",
+      "difficulty": "MEDIUM",
+      "movie": {
+        "title": "No Country for Old Men",
+        "year": 2007
+      },
+      "answer": {
+        "value": "United States",
+        "country": "United States",
+        "city": "Marfa",
+        "realLocation": "Big Bend area, West Texas",
+        "lat": 30.3083,
+        "lng": -104.0214,
+        "continent": "North America"
+      },
+      "options": [
+        "Guatemala",
+        "Canada",
+        "United States",
+        "Mexico"
+      ],
+      "prompt": {
+        "es": "No Country for Old Men (2007) de los Coen, con Javier Bardem como Anton Chigurh, transcurre en el oeste de Texas, en qué país?",
+        "en": "The Coens' No Country for Old Men (2007), with Javier Bardem as Anton Chigurh, takes place in West Texas, in which country?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/No_Country_for_Old_Men_(film)",
+          "claim": "No Country for Old Men (2007) was filmed in West Texas and New Mexico, USA."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "fargo-minnesota",
+      "answerKind": "country",
+      "difficulty": "MEDIUM",
+      "movie": {
+        "title": "Fargo",
+        "year": 1996
+      },
+      "answer": {
+        "value": "United States",
+        "country": "United States",
+        "city": "Brainerd",
+        "realLocation": "Minneapolis and rural Minnesota",
+        "lat": 44.9778,
+        "lng": -93.265,
+        "continent": "North America"
+      },
+      "options": [
+        "Sweden",
+        "United States",
+        "Canada",
+        "Norway"
+      ],
+      "prompt": {
+        "es": "Fargo (1996) de los Coen, con su famosa máquina de chips de madera y los acentos del Medio Oeste, transcurre principalmente en qué país?",
+        "en": "The Coens' Fargo (1996), with its infamous wood chipper and Midwest accents, takes place primarily in which country?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Fargo_(1996_film)",
+          "claim": "Fargo (1996) is set in Minnesota and North Dakota, USA."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "127-hours-utah",
+      "answerKind": "country",
+      "difficulty": "HARD",
+      "movie": {
+        "title": "127 Hours",
+        "year": 2010
+      },
+      "answer": {
+        "value": "United States",
+        "country": "United States",
+        "city": "Bluejohn Canyon",
+        "realLocation": "Bluejohn Canyon, Utah",
+        "lat": 38.213,
+        "lng": -110.119,
+        "continent": "North America"
+      },
+      "options": [
+        "Chile",
+        "Australia",
+        "United States",
+        "Canada"
+      ],
+      "prompt": {
+        "es": "127 Hours (2010), donde James Franco interpreta a Aron Ralston atrapado por una roca en un cañón, recrea el accidente real ocurrido en Bluejohn Canyon, en qué país?",
+        "en": "127 Hours (2010), where James Franco plays Aron Ralston pinned by a boulder in a canyon, recreates the real accident at Bluejohn Canyon, in which country?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/127_Hours",
+          "claim": "127 Hours (2010) recreates Aron Ralston's accident in Bluejohn Canyon, Utah, USA."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "moonrise-kingdom-rhode-island",
+      "answerKind": "country",
+      "difficulty": "HARD",
+      "movie": {
+        "title": "Moonrise Kingdom",
+        "year": 2012
+      },
+      "answer": {
+        "value": "United States",
+        "country": "United States",
+        "city": "Newport County",
+        "realLocation": "Rhode Island coast",
+        "lat": 41.4901,
+        "lng": -71.3128,
+        "continent": "North America"
+      },
+      "options": [
+        "France",
+        "Canada",
+        "United Kingdom",
+        "United States"
+      ],
+      "prompt": {
+        "es": "Moonrise Kingdom (2012) de Wes Anderson, con sus boy scouts y la fugada Suzy, se filmó en la costa de Rhode Island, en qué país?",
+        "en": "Wes Anderson's Moonrise Kingdom (2012), with its boy scouts and runaway Suzy, was filmed on the Rhode Island coast, in which country?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Moonrise_Kingdom",
+          "claim": "Moonrise Kingdom (2012) was filmed in Rhode Island, USA."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "spotlight-boston",
+      "answerKind": "city",
+      "difficulty": "MEDIUM",
+      "movie": {
+        "title": "Spotlight",
+        "year": 2015
+      },
+      "answer": {
+        "value": "Boston",
+        "country": "United States",
+        "city": "Boston",
+        "realLocation": "Boston Globe newsroom and Boston streets",
+        "lat": 42.3601,
+        "lng": -71.0589,
+        "continent": "North America"
+      },
+      "options": [
+        "Boston",
+        "New York",
+        "Philadelphia",
+        "Chicago"
+      ],
+      "prompt": {
+        "es": "Spotlight (2015), ganadora del Oscar a mejor película, recrea la investigación del periódico que destapó el encubrimiento de abusos, en qué ciudad estadounidense?",
+        "en": "Spotlight (2015), Best Picture Oscar winner, recreates the newspaper investigation that exposed the abuse cover-up, in which US city?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Spotlight_(film)",
+          "claim": "Spotlight (2015) is set at the Boston Globe in Boston."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "roma-mexico-city",
+      "answerKind": "city",
+      "difficulty": "MEDIUM",
+      "movie": {
+        "title": "Roma",
+        "year": 2018
+      },
+      "answer": {
+        "value": "Mexico City",
+        "country": "Mexico",
+        "city": "Mexico City",
+        "realLocation": "Colonia Roma neighborhood",
+        "lat": 19.4326,
+        "lng": -99.1332,
+        "continent": "North America"
+      },
+      "options": [
+        "Havana",
+        "Mexico City",
+        "Guadalajara",
+        "Monterrey"
+      ],
+      "prompt": {
+        "es": "Roma (2018) de Alfonso Cuarón retrata la vida de una empleada doméstica en el barrio Colonia Roma de qué ciudad latinoamericana?",
+        "en": "Alfonso Cuarón's Roma (2018) portrays the life of a domestic worker in the Colonia Roma neighborhood of which Latin American city?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Roma_(2018_film)",
+          "claim": "Roma (2018) is set in Mexico City's Colonia Roma."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "the-shining-stanley-hotel",
+      "answerKind": "country",
+      "difficulty": "HARD",
+      "movie": {
+        "title": "The Shining",
+        "year": 1980
+      },
+      "answer": {
+        "value": "United States",
+        "country": "United States",
+        "city": "Estes Park",
+        "realLocation": "Stanley Hotel (inspiration), Colorado",
+        "lat": 40.3837,
+        "lng": -105.5217,
+        "continent": "North America"
+      },
+      "options": [
+        "Canada",
+        "Switzerland",
+        "United Kingdom",
+        "United States"
+      ],
+      "prompt": {
+        "es": "El Hotel Stanley en Estes Park, que inspiró la novela de Stephen King en la que se basa El Resplandor, se encuentra en qué país?",
+        "en": "The Stanley Hotel in Estes Park, which inspired the Stephen King novel that The Shining is based on, is located in which country?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Stanley_Hotel",
+          "claim": "The Stanley Hotel that inspired The Shining is in Colorado, USA."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "brokeback-mountain-alberta",
+      "answerKind": "country",
+      "difficulty": "MEDIUM",
+      "movie": {
+        "title": "Brokeback Mountain",
+        "year": 2005
+      },
+      "answer": {
+        "value": "Canada",
+        "country": "Canada",
+        "city": "Kananaskis",
+        "realLocation": "Kananaskis Country, Alberta",
+        "lat": 50.95,
+        "lng": -115.06,
+        "continent": "North America"
+      },
+      "options": [
+        "Norway",
+        "New Zealand",
+        "Canada",
+        "United States"
+      ],
+      "prompt": {
+        "es": "Brokeback Mountain (2005) de Ang Lee, aunque ambientada en Wyoming, se filmó en las Montañas Rocosas de qué país?",
+        "en": "Ang Lee's Brokeback Mountain (2005), though set in Wyoming, was filmed in the Rocky Mountains of which country?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Brokeback_Mountain",
+          "claim": "Brokeback Mountain was filmed in Alberta, Canada."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "babel-morocco-mexico-japan",
+      "answerKind": "city",
+      "difficulty": "HARD",
+      "movie": {
+        "title": "Babel",
+        "year": 2006
+      },
+      "answer": {
+        "value": "Tijuana",
+        "country": "Mexico",
+        "city": "Tijuana",
+        "realLocation": "Tijuana/San Diego border (one of three interwoven storylines)",
+        "lat": 32.5149,
+        "lng": -117.0382,
+        "continent": "North America"
+      },
+      "options": [
+        "Tokyo",
+        "Tijuana",
+        "Casablanca",
+        "Marrakech"
+      ],
+      "prompt": {
+        "es": "Babel (2006) de Iñárritu entrelaza tres historias: una en Marruecos, otra en Japón y la tercera en la frontera, donde una niñera cruza con dos niños. ¿Qué ciudad mexicana aparece en ese segmento?",
+        "en": "Iñárritu's Babel (2006) interweaves three stories: one in Morocco, one in Japan, and a third at the border, where a nanny crosses with two kids. Which Mexican city features in that segment?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Babel_(film)",
+          "claim": "The border-crossing storyline of Babel (2006) was filmed in Tijuana."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "pulp-fiction-los-angeles",
+      "answerKind": "city",
+      "difficulty": "EASY",
+      "movie": {
+        "title": "Pulp Fiction",
+        "year": 1994
+      },
+      "answer": {
+        "value": "Los Angeles",
+        "country": "United States",
+        "city": "Los Angeles",
+        "realLocation": "Hawthorne Grill, Jack Rabbit Slim's, Sunset Boulevard",
+        "lat": 34.0522,
+        "lng": -118.2437,
+        "continent": "North America"
+      },
+      "options": [
+        "New York",
+        "Las Vegas",
+        "Los Angeles",
+        "Miami"
+      ],
+      "prompt": {
+        "es": "Pulp Fiction (1994) de Tarantino, con sus diner shootouts y el baile de Mia y Vincent en Jack Rabbit Slim's, transcurre en qué ciudad?",
+        "en": "Tarantino's Pulp Fiction (1994), with its diner shootouts and the Mia-Vincent dance at Jack Rabbit Slim's, takes place in which city?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Pulp_Fiction",
+          "claim": "Pulp Fiction (1994) is set and filmed in Los Angeles."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "central-station-rio",
+      "answerKind": "country",
+      "difficulty": "HARD",
+      "movie": {
+        "title": "Central Station",
+        "year": 1998
+      },
+      "answer": {
+        "value": "Brazil",
+        "country": "Brazil",
+        "city": "Rio de Janeiro",
+        "realLocation": "Rio's Central do Brasil station and northeastern sertão",
+        "lat": -22.9035,
+        "lng": -43.1814,
+        "continent": "South America"
+      },
+      "options": [
+        "Uruguay",
+        "Brazil",
+        "Chile",
+        "Argentina"
+      ],
+      "prompt": {
+        "es": "Central do Brasil / Estación Central (1998), nominada al Oscar, sigue a una escritora de cartas y un niño huérfano desde una estación de tren en qué país sudamericano?",
+        "en": "Oscar-nominated Central Station (1998) follows a letter-writer and an orphan boy from a train station in which South American country?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Central_Station_(film)",
+          "claim": "Central Station (1998) starts at Central do Brasil station in Rio and crosses Brazil's northeast."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "diarios-motocicleta-machu-picchu",
+      "answerKind": "country",
+      "difficulty": "HARD",
+      "movie": {
+        "title": "The Motorcycle Diaries",
+        "year": 2004
+      },
+      "answer": {
+        "value": "Peru",
+        "country": "Peru",
+        "city": "Cusco",
+        "realLocation": "Machu Picchu and Andean route",
+        "lat": -13.1631,
+        "lng": -72.545,
+        "continent": "South America"
+      },
+      "options": [
+        "Argentina",
+        "Chile",
+        "Peru",
+        "Bolivia"
+      ],
+      "prompt": {
+        "es": "Diarios de motocicleta (2004), sobre el viaje del joven Che Guevara, incluye una visita a Machu Picchu. ¿En qué país está ese sitio arqueológico?",
+        "en": "The Motorcycle Diaries (2004), about young Che Guevara's journey, includes a visit to Machu Picchu. In which country is that archaeological site?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/The_Motorcycle_Diaries_(film)",
+          "claim": "Machu Picchu is in the Cusco region of Peru."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "y-tu-mama-tambien-oaxaca",
+      "answerKind": "country",
+      "difficulty": "MEDIUM",
+      "movie": {
+        "title": "Y Tu Mamá También",
+        "year": 2001
+      },
+      "answer": {
+        "value": "Mexico",
+        "country": "Mexico",
+        "city": "Huatulco",
+        "realLocation": "Oaxaca coast and inland road trip",
+        "lat": 15.7677,
+        "lng": -96.1402,
+        "continent": "North America"
+      },
+      "options": [
+        "Mexico",
+        "Cuba",
+        "Colombia",
+        "Guatemala"
+      ],
+      "prompt": {
+        "es": "Y Tu Mamá También (2001) de Alfonso Cuarón sigue a dos adolescentes y una mujer mayor en un road trip por la costa de Oaxaca, en qué país?",
+        "en": "Alfonso Cuarón's Y Tu Mamá También (2001) follows two teenagers and an older woman on a road trip along the Oaxaca coast, in which country?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Y_Tu_Mam%C3%A1_Tambi%C3%A9n",
+          "claim": "Y Tu Mamá También (2001) was filmed across Mexico (Mexico City and Oaxaca coast)."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "fitzcarraldo-peru",
+      "answerKind": "country",
+      "difficulty": "HARD",
+      "movie": {
+        "title": "Fitzcarraldo",
+        "year": 1982
+      },
+      "answer": {
+        "value": "Peru",
+        "country": "Peru",
+        "city": "Iquitos",
+        "realLocation": "Amazon River near Iquitos",
+        "lat": -3.7491,
+        "lng": -73.2538,
+        "continent": "South America"
+      },
+      "options": [
+        "Ecuador",
+        "Peru",
+        "Brazil",
+        "Colombia"
+      ],
+      "prompt": {
+        "es": "Fitzcarraldo (1982) de Werner Herzog, famosa por arrastrar un barco real sobre una montaña en la selva amazónica, se filmó en la región de Iquitos, en qué país?",
+        "en": "Werner Herzog's Fitzcarraldo (1982), famous for dragging a real steamship over a mountain in the Amazon, was shot in the Iquitos region, in which country?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Fitzcarraldo",
+          "claim": "Fitzcarraldo was filmed in the Peruvian Amazon near Iquitos."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "district-9-johannesburg",
+      "answerKind": "city",
+      "difficulty": "HARD",
+      "movie": {
+        "title": "District 9",
+        "year": 2009
+      },
+      "answer": {
+        "value": "Johannesburg",
+        "country": "South Africa",
+        "city": "Johannesburg",
+        "realLocation": "Chiawelo/Soweto townships",
+        "lat": -26.2041,
+        "lng": 28.0473,
+        "continent": "Africa"
+      },
+      "options": [
+        "Johannesburg",
+        "Lagos",
+        "Nairobi",
+        "Cape Town"
+      ],
+      "prompt": {
+        "es": "District 9 (2009) de Neill Blomkamp, donde aliens viven en un campo de refugiados, fue filmada en townships reales de qué ciudad sudafricana?",
+        "en": "Neill Blomkamp's District 9 (2009), where aliens live in a refugee camp, was filmed in real townships of which South African city?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/District_9",
+          "claim": "District 9 (2009) was filmed in townships near Johannesburg."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "tsotsi-johannesburg",
+      "answerKind": "city",
+      "difficulty": "HARD",
+      "movie": {
+        "title": "Tsotsi",
+        "year": 2005
+      },
+      "answer": {
+        "value": "Johannesburg",
+        "country": "South Africa",
+        "city": "Johannesburg",
+        "realLocation": "Alexandra township, Johannesburg",
+        "lat": -26.1,
+        "lng": 28.1,
+        "continent": "Africa"
+      },
+      "options": [
+        "Durban",
+        "Pretoria",
+        "Johannesburg",
+        "Cape Town"
+      ],
+      "prompt": {
+        "es": "Tsotsi (2005), ganadora del Oscar a mejor película extranjera sobre un joven delincuente que rapta un bebé, se filmó en townships de qué ciudad sudafricana?",
+        "en": "Tsotsi (2005), Best Foreign Film Oscar winner about a young thug who kidnaps a baby, was shot in townships of which South African city?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Tsotsi",
+          "claim": "Tsotsi (2005) was filmed in Alexandra and Soweto townships, Johannesburg."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "the-last-king-of-scotland-uganda",
+      "answerKind": "country",
+      "difficulty": "HARD",
+      "movie": {
+        "title": "The Last King of Scotland",
+        "year": 2006
+      },
+      "answer": {
+        "value": "Uganda",
+        "country": "Uganda",
+        "city": "Kampala",
+        "realLocation": "Kampala and Lake Victoria",
+        "lat": 0.3476,
+        "lng": 32.5825,
+        "continent": "Africa"
+      },
+      "options": [
+        "Rwanda",
+        "Tanzania",
+        "Kenya",
+        "Uganda"
+      ],
+      "prompt": {
+        "es": "The Last King of Scotland (2006), donde Forest Whitaker ganó el Oscar interpretando a Idi Amin, se filmó en el país donde Amin gobernó: ¿cuál?",
+        "en": "The Last King of Scotland (2006), where Forest Whitaker won the Oscar playing Idi Amin, was filmed in the country Amin ruled: which one?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/The_Last_King_of_Scotland_(film)",
+          "claim": "The Last King of Scotland (2006) was filmed in Uganda."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "the-mummy-1999-morocco",
+      "answerKind": "country",
+      "difficulty": "MEDIUM",
+      "movie": {
+        "title": "The Mummy",
+        "year": 1999,
+        "franchise": "The Mummy"
+      },
+      "answer": {
+        "value": "Morocco",
+        "country": "Morocco",
+        "city": "Erfoud",
+        "realLocation": "Erg Chebbi dunes near Erfoud",
+        "lat": 31.4324,
+        "lng": -4.2333,
+        "continent": "Africa"
+      },
+      "options": [
+        "Morocco",
+        "Tunisia",
+        "Egypt",
+        "Libya"
+      ],
+      "prompt": {
+        "es": "The Mummy / La momia (1999) con Brendan Fraser, aunque ambientada en Egipto, fue filmada en las dunas de Erg Chebbi, en qué país norteafricano?",
+        "en": "The Mummy (1999) with Brendan Fraser, though set in Egypt, was shot in the dunes of Erg Chebbi, in which North African country?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/The_Mummy_(1999_film)",
+          "claim": "The Mummy (1999) was largely filmed in the Erg Chebbi dunes, Morocco."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "gladiator-morocco",
+      "answerKind": "country",
+      "difficulty": "HARD",
+      "movie": {
+        "title": "Gladiator",
+        "year": 2000
+      },
+      "answer": {
+        "value": "Morocco",
+        "country": "Morocco",
+        "city": "Ouarzazate",
+        "realLocation": "Aït Benhaddou and Atlas Studios",
+        "lat": 30.9335,
+        "lng": -6.937,
+        "continent": "Africa"
+      },
+      "options": [
+        "Spain",
+        "Morocco",
+        "Italy",
+        "Tunisia"
+      ],
+      "prompt": {
+        "es": "Aunque Gladiator (2000) está ambientada en el imperio romano, las arenas del coliseo y el desierto inicial se filmaron en Aït Benhaddou y Ouarzazate, en qué país?",
+        "en": "Although Gladiator (2000) is set in the Roman Empire, the colosseum sands and opening desert were filmed in Aït Benhaddou and Ouarzazate, in which country?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Gladiator_(2000_film)",
+          "claim": "Many Gladiator exteriors were shot in Aït Benhaddou and Ouarzazate, Morocco."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "blood-diamond-mozambique",
+      "answerKind": "country",
+      "difficulty": "HARD",
+      "movie": {
+        "title": "Blood Diamond",
+        "year": 2006
+      },
+      "answer": {
+        "value": "Mozambique",
+        "country": "Mozambique",
+        "city": "Maputo",
+        "realLocation": "Maputo and South African locations (Sierra Leone fictional setting)",
+        "lat": -25.9692,
+        "lng": 32.5732,
+        "continent": "Africa"
+      },
+      "options": [
+        "Mozambique",
+        "South Africa",
+        "Zimbabwe",
+        "Sierra Leone"
+      ],
+      "prompt": {
+        "es": "Blood Diamond / Diamantes de sangre (2006) con Leonardo DiCaprio ambienta la guerra civil en Sierra Leona, pero buena parte se filmó en qué país del sur de África?",
+        "en": "Blood Diamond (2006) with Leonardo DiCaprio is set during the Sierra Leone civil war, but much of it was shot in which Southern African country?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Blood_Diamond",
+          "claim": "Blood Diamond (2006) was filmed in Mozambique and South Africa."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "the-constant-gardener-kenya",
+      "answerKind": "country",
+      "difficulty": "HARD",
+      "movie": {
+        "title": "The Constant Gardener",
+        "year": 2005
+      },
+      "answer": {
+        "value": "Kenya",
+        "country": "Kenya",
+        "city": "Loiyangalani",
+        "realLocation": "Kibera (Nairobi) and Lake Turkana",
+        "lat": -1.286389,
+        "lng": 36.817223,
+        "continent": "Africa"
+      },
+      "options": [
+        "Ethiopia",
+        "Uganda",
+        "Kenya",
+        "Tanzania"
+      ],
+      "prompt": {
+        "es": "The Constant Gardener / El jardinero fiel (2005) de Fernando Meirelles, con Ralph Fiennes, se filmó en barrios de Nairobi y a orillas del lago Turkana, en qué país?",
+        "en": "Fernando Meirelles' The Constant Gardener (2005) with Ralph Fiennes was filmed in Nairobi neighborhoods and at Lake Turkana, in which country?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/The_Constant_Gardener_(film)",
+          "claim": "The Constant Gardener (2005) was filmed in Kibera, Nairobi and Lake Turkana, Kenya."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "the-piano-new-zealand",
+      "answerKind": "country",
+      "difficulty": "HARD",
+      "movie": {
+        "title": "The Piano",
+        "year": 1993
+      },
+      "answer": {
+        "value": "New Zealand",
+        "country": "New Zealand",
+        "city": "Karekare",
+        "realLocation": "Karekare Beach, North Island",
+        "lat": -36.989,
+        "lng": 174.49,
+        "continent": "Oceania"
+      },
+      "options": [
+        "Australia",
+        "New Zealand",
+        "Scotland",
+        "Ireland"
+      ],
+      "prompt": {
+        "es": "The Piano (1993) de Jane Campion, ganadora de la Palma de Oro, retrata a una mujer escocesa con un piano en una playa salvaje, en qué país?",
+        "en": "Jane Campion's The Piano (1993), Palme d'Or winner, depicts a Scottish woman with a piano on a wild beach, in which country?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/The_Piano",
+          "claim": "The Piano (1993) was filmed at Karekare Beach, New Zealand."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "whale-rider-new-zealand",
+      "answerKind": "country",
+      "difficulty": "MEDIUM",
+      "movie": {
+        "title": "Whale Rider",
+        "year": 2002
+      },
+      "answer": {
+        "value": "New Zealand",
+        "country": "New Zealand",
+        "city": "Whangara",
+        "realLocation": "Whangara, Gisborne region",
+        "lat": -38.567,
+        "lng": 178.27,
+        "continent": "Oceania"
+      },
+      "options": [
+        "Australia",
+        "Indonesia",
+        "New Zealand",
+        "Fiji"
+      ],
+      "prompt": {
+        "es": "Whale Rider / La leyenda de las ballenas (2002), sobre una niña maorí destinada a liderar a su pueblo, se filmó en el pueblo real de Whangara, en qué país?",
+        "en": "Whale Rider (2002), about a young Maori girl destined to lead her people, was shot in the actual village of Whangara, in which country?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Whale_Rider",
+          "claim": "Whale Rider (2002) was shot in Whangara, New Zealand."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "mad-max-fury-road-namibia",
+      "answerKind": "country",
+      "difficulty": "HARD",
+      "movie": {
+        "title": "Mad Max: Fury Road",
+        "year": 2015,
+        "franchise": "Mad Max"
+      },
+      "answer": {
+        "value": "Namibia",
+        "country": "Namibia",
+        "city": "Swakopmund",
+        "realLocation": "Dorob/Skeleton Coast desert",
+        "lat": -22.6792,
+        "lng": 14.5272,
+        "continent": "Africa"
+      },
+      "options": [
+        "Morocco",
+        "Chile",
+        "Australia",
+        "Namibia"
+      ],
+      "prompt": {
+        "es": "Aunque la saga Mad Max es australiana, Fury Road (2015) se filmó casi en su totalidad en las dunas del desierto de qué país africano?",
+        "en": "Although the Mad Max saga is Australian, Fury Road (2015) was filmed almost entirely in the desert dunes of which African country?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Mad_Max:_Fury_Road",
+          "claim": "Fury Road (2015) was filmed in the Namib Desert of Namibia."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "the-power-of-the-dog-otago",
+      "answerKind": "country",
+      "difficulty": "HARD",
+      "movie": {
+        "title": "The Power of the Dog",
+        "year": 2021
+      },
+      "answer": {
+        "value": "New Zealand",
+        "country": "New Zealand",
+        "city": "Otago",
+        "realLocation": "Otago Region, South Island",
+        "lat": -45.0312,
+        "lng": 168.6626,
+        "continent": "Oceania"
+      },
+      "options": [
+        "United States",
+        "New Zealand",
+        "Australia",
+        "Canada"
+      ],
+      "prompt": {
+        "es": "The Power of the Dog (2021) de Jane Campion, ambientada en Montana 1925 pero rodada al otro lado del mundo, se filmó en la región de Otago, en qué país?",
+        "en": "Jane Campion's The Power of the Dog (2021), set in 1925 Montana but shot on the other side of the world, was filmed in the Otago region, in which country?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/The_Power_of_the_Dog_(film)",
+          "claim": "The Power of the Dog (2021) was filmed in Otago, New Zealand."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
+    },
+    {
+      "id": "rabbit-proof-fence-australia",
+      "answerKind": "country",
+      "difficulty": "HARD",
+      "movie": {
+        "title": "Rabbit-Proof Fence",
+        "year": 2002
+      },
+      "answer": {
+        "value": "Australia",
+        "country": "Australia",
+        "city": "Jigalong",
+        "realLocation": "Western Australian outback",
+        "lat": -23.4,
+        "lng": 120.776,
+        "continent": "Oceania"
+      },
+      "options": [
+        "Australia",
+        "New Zealand",
+        "South Africa",
+        "United States"
+      ],
+      "prompt": {
+        "es": "Rabbit-Proof Fence / Generación robada (2002), basada en la historia real de tres niñas aborígenes que recorren miles de kilómetros a casa, transcurre en el outback de qué país?",
+        "en": "Rabbit-Proof Fence (2002), based on the true story of three Aboriginal girls walking thousands of kilometers home, takes place in the outback of which country?"
+      },
+      "sources": [
+        {
+          "sourceUrl": "https://en.wikipedia.org/wiki/Rabbit-Proof_Fence_(film)",
+          "claim": "Rabbit-Proof Fence (2002) was filmed in Western Australia."
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "approved"
     }
   ]
 }
