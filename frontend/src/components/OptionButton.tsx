@@ -32,8 +32,12 @@ export const OptionButton = React.memo(function OptionButton({
   showResult,
 }: OptionButtonProps) {
   const renderedLabel = displayLabel ?? option;
+  // focus-visible: only show focus ring on KEYBOARD navigation, not on touch/click.
+  // Antes el browser dejaba un focus ring azul sobre la última opción tras click
+  // o navegación — los QA rounds 1-3 lo reportaron como "parece pre-seleccionado".
+  // Conservamos a11y para teclado (Tab) pero quitamos el ruido visual del click.
   const baseClasses =
-    'option-button-shell pressable w-full rounded-2xl text-left transition-all duration-200 flex items-stretch gap-2.5 overflow-hidden border px-3 py-2 option-button-base sm:px-3.5 sm:py-2.5';
+    'option-button-shell pressable w-full rounded-2xl text-left transition-all duration-200 flex items-stretch gap-2.5 overflow-hidden border px-3 py-2 option-button-base sm:px-3.5 sm:py-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-1 focus-visible:ring-offset-[var(--color-bg-app)]';
 
   const defaultStateClasses =
     'bg-[var(--color-surface-muted)] border-[var(--color-border)] text-[var(--color-text-primary)] hover:border-[var(--color-primary-400)] hover:bg-[var(--color-surface)] cursor-pointer';

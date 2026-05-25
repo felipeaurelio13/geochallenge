@@ -248,12 +248,10 @@ export function MenuPage() {
 
       
       <section className="mt-3" aria-label={t('menu.gameModes')}>
-        <p className="mb-2 px-1 text-xs text-app-subtle sm:px-0">
-          {t(
-            'menu.modeHelper',
-            'Después elige el ritmo de partida: rápido, competitivo o para entrenar con calma.'
-          )}
-        </p>
+        {/* QA round 3 design audit: el helper "Después elige el ritmo..." era
+            redundante con el de arriba ("Elige cómo quieres practicar hoy").
+            Lo removemos para acortar la página y reducir ruido visual. La
+            sección sigue siendo identificable por su grid de cards. */}
         <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 sm:gap-2">
           <GameModeCard
             icon="⚡"

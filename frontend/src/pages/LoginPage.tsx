@@ -96,7 +96,7 @@ export function LoginPage() {
             autoComplete="email"
             inputMode="email"
             spellCheck={false}
-            placeholder="tu@email.com"
+            placeholder={t("auth.emailPlaceholder", "you@example.com")}
           />
         </FormField.Root>
 
@@ -111,7 +111,7 @@ export function LoginPage() {
               required
               autoComplete="current-password"
               className="pr-24"
-              placeholder="********"
+              placeholder={t("auth.passwordPlaceholder", "Your password")}
             />
             <button
               type="button"

@@ -62,7 +62,10 @@
     "show": "Mostrar",
     "hide": "Ocultar",
     "completeFieldsHint": "Completa correo y contraseña para continuar.",
-    "rateLimitError": "Demasiados intentos. Intenta de nuevo en {{minutes}} min."
+    "rateLimitError": "Demasiados intentos. Intenta de nuevo en {{minutes}} min.",
+    "emailPlaceholder": "tu@correo.com",
+    "passwordPlaceholder": "Tu contraseña",
+    "usernamePlaceholder": "Tu nombre de usuario"
   },
   "menu": {
     "dailyChallenge": "Reto del día",
@@ -71,13 +74,13 @@
     "welcome": "¡Hola, {{name}}!",
     "chooseMode": "Elige un modo de juego",
     "singlePlayer": "Un Jugador",
-    "singlePlayerDesc": "Juega solo y mejora tu puntuación",
+    "singlePlayerDesc": "10 rondas · 10s c/u · entrena con calma",
     "duel": "Duelo",
-    "duelDesc": "Compite en tiempo real contra otro jugador",
+    "duelDesc": "10 rondas · 1v1 · tiempo real",
     "challenge": "Desafíos",
-    "challengeDesc": "Envía desafíos a tus amigos",
+    "challengeDesc": "2–8 jugadores · asíncrono · con amigos",
     "streak": "Racha",
-    "streakDesc": "Sigue hasta fallar y rompe tu récord",
+    "streakDesc": "Sin fin · 1 fallo termina · supera tu récord",
     "rankings": "Rankings",
     "rankingsDesc": "Mira el top global y tu posición",
     "yourStats": "Tu perfil",
@@ -96,7 +99,7 @@
     "flashBadge": "Nuevo · Mobile",
     "flashNoMap": "El modo Flash no admite mapas — elige otra categoría",
     "survival": "Survival",
-    "survivalDesc": "1 vida · dificultad progresiva · último en pie gana",
+    "survivalDesc": "Multijugador · 2 vidas · último en pie gana",
     "flagMaster": "Maestro de Banderas",
     "flagMasterBadge": "Difícil",
     "flagMasterDesc": "10 rondas · sin color, recortes y trampas · multiplicadores hasta x2.5"

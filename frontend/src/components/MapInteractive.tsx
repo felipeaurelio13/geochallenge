@@ -145,12 +145,17 @@ export function MapInteractive({
   const distance = showResult ? calculateDistance() : null;
 
   return (
-    <div className="relative">
-      <div className="map-surface overflow-hidden rounded-2xl">
+    // El wrapper toma toda la altura disponible del flex parent en
+    // GameRoundScaffold. Antes la map-surface tenía clamp con max ~19rem
+    // (304px), dejando ~250px de espacio muerto debajo en iPhone 14 (QA round
+    // 3 design audit). Ahora el mapa fluye: min razonable, max = 100% del flex
+    // container disponible.
+    <div className="relative flex h-full min-h-0 flex-col">
+      <div className="map-surface flex-1 min-h-[12.5rem] overflow-hidden rounded-2xl">
         <MapContainer
           center={MAP_DEFAULT_VIEW.center}
           zoom={MAP_DEFAULT_VIEW.zoom}
-          style={{ height: 'clamp(var(--map-height-min), var(--map-height-fluid), var(--map-height-max))', width: '100%' }}
+          style={{ height: '100%', width: '100%' }}
           className="z-0 touch-manipulation"
         >
           <TileLayer

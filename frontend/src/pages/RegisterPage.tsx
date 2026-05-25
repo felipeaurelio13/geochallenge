@@ -76,7 +76,7 @@ export function RegisterPage() {
             required
             minLength={3}
             maxLength={20}
-            placeholder="GeoMaster2024"
+            placeholder={t("auth.usernamePlaceholder", "Your username")}
           />
         </FormField.Root>
 
@@ -88,7 +88,7 @@ export function RegisterPage() {
             value={values.email}
             onChange={handleChange}
             required
-            placeholder="tu@email.com"
+            placeholder={t("auth.emailPlaceholder", "you@example.com")}
           />
         </FormField.Root>
 
@@ -101,7 +101,7 @@ export function RegisterPage() {
             onChange={handleChange}
             required
             minLength={6}
-            placeholder="********"
+            placeholder={t("auth.passwordPlaceholder", "Your password")}
           />
           <FormField.Hint>{t('auth.passwordHint')}</FormField.Hint>
         </FormField.Root>
@@ -122,7 +122,7 @@ export function RegisterPage() {
             value={values.confirmPassword}
             onChange={handleChange}
             required
-            placeholder="********"
+            placeholder={t("auth.passwordPlaceholder", "Your password")}
           />
         </FormField.Root>
 
