@@ -55,6 +55,7 @@ Cada entrada en [cinema-geo-questions.json](cinema-geo-questions.json) sigue est
 2. **`options` debe tener exactamente 4 elementos**, sin duplicados, e incluir `answer.value`.
 3. **Aprobada (`reviewStatus: "approved"`) requiere al menos un `sourceUrl` real**. Wikipedia es la fuente por defecto; otras citas verificables (production notes, IMDb trivia con cita) también valen.
 4. **`answer.country` debe coincidir con un país del catálogo** ([data/country-catalog.v1.json](../country-catalog.v1.json)) para que los filtros geográficos funcionen (continente, insular, sin salida al mar).
+5. **Consistencia regional prompt ↔ distractores**: si el prompt promete una restricción ("qué ciudad surcoreana", "qué país norteafricano", "qué capital europea"), **todas las opciones deben respetar esa restricción**. Ejemplos de cosas que no van: prometer "ciudad surcoreana" y listar Tokyo como distractor; prometer "capital europea" y listar Munich (que no es capital nacional). Si vas a mezclar regiones en los distractores, deshacé la promesa en el prompt y dejalo abierto ("en qué ciudad").
 
 ## Flujo para agregar una pregunta nueva
 

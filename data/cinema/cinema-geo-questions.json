@@ -67,10 +67,10 @@
         "continent": "Asia"
       },
       "options": [
-        "Tokyo",
-        "Busan",
-        "Singapore",
-        "Seoul"
+        "Incheon",
+        "Daegu",
+        "Seoul",
+        "Busan"
       ],
       "prompt": {
         "es": "La persecución nocturna del casino y las calles en Black Panther (2018) fue filmada principalmente en qué ciudad surcoreana?",
@@ -1293,10 +1293,10 @@
         "continent": "South America"
       },
       "options": [
-        "Argentina",
-        "Canada",
+        "Bolivia",
+        "Brazil",
         "Chile",
-        "Norway"
+        "Argentina"
       ],
       "prompt": {
         "es": "Para las escenas finales nevadas de The Revenant (2015), el equipo de Iñárritu se trasladó al fin del mundo: a qué país sudamericano?",
@@ -1516,8 +1516,8 @@
         "Seoul"
       ],
       "prompt": {
-        "es": "Parasite (2019) de Bong Joon-ho, ganadora del Oscar, se desarrolla y fue filmada en qué capital asiática?",
-        "en": "Bong Joon-ho's Oscar-winning Parasite (2019) is set and was filmed in which Asian capital?"
+        "es": "Parasite (2019) de Bong Joon-ho, ganadora del Oscar, se desarrolla y fue filmada en qué ciudad surcoreana?",
+        "en": "Bong Joon-ho's Oscar-winning Parasite (2019) is set and was filmed in which South Korean city?"
       },
       "sources": [
         {
@@ -1619,10 +1619,10 @@
         "continent": "Europe"
       },
       "options": [
-        "Vienna",
         "Prague",
-        "Munich",
-        "Budapest"
+        "Budapest",
+        "Berlin",
+        "Vienna"
       ],
       "prompt": {
         "es": "El primer encuentro de Jesse y Céline en Before Sunrise (1995) de Richard Linklater transcurre en una sola noche en qué capital europea?",
@@ -2091,10 +2091,10 @@
         "continent": "Europe"
       },
       "options": [
+        "Athens",
+        "Madrid",
         "Rome",
-        "Venice",
-        "Milan",
-        "Florence"
+        "Paris"
       ],
       "prompt": {
         "es": "El cortejo fúnebre y la persecución en Aston Martin junto al río en Spectre (2015) se filmaron en qué capital europea?",
@@ -2812,10 +2812,10 @@
         "continent": "North America"
       },
       "options": [
-        "Tokyo",
+        "Mexicali",
+        "Ciudad Juárez",
         "Tijuana",
-        "Casablanca",
-        "Marrakech"
+        "Monterrey"
       ],
       "prompt": {
         "es": "Babel (2006) de Iñárritu entrelaza tres historias: una en Marruecos, otra en Japón y la tercera en la frontera, donde una niñera cruza con dos niños. ¿Qué ciudad mexicana aparece en ese segmento?",
@@ -3354,10 +3354,10 @@
         "continent": "Africa"
       },
       "options": [
-        "Morocco",
-        "Chile",
-        "Australia",
-        "Namibia"
+        "South Africa",
+        "Namibia",
+        "Egypt",
+        "Morocco"
       ],
       "prompt": {
         "es": "Aunque la saga Mad Max es australiana, Fury Road (2015) se filmó casi en su totalidad en las dunas del desierto de qué país africano?",
