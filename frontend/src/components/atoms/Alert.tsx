@@ -12,11 +12,19 @@ interface AlertProps {
   children: React.ReactNode;
   className?: string;
   onDismiss?: () => void;
+  /** ARIA role — default `alert` para que lectores de pantalla anuncien. */
+  role?: 'alert' | 'status';
+  /** ARIA live region politeness para anunciar cambios dinámicos. */
+  'aria-live'?: 'off' | 'polite' | 'assertive';
 }
 
-export function Alert({ type, children, className = '', onDismiss }: AlertProps) {
+export function Alert({ type, children, className = '', onDismiss, role = 'alert', ...ariaProps }: AlertProps) {
   return (
-    <div className={`rounded-lg border px-4 py-3 text-sm ${typeStyles[type]} ${className}`}>
+    <div
+      role={role}
+      aria-live={ariaProps['aria-live']}
+      className={`rounded-lg border px-4 py-3 text-sm ${typeStyles[type]} ${className}`}
+    >
       <div className="flex items-start justify-between gap-2">
         <div>{children}</div>
         {onDismiss && (
