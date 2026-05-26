@@ -2,13 +2,18 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../services/api';
-import { LoadingSpinner } from '../components';
+import {
+  LoadingSpinner,
+  GameRoundScaffold,
+  RoundActionTray,
+  ProgressBar,
+  ScoreDisplay,
+  Timer,
+} from '../components';
 import { Button } from '../components/atoms/Button';
-import { OptionButton } from '../components/OptionButton';
 import { MonumentAttribution } from '../components/MonumentAttribution';
 import { generateFunFact } from '../utils/funFacts';
 import { getQuestionDuration } from '../utils/questionTiming';
-import { getLocalizedQuestionText } from '../utils/questionText';
 import { useStreakShareImage } from '../hooks/useStreakShareImage';
 import type { Question, DailyResult } from '../types';
 
@@ -27,15 +32,24 @@ export function DailyChallengePage() {
   const [selected, setSelected] = useState<string | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [correctCount, setCorrectCount] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(ANSWER_TIME);
+  // QA fix HI-1: results acumulados por ronda — alimentan ProgressBar (los
+  // dots 1..N rojos/verdes) y ScoreDisplay para que Daily tenga el mismo
+  // feedback visual que GamePage (Single Player). Antes solo había
+  // currentIndex y correctCount.
+  const [results, setResults] = useState<Array<{ isCorrect: boolean; timedOut: boolean }>>([]);
+  const [timedOut, setTimedOut] = useState(false);
   const [previousResult, setPreviousResult] = useState<DailyResult | null>(null);
   const [finalResult, setFinalResult] = useState<DailyResult | null>(null);
   const [shareFeedback, setShareFeedback] = useState('');
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const currentQuestion = questions[currentIndex] ?? null;
   const isLastQuestion = currentIndex === questions.length - 1;
+  const roundDuration = getQuestionDuration(currentQuestion?.category, ANSWER_TIME);
+  const [timeRemaining, setTimeRemaining] = useState(roundDuration);
+  const score = correctCount * 100;
+  const previousScore = score - (results.length > 0 && results[results.length - 1]?.isCorrect ? 100 : 0);
+  const lastAnswerCorrect = results.length > 0 ? results[results.length - 1]?.isCorrect ?? false : false;
 
   useEffect(() => {
     api.getDaily()
@@ -51,31 +65,28 @@ export function DailyChallengePage() {
       .catch(() => setPageState('error'));
   }, []);
 
-  // Timer per question
+  // QA fix HI-1: reset del time-remaining cuando cambia la pregunta.
+  // El <Timer> componente maneja el tick interno, sólo lo re-inicializamos.
   useEffect(() => {
     if (pageState !== 'playing' || showResult) return;
-    setTimeLeft(getQuestionDuration(currentQuestion?.category, ANSWER_TIME));
-    timerRef.current = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timerRef.current!);
-          handleSubmit();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+    setTimeRemaining(getQuestionDuration(currentQuestion?.category, ANSWER_TIME));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentIndex, pageState, showResult]);
 
   function handleSubmit(forcedAnswer?: string) {
     if (showResult) return;
-    if (timerRef.current) clearInterval(timerRef.current);
     const answer = forcedAnswer ?? selected ?? '';
     const isCorrect = answer === currentQuestion?.correctAnswer;
+    const isTimeout = !answer;
     if (isCorrect) setCorrectCount((c) => c + 1);
+    setResults((prev) => [...prev, { isCorrect, timedOut: isTimeout }]);
+    setTimedOut(isTimeout);
     setShowResult(true);
+  }
+
+  function handleTimeComplete() {
+    if (showResult) return;
+    handleSubmit();
   }
 
   async function handleNext() {
@@ -93,6 +104,7 @@ export function DailyChallengePage() {
       setCurrentIndex((i) => i + 1);
       setSelected(null);
       setShowResult(false);
+      setTimedOut(false);
     }
   }
 
@@ -205,98 +217,96 @@ export function DailyChallengePage() {
 
   if (!currentQuestion) return null;
 
-  const isCorrect = selected === currentQuestion.correctAnswer;
-
+  // QA fix HI-1 + ME-2: ahora Daily comparte scaffold con GamePage. Mismo
+  // header (Exit · Score · Timer), misma ProgressBar 1..N, mismas opciones
+  // verticales en 1 columna, mismo RoundActionTray con feedback "Correcto" /
+  // "Incorrecto" / "Tiempo agotado". El timeout ya no muestra "Incorrect"
+  // genérico — distingue claramente que no fue un error sino tiempo expirado.
   return (
-    <div className="flex h-full flex-col bg-[var(--color-bg-app)]">
-      {/* Header */}
-      <header className="flex items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-surface-muted)] px-4 py-3">
-        <button
-          onClick={() => { if (window.confirm(t('game.confirmExit'))) navigate('/menu'); }}
-          className="text-xs text-[var(--color-text-secondary)] hover:text-app-text"
-        >
-          ✕ {t('game.exit')}
-        </button>
-        <div className="text-center">
-          <div className="text-xs font-medium text-cyan-400">{t('menu.dailyChallenge', 'Reto del día')}</div>
-          <div className="text-xs text-[var(--color-text-muted)]">{currentIndex + 1} / {questions.length}</div>
-        </div>
-        <div className="flex items-center gap-1 text-sm">
-          <span className={`font-mono font-bold ${timeLeft <= 5 ? 'text-red-400' : 'text-app-text'}`}>{timeLeft}s</span>
-        </div>
-      </header>
-
-      {/* Progress bar */}
-      <div className="h-1 bg-[var(--color-surface)]">
-        <div
-          className="h-full bg-cyan-500 transition-all duration-300"
-          style={{ width: `${((currentIndex) / questions.length) * 100}%` }}
-        />
-      </div>
-
-      {/* Question */}
-      <main className="flex-1 overflow-y-auto px-4 py-4">
-        {currentQuestion.imageUrl && (
-          <div className="mb-4 flex justify-center">
-            <img
-              src={currentQuestion.imageUrl}
-              alt=""
-              className="max-h-40 w-auto rounded-xl object-contain"
+    <GameRoundScaffold
+      header={
+        <header className="sticky top-0 z-30 border-b border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 pb-2 pt-3 backdrop-blur sm:px-4 sm:pb-3 sm:pt-4">
+          <div className="max-w-4xl mx-auto grid grid-cols-[auto_1fr_auto] items-center gap-2.5 sm:gap-4">
+            <button
+              onClick={() => { if (window.confirm(t('game.confirmExit'))) navigate('/menu'); }}
+              className="pressable min-h-10 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 py-2 text-xs sm:text-sm text-[var(--color-text-secondary)] hover:border-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors"
+              aria-label={t('game.exit')}
+            >
+              ✕ {t('game.exit')}
+            </button>
+            <div className="text-center">
+              <ScoreDisplay
+                score={score}
+                previousScore={previousScore}
+                showAnimation={showResult}
+                lastResult={null}
+              />
+              <p className="mt-0.5 text-[0.65rem] font-medium uppercase tracking-wide text-cyan-400">
+                {t('menu.dailyChallenge', 'Reto del día')}
+              </p>
+            </div>
+            <div className="justify-self-end pr-[max(env(safe-area-inset-right),0.5rem)] sm:pr-[max(env(safe-area-inset-right),0.75rem)] md:pr-0">
+              <Timer
+                duration={roundDuration}
+                timeRemaining={timeRemaining}
+                onTick={setTimeRemaining}
+                onComplete={handleTimeComplete}
+                isActive={!showResult && pageState === 'playing'}
+              />
+            </div>
+          </div>
+        </header>
+      }
+      progress={
+        <div className="bg-[var(--color-surface-muted)] px-3 py-1 sm:px-4 sm:py-1.5">
+          <div className="max-w-4xl mx-auto overflow-x-hidden">
+            <ProgressBar
+              current={currentIndex + 1}
+              total={questions.length}
+              results={results}
+              showCurrentResult={showResult}
             />
           </div>
-        )}
-        <h2 className="mb-4 text-center text-lg font-semibold text-app-text">
-          {getLocalizedQuestionText(currentQuestion, t, i18n.language)}
-        </h2>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {currentQuestion.options.map((opt, idx) => {
-            const isSelected = selected === opt;
-            const isCorrectOpt = opt === currentQuestion.correctAnswer;
-            return (
-              <OptionButton
-                key={opt}
-                option={opt}
-                index={idx}
-                selected={isSelected}
-                disabled={showResult}
-                isCorrect={showResult ? isCorrectOpt : undefined}
-                showResult={showResult}
-                onClick={() => !showResult && setSelected(opt)}
-              />
-            );
-          })}
         </div>
-      </main>
-
-      {/* Action tray */}
-      <div className="border-t border-[var(--color-border)] bg-[var(--color-surface)] px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3">
-        {showResult ? (
-          <div className="flex flex-col gap-2">
-            <p className={`text-center text-sm font-semibold ${isCorrect ? 'text-green-400' : 'text-red-400'}`}>
-              {isCorrect ? t('game.correct') : `${t('game.incorrect')} — ${currentQuestion.correctAnswer}`}
-            </p>
-            {funFact && <p className="text-center text-xs text-[var(--color-text-secondary)]">{funFact}</p>}
-            {currentQuestion.category === 'MONUMENT' && (
-              <div className="text-center text-[0.65rem] text-gray-400">
-                <MonumentAttribution question={currentQuestion} />
-              </div>
-            )}
-<Button onClick={handleNext} variant="primary" size="lg" fullWidth>
-              {isLastQuestion ? t('daily.finish', 'Ver resultado') : t('game.next')}
-            </Button>
-          </div>
-        ) : (
-          <Button
-            onClick={() => handleSubmit()}
-            disabled={!selected}
-            variant="primary"
-            size="lg"
-            fullWidth
-          >
-            {t('game.submit')}
-          </Button>
-        )}
-      </div>
-    </div>
+      }
+      question={currentQuestion}
+      questionNumber={currentIndex + 1}
+      totalQuestions={questions.length}
+      compactQuestionCard
+      isMapQuestion={false}
+      mapContent={null}
+      selectedAnswer={selected}
+      onOptionSelect={(opt) => { if (!showResult) setSelected(opt); }}
+      showResult={showResult}
+      actionTray={
+        <RoundActionTray
+          mode="single"
+          showResult={showResult}
+          canSubmit={!!selected}
+          submitLabel={t('game.submit')}
+          nextLabel={isLastQuestion ? t('daily.finish', 'Ver resultado') : t('game.next')}
+          // QA fix ME-2: distinguir timeout de respuesta incorrecta.
+          resultLabel={
+            timedOut
+              ? t('game.timeUp', 'Tiempo agotado')
+              : lastAnswerCorrect
+                ? t('game.correct')
+                : t('game.incorrect')
+          }
+          resultHint={funFact ?? undefined}
+          resultAttribution={
+            currentQuestion.category === 'MONUMENT'
+              ? <MonumentAttribution question={currentQuestion} />
+              : undefined
+          }
+          selectionAssistiveText={selected && !showResult ? t('game.selectionReadyShortHint') : undefined}
+          showResultBadge
+          isCorrect={lastAnswerCorrect}
+          correctAnswer={showResult && !lastAnswerCorrect ? currentQuestion.correctAnswer : undefined}
+          onSubmit={() => handleSubmit()}
+          onNext={handleNext}
+        />
+      }
+    />
   );
 }
