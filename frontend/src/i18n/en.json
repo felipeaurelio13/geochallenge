@@ -62,6 +62,9 @@
     "show": "Show",
     "hide": "Hide",
     "completeFieldsHint": "Complete email and password to continue.",
+    "invalidEmail": "Enter a valid email (e.g. you@example.com).",
+    "passwordRequired": "Enter your password.",
+    "loginFailed": "Wrong email or password. Double-check and try again.",
     "rateLimitError": "Too many attempts. Try again in {{minutes}} min.",
     "emailPlaceholder": "you@example.com",
     "passwordPlaceholder": "Your password",
@@ -154,8 +157,8 @@
     }
   },
   "serverWakeUp": {
-    "title": "Waking up the server...",
-    "body": "The free server sleeps after a few minutes of inactivity. This only takes a few seconds."
+    "title": "Loading GeoChallenge…",
+    "body": "This may take a few seconds the first time."
   },
   "survival": {
     "title": "Survival",
@@ -234,6 +237,7 @@
     "submit": "Submit",
     "correct": "Correct!",
     "incorrect": "Incorrect",
+    "timeUp": "Time's up",
     "correctAnswerWas": "The correct answer was",
     "correctLabel": "Correct",
     "incorrectLabel": "Incorrect",
@@ -305,7 +309,7 @@
     "playAgain": "Find another duel",
     "queueCategory": "Searching in {{category}}",
     "averageWaitHint": "This usually takes under 30 seconds. Thanks for waiting.",
-    "cancelHint": "If you change your mind, you can cancel without losing progress.",
+    "cancelHint": "You can cancel the search at any time.",
     "retry": "Retry",
     "errorGeneric": "We couldn't continue the duel. Please try again.",
     "connectionLost": "Connection lost. Reconnecting...",
@@ -316,11 +320,11 @@
   },
   "challenges": {
     "title": "Challenges",
-    "create": "New",
-    "createTitle": "Create Challenge",
+    "create": "New challenge",
+    "createTitle": "Create challenge",
     "createMultiplayerTitle": "Create a multiplayer challenge",
     "createMultiplayerHint": "Set categories, player limit and answer time in seconds.",
-    "createMultiplayerCta": "Create multiplayer challenge",
+    "createMultiplayerCta": "Create challenge",
     "opponentUsername": "Opponent's username",
     "usernamePlaceholder": "Enter username",
     "category": "Category",
