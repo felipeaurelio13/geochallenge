@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useLocalStorage } from '../hooks';
 import { useGameFilters } from '../hooks/useGameFilters';
 import { Button, Header, Icon, PageTemplate, SectionTitle } from '../components';
+import { LanguageSwitcher } from '../components/atoms/LanguageSwitcher';
 import { UserAvatar } from '../components/atoms/UserAvatar';
 import { CategorySelector } from '../components/molecules/CategorySelector';
 import { GameModeCard } from '../components/molecules/GameModeCard';
@@ -22,7 +23,11 @@ const categories: { id: Category; icon: string; labelKey: string; accentClass: s
   { id: 'SILHOUETTE', icon: '🖼️', labelKey: 'categories.silhouettes', accentClass: 'border-violet-500/50 bg-violet-500/15 text-violet-400' },
   { id: 'MONUMENT', icon: '🗿', labelKey: 'categories.monuments', accentClass: 'border-amber-500/50 bg-amber-500/15 text-amber-400' },
   { id: 'CINEMA_GEO', icon: '🎬', labelKey: 'categories.cinemaGeo', accentClass: 'border-rose-500/50 bg-rose-500/15 text-rose-400' },
-  { id: 'MIXED', icon: '🎲', labelKey: 'categories.mixed', accentClass: 'border-slate-400/50 bg-slate-400/15 text-slate-300' },
+  // QA fix HI-5: el accent previo (`text-slate-300` sobre `bg-slate-400/15`)
+  // daba contraste ~1.8:1 y se veía MÁS DÉBIL que el estado no-seleccionado.
+  // Usamos fuchsia para mantener la saturación 400 del resto del set y dar
+  // la lectura "categoría sin temática fija" sin grisearse.
+  { id: 'MIXED', icon: '🎲', labelKey: 'categories.mixed', accentClass: 'border-fuchsia-500/50 bg-fuchsia-500/15 text-fuchsia-400' },
 ];
 
 const GAME_MODE_ACCENTS = {
@@ -174,6 +179,7 @@ export function MenuPage() {
         <Header
           actions={
             <>
+              <LanguageSwitcher />
               <Link
                 to="/profile"
                 className="flex min-h-11 items-center gap-2 rounded-lg border border-app-border bg-app-surface px-2.5 py-1.5 text-app-secondary transition-colors hover:border-app-border hover:text-app-text"

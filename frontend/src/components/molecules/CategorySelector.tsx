@@ -18,7 +18,7 @@ export function CategorySelector({ categories, selected, onSelect }: CategorySel
     // (sólo se muestra cuando hay scroll horizontal, oculto en sm+ con grid).
     <div className="relative">
       <div
-        className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:grid sm:grid-cols-6 sm:overflow-visible sm:px-0"
+        className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:grid sm:grid-cols-7 sm:overflow-visible sm:px-0"
         aria-label="Categorías"
       >
         {categories.map((cat) => (
