@@ -11,9 +11,24 @@ export type ScreenProps = {
 // Screen encapsulates a single viewport-sized route with fixed header/footer slots.
 export function Screen({ header, footer, children }: ScreenProps) {
   const { pathname } = useLocation();
-  const isGameplayRoute = pathname.startsWith('/game/')
+  // QA fix HI-6/ME-4: agregamos /daily y /flag-master a las rutas de gameplay
+  // para que el AppFooter ("v1.2.87" + año) no aparezca mid-juego.
+  //
+  // Además, /profile, /rankings, /challenges y /survival son páginas con
+  // contenido scrollable interno: el footer global se renderizaba debajo
+  // del scroll-container y daba la falsa sensación de "fin de página" sin
+  // pista de "hay más abajo". Ocultarlo en esas rutas resuelve la
+  // confusión visual sin cambiar el layout interno.
+  const isFullViewportRoute = pathname.startsWith('/game/')
     || pathname === '/duel'
+    || pathname === '/daily'
+    || pathname === '/flag-master'
+    || pathname === '/survival'
+    || pathname === '/profile'
+    || pathname === '/rankings'
+    || pathname.startsWith('/challenges')
     || /^\/challenges\/[^/]+\/play$/.test(pathname);
+  const isGameplayRoute = isFullViewportRoute;
   const footerContent = footer ?? <AppFooter />;
 
   return (
