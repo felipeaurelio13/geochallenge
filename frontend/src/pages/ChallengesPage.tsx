@@ -212,18 +212,11 @@ export function ChallengesPage() {
 
       <main className="max-w-4xl mx-auto px-4 py-4 space-y-4">
         {fetchError && <Alert type="error">{fetchError}</Alert>}
-        <section className="rounded-xl border border-primary/30 bg-primary/10 p-4">
-          <p className="text-sm font-semibold text-primary">{t('challenges.createMultiplayerTitle')}</p>
-          <p className="mt-1 text-xs text-[var(--color-text-secondary)] sm:text-sm">{t('challenges.createMultiplayerHint')}</p>
-          <Button
-            onClick={() => setShowCreateModal(true)}
-            className="mt-3 sm:w-auto"
-            fullWidth
-          >
-            {t('challenges.createMultiplayerCta')}
-          </Button>
-        </section>
-
+        {/* QA fix ME-9: antes había TRES CTAs para crear desafío: "+ Nuevo"
+            en header, una helper-card con título+descripción+botón, y otro
+            botón en EmptyState. Removimos la helper-card (redundante con el
+            botón del header) y dejamos sólo header + empty-state cuando no
+            hay desafíos. La descripción se muestra ahora dentro del modal. */}
         {loading ? <LoadingSpinner size="lg" /> : filteredChallenges.length === 0 ? (
           <EmptyState
             message={t('challenges.empty')}

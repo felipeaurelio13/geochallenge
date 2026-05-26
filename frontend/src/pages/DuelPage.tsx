@@ -477,10 +477,12 @@ export function DuelPage() {
             <span className="relative text-6xl">⚔️</span>
           </div>
 
-          <h1 className="text-2xl font-bold text-[var(--color-text-primary)] mb-1">
+          <h1 className="text-2xl font-bold text-[var(--color-text-primary)] mb-5">
             {t('duel.searching')}
           </h1>
-          <p className="text-[var(--color-text-muted)] mb-5">{t('duel.waitingForOpponent')}</p>
+          {/* QA fix LO-1: antes había dos frases redundantes ("Buscando
+              oponente..." + "Esperando al oponente..."). Dejamos sólo el
+              título; el contador de tiempo ya señala que está activo. */}
           {connectionBanner}
 
           <div className="mb-4 tabular-nums text-3xl font-bold text-[var(--color-text-secondary)]">

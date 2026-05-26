@@ -61,7 +61,10 @@ const PODIUM_COLORS = {
     crown: '🥇',
   },
   2: {
-    bg: 'bg-gradient-to-b from-slate-300 to-slate-500',
+    // QA fix LO-5: antes from-slate-300 to-slate-500 daba un gris plano que
+    // no leía como "plata". Gradient más brillante con shine arriba lo hace
+    // sentir metálico junto al oro y el bronce.
+    bg: 'bg-gradient-to-b from-zinc-200 via-slate-300 to-slate-500',
     border: 'border-slate-300',
     text: 'text-slate-300',
     glow: 'shadow-slate-400/40',

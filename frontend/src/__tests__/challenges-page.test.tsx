@@ -41,7 +41,11 @@ describe('ChallengesPage', () => {
   it('muestra una llamada clara para crear desafío multijugador', async () => {
     render(<ChallengesPage />);
 
-    expect(await screen.findByText('challenges.createMultiplayerTitle')).toBeInTheDocument();
+    // QA fix ME-9: antes había una helper-card permanente con
+    // `challenges.createMultiplayerTitle` que duplicaba el "+ Nuevo desafío"
+    // del header y el botón del empty-state. La quitamos: el header y el
+    // empty-state cubren la llamada a crear.
+    expect(await screen.findByRole('button', { name: /\+ challenges.create/i })).toBeInTheDocument();
     expect(screen.getAllByRole('button', { name: 'challenges.createMultiplayerCta' }).length).toBeGreaterThan(0);
   });
 

@@ -13,7 +13,9 @@ describe('traducciones en español', () => {
     expect(es.game.lowTimeHint).toBe('Te quedan {{seconds}} segundos. Respira y confirma tu respuesta.');
     expect(es.results.newHighScore).toBe('¡Nuevo récord!');
     expect(es.challenges.title).toBe('Desafíos');
-    expect(es.challenges.createMultiplayerCta).toBe('Crear desafío multijugador');
+    // QA fix ME-9: "Crear desafío multijugador" se redujo a "Crear desafío"
+    // para no duplicar el "+ Nuevo desafío" del header (ME-9).
+    expect(es.challenges.createMultiplayerCta).toBe('Crear desafío');
     expect(es.rankings.empty).toBe('Aún no hay jugadores en el ranking');
     expect(es.common.success).toBe('Éxito');
   });
