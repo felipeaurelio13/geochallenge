@@ -327,8 +327,11 @@ export function ProfilePage() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <StatCard value={user.highScore} label={t('stats.highScore')} color="primary" />
                 <StatCard value={user.gamesPlayed} label={t('stats.gamesPlayed')} color="white" />
-                <StatCard value={user.wins} label={t('stats.wins')} color="green" />
-                <StatCard value={`${winRate}%`} label={t('stats.winRate')} color="yellow" />
+                {/* QA fix LO-6: cero no es éxito ni alerta; usar neutral hasta
+                    que haya datos reales. Antes "0 Victorias" salía en verde y
+                    "0% Tasa de victoria" en amarillo, ambos engañosos. */}
+                <StatCard value={user.wins} label={t('stats.wins')} color={user.wins > 0 ? 'green' : 'white'} />
+                <StatCard value={`${winRate}%`} label={t('stats.winRate')} color={user.gamesPlayed > 0 && winRate > 0 ? 'yellow' : 'white'} />
               </div>
             </div>
 
@@ -376,7 +379,10 @@ export function ProfilePage() {
             {achievements && achievements.length > 0 && (
               <div className="bg-[var(--color-surface)] rounded-xl p-6 mb-6">
                 <h3 className="text-lg font-semibold text-app-text mb-4">{t('profile.achievements', 'Logros')}</h3>
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {/* QA fix ME-6: antes `sm:grid-cols-3` dejaba el 4to logro
+                    huérfano en una fila vacía. `auto-fit` deja que cada fila
+                    se llene completa sin importar cuántos logros haya. */}
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-[repeat(auto-fit,minmax(140px,1fr))]">
                   {achievements.map((ach) => (
                     <div
                       key={ach.key}
@@ -387,7 +393,9 @@ export function ProfilePage() {
                         {i18n.language === 'en' ? ach.nameEn : ach.nameEs}
                       </span>
                       <span className="text-[0.65rem] text-[var(--color-text-muted)]">
-                        {new Date(ach.earnedAt).toLocaleDateString()}
+                        {/* QA fix ME-5: locale del i18n, no del browser.
+                            Antes mostraba 5/25/2026 en español (formato US). */}
+                        {new Date(ach.earnedAt).toLocaleDateString(i18n.language)}
                       </span>
                     </div>
                   ))}
@@ -458,7 +466,7 @@ export function ProfilePage() {
                   <div>
                     <FormLabel>{t('profile.memberSince')}</FormLabel>
                     <div className="px-4 py-3 bg-[var(--color-surface-muted)] rounded-lg text-[var(--color-text-muted)]">
-                      {new Date(user.createdAt).toLocaleDateString()}
+                      {new Date(user.createdAt).toLocaleDateString(i18n.language)}
                     </div>
                   </div>
                 )}
@@ -589,7 +597,7 @@ export function ProfilePage() {
                           {m.opponentUsername}
                         </div>
                         <div className="text-xs text-[var(--color-text-muted)]">
-                          {new Date(m.createdAt).toLocaleDateString()}
+                          {new Date(m.createdAt).toLocaleDateString(i18n.language)}
                           {m.category && (
                             <span className="ml-2 capitalize">{m.category.toLowerCase()}</span>
                           )}
@@ -672,7 +680,7 @@ export function ProfilePage() {
                             )}
                           </div>
                           <div className="text-xs text-[var(--color-text-muted)]">
-                            {new Date(entry.createdAt).toLocaleDateString()}
+                            {new Date(entry.createdAt).toLocaleDateString(i18n.language)}
                             <span className="mx-1.5">·</span>
                             {t('gameHistory.accuracy', {
                               correct: entry.correctCount,
@@ -770,7 +778,7 @@ export function ProfilePage() {
                         <li key={m.id} className="flex items-center gap-3 px-4 py-3">
                           <div className="flex-1 min-w-0">
                             <div className="text-xs text-[var(--color-text-muted)]">
-                              {new Date(m.createdAt).toLocaleDateString()}
+                              {new Date(m.createdAt).toLocaleDateString(i18n.language)}
                               {m.category && (
                                 <span className="ml-2 capitalize">{m.category.toLowerCase()}</span>
                               )}
