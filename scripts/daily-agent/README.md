@@ -12,6 +12,7 @@ no la duplica.
 ```
 scripts/daily-agent/
 ├── run.sh          # entry point (lo que dispara launchd)
+├── collectors.sh   # pre-flight: npm audit, i18n diff, TODOs, dep versions
 ├── prompt.md       # prompt estructurado del auditor
 ├── README.md       # este archivo
 ├── .gitignore      # ignora runs/ (logs locales)
@@ -21,6 +22,14 @@ scripts/daily-agent/
     ├── launchd.err.log
     └── YYYY-MM-DD/
         ├── context.md          # snapshot git que vio el auditor
+        ├── collectors.log      # log de los pre-flight collectors
+        ├── inputs/             # data pre-recolectada para el auditor
+        │   ├── INDEX.json
+        │   ├── npm-audit-frontend.json
+        │   ├── npm-audit-backend.json
+        │   ├── i18n-drift.json
+        │   ├── old-todos.json
+        │   └── dep-versions.json
         ├── prompt-rendered.md  # prompt con RUN_DIR resuelto
         ├── findings.json       # output estructurado del auditor
         ├── issue-body.md       # markdown que se postea como issue
@@ -143,11 +152,11 @@ Tokens por corrida: revisable en `runs/$(date +%F)/claude-output.json` (campo
 
 | Dimensión | Cómo | Estado |
 |---|---|---|
-| **Datos del juego** | Sample de monumentos (HEAD a Wikimedia), capitals cross-checked vs web, integridad estructural, propuestas de nuevos monumentos | Día 1 ✅ |
-| **Best practices externas** | Changelogs de React/Prisma/Node/Socket.IO, OWASP top 10 actualizado, mapeo al stack | Día 1 ✅ |
-| Security & deps | `npm audit`, drift de tipos Frontend↔Zod | Fase 2 (semana 3+) |
-| i18n consistencia | Diff es.json ↔ en.json, strings hardcoded | Fase 2 |
-| Auto-PR para low-risk | Findings con `auto_pr_safe: true` | Fase 3 (mes 2+) |
+| **A. Datos del juego** | Sample de monumentos (HEAD a Wikimedia), capitals cross-checked vs web, integridad estructural, propuestas de nuevos monumentos | Día 1 ✅ |
+| **B. Best practices externas** | Changelogs de React/Prisma/Node/Socket.IO, OWASP top 10 actualizado, mapeo al stack | Día 1 ✅ |
+| **C. Security & deps** | `collectors.sh` corre `npm audit` en frontend+backend, recolecta CVEs high/critical con `fix_available`. El auditor también cross-checkea 1 CVE reciente de JWT/Socket.IO/Express del último mes. | Día 1 ✅ |
+| **D. Consistencia interna** | `collectors.sh` diffea keys de `es.json` ↔ `en.json` y junta TODO/FIXME >90 días via `git blame`. El auditor samplea hardcoded strings en JSX. | Día 1 ✅ |
+| Auto-PR para low-risk | Findings con `auto_pr_safe: true` (`npm audit fix`, claves i18n triviales faltantes, URL Wikimedia rota con reemplazo verificado) | Fase 3 (mes 2+) |
 | UX/visual + a11y | Playwright + Claude visual eval | Fase 4 |
 
 ## Cambiar el horario

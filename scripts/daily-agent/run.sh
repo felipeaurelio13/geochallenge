@@ -81,6 +81,7 @@ require_cmd gh
 require_cmd jq
 require_cmd git
 require_cmd curl
+require_cmd npm
 
 if ! gh auth status >/dev/null 2>&1; then
   log_err "gh CLI is not authenticated. Run 'gh auth login' and retry."
@@ -130,6 +131,21 @@ git fetch origin master --quiet 2>/dev/null || log "git fetch failed (continuing
     2>/dev/null || echo "(could not query gh)"
   echo '```'
 } > "$RUN_DIR/context.md"
+
+# ---- Pre-flight collectors -------------------------------------------------
+# Run cheap, machine-readable checks BEFORE invoking Claude so we don't spend
+# tokens on work bash+jq can do in seconds. Outputs go to RUN_DIR/inputs/.
+log "Running pre-flight collectors..."
+set +e
+"$SCRIPT_DIR/collectors.sh" "$REPO_ROOT" "$RUN_DIR" > "$RUN_DIR/collectors.log" 2>&1
+COLLECTORS_EXIT=$?
+set -e
+if [ "$COLLECTORS_EXIT" -ne 0 ]; then
+  log "WARN: collectors exited with $COLLECTORS_EXIT — proceeding anyway (auditor will see whatever it produced)"
+fi
+if [ -f "$RUN_DIR/inputs/INDEX.json" ]; then
+  log "Collectors produced: $(jq -r '.files | join(", ")' "$RUN_DIR/inputs/INDEX.json")"
+fi
 
 # ---- Render prompt ---------------------------------------------------------
 PROMPT_FILE="$SCRIPT_DIR/prompt.md"

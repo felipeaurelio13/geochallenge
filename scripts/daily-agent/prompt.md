@@ -41,7 +41,23 @@ The wrapper script owns side effects.
 dimension has nothing actionable today, state that explicitly in
 `per_dimension_status`. A short, true digest beats a long, padded one.
 
-## Scope (Day 1)
+## Pre-collected inputs (read these first)
+
+The runner script has already gathered cheap, machine-readable inputs under
+`RUN_DIR/inputs/`. Read `inputs/INDEX.json` first to see what's available,
+then read the specific JSON files. Do NOT re-do the work those files already
+contain (running `npm audit`, scanning i18n keys, finding TODOs). Use them
+as your source of truth for dimensions C and D below.
+
+Available collectors:
+- `npm-audit-frontend.json`, `npm-audit-backend.json` — slim audit summary
+  with high/critical CVEs and `fix_available` flag.
+- `i18n-drift.json` — total key counts in es.json and en.json, plus exact
+  lists of keys missing on each side.
+- `old-todos.json` — TODO/FIXME/XXX older than 90 days (with file:line, age).
+- `dep-versions.json` — current installed versions for both projects.
+
+## Scope
 
 ### Dimension A — Game data freshness & integrity
 
@@ -85,6 +101,57 @@ the whole web.
    in the last week relevant to React 18 SPA + PWA + Leaflet + i18next + JWT.
    Cite the URL.
 
+### Dimension C — Security & dependencies
+
+The expensive work is done. You consume `inputs/npm-audit-frontend.json` and
+`inputs/npm-audit-backend.json`.
+
+1. **High / critical CVEs**: list each `high_or_critical` entry. For each,
+   one finding with severity matching the CVE severity. Include `name`, the
+   first `via` title (the CVE summary), and `fix_available`. If
+   `fix_available: true`, the `proposed_action` is "run `npm audit fix` in
+   `<project>/`" and `auto_pr_safe: true` (the runner trusts this gate, do
+   NOT mark transitive breakages as safe — only when fix_available is true
+   *and* the via is a single direct dependency).
+2. **Moderate CVE volume signal**: if `vulnerabilities_summary.moderate >= 10`,
+   emit ONE summary finding pointing at the count, severity `warning`, action
+   "review `npm audit` in both projects, batch upgrade compatible patches".
+   Not one per moderate — that's noise.
+3. **Stack-specific security review** (no audit input needed): WebSearch one
+   item only — most recent JWT, Socket.IO, or Express CVE / security advisory
+   from the last 30 days. Cross-reference our `dep-versions.json`. Only flag
+   if we are actually affected.
+
+Do NOT re-run `npm audit` yourself. The collector already did it.
+
+### Dimension D — Internal consistency
+
+1. **i18n drift**: consume `inputs/i18n-drift.json`.
+   - If `missing_in_en_count > 0` or `missing_in_es_count > 0`: one finding
+     per side (max 2). Severity `warning`. Evidence: the count and 3-5
+     example keys. Action: "add the missing keys to `frontend/src/i18n/<lang>.json`".
+     Mark `auto_pr_safe: true` IF the missing count is ≤ 5 and the keys are
+     trivial (single-word leaf nodes). Otherwise `auto_pr_safe: false`
+     (translations need a human).
+   - If both counts are 0: state "i18n parity ok" in `per_dimension_status`.
+2. **Stale TODOs**: consume `inputs/old-todos.json`.
+   - If `total >= 5`: ONE summary finding, severity `suggestion`. List the
+     top 3 oldest with file:line. Action: "decide: fix, file as issue, or
+     remove the comment".
+   - If `total` is 0-4: skip — not worth an issue line.
+3. **Hardcoded strings hunt** (sample only, do NOT exhaustively scan):
+   - Grep for `>[A-Z][a-z]+ [a-z]+` (rough heuristic for English/Spanish
+     text inside JSX) in 3-5 random files under `frontend/src/components/`.
+     If you find a clear case (a visible UI string not behind `useTranslation()`),
+     emit ONE finding, severity `suggestion`, citing file:line. Do NOT list
+     more than 2 examples — this is sampling.
+4. **Type drift between frontend and backend Zod schemas**: out of scope for
+   automated checking (too much false-positive risk). If you happen to read
+   both `frontend/src/types/index.ts` and a backend Zod schema while doing
+   another check, and notice an obvious mismatch (e.g. a field present in
+   one but not the other), flag as `suggestion` with `auto_pr_safe: false`.
+   Do not actively hunt for these.
+
 ## Tools you may use
 
 - `Read`, `Grep`, `Glob` — for the repo
@@ -104,11 +171,13 @@ You may NOT: run npm, modify any file outside `RUN_DIR`, push to git, call
   "summary": "1 critical (broken monument URL), 2 warnings, 3 suggestions",
   "per_dimension_status": {
     "data": "ok | issues_found | check_failed",
-    "best_practices": "ok | issues_found | check_failed"
+    "best_practices": "ok | issues_found | check_failed",
+    "security": "ok | issues_found | check_failed",
+    "consistency": "ok | issues_found | check_failed"
   },
   "findings": [
     {
-      "dimension": "data" | "best_practices",
+      "dimension": "data" | "best_practices" | "security" | "consistency",
       "severity": "critical" | "warning" | "suggestion",
       "title": "Short imperative title",
       "evidence": "How you verified this. Include curl output, URL, search result snippet, or file:line reference. No vague claims.",
@@ -150,6 +219,8 @@ Field rules:
 
 - Data: <ok / N findings / check failed because X>
 - Best practices: <ok / N findings / check failed because X>
+- Security: <ok / N findings / check failed because X>
+- Consistency: <ok / N findings / check failed because X>
 
 ---
 
