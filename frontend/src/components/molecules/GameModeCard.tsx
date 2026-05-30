@@ -40,7 +40,7 @@ export function GameModeCard({
       className={`pressable rounded-2xl border ${borderClass} bg-app-surface/80 py-2.5 px-3 text-left transition-all ${hoverClass} disabled:opacity-50 disabled:cursor-not-allowed sm:py-3 sm:px-4 ${className}`}
     >
       <h3 className="flex items-center gap-2 text-base font-bold text-app-text sm:text-lg">
-        <span role="img" className={accent?.icon}>{icon}</span>
+        <span aria-hidden="true" className={accent?.icon}>{icon}</span>
         {title}
       </h3>
       <p className="mt-0.5 text-xs leading-snug text-app-subtle sm:text-[0.82rem]">

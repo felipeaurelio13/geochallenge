@@ -9,9 +9,10 @@ interface CategorySelectorProps {
   categories: CategoryItem[];
   selected: string;
   onSelect: (id: string) => void;
+  ariaLabel: string;
 }
 
-export function CategorySelector({ categories, selected, onSelect }: CategorySelectorProps) {
+export function CategorySelector({ categories, selected, onSelect, ariaLabel }: CategorySelectorProps) {
   return (
     // Wrapper relative para hostear el fade gradient en el borde derecho.
     // El fade le indica al usuario que hay más opciones a la derecha en mobile
@@ -19,7 +20,8 @@ export function CategorySelector({ categories, selected, onSelect }: CategorySel
     <div className="relative">
       <div
         className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:grid sm:grid-cols-7 sm:overflow-visible sm:px-0"
-        aria-label="Categorías"
+        role="group"
+        aria-label={ariaLabel}
       >
         {categories.map((cat) => (
           <button
@@ -33,7 +35,7 @@ export function CategorySelector({ categories, selected, onSelect }: CategorySel
                 : 'border-app-border bg-app-surface/80 text-app-secondary hover:border-app-border hover:text-app-text hover:bg-app-muted/60'
             }`}
           >
-            <span className="menu-category-selector__icon text-xl leading-none">{cat.icon}</span>
+            <span aria-hidden="true" className="menu-category-selector__icon text-xl leading-none">{cat.icon}</span>
             <span className="menu-category-selector__label text-[0.7rem] font-medium leading-tight xs:text-[0.75rem] sm:text-xs">
               {cat.label}
             </span>

@@ -173,6 +173,11 @@ export function MenuPage() {
     return parts.join(' · ');
   }
 
+  const activeFilterSummary = filterSummary();
+  const filterButtonLabel = filtersActive
+    ? t('filters.openActiveFilters', { summary: activeFilterSummary })
+    : t('filters.openFilters');
+
   return (
     <PageTemplate
       header={
@@ -215,30 +220,37 @@ export function MenuPage() {
           categories={categories.map((cat) => ({ id: cat.id, icon: cat.icon, label: t(cat.labelKey), accentClass: cat.accentClass }))}
           selected={selectedCategory}
           onSelect={(id) => setSelectedCategory(id as Category)}
+          ariaLabel={t('menu.categorySelectorLabel')}
         />
       </section>
 
       {/* Filter bar */}
       <div className="mt-3 flex items-center gap-2">
         <button
+          type="button"
           onClick={() => setDrawerOpen(true)}
+          aria-label={filterButtonLabel}
+          aria-haspopup="dialog"
+          aria-expanded={drawerOpen}
           className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
             filtersActive
               ? 'border-primary/60 bg-primary/15 text-primary'
               : 'border-app-border bg-app-surface/80 text-app-subtle hover:border-app-border hover:text-app-secondary'
           }`}
         >
-          <span>🎚️</span>
-          <span>{filtersActive ? filterSummary() : t('filters.filterBy')}</span>
-          {!filtersActive && <span className="opacity-50">▾</span>}
+          <span aria-hidden="true">🎚️</span>
+          <span>{filtersActive ? activeFilterSummary : t('filters.filterBy')}</span>
+          {!filtersActive && <span aria-hidden="true" className="opacity-50">▾</span>}
         </button>
         {filtersActive && (
           <button
+            type="button"
             onClick={clearFilters}
             className="rounded-full border border-app-border bg-app-surface/80 px-2 py-1.5 text-xs text-app-subtle hover:text-red-400"
-            title={t('filters.clearAll')}
+            title={t('filters.clearActive')}
+            aria-label={t('filters.clearActive')}
           >
-            ✕
+            <span aria-hidden="true">✕</span>
           </button>
         )}
       </div>
@@ -313,7 +325,7 @@ export function MenuPage() {
         to="/flag-master"
         className="mt-4 flex items-center gap-4 rounded-2xl border border-red-500/70 bg-gradient-to-r from-red-700 to-amber-700 px-4 py-3.5 text-white shadow-md shadow-red-900/30 transition-all hover:from-red-600 hover:to-amber-600 hover:shadow-lg pressable"
       >
-        <span className="shrink-0 text-3xl leading-none drop-shadow">🏴</span>
+        <span aria-hidden="true" className="shrink-0 text-3xl leading-none drop-shadow">🏴</span>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <span className="font-bold text-white">{t('menu.flagMaster', 'Maestro de Banderas')}</span>
@@ -325,7 +337,7 @@ export function MenuPage() {
             {t('menu.flagMasterDesc', '10 rondas · sin color, recortes y trampas · multiplicadores hasta x2.5')}
           </div>
         </div>
-        <span className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white text-base font-bold">
+        <span aria-hidden="true" className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white text-base font-bold">
           →
         </span>
       </Link>
@@ -335,7 +347,7 @@ export function MenuPage() {
         to="/daily"
         className="mt-4 flex items-center gap-4 rounded-2xl border border-cyan-500/70 bg-gradient-to-r from-cyan-700 to-emerald-700 px-4 py-3.5 text-white shadow-md shadow-cyan-900/30 transition-all hover:from-cyan-600 hover:to-emerald-600 hover:shadow-lg pressable"
       >
-        <span className="shrink-0 text-3xl leading-none drop-shadow">📅</span>
+        <span aria-hidden="true" className="shrink-0 text-3xl leading-none drop-shadow">📅</span>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <span className="font-bold text-white">{t('menu.dailyChallenge', 'Reto del día')}</span>
@@ -345,7 +357,7 @@ export function MenuPage() {
           </div>
           <div className="mt-0.5 text-xs text-white/85">{t('menu.dailyChallengeDesc', '10 preguntas · mismas para todos · un intento')}</div>
         </div>
-        <span className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white text-base font-bold">
+        <span aria-hidden="true" className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white text-base font-bold">
           →
         </span>
       </Link>
@@ -362,7 +374,7 @@ export function MenuPage() {
             to="/rankings"
             className="pressable flex items-center gap-3 rounded-xl border border-app-border bg-app-surface/80 px-4 py-3 text-app-secondary transition-colors hover:border-primary/60 hover:bg-primary/10"
           >
-            <span className="text-2xl leading-none">🏆</span>
+            <span aria-hidden="true" className="text-2xl leading-none">🏆</span>
             <div className="min-w-0 flex-1">
               <div className="text-sm font-semibold text-app-text">{t('menu.rankings')}</div>
               <div className="truncate text-xs text-app-subtle">{t('menu.rankingsDesc')}</div>
@@ -372,7 +384,7 @@ export function MenuPage() {
             to="/profile"
             className="pressable flex items-center gap-3 rounded-xl border border-app-border bg-app-surface/80 px-4 py-3 text-app-secondary transition-colors hover:border-primary/60 hover:bg-primary/10"
           >
-            <span className="text-2xl leading-none">📊</span>
+            <span aria-hidden="true" className="text-2xl leading-none">📊</span>
             <div className="min-w-0 flex-1">
               <div className="text-sm font-semibold text-app-text">{t('menu.yourStats')}</div>
               <div className="truncate text-xs text-app-subtle">{t('menu.yourStatsDesc')}</div>

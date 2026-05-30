@@ -33,12 +33,19 @@ vi.mock('../context/AuthContext', () => ({
   }),
 }));
 
+vi.mock('../services/api', () => ({
+  api: {
+    getGameAvailability: vi.fn(() => new Promise(() => {})),
+  },
+}));
+
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string, _options?: Record<string, string>) => {
       const translations: Record<string, string> = {
         'menu.selectCategory': 'Selecciona una categoría',
         'menu.gameModes': 'Modos de juego',
+        'menu.categorySelectorLabel': 'Categorías de preguntas',
         'menu.flash': 'Flash',
         'menu.flashDesc': '60s · combo x10',
         'menu.singlePlayer': 'Un Jugador',
@@ -55,8 +62,12 @@ vi.mock('react-i18next', () => ({
         'categories.silhouettes': 'Siluetas',
         'categories.mixed': 'Mixto',
         'auth.logout': 'Cerrar sesión',
+        'filters.filterBy': 'Filtrar',
+        'filters.openFilters': 'Abrir filtros de preguntas',
+        'filters.openActiveFilters': 'Abrir filtros de preguntas. Filtros activos: {{summary}}',
+        'filters.clearActive': 'Limpiar filtros activos',
       };
-      return translations[key] ?? key;
+      return (translations[key] ?? key).replace('{{summary}}', _options?.summary ?? '');
     },
   }),
 }));
@@ -159,7 +170,7 @@ describe('MenuPage', () => {
     const main = container.querySelector('main');
     expect(main?.className).toContain('py-2.5');
 
-    const categoryButton = screen.getByRole('button', { name: /🎲\s*mixto/i });
+    const categoryButton = screen.getByRole('button', { name: /^mixto$/i });
     expect(categoryButton.className).toContain('min-h-[4.5rem]');
 
     const singleModeButton = screen.getByRole('button', { name: /un jugador[\s\S]*juega solo/i });
@@ -182,7 +193,7 @@ describe('MenuPage', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /mapas/i }));
 
-    expect(screen.getByRole('button', { name: /🗺️\s*mapas/i })).toHaveAttribute(
+    expect(screen.getByRole('button', { name: /^mapas$/i })).toHaveAttribute(
       'aria-pressed',
       'true',
     );
@@ -195,8 +206,8 @@ describe('MenuPage', () => {
       </MemoryRouter>,
     );
 
-    const mixedButton = screen.getByRole('button', { name: /🎲\s*mixto/i });
-    const flagsButton = screen.getByRole('button', { name: /🏳️\s*banderas/i });
+    const mixedButton = screen.getByRole('button', { name: /^mixto$/i });
+    const flagsButton = screen.getByRole('button', { name: /^banderas$/i });
 
     expect(mixedButton.className).toContain('menu-category-selector');
     expect(flagsButton.className).toContain('menu-category-selector');
@@ -228,5 +239,20 @@ describe('MenuPage', () => {
     fireEvent.click(singleModeButton);
 
     expect(mockNavigate).toHaveBeenCalledWith('/game/single?category=CAPITAL');
+  });
+
+  it('expone nombres accesibles claros para categorías y filtros', () => {
+    render(
+      <MemoryRouter future={routerFutureConfig}>
+        <MenuPage />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole('group', { name: /categorías de preguntas/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^banderas$/i })).toBeInTheDocument();
+
+    const filterButton = screen.getByRole('button', { name: /abrir filtros de preguntas/i });
+    expect(filterButton).toHaveAttribute('aria-haspopup', 'dialog');
+    expect(filterButton).toHaveAttribute('aria-expanded', 'false');
   });
 });
