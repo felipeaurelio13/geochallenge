@@ -16,7 +16,7 @@ import { uiStoreActions, useUiStore } from '../store/useUiStore';
 import type {
   DuelMatchRecord,
   DuelPeriodStats,
-  DuelOpponent,
+  DuelOpponentSummary,
   HeadToHeadData,
   DuelPeriod,
   CategoryStat,
@@ -79,7 +79,7 @@ export function ProfilePage() {
 
   // H2H tab state
   const [h2hSearch, setH2hSearch] = useState('');
-  const [opponents, setOpponents] = useState<DuelOpponent[]>([]);
+  const [opponents, setOpponents] = useState<DuelOpponentSummary[]>([]);
   const [opponentsLoading, setOpponentsLoading] = useState(false);
   const [selectedOpponent, setSelectedOpponent] = useState<HeadToHeadData | null>(null);
   const [h2hLoading, setH2hLoading] = useState(false);

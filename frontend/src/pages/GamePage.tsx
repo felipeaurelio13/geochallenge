@@ -18,7 +18,7 @@ import { FullScreenError } from '../components/molecules/FullScreenError';
 import { MonumentAttribution } from '../components/MonumentAttribution';
 import { Category, GameFilters, MechanicUsage, Question, hasActiveFilters } from '../types';
 import { GAME_CONSTANTS } from '../constants/game';
-import { useHaptics } from '../hooks';
+import { useConfirmDialog, useHaptics } from '../hooks';
 import { areMechanicsV2Enabled } from '../config/featureFlags';
 import { trackUxEvent } from '../utils/uxTelemetry';
 import { generateFunFact } from '../utils/funFacts';
@@ -81,6 +81,7 @@ export function GamePage() {
 
   const { questions, currentIndex, score, results, status } = state;
   const haptics = useHaptics();
+  const { confirm, confirmDialog } = useConfirmDialog();
 
   const [timeRemaining, setTimeRemaining] = useState(TIME_PER_QUESTION);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
@@ -167,7 +168,7 @@ export function GamePage() {
           typeof shortGameData.requested === 'number' &&
           shortGameData.available < shortGameData.requested
         ) {
-          const confirmed = window.confirm(
+          const confirmed = await confirm(
             t('game.shortGameConfirm', {
               available: shortGameData.available,
               requested: shortGameData.requested,
@@ -188,11 +189,11 @@ export function GamePage() {
           return;
         }
 
-        setError(err.message || 'Error al iniciar el juego');
+        setError(err.message || t('game.startError'));
       }
     };
     initGame();
-  }, [category, gameType, gameFilters, startGame]);
+  }, [category, gameType, gameFilters, startGame, confirm]);
 
   // Keyboard shortcuts: A/B/C/D to select, Enter to submit/next
   const handleKeyDown = useCallback(
@@ -428,6 +429,7 @@ export function GamePage() {
   if (isLoading) {
     return (
       <div className="h-full min-h-0 bg-[var(--color-bg-app)] flex items-center justify-center">
+        {confirmDialog}
         <LoadingSpinner size="lg" text={t('game.loading')} />
       </div>
     );
@@ -455,13 +457,15 @@ export function GamePage() {
   }
 
   return (
+    <>
+    {confirmDialog}
     <GameRoundScaffold
       header={
         <header className="sticky top-0 z-30 border-b border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 pb-2 pt-3 backdrop-blur sm:px-4 sm:pb-3 sm:pt-4">
           <div className="max-w-4xl mx-auto grid grid-cols-[auto_1fr_auto] items-center gap-2.5 sm:gap-4">
             <button
-              onClick={() => {
-                if (window.confirm(t('game.confirmExit'))) {
+              onClick={async () => {
+                if (await confirm(t('game.confirmExit'))) {
                   trackUxEvent('round_abandon', {
                     mode: gameType,
                     questionId: currentQuestion?.id,
@@ -603,5 +607,6 @@ export function GamePage() {
         />
       }
     />
+    </>
   );
 }

@@ -1,5 +1,6 @@
 export { Card } from './Card';
 export { CategorySelector } from './CategorySelector';
+export { ConfirmDialog } from './ConfirmDialog';
 export { FilterDrawer } from './FilterDrawer';
 export { EmptyState } from './EmptyState';
 export { FormField } from './FormField';

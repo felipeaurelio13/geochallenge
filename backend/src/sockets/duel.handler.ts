@@ -157,8 +157,9 @@ async function persistPlayerDuel(userId: string, duelId: string | null): Promise
     } else {
       await redis.del(`duel:player:${userId}`);
     }
-  } catch {
+  } catch (err) {
     // Redis failure is non-fatal — in-memory state still works
+    console.error(`[duel] failed to persist duel pointer for ${userId}:`, err);
   }
 }
 

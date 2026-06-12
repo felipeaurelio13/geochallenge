@@ -24,9 +24,24 @@ export const createChallengeSchema = z.object({
   }).optional(),
 });
 
-const submitResultSchema = z.object({
-  score: z.number().min(0),
-  correctCount: z.number().min(0),
+// El cliente manda sus respuestas, NUNCA el puntaje: el servidor las valida
+// contra la DB y calcula el score (ver utils/answerEvaluation.ts).
+export const submitResultSchema = z.object({
+  answers: z
+    .array(
+      z.object({
+        questionId: z.string().min(1).max(64),
+        answer: z.string().max(200).optional(),
+        mapAnswer: z
+          .object({
+            lat: z.number().min(-90).max(90),
+            lng: z.number().min(-180).max(180),
+          })
+          .optional(),
+        timeRemaining: z.number().min(0).max(300),
+      })
+    )
+    .max(20),
 });
 
 router.post('/', authenticateJWT, async (req: AuthRequest, res: Response) => {
@@ -98,15 +113,21 @@ router.post('/:id/accept', authenticateJWT, async (req: AuthRequest, res: Respon
 
 router.post('/:id/submit', authenticateJWT, async (req: AuthRequest, res: Response) => {
   try {
+    // Clientes con la versión anterior cacheada (PWA) mandan {score, correctCount}.
+    if (!req.body?.answers && typeof req.body?.score === 'number') {
+      return res.status(400).json({
+        error: 'Tu versión de la app está desactualizada. Recarga la página e intenta de nuevo.',
+      });
+    }
+
     const data = submitResultSchema.parse(req.body);
-    const challenge = await challengeService.submitChallengeResult(
+    const { challenge, result } = await challengeService.submitChallengeResult(
       req.params.id,
       req.user!.userId,
-      data.score,
-      data.correctCount
+      data.answers
     );
 
-    res.json({ message: 'Resultado guardado', challenge });
+    res.json({ message: 'Resultado guardado', challenge, result });
   } catch (error: any) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: 'Datos inválidos', details: error.errors });

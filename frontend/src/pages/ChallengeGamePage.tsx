@@ -1,4 +1,4 @@
-import { useEffect, useState, lazy, Suspense } from 'react';
+import { useEffect, useRef, useState, lazy, Suspense } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../services/api';
@@ -15,6 +15,7 @@ import { FullScreenError } from '../components/molecules/FullScreenError';
 import { MonumentAttribution } from '../components/MonumentAttribution';
 import { Question } from '../types';
 import { GAME_CONSTANTS } from '../constants/game';
+import { getApiErrorMessage } from '../utils/apiError';
 import { useHaptics } from '../hooks';
 import { areMechanicsV2Enabled } from '../config/featureFlags';
 import { trackUxEvent } from '../utils/uxTelemetry';
@@ -36,6 +37,15 @@ export function ChallengeGamePage() {
   const [score, setScore] = useState(0);
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [results, setResults] = useState<Array<{ isCorrect: boolean }>>([]);
+  // Respuestas crudas para el backend: el servidor las valida y calcula el score.
+  const answersRef = useRef<
+    Array<{
+      questionId: string;
+      answer?: string;
+      mapAnswer?: { lat: number; lng: number };
+      timeRemaining: number;
+    }>
+  >([]);
   const haptics = useHaptics();
   const [timePerQuestion, setTimePerQuestion] = useState(TIME_PER_QUESTION);
   const [timeRemaining, setTimeRemaining] = useState(TIME_PER_QUESTION);
@@ -77,8 +87,8 @@ export function ChallengeGamePage() {
         } else if (response.questions) {
           setQuestions(response.questions);
         }
-      } catch (err: any) {
-        setError(err.response?.data?.error || 'Error al cargar el desafio');
+      } catch (err: unknown) {
+        setError(getApiErrorMessage(err, t('challenges.loadError')));
       } finally {
         setLoading(false);
       }
@@ -143,6 +153,15 @@ export function ChallengeGamePage() {
 
     const points = calculatePoints(isCorrect, mapDistance);
 
+    if (answersRef.current.length <= currentIndex) {
+      answersRef.current.push({
+        questionId: currentQuestion.id,
+        answer: !isMapQuestion && selectedAnswer ? selectedAnswer : undefined,
+        mapAnswer: isMapQuestion && mapLocation ? mapLocation : undefined,
+        timeRemaining: Math.max(0, timeRemaining),
+      });
+    }
+
     setPreviousScore(score);
     if (isCorrect) {
       setCorrectAnswers((prev) => prev + 1);
@@ -202,20 +221,20 @@ export function ChallengeGamePage() {
     if (currentIndex >= questions.length - 1) {
       try {
         setIsSubmitting(true);
-        await api.post<{ success: boolean }>(`/challenges/${id}/submit`, {
-          score,
-          correctCount: correctAnswers,
-        });
+        const response = await api.post<{ result?: { score: number; correctCount: number } }>(
+          `/challenges/${id}/submit`,
+          { answers: answersRef.current }
+        );
         navigate(`/challenges/${id}/results`, {
           state: {
-            score: score,
-            correctAnswers: correctAnswers,
+            score: response.result?.score ?? score,
+            correctAnswers: response.result?.correctCount ?? correctAnswers,
             totalQuestions: questions.length,
           },
         });
-      } catch (err: any) {
-        alert(err.response?.data?.error || 'Error al guardar resultado');
-        navigate('/challenges');
+      } catch (err: unknown) {
+        // El estado `error` renderiza FullScreenError con botón de volver a /challenges.
+        setError(getApiErrorMessage(err, t('challenges.submitError')));
       } finally {
         setIsSubmitting(false);
       }

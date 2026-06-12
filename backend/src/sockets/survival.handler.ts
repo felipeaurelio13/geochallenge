@@ -412,29 +412,41 @@ async function endGame(
   cleanupMatch(match.id);
 
   try {
-    await prisma.survivalMatch.create({
-      data: {
-        id: matchSnapshot.id,
-        category: matchSnapshot.category || null,
-        totalRounds: matchSnapshot.totalRounds,
-        peakPlayers: matchSnapshot.peakPlayers,
-        participants: {
-          create: matchSnapshot.players.map((p) => ({
-            userId: p.userId,
-            finalRank: p.finalRank,
-            eliminatedRound: p.eliminatedRound,
-            finalScore: p.finalScore,
-            correctCount: p.correctCount,
-            livesEarned: p.livesEarned,
-          })),
+    // Atómico: el match, sus participantes y los GameResult de cada jugador
+    // se persisten juntos o no se persiste nada (evita historiales a medias).
+    await prisma.$transaction(async (tx) => {
+      await tx.survivalMatch.create({
+        data: {
+          id: matchSnapshot.id,
+          category: matchSnapshot.category || null,
+          totalRounds: matchSnapshot.totalRounds,
+          peakPlayers: matchSnapshot.peakPlayers,
+          participants: {
+            create: matchSnapshot.players.map((p) => ({
+              userId: p.userId,
+              finalRank: p.finalRank,
+              eliminatedRound: p.eliminatedRound,
+              finalScore: p.finalScore,
+              correctCount: p.correctCount,
+              livesEarned: p.livesEarned,
+            })),
+          },
         },
-      },
+      });
+
+      for (const p of matchSnapshot.players) {
+        await saveGameResult(p.userId, p.answers, matchSnapshot.category, GameMode.SURVIVAL, tx);
+      }
     });
 
+    // Leaderboards (Redis) fuera de la transacción: best-effort, pero logueado.
     for (const p of matchSnapshot.players) {
-      await saveGameResult(p.userId, p.answers, matchSnapshot.category, GameMode.SURVIVAL);
-      await updateLeaderboardScore(p.userId, p.finalScore).catch(() => {});
-      await updateSeasonLeaderboardScore(p.userId, p.finalScore).catch(() => {});
+      await updateLeaderboardScore(p.userId, p.finalScore).catch((err) => {
+        console.error(`[survival] leaderboard update failed for ${p.userId}:`, err);
+      });
+      await updateSeasonLeaderboardScore(p.userId, p.finalScore).catch((err) => {
+        console.error(`[survival] season leaderboard update failed for ${p.userId}:`, err);
+      });
     }
   } catch (err) {
     console.error(`[survival] Error saving results for ${matchSnapshot.id}:`, err);

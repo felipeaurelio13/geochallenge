@@ -10,6 +10,7 @@ import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ShareButton } from '../components/ShareButton';
 import { FullScreenError } from '../components/molecules/FullScreenError';
 import { PageTemplate } from '../components/templates/PageTemplate';
+import { useConfirmDialog } from '../hooks/useConfirmDialog';
 import { api } from '../services/api';
 import type {
   FlagMasterFinishResponse,
@@ -87,6 +88,7 @@ const MODIFIER_DESC_KEYS: Record<FlagModifier, { key: string; fallback: string }
 export function FlagMasterPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { confirm, confirmDialog } = useConfirmDialog();
   const [status, setStatus] = useState<PageStatus>('loading');
   const [gameId, setGameId] = useState<string | null>(null);
   const [rounds, setRounds] = useState<FlagMasterRound[]>([]);
@@ -290,13 +292,14 @@ export function FlagMasterPage() {
 
   return (
     <PageTemplate contentClassName="pb-4">
+      {confirmDialog}
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-3 px-2 py-2 sm:gap-4 sm:px-4">
         {/* Header: exit + round counter + score */}
         <div className="flex items-center justify-between gap-2">
           <button
             type="button"
-            onClick={() => {
-              if (window.confirm(t('flagMaster.confirmExit', '¿Seguro? Perderás tu progreso.'))) {
+            onClick={async () => {
+              if (await confirm(t('flagMaster.confirmExit', '¿Seguro? Perderás tu progreso.'))) {
                 navigate('/menu');
               }
             }}

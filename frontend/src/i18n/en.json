@@ -267,7 +267,8 @@
     "scoreBreakdownAccuracy": "accuracy",
     "timeRemaining": "Time remaining {{seconds}}s seconds",
     "shortGameConfirm": "Only {{available}} questions are available (out of {{requested}} requested). Do you want to play anyway?",
-    "shortGameCancelled": "Game cancelled. Try another category or setup to get more questions."
+    "shortGameCancelled": "Game cancelled. Try another category or setup to get more questions.",
+    "startError": "Failed to start the game"
   },
   "results": {
     "shareStreakButton": "Share my streak",
@@ -317,7 +318,8 @@
     "reconnected": "Connection restored.",
     "reconnectedSearching": "Connection restored. We rejoined matchmaking.",
     "reconnectedSyncing": "Connection restored. Syncing the current round...",
-    "searchTimeout": "No opponent found. Try again later."
+    "searchTimeout": "No opponent found. Try again later.",
+    "opponent": "Opponent"
   },
   "challenges": {
     "title": "Challenges",
@@ -375,7 +377,11 @@
     "resultsSubtitle": "Summary of your match. You can now go back to the list and keep competing.",
     "resultsUnavailable": "We could not find this challenge results. Go back to the list to continue.",
     "playAgain": "Play this challenge again",
-    "activeFilters": "Active filters: {{summary}}"
+    "activeFilters": "Active filters: {{summary}}",
+    "loadError": "Failed to load the challenge",
+    "submitError": "Failed to save your result",
+    "joinError": "Failed to join the challenge",
+    "createError": "Failed to create the challenge"
   },
   "rankings": {
     "title": "Global Rankings",

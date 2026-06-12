@@ -2,6 +2,7 @@ import { prisma } from '../config/database.js';
 import { Category, Prisma } from '@prisma/client';
 import { updateLeaderboardScore, updateSeasonLeaderboardScore } from './leaderboard.service.js';
 import { QuestionFilters } from './game.service.js';
+import { evaluateTimedAnswers, SubmittedAnswer } from '../utils/answerEvaluation.js';
 
 const CHALLENGE_EXPIRY_DAYS = 7;
 const QUESTIONS_PER_CHALLENGE = 10;
@@ -246,8 +247,7 @@ export class ChallengeService {
   async submitChallengeResult(
     challengeId: string,
     userId: string,
-    score: number,
-    correctCount: number
+    answers: SubmittedAnswer[]
   ) {
     const challenge = await prisma.challenge.findUnique({
       where: { id: challengeId },
@@ -271,6 +271,17 @@ export class ChallengeService {
     if (participant.score !== null) {
       throw new Error('Ya has jugado este desafío');
     }
+
+    const questions = await prisma.question.findMany({
+      where: { id: { in: challenge.questionIds } },
+      select: { id: true, category: true, correctAnswer: true, latitude: true, longitude: true },
+    });
+
+    const { score, correctCount } = evaluateTimedAnswers(
+      questions,
+      answers,
+      challenge.answerTimeSeconds
+    );
 
     await prisma.challengeParticipant.update({
       where: { id: participant.id },
@@ -297,24 +308,28 @@ export class ChallengeService {
       const tied = sorted.filter((p) => p.score === topScore);
       const winnerId = tied.length === 1 ? tied[0].userId : null;
 
-      await prisma.challenge.update({
-        where: { id: challengeId },
-        data: {
-          status: 'COMPLETED',
-          completedAt: new Date(),
-          winnerId,
-        },
-      });
+      // Cierre atómico: status + stats de todos los participantes, o nada.
+      await prisma.$transaction(async (tx) => {
+        await tx.challenge.update({
+          where: { id: challengeId },
+          data: {
+            status: 'COMPLETED',
+            completedAt: new Date(),
+            winnerId,
+          },
+        });
 
-      await Promise.all(
-        updatedChallenge.participants.map(async (p) => {
+        for (const p of updatedChallenge.participants) {
           const isWinner = winnerId === p.userId;
           const isLoss = winnerId !== null && winnerId !== p.userId;
-          const userHighScore = await this.getUserHighScore(p.userId);
+          const user = await tx.user.findUnique({
+            where: { id: p.userId },
+            select: { highScore: true },
+          });
           const newScore = p.score ?? 0;
-          const isHighScore = newScore > userHighScore;
+          const isHighScore = newScore > (user?.highScore ?? 0);
 
-          await prisma.user.update({
+          await tx.user.update({
             where: { id: p.userId },
             data: {
               gamesPlayed: { increment: 1 },
@@ -323,11 +338,19 @@ export class ChallengeService {
               highScore: isHighScore ? newScore : undefined,
             },
           });
+        }
+      });
 
-          await updateLeaderboardScore(p.userId, newScore);
-          await updateSeasonLeaderboardScore(p.userId, newScore);
-        })
-      );
+      // Leaderboards (Redis) fuera de la transacción: best-effort, pero logueado.
+      for (const p of updatedChallenge.participants) {
+        const newScore = p.score ?? 0;
+        await Promise.all([
+          updateLeaderboardScore(p.userId, newScore),
+          updateSeasonLeaderboardScore(p.userId, newScore),
+        ]).catch((err) => {
+          console.error(`[challenge] leaderboard update failed for ${p.userId}:`, err);
+        });
+      }
     }
 
     const finalChallenge = await prisma.challenge.findUnique({
@@ -335,12 +358,10 @@ export class ChallengeService {
       include: this.challengeInclude,
     });
 
-    return this.toChallengeView(finalChallenge!, userId);
-  }
-
-  private async getUserHighScore(userId: string): Promise<number> {
-    const user = await prisma.user.findUnique({ where: { id: userId }, select: { highScore: true } });
-    return user?.highScore || 0;
+    return {
+      challenge: this.toChallengeView(finalChallenge!, userId),
+      result: { score, correctCount },
+    };
   }
 
   private readonly challengeInclude = {

@@ -267,7 +267,8 @@
     "scoreBreakdownAccuracy": "precisión",
     "timeRemaining": "Tiempo restante {{seconds}}s segundos",
     "shortGameConfirm": "Solo hay {{available}} preguntas disponibles (de {{requested}} solicitadas). ¿Quieres jugar igualmente?",
-    "shortGameCancelled": "Partida cancelada. Prueba con otra categoría o configuración para obtener más preguntas."
+    "shortGameCancelled": "Partida cancelada. Prueba con otra categoría o configuración para obtener más preguntas.",
+    "startError": "Error al iniciar el juego"
   },
   "results": {
     "shareStreakButton": "Compartir mi racha",
@@ -317,7 +318,8 @@
     "reconnected": "Conexión restablecida.",
     "reconnectedSearching": "Conexión restablecida. Volvimos a buscar oponente.",
     "reconnectedSyncing": "Conexión restablecida. Sincronizando la ronda...",
-    "searchTimeout": "No se encontró oponente. Intenta de nuevo más tarde."
+    "searchTimeout": "No se encontró oponente. Intenta de nuevo más tarde.",
+    "opponent": "Oponente"
   },
   "challenges": {
     "title": "Desafíos",
@@ -375,7 +377,11 @@
     "resultsSubtitle": "Resumen de tu partida. Ya puedes volver a la lista y seguir compitiendo.",
     "resultsUnavailable": "No encontramos los resultados de este desafío. Vuelve a la lista para continuar.",
     "playAgain": "Volver a jugar este desafío",
-    "activeFilters": "Filtros activos: {{summary}}"
+    "activeFilters": "Filtros activos: {{summary}}",
+    "loadError": "Error al cargar el desafío",
+    "submitError": "Error al guardar el resultado",
+    "joinError": "Error al unirse al desafío",
+    "createError": "Error al crear el desafío"
   },
   "rankings": {
     "title": "Rankings Globales",

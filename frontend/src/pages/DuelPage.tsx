@@ -236,7 +236,7 @@ export function DuelPage() {
         winner: data.winnerId,
         myScore: myFinalScore,
         opponentScore: rivalFinalScore,
-        opponentName: rivalResult?.username || opponent?.username || 'Opponent',
+        opponentName: rivalResult?.username || opponent?.username || t('duel.opponent'),
       });
       setDuelState('finished');
       if (data.winnerId === user?.id) {
@@ -251,7 +251,7 @@ export function DuelPage() {
         winner: user?.id || null,
         myScore: scoreRef.current,
         opponentScore: 0,
-        opponentName: opponentRef.current?.username || 'Opponent',
+        opponentName: opponentRef.current?.username || t('duel.opponent'),
       });
       setDuelState('finished');
     };

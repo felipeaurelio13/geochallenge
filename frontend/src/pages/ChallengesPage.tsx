@@ -5,6 +5,7 @@ import type { GameFilters } from '../types';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
+import { getApiErrorMessage } from '../utils/apiError';
 import { useGameFilters } from '../hooks/useGameFilters';
 import { LoadingSpinner } from '../components';
 import { PageHeader } from '../components/molecules/PageHeader';
@@ -142,10 +143,11 @@ export function ChallengesPage() {
 
   const handleJoin = async (challengeId: string) => {
     try {
+      setFetchError('');
       await api.post(`/challenges/${challengeId}/join`);
       fetchChallenges();
-    } catch (err: any) {
-      alert(err.response?.data?.error || 'Error al unirse');
+    } catch (err: unknown) {
+      setFetchError(getApiErrorMessage(err, t('challenges.joinError')));
     }
   };
 
@@ -165,8 +167,8 @@ export function ChallengesPage() {
       });
       setShowCreateModal(false);
       fetchChallenges();
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Error al crear desafío');
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, t('challenges.createError')));
     } finally {
       setCreating(false);
     }

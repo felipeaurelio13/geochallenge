@@ -3,7 +3,7 @@ name: Backend Quality
 on:
   pull_request:
   push:
-    branches: [main, master]
+    branches: [master]
 
 jobs:
   backend-checks:

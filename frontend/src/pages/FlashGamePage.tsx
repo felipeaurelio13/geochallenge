@@ -5,7 +5,7 @@ import { api } from '../services/api';
 import { FlashCard, LoadingSpinner, MechanicsHud, ShareButton, StreakCombo } from '../components';
 import { FullScreenError } from '../components/molecules/FullScreenError';
 import { Button } from '../components/atoms/Button';
-import { useHaptics, useImagePreloader } from '../hooks';
+import { useConfirmDialog, useHaptics, useImagePreloader } from '../hooks';
 import { useUiStore } from '../store/useUiStore';
 import { hasActiveFilters, type Question, type GameFilters } from '../types';
 import { areMechanicsV2Enabled } from '../config/featureFlags';
@@ -36,6 +36,7 @@ export function FlashGamePage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const haptics = useHaptics();
+  const { confirm, confirmDialog } = useConfirmDialog();
   const prefersReducedMotion = useUiStore((s) => s.prefersReducedMotion);
   const category = searchParams.get('category') ?? undefined;
 
@@ -428,11 +429,12 @@ export function FlashGamePage() {
   // playing
   return (
     <div className="flex h-full min-h-0 flex-col bg-[var(--color-bg-app)] px-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-[calc(env(safe-area-inset-top)+0.5rem)] sm:px-4">
+      {confirmDialog}
       <div className="mx-auto flex w-full max-w-md flex-col gap-3">
         <div className="flex items-center justify-between gap-2">
           <button
-            onClick={() => {
-              if (window.confirm(t('game.confirmExit'))) navigate('/menu');
+            onClick={async () => {
+              if (await confirm(t('game.confirmExit'))) navigate('/menu');
             }}
             className="pressable min-h-10 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 py-2 text-sm text-[var(--color-text-secondary)]"
             aria-label={t('game.exit')}

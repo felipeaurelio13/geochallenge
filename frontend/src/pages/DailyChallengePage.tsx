@@ -15,6 +15,7 @@ import { MonumentAttribution } from '../components/MonumentAttribution';
 import { generateFunFact } from '../utils/funFacts';
 import { getQuestionDuration } from '../utils/questionTiming';
 import { useStreakShareImage } from '../hooks/useStreakShareImage';
+import { useConfirmDialog } from '../hooks/useConfirmDialog';
 import type { Question, DailyResult } from '../types';
 
 const ANSWER_TIME = 20;
@@ -25,6 +26,7 @@ export function DailyChallengePage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { share: shareImage, status: shareStatus } = useStreakShareImage();
+  const { confirm, confirmDialog } = useConfirmDialog();
 
   const [pageState, setPageState] = useState<PageState>('loading');
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -37,6 +39,8 @@ export function DailyChallengePage() {
   // feedback visual que GamePage (Single Player). Antes solo había
   // currentIndex y correctCount.
   const [results, setResults] = useState<Array<{ isCorrect: boolean; timedOut: boolean }>>([]);
+  // Respuestas crudas para el backend: el servidor recalcula score/correctCount.
+  const answersRef = useRef<Array<{ questionId: string; answer: string }>>([]);
   const [timedOut, setTimedOut] = useState(false);
   const [previousResult, setPreviousResult] = useState<DailyResult | null>(null);
   const [finalResult, setFinalResult] = useState<DailyResult | null>(null);
@@ -78,6 +82,9 @@ export function DailyChallengePage() {
     const answer = forcedAnswer ?? selected ?? '';
     const isCorrect = answer === currentQuestion?.correctAnswer;
     const isTimeout = !answer;
+    if (currentQuestion) {
+      answersRef.current.push({ questionId: currentQuestion.id, answer });
+    }
     if (isCorrect) setCorrectCount((c) => c + 1);
     setResults((prev) => [...prev, { isCorrect, timedOut: isTimeout }]);
     setTimedOut(isTimeout);
@@ -95,7 +102,7 @@ export function DailyChallengePage() {
       setShowResult(false);
       setPageState('finished');
       try {
-        const result = await api.submitDaily({ score, correctCount, totalQuestions: questions.length });
+        const result = await api.submitDaily({ answers: answersRef.current });
         setFinalResult(result.result);
       } catch {
         setFinalResult({ score, correctCount, totalQuestions: questions.length, playedAt: new Date().toISOString() });
@@ -223,12 +230,14 @@ export function DailyChallengePage() {
   // "Incorrecto" / "Tiempo agotado". El timeout ya no muestra "Incorrect"
   // genérico — distingue claramente que no fue un error sino tiempo expirado.
   return (
+    <>
+    {confirmDialog}
     <GameRoundScaffold
       header={
         <header className="sticky top-0 z-30 border-b border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 pb-2 pt-3 backdrop-blur sm:px-4 sm:pb-3 sm:pt-4">
           <div className="max-w-4xl mx-auto grid grid-cols-[auto_1fr_auto] items-center gap-2.5 sm:gap-4">
             <button
-              onClick={() => { if (window.confirm(t('game.confirmExit'))) navigate('/menu'); }}
+              onClick={async () => { if (await confirm(t('game.confirmExit'))) navigate('/menu'); }}
               className="pressable min-h-10 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 py-2 text-xs sm:text-sm text-[var(--color-text-secondary)] hover:border-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors"
               aria-label={t('game.exit')}
             >
@@ -308,5 +317,6 @@ export function DailyChallengePage() {
         />
       }
     />
+    </>
   );
 }

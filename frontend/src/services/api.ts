@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosError } from 'axios';
+import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
 import type {
   User,
   Question,
@@ -11,7 +11,7 @@ import type {
   MechanicUsage,
   DuelMatchRecord,
   DuelPeriodStats,
-  DuelOpponent,
+  DuelOpponentSummary,
   HeadToHeadData,
   DuelPeriod,
   GameFilters,
@@ -27,6 +27,15 @@ import { testAuthBypass } from '../utils/testAuthBypass';
 import { toAppPath } from '../utils/routing';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
+
+// Reintentos para GETs idempotentes: el backend en Render free tier tiene
+// cold starts de ~30s, así que un timeout o 502/503/504 transitorio no debe
+// romper la experiencia. Backoff exponencial: 1s, 2s, 4s.
+const MAX_GET_RETRIES = 3;
+const RETRY_BASE_DELAY_MS = 1000;
+const RETRYABLE_STATUS = new Set([502, 503, 504]);
+
+type RetryableConfig = InternalAxiosRequestConfig & { _retryCount?: number };
 
 class ApiService {
   private client: AxiosInstance;
@@ -56,7 +65,7 @@ class ApiService {
     // Response interceptor for error handling
     this.client.interceptors.response.use(
       (response) => response,
-      (error: AxiosError) => {
+      async (error: AxiosError) => {
         if (error.response?.status === 401) {
           const isAuthPage = [toAppPath('/login'), toAppPath('/register')].includes(window.location.pathname);
           const hasBypass = testAuthBypass.isEnabled && testAuthBypass.isConfigured;
@@ -65,6 +74,23 @@ class ApiService {
             window.location.href = toAppPath('/login');
           }
         }
+
+        const config = error.config as RetryableConfig | undefined;
+        const isTransient =
+          !error.response || error.code === 'ECONNABORTED' || RETRYABLE_STATUS.has(error.response.status);
+        const canRetry =
+          config?.method === 'get' &&
+          isTransient &&
+          navigator.onLine !== false &&
+          (config._retryCount ?? 0) < MAX_GET_RETRIES;
+
+        if (config && canRetry) {
+          config._retryCount = (config._retryCount ?? 0) + 1;
+          const delay = RETRY_BASE_DELAY_MS * 2 ** (config._retryCount - 1);
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          return this.client.request(config);
+        }
+
         if (error.code === 'ECONNABORTED') {
           return Promise.reject(new Error('La solicitud tardó demasiado. Verifica tu conexión.'));
         }
@@ -324,7 +350,7 @@ class ApiService {
   }
 
   async getDuelOpponents(search?: string) {
-    const response = await this.client.get<{ opponents: DuelOpponent[] }>(
+    const response = await this.client.get<{ opponents: DuelOpponentSummary[] }>(
       '/game/duel-opponents',
       { params: search ? { search } : {} }
     );
@@ -351,7 +377,7 @@ class ApiService {
     return response.data;
   }
 
-  async submitDaily(data: { score: number; correctCount: number; totalQuestions: number }) {
+  async submitDaily(data: { answers: Array<{ questionId: string; answer: string }> }) {
     const response = await this.client.post<{
       result: DailyResult;
       newAchievements: string[];

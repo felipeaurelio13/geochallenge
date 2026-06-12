@@ -3,7 +3,7 @@ name: Frontend Quality
 on:
   pull_request:
   push:
-    branches: [main, master]
+    branches: [master]
 
 jobs:
   frontend-checks:
@@ -34,3 +34,7 @@ jobs:
 
       - name: Build app
         run: npm run build
+
+      # Los e2e corren contra mocks (vite preview + Playwright), sin backend real.
+      - name: Run e2e tests
+        run: npm run test:e2e:ci

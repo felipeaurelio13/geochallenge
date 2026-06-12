@@ -379,14 +379,16 @@ export interface DuelPeriodStats {
   all: DuelStats;
 }
 
-export interface DuelOpponent {
+// Distinto de DuelOpponent (matchmaking): este es el resumen para stats/head-to-head.
+// OJO: antes ambos se llamaban DuelOpponent y TS fusionaba las declaraciones.
+export interface DuelOpponentSummary {
   id: string;
   username: string;
   totalMatches: number;
 }
 
 export interface HeadToHeadData {
-  opponent: DuelOpponent;
+  opponent: DuelOpponentSummary;
   periods: DuelPeriodStats;
   recentMatches: DuelMatchRecord[];
 }

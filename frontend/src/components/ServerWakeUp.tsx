@@ -11,6 +11,11 @@ interface ServerWakeUpProps {
 // sentía como app rota. Bajamos a 1s para que el mensaje "despertando el
 // servidor" aparezca antes y le diga al usuario qué está pasando.
 const WAKEUP_HINT_DELAY_MS = 1000;
+// Render free tier tarda ~30s en despertar; reintentamos el health check en
+// vez de soltar al usuario contra un backend dormido. Cada intento ya trae
+// retries internos del api client, así que pocos intentos cubren el cold start.
+const WAKEUP_MAX_ATTEMPTS = 3;
+const WAKEUP_RETRY_DELAY_MS = 2000;
 
 export function ServerWakeUp({ children }: ServerWakeUpProps) {
   const { t } = useTranslation();
@@ -18,23 +23,36 @@ export function ServerWakeUp({ children }: ServerWakeUpProps) {
   const [showWakeUp, setShowWakeUp] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
+
     const showTimer: ReturnType<typeof setTimeout> = setTimeout(() => {
-      if (!serverReady) {
-        setShowWakeUp(true);
-      }
+      setShowWakeUp(true);
     }, WAKEUP_HINT_DELAY_MS);
 
-    api
-      .healthCheck()
-      .then(() => {
+    const waitForServer = async () => {
+      for (let attempt = 1; attempt <= WAKEUP_MAX_ATTEMPTS; attempt++) {
+        try {
+          await api.healthCheck();
+          break;
+        } catch {
+          if (cancelled || attempt === WAKEUP_MAX_ATTEMPTS) break;
+          await new Promise((resolve) => setTimeout(resolve, WAKEUP_RETRY_DELAY_MS));
+        }
+      }
+      // Tras agotar intentos igual dejamos pasar: el modo offline (IndexedDB)
+      // permite jugar sin backend y el resto de la app maneja sus errores.
+      if (!cancelled) {
         clearTimeout(showTimer);
         setServerReady(true);
-      })
-      .catch(() => {
-        setServerReady(true);
-      });
+      }
+    };
 
-    return () => clearTimeout(showTimer);
+    void waitForServer();
+
+    return () => {
+      cancelled = true;
+      clearTimeout(showTimer);
+    };
   }, []);
 
   if (serverReady) {

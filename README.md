@@ -169,10 +169,10 @@ Con ese secret configurado, el workflow **Keep backend awake** hará ping autom�
 
 ### Flujo interno recomendado para evitar fallas de deploy
 
-1. Trabajar siempre en branch de feature y abrir PR a `main`.
+1. Trabajar siempre en branch de feature y abrir PR a `master` (rama principal del repo).
 2. Verificar localmente en frontend con un solo comando: `npm run ci:quality` (equivale a lint + tests + build).
 3. Hacer merge sólo cuando estén en verde los workflows `Frontend Quality` y `Backend Quality`.
-4. El deploy a GitHub Pages se ejecuta automáticamente en push a `main` con quality gate previo (`lint + tests + build`).
+4. El deploy a GitHub Pages se ejecuta automáticamente en push a `master` con quality gate previo (`lint + tests + build + e2e`).
 5. Si falla deploy, revisar primero el job `Frontend quality gate`: ese job corta el release antes de publicar para evitar romper producción.
 6. El workflow de deploy se dispara solo con cambios de frontend o del propio pipeline, reduciendo ruido por cambios ajenos al cliente web.
 7. Si el deploy falla, usar este protocolo interno: (a) `npm run ci:quality` local, (b) revisar secretos/configuración de Pages, (c) relanzar workflow solo tras corregir la causa raíz.

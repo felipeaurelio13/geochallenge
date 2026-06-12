@@ -494,6 +494,8 @@ router.get('/category-stats', authenticateJWT, async (req: AuthRequest, res: Res
 
 const DAILY_QUESTION_COUNT = 10;
 const DAILY_TTL_SECONDS = 60 * 60 * 50; // 50h — survives past midnight safely
+// El daily usa scoring simple (sin bonus de tiempo); espejo de DailyChallengePage.
+const DAILY_POINTS_PER_CORRECT = 100;
 
 function getTodayKey(): string {
   return new Date().toISOString().slice(0, 10); // YYYY-MM-DD
@@ -508,6 +510,24 @@ function seededShuffle<T>(arr: T[], seed: number): T[] {
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
+}
+
+/**
+ * Generación determinista de las preguntas del día: misma lista para todos
+ * los usuarios y reproducible sin Redis (la caché es solo una optimización).
+ * El submit la usa para validar que las respuestas correspondan al reto real.
+ */
+async function generateDailyQuestionIds(today: string): Promise<string[]> {
+  const seed = parseInt(today.replace(/-/g, ''), 10);
+  const allIds = await prisma.question.findMany({
+    where: {
+      isAvailable: true,
+      category: { in: ['FLAG', 'CAPITAL', 'SILHOUETTE', 'MONUMENT', 'CINEMA_GEO'] },
+    },
+    select: { id: true },
+  });
+  const shuffled = seededShuffle(allIds.map((q) => q.id), seed);
+  return shuffled.slice(0, DAILY_QUESTION_COUNT);
 }
 
 /**
@@ -584,16 +604,7 @@ router.get('/daily', optionalAuth, async (req: AuthRequest, res: Response) => {
     }
 
     if (questionIds.length === 0) {
-      const seed = parseInt(today.replace(/-/g, ''), 10);
-      const allIds = await prisma.question.findMany({
-        where: {
-          isAvailable: true,
-          category: { in: ['FLAG', 'CAPITAL', 'SILHOUETTE', 'MONUMENT', 'CINEMA_GEO'] },
-        },
-        select: { id: true },
-      });
-      const shuffled = seededShuffle(allIds.map((q) => q.id), seed);
-      questionIds = shuffled.slice(0, DAILY_QUESTION_COUNT);
+      questionIds = await generateDailyQuestionIds(today);
       if (!redisDown) {
         try {
           await redis.set(cacheKey, JSON.stringify(questionIds), 'EX', DAILY_TTL_SECONDS);
@@ -635,10 +646,17 @@ router.get('/daily', optionalAuth, async (req: AuthRequest, res: Response) => {
   }
 });
 
+// El cliente manda sus respuestas, NUNCA el puntaje: el servidor las valida
+// contra las preguntas reales del día (deterministas) y calcula el score.
 const dailySubmitSchema = z.object({
-  score: z.number().int().min(0),
-  correctCount: z.number().int().min(0),
-  totalQuestions: z.number().int().min(1),
+  answers: z
+    .array(
+      z.object({
+        questionId: z.string().min(1).max(64),
+        answer: z.string().max(200),
+      })
+    )
+    .max(DAILY_QUESTION_COUNT),
 });
 
 /**
@@ -647,12 +665,20 @@ const dailySubmitSchema = z.object({
  */
 router.post('/daily/submit', authenticateJWT, async (req: AuthRequest, res: Response) => {
   try {
+    // Clientes con la versión anterior cacheada (PWA) mandan {score, correctCount}.
+    if (!req.body?.answers && typeof req.body?.score === 'number') {
+      res.status(400).json({
+        error: 'Tu versión de la app está desactualizada. Recarga la página e intenta de nuevo.',
+      });
+      return;
+    }
+
     const parsed = dailySubmitSchema.safeParse(req.body);
     if (!parsed.success) {
       res.status(400).json({ error: 'Datos inválidos' });
       return;
     }
-    const { score, correctCount, totalQuestions } = parsed.data;
+    const { answers } = parsed.data;
     const today = getTodayKey();
     const redis = getRedis();
     const userId = req.user!.userId;
@@ -670,6 +696,38 @@ router.post('/daily/submit', authenticateJWT, async (req: AuthRequest, res: Resp
       // Redis caído: seguimos con la guardia de DB.
     }
 
+    // Validación server-side: las respuestas deben corresponder a las
+    // preguntas reales del día, sin duplicados, y el score se recalcula acá.
+    let questionIds: string[] = [];
+    try {
+      const cached = await redis.get(`daily:questions:${today}`);
+      if (cached) questionIds = JSON.parse(cached);
+    } catch {
+      // Redis caído: la generación determinista cubre el caso.
+    }
+    if (questionIds.length === 0) {
+      questionIds = await generateDailyQuestionIds(today);
+    }
+
+    const validIds = new Set(questionIds);
+    const seen = new Set<string>();
+    for (const a of answers) {
+      if (!validIds.has(a.questionId) || seen.has(a.questionId)) {
+        res.status(400).json({ error: 'Datos inválidos' });
+        return;
+      }
+      seen.add(a.questionId);
+    }
+
+    const dailyQuestions = await prisma.question.findMany({
+      where: { id: { in: questionIds } },
+      select: { id: true, correctAnswer: true },
+    });
+    const correctById = new Map(dailyQuestions.map((q) => [q.id, q.correctAnswer]));
+    const correctCount = answers.filter((a) => a.answer === correctById.get(a.questionId)).length;
+    const score = correctCount * DAILY_POINTS_PER_CORRECT;
+    const totalQuestions = questionIds.length;
+
     // Update daily streak in DB
     const userRow = await prisma.user.findUnique({
       where: { id: userId },
@@ -679,9 +737,10 @@ router.post('/daily/submit', authenticateJWT, async (req: AuthRequest, res: Resp
     // Reenvío del mismo día (p.ej. Redis caído saltó la idempotencia anterior):
     // no recontar la partida ni resetear la racha.
     if (userRow?.lastDailyDate === today) {
+      const previous = await getDailyResultFromDb(userId, today);
       res.json({
         message: 'Ya enviado',
-        result: {
+        result: previous ?? {
           score,
           correctCount,
           totalQuestions,
@@ -710,7 +769,13 @@ router.post('/daily/submit', authenticateJWT, async (req: AuthRequest, res: Resp
       updateData.highScore = score;
     }
 
-    await prisma.user.update({ where: { id: userId }, data: updateData });
+    // Atómico: o queda el usuario actualizado Y el resultado en el historial, o nada.
+    await prisma.$transaction(async (tx) => {
+      await tx.user.update({ where: { id: userId }, data: updateData });
+      await tx.gameResult.create({
+        data: { userId, score, correctCount, totalQuestions, gameMode: 'SINGLE', category: 'MIXED' },
+      });
+    });
 
     const result = { score, correctCount, totalQuestions, dailyStreak: newStreak, playedAt: new Date().toISOString() };
     try {
@@ -719,16 +784,13 @@ router.post('/daily/submit', authenticateJWT, async (req: AuthRequest, res: Resp
       // best-effort: User.lastDailyDate ya quedó persistido como fuente de verdad
     }
 
-    // Save as GameResult for history
-    await prisma.gameResult.create({
-      data: { userId, score, correctCount, totalQuestions, gameMode: 'SINGLE', category: 'MIXED' },
-    });
-
-    // Update leaderboard
+    // Update leaderboard (Redis): best-effort, pero logueado para observabilidad.
     await Promise.all([
       updateLeaderboardScore(userId, score),
       updateSeasonLeaderboardScore(userId, score),
-    ]).catch(() => {});
+    ]).catch((err) => {
+      console.error(`[daily] leaderboard update failed for ${userId}:`, err);
+    });
 
     // Evaluate achievements
     const newAchievements = await evaluateAchievementsAfterDaily(userId, newStreak).catch(() => []);
