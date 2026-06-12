@@ -3,7 +3,7 @@
 **GeoChallenge** es un juego de trivia geográfica full-stack con modos de juego múltiples (single-player, duelos, survival, challenges, daily), multijugador en tiempo real via WebSockets, leaderboards, achievements y soporte offline (PWA).
 
 - Frontend: React 18 + TypeScript + Vite (`frontend/`) — v1.2.87
-- Backend: Node.js + Express + Socket.IO + Prisma + PostgreSQL + Redis (`backend/`) — v1.0.0
+- Backend: Node.js + Express + Socket.IO + Prisma + PostgreSQL + Redis (`backend/`) — v1.1.0
 - Datos de juego estáticos en `data/` (JSON)
 - Monorepo con workspace scripts en la raíz
 
@@ -107,7 +107,7 @@ cd frontend
 npm run dev        # Vite dev server en :5173 (proxy /api y /socket.io → :3001)
 npm run build      # tsc + vite build → dist/
 npm run test       # Vitest
-npm run lint       # tsc --noEmit
+npm run lint       # ESLint
 ```
 
 ### Estructura de carpetas
@@ -411,9 +411,9 @@ Para e2e tests sin registro real:
 
 | Workflow | Trigger | Pasos |
 |---|---|---|
-| `backend-quality.yml` | PR / push a main | lint → test → build |
-| `frontend-quality.yml` | PR / push a main | lint → test → build |
-| `deploy-frontend-pages.yml` | Push a main (frontend/) | quality gate → deploy GitHub Pages |
+| `backend-quality.yml` | PR / push a master | lint → test → build |
+| `frontend-quality.yml` | PR / push a master | lint → test → build |
+| `deploy-frontend-pages.yml` | Push a master (frontend/) | quality gate → deploy GitHub Pages |
 | `keep-backend-awake.yml` | Cada 5 minutos (cron) | GET /ping → previene sleep en Render free |
 
 ### Deploy en Render (`render.yaml`)

@@ -1,1284 +1,266 @@
 # GeoChallenge
 
-Juego de trivia geográfica con modos individual, duelos en tiempo real y desafíos entre amigos.
+GeoChallenge es un juego full-stack de trivia geografica. Incluye modos single-player, racha, flash, duelos en tiempo real, desafios entre amigos, rankings y categorias de preguntas como paises, capitales, mapas, siluetas y monumentos.
 
-## Versión actual
+## Estado actual
 
-- Frontend: **v1.2.87**
+- Rama principal: `master`
+- Frontend: React 18 + Vite + TypeScript + Tailwind + i18n + PWA
+- Backend: Node.js + Express + TypeScript + Prisma + PostgreSQL + Redis + Socket.IO
+- Frontend de produccion: GitHub Pages / sitio estatico
+- Backend de produccion: Render o VPS Docker, segun despliegue
+- Version visible del frontend: definida en `frontend/package.json`
 
-- Feature: nueva categoría **Monumentos** (50 lugares famosos curados, dos variantes por monumento — identificar nombre o país — con foto y atribución de Wikimedia Commons).
+## Estructura
 
-## Novedades de la versión 1.2.87
-
-- Nueva categoría **MONUMENT** junto a FLAG/CAPITAL/MAP/SILHOUETTE: 50 monumentos curados con nombre EN/ES, país, coordenadas, imagen Wikimedia y atribución verificada (autor, licencia, fuente).
-- Dos variantes de pregunta elegidas al seedear: "¿Qué monumento es este?" (4 nombres) y "¿En qué país está?" (4 países). Distractores priorizan el mismo continente.
-- `MenuPage` muestra la categoría con icono 🗿 en grilla de 6 columnas; `QuestionCard` renderiza foto 16:9 con badge de dificultad; `RoundActionTray` expone slot de atribución que aparece sólo después de responder.
-- Modo Racha bloquea repeticiones del mismo monumento aunque cambie la variante (`buildQuestionUniquenessKey` ancla al slug).
-- Backend: migración Prisma agrega `MONUMENT` al enum `Category`, `game.service` lo incluye en `MIXED` y Flash visual.
-- Frontend: contrato backend intacto (nombres canónicos en EN); `getOptionDisplayLabel` traduce opciones según `i18n.language` para el render.
-
-## Novedades de la versión 1.2.86
-
-- Se corrigió el acceso a rankings en frontend: la ruta `/rankings` ya no requiere autenticación, alineándose con el endpoint backend (`/api/leaderboard`) que soporta acceso público con auth opcional.
-- Home ahora incluye CTA directo a **Rankings** tanto para usuarios autenticados como no autenticados.
-- Se actualizaron tests de routing y Home para cubrir acceso público y presencia del nuevo botón.
-- Footer/versionado actualizado a **v1.2.86** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.85
-
-- Se agregó `excludeQuestionKeys` al contrato de `GET /api/game/start` para racha, manteniendo compatibilidad total (parámetro opcional con fallback automático).
-- `GamePage` ahora calcula y envía claves de unicidad por pregunta durante refills de racha para bloquear repetición semántica (ej. misma bandera con otro ID).
-- Backend incorpora filtro de unicidad en `getQuestionsForStreakGame` detrás de feature flag `ENABLE_STREAK_UNIQUE_QUESTIONS` (default activo, rollback inmediato al flujo previo si se desactiva).
-- Se actualizaron tests backend/frontend para cubrir parsing de `excludeQuestionKeys`, propagación al servicio y contrato de refill en racha.
-- Footer/versionado actualizado a **v1.2.85** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.84
-
-- Se corrigió el parsing del query param `questionCount` en backend usando coerción numérica para que los refills de racha no fallen por tipo (`"10"` string en URL).
-- `GamePage` ahora solicita refill en racha excluyendo IDs ya usados, evitando repeticiones inmediatas y permitiendo avanzar hasta agotar el pool o fallar.
-- En racha, el CTA de avance se mantiene como **Siguiente** para alinear UX con flujo potencialmente ilimitado (en lugar de sugerir cierre de partida en el tercer ítem).
-- Se actualizaron tests backend/frontend para cubrir coerción de query params y contrato de refill con `excludeIds`.
-- Footer/versionado actualizado a **v1.2.84** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.83
-
-- Se ajustó el script `npm run lint` para que reporte warnings sin bloquear el pipeline por deuda histórica no crítica.
-- Se agregó `npm run lint:strict` para mantener disponible la verificación estricta (`--max-warnings 0`) cuando se quiera limpiar reglas de forma incremental.
-- Se mantiene compatibilidad total con el flujo actual de desarrollo y despliegue, evitando un refactor masivo de imports en este cambio.
-- Footer/versionado actualizado a **v1.2.83** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.82
-
-- `GamePage` ahora evalúa el avance de racha con el buffer actualizado tras prefetch para evitar cierre prematuro al finalizar un bloque inicial de preguntas.
-- Se mantiene comportamiento existente del modo `single` sin cambios y con fallback natural: si falla el refill, la partida termina como hasta ahora.
-- Se agregó cobertura de test para asegurar que en la última pregunta de racha el juego continúe si el refill llega correctamente.
-- Footer/versionado actualizado a **v1.2.82** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.81
-
-- `MenuPage` ahora incluye un cuarto modo visible: **Racha**, junto a Single, Duelo y Desafíos.
-- El nuevo CTA navega a `/game/single?category=...&mode=streak` para reutilizar `GamePage` sin crear una pantalla nueva.
-- `GamePage` acepta `mode=streak` como fallback de compatibilidad además de `gameType=streak`, manteniendo soporte para rutas existentes.
-- Se agregaron nuevas claves i18n para Racha en español e inglés (`menu.streak`, `menu.streakDesc`).
-- Se actualizaron tests de menú y flujo de racha para cubrir navegación y parsing del nuevo query param.
-- Footer/versionado actualizado a **v1.2.81** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.80
-
-- `GameType` ahora está tipado como `'single' | 'streak'` y `GameConfig` incluye `gameType` para soportar flujos diferenciados.
-- `api.startGame` acepta `gameType` opcional (y mantiene compatibilidad de llamadas existentes con parámetros opcionales).
-- `GameContext` incorpora acciones aditivas para racha: `appendQuestions(...)` y estado `streakAlive`.
-- `GamePage` mantiene intacto el flujo `single` y, cuando `gameType=streak`, finaliza inmediatamente al fallar y hace prefetch de nuevas preguntas cuando el buffer es bajo.
-- Se agregó `game-page-streak.test.tsx` para validar inicio en modo racha, finalización inmediata por fallo y recarga incremental de preguntas.
-- Backend: se agregó estrategia de puntaje por modo individual (single/streak) sin tocar `validateAnswer` base; en `streak` la API puede devolver `points` 1/0 por respuesta correcta/incorrecta.
-- Backend: nueva feature flag `ENABLE_STREAK_SIMPLE_SCORING` (default `true`) para activar/desactivar el puntaje simple de racha con fallback inmediato al scoring actual de single.
-- Footer/versionado actualizado a **v1.2.80** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.79
-
-- Se agregó la nueva clave i18n `rankings.noSearchResults` en español e inglés para comunicar búsquedas sin coincidencias.
-- `RankingsPage` ahora muestra `rankings.noSearchResults` cuando existen datos globales pero el filtro local devuelve 0 resultados.
-- Se mantiene `rankings.empty` únicamente para ausencia real de datos globales en el leaderboard.
-- Se actualizaron pruebas de `RankingsPage` e i18n para cubrir la nueva distinción de estados.
-- Footer/versionado actualizado a **v1.2.79** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Catálogo canónico de países (seed backend)
-
-Para soportar incorporación incremental de países/banderas sin romper producción, el seed ahora prioriza un catálogo versionado:
-
-- Fuente principal: `data/country-catalog.v1.json`
-- Metadata: `data/country-catalog.meta.json`
-- Fallback automático: `data/countries.json` (compatibilidad hacia atrás)
-
-### Flujo de actualización recomendado
-
-1. Actualizar `data/country-catalog.v1.json` agregando/ajustando países con schema:
-   - `iso2`, `name`, `capital`, `continent`, `lat`, `lng`, `flag`, `status`, `rollout` (opcional).
-2. Marcar estado por país:
-   - `active`: entra al seed y se publica en preguntas.
-   - `pending_review`: queda fuera del seed productivo mientras se revisa.
-   - `disabled`: excluido del seed (retirado temporal o permanentemente).
-3. Definir canal de rollout (`rollout`) para países `active`:
-   - `stable` (o sin valor): entra siempre al catálogo estable.
-   - `extended`: solo entra cuando el modo extendido está habilitado.
-4. Regenerar `data/country-catalog.meta.json` con:
-   - `version`, `source`, `generatedAt`, `totalCountries`, `activeCountries`.
-5. Ejecutar seed backend (`npm --prefix backend run seed`) y validar tests.
-
-### Feature flag: catálogo extendido de banderas
-
-- Variable backend: `ENABLE_EXTENDED_FLAGS`.
-- Valor por defecto: `false` (mantiene comportamiento productivo actual, catálogo estable).
-- Activación:
-  - macOS/Linux: `ENABLE_EXTENDED_FLAGS=true npm --prefix backend run seed`
-  - PowerShell: `$env:ENABLE_EXTENDED_FLAGS='true'; npm --prefix backend run seed`
-- Volver al set estable:
-  - macOS/Linux: `ENABLE_EXTENDED_FLAGS=false npm --prefix backend run seed`
-  - PowerShell: `$env:ENABLE_EXTENDED_FLAGS='false'; npm --prefix backend run seed`
-  - También puedes omitir la variable y se usará `false`.
-
-El resumen del seed ahora informa explícitamente cuántas banderas `active` entraron por el modo extendido y cuántas quedaron fuera por correr en modo estable.
-
-### Criterios de aceptación para nuevas banderas
-
-- `flag` debe ser código ISO-2 válido (minúsculas para URL de `flagcdn`).
-- `iso2` debe coincidir con `flag` en mayúsculas.
-- `name` y `capital` no vacíos y consistentes con el dataset existente.
-- Coordenadas (`lat`, `lng`) válidas y razonables para la capital.
-- Solo pasar a `active` cuando QA confirme:
-  - render correcto de bandera/silueta,
-  - país aparece en preguntas sin errores,
-  - sin regresiones en modos de juego.
-
-### Política de integridad del catálogo
-
-- Todo país nuevo requiere pasar el test de integridad (`backend/src/__tests__/country-catalog.integrity.test.ts`) antes de merge/deploy.
-
-## Novedades de la versión 1.2.78
-
-- `RankingsPage` ahora usa `data.totalPlayers` y `data.topScore` como fuente única para el bloque de estadísticas globales, evitando sesgos por filtros locales.
-- Se añadió copy explícito de contexto (`Global` / `Filtrado por búsqueda`) y subtítulo opcional `Resultados filtrados` cuando hay búsqueda activa.
-- Se eliminó el promedio calculado en cliente; ahora solo se muestra `avgScore` cuando el backend lo entrega (campo opcional).
-- El backend expone `avgScore` opcional en `/leaderboard` junto con `totalPlayers` y `topScore`.
-- Se actualizaron tests de `RankingsPage` para cubrir uso de métricas globales + estado filtrado sin promedio local.
-- Footer/versionado actualizado a **v1.2.78** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.77
-
-- `RankingsPage` eliminó la llamada bloqueante inicial a `/leaderboard/me`: ahora carga ranking principal únicamente desde `getLeaderboard(50)` (manteniendo cache key/TTL actuales).
-- Se incorporó `VITE_RANKING_NEIGHBORS_ENABLED` para traer vecinos desde `/leaderboard/me` en un bloque separado y no bloqueante (`Contexto cercano`).
-- Se añadió fallback diferido: si `/leaderboard` no trae `userRank`, la vista invoca `/leaderboard/me` en segundo plano para completar `userRank/userScore` sin frenar el render principal.
-- Se actualizaron pruebas de `RankingsPage` para cubrir: no llamada inicial a `/leaderboard/me`, fallback diferido y carga de vecinos por feature flag.
-- Footer/versionado actualizado a **v1.2.77** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.76
-
-- `RankingsPage` ahora soporta `VITE_RANKING_USE_BACKEND_RANK=true` para usar `entry.rank` proveniente del backend sin depender del índice del cliente.
-- Se agregó fallback defensivo: si `entry.rank` llega ausente/invalidado por regresión, se mantiene `index + 1` para evitar romper la UI.
-- Las filas del ranking usan clave estable combinando `userId+rank` (o `username+rank` como fallback) para minimizar colisiones y re-renderizados incorrectos.
-- Se añadieron pruebas unitarias de `RankingsPage` cubriendo flag activo/inactivo y fallback de rank.
-- Footer/versionado actualizado a **v1.2.76** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-### Mantener backend activo en producción
-
-Configura el secret **`BACKEND_HEALTHCHECK_URL`** en GitHub (Settings → Secrets and variables → Actions) con la URL pública de salud de tu API, por ejemplo:
-
-`https://tu-backend.onrender.com/health`
-
-Con ese secret configurado, el workflow **Keep backend awake** hará ping automático cada 10 minutos para minimizar el estado dormido del servicio free.
-
-### Flujo interno recomendado para evitar fallas de deploy
-
-1. Trabajar siempre en branch de feature y abrir PR a `master` (rama principal del repo).
-2. Verificar localmente en frontend con un solo comando: `npm run ci:quality` (equivale a lint + tests + build).
-3. Hacer merge sólo cuando estén en verde los workflows `Frontend Quality` y `Backend Quality`.
-4. El deploy a GitHub Pages se ejecuta automáticamente en push a `master` con quality gate previo (`lint + tests + build + e2e`).
-5. Si falla deploy, revisar primero el job `Frontend quality gate`: ese job corta el release antes de publicar para evitar romper producción.
-6. El workflow de deploy se dispara solo con cambios de frontend o del propio pipeline, reduciendo ruido por cambios ajenos al cliente web.
-7. Si el deploy falla, usar este protocolo interno: (a) `npm run ci:quality` local, (b) revisar secretos/configuración de Pages, (c) relanzar workflow solo tras corregir la causa raíz.
-
-
-
-
-## Novedades de la versión 1.2.75
-
-- Se estabilizó el stack icono+label del selector de categorías del menú con centrado consistente (`align-items: center`) y sin dependencia de `min-height` rígido en el contenedor del botón.
-- La etiqueta del selector ahora usa altura y `line-height` controlados para mantener equilibrio visual entre textos cortos/largos sin “flotar” hacia arriba.
-- Se reforzó `menu-page.test.tsx` para validar clases compartidas de alineación en reposo y cuando `aria-pressed=true`.
-
-## Novedades de la versión 1.2.75
-
-- Se amplió el label de alternativas a **2 líneas** (`line-clamp: 2`) con `line-height` controlado para mejorar legibilidad de textos largos sin romper densidad mobile.
-- `OptionButton` ajustó tipografía y leading para que las dos líneas convivan con el alto de botón y mantengan estable la grilla de 4 opciones.
-- Se reforzó el guardrail de CSS para bloquear overflow horizontal en `game-options-wrap` y proteger viewports móviles críticos.
-- Se actualizaron tests de `OptionButton` para validar el nuevo comportamiento multi-línea (sin dependencia de `truncate`).
-- Se separaron clases base del indicador de selección en `OptionButton` para distinguir explícitamente estado visible vs oculto sin alterar dimensiones del nodo.
-- El estado oculto del indicador ahora elimina sombra y borde visible (`shadow-none`, `border-transparent`) manteniendo ancho/alto para evitar layout shift horizontal.
-- Se reforzó el test de `OptionButton` para validar que el indicador oculto no conserve clases de sombra visibles.
-## Novedades de la versión 1.2.75
-
-- Se estabilizó el stack icono+label del selector de categorías (`.menu-category-selector`) con centrado consistente (`display:flex`, columna y `align-items:center`) para evitar compensaciones por `min-height`.
-- Se reemplazó `min-height` del label por altura y `line-height` controlados (`height: 2rem`, `line-height: 1rem`) para mantener consistencia visual entre etiquetas cortas/largas.
-- `MenuPage` ahora usa una caja interna común (`menu-category-selector__content`) tanto en reposo como en estado seleccionado (`aria-pressed=true`), evitando desplazamientos visuales al cambiar categoría.
-- Se actualizaron tests del menú para validar presencia de clases de alineación comunes en ambos estados.
-- Footer/versionado actualizado a **v1.2.75** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.74
-
-- Se ajustó el selector de categorías del menú para alinear icono + etiqueta de forma estable en estados reposo/seleccionado, mejorando consistencia vertical y horizontal.
-- `OptionButton` ahora reserva espacio fijo para el indicador de selección, evitando “saltos” de contenido al marcar una alternativa.
-- Se reforzaron estilos de alineación con clases dedicadas (`menu-category-selector*`, `option-button-*`) manteniendo enfoque mobile-first y compatibilidad con dark mode.
-- Se añadieron tests para blindar la alineación estable de selectores de categoría y alternativas.
-- Footer/versionado actualizado a **v1.2.74** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.73
-
-- Se incorporó un test E2E mobile-first en dark mode para la ronda de juego, validando CTA visible, 4 opciones y ausencia de overflow horizontal accidental en iPhone SE, iPhone 15 Pro y Android Medium.
-- Se refactorizó de forma aditiva el mock de APIs de juego de E2E a un helper compartido (`tests/e2e/helpers/gameApiMocks.ts`) para evitar duplicación y facilitar mantenimiento.
-- Se agregó `pull_request_template.md` con checklist visual de release (mobile/dark mode/safe areas/overflow) para reducir drift visual en cambios rápidos.
-- Footer/versionado actualizado a **v1.2.73** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.72
-
-- Se realizó una auditoría experta de UX/UI mobile-first centrada en alineación, centrados por contexto, safe-areas y estabilidad del layout universal de juego.
-- Se agregó una suite automatizada de guardrails visuales (`ui-ux-audit-guardrails.test.ts`) para prevenir regresiones en: `100dvh`, grilla de 3 filas (`header/main/footer`), composición de pregunta (capital/media), `overscroll-behavior` y regla de 4 alternativas visibles.
-- Se documentó el diagnóstico técnico y el plan de mitigación incremental en `docs/ui-ux-audit-2026-04-11.md`, manteniendo cambios aditivos y rollback simple.
-- Footer/versionado actualizado a **v1.2.72** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.71
-
-- Se eliminó el cálculo dinámico de `--action-tray-h` y se migró el layout universal de juego a una grilla real de 3 filas (`header / content / footer`) para evitar doble reserva de espacio y vacíos bajo alternativas.
-- `content-area` ahora mantiene scroll interno consistente (`min-height: 0`, `overflow-y: auto`, `overscroll-behavior: contain`) y el action tray se renderiza en flujo normal, por lo que el CTA **Confirmar** nunca tapa opciones.
-- Se corrigió la doble aplicación de `safe-area-inset-top` en headers de juego (single/duel/challenge), eliminando recortes en iPhone con notch/dynamic island.
-- Se ajustó el contenedor de media de preguntas (banderas/siluetas) con `aspect-ratio: 16/9`, `max-height` en `dvh` y `object-fit: contain` para evitar clipping.
-- Se añadieron tests E2E mobile para iPhone SE, iPhone 15 Pro y Android Medium validando visibilidad de CTA, accesibilidad de alternativas e integridad visual de media.
-- Footer/versionado actualizado a **v1.2.71** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.70
-
-- Se corrigió la distribución vertical en rondas con media (Banderas/Siluetas): el bloque de pregunta vuelve a tamaño de contenido y la grilla de alternativas recupera el espacio flexible para mostrar las 4 opciones.
-- Se reforzó `GameRoundScaffold` con una variante explícita para preguntas con media (`game-question-wrap--media`) evitando que el card de bandera consuma toda la altura útil.
-- Se agregaron pruebas en `game-round-scaffold.test.tsx` para cubrir el caso visual reportado (4 alternativas visibles en modo banderas) y prevenir regresiones.
-- Footer/versionado actualizado a **v1.2.70** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.69
-
-- Se migró la arquitectura de ronda a **fixed shell + scroll interno**: `header` y action tray permanecen estables mientras `main` ahora permite scroll táctil confinado, eliminando cortes de alternativas en iPhone.
-- `UniversalGameLayout` ahora mide dinámicamente la altura real del tray (`ResizeObserver` + `--action-tray-h`) y aplica padding inferior al área scrolleable para que **Confirmar nunca tape opciones** (incluyendo safe-area inferior de iOS).
-- `QuestionCard` ajustó densidad mobile y render de media para mostrar banderas/siluetas completas con `object-contain` real, `object-position:center` y contenedor responsivo sin cropping agresivo.
-- Se habilitó scroll interno resiliente en lista de alternativas (`min-height:0` + `overflow-y:auto`) para que todas las opciones sean alcanzables en viewports bajos sin doble scroll global.
-- Se reforzó el shell de pantallas no-juego para evitar contenido oculto bajo footer/version (Home/Profile/Rankings y vistas similares).
-- Footer/versionado actualizado a **v1.2.69** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-### QA checklist mobile (anti-regresiones)
-
-- En iPhone (alto bajo y normal), validar que la **última alternativa se vea completa** haciendo scroll interno y que el tray Confirmar no la tape.
-- Validar preguntas con bandera y silueta: la imagen debe verse **completa** dentro del card (`object-fit: contain`) tanto en light como en dark mode.
-- Confirmar que Home/Profile/Rankings no oculten contenido bajo el footer/version y que no exista overflow horizontal accidental.
-
-## Novedades de la versión 1.2.68
-
-- Se reforzó el layout universal de ronda a tres zonas en flujo (`header/main/footer`) para evitar overlays del action tray sobre alternativas y asegurar que el botón Confirmar siempre reserve espacio real.
-- Se ajustó `RoundActionTray` con mayor separación vertical y `safe-area` inferior para que el CTA no quede pegado ni recortado por el home indicator en iOS.
-- Se compactó automáticamente `QuestionCard` cuando hay media (bandera/silueta), limitando altura de tarjeta y media con `clamp(...)` para preservar visibilidad completa de las 4 opciones en viewports móviles bajos.
-- Se redujeron gaps verticales del scaffold de ronda y se ampliaron pruebas de estructura/layout para prevenir regresiones de superposición.
-- Footer/versionado actualizado a **v1.2.68** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.66
-
-- Se reforzó el `UniversalGameLayout` con `height/min-height: 100dvh`, `overflow: hidden`, `overscroll-behavior: none`, safe-areas en header/footer y estructura estable sin scroll para las rondas de juego.
-- Se corrigieron estados de `OptionButton` para mantener fondos sólidos en todos los casos (default, selected, locked, correct, wrong, disabled), eliminando transparencias/opacidad en post-respuesta.
-- Se ajustó el scaffold de ronda para evitar solapamientos post-respuesta en Banderas y centrar verticalmente la pregunta en Capitales cuando no hay media.
-- Se afinó la UI de mapas con insets para controles/atribución Leaflet dentro del card redondeado y estilo consistente mediante tokens de tema.
-- Se ampliaron pruebas en `GameRoundScaffold`, `OptionButton` y `MapInteractive` para blindar cero-scroll, integridad visual de opciones y contenedor de mapa sin desbordes.
-- Footer/versionado actualizado a **v1.2.66** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.65
-
-- Se corrigió un error de compilación en `GamePage` eliminando una variable sin uso (`isFlagQuestion`) que rompía el build de TypeScript en CI/deploy.
-- Se validó nuevamente el pipeline de frontend (`tests` + `build`) para asegurar despliegue estable en GitHub Pages.
-- Footer/versionado actualizado a **v1.2.65** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.64
-
-- Se incorporó `UniversalGameLayout` para que modos Banderas, Capitales, Mapas, Duelo y Desafíos compartan la misma distribución vertical en `100dvh`, con `overflow: hidden` y safe-areas aisladas en header/footer.
-- Se estandarizó la lista de respuestas a formato vertical (1x4) en todas las modalidades, reduciendo inconsistencias visuales entre modos y mejorando el uso del espacio en mobile.
-- Se corrigió el bug de transparencia en `OptionButton`: estados seleccionado/correcto/incorrecto mantienen fondo sólido y sin opacidad residual para evitar superposición visual.
-- Se ajustó el timer para mostrar el sufijo `s` (ej. `57s`) y mantener feedback temporal consistente entre pantallas.
-- Se actualizaron pruebas de `GamePage`, `GameRoundScaffold` y `OptionButton` para blindar layout universal y estados sólidos.
-- Footer/versionado actualizado a **v1.2.64** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.63
-
-- Pantalla de juego optimizada para mobile-first: contenedor principal fijado a viewport (`100vh/100dvh`) con distribución flex para reducir scroll accidental y mantener CTA sticky sin overflow horizontal.
-- Se redimensionó el contenedor de bandera con límites responsivos (~22% del alto visible), manteniendo `object-contain` para evitar deformaciones/recortes y moviendo el badge de dificultad dentro del bloque visual de la imagen.
-- Se compactaron alternativas y bandeja de acción (`OptionButton` + `RoundActionTray`) reduciendo paddings y separaciones verticales para que más contenido crítico quede visible antes del botón Confirmar.
-- En menú se redujo el espacio entre categorías y “Modos de juego”, se bajó la altura de los CTAs de modo (~15%) y se compactó tipografía descriptiva para dar más aire al footer.
-- Se reforzó safe-area superior en headers (juego y shell principal) para evitar choques visuales con isla dinámica/notch.
-- Se actualizaron pruebas unitarias de `GamePage`, `GameRoundScaffold`, `QuestionCard`, `OptionButton`, `RoundActionTray` y `MenuPage` para blindar la nueva densidad visual y clases de layout mobile.
-- Footer/versionado actualizado a **v1.2.63** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.62
-
-- Se redujo ~35% la altura mínima de la bandera en `QuestionCard` para recuperar espacio vertical en mobile sin recortar contenido, manteniendo `object-contain` y proporción fija.
-- Se compactó el bloque pregunta+dificultad en modo compacto: menor separación bajo la bandera y badge de dificultad más pequeño alineado junto al enunciado para evitar ocupar una fila completa.
-- Se adelgazaron las alternativas (`OptionButton`) con menor padding vertical, badge lateral más compacto y tipografía ajustada para sostener legibilidad en pantallas pequeñas.
-- Se redujo la altura útil del `RoundActionTray` (padding contenedor + CTA principal/secundario) y del espacio reservado en `GameRoundScaffold`, acercando `Confirmar` a la última opción y disminuyendo vacío visual.
-- Se actualizaron pruebas automatizadas de `QuestionCard`, `OptionButton` y `RoundActionTray` para blindar los nuevos tamaños compactos y prevenir regresiones visuales.
-- Footer/versionado actualizado a **v1.2.62** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.61
-
-- Se eliminó la barra azul continua de progreso en juego para reducir ruido visual: ahora la progresión se comunica únicamente con los indicadores discretos de preguntas (1-10) y sus estados (correcta/incorrecta/actual).
-- Se ajustó el header de partida con safe-areas reales en mobile y se separó el timer del borde derecho para evitar solapamientos con batería/señal/notch.
-- Se corrigió el encuadre de banderas en `QuestionCard` con contenedor de aspect-ratio fijo y render `object-contain`, evitando recortes en banderas altas o alargadas.
-- Se mejoró la legibilidad del botón `Confirmar` en estado deshabilitado aumentando contraste visual para mantener jerarquía clara sin parecer componente roto.
-- Se actualizaron pruebas automatizadas (`GamePage`, `ProgressBar`, `QuestionCard`, `RoundActionTray`) para blindar safe-areas, eliminación de barra continua, escalado de bandera y contraste del CTA.
-- Footer/versionado actualizado a **v1.2.61** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.60
-
-- Se simplificó la pantalla de menú eliminando redundancias de categoría activa: ya no se muestra el texto duplicado ni la cápsula intermedia, dejando al estado visual del carrusel como fuente principal de contexto.
-- Se mejoró la jerarquía visual con un saludo más sutil y una única sección explícita de **Modos de juego**, reduciendo ruido vertical y facilitando la lectura mobile-first.
-- Se ajustó el layout para evitar el efecto de “cajas dentro de cajas”: las categorías ahora flotan sobre el fondo, mantienen scroll horizontal natural y refuerzan contraste en estados desactivados.
-- Se añadieron íconos descriptivos en acciones de juego (`Un Jugador`, `Duelo`, `Desafíos`) para aumentar feedback visual inmediato y escaneabilidad.
-- Se actualizaron pruebas de `MenuPage` para cubrir la eliminación de textos redundantes, la nueva jerarquía de títulos y la persistencia de categoría activa sin labels duplicados.
-- Footer/versionado actualizado a **v1.2.60** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.59
-
-- Se corrigió la resolución de `zod` en `frontend/package-lock.json`: dejó de apuntar como symlink a `../backend/node_modules/zod` y quedó fijado como dependencia normal desde npm registry, evitando el error de TypeScript `Cannot find module "zod"` en entornos limpios de CI/deploy.
-- Se ajustaron scripts de calidad en la raíz para ejecutar `npm --prefix ... run ...`, garantizando que ESLint del frontend/backend se resuelva desde cada paquete y evitando falsos fallos por plugins no encontrados cuando se ejecuta desde la raíz.
-- Se volvió a validar build y tests del frontend tras el cambio para asegurar estabilidad del deploy en GitHub Pages.
-- Footer/versionado actualizado a **v1.2.59** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.58
-
-- Se corrigió el fallo de compilación en TypeScript que bloqueaba deploy en GitHub Pages: `Icon.tsx` eliminó un import de `React` no utilizado que rompía `tsc` con `noUnusedLocals` activo.
-- Se ejecutó y validó el pipeline de calidad del frontend (`lint + tests + build`) para asegurar que el deploy no vuelva a fallar por errores de tipado o regresiones de pruebas.
-- Se mantuvo el flujo de validación de formularios basado en `zod` y se verificó su cobertura de tests para login/registro y hooks.
-- Footer/versionado actualizado a **v1.2.58** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.57
-
-- Se realizó una revisión integral post-refactor Atomic Design para eliminar errores de ejecución y cerrar brechas de calidad detectadas: ahora `zod` se consume desde una dependencia normal del frontend, evitando fallos de resolución en entornos limpios.
-- Se restauró el feedback contextual en `LoginPage` cuando faltan campos (`Completa correo y contraseña para continuar.`), manteniendo la guía empática al usuario y alineando los tests existentes.
-- Se reforzó la validación de layout con una prueba adicional de atomic design para chequear estructura base (`app-shell`, `flex-1`) y cabecera con soporte de safe-area mobile.
-- Se ajustó la composición de `MenuPage` para mantener semántica de lista consistente al reutilizar `ListItem`.
-- Se volvió a ejecutar la suite completa de frontend con **106 tests en verde** y se validó visualmente Home en mobile tanto en tema claro como oscuro.
-- Footer/versionado actualizado a **v1.2.57** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.56
-
-- Se refactorizó la arquitectura visual del frontend en `src/components/` con Atomic Design: **atoms** (`Button`, `Icon`, `Input`, `Badge`), **molecules** (`Card`, `FormField`, `ListItem`), **organisms** (`Header`, `Modal`, `ScreenLayout`) y **templates** reutilizables para páginas.
-- `LoginPage`, `RegisterPage`, `HomePage` y `MenuPage` ahora consumen la nueva estructura de componentes para reducir duplicación, mantener una jerarquía visual consistente y reforzar el enfoque mobile-first.
-- Se eliminó prop drilling en formularios mediante un patrón **Compound Components** en `FormField`, centralizando `id`, estado de error y estilos accesibles por contexto.
-- Se añadieron pruebas automatizadas para la nueva capa de Atomic Design (atoms, compounds y composición template+organisms), reduciendo riesgo de regresiones de UI.
-- Footer/versionado actualizado a **v1.2.56** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.55
-
-- Se extrajo lógica de negocio del frontend a un set de custom hooks reutilizables en `hooks/` (persistencia en localStorage, debounce, media query, tamaño de ventana, animaciones y gestos) para reducir lógica inline en componentes.
-- Se incorporó un hook `useApi` con soporte de caché temporal y mutaciones optimistas con rollback para mejorar experiencia percibida en rankings/perfil.
-- Login y registro ahora validan formularios con esquema (`Zod`) mediante `useFormValidation`, centralizando reglas y mensajes de error por campo.
-- Se refactorizaron vistas y componentes para usar hooks reutilizables (`MenuPage`, `RankingsPage`, `ProfilePage`, `ScoreDisplay`, `AppRoot`) y se añadió estado global mínimo para viewport/preferencias de interacción.
-- Se añadieron pruebas automatizadas para los nuevos hooks y se actualizaron traducciones para búsqueda en rankings.
-- Footer/versionado actualizado a **v1.2.55** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.54
-
-- Se configuró una base de calidad enterprise para frontend y backend con ESLint + Prettier centralizados en la raíz del repositorio, reglas estrictas de TypeScript y orden automático de imports.
-- Se añadieron scripts de formato y lint en ambos paquetes, junto con `lint-staged` + Husky para ejecutar validaciones automáticas en cada `pre-commit`.
-- Se fortalecieron workflows de GitHub Actions para ejecutar lint + tests + build en Pull Requests y en `main`, reforzando el quality gate antes de deploy.
-- Se incorporó una prueba automatizada que valida la presencia de lint/test en workflows y el hook de pre-commit para evitar regresiones en la configuración.
-- Footer/versionado actualizado a **v1.2.54** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.53
-
-- Se corrigió el layout de la ronda para evitar que el enunciado de la pregunta (especialmente en modo mapa y en iPhone) se comprima verticalmente cuando ocupa más de una línea: ahora el bloque de pregunta mantiene su altura natural y el scroll ocurre en el contenedor correcto.
-- Se añadió una prueba automatizada nueva de `GameRoundScaffold` que valida que la tarjeta de pregunta no se encoja, previniendo regresiones de texto cortado en mobile.
-- Se revisó visualmente el flujo de juego en viewport móvil para validar jerarquía, lectura y espaciados en la zona de pregunta/mapa.
-- Footer/versionado actualizado a **v1.2.53** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.52
-
-- Se amplió el área visual de preguntas de silueta en `QuestionCard`, aumentando altura mínima del contenedor e imagen para que la forma del país se perciba completa y con mejor legibilidad en mobile.
-- Se optimizó el enunciado de preguntas de mapa en layout compacto con tipografía y `line-height` más contenidos, evitando que el texto compita con el mapa y mejorando la jerarquía visual.
-- Se añadieron pruebas automatizadas de `QuestionCard` para validar el nuevo espacio de silueta y el ajuste tipográfico del enunciado de mapa, reduciendo riesgo de regresión visual.
-- Footer/versionado actualizado a **v1.2.52** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.51
-
-- Se compactó la pantalla de ronda en modo individual para aprovechar mejor el alto en mobile: se eliminó la barra textual `Pregunta X de Y`, se redujo el margen superior del header y se quitaron mensajes contextuales redundantes en el cuerpo/resultado.
-- En preguntas de capitales se retiró el icono superior para evitar ocupar una línea completa y mejorar la jerarquía visual del enunciado.
-- Las alternativas ahora reemplazan la letra por ✓/✕ de color al mostrar resultado, eliminando badges de texto para reducir ruido visual y ganar espacio útil.
-- Se reforzó la renderización de imágenes en `QuestionCard`: normalización de URL de bandera (código ISO en minúsculas para `flagcdn`) y contenedores con alturas mínimas para que banderas/siluetas se vean completas con `object-contain`.
-- Se actualizaron pruebas automatizadas de `GamePage`, `DuelPage` y `OptionButton` para reflejar el nuevo layout y prevenir regresiones.
-- Footer/versionado actualizado a **v1.2.51** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.50
-
-- Se centralizó el footer global en el layout `Screen` para que la versión de la app aparezca de forma consistente en **todas las vistas** del frontend, incluyendo rutas protegidas y públicas.
-- Se retiraron footers duplicados en páginas que ya estaban renderizando versión manualmente para evitar inconsistencias y mantener jerarquía visual limpia en mobile-first.
-- Se actualizaron pruebas de vistas y layout para validar que el footer/versionado siga visible tras el cambio arquitectónico.
-- Footer/versionado actualizado a **v1.2.50** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.49
-
-- Se auditó y reforzó el flujo completo de autenticación para evitar fallas silenciosas en login/registro causadas por emails con espacios o mayúsculas.
-- Backend: el email ahora se normaliza (`trim + lowercase`) en login y registro, y la búsqueda de usuario en login se realiza en modo case-insensitive para mejorar robustez.
-- Frontend: `AuthContext` normaliza email y username antes de invocar la API, reduciendo errores de ingreso desde mobile/autocompletado.
-- Se añadieron pruebas automatizadas nuevas en frontend y backend para cubrir la normalización de credenciales y prevenir regresiones.
-- Footer/versionado actualizado a **v1.2.49** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.48
-
-- Se recuperó la visualización del enunciado en preguntas cuando `questionData` llega serializado como JSON string, parseándolo de forma segura para extraer `country/capital` y mantener la experiencia consistente.
-- Se añadió fallback para casos legacy sin `questionText`, priorizando contexto útil del usuario antes de dejar el enunciado vacío.
-- Se agregó prueba automatizada de `QuestionCard` para asegurar que el enunciado de capital se renderice correctamente con `questionData` serializado.
-- Footer/versionado actualizado a **v1.2.48** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.47
-
-- Se eliminó código muerto del frontend: se retiraron `OverlayModal` y `useLockBodyScroll`, que no estaban referenciados en rutas ni componentes activos.
-- Se limpió duplicación de lógica en rutas de autenticación extrayendo el estado de carga compartido a `AuthRouteLoading`.
-- Se actualizaron exports del barrel de componentes y pruebas de layout para reflejar la limpieza sin afectar UX mobile-first.
-- Footer/versionado actualizado a **v1.2.47** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.46
-
-- Se refactorizó el sistema visual del frontend hacia **CSS Custom Properties globales** en `:root`, documentando tokens de color, spacing, radios, sombras y breakpoints para mantener consistencia mobile-first y facilitar evolución de UI.
-- Se habilitó **dark mode automático** mediante `prefers-color-scheme`, manteniendo contraste y jerarquía visual en componentes compartidos.
-- Se sincronizó `tailwind.config.js` con `theme.extend` basado en variables CSS para usar los mismos tokens de diseño desde utilidades Tailwind.
-- Se actualizaron componentes principales (`Timer`, `MapInteractive`, `OptionButton`, `ScoreDisplay`) para consumir tokens globales en lugar de valores hardcodeados.
-- Se agregó cobertura automatizada para validar la existencia y mapeo del token system (`design-tokens.test.js`) y se actualizaron tests afectados por el refactor de estilos.
-- Footer/versionado actualizado a **v1.2.46** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.45
-
-- Se optimizó el layout de rondas (individual, duelo y desafío) para que el área central use mejor el alto disponible: header/progreso compactados, contenido principal con `flex-1` + `min-h-0` y scroll interno sólo en el bloque que realmente lo necesita.
-- Se eliminó espacio vertical desperdiciado sobre el core de juego reduciendo paddings superiores y gaps, con una jerarquía visual más cercana al header sin perder legibilidad en dark mode.
-- Se consolidó el patrón de viewport mobile con `height: 100%` + `min-height` (`100svh`/`100dvh`) en el contenedor raíz, manteniendo `html/body` sin scroll global y evitando regresiones de `100vh` en iOS/Android.
-- Se ajustó el mapa interactivo para usar una altura más equilibrada en mobile y disminuir scroll innecesario en preguntas de mapa.
-- Se actualizaron tests automatizados de layout en páginas de juego para cubrir las nuevas clases de contenedor y safe area.
-- Footer/versionado actualizado a **v1.2.45** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.44
-
-- Se implementó un contenedor raíz `app-root` full-screen con `100svh` (fallback `100vh`), safe areas y bloqueo de overflow global para estabilizar altura visible en iOS Safari y Chrome Android.
-- Se introdujo el componente reutilizable `Screen` (header/content/footer) para estandarizar pantallas de altura fija sin scroll del `body`, delegando el scroll sólo a contenedores internos cuando corresponde.
-- Se añadió el hook `useLockBodyScroll(ref)` y un ejemplo `OverlayModal` para bloquear fondo en overlays y reducir rubber-band/scroll accidental en mobile.
-- Se ajustó el viewport meta, estilos globales (`html`, `body`, `#root`) y reemplazos de `100vh/min-h-screen` conflictivos por patrón robusto mobile-first.
-- Se agregaron tests automatizados para validar `Screen` y el lock/unlock del scroll de `body`.
-- Footer/versionado actualizado a **v1.2.44** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.43
-
-- Se compactó el layout del menú principal en mobile (cabecera de contenido, selector de categoría y tarjetas de modo) para aprovechar mejor el alto disponible y reducir scroll innecesario sin recortar información.
-- Se ajustó la densidad visual de chips y CTAs con jerarquía más clara, manteniendo contraste y legibilidad en dark mode.
-- Se actualizaron tests automatizados del menú para validar el nuevo layout compacto mobile-first y prevenir regresiones de espaciado/altura.
-- Footer/versionado actualizado a **v1.2.43** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.42
-
-- Se consolidó una bandeja de acción fija para ronda en mobile (confirmar/siguiente/espera) en modo individual, duelo y desafío, evitando que los CTA críticos queden fuera de pantalla.
-- Se compactaron márgenes y alturas en scaffold de ronda, cabeceras y progreso para aprovechar mejor el alto disponible sin cortar contenido crítico.
-- Se optimizó la tarjeta de pregunta compacta (especialmente siluetas y banderas) para reducir espacios verticales desaprovechados y mejorar jerarquía visual.
-- Se actualizaron pruebas automatizadas de bandeja y páginas de juego para validar el contenedor fijo de acciones y prevenir regresiones de visibilidad en mobile.
-- Footer/versionado actualizado a **v1.2.42** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.41
-
-- Se rediseñaron las vistas previas al juego (Home, Menú, Login y Registro) con una estética dark mode más cuidada, compacta y mobile-first, priorizando jerarquía visual clara y mejor legibilidad.
-- En menú se eliminaron CTA redundantes en mobile (barra fija duplicada), manteniendo una única zona de acciones para reducir ruido y mejorar foco de decisión.
-- Se ajustaron espaciados y densidad visual para minimizar la necesidad de scroll en pantallas pequeñas sin forzar recortes de contenido.
-- Se añadieron/actualizaron pruebas automatizadas de Home/Menú/Login y nueva cobertura de Registro para blindar el layout previo a partida.
-- Footer/versionado actualizado a **v1.2.41** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.40
-
-- Se simplificó la bandeja de acciones en ronda para que **Confirmar** sea el único CTA principal antes de responder, reduciendo ruido visual y priorizando la acción clave.
-- Se eliminó el botón secundario de “Cambiar selección”: ahora basta con tocar otra alternativa para corregir, manteniendo una interacción más natural y mobile-first.
-- Se actualizaron pruebas de bandeja y páginas de juego (individual, duelo y desafío) para validar la nueva jerarquía de acciones sin CTA auxiliar.
-- Footer/versionado actualizado a **v1.2.40** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.39
-
-- Se mejoró visualmente la bandeja de acciones en dark mode con un estilo más atractivo para contexto Río: contraste reforzado, profundidad sutil y CTA principal con gradiente cian/azulado para jerarquía clara.
-- Se optimizó la UX de los botones **Confirmar** y **Cambiar selección**: mejor lectura táctil mobile-first, iconografía de apoyo y feedback visual más evidente para reducir errores.
-- Se agregó microcopy asistivo breve (“Selección lista para confirmar”) para dar seguridad antes de enviar respuesta en modos individual, duelo y desafío.
-- Se actualizó la cobertura automatizada de `RoundActionTray` para validar este nuevo estado de ayuda contextual.
-- Footer/versionado actualizado a **v1.2.39** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.38
-
-- Se consolidó la bandeja de acciones de ronda en un componente reutilizable (`RoundActionTray`) para un jugador, duelo y desafío, evitando implementaciones separadas por modo y asegurando consistencia visual mobile-first.
-- Cada modo ahora delega en el mismo bloque base y controla por estado interno qué mostrar (enviar, limpiar, esperando rival, resultado o siguiente), reduciendo divergencias de UX/UI y facilitando mantenimiento.
-- Se agregó cobertura automatizada para el nuevo componente reutilizable y se actualizaron pruebas de páginas de juego para validar la integración transversal.
-- Footer/versionado actualizado a **v1.2.38** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.37
-
-- Se unificó la estructura visual de ronda de juego en un componente reutilizable (`GameRoundScaffold`) para modo individual, duelo y desafío, evitando divergencias de layout entre modos.
-- Ahora cada modo reutiliza los mismos bloques base (header/progreso/contenido/CTA) y sólo define qué piezas se muestran según estado interno, manteniendo una experiencia coherente mobile-first en claro/oscuro.
-- Se actualizaron pruebas de páginas de juego para cubrir la reutilización del scaffold y prevenir regresiones de UX/UI al evolucionar nuevos modos.
-- Footer/versionado actualizado a **v1.2.37** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.36
-
-- Se corrigió el layout de `GamePage` para evitar recortes visuales tras seleccionar/responder: ahora el contenido principal puede crecer y desplazarse verticalmente sin cortar tarjetas, alternativas ni bloque de resultado.
-- Se mantuvo la bandeja de acción sticky con espacio seguro inferior, pero reforzando el contenedor para no sacrificar contenido visible en pantallas pequeñas y dark mode.
-- Se agregaron/actualizaron pruebas de `GamePage` para blindar el comportamiento de contención (sin clipping) y la visibilidad de CTA/resultados.
-- Se creó `AGENTS.md` en la raíz con lineamientos de diseño/UX permanentes (mobile-first, dark mode, no clipping, tests obligatorios, actualización de README + footer versionado).
-- Footer/versionado actualizado a **v1.2.36** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.35
-
-- Se ajustó la barra de progreso para que los números de preguntas queden **en una sola fila** en mobile y desktop, sin saltos de línea ni desplazamiento horizontal.
-- Cada indicador ahora calcula su ancho de forma proporcional dentro del contenedor, manteniendo todos los números visibles y adaptados al margen disponible.
-- Se redujo el peso visual del estado actual en los indicadores para priorizar legibilidad en pantallas pequeñas sin perder feedback de estado.
-- Se actualizó la prueba unitaria de `ProgressBar` para validar explícitamente el layout en una sola fila (`flex-nowrap` + `overflow-hidden`).
-- Footer/versionado actualizado a **v1.2.35** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.34
-
-- Se rediseñó la barra de progreso de preguntas en formato **grilla responsiva**, eliminando el scroll horizontal para que todos los números se vean completos dentro del contenedor en mobile-first.
-- Se compactó el layout vertical de `GamePage` (header, estado de progreso, tarjetas y CTA) para que el contenido clave quede mejor adaptado al alto de pantalla y se reduzca la necesidad de desplazamiento.
-- Se ajustaron tipografías y alturas mínimas de tarjeta/opciones con foco empático en legibilidad y control táctil en teléfonos pequeños.
-- Se agregaron y actualizaron pruebas automatizadas para blindar la nueva grilla de progreso sin overflow y los cambios de layout móvil.
-- Footer/versionado actualizado a **v1.2.34** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.33
-
-- Se corrigió el desborde de texto en las opciones de respuesta dentro de tarjetas, priorizando una lectura fluida en mobile-first: ahora los textos largos se adaptan dentro del ancho disponible y no rompen el layout del contenedor.
-- Se reorganizó internamente el contenido de cada opción para mantener jerarquía visual clara (letra de opción + contenido + estado) con mejor estabilidad en pantallas pequeñas.
-- Se añadió prueba automatizada para blindar el ajuste de texto largo y prevenir regresiones en esta experiencia de juego.
-- Footer/versionado actualizado a **v1.2.33** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.32
-
-- Se mejoró la experiencia mobile-first en juego individual y desafíos para reducir el scroll al responder: tarjetas más compactas, menor padding vertical y bandeja de acción ajustada al safe-area para priorizar visibilidad inmediata de contenido clave.
-- El indicador de pregunta actual ya no comunica error antes de responder: ahora se representa en **amarillo (pendiente actual)** y recién toma estado verde/rojo cuando la respuesta fue confirmada.
-- Se reforzó la contención visual para evitar desbordes horizontales en contenedores (pregunta, opciones y barras de progreso), mejorando estabilidad y legibilidad en pantallas pequeñas.
-- Se actualizaron pruebas automatizadas del progreso de preguntas y del layout móvil para cubrir estos comportamientos y prevenir regresiones.
-- Footer/versionado actualizado a **v1.2.32** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.31
-
-- Se fortaleció el pipeline de despliegue a GitHub Pages para reducir fallas intermitentes: el artefacto se construye una sola vez en el quality gate y luego se publica, evitando dobles builds inconsistentes.
-- El workflow de deploy ahora se ejecuta únicamente cuando hay cambios relevantes de frontend o del propio pipeline, disminuyendo alertas innecesarias.
-- Se unificó el chequeo de calidad de frontend en el script `npm run ci:quality` para estandarizar validación local/CI y simplificar el flujo interno del equipo.
-- Se actualizó la prueba automatizada del workflow para blindar esta configuración y prevenir regresiones futuras en CI/CD.
-- Footer/versionado actualizado a **v1.2.31** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.30
-
-- Se creó un workflow dedicado de **deploy a GitHub Pages** con `quality gate` previo (lint + tests unitarios + build), para bloquear despliegues con regresiones antes de publicar.
-- El despliegue ahora usa `concurrency` para cancelar ejecuciones simultáneas y reducir fallas intermitentes por carreras entre pushes.
-- Se configuró el build para GitHub Pages con `VITE_BASE_PATH` dinámico por repositorio, evitando errores de carga de assets/rutas al publicar en `/<repo>/`.
-- Se añadió prueba automatizada para blindar la existencia del flujo de deploy y la configuración del base path, evitando que futuras modificaciones rompan CI/CD.
-- Footer/versionado actualizado a **v1.2.30** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.29
-
-- Se optimizó la pantalla de juego individual para móviles en preguntas de silueta: la tarjeta de pregunta ahora usa un layout compacto (menos altura de imagen y tipografía ajustada) para responder sin necesidad de scroll en la mayoría de pantallas pequeñas.
-- Se redujeron espacios verticales en el flujo de pregunta/respuesta para mantener el CTA principal más accesible con el pulgar y mejorar la continuidad de uso.
-- Se agregó cobertura de pruebas en `GamePage` para validar la activación automática del modo compacto en la categoría `SILHOUETTE`.
-- Footer/versionado actualizado a **v1.2.29** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.28
-
-- Se ajustó el workflow `keep-backend-awake` para que, si el secret `BACKEND_HEALTHCHECK_URL` no está configurado, emita una advertencia y finalice sin error en lugar de romper la ejecución.
-- Se mantiene el comportamiento de ping cada 10 minutos cuando el secret está presente, sin cambios en la URL de salud configurada.
-- Footer/versionado actualizado a **v1.2.28** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.27
-
-- Se corrigió un error de tipado en pruebas de `ResultsPage` que rompía el build de TypeScript en CI/deploy.
-- Se ajustó el flujo async del test de compartir resultado para mantener cobertura sin sacrificar estabilidad del pipeline.
-- Footer/versionado actualizado a **v1.2.27** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.26
-
-- Se aplicaron **10+ mejoras de UX mobile-first** en `ChallengeGamePage`: header sticky con salida rápida, temporizador y puntuación más legibles, bandeja de acción fija inferior con safe-area y CTA principal con mejor jerarquía táctil.
-- Se incorporó guía contextual dinámica por estado (sin selección, selección lista, tiempo crítico y post-respuesta) para acompañar al usuario de forma empática sin saturar la interfaz.
-- Se añadió acción explícita **Cambiar selección** antes de confirmar para reducir errores por toques accidentales en móvil.
-- Se reforzó la accesibilidad visual y semántica en progreso/temporizador/tarjeta de pregunta (roles, labels y contraste) y se mejoró el tratamiento responsive de alternativas para banderas en una sola columna en pantallas pequeñas.
-- Se actualizaron traducciones ES/EN y pruebas de `ChallengeGamePage` para cubrir bandeja sticky, estado deshabilitado de confirmar y limpieza de selección.
-- Footer/versionado actualizado a **v1.2.26** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.25
-
-- Se aplicaron **10+ mejoras de UX mobile-first** en la pantalla de resultados: mayor jerarquía visual del puntaje, tarjeta principal con mejor contraste, barra de precisión más clara y tarjetas de métricas más legibles para lectura rápida.
-- Se mejoró la usabilidad de acciones finales con una bandeja inferior sticky (Jugar de nuevo, Ver rankings, Volver al menú), targets táctiles más cómodos y soporte de safe-area en móviles con notch.
-- El flujo de compartir ahora evita toques duplicados: el botón se deshabilita mientras comparte, muestra estado de carga y mantiene confirmación inline no intrusiva.
-- En la pantalla de juego se reforzó el contexto durante la partida: encabezado con safe-area y estado de selección visible junto al progreso para reducir dudas antes de confirmar.
-- Se añadieron/actualizaron pruebas en `ResultsPage` y `GamePage` para cubrir barra de precisión, estado de compartir en progreso y nuevo estado contextual de selección.
-- Footer actualizado a **v1.2.25** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.24
-
-- Se aplicó un refinamiento visual mobile-first en la pantalla de juego para alinearla con los pantallazos de referencia: tarjeta de pregunta más limpia, badges de dificultad con mejor contraste y botones de alternativa con mayor legibilidad táctil.
-- Se mejoró la jerarquía del flujo de respuesta con CTA principal/deshabilitado más claro, panel de ayuda contextual más legible y bloque de acción inferior con mejor espaciado para pulgar.
-- Se ajustó la barra de progreso para reforzar estados (actual/correcta/incorrecta) y mantener lectura cómoda en scroll horizontal en dispositivos pequeños.
-- Se agregó/actualizó cobertura de pruebas en `GamePage` para validar que el botón **Confirmar** permanezca deshabilitado hasta seleccionar una alternativa y el nuevo espaciado inferior mobile.
-- Footer actualizado a **v1.2.24** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.23
-
-- Se mejoró la experiencia mobile-first en la modalidad individual: la guía de selección ahora se oculta automáticamente al mostrar el resultado, evitando mensajes duplicados y reduciendo ruido visual.
-- Se reforzó la jerarquía visual del mapa y del bloque de distancia con contenedores más claros y espaciado consistente, para lectura rápida en pantallas pequeñas.
-- Se ajustó la barra de progreso de preguntas con indicadores más cómodos para touch y scroll horizontal en móvil cuando sea necesario.
-- Se agregaron/actualizaron pruebas de `GamePage` para validar que la guía contextual no aparezca durante la revisión de respuesta.
-- Footer actualizado a **v1.2.23** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.22
-
-- Se aplicó una mejora de usabilidad mobile-first en Juego individual y Duelo: la bandeja de acciones (Confirmar/Cambiar selección/Siguiente) ahora queda anclada al borde inferior con gradiente sutil, mejorando visibilidad y alcance con pulgar.
-- Se añadió espacio inferior seguro (`safe-area`) y padding del contenido para evitar que la UI quede tapada en dispositivos con notch o barras del sistema.
-- Se agregaron pruebas en `GamePage` y `DuelPage` para validar la bandeja fija y prevenir regresiones de UX.
-- Footer actualizado a **v1.2.22** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.21
-
-- Se aplicaron 3 mejoras en Duelo con enfoque mobile-first y empatía: contexto visible durante matchmaking (categoría activa, espera estimada y salida sin penalización), guía contextual dinámica antes de confirmar respuesta y alerta calmada cuando quedan pocos segundos.
-- Se añadió una acción explícita de **Cambiar selección** para reducir envíos accidentales y dar más control al usuario en pantallas táctiles.
-- Se actualizaron traducciones ES/EN y pruebas de `DuelPage` para cubrir estas mejoras de usabilidad.
-- Footer actualizado a **v1.2.21** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.20
-
-- Se aplicaron 3 mejoras de usabilidad y empatía en `GamePage` con enfoque mobile-first: guía contextual persistente antes de responder, aviso calmado de tiempo crítico (últimos 5 segundos) y acción explícita para cambiar selección antes de confirmar.
-- Estas mejoras reducen errores por toques accidentales y acompañan mejor al usuario en momentos de presión sin recargar la interfaz.
-- Se actualizaron traducciones ES/EN y pruebas automatizadas para cubrir los nuevos mensajes y el flujo de limpiar selección.
-- Footer actualizado a **v1.2.20** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.19
-
-- Se corrigió el fallo de build en TypeScript eliminando imports de APIs de Node en el test `qa-scripts` y reemplazándolos por import directo de `package.json`, compatible con el entorno de compilación web.
-- Se mantiene la cobertura de QA para scripts de lint y E2E en local/CI sin depender de tipados de Node en el pipeline de despliegue.
-- Footer actualizado a **v1.2.19** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.18
-
-- Login reforzado con 3 mejoras de usabilidad mobile-first: botón de acceso deshabilitado hasta completar datos, ayuda contextual visible y toggle para mostrar/ocultar contraseña con targets táctiles cómodos.
-- Se añadieron atributos de autocompletado y entrada optimizada para correo (`autoComplete`, `inputMode`, `autoFocus`) para reducir fricción en pantallas móviles.
-- Los errores de login ahora se limpian cuando el usuario edita campos, evitando mensajes obsoletos y mejorando claridad.
-- Se actualizaron pruebas de `LoginPage` para cubrir las nuevas funcionalidades de UX.
-- Footer actualizado a **v1.2.18** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.16
-
-- Menú mobile mejorado con una barra de **acciones rápidas** (Un Jugador, Duelo y Desafíos) para reducir pasos y facilitar partidas rápidas con una sola mano.
-- Se recuerda automáticamente la última categoría elegida en el menú (`localStorage`) para evitar que el usuario repita la misma selección en cada ingreso.
-- Home ahora muestra un mensaje de bienvenida contextual cuando el usuario está autenticado, reforzando cercanía y claridad de la acción principal.
-- Se actualizaron pruebas automatizadas de Home y Menú para cubrir estas funcionalidades nuevas.
-- Footer actualizado a **v1.2.16** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.15
-
-- Se unificó el footer en un componente reutilizable (`AppFooter`) para reducir duplicidad y asegurar consistencia visual de la versión en Home y Menú.
-- Home ahora incluye un **skip link** accesible (“Ir a las acciones principales”) para mejorar navegación con teclado y lectores de pantalla, especialmente en mobile con accesorios.
-- Se añadió una línea de confianza breve en Home y una confirmación visible/`aria-live` de categoría activa en Menú para reducir fricción y reforzar claridad de estado.
-- Se actualizaron pruebas de Home y Menú para cubrir las nuevas mejoras de usabilidad y accesibilidad.
-- Footer actualizado a **v1.2.15** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.14
-
-- Se añadió un workflow de GitHub Actions (`keep-backend-awake.yml`) que hace ping automático cada 10 minutos al endpoint de salud del backend para reducir los cold starts y evitar tener que “despertar” manualmente el servidor antes de jugar.
-- Se incorporó un keep-alive silencioso en frontend que envía un ping cada 4 minutos mientras la app está abierta y visible, mejorando continuidad en sesiones móviles reales sin afectar la UI minimalista.
-- Se agregaron pruebas automatizadas para validar el comportamiento del keep-alive en pestaña visible/oculta.
-- Footer actualizado a **v1.2.14** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.13
-
-- Se aplicaron 3 mejoras de estilo globales con enfoque mobile-first y coherencia visual: nuevo `app-shell` reutilizable, paneles `surface-panel` y footer unificado con badge de versión para reducir duplicidad entre pantallas clave.
-- Se optimizó la usabilidad móvil en la grilla horizontal de categorías ocultando el scrollbar visual (`scrollbar-none`) sin perder desplazamiento táctil, manteniendo una UI más limpia y minimalista.
-- Se incorporó soporte global de accesibilidad para usuarios con `prefers-reduced-motion`, reduciendo animaciones/transiciones para una experiencia más confortable sin afectar funcionalidad.
-- Se actualizaron pruebas de Home y Menú para cubrir las nuevas clases globales y el badge de versión en footer.
-- Footer actualizado a **v1.2.13** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.12
-
-- Se corrigió el test E2E mobile de Home que fallaba en CI por depender de una versión fija (`v1.2.7`): ahora valida la versión real leyendo `frontend/package.json`, evitando obsolescencia en cada release.
-- Con este ajuste, el check de footer sigue verificando trazabilidad de versión sin romper despliegues en GitHub Pages cuando subimos versión.
-- Footer actualizado a **v1.2.12** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.11
-
-- Se actualizaron los tests de páginas que usan `MemoryRouter` para adoptar los future flags de React Router v7 (`v7_startTransition` y `v7_relativeSplatPath`), eliminando advertencias deprecadas y dejando la suite alineada al comportamiento actual del enrutador.
-- Se mantuvo la cobertura funcional existente sin datos mock adicionales, asegurando que los flujos clave de Home, Login y Menú sigan verificados con un enfoque mobile-first y minimalista.
-- Footer actualizado a **v1.2.11** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.10
-
-- Se rediseñó la arquitectura de enrutamiento para usar un único `AuthProvider` global, eliminando montajes repetidos por ruta que reiniciaban el estado de autenticación y podían disparar validaciones innecesarias de sesión durante el login.
-- Se corrigió la latencia percibida al iniciar sesión: la conexión de socket ahora se ejecuta en segundo plano, evitando bloquear la navegación al menú cuando las credenciales son correctas.
-- Se mejoró el feedback UX del login con estado local de envío y mensajes accionables ante rate limit (`retryAfterSeconds`), para que el usuario sepa exactamente cuándo reintentar.
-- Se actualizaron pruebas automatizadas de routing y login para blindar la nueva estructura y el manejo de errores de autenticación.
-- Footer actualizado a **v1.2.10** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.9
-
-- Se corrigió un error crítico de compilación en backend que rompía deploys: las respuestas automáticas por timeout en duelos ahora incluyen `timeRemaining`, cumpliendo el contrato tipado de `AnswerResult`.
-- Se centralizó la creación de respuestas vacías en un helper reutilizable para evitar futuras divergencias de tipo en flujos de juego en tiempo real.
-- Se añadió una prueba automatizada específica para blindar la estructura mínima requerida de respuestas no contestadas.
-- Se incorporó un workflow de CI para backend que ejecuta instalación, build TypeScript y tests en cada push/PR, previniendo que errores de compilación lleguen a producción.
-- Footer actualizado a **v1.2.9** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.8
-
-- Se corrigió la validación al crear desafíos para aceptar payloads parametrizados de forma robusta: categorías en minúsculas/mayúsculas y campos numéricos serializados como string ahora se normalizan antes de validar.
-- Se evita el falso error de **"Datos inválidos"** cuando el cliente envía datos tipados de forma compatible pero no estrictamente idéntica (caso común en integraciones y formularios).
-- Se añadió una prueba automatizada del esquema de creación de desafíos para prevenir regresiones de validación.
-- Footer actualizado a **v1.2.8** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.7
-
-- Se ajustó la protección de autenticación para evitar bloqueos injustos: el límite de intentos ahora se aplica solo a **login/registro**, sin impactar endpoints autenticados como `me` o `profile`.
-- Se mejoró la experiencia ante límite excedido con un mensaje más claro y un campo `retryAfterSeconds` para guiar al usuario sobre cuándo reintentar.
-- El backend ahora confía en proxy (`trust proxy`) para identificar correctamente la IP real en despliegues detrás de infraestructura intermedia.
-- Se añadieron pruebas automatizadas para validar el cálculo de reintento del rate limit (sin mock data).
-- Footer actualizado a **v1.2.7** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.6
-
-- Se corrigió el build de frontend en CI/CD y GitHub Pages eliminando dependencias de APIs de Node en una prueba de QA (`node:fs`, `node:path`, `__dirname`) que no estaban disponibles en el entorno de compilación.
-- La prueba de scripts QA ahora usa importación JSON tipada desde `package.json`, compatible con la configuración TypeScript del proyecto y con enfoque de mantenimiento simple.
-- Se mantuvo cobertura automatizada de la funcionalidad QA existente, actualizando la implementación del test sin usar mock data.
-- Footer actualizado a **v1.2.6** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.5
-
-- Se corrigió la navegación de **Desafíos** para despliegues en GitHub Pages: el router ahora respeta `BASE_URL`, evitando redirecciones a rutas inservibles fuera del prefijo de la app.
-- El acceso a **Desafíos** desde el menú ahora conserva la categoría elegida y abre la configuración directamente para parametrizar más rápido (flujo mobile-first con menor fricción).
-- Se reforzó el manejo de redirecciones de autenticación para usar rutas internas de la app, evitando saltos rotos a `/login` fuera del contexto del despliegue.
-- Se añadieron pruebas automatizadas para validar la preparametrización de desafíos desde menú y la creación con categoría inicial.
-- Footer actualizado a **v1.2.5** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.4
-
-- Se corrigió el flujo de cierre de partida en **Desafíos**: ahora existe una pantalla de resultados dedicada para `/challenges/:id/results`, evitando la navegación a una página inservible al terminar.
-- Se mejoró la usabilidad al parametrizar y jugar desafíos grupales: si todavía no se completa el cupo de jugadores, el CTA se muestra deshabilitado y con estado de espera claro (sin redirecciones erróneas).
-- Se añadieron/actualizaron pruebas automatizadas para cubrir la nueva ruta de resultados y el estado de espera del botón en desafíos pendientes.
-- Footer actualizado a **v1.2.4** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.3
-
-- Se simplificó la **Home** para mantener solo lo esencial: propuesta de valor clara, CTA principal y navegación directa, eliminando bloques de relleno visual.
-- Se rediseñó el **Menú** con enfoque minimalista y mobile-first: menos ruido, categorías priorizadas y accesos rápidos a los tres modos clave.
-- Se removieron elementos secundarios de baja utilidad (estadísticas y accesos redundantes) para reducir carga cognitiva y mejorar la toma de decisión del usuario.
-- Pruebas automatizadas actualizadas para validar el nuevo layout mínimo y la versión vigente en footer.
-- Footer actualizado a **v1.2.3** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.2
-
-- Se mejoró la discoverabilidad para crear desafíos multijugador: ahora la pantalla de **Desafíos** muestra una sección destacada con CTA claro para configurar categorías, cupo y tiempo por pregunta.
-- Cuando no existen desafíos en la pestaña activa, se muestra un estado vacío accionable con botón directo para crear un nuevo desafío multijugador.
-- Se actualizaron traducciones ES/EN y pruebas automatizadas para validar la nueva llamada a la acción de creación.
-- Footer actualizado a **v1.2.2** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.1
-
-- Se completó el flujo de **Desafíos** para duelos grupales con enfoque mobile-first: creación guiada por categorías, cupo de jugadores (2-8) y tiempo por pregunta (10/20/30s) con resumen claro antes de publicar.
-- Se mejoró la experiencia de quienes se quieren unir a una convocatoria: estado localizado, categorías legibles y visibilidad de cupos disponibles en cada desafío.
-- Se añadieron nuevos textos i18n (ES/EN) para mantener consistencia entre creación y unión de desafíos multijugador.
-- Se actualizaron pruebas automatizadas para cubrir la nueva selección de cupo y el flujo de unión desde la pestaña “Para unirme”.
-- Footer actualizado a **v1.2.1** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.2.0
-
-- La funcionalidad de **Desafíos** ahora soporta partidas multijugador (más de 2 personas) con cupo configurable de 2 a 8 jugadores.
-- Al crear una convocatoria puedes definir categorías incluidas (multi-selección), tiempo por pregunta (10/20/30 segundos) y cantidad máxima de participantes.
-- Nuevo flujo para unirse a convocatorias abiertas desde la pestaña “Para unirme”, con estado de cupos visibles y experiencia mobile-first.
-- El modo de juego del desafío respeta el tiempo configurado por convocatoria para mantener consistencia entre creación y partida.
-- Se añadieron pruebas automatizadas para validar la creación de desafíos multijugador con configuración completa.
-- Footer actualizado a **v1.2.0** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.1.24
-
-- Se reforzó la ejecución de calidad para que ESLint y Playwright se lancen siempre con comandos consistentes desde `package.json`, tanto en local como en CI.
-- El workflow de frontend ahora ejecuta el script único `test:e2e:ci`, reduciendo fallos por diferencias de comandos entre entornos.
-- Nueva prueba automatizada para validar la configuración mobile-first de Playwright y el arranque e2e (build + preview) y prevenir regresiones.
-- Footer actualizado a **v1.1.24** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.1.23
-
-- Corrección en duelos para preguntas consecutivas de tipo **MAP**: ahora el componente del mapa recibe `questionId`, permitiendo resetear correctamente el viewport (centro + zoom) al iniciar cada nueva pregunta y evitando arrastrar la vista anterior.
-- Se añadió prueba automatizada en `DuelPage` para validar que el `questionId` se propaga al mapa y prevenir regresiones en este flujo.
-- Footer actualizado a **v1.1.23** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.1.22
-
-- Se configuró ESLint en frontend con una base estable para que `npm run lint` pueda ejecutarse de forma consistente en local y CI.
-- Se añadió infraestructura de Playwright para e2e (`playwright.config.ts` + prueba mobile-first de Home) enfocada en validar el flujo principal sin mock data.
-- Se incorporó workflow de GitHub Actions para ejecutar lint, pruebas unitarias y pruebas e2e de Playwright en cada push/PR.
-- Footer actualizado a **v1.1.22** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.1.21
-
-- Corrección visual mobile-first en pantalla de resultados: los badges de **Correctas/Incorrectas** ahora quedan contenidos dentro de sus tarjetas, evitando desbordes y mejorando legibilidad en pantallas pequeñas.
-- Refuerzo global del componente `AnswerStatusBadge` para prevenir overflow en otros contextos (ancho máximo, truncado y espaciado más compacto).
-- Mejora del bloque de compartir resultados con CTA más claro, jerarquía visual más limpia y feedback inline no intrusivo (sin `alert`).
-- Mensaje de compartir actualizado para ser más útil y motivador, incluyendo puntaje, aciertos totales y precisión.
-- Nueva prueba automatizada de `ResultsPage` para validar contención visual y flujo de compartir (texto copiado + confirmación).
-- Footer actualizado a **v1.1.21** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.1.20
-
-- Ajuste mobile-first de consistencia visual en Home y Menú: se reforzó la contención horizontal de layout (`overflow-x-clip`) para evitar desbordes involuntarios entre secciones en pantallas pequeñas.
-- Se añadieron mejoras de coherencia en tarjetas y textos (`min-w-0` y `break-words`) para que el contenido interno respete los márgenes del contenedor y no se salga visualmente.
-- Se ajustaron áreas seguras móviles en header/CTA inferior del menú para mejorar estabilidad visual en dispositivos con notch o barras del sistema.
-- Pruebas automatizadas actualizadas para validar contención visual y versión del footer.
-- Footer actualizado a **v1.1.20** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.1.19
-
-- Mejora mobile-first en partida individual para categoría **Banderas**: las alternativas ahora se muestran en una sola columna en pantallas pequeñas, priorizando legibilidad y evitando toques accidentales cuando hay imagen de bandera en pantalla.
-- En pantallas medianas o mayores se conserva la grilla de dos columnas para mantener densidad visual sin perder claridad.
-- Se actualizó la suite de pruebas de `GamePage` incorporando un caso específico para categoría `FLAG` que valida este comportamiento responsive y previene regresiones.
-- Footer actualizado a **v1.1.19** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.1.18
-
-- Mejora mobile-first de navegación en menú: se aumentó el área táctil mínima de acciones clave (rankings, perfil, cerrar sesión y categorías) para facilitar interacción con pulgar y reducir toques erróneos.
-- Se añadió una pista contextual en móvil para el carrusel de categorías ("Desliza para ver más categorías"), mejorando descubribilidad y usabilidad sin recargar la interfaz.
-- Se actualizaron traducciones i18n (ES/EN) y pruebas automatizadas para validar la nueva pista mobile y mantener cobertura funcional.
-- Footer actualizado a **v1.1.18** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.1.17
-
-- Mejora mobile-first en el menú principal: selección de categoría convertida en carrusel horizontal con `snap`, reduciendo saturación visual y facilitando el alcance con pulgar en pantallas pequeñas.
-- Se añadió un CTA fijo inferior para iniciar partida individual con la categoría activa visible, priorizando acción principal y disminuyendo fricción en móvil.
-- El menú ahora incluye footer con versión de app para trazabilidad del despliegue en GitHub Pages, alineado con el resto de vistas.
-- Pruebas automatizadas actualizadas para validar el CTA mobile y la versión visible en footer.
-- Footer actualizado a **v1.1.17** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.1.16
-
-- Recomendación aplicada: el badge principal del Home dejó de estar hardcodeado y ahora usa i18n (`home.badge`), mejorando consistencia multilenguaje y usabilidad para usuarios en inglés.
-- Se añadieron/actualizaron pruebas para validar el texto del badge y la versión visible en el footer.
-- Footer actualizado a **v1.1.16** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.1.15
-
-- Se reforzó la estabilidad del inicio de duelos agregando un timeout de seguridad de "ready": si ambos jugadores quedan emparejados pero uno no confirma, el backend fuerza el arranque para evitar bloqueos en estado de espera.
-- Se añadió un evento explícito (`duel:ready-timeout`) para dejar trazabilidad del arranque forzado y facilitar monitoreo/diagnóstico del matchmaking en producción.
-- Nuevas pruebas automatizadas para blindar la lógica de timeout del estado `waiting` y prevenir regresiones en el flujo de inicio.
-- Footer actualizado a **v1.1.15** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.1.14
-
-- Mejora mobile-first en vistas de desafío y duelo: las alternativas ahora se renderizan en grilla de 2 columnas para mostrar todas las opciones más rápido y reducir el scroll en pantallas pequeñas.
-- Se agregaron pruebas automatizadas nuevas para validar la grilla de alternativas en `ChallengeGamePage` y `DuelPage`, manteniendo cobertura de UX en flujos clave.
-- Footer actualizado a **v1.1.14** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.1.13
-
-- Se incorporó un bypass de autenticación **seguro y explícito para tests** que evita bloquear la ejecución automática cuando no hay sesión iniciada.
-- El bypass requiere cabecera secreta (`x-test-auth-bypass`) y sólo se activa en entorno de testing o cuando se habilita por variables de entorno, manteniendo protección en producción.
-- Se añadió utilitario de frontend para inyectar el bypass en pruebas y fallback de autenticación en `AuthContext` para mejorar estabilidad de tests E2E/integración.
-- Nuevas pruebas automatizadas para validar la configuración del bypass en frontend y backend.
-- Footer actualizado a **v1.1.13** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.1.12
-
-- Reorganización mobile-first de alternativas en juego individual: ahora se muestran en una grilla de 2 columnas para reducir el scroll y mantener todas las opciones visibles más rápido en pantallas pequeñas.
-- Ajuste visual minimalista en cada botón de alternativa (espaciado, tipografía y tamaños) para mejorar legibilidad y densidad sin perder accesibilidad.
-- Nueva prueba automatizada en `GamePage` para validar la grilla de dos columnas y actualización de pruebas del botón de alternativa para el nuevo tamaño compacto.
-- Footer actualizado a **v1.1.12** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.1.11
-
-- Optimización mobile-first del bloque de alternativas para que entren mejor en pantalla sin scroll innecesario: menor altura mínima, padding más compacto y tipografía ajustada en pantallas pequeñas.
-- Badge de selección adaptado para mobile con icono compacto, conservando el texto completo en pantallas mayores para mantener claridad y accesibilidad.
-- Se actualizó la prueba del botón de alternativa para validar explícitamente la nueva configuración compacta orientada a móvil.
-- Footer actualizado a **v1.1.11** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.1.10
-
-- Se corrigieron y estandarizaron textos en español para respetar tildes, signos de apertura (¿, ¡) y ortografía en la experiencia completa.
-- Se reforzó la calidad con una prueba automatizada nueva para validar traducciones críticas en español y prevenir regresiones de acentuación.
-- Footer actualizado a **v1.1.10** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.1.9
-
-- Se incorporó selección integral de categoría en duelos: ahora puedes buscar partidas de **solo banderas, solo capitales, solo mapas, solo siluetas o mixto** desde el menú principal.
-- Matchmaking de duelos ajustado para respetar la categoría elegida por ambos jugadores, evitando cruces inconsistentes entre modos.
-- El reintento de duelo conserva la categoría activa para mantener una experiencia coherente y predecible.
-- Se agregaron pruebas automatizadas en frontend y backend para blindar el ruteo por categoría y el emparejamiento por tipo de duelo.
-- Footer actualizado a **v1.1.9** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.1.8
-
-- Se rediseñó el modelo de puntuación para que sea transversal, objetivo y coherente entre modos: ahora la velocidad de respuesta impacta de forma explícita en el puntaje en preguntas de opción múltiple y también en preguntas de mapa.
-- En preguntas de mapa, el puntaje ya no depende solo de acertar/fallar: combina precisión geográfica (distancia) + rapidez para premiar mejor desempeño real.
-- En duelos, además del score total, se agregó un desempate objetivo por tiempo restante acumulado cuando ambos jugadores terminan con el mismo puntaje.
-- Se reforzaron pruebas automatizadas de scoring y de desempate en duelos para cubrir estos nuevos criterios y evitar regresiones.
-- Footer actualizado a **v1.1.8** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.1.7
-
-- Corregido el resumen de progreso en partida individual: ahora cada indicador solo se pinta verde/rojo si esa pregunta ya fue respondida, evitando que preguntas no respondidas aparezcan en rojo.
-- Ajustada la lógica para que la pregunta activa se marque correctamente como actual incluso cuando el avance y los resultados llegan desfasados temporalmente.
-- Se reforzó la suite de pruebas con un caso que reproduce este desajuste y previene regresiones en el indicador superior.
-- Footer actualizado a **v1.1.7** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.1.6
-
-- Estandarizados los indicadores de respuesta correcta/incorrecta en juego individual, duelo y resumen final usando un mismo componente visual reutilizable.
-- Se alineó el feedback de selección y resultado entre botones de alternativas y paneles de resultado para mantener coherencia total en mobile y desktop.
-- Se agregaron nuevas claves de i18n para etiquetas consistentes de estado de respuesta (correcta/incorrecta y opción seleccionada).
-- Se incorporó una prueba automatizada para el nuevo badge de estado y se actualizaron pruebas existentes de botón/versión.
-- Footer actualizado a **v1.1.6** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.1.5
-
-- Auditoría de buenas prácticas aplicada al manejo de versión en frontend: el footer ahora consume automáticamente la versión real del paquete en build para evitar desalineación entre app y despliegue en GitHub Pages.
-- Se tipó la constante global de versión (`__APP_VERSION__`) para mantener seguridad de tipos y evitar accesos implícitos.
-- Se reforzó la prueba de Home para validar que el footer renderiza la versión activa esperada.
-- Footer actualizado a **v1.1.5** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.1.4
-
-- Corregida una condición de carrera en duelos que podía resolver la misma pregunta más de una vez bajo latencia/reintentos, provocando auto-respuestas aparentes en ambos jugadores.
-- Se agregó un candado de resolución por índice de pregunta (`resolvingQuestionIndex`) para garantizar idempotencia del cierre por pregunta.
-- Se añadió protección de respuesta en vuelo por jugador (`pendingQuestionIndex`) para evitar duplicados mientras se valida en backend.
-- Se reforzó la suite de pruebas en backend para cubrir escenarios de auto-cierre y resolución única.
-- Footer actualizado a **v1.1.4** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.1.3
-
-- En preguntas de mapa, cada nueva pregunta ahora inicia desde una vista neutral global para evitar perder tiempo reubicando el mapa entre intentos consecutivos.
-- Se corrigió el estado visual del resumen de progreso: cada burbuja ahora refleja el resultado real de su pregunta (verde/roja) en lugar de depender del total acumulado de aciertos.
-- Se dejó explícito en backend el umbral de acierto para mapa (`< 500 km`) para mantener consistencia entre puntaje y estado correcto/incorrecto.
-- Se agregaron pruebas automatizadas para cubrir el reset de viewport en mapa y la lógica de estado por pregunta en la barra de progreso.
-- Footer actualizado a **v1.1.3** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.1.2
-
-- Corregido un bug crítico en duelos: timers pendientes de preguntas anteriores podían auto-cerrar preguntas nuevas, haciendo que varias respuestas se marcaran solas sin interacción del jugador.
-- Se agregó una guarda explícita de índice de pregunta para que cada timeout solo afecte a la pregunta para la que fue programado.
-- Se incorporó una prueba automatizada para blindar este comportamiento y evitar regresiones en el flujo multijugador.
-- Footer actualizado a **v1.1.2** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.1.1
-
-- Corregido el flujo final de partida en modo individual: la pantalla de resultados ya no desaparece al instante y permanece visible para revisar puntaje, aciertos y acciones posteriores.
-- Se agregó prueba automatizada del flujo de fin de partida para asegurar que no se resetee el estado al navegar a resultados.
-- Footer actualizado a **v1.1.1** para mantener trazabilidad con el despliegue en GitHub Pages.
-
-## Novedades de la versión 1.1.0
-
-- Correcciones de ortografía y acentuación en español (incluye “Iniciar sesión”) para una experiencia más cuidada.
-- Vista de login refinada para modo oscuro con CTA de “Entrar” más claro y apariencia inequívoca de botón en móvil.
-- Pantalla de selección de modo de juego rediseñada (header y cuerpo) con enfoque mobile-first, mayor jerarquía visual y mejor legibilidad.
-- Footer actualizado a **v1.1.0** para mantener trazabilidad con el despliegue en GitHub Pages.
-- Mejorado el estado visual de alternativas en preguntas: selección más evidente (anillo, contraste y badge) para reducir dudas en móvil.
-- Header de juego fijado arriba (sticky) para mantener el temporizador siempre visible mientras haces scroll en preguntas largas o mapas.
-- Botones de login, registro y acciones de juego actualizados con apariencia de CTA clara y feedback de carga/press para mejor percepción de respuesta.
-- Home refinado con layout mobile-first más compacto y jerarquía visual optimizada para primera interacción en teléfonos.
-- Footer actualizado a **v1.0.9** para reflejar la versión desplegada en GitHub Pages.
-- Reparado el flujo completo de duelos para evitar efectos secundarios de re-suscripción en sockets (causaban comportamientos erráticos de respuestas en pantalla) y mantener estado consistente al actualizar puntajes.
-- Mejorado el envío de respuestas de mapa en duelos: ahora se incluyen coordenadas reales para validación correcta en backend.
-- Footer de la app actualizado a **v1.0.9** para mantener trazabilidad con el despliegue en GitHub Pages.
-- Corregido el flujo de fin de partida en modo individual: ahora `Ver resultado` mantiene el estado de la sesión y muestra la pantalla de resultados en lugar de redirigir al home/menu.
-- Rediseño de la vista principal con enfoque **mobile-first**, mejor jerarquía visual y CTA más claros para mejorar la usabilidad inicial.
-- Feedback visual mejorado al seleccionar alternativas (estado activo más claro con realce y etiqueta de selección), manteniendo un enfoque mobile-first y accesible.
-- En preguntas de mapa, al mostrar un resultado incorrecto la vista ahora ajusta automáticamente el encuadre para mostrar tanto tu selección como la ubicación correcta, evitando que tengas que desplazar el mapa manualmente.
-
-## Requisitos Previos
-
-- **Node.js** v18 o superior
-- **PostgreSQL** v14 o superior
-- **Redis** v6 o superior (para leaderboards y duelos)
-
-## Estructura del Proyecto
-
-```
+```text
 geochallenge/
-├── backend/          # API Node.js + Express + Socket.IO
-├── frontend/         # React + Vite + TypeScript
-└── data/             # Datos de países (JSON)
+├── frontend/              # SPA React + Vite + Tailwind
+├── backend/               # API Express + Socket.IO + Prisma
+├── data/                  # Catalogos canonicos del juego
+├── docs/                  # Auditorias y notas tecnicas
+├── scripts/               # Automatizaciones del repo
+├── .github/workflows/     # CI y deploy frontend
+├── docker-compose.yml     # Stack completo para VPS
+├── render.yaml            # Servicios Render
+├── DEPLOY.md              # Playbook de deploy/predeploy
+└── DEPLOY-ORACLE.md       # Guia VPS Oracle Cloud Always Free
 ```
 
----
+## Funcionalidad principal
 
-## Paso 1: Configurar PostgreSQL
+- Modos de juego:
+  - `single`: partida clasica.
+  - `streak`: racha infinita hasta fallar.
+  - `flash`: respuestas rapidas por tiempo.
+  - `duel`: PvP en tiempo real via Socket.IO.
+  - `challenge`: desafios creados por usuarios.
+  - `daily`: desafio diario.
+- Categorias:
+  - `MAP`
+  - `FLAG`
+  - `CAPITAL`
+  - `SILHOUETTE`
+  - `MONUMENT`
+  - `MIXED`
+- Rankings globales y por contexto.
+- Autenticacion JWT.
+- PWA con soporte movil.
+- i18n en español e ingles.
 
-### Opción A: Con Docker (recomendado)
+## Requisitos locales
+
+- Node.js 20
+- npm
+- Docker y Docker Compose, recomendado para PostgreSQL y Redis locales
+- Git
+
+## Setup local
+
+Instala dependencias:
 
 ```bash
-docker run --name geochallenge-postgres \
-  -e POSTGRES_USER=postgres \
-  -e POSTGRES_PASSWORD=postgres \
-  -e POSTGRES_DB=geochallenge \
-  -p 5432:5432 \
-  -d postgres:14
-```
-
-### Opción B: Instalación local
-
-1. Instalar PostgreSQL
-2. Crear base de datos:
-
-```sql
-CREATE DATABASE geochallenge;
-```
-
----
-
-## Paso 2: Configurar Redis
-
-### Opción A: Con Docker (recomendado)
-
-```bash
-docker run --name geochallenge-redis \
-  -p 6379:6379 \
-  -d redis:7
-```
-
-### Opción B: Instalación local
-
-Instalar Redis y asegurarse de que esté corriendo en el puerto 6379.
-
----
-
-## Paso 3: Configurar el Backend
-
-```bash
-cd backend
-
-# Instalar dependencias
 npm install
-
-# Crear archivo de variables de entorno
-cp .env.example .env
+npm --prefix frontend install
+npm --prefix backend install
 ```
 
-### Editar el archivo `.env`:
-
-```env
-# Base de datos
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/geochallenge?schema=public"
-
-# Redis
-REDIS_URL="redis://localhost:6379"
-
-# JWT
-JWT_SECRET="tu-secreto-super-seguro-cambiar-en-produccion"
-
-# Server
-PORT=3001
-NODE_ENV=development
-```
-
-### Ejecutar migraciones y seed:
+Copia variables de entorno:
 
 ```bash
-# Generar cliente de Prisma
-npx prisma generate
-
-# Ejecutar migraciones
-npx prisma migrate dev --name init
-
-# Poblar base de datos con preguntas (196 países × 4 categorías = 784 preguntas)
-npm run seed
+cp frontend/.env.example frontend/.env
+cp backend/.env.example backend/.env
 ```
 
-### Iniciar el servidor:
+Levanta dependencias locales:
 
 ```bash
-npm run dev
+docker compose up -d postgres redis
 ```
 
-El backend estará disponible en: `http://localhost:3001`
-
----
-
-## Paso 4: Configurar el Frontend
+Aplica migraciones y carga datos:
 
 ```bash
-cd frontend
-
-# Instalar dependencias
-npm install
-
-# Crear archivo de variables de entorno
-cp .env.example .env
+npm --prefix backend run db:migrate
+npm --prefix backend run seed
 ```
 
-### Editar el archivo `.env`:
+Arranca backend y frontend en terminales separadas:
 
-```env
+```bash
+npm --prefix backend run dev
+npm --prefix frontend run dev
+```
+
+URLs por defecto:
+
+- Frontend: `http://localhost:5173`
+- Backend API: `http://localhost:3001/api`
+- Backend health: `http://localhost:3001/health`
+
+## Scripts principales
+
+Desde la raiz:
+
+```bash
+npm run predeploy          # chequeo obligatorio antes de push a master
+npm run lint               # lint/typecheck frontend + backend
+npm run test               # tests frontend + backend
+npm run format:check       # valida formato
+npm run validate:cinema-geo
+```
+
+Frontend:
+
+```bash
+npm --prefix frontend run dev
+npm --prefix frontend run build
+npm --prefix frontend run lint
+npm --prefix frontend run lint:strict
+npm --prefix frontend run test
+npm --prefix frontend run test:e2e
+npm --prefix frontend run ci:quality
+```
+
+Backend:
+
+```bash
+npm --prefix backend run dev
+npm --prefix backend run build
+npm --prefix backend run lint
+npm --prefix backend run test
+npm --prefix backend run db:migrate
+npm --prefix backend run db:generate
+npm --prefix backend run seed
+npm --prefix backend run rebuild:leaderboards
+```
+
+## Variables de entorno
+
+Frontend (`frontend/.env`):
+
+```bash
 VITE_API_URL=http://localhost:3001/api
 VITE_SOCKET_URL=http://localhost:3001
+VITE_ENABLE_TEST_AUTH_BYPASS=false
+VITE_TEST_AUTH_BYPASS_SECRET=
+VITE_TEST_AUTH_BYPASS_EMAIL=test-runner@geochallenge.local
+VITE_TEST_AUTH_BYPASS_USERNAME=TestRunner
 ```
 
-### Iniciar el servidor de desarrollo:
+Backend (`backend/.env`):
 
 ```bash
-npm run dev
+DATABASE_URL="postgresql://user:password@localhost:5432/geochallenge?schema=public"
+REDIS_URL="redis://localhost:6379"
+JWT_SECRET="change-me"
+JWT_EXPIRES_IN="24h"
+PORT=3001
+NODE_ENV=development
+FRONTEND_URL="http://localhost:5173"
+ADMIN_TOKEN=""
 ```
 
-El frontend estará disponible en: `http://localhost:5173`
-
----
-
-## Paso 5: Crear un usuario de prueba
-
-### Opción A: Usar el formulario de registro
-
-1. Ir a `http://localhost:5173`
-2. Click en "Registrarse"
-3. Completar el formulario
-
-### Opción B: Crear usuario via API (curl)
+Docker/VPS (`.env` en la raiz):
 
 ```bash
-curl -X POST http://localhost:3001/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "testuser",
-    "email": "test@test.com",
-    "password": "123456"
-  }'
+DOMAIN=geochallenge.duckdns.org
+POSTGRES_PASSWORD=change-me
+JWT_SECRET=change-me
 ```
 
-### Opción C: Modo desarrollo (bypass login)
+No subas archivos `.env` reales al repositorio.
 
-Agregar `?dev=true` a la URL para activar el modo desarrollo:
+## Datos del juego
 
-```
-http://localhost:5173?dev=true
-```
+Los catalogos viven en `data/`:
 
----
+- `countries.json`: fuente historica de paises.
+- `country-catalog.v1.json`: catalogo canonico versionado.
+- `country-catalog.meta.json`: metadata generada del catalogo.
+- `cities.json`: ciudades para preguntas geograficas.
+- `monuments.json`: monumentos con nombre, pais, coordenadas, imagen y atribucion.
+- `cinema/`: dataset de cine con validaciones propias.
 
-## Comandos Útiles
+Para agregar o ajustar datos:
 
-### Backend
+1. Edita el JSON correspondiente.
+2. Valida integridad si existe script asociado.
+3. Ejecuta seed backend.
+4. Corre tests proporcionales al cambio.
+
+Comandos utiles:
 
 ```bash
-npm run dev          # Iniciar en modo desarrollo
-npm run build        # Compilar TypeScript
-npm run start        # Iniciar en producción
-npm run seed         # Poblar base de datos
-npm test             # Ejecutar tests
-npx prisma studio    # Abrir GUI de base de datos
+npm --prefix backend run seed
+npm run validate:cinema-geo
 ```
 
-### Frontend
+## Base de datos
+
+Prisma vive en `backend/prisma/`.
+
+Flujo para cambios de schema:
 
 ```bash
-npm run dev          # Iniciar en modo desarrollo
-npm run build        # Compilar para producción
-npm run preview      # Vista previa de producción
-npm test             # Ejecutar tests
+npm --prefix backend run db:migrate
+npm --prefix backend run db:generate
 ```
 
----
+Reglas importantes:
 
-## API (Contrato)
+- No modificar `schema.prisma` sin crear migracion cuando el cambio afecta produccion.
+- Commitar `schema.prisma` junto con el directorio nuevo en `backend/prisma/migrations/`.
+- `npm run predeploy` detecta `schema.prisma` modificado sin migracion nueva.
 
-### `GET /api/game/start`
+## Tests y calidad
 
-Parámetros de query:
+Checks recomendados segun alcance:
 
-- `category` (opcional): `MIXED | FLAG | CAPITAL | MAP | SILHOUETTE`.  
-  Valor por defecto: `MIXED`.
-- `questionCount` (opcional, number): para `single` mantiene el flujo actual de 10 preguntas.
-- `gameType` (opcional): `single | streak`.  
-  Valor por defecto: `single` (compatibilidad hacia atrás).
-- `excludeIds` (opcional, csv o array): IDs de preguntas recientes a excluir del próximo lote.
+- Solo frontend: `npm --prefix frontend run ci:quality`
+- Solo backend: `npm --prefix backend run lint && npm --prefix backend run test`
+- Ambos lados, datos o Prisma: `npm run predeploy`
+- Flujos reales, routing, auth, juego o UX critica: agregar E2E con Playwright cuando corresponda.
 
-Comportamiento:
+Antes de cualquier push a `master`, debe pasar:
 
-- `single`: conserva comportamiento existente (partida estándar de 10 preguntas por defecto).
-- `streak`: entrega un lote pequeño de preguntas reutilizando la selección estándar y aplicando `excludeIds` para evitar repetidas inmediatas.
+```bash
+npm run predeploy
+```
 
----
+El resultado esperado es:
 
-### `GET /api/leaderboard`
+```text
+✓ predeploy: builds limpios
+```
 
-Parámetros de query:
+## Deploy
 
-- `limit` (opcional, number): cantidad máxima de resultados (cap interno actual en `100`).
-- `scope` (opcional): `global | weekly | friends`.  
-  Valor por defecto: `global`.
+Lee primero [DEPLOY.md](DEPLOY.md). Ese documento es la fuente operativa para pushes a `master`, hooks, predeploy y errores recurrentes.
 
-Comportamiento de compatibilidad:
+Opciones disponibles:
 
-- El backend mantiene el comportamiento actual del leaderboard global.
-- Si se envía un `scope` aún no soportado (por ejemplo `weekly` o `friends`), la consulta **degrada a `global`** y responde metadatos de fallback en `queryMeta`.
+- GitHub Pages para frontend estatico.
+- Render para backend y/o sitio estatico segun `render.yaml`.
+- VPS Docker con Postgres, Redis, backend, frontend estatico y Caddy. Ver [DEPLOY-ORACLE.md](DEPLOY-ORACLE.md).
 
-Respuesta (campos existentes + extensiones aditivas no rompientes):
+## Convenciones de desarrollo
 
-- Existentes: `leaderboard`, `totalPlayers`, `topScore`, `avgScore`, `userRank`.
-- Nuevos opcionales/no rompientes: `season`, `window`, `generatedAt`, `queryMeta`.
-  - `queryMeta.requestedScope`
-  - `queryMeta.effectiveScope`
-  - `queryMeta.fallbackApplied`
+- Mantener diffs pequeños, reversibles y faciles de revisar.
+- Reutilizar patrones existentes antes de crear variantes paralelas.
+- Mantener compatibilidad de contratos HTTP y Socket.IO salvo cambio explicito.
+- En frontend, actualizar ES/EN cuando cambie texto visible.
+- En pantallas de juego, proteger viewport movil, safe areas, CTA principal y las 4 alternativas.
+- Evitar refactors oportunistas fuera de scope.
+- No tocar versionado visible ni metadata de release salvo tarea explicita.
 
-Notas de frontend:
+## Documentacion relacionada
 
-- El frontend continúa consumiendo leaderboard con `scope=global` por defecto hasta habilitar feature flags para nuevos scopes.
-
----
-
-## Troubleshooting
-
-### Error: "Cannot connect to database"
-
-- Verificar que PostgreSQL esté corriendo
-- Verificar el `DATABASE_URL` en `.env`
-- Probar conexión: `psql -U postgres -d geochallenge`
-
-### Error: "Redis connection refused"
-
-- Verificar que Redis esté corriendo
-- Verificar el `REDIS_URL` en `.env`
-- Probar conexión: `redis-cli ping`
-
-### Error: "CORS error" en el frontend
-
-- Verificar que el backend esté corriendo en el puerto 3001
-- Verificar `VITE_API_URL` en el `.env` del frontend
-
-### Error: "Invalid token" o "Unauthorized"
-
-- Limpiar localStorage: `localStorage.clear()` en la consola del navegador
-- Registrar un nuevo usuario
-
-### Las preguntas no aparecen
-
-- Ejecutar `npm run seed` en el backend
-- Verificar en Prisma Studio: `npx prisma studio` y revisar la tabla `Question`
-
-### En duelos se hace match pero no cargan preguntas
-
-- Verificar que el frontend escuche eventos `duel:question`, `duel:questionResult` y `duel:finished` (no `game:*`).
-- Verificar que al enviar respuesta se envíe `timeRemaining` en `duel:answer`.
-- Verificar que ambos clientes emitan `duel:ready` tras el match para iniciar countdown.
-
----
-
-## Modos de Juego
-
-1. **Un Jugador**: Partida individual con 10 preguntas
-2. **Duelo**: Competencia en tiempo real contra otro jugador
-3. **Desafío**: Envía un desafío a un amigo para jugar de forma asíncrona
-
-## Categorías
-
-- **Banderas**: Identificar países por su bandera
-- **Capitales**: Asociar países con sus capitales
-- **Mapas**: Ubicar ciudades/capitales en el mapa mundial
-- **Siluetas**: Identificar países por su forma geográfica
-- **Mixto**: Combinación de todas las categorías
-
----
-
-## Tecnologías
-
-### Backend
-
-- Node.js + Express
-- TypeScript
-- Prisma ORM
-- PostgreSQL
-- Redis
-- Socket.IO
-- JWT Authentication
-- bcrypt
-
-### Frontend
-
-- React 18
-- TypeScript
-- Vite
-- Tailwind CSS
-- React Router v6
-- i18next (ES/EN)
-- Leaflet (mapas)
-- Socket.IO Client
+- [AGENTS.md](AGENTS.md): reglas de trabajo para agentes en este repo.
+- [CLAUDE.md](CLAUDE.md): contexto ampliado y routing historico de agentes.
+- [DEPLOY.md](DEPLOY.md): checklist de deploy y predeploy.
+- [DEPLOY-ORACLE.md](DEPLOY-ORACLE.md): deploy completo en VPS.
+- [docs/ui-ux-audit-2026-04-11.md](docs/ui-ux-audit-2026-04-11.md): auditoria UI/UX.
+- [docs/duel-audit-2026-05-01.md](docs/duel-audit-2026-05-01.md): auditoria de duelos.
+- [data/cinema/README.md](data/cinema/README.md): notas del dataset de cine.
+- [scripts/daily-agent/README.md](scripts/daily-agent/README.md): agente diario.
