@@ -4,29 +4,52 @@ dotenv.config();
 
 type SoloModeScoringStrategy = 'simple_1_0' | 'progressive_combo';
 
+type EnvSource = NodeJS.ProcessEnv;
+
+const LOCAL_TEST_AUTH_BYPASS_SECRET = 'local-test-auth-bypass';
+
 function resolveSoloModeScoringStrategy(): SoloModeScoringStrategy {
   return process.env.SOLO_MODE_SCORING_STRATEGY === 'progressive_combo'
     ? 'progressive_combo'
     : 'simple_1_0';
 }
 
-const isProduction = process.env.NODE_ENV === 'production';
 const parseNumberEnv = (value: string | undefined, fallback: number): number => {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
 };
 
-// Validate required env vars in production
-if (isProduction) {
-  const required = ['DATABASE_URL', 'JWT_SECRET', 'REDIS_URL', 'FRONTEND_URL'];
-  const missing = required.filter((key) => !process.env[key]);
-  if (missing.length > 0) {
-    throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
+export function validateRuntimeEnv(env: EnvSource = process.env): void {
+  const nodeEnv = env.NODE_ENV || 'development';
+  const isProd = nodeEnv === 'production';
+  const bypassEnabled = env.ENABLE_TEST_AUTH_BYPASS === 'true';
+  const bypassSecret = env.TEST_AUTH_BYPASS_SECRET || '';
+
+  if (isProd) {
+    const required = ['DATABASE_URL', 'JWT_SECRET', 'REDIS_URL', 'FRONTEND_URL'];
+    const missing = required.filter((key) => !env[key]);
+    if (missing.length > 0) {
+      throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
+    }
+    if (env.JWT_SECRET === 'default-secret-change-me') {
+      throw new Error('JWT_SECRET must be changed from default value in production');
+    }
+    if (bypassEnabled) {
+      throw new Error('ENABLE_TEST_AUTH_BYPASS must not be true in production');
+    }
+    if (bypassSecret) {
+      throw new Error('TEST_AUTH_BYPASS_SECRET must not be configured in production');
+    }
   }
-  if (process.env.JWT_SECRET === 'default-secret-change-me') {
-    throw new Error('JWT_SECRET must be changed from default value in production');
+
+  if (nodeEnv !== 'test' && bypassSecret === LOCAL_TEST_AUTH_BYPASS_SECRET) {
+    throw new Error(
+      'TEST_AUTH_BYPASS_SECRET must not use the local test default outside NODE_ENV=test',
+    );
   }
 }
+
+validateRuntimeEnv();
 
 export const config = {
   port: parseInt(process.env.PORT || '3001', 10),
@@ -80,7 +103,7 @@ export const config = {
     enabled: process.env.NODE_ENV === 'test' || process.env.ENABLE_TEST_AUTH_BYPASS === 'true',
     secret:
       process.env.TEST_AUTH_BYPASS_SECRET ||
-      (process.env.NODE_ENV === 'test' ? 'local-test-auth-bypass' : ''),
+      (process.env.NODE_ENV === 'test' ? LOCAL_TEST_AUTH_BYPASS_SECRET : ''),
     defaultEmail: process.env.TEST_AUTH_BYPASS_EMAIL || 'test-runner@geochallenge.local',
   },
 

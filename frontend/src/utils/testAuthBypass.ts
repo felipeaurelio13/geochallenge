@@ -1,10 +1,15 @@
 import type { User } from '../types';
 
-const BYPASS_ENABLED = import.meta.env.MODE === 'test' || import.meta.env.VITE_ENABLE_TEST_AUTH_BYPASS === 'true';
-const BYPASS_SECRET =
-  import.meta.env.VITE_TEST_AUTH_BYPASS_SECRET ||
-  (import.meta.env.MODE === 'test' ? 'local-test-auth-bypass' : '');
-const BYPASS_EMAIL = import.meta.env.VITE_TEST_AUTH_BYPASS_EMAIL || 'test-runner@geochallenge.local';
+const IS_TEST_AUTH_BUILD = import.meta.env.MODE === 'test' || import.meta.env.MODE === 'e2e';
+const BYPASS_ENABLED =
+  !import.meta.env.PROD &&
+  (IS_TEST_AUTH_BUILD || import.meta.env.VITE_ENABLE_TEST_AUTH_BYPASS === 'true');
+const BYPASS_SECRET = !import.meta.env.PROD
+  ? import.meta.env.VITE_TEST_AUTH_BYPASS_SECRET ||
+    (IS_TEST_AUTH_BUILD ? 'local-test-auth-bypass' : '')
+  : '';
+const BYPASS_EMAIL =
+  import.meta.env.VITE_TEST_AUTH_BYPASS_EMAIL || 'test-runner@geochallenge.local';
 const BYPASS_USERNAME = import.meta.env.VITE_TEST_AUTH_BYPASS_USERNAME || 'TestRunner';
 
 const isBypassConfigured = Boolean(BYPASS_SECRET && BYPASS_SECRET.trim().length > 0);
