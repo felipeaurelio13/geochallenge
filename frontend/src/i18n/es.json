@@ -71,6 +71,7 @@
     "usernamePlaceholder": "Tu nombre de usuario",
     "forgotTitle": "¿Olvidaste tu contraseña?",
     "forgotSubtitle": "Te ayudamos a recuperar el acceso en un momento",
+    "forgotSubmit": "Enviar enlace de recuperación",
     "forgotSent": "Si existe una cuenta con ese correo, te enviamos un enlace. Revisa también spam 📬",
     "resetTitle": "Restablecer contraseña",
     "newPassword": "Nueva contraseña",

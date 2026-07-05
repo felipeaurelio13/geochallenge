@@ -71,6 +71,7 @@
     "usernamePlaceholder": "Your username",
     "forgotTitle": "Forgot your password?",
     "forgotSubtitle": "We'll help you get back in shortly",
+    "forgotSubmit": "Send reset link",
     "forgotSent": "If an account exists for that email, we sent a link. Check your spam folder too 📬",
     "resetTitle": "Reset password",
     "newPassword": "New password",

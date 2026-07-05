@@ -86,7 +86,7 @@ export function ForgotPasswordPage() {
                   <span className="text-sm">{t('common.processing')}</span>
                 </>
               ) : (
-                t('auth.forgotPassword')
+                t('auth.forgotSubmit')
               )}
             </Button>
           </form>
