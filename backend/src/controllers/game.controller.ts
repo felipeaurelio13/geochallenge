@@ -32,6 +32,9 @@ import {
 } from '../services/achievement.service.js';
 import { updateLeaderboardScore, updateSeasonLeaderboardScore } from '../services/leaderboard.service.js';
 import { config } from '../config/env.js';
+import { AppError } from '../utils/appError.js';
+import { respondWithError } from '../utils/respondWithError.js';
+import { mapZodIssuesToFields } from '../utils/zodIssueMapper.js';
 
 const router = Router();
 const gameTypeSchema = z.enum(['single', 'streak', 'flash']);
@@ -140,6 +143,8 @@ router.get('/start', optionalAuth, async (req: AuthRequest, res: Response) => {
     if (!validation.success) {
       res.status(400).json({
         error: 'Parámetros inválidos',
+        code: 'VALIDATION_FAILED',
+        params: { fields: mapZodIssuesToFields(validation.error.errors) },
         details: validation.error.errors,
       });
       return;
@@ -160,6 +165,8 @@ router.get('/start', optionalAuth, async (req: AuthRequest, res: Response) => {
     if (questions.length < expectedQuestions && !canServeReducedSet) {
       res.status(409).json({
         error: 'No hay suficientes preguntas disponibles',
+        code: 'GAME_NOT_ENOUGH_QUESTIONS',
+        params: { available: questions.length, requested: expectedQuestions },
         available: questions.length,
         requested: expectedQuestions,
         canStartShortGame: gameType !== 'streak' && questions.length > 0,
@@ -179,8 +186,7 @@ router.get('/start', optionalAuth, async (req: AuthRequest, res: Response) => {
       questions,
     });
   } catch (error) {
-    console.error('Error al iniciar partida:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    respondWithError(res, error);
   }
 });
 
@@ -205,7 +211,12 @@ router.get('/availability', optionalAuth, async (req: AuthRequest, res: Response
   try {
     const validation = availabilitySchema.safeParse(req.query);
     if (!validation.success) {
-      res.status(400).json({ error: 'Parámetros inválidos', details: validation.error.errors });
+      res.status(400).json({
+        error: 'Parámetros inválidos',
+        code: 'VALIDATION_FAILED',
+        params: { fields: mapZodIssuesToFields(validation.error.errors) },
+        details: validation.error.errors,
+      });
       return;
     }
 
@@ -219,8 +230,7 @@ router.get('/availability', optionalAuth, async (req: AuthRequest, res: Response
       canPlay: available >= questionCount,
     });
   } catch (error) {
-    console.error('Error al consultar disponibilidad:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    respondWithError(res, error);
   }
 });
 
@@ -237,6 +247,8 @@ router.get('/flash/start', optionalAuth, async (req: AuthRequest, res: Response)
     if (questions.length < 10) {
       res.status(503).json({
         error: 'No hay suficientes preguntas visuales disponibles',
+        code: 'GAME_INSUFFICIENT_QUESTIONS_SHORT',
+        params: { available: questions.length },
         available: questions.length,
       });
       return;
@@ -255,8 +267,7 @@ router.get('/flash/start', optionalAuth, async (req: AuthRequest, res: Response)
       questions,
     });
   } catch (error) {
-    console.error('Error al iniciar flash:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    respondWithError(res, error);
   }
 });
 
@@ -275,6 +286,8 @@ router.post('/answer', optionalAuth, async (req: AuthRequest, res: Response) => 
       });
       res.status(400).json({
         error: 'Datos inválidos',
+        code: 'VALIDATION_FAILED',
+        params: { fields: mapZodIssuesToFields(validation.error.errors) },
         details: validation.error.errors,
         debug: process.env.NODE_ENV !== 'production' ? { timeRemaining: req.body.timeRemaining } : undefined,
       });
@@ -294,8 +307,7 @@ router.post('/answer', optionalAuth, async (req: AuthRequest, res: Response) => 
 
     res.json(result);
   } catch (error) {
-    console.error('Error al validar respuesta:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    respondWithError(res, error);
   }
 });
 
@@ -310,6 +322,8 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
     if (!validation.success) {
       res.status(400).json({
         error: 'Datos inválidos',
+        code: 'VALIDATION_FAILED',
+        params: { fields: mapZodIssuesToFields(validation.error.errors) },
         details: validation.error.errors,
       });
       return;
@@ -371,8 +385,7 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
       newAchievements,
     });
   } catch (error) {
-    console.error('Error al finalizar partida:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    respondWithError(res, error);
   }
 });
 
@@ -387,8 +400,7 @@ router.get('/history', authenticateJWT, async (req: AuthRequest, res: Response) 
 
     res.json({ history });
   } catch (error) {
-    console.error('Error al obtener historial:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    respondWithError(res, error);
   }
 });
 
@@ -407,8 +419,7 @@ router.get('/duel-history', authenticateJWT, async (req: AuthRequest, res: Respo
     const result = await getDuelMatchHistory(req.user!.userId, period, page, pageSize);
     res.json(result);
   } catch (error) {
-    console.error('Error al obtener historial de duelos:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    respondWithError(res, error);
   }
 });
 
@@ -421,8 +432,7 @@ router.get('/duel-stats', authenticateJWT, async (req: AuthRequest, res: Respons
     const stats = await getDuelMatchStats(req.user!.userId);
     res.json(stats);
   } catch (error) {
-    console.error('Error al obtener estadísticas de duelos:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    respondWithError(res, error);
   }
 });
 
@@ -438,8 +448,7 @@ router.get('/duel-opponents', authenticateJWT, async (req: AuthRequest, res: Res
     const opponents = await getDuelOpponents(req.user!.userId, search);
     res.json({ opponents });
   } catch (error) {
-    console.error('Error al obtener oponentes de duelos:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    respondWithError(res, error);
   }
 });
 
@@ -457,8 +466,7 @@ router.get('/duel-h2h/:opponentId', authenticateJWT, async (req: AuthRequest, re
     }
     res.json(data);
   } catch (error) {
-    console.error('Error al obtener head-to-head:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    respondWithError(res, error);
   }
 });
 
@@ -471,8 +479,7 @@ router.get('/achievements', authenticateJWT, async (req: AuthRequest, res: Respo
     const achievements = await getUserAchievements(req.user!.userId);
     res.json({ achievements });
   } catch (error) {
-    console.error('Error al obtener logros:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    respondWithError(res, error);
   }
 });
 
@@ -485,8 +492,7 @@ router.get('/category-stats', authenticateJWT, async (req: AuthRequest, res: Res
     const stats = await getCategoryStats(req.user!.userId);
     res.json({ stats });
   } catch (error) {
-    console.error('Error al obtener estadísticas por categoría:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    respondWithError(res, error);
   }
 });
 
@@ -499,6 +505,61 @@ const DAILY_POINTS_PER_CORRECT = 100;
 
 function getTodayKey(): string {
   return new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+}
+
+function dayKeyToUtcMidnight(dayKey: string): number {
+  return new Date(`${dayKey}T00:00:00.000Z`).getTime();
+}
+
+function addDaysToKey(dayKey: string, days: number): string {
+  const date = new Date(dayKeyToUtcMidnight(dayKey));
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
+const CLIENT_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+const CLIENT_DATE_MAX_DRIFT_DAYS = 1;
+
+/**
+ * Resuelve el "día" a usar para el gate de racha diaria. El servidor corre en
+ * UTC; un usuario en UTC-4 jugando a las 23:30 local puede caer ya en
+ * "mañana" en UTC y perder su racha aunque haya jugado todos los días reales.
+ *
+ * `clientDate` (YYYY-MM-DD, fecha calendario LOCAL del dispositivo) permite
+ * corregir eso. Se acepta sólo si:
+ *  - tiene el formato correcto y parsea a una fecha real, Y
+ *  - está a ±1 día calendario de la fecha UTC del servidor (evita spoofing
+ *    para gamear la racha).
+ * Si es inválido, falta, o está fuera de rango: se ignora silenciosamente y
+ * se usa el fallback UTC de siempre (nunca 400 — clientes viejos cacheados
+ * de la PWA no mandan este parámetro).
+ */
+function resolveDayKey(clientDate: unknown): string {
+  const serverToday = getTodayKey();
+
+  if (typeof clientDate !== 'string' || !CLIENT_DATE_PATTERN.test(clientDate)) {
+    return serverToday;
+  }
+
+  const parsedMs = dayKeyToUtcMidnight(clientDate);
+  if (Number.isNaN(parsedMs)) {
+    return serverToday;
+  }
+
+  // Re-serializar y comparar el string: rechaza fechas "reales" pero mal
+  // formateadas por JS Date (p.ej. 2026-02-30 → rueda a marzo).
+  if (new Date(parsedMs).toISOString().slice(0, 10) !== clientDate) {
+    return serverToday;
+  }
+
+  const serverTodayMs = dayKeyToUtcMidnight(serverToday);
+  const driftDays = Math.round((parsedMs - serverTodayMs) / (24 * 60 * 60 * 1000));
+
+  if (Math.abs(driftDays) > CLIENT_DATE_MAX_DRIFT_DAYS) {
+    return serverToday;
+  }
+
+  return clientDate;
 }
 
 function seededShuffle<T>(arr: T[], seed: number): T[] {
@@ -567,7 +628,12 @@ async function getDailyResultFromDb(userId: string, today: string) {
  */
 router.get('/daily', optionalAuth, async (req: AuthRequest, res: Response) => {
   try {
+    // `today` (UTC) sigue siendo la clave del set de preguntas: determinista y
+    // compartida por todos los usuarios, no debe moverse con la fecha local
+    // del cliente. `dayKey` es la fecha usada para el gate "¿ya jugó?" del
+    // usuario — ahí sí preferimos su calendario local si es válido.
     const today = getTodayKey();
+    const dayKey = resolveDayKey(req.query.clientDate);
     const redis = getRedis();
     const cacheKey = `daily:questions:${today}`;
     const userId = req.user?.userId;
@@ -575,18 +641,18 @@ router.get('/daily', optionalAuth, async (req: AuthRequest, res: Response) => {
 
     // ¿Ya jugó hoy? Redis es el camino rápido; DB es el fallback.
     if (userId) {
-      const playedKey = `daily:played:${userId}:${today}`;
+      const playedKey = `daily:played:${userId}:${dayKey}`;
       try {
         const existing = await redis.get(playedKey);
         if (existing) {
-          res.json({ alreadyPlayed: true, result: JSON.parse(existing), today });
+          res.json({ alreadyPlayed: true, result: JSON.parse(existing), today: dayKey });
           return;
         }
       } catch {
         redisDown = true;
-        const played = await getDailyResultFromDb(userId, today);
+        const played = await getDailyResultFromDb(userId, dayKey);
         if (played) {
-          res.json({ alreadyPlayed: true, result: played, today });
+          res.json({ alreadyPlayed: true, result: played, today: dayKey });
           return;
         }
       }
@@ -639,10 +705,9 @@ router.get('/daily', optionalAuth, async (req: AuthRequest, res: Response) => {
       areaTier: q.areaTier,
     }));
 
-    res.json({ questions: formatted, today, alreadyPlayed: false });
+    res.json({ questions: formatted, today: dayKey, alreadyPlayed: false });
   } catch (error) {
-    console.error('Error al obtener el reto del día:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    respondWithError(res, error);
   }
 });
 
@@ -657,6 +722,10 @@ const dailySubmitSchema = z.object({
       })
     )
     .max(DAILY_QUESTION_COUNT),
+  // Fecha calendario LOCAL del dispositivo (YYYY-MM-DD). Opcional y no confiable
+  // por sí sola — resolveDayKey() la descarta si está mal formada o muy alejada
+  // de la fecha UTC del servidor.
+  clientDate: z.string().optional(),
 });
 
 /**
@@ -675,17 +744,25 @@ router.post('/daily/submit', authenticateJWT, async (req: AuthRequest, res: Resp
 
     const parsed = dailySubmitSchema.safeParse(req.body);
     if (!parsed.success) {
-      res.status(400).json({ error: 'Datos inválidos' });
+      res.status(400).json({
+        error: 'Datos inválidos',
+        code: 'VALIDATION_FAILED',
+        params: { fields: mapZodIssuesToFields(parsed.error.errors) },
+      });
       return;
     }
-    const { answers } = parsed.data;
+    const { answers, clientDate } = parsed.data;
+    // `today` (UTC) sigue siendo la clave del set de preguntas determinista.
+    // `dayKey` es la fecha usada para el gate de idempotencia y la racha del
+    // usuario — preferimos su calendario local si `clientDate` es válido.
     const today = getTodayKey();
+    const dayKey = resolveDayKey(clientDate);
     const redis = getRedis();
     const userId = req.user!.userId;
-    const playedKey = `daily:played:${userId}:${today}`;
+    const playedKey = `daily:played:${userId}:${dayKey}`;
 
     // Idempotencia: Redis es el camino rápido. Si Redis está caído, la guardia
-    // es User.lastDailyDate === today (verificada justo abajo).
+    // es User.lastDailyDate === dayKey (verificada justo abajo).
     try {
       const alreadySaved = await redis.get(playedKey);
       if (alreadySaved) {
@@ -736,8 +813,8 @@ router.post('/daily/submit', authenticateJWT, async (req: AuthRequest, res: Resp
 
     // Reenvío del mismo día (p.ej. Redis caído saltó la idempotencia anterior):
     // no recontar la partida ni resetear la racha.
-    if (userRow?.lastDailyDate === today) {
-      const previous = await getDailyResultFromDb(userId, today);
+    if (userRow?.lastDailyDate === dayKey) {
+      const previous = await getDailyResultFromDb(userId, dayKey);
       res.json({
         message: 'Ya enviado',
         result: previous ?? {
@@ -751,18 +828,17 @@ router.post('/daily/submit', authenticateJWT, async (req: AuthRequest, res: Resp
       return;
     }
 
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayKey = yesterday.toISOString().slice(0, 10);
-
-    const newStreak =
-      userRow?.lastDailyDate === yesterdayKey
-        ? (userRow.dailyStreak ?? 0) + 1
-        : 1;
+    const yesterdayKey = addDaysToKey(dayKey, -1);
+    const previousStreak = userRow?.dailyStreak ?? 0;
+    const isContinuingStreak = userRow?.lastDailyDate === yesterdayKey;
+    const newStreak = isContinuingStreak ? previousStreak + 1 : 1;
+    // Sólo marcamos "perdida" una racha que valía la pena flaggear (>=2):
+    // perder una racha de 1 día no es una pérdida notable para el usuario.
+    const streakLost = !isContinuingStreak && userRow?.lastDailyDate != null && previousStreak >= 2;
 
     const updateData: Record<string, unknown> = {
       dailyStreak: newStreak,
-      lastDailyDate: today,
+      lastDailyDate: dayKey,
       gamesPlayed: { increment: 1 },
     };
     if (userRow && score > (userRow.highScore ?? 0)) {
@@ -777,7 +853,18 @@ router.post('/daily/submit', authenticateJWT, async (req: AuthRequest, res: Resp
       });
     });
 
-    const result = { score, correctCount, totalQuestions, dailyStreak: newStreak, playedAt: new Date().toISOString() };
+    const result: Record<string, unknown> = {
+      score,
+      correctCount,
+      totalQuestions,
+      dailyStreak: newStreak,
+      playedAt: new Date().toISOString(),
+    };
+    if (streakLost) {
+      result.previousStreak = previousStreak;
+      result.streakLost = true;
+    }
+
     try {
       await redis.set(playedKey, JSON.stringify(result), 'EX', DAILY_TTL_SECONDS);
     } catch {
@@ -797,8 +884,7 @@ router.post('/daily/submit', authenticateJWT, async (req: AuthRequest, res: Resp
 
     res.json({ result, newAchievements, message: 'Resultado guardado' });
   } catch (error) {
-    console.error('Error al guardar resultado diario:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    respondWithError(res, error);
   }
 });
 

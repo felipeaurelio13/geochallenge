@@ -62,13 +62,22 @@
     "show": "Show",
     "hide": "Hide",
     "completeFieldsHint": "Complete email and password to continue.",
-    "invalidEmail": "Enter a valid email (e.g. you@example.com).",
+    "invalidEmail": "That email doesn't look complete — something like you@example.com",
     "passwordRequired": "Enter your password.",
-    "loginFailed": "Wrong email or password. Double-check and try again.",
-    "rateLimitError": "Too many attempts. Try again in {{minutes}} min.",
+    "loginFailed": "That email and password don't match. Want to try again?",
+    "rateLimitError": "For safety we paused attempts for a moment. Try again in {{minutes}} min",
     "emailPlaceholder": "you@example.com",
     "passwordPlaceholder": "Your password",
-    "usernamePlaceholder": "Your username"
+    "usernamePlaceholder": "Your username",
+    "forgotTitle": "Forgot your password?",
+    "forgotSubtitle": "We'll help you get back in shortly",
+    "forgotSent": "If an account exists for that email, we sent a link. Check your spam folder too 📬",
+    "resetTitle": "Reset password",
+    "newPassword": "New password",
+    "confirmNewPassword": "Confirm new password",
+    "resetSuccess": "Your password was updated. You can now log in.",
+    "resetTokenInvalid": "This link isn't valid anymore. It may have expired.",
+    "resetRequestNew": "Request a new one"
   },
   "menu": {
     "dailyChallenge": "Daily Challenge",
@@ -83,7 +92,7 @@
     "challenge": "Challenges",
     "challengeDesc": "2–8 players · async · invite friends",
     "streak": "Streak",
-    "streakDesc": "Endless · 1 miss ends it · beat your best",
+    "streakDesc": "How many can you get in a row? 🔥",
     "rankings": "Rankings",
     "rankingsDesc": "See the global top and your position",
     "yourStats": "Your profile",
@@ -106,7 +115,42 @@
     "survivalDesc": "Multiplayer · 2 lives · last standing wins",
     "flagMaster": "Flag Master",
     "flagMasterBadge": "Hard",
-    "flagMasterDesc": "10 rounds · no color, cropped, lookalike traps · multipliers up to x2.5"
+    "flagMasterDesc": "10 rounds · no color, cropped, lookalike traps · multipliers up to x2.5",
+    "howToPlay": "How to play",
+    "howToPlayAria": "How to play {{mode}}",
+    "letsPlay": "Let's play!"
+  },
+  "howto": {
+    "flash": {
+      "objective": "Answer as many questions as you can in 60 seconds.",
+      "rule": "The clock runs for the whole game, not per question.",
+      "tip": "Chain correct answers to build your combo up to x10."
+    },
+    "single": {
+      "objective": "Answer 10 questions at your own pace.",
+      "rule": "You get 10 seconds per question.",
+      "tip": "Great for practicing without pressure before a duel."
+    },
+    "duel": {
+      "objective": "Compete in real time against another player.",
+      "rule": "You both answer the same 10 questions; the higher score wins.",
+      "tip": "Speed adds points too, not just accuracy."
+    },
+    "streak": {
+      "objective": "Get as many questions right in a row as possible.",
+      "rule": "One mistake ends the streak — there's no question limit.",
+      "tip": "Use Streak Shield if you have one before taking a risky guess."
+    },
+    "survival": {
+      "objective": "Be the last player standing.",
+      "rule": "You start with 2 lives; every mistake costs one.",
+      "tip": "4 correct answers in a row earns you an extra life."
+    },
+    "challenge": {
+      "objective": "Compete asynchronously against your friends.",
+      "rule": "Everyone plays the same setup whenever they want.",
+      "tip": "Invite more players to make it more competitive."
+    }
   },
   "flagMaster": {
     "question": "Which country does this flag belong to?",
@@ -159,7 +203,11 @@
   },
   "serverWakeUp": {
     "title": "Loading GeoChallenge…",
-    "body": "This may take a few seconds the first time."
+    "body": "This may take a few seconds the first time.",
+    "rotating1": "Waking up the server…",
+    "rotating2": "Almost there…",
+    "rotating3": "Free servers take their naps too 😴",
+    "tooLong": "This is taking longer than usual — you can keep waiting or try offline mode"
   },
   "survival": {
     "title": "Survival",
@@ -195,7 +243,11 @@
     "gameOver": "Game Over",
     "survivedRounds": "{{rounds}} rounds played",
     "playAgain": "Play Again",
-    "backToMenu": "Back to menu"
+    "backToMenu": "Back to menu",
+    "autoStartHint": "The match starts automatically once the room fills",
+    "eliminatedWarm": "You made it to round {{round}} of {{total}} 💪 Stick around to see the finish",
+    "spectatingHeader": "👀 Spectator mode — you survived {{round}} rounds",
+    "finalPlacement": "You finished {{place}} of {{players}}"
   },
   "categories": {
     "mixed": "Mixed",
@@ -244,7 +296,7 @@
     "incorrectLabel": "Incorrect",
     "next": "Next",
     "seeResults": "See Results",
-    "streakBroken": "Streak over! This was the correct answer.",
+    "streakBroken": "Ended at {{count}} 💛 The answer was:",
     "difficulty": {
       "easy": "Easy",
       "medium": "Medium",
@@ -268,7 +320,14 @@
     "timeRemaining": "Time remaining {{seconds}}s seconds",
     "shortGameConfirm": "Only {{available}} questions are available (out of {{requested}} requested). Do you want to play anyway?",
     "shortGameCancelled": "Game cancelled. Try another category or setup to get more questions.",
-    "startError": "Failed to start the game"
+    "startError": "Failed to start the game",
+    "offlineBadge": "📴 Offline — you can keep playing",
+    "imageErrorTitle": "We couldn't load this image 🖼️",
+    "imageErrorRetry": "Retry",
+    "imageErrorSkip": "Skip question"
+  },
+  "map": {
+    "keyboardInstructions": "Use the arrow keys to pan the map, + and - to zoom, and Enter to place your answer at the center"
   },
   "results": {
     "shareStreakButton": "Share my streak",
@@ -294,7 +353,18 @@
     "basePoints": "Base",
     "timeBonus": "Speed",
     "comboBonus": "Streak",
-    "accuracyBonus": "Map accuracy"
+    "accuracyBonus": "Map accuracy",
+    "achievementUnlocked": "🏅 Achievement unlocked!",
+    "moreAchievements": "+{{count}} more achievements",
+    "pendingSync": "📡 Result saved on this device — it'll sync automatically",
+    "streakHeadline": "Streak of {{count}} 🔥",
+    "streakShort": "Everyone starts here. One more and you'll find your rhythm.",
+    "streakMid": "Solid streak! Your record is within reach.",
+    "streakLong": "Huge streak. That's expert level 👏",
+    "yourBest": "Your best: {{best}}",
+    "playAgainStreak": "Another streak",
+    "growthMindset": "The first games are the hardest — each one teaches you new flags 🌱",
+    "tryEasy": "Try Easy difficulty"
   },
   "duel": {
     "searching": "Searching for opponent...",
@@ -319,7 +389,17 @@
     "reconnectedSearching": "Connection restored. We rejoined matchmaking.",
     "reconnectedSyncing": "Connection restored. Syncing the current round...",
     "searchTimeout": "No opponent found. Try again later.",
-    "opponent": "Opponent"
+    "opponent": "Opponent",
+    "connectionErrorNotice": "We couldn't connect to the match server. Retrying…",
+    "backToMenu": "Back to menu",
+    "syncingLong": "Syncing with the match… your progress is safe",
+    "expectedWait": "Most players find an opponent in under 1 min",
+    "searchTimeoutWarm": "No one showed up this time 😅 Try another category or check back in a few minutes",
+    "changeCategory": "Change category",
+    "almostWon": "You were only {{diff}} points away 🔥",
+    "rematchNudge": "{{opponent}} brought their A-game today. Rematch whenever you're ready.",
+    "rematch": "Rematch",
+    "wonByForfeit": "{{opponent}} left the match. Win goes to you — it still counts for your ranking ✓"
   },
   "challenges": {
     "title": "Challenges",
@@ -340,6 +420,7 @@
       "joinable": "Joinable"
     },
     "empty": "No challenges",
+    "emptyWithAction": "No challenges yet. Create the first one and invite someone!",
     "from": "From",
     "to": "To",
     "status": {
@@ -389,6 +470,8 @@
     "loadError": "Failed to load rankings",
     "empty": "No players in the rankings yet",
     "noSearchResults": "No results found for this search",
+    "yourPositionSummary": "Your position: #{{rank}} of {{total}} — top {{percent}}%",
+    "playFirstGame": "Play your first game to show up here 🚀",
     "you": "You",
     "stats": "Statistics",
     "totalPlayers": "Total players",
@@ -462,7 +545,11 @@
     "hapticsLabel": "Haptic feedback",
     "hapticsDescription": "Vibration on taps, hits and misses",
     "soundLabel": "Sound",
-    "soundDescription": "Sound effects on answers (coming soon)"
+    "soundDescription": "Sound effects on answers (coming soon)",
+    "extendedTime": "More time per question (+50%)",
+    "extendedTimeHint": "Good if you'd like more time to think",
+    "emptyHistory": "Your first game is one click away 🚀",
+    "emptyDuels": "Your first duel awaits ⚔️"
   },
   "share": {
     "shared": "Shared!",
@@ -471,14 +558,16 @@
     "error": "Could not share"
   },
   "daily": {
-    "alreadyPlayed": "You already played today",
-    "comeBackTomorrow": "Come back tomorrow for the next challenge",
+    "alreadyPlayed": "Today's challenge is done! 🎯",
+    "comeBackTomorrow": "A new one is waiting for you tomorrow",
     "streak": "Streak",
     "days": "days",
     "streakStart": "day! Come back tomorrow to keep your streak",
     "streakDays": "days in a row",
     "complete": "Daily Challenge complete!",
-    "finish": "See results"
+    "finish": "See results",
+    "streakLostNotice": "Your {{count}}-day streak ended 💛 — a new one starts today. What matters is coming back.",
+    "nextChallengeAt": "The next challenge opens at midnight (your time)"
   },
   "install": {
     "title": "Install GeoChallenge",
@@ -525,7 +614,12 @@
     "streakShield": "Streak shield",
     "available": "Available",
     "consumed": "Consumed",
-    "streakShieldTriggered": "Shield triggered: streak continues, but this round scores 0."
+    "streakShieldTriggered": "🛡️ Your shield saved the streak! Keep going",
+    "streakShieldTriggeredDetail": "This round scores 0.",
+    "intel5050Tooltip": "Removes 2 wrong options — 1 per game",
+    "focusTimeTooltip": "Adds 3 extra seconds to the clock — 1 per game",
+    "streakShieldTooltip": "Protects your streak from one mistake — 1 per game",
+    "coachmarkTitle": "Your power-ups 👇 tap them when you need them"
   },
   "stats": {
     "highScore": "High Score",
@@ -547,6 +641,7 @@
     "save": "Save",
     "processing": "Processing...",
     "skipToMainAction": "Skip to main actions",
+    "skipToAnswerOptions": "Skip to answer options",
     "search": "Search"
   },
   "duelHistory": {
@@ -622,5 +717,44 @@
       "HARD": "Hard"
     },
     "unavailableCombination": "This filter combination does not have enough questions ({{available}} available, minimum {{required}})."
+  },
+  "a11y": {
+    "dismissToast": "Dismiss notification",
+    "correctAnswer": "Correct",
+    "incorrectAnswer": "Incorrect",
+    "eliminatedOption": "Eliminated",
+    "hurryUp": "{{seconds}} seconds left"
+  },
+  "socket": {
+    "connectionError": "We couldn't connect to the match server. Retrying…",
+    "connectionTimeout": "This is taking longer than expected. Check your connection.",
+    "retry": "Retry",
+    "backToMenu": "Back to menu"
+  },
+  "sync": {
+    "done": "Your pending games synced ✓"
+  },
+  "pwa": {
+    "updateAvailable": "GeoChallenge just updated ✨ Changes apply on reload"
+  },
+  "apiErrors": {
+    "VALIDATION_FAILED": "Something in the form doesn't add up — check the highlighted fields",
+    "AUTH_INVALID_CREDENTIALS": "That email and password don't match. Want to try again?",
+    "AUTH_EMAIL_TAKEN": "That email already has an account — want to log in instead?",
+    "AUTH_USERNAME_TAKEN": "That username is already taken, try another one",
+    "AUTH_RESET_TOKEN_INVALID": "This link isn't valid. It may have already been used.",
+    "AUTH_RESET_TOKEN_EXPIRED": "This link has expired — request a new one",
+    "CHALLENGE_PLAYER_RANGE": "Challenges are between {{min}} and {{max}} players",
+    "CHALLENGE_NOT_ENOUGH_QUESTIONS": "Not enough questions for those filters — try widening your categories 🗺️",
+    "CHALLENGE_ALREADY_JOINED": "You already joined this challenge",
+    "CHALLENGE_NOT_FOUND": "We couldn't find that challenge — it may have expired",
+    "CHALLENGE_FULL": "This challenge is already full",
+    "GAME_NOT_ENOUGH_QUESTIONS": "Only {{available}} questions are available (out of {{requested}} requested)",
+    "GAME_INSUFFICIENT_QUESTIONS_SHORT": "Not enough questions for this setup — try another category",
+    "DUEL_RATE_LIMITED": "You're going too fast — wait a moment before trying again",
+    "DUEL_ERROR_GENERIC": "We couldn't continue the duel. Please try again.",
+    "SURVIVAL_ERROR_GENERIC": "Something went wrong in the survival match. Please try again.",
+    "RATE_LIMITED": "For safety we paused attempts for a moment. Try again in {{minutes}} min",
+    "INTERNAL": "Something went wrong on our end 😓 It's already been logged (ref: {{requestId}}). Please try again in a moment."
   }
 }

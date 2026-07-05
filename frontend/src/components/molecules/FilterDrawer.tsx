@@ -17,7 +17,7 @@ interface FilterDrawerProps {
 
 export function FilterDrawer({ filters, onChange, onClose, disabledOptions }: FilterDrawerProps) {
   const { t } = useTranslation();
-  const backdropRef = useRef<HTMLDivElement>(null);
+  const backdropRef = useRef<HTMLButtonElement>(null);
 
   // Close on Escape
   useEffect(() => {
@@ -54,8 +54,10 @@ export function FilterDrawer({ filters, onChange, onClose, disabledOptions }: Fi
   return (
     <div className="fixed inset-0 z-50 flex flex-col justify-end">
       {/* Backdrop */}
-      <div
+      <button
         ref={backdropRef}
+        type="button"
+        aria-label={t('common.close')}
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={onClose}
       />

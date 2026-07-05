@@ -22,7 +22,12 @@ import { useConfirmDialog, useHaptics } from '../hooks';
 import { areMechanicsV2Enabled } from '../config/featureFlags';
 import { trackUxEvent } from '../utils/uxTelemetry';
 import { generateFunFact } from '../utils/funFacts';
-import { getQuestionDuration } from '../utils/questionTiming';
+import { applyExtendedTime, getQuestionDuration } from '../utils/questionTiming';
+import { useUiStore } from '../store/useUiStore';
+
+function isOnlineNow(): boolean {
+  return typeof navigator === 'undefined' ? true : navigator.onLine !== false;
+}
 
 const MapInteractive = lazy(() =>
   import('../components/MapInteractive').then((m) => ({ default: m.MapInteractive }))
@@ -99,6 +104,20 @@ export function GamePage() {
   });
   const [previousScore, setPreviousScore] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  // Part 1.3: guarda doble-submit + deshabilita opciones/submit durante el round-trip.
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  // Part 4.1: feedback optimista — el veredicto local se muestra al instante;
+  // cuando llega la respuesta del servidor puede confirmar o corregir sin salto brusco.
+  const [optimisticCorrect, setOptimisticCorrect] = useState<boolean | null>(null);
+  const [isAwaitingServerResult, setIsAwaitingServerResult] = useState(false);
+  // Part 4.2: si el reemplazo de una imagen rota también falla, mostramos
+  // Reintentar/Saltar en vez de dejar la pregunta en blanco con el timer corriendo.
+  const [imageReplacementFailed, setImageReplacementFailed] = useState(false);
+  const [isRetryingImage, setIsRetryingImage] = useState(false);
+  // Part 1.2: chip persistente mientras no hay conexión durante la partida.
+  const [isBrowserOffline, setIsBrowserOffline] = useState(!isOnlineNow());
+  const prefersReducedMotion = useUiStore((s) => s.prefersReducedMotion);
+  const extendedTimeEnabled = useUiStore((s) => s.extendedTimeEnabled);
 
   const currentQuestion: Question | null = questions[currentIndex] || null;
   const isMapQuestion = currentQuestion?.category === 'MAP';
@@ -108,7 +127,10 @@ export function GamePage() {
   const shouldUseCompactQuestionCard = true;
   const shouldUseStreakFlow = gameType === 'streak';
   const baseDuration = state.config?.timePerQuestion ?? TIME_PER_QUESTION;
-  const roundDuration = getQuestionDuration(currentQuestion?.category, baseDuration);
+  const roundDuration = applyExtendedTime(
+    getQuestionDuration(currentQuestion?.category, baseDuration),
+    extendedTimeEnabled
+  );
   const mechanicsFeatureEnabled = areMechanicsV2Enabled(gameType);
   const mechanicsConfig = state.config?.mechanics;
   const mechanicsRuntimeEnabled = mechanicsFeatureEnabled && Boolean(mechanicsConfig?.enabled);
@@ -139,6 +161,20 @@ export function GamePage() {
     setDisabledOptionIndexes([]);
     setPendingMechanicUsage(undefined);
   }, [mechanicsConfig, mechanicsRuntimeEnabled]);
+
+  // Chip persistente "sin conexión" durante la partida (Part 1.2). El drenado
+  // real de partidas pendientes vive en GameContext (listener global); acá
+  // solo reflejamos el estado de red para la UI de esta pantalla.
+  useEffect(() => {
+    const handleOnline = () => setIsBrowserOffline(false);
+    const handleOffline = () => setIsBrowserOffline(true);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   // Prevent accidental navigation during game
   useEffect(() => {
@@ -305,7 +341,9 @@ export function GamePage() {
 
   // Submit answer
   const handleSubmitAnswer = async () => {
-    if (!currentQuestion || showResult) return;
+    // Part 1.3: guarda contra doble-submit (doble tap, Enter + click, timeout
+    // disparando junto con un click manual) mientras el round-trip está en vuelo.
+    if (!currentQuestion || showResult || isSubmitting) return;
 
     let answer: string;
     if (isMapQuestion) {
@@ -315,6 +353,26 @@ export function GamePage() {
     }
 
     setPreviousScore(score);
+    setIsSubmitting(true);
+
+    // Part 4.1: feedback optimista. La validación local (misma comparación
+    // case-insensitive que GameContext usa en el path offline) se muestra
+    // AL INSTANTE — no esperamos el round-trip del servidor para pintar
+    // correcto/incorrecto ni para pausar el timer. Solo aplica a preguntas de
+    // opciones: MAP se resuelve por distancia/haversine en el servidor y no
+    // tiene un veredicto local confiable.
+    if (!isMapQuestion) {
+      const localIsCorrect = answer.trim().toLowerCase() === currentQuestion.correctAnswer.trim().toLowerCase();
+      setOptimisticCorrect(localIsCorrect);
+      setLastAnswerCorrect(localIsCorrect);
+      setIsAwaitingServerResult(true);
+      setShowResult(true);
+      if (localIsCorrect) {
+        haptics.success();
+      } else {
+        haptics.error();
+      }
+    }
 
     try {
       const result = await submitAnswer(answer, mapLocation || undefined, pendingMechanicUsage);
@@ -324,11 +382,26 @@ export function GamePage() {
         questionId: currentQuestion.id,
         value: result.points,
       });
-      if (result.isCorrect) {
-        haptics.success();
-      } else {
-        haptics.error();
+
+      if (isMapQuestion) {
+        // MAP nunca tuvo veredicto optimista — el haptic corre acá, en el único momento real.
+        if (result.isCorrect) {
+          haptics.success();
+        } else {
+          haptics.error();
+        }
+      } else if (result.isCorrect !== optimisticCorrect) {
+        // Caso raro: el servidor discrepa del check local (edge case de datos).
+        // El servidor gana, sin flash — solo actualizamos el veredicto final.
+        if (result.isCorrect) {
+          haptics.success();
+        } else {
+          haptics.error();
+        }
       }
+
+      setIsAwaitingServerResult(false);
+      setIsSubmitting(false);
 
       if (shouldUseStreakFlow && !result.isCorrect) {
         setStreakAlive(false);
@@ -336,7 +409,9 @@ export function GamePage() {
         setLastAnswerCorrect(false);
         setShowResult(true);
         finishGame()
-          .then(() => navigate('/results?gameType=streak'))
+          .then((gameResult) => {
+            navigate(gameResult.pendingSync ? '/results?gameType=streak&pendingSync=1' : '/results?gameType=streak');
+          })
           .catch(() => navigate('/results?gameType=streak'));
         return;
       }
@@ -346,6 +421,10 @@ export function GamePage() {
       setFunFact(generateFunFact(currentQuestion, i18n.language === 'en' ? 'en' : 'es'));
     } catch (err: any) {
       console.error('Error submitting answer:', err);
+      setIsAwaitingServerResult(false);
+      setIsSubmitting(false);
+      setOptimisticCorrect(null);
+      setShowResult(false);
       setError(err.message || t('game.error'));
     }
   };
@@ -382,12 +461,15 @@ export function GamePage() {
     }
 
     if (currentIndex >= bufferedQuestionCount - 1) {
-      // Game finished
+      // Game finished. finishGame() ya retries una vez internamente y encola
+      // localmente si ambos intentos fallan (Part 1.2) — pendingSync=1 le dice
+      // a ResultsPage que muestre el badge "guardado en este dispositivo".
+      const base = shouldUseStreakFlow ? '/results?gameType=streak' : '/results';
       try {
-        await finishGame();
-        navigate(shouldUseStreakFlow ? '/results?gameType=streak' : '/results');
+        const gameResult = await finishGame();
+        navigate(gameResult.pendingSync ? `${base}${base.includes('?') ? '&' : '?'}pendingSync=1` : base);
       } catch (err) {
-        navigate(shouldUseStreakFlow ? '/results?gameType=streak' : '/results');
+        navigate(base);
       }
     } else {
       nextQuestion();
@@ -399,6 +481,10 @@ export function GamePage() {
       setGlobalTimeRemaining(roundDuration);
       setDisabledOptionIndexes([]);
       setPendingMechanicUsage(undefined);
+      setIsSubmitting(false);
+      setOptimisticCorrect(null);
+      setIsAwaitingServerResult(false);
+      setImageReplacementFailed(false);
     }
   };
 
@@ -422,6 +508,51 @@ export function GamePage() {
   const handleMapSelect = (lat: number, lng: number) => {
     if (!showResult) {
       setMapLocation({ lat, lng });
+    }
+  };
+
+  // Part 4.2: primer intento de reemplazo automático (disparado por
+  // onImageError de QuestionCard/GameRoundScaffold cuando la imagen original
+  // Y el fallback CDN fallan). Si ESTE intento también falla, mostramos la UI
+  // de Reintentar/Saltar en vez de dejar la pregunta en blanco.
+  const handleImageError = useCallback(async () => {
+    const succeeded = await replaceCurrentQuestion(gameFilters);
+    if (!succeeded) {
+      setImageReplacementFailed(true);
+    }
+  }, [replaceCurrentQuestion, gameFilters]);
+
+  // Botón "Reintentar" de la UI de error: vuelve a intentar el fetch de reemplazo.
+  const handleRetryImage = async () => {
+    if (isRetryingImage) return;
+    setIsRetryingImage(true);
+    const succeeded = await replaceCurrentQuestion(gameFilters);
+    setImageReplacementFailed(!succeeded);
+    setIsRetryingImage(false);
+  };
+
+  // Botón "Saltar pregunta": avanza sin llamar submitAnswer, así la pregunta
+  // rota NUNCA entra a `answers`/`results` — no cuenta ni como acierto ni
+  // como fallo en el tally final que ve finishGame()/ResultsPage.
+  const handleSkipQuestion = () => {
+    trackUxEvent('round_abandon', {
+      mode: gameType,
+      questionId: currentQuestion?.id,
+      value: currentIndex,
+    });
+    setImageReplacementFailed(false);
+    if (currentIndex >= questions.length - 1) {
+      handleNextQuestion();
+    } else {
+      nextQuestion();
+      setSelectedAnswer(null);
+      setMapLocation(null);
+      setShowResult(false);
+      setFunFact(null);
+      setTimeRemaining(roundDuration);
+      setGlobalTimeRemaining(roundDuration);
+      setDisabledOptionIndexes([]);
+      setPendingMechanicUsage(undefined);
     }
   };
 
@@ -459,6 +590,9 @@ export function GamePage() {
   return (
     <>
     {confirmDialog}
+    <a href="#game-options" className="skip-link">
+      {t('common.skipToAnswerOptions')}
+    </a>
     <GameRoundScaffold
       header={
         <header className="sticky top-0 z-30 border-b border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 pb-2 pt-3 backdrop-blur sm:px-4 sm:pb-3 sm:pt-4">
@@ -488,6 +622,14 @@ export function GamePage() {
                 showAnimation={showResult}
                 lastResult={results[results.length - 1] ?? null}
               />
+              {isAwaitingServerResult && (
+                <p
+                  className={`mt-0.5 text-xs text-[var(--color-text-muted)] ${prefersReducedMotion ? '' : 'animate-pulse'}`}
+                  aria-live="polite"
+                >
+                  +…
+                </p>
+              )}
               {hasActiveFilters(gameFilters) && (
                 <p className="mt-0.5 text-xs text-[var(--color-text-muted)]">
                   {[
@@ -509,10 +651,15 @@ export function GamePage() {
                   setGlobalTimeRemaining(time);
                 }}
                 onComplete={handleTimeComplete}
-                isActive={!showResult && status === 'playing'}
+                isActive={!showResult && !imageReplacementFailed && status === 'playing'}
               />
             </div>
           </div>
+          {isBrowserOffline && (
+            <div className="max-w-4xl mx-auto mt-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-center text-xs font-medium text-amber-600">
+              {t('game.offlineBadge', '📴 Sin conexión — puedes seguir jugando')}
+            </div>
+          )}
         </header>
       }
       progress={
@@ -567,22 +714,31 @@ export function GamePage() {
       selectedAnswer={selectedAnswer}
       onOptionSelect={handleOptionSelect}
       showResult={showResult}
+      disableOptions={isSubmitting || imageReplacementFailed}
       hiddenOptionIndexes={disabledOptionIndexes}
       optionsGridClassName="game-options-grid"
       onImageError={
         currentQuestion?.category === 'FLAG' || currentQuestion?.category === 'SILHOUETTE'
-          ? () => replaceCurrentQuestion(gameFilters)
+          ? handleImageError
           : undefined
       }
+      imageReplacementFailed={imageReplacementFailed}
+      onRetryImage={handleRetryImage}
+      onSkipQuestion={handleSkipQuestion}
       actionTray={
         <RoundActionTray
           mode="single"
           showResult={showResult}
           canSubmit={hasSelection}
+          isSubmitting={isSubmitting}
           submitLabel={t('game.submit')}
           nextLabel={streakGameOver ? t('game.seeResults') : shouldUseStreakFlow ? t('game.next') : isLastQuestion ? t('game.seeResults') : t('game.next')}
           resultLabel={lastAnswerCorrect ? t('game.correct') : t('game.incorrect')}
-          resultHint={streakGameOver ? t('game.streakBroken') : (funFact ?? undefined)}
+          resultHint={
+            streakGameOver
+              ? (t('game.streakBroken', { count: results.filter((r) => r.isCorrect).length }) as string)
+              : (funFact ?? undefined)
+          }
           resultAttribution={
             currentQuestion && currentQuestion.category === 'MONUMENT'
               ? <MonumentAttribution question={currentQuestion} />

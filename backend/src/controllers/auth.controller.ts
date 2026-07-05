@@ -1,12 +1,23 @@
 import { Router, Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import { z } from 'zod';
 import { prisma } from '../config/database.js';
 import { generateToken, authenticateJWT, AuthRequest } from '../middleware/auth.js';
 import { authLimiter } from '../middleware/rateLimit.js';
 import { normalizeEmail, normalizeUsername } from '../utils/authNormalization.js';
+import { AppError } from '../utils/appError.js';
+import { respondWithError } from '../utils/respondWithError.js';
+import { mapZodIssuesToFields } from '../utils/zodIssueMapper.js';
+import { sendPasswordResetEmail } from '../services/email.service.js';
 
 const router = Router();
+
+const RESET_TOKEN_TTL_MS = 30 * 60 * 1000; // 30 minutos
+
+function hashToken(rawToken: string): string {
+  return crypto.createHash('sha256').update(rawToken).digest('hex');
+}
 
 // Schemas de validación
 const registerSchema = z.object({
@@ -28,6 +39,18 @@ const loginSchema = z.object({
   password: z.string().min(1, 'Contraseña requerida'),
 });
 
+const forgotPasswordSchema = z.object({
+  email: z.string().email('Email inválido'),
+});
+
+const resetPasswordSchema = z.object({
+  token: z.string().min(1, 'Token requerido'),
+  newPassword: z
+    .string()
+    .min(6, 'La contraseña debe tener al menos 6 caracteres')
+    .max(100, 'Contraseña demasiado larga'),
+});
+
 /**
  * POST /api/auth/register
  * Registrar nuevo usuario
@@ -39,6 +62,8 @@ router.post('/register', authLimiter, async (req: Request, res: Response) => {
     if (!validation.success) {
       res.status(400).json({
         error: 'Datos inválidos',
+        code: 'VALIDATION_FAILED',
+        params: { fields: mapZodIssuesToFields(validation.error.errors) },
         details: validation.error.errors,
       });
       return;
@@ -56,9 +81,11 @@ router.post('/register', authLimiter, async (req: Request, res: Response) => {
     });
 
     if (existingUser) {
-      const field = existingUser.email.toLowerCase() === normalizedEmail ? 'email' : 'nombre de usuario';
-      res.status(400).json({ error: `El ${field} ya está registrado` });
-      return;
+      const emailTaken = existingUser.email.toLowerCase() === normalizedEmail;
+      if (emailTaken) {
+        throw new AppError('AUTH_EMAIL_TAKEN', 400, 'El email ya está registrado');
+      }
+      throw new AppError('AUTH_USERNAME_TAKEN', 400, 'El nombre de usuario ya está registrado');
     }
 
     // Hash de la contraseña
@@ -96,8 +123,7 @@ router.post('/register', authLimiter, async (req: Request, res: Response) => {
       token,
     });
   } catch (error) {
-    console.error('Error en registro:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    respondWithError(res, error);
   }
 });
 
@@ -112,6 +138,8 @@ router.post('/login', authLimiter, async (req: Request, res: Response) => {
     if (!validation.success) {
       res.status(400).json({
         error: 'Datos inválidos',
+        code: 'VALIDATION_FAILED',
+        params: { fields: mapZodIssuesToFields(validation.error.errors) },
         details: validation.error.errors,
       });
       return;
@@ -131,16 +159,14 @@ router.post('/login', authLimiter, async (req: Request, res: Response) => {
     });
 
     if (!user) {
-      res.status(401).json({ error: 'Credenciales inválidas' });
-      return;
+      throw new AppError('AUTH_INVALID_CREDENTIALS', 401, 'Credenciales inválidas');
     }
 
     // Verificar contraseña
     const validPassword = await bcrypt.compare(password, user.passwordHash);
 
     if (!validPassword) {
-      res.status(401).json({ error: 'Credenciales inválidas' });
-      return;
+      throw new AppError('AUTH_INVALID_CREDENTIALS', 401, 'Credenciales inválidas');
     }
 
     // Generar token
@@ -165,8 +191,129 @@ router.post('/login', authLimiter, async (req: Request, res: Response) => {
       token,
     });
   } catch (error) {
-    console.error('Error en login:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    respondWithError(res, error);
+  }
+});
+
+/**
+ * POST /api/auth/forgot-password
+ * Genera un token de recuperación y envía un email si el usuario existe.
+ * Siempre responde 200 con un mensaje genérico (previene user enumeration).
+ */
+router.post('/forgot-password', authLimiter, async (req: Request, res: Response) => {
+  const GENERIC_MESSAGE = 'Si el email está registrado, vas a recibir un correo con instrucciones para recuperar tu contraseña.';
+
+  try {
+    const validation = forgotPasswordSchema.safeParse(req.body);
+
+    if (!validation.success) {
+      // No hacemos 400 acá tampoco para no diferenciar "email mal formado" de
+      // "email válido pero inexistente" — ambos casos responden el genérico.
+      res.json({ message: GENERIC_MESSAGE });
+      return;
+    }
+
+    const normalizedEmail = normalizeEmail(validation.data.email);
+
+    const user = await prisma.user.findFirst({
+      where: { email: { equals: normalizedEmail, mode: 'insensitive' } },
+      select: { id: true, email: true, preferredLanguage: true },
+    });
+
+    if (user) {
+      try {
+        const rawToken = crypto.randomBytes(32).toString('hex');
+        const tokenHash = hashToken(rawToken);
+        const expiresAt = new Date(Date.now() + RESET_TOKEN_TTL_MS);
+
+        await prisma.passwordResetToken.create({
+          data: {
+            userId: user.id,
+            tokenHash,
+            expiresAt,
+          },
+        });
+
+        const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${rawToken}`;
+        const language = user.preferredLanguage === 'en' ? 'en' : 'es';
+
+        await sendPasswordResetEmail(user.email, resetUrl, language);
+      } catch (err) {
+        // Nunca debe romper la respuesta genérica: local dev sin RESEND_API_KEY
+        // o fallas de infra no deben impedir el flujo (ni filtrar si el email existe).
+        console.warn('[auth] forgot-password: fallo no bloqueante generando/enviando el reset:', err);
+      }
+    }
+
+    res.json({ message: GENERIC_MESSAGE });
+  } catch (error) {
+    respondWithError(res, error);
+  }
+});
+
+/**
+ * POST /api/auth/reset-password
+ * Valida el token de recuperación y actualiza la contraseña.
+ */
+router.post('/reset-password', authLimiter, async (req: Request, res: Response) => {
+  try {
+    const validation = resetPasswordSchema.safeParse(req.body);
+
+    if (!validation.success) {
+      res.status(400).json({
+        error: 'Datos inválidos',
+        code: 'VALIDATION_FAILED',
+        params: { fields: mapZodIssuesToFields(validation.error.errors) },
+        details: validation.error.errors,
+      });
+      return;
+    }
+
+    const { token, newPassword } = validation.data;
+    const tokenHash = hashToken(token);
+
+    const resetToken = await prisma.passwordResetToken.findFirst({
+      where: { tokenHash },
+    });
+
+    if (!resetToken) {
+      throw new AppError('AUTH_RESET_TOKEN_INVALID', 400, 'El enlace de recuperación no es válido');
+    }
+
+    const isExpired = resetToken.expiresAt.getTime() < Date.now();
+    if (resetToken.usedAt || isExpired) {
+      throw new AppError('AUTH_RESET_TOKEN_EXPIRED', 400, 'El enlace de recuperación expiró o ya fue usado');
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 12);
+    const now = new Date();
+
+    await prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id: resetToken.userId },
+        data: { passwordHash },
+      });
+
+      await tx.passwordResetToken.update({
+        where: { id: resetToken.id },
+        data: { usedAt: now },
+      });
+
+      // Invalidar cualquier otro token vigente del mismo usuario.
+      await tx.passwordResetToken.updateMany({
+        where: {
+          userId: resetToken.userId,
+          id: { not: resetToken.id },
+          usedAt: null,
+          expiresAt: { gt: now },
+        },
+        data: { usedAt: now },
+      });
+    });
+
+    res.json({ message: 'Contraseña actualizada exitosamente' });
+  } catch (error) {
+    respondWithError(res, error);
   }
 });
 
@@ -198,8 +345,7 @@ router.get('/me', authenticateJWT, async (req: AuthRequest, res: Response) => {
 
     res.json({ user });
   } catch (error) {
-    console.error('Error al obtener usuario:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    respondWithError(res, error);
   }
 });
 
@@ -224,6 +370,8 @@ router.put('/profile', authenticateJWT, async (req: AuthRequest, res: Response) 
     if (!validation.success) {
       res.status(400).json({
         error: 'Datos inválidos',
+        code: 'VALIDATION_FAILED',
+        params: { fields: mapZodIssuesToFields(validation.error.errors) },
         details: validation.error.errors,
       });
       return;
@@ -241,8 +389,7 @@ router.put('/profile', authenticateJWT, async (req: AuthRequest, res: Response) 
       });
 
       if (existing) {
-        res.status(400).json({ error: 'El nombre de usuario ya está en uso' });
-        return;
+        throw new AppError('AUTH_USERNAME_TAKEN', 400, 'El nombre de usuario ya está en uso');
       }
     }
 
@@ -266,8 +413,7 @@ router.put('/profile', authenticateJWT, async (req: AuthRequest, res: Response) 
 
     res.json({ user });
   } catch (error) {
-    console.error('Error al actualizar perfil:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    respondWithError(res, error);
   }
 });
 

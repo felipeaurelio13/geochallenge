@@ -52,13 +52,38 @@ type DuelEventHandlers = {
     myScore?: number;
     opponentScore?: number;
   }) => void;
-  onError?: (data: { message: string }) => void;
+  onError?: (data: SocketErrorPayload) => void;
   onOpponentDisconnected?: () => void;
 };
+
+/**
+ * Forma que traen `duel:error` / `survival:error` — `message` sigue siendo el
+ * fallback en español de siempre; `code`/`params` (opcionales, agregados por
+ * el backend de forma aditiva) permiten localizar el copy vía `apiErrors.<code>`.
+ */
+export interface SocketErrorPayload {
+  message: string;
+  code?: string;
+  params?: Record<string, unknown>;
+}
+
+export type ConnectionState = 'connected' | 'disconnected' | 'error';
 
 class SocketService {
   public socket: Socket | null = null;
   private handlers: DuelEventHandlers = {};
+  private connectionStateListeners: Set<(state: ConnectionState) => void> = new Set();
+
+  onConnectionStateChange(cb: (state: ConnectionState) => void): () => void {
+    this.connectionStateListeners.add(cb);
+    return () => {
+      this.connectionStateListeners.delete(cb);
+    };
+  }
+
+  private emitConnectionState(state: ConnectionState): void {
+    this.connectionStateListeners.forEach((listener) => listener(state));
+  }
 
   connect(token?: string): void {
     const authToken = token || localStorage.getItem('token');
@@ -83,14 +108,17 @@ class SocketService {
     this.socket.on('connect', () => {
       console.log('Socket connected');
       this.setupListeners();
+      this.emitConnectionState('connected');
     });
 
     this.socket.on('connect_error', (error) => {
       console.error('Socket connection error:', error.message);
+      this.emitConnectionState('error');
     });
 
     this.socket.on('disconnect', (reason) => {
       console.log('Socket disconnected:', reason);
+      this.emitConnectionState('disconnected');
     });
   }
 

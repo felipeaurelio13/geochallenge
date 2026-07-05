@@ -20,6 +20,8 @@ import {
   FlagMasterPage,
 } from './pages';
 import { DailyChallengePage } from './pages/DailyChallengePage';
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
+import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import {
   ErrorBoundary,
   ServerWakeUp,
@@ -113,6 +115,14 @@ export const appRoutes = [
       {
         path: '/register',
         element: <PublicRoute><RegisterPage /></PublicRoute>,
+      },
+      {
+        path: '/forgot-password',
+        element: <PublicRoute><ForgotPasswordPage /></PublicRoute>,
+      },
+      {
+        path: '/reset-password',
+        element: <PublicRoute><ResetPasswordPage /></PublicRoute>,
       },
       {
         path: '/menu',

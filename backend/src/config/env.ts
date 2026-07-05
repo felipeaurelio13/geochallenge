@@ -110,4 +110,12 @@ export const config = {
   // Token para endpoints administrativos (rebuild de leaderboards, etc).
   // Si no está seteado, los endpoints admin responden 404.
   adminToken: process.env.ADMIN_TOKEN || '',
+
+  // Email transaccional (recuperación de contraseña) via Resend. Ambas son
+  // opcionales: sin RESEND_API_KEY, email.service.ts no-opea (log warning)
+  // en vez de romper el arranque o el flujo de forgot-password.
+  email: {
+    resendApiKey: process.env.RESEND_API_KEY || '',
+    from: process.env.EMAIL_FROM || 'GeoChallenge <no-reply@geochallenge.app>',
+  },
 };

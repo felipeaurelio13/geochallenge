@@ -16,12 +16,27 @@ export function calculateRetryAfterSeconds(resetTime?: Date, now = Date.now()): 
 // jugar más, con 429 en /auth/me cascadeando a logout (ver AuthContext).
 // 1000 req / 15min ≈ 66 rpm permite gameplay activo sin abrir la puerta a
 // abuso real (que igual se atajaría con authLimiter en /api/auth).
+export const globalErrorMessage = {
+  error: 'Demasiadas solicitudes, intenta de nuevo más tarde',
+};
+
 export const globalLimiter = rateLimit({
   windowMs: FIFTEEN_MINUTES_IN_MS,
   max: 1000,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: 'Demasiadas solicitudes, intenta de nuevo más tarde' },
+  message: globalErrorMessage,
+  handler: (req, res, _next, options) => {
+    const requestWithRateLimit = req as typeof req & { rateLimit?: { resetTime?: Date } };
+    const retryAfterSeconds = calculateRetryAfterSeconds(requestWithRateLimit.rateLimit?.resetTime);
+
+    res.status(options.statusCode).json({
+      ...globalErrorMessage,
+      code: 'RATE_LIMITED',
+      params: { retryAfterSeconds },
+      retryAfterSeconds,
+    });
+  },
 });
 
 export const authErrorMessage = {
@@ -41,6 +56,8 @@ export const authLimiter: RateLimitRequestHandler = rateLimit({
 
     res.status(options.statusCode).json({
       ...authErrorMessage,
+      code: 'RATE_LIMITED',
+      params: { retryAfterSeconds },
       retryAfterSeconds,
     });
   },

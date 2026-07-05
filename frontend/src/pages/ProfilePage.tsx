@@ -6,12 +6,14 @@ import { api } from '../services/api';
 import { useApi, useDebounce } from '../hooks';
 import { LoadingSpinner } from '../components';
 import { PageHeader } from '../components/molecules/PageHeader';
+import { EmptyState } from '../components/molecules/EmptyState';
 import { UserAvatar } from '../components/atoms/UserAvatar';
 import { Alert } from '../components/atoms/Alert';
 import { StatCard } from '../components/atoms/StatCard';
 import { Input } from '../components/atoms/Input';
 import { FormLabel } from '../components/atoms/FormLabel';
 import { Button } from '../components/atoms/Button';
+import { SkeletonRow } from '../components/atoms/Skeleton';
 import { uiStoreActions, useUiStore } from '../store/useUiStore';
 import type {
   DuelMatchRecord,
@@ -59,6 +61,7 @@ export function ProfilePage() {
   const { user, updateUser } = useAuth();
 
   const hapticsEnabled = useUiStore((store) => store.hapticsEnabled);
+  const extendedTimeEnabled = useUiStore((store) => store.extendedTimeEnabled);
 
   const [isEditing, setIsEditing] = useState(false);
   const [username, setUsername] = useState(user?.username || '');
@@ -525,6 +528,28 @@ export function ProfilePage() {
                   </div>
                 </label>
 
+                <label className="pressable flex cursor-pointer items-center justify-between rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-4 py-3 hover:border-gray-500">
+                  <div className="pr-4">
+                    <div className="text-sm font-medium text-app-text">
+                      {t('profile.extendedTime')}
+                    </div>
+                    <div className="text-xs text-[var(--color-text-muted)]">
+                      {t('profile.extendedTimeHint')}
+                    </div>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={extendedTimeEnabled}
+                    onChange={(event) => uiStoreActions.setExtendedTimeEnabled(event.target.checked)}
+                    className="sr-only"
+                    aria-label={t('profile.extendedTime')}
+                  />
+                  <div className="relative flex-shrink-0" aria-hidden="true">
+                    <div className={`h-6 w-11 rounded-full transition-colors duration-200 ${extendedTimeEnabled ? 'bg-primary' : 'bg-app-muted'}`} />
+                    <div className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform duration-200 ${extendedTimeEnabled ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                  </div>
+                </label>
+
               </div>
             </div>
           </>
@@ -580,13 +605,22 @@ export function ProfilePage() {
             {/* Match list */}
             <div className="bg-[var(--color-surface)] rounded-xl overflow-hidden">
               {duelLoading && duelMatches.length === 0 ? (
-                <div className="flex justify-center py-10">
-                  <LoadingSpinner size="md" />
+                <div className="space-y-2 p-3" aria-hidden="true">
+                  <span className="sr-only" role="status">{t('common.loading')}</span>
+                  <SkeletonRow />
+                  <SkeletonRow />
+                  <SkeletonRow />
                 </div>
               ) : duelMatches.length === 0 ? (
-                <p className="text-center text-[var(--color-text-muted)] py-10 text-sm">
-                  {t('duelHistory.noMatches')}
-                </p>
+                <EmptyState
+                  emoji="⚔️"
+                  message={t('profile.emptyDuels')}
+                  action={
+                    <Button variant="primary" size="md" onClick={() => navigate('/duel')}>
+                      {t('nav.duel')}
+                    </Button>
+                  }
+                />
               ) : (
                 <ul className="divide-y divide-[var(--color-border)]">
                   {duelMatches.map((m) => (
@@ -643,13 +677,22 @@ export function ProfilePage() {
           <div className="space-y-4">
             <div className="bg-[var(--color-surface)] rounded-xl overflow-hidden">
               {historyLoading && historyEntries === null ? (
-                <div className="flex justify-center py-10">
-                  <LoadingSpinner size="md" />
+                <div className="space-y-2 p-3" aria-hidden="true">
+                  <span className="sr-only" role="status">{t('common.loading')}</span>
+                  <SkeletonRow />
+                  <SkeletonRow />
+                  <SkeletonRow />
                 </div>
               ) : !historyEntries || historyEntries.length === 0 ? (
-                <p className="text-center text-[var(--color-text-muted)] py-10 text-sm px-4">
-                  {t('gameHistory.empty')}
-                </p>
+                <EmptyState
+                  emoji="🚀"
+                  message={t('profile.emptyHistory')}
+                  action={
+                    <Button variant="primary" size="md" onClick={() => navigate('/menu')}>
+                      {t('menu.chooseMode')}
+                    </Button>
+                  }
+                />
               ) : (
                 <ul className="divide-y divide-[var(--color-border)]">
                   {historyEntries.map((entry) => {
@@ -822,8 +865,10 @@ export function ProfilePage() {
                   </h4>
 
                   {opponentsLoading ? (
-                    <div className="flex justify-center py-8">
-                      <LoadingSpinner size="md" />
+                    <div className="space-y-2 p-3" aria-hidden="true">
+                      <span className="sr-only" role="status">{t('common.loading')}</span>
+                      <SkeletonRow />
+                      <SkeletonRow />
                     </div>
                   ) : opponents.length === 0 ? (
                     <p className="text-center text-[var(--color-text-muted)] py-8 text-sm px-4">

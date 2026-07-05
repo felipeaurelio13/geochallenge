@@ -1,20 +1,25 @@
-import React, { createContext, useContext, useState, useCallback, useRef, useEffect, useMemo } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { api } from '../services/api';
 import type {
-  GameState,
   Answer,
   AnswerResult,
-  GameResult,
   Category,
-  Question,
+  GameFilters,
+  GameResult,
+  GameState,
   GameType,
   MechanicUsage,
-  GameFilters,
+  Question,
 } from '../types';
 import { hasActiveFilters } from '../types';
-import { cacheQuestions, getCachedQuestions, enqueuePendingSession } from '../hooks/useOfflineQuestions';
+import { cacheQuestions, drainPendingSessions, enqueuePendingSession, getCachedQuestions } from '../hooks/useOfflineQuestions';
 import { useImagePreloader } from '../hooks/useImagePreloader';
-import { getQuestionDuration, clampTimeRemainingForScoring } from '../utils/questionTiming';
+import { clampTimeRemainingForScoring, getQuestionDuration } from '../utils/questionTiming';
+import { uiStoreActions } from '../store/useUiStore';
+// OJO: `i18next` (paquete, singleton) y NO `../i18n` (bootstrap de la app) —
+// mismo motivo que utils/apiError.ts: evita reventar tests que mockean
+// `react-i18next` sin `initReactI18next`.
+import i18n from 'i18next';
 
 interface GameContextType {
   state: GameState;
@@ -31,7 +36,15 @@ interface GameContextType {
   finishGame: () => Promise<GameResult>;
   resetGame: () => void;
   setTimeRemaining: (time: number) => void;
-  replaceCurrentQuestion: (filters?: GameFilters) => Promise<void>;
+  /** Devuelve true si el reemplazo llegó con éxito, false si también falló (ver QuestionCard retry/skip UI). */
+  replaceCurrentQuestion: (filters?: GameFilters) => Promise<boolean>;
+  /**
+   * Achievements newly unlocked by the most recent `finishGame()` call.
+   * Populated even though `GamePage` (owned separately) discards the
+   * `finishGame()` return value — `ResultsPage` reads it from here instead
+   * of requiring a prop/navigation-state plumbing change in `GamePage`.
+   */
+  lastNewAchievements: string[];
 }
 
 const initialState: GameState = {
@@ -57,6 +70,7 @@ const GameContext = createContext<GameContextType | null>(null);
 export function GameProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<GameState>(initialState);
   const [streakAlive, setStreakAlive] = useState(true);
+  const [lastNewAchievements, setLastNewAchievements] = useState<string[]>([]);
   const timerRef = useRef<number | null>(null);
   const stateRef = useRef(state);
 
@@ -71,6 +85,36 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         clearInterval(timerRef.current);
       }
     };
+  }, []);
+
+  // Cuando el navegador recupera conectividad, drenamos las sesiones que
+  // quedaron encoladas (offline real o los 2 reintentos de finishGame
+  // agotados) y las reenviamos al backend. Antes nada llamaba a
+  // drainPendingSessions — quedaban en localStorage para siempre.
+  useEffect(() => {
+    const handleOnline = () => {
+      const pending = drainPendingSessions();
+      if (!pending.length) return;
+
+      (async () => {
+        let syncedCount = 0;
+        for (const session of pending) {
+          try {
+            await api.finishGame({ answers: session.answers, category: session.category });
+            syncedCount += 1;
+          } catch {
+            // Si el reenvío falla de nuevo, la re-encolamos para el próximo online.
+            enqueuePendingSession(session);
+          }
+        }
+        if (syncedCount > 0) {
+          uiStoreActions.pushToast({ type: 'success', message: i18n.t('sync.done') });
+        }
+      })();
+    };
+
+    window.addEventListener('online', handleOnline);
+    return () => window.removeEventListener('online', handleOnline);
   }, []);
 
   const startGame = useCallback(async (category?: Category, questionCount?: number, gameType?: GameType, filters?: GameFilters, acceptShortGame?: boolean) => {
@@ -241,10 +285,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const replaceCurrentQuestion = useCallback(async (filters?: GameFilters) => {
+  const replaceCurrentQuestion = useCallback(async (filters?: GameFilters): Promise<boolean> => {
     const { questions, currentIndex, config, isOffline } = stateRef.current;
     const currentQuestion = questions[currentIndex];
-    if (!currentQuestion || isOffline || !isOnline()) return;
+    if (!currentQuestion || isOffline || !isOnline()) return false;
 
     try {
       const response = await api.startGame(
@@ -256,7 +300,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         filters
       );
       const replacement = response.questions?.[0];
-      if (!replacement) return;
+      if (!replacement) return false;
 
       setState((prev) => {
         const updated = [...prev.questions];
@@ -267,8 +311,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           timeRemaining: getQuestionDuration(replacement.category, prev.config?.timePerQuestion ?? 10),
         };
       });
+      return true;
     } catch {
-      // Silent: if replacement fails the question stays with text-only display
+      // El llamador (GamePage) decide qué mostrar cuando el reemplazo también falla:
+      // pausa el timer y ofrece Reintentar/Saltar en vez de dejar la pregunta en blanco.
+      return false;
     }
   }, []);
 
@@ -286,6 +333,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       }
       const correctCount = results.filter((r) => r.isCorrect).length;
       const totalQuestions = results.length || answers.length || 1;
+      setLastNewAchievements([]);
       return {
         gameId: `offline-${Date.now()}`,
         totalScore: score,
@@ -294,16 +342,58 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         accuracy: Math.round((correctCount / totalQuestions) * 100),
         isHighScore: false,
         details: results,
+        newAchievements: [],
       };
     }
 
-    const result = await api.finishGame({
-      answers,
-      category: config?.category,
-      gameType: config?.gameType,
-    });
-
-    return result;
+    // Estar online no garantiza que el request llegue (timeout, cold start de
+    // Render, blip de red). Reintentamos UNA vez antes de resignarnos a
+    // encolar localmente — así no perdemos partidas por un fallo transitorio.
+    try {
+      const result = await api.finishGame({
+        answers,
+        category: config?.category,
+        gameType: config?.gameType,
+      });
+      setLastNewAchievements(result.newAchievements ?? []);
+      return result;
+    } catch {
+      try {
+        const result = await api.finishGame({
+          answers,
+          category: config?.category,
+          gameType: config?.gameType,
+        });
+        setLastNewAchievements(result.newAchievements ?? []);
+        return result;
+      } catch {
+        // Los dos intentos fallaron: encolamos exactamente como el path
+        // offline (mismo enqueuePendingSession) y devolvemos un resumen local
+        // marcado como pendiente de sync — GamePage navega con ?pendingSync=1
+        // y ResultsPage muestra el badge correspondiente.
+        if (config?.category) {
+          enqueuePendingSession({
+            category: config.category,
+            answers,
+            finishedAt: Date.now(),
+          });
+        }
+        const correctCount = results.filter((r) => r.isCorrect).length;
+        const totalQuestions = results.length || answers.length || 1;
+        setLastNewAchievements([]);
+        return {
+          gameId: `pending-${Date.now()}`,
+          totalScore: score,
+          correctCount,
+          totalQuestions,
+          accuracy: Math.round((correctCount / totalQuestions) * 100),
+          isHighScore: false,
+          details: results,
+          newAchievements: [],
+          pendingSync: true,
+        };
+      }
+    }
   }, []);
 
   const resetGame = useCallback(() => {
@@ -312,6 +402,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       timerRef.current = null;
     }
     setStreakAlive(true);
+    setLastNewAchievements([]);
     setState(initialState);
   }, []);
 
@@ -339,6 +430,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         resetGame,
         setTimeRemaining,
         replaceCurrentQuestion,
+        lastNewAchievements,
       }}
     >
       {children}

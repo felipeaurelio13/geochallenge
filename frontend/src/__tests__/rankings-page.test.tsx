@@ -38,6 +38,9 @@ vi.mock('react-i18next', () => ({
         'rankings.otherPlayers': 'Otros jugadores',
         'rankings.globalStats': 'Estadísticas globales',
         'rankings.seasonStats': 'Estadísticas del mes',
+        'rankings.yourPosition': 'Tu posición',
+        'rankings.yourPositionSummary': `Tu posición: #${options?.rank ?? ''} de ${options?.total ?? ''} — top ${options?.percent ?? ''}%`,
+        'rankings.playFirstGame': 'Juega tu primera partida para aparecer aquí 🚀',
       };
 
       return translations[key] ?? key;
@@ -125,7 +128,10 @@ describe('RankingsPage', () => {
 
     render(<RankingsPage />);
 
-    expect(await screen.findByText('#11')).toBeInTheDocument();
+    // "#11" ahora aparece dos veces: en el bloque fijo "Tu posición" (siempre
+    // visible, PARTE 4 del plan de empatía) y en la fila del propio usuario
+    // dentro de la lista.
+    expect((await screen.findAllByText('#11')).length).toBeGreaterThanOrEqual(2);
     expect(screen.getByText('#15')).toBeInTheDocument();
     expect(screen.queryByText('🥇')).not.toBeInTheDocument();
   });
@@ -186,7 +192,8 @@ describe('RankingsPage', () => {
 
     render(<RankingsPage />);
 
-    expect(await screen.findByText('#4')).toBeInTheDocument();
+    // "#4" aparece dos veces: bloque fijo "Tu posición" + fila propia en la lista.
+    expect((await screen.findAllByText('#4')).length).toBeGreaterThanOrEqual(2);
     expect(screen.getByText('999')).toBeInTheDocument();
     expect(screen.getByText('7,777')).toBeInTheDocument();
 

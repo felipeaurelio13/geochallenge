@@ -1,9 +1,10 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { triggerHaptic } from '../hooks/useHaptics';
 import { useUiStore } from '../store/useUiStore';
 
 const URGENCY_THRESHOLD_SECONDS = 3;
+const HURRY_ANNOUNCE_THRESHOLD_SECONDS = 5;
 
 interface TimerProps {
   duration: number;
@@ -26,6 +27,9 @@ export function Timer({ duration, timeRemaining, onTick, onComplete, isActive }:
   const timeRemainingRef = useRef(timeRemaining);
   const onTickRef = useRef(onTick);
   const onCompleteRef = useRef(onComplete);
+  const hasAnnouncedHurryRef = useRef(false);
+  const prevTimeRemainingRef = useRef(timeRemaining);
+  const [hurryAnnouncement, setHurryAnnouncement] = useState('');
 
   useEffect(() => { timeRemainingRef.current = timeRemaining; }, [timeRemaining]);
   useEffect(() => { onTickRef.current = onTick; }, [onTick]);
@@ -63,10 +67,31 @@ export function Timer({ duration, timeRemaining, onTick, onComplete, isActive }:
 
   useEffect(() => {
     if (!isActive) return;
+    if (prefersReducedMotion) return;
     if (timeRemaining > 0 && timeRemaining <= URGENCY_THRESHOLD_SECONDS) {
       triggerHaptic('urgency');
     }
-  }, [timeRemaining, isActive]);
+  }, [timeRemaining, isActive, prefersReducedMotion]);
+
+  // A jump upward in `timeRemaining` (vs. the previous tick) signals a new
+  // question/round has started with a fresh timer instance — reset the
+  // one-time "hurry up" announcement so it can fire again for this round.
+  useEffect(() => {
+    if (timeRemaining > prevTimeRemainingRef.current) {
+      hasAnnouncedHurryRef.current = false;
+    }
+    prevTimeRemainingRef.current = timeRemaining;
+
+    if (
+      isActive &&
+      !hasAnnouncedHurryRef.current &&
+      timeRemaining > 0 &&
+      timeRemaining <= HURRY_ANNOUNCE_THRESHOLD_SECONDS
+    ) {
+      hasAnnouncedHurryRef.current = true;
+      setHurryAnnouncement(t('a11y.hurryUp', { seconds: timeRemaining }));
+    }
+  }, [timeRemaining, isActive, t]);
 
   const percentage = (timeRemaining / duration) * 100;
   const strokeDashoffset = 283 - (283 * percentage) / 100;
@@ -104,6 +129,9 @@ export function Timer({ duration, timeRemaining, onTick, onComplete, isActive }:
           {Math.max(0, timeRemaining)}s
         </span>
       </div>
+      <span className="sr-only" aria-live="polite">
+        {hurryAnnouncement}
+      </span>
     </div>
   );
 }

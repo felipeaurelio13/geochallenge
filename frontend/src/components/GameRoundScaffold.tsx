@@ -24,6 +24,10 @@ type GameRoundScaffoldProps = {
   rootClassName?: string;
   optionsGridClassName?: string;
   onImageError?: () => void;
+  /** true cuando el intento de reemplazo de la pregunta también falló (ver QuestionCard). */
+  imageReplacementFailed?: boolean;
+  onRetryImage?: () => void;
+  onSkipQuestion?: () => void;
 };
 
 export function GameRoundScaffold({
@@ -44,6 +48,9 @@ export function GameRoundScaffold({
   rootClassName,
   optionsGridClassName = 'game-options-grid',
   onImageError,
+  imageReplacementFailed = false,
+  onRetryImage,
+  onSkipQuestion,
 }: GameRoundScaffoldProps) {
   const { i18n } = useTranslation();
   const isCapitalQuestion = !isMapQuestion && question.category === 'CAPITAL';
@@ -70,13 +77,16 @@ export function GameRoundScaffold({
           totalQuestions={totalQuestions}
           compact={compactQuestionCard}
           onImageError={onImageError}
+          replacementFailed={imageReplacementFailed}
+          onRetryImage={onRetryImage}
+          onSkipQuestion={onSkipQuestion}
         />
       </div>
 
       {isMapQuestion ? (
-        <div className="min-h-0 flex-1 overflow-hidden">{mapContent}</div>
+        <div id="game-options" className="min-h-0 flex-1 overflow-hidden">{mapContent}</div>
       ) : (
-        <div className="game-options-wrap min-h-0 w-full flex-1 overflow-hidden">
+        <div id="game-options" className="game-options-wrap min-h-0 w-full flex-1 overflow-hidden">
           <div key={questionNumber} className={optionsGridClassName}>
             {question.options.map((option, index) => (
             <OptionButton
@@ -85,7 +95,7 @@ export function GameRoundScaffold({
               displayLabel={getOptionDisplayLabel(question, option, i18n.language)}
               index={index}
               onClick={() => onOptionSelect(option)}
-              disabled={showResult || disableOptions || hiddenOptionIndexes.includes(index)}
+              disabled={showResult || disableOptions || imageReplacementFailed || hiddenOptionIndexes.includes(index)}
               eliminated={hiddenOptionIndexes.includes(index)}
               selected={selectedAnswer === option}
               isCorrect={option === question.correctAnswer}

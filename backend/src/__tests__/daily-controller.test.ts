@@ -238,3 +238,187 @@ describe('POST /api/game/daily/submit — el servidor calcula el puntaje', () =>
     expect(mocks.userUpdate).not.toHaveBeenCalled();
   });
 });
+
+describe('POST /api/game/daily/submit — clientDate y racha en zona horaria local', () => {
+  // Servidor fijo en UTC 2026-03-02T02:00:00Z. Un usuario en UTC-4 jugando a
+  // las 22:00 del 2026-03-01 local ve "hoy" como 2026-03-01, pero el servidor
+  // ya está en 2026-03-02. Sin clientDate, getTodayKey() usaría 2026-03-02.
+  const SERVER_NOW = '2026-03-02T02:00:00.000Z';
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(SERVER_NOW));
+    mocks.redisGet.mockResolvedValue(null);
+    mocks.redisSet.mockResolvedValue('OK');
+    mocks.questionFindMany.mockImplementation((args: any) => {
+      if (args?.select?.id && !args?.where?.id) {
+        return Promise.resolve(QUESTION_POOL.map((q) => ({ id: q.id })));
+      }
+      const ids: string[] = args?.where?.id?.in ?? [];
+      return Promise.resolve(
+        QUESTION_POOL.filter((q) => ids.includes(q.id)).map((q) =>
+          args?.select?.correctAnswer ? { id: q.id, correctAnswer: q.correctAnswer } : q
+        )
+      );
+    });
+    mocks.userUpdate.mockResolvedValue({});
+    mocks.gameResultCreate.mockResolvedValue({});
+    vi.mocked(evaluateAchievementsAfterDaily).mockResolvedValue([]);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  async function getDailyQuestionIds(baseUrl: string): Promise<string[]> {
+    const response = await fetch(`${baseUrl}/api/game/daily`);
+    const body = (await response.json()) as { questions: Array<{ id: string }> };
+    return body.questions.map((q) => q.id);
+  }
+
+  it('(a) clientDate un día detrás de la fecha UTC del servidor mantiene la racha si jugó "ayer" localmente', async () => {
+    // El usuario jugó ayer local (2026-02-28) y hoy es 2026-03-01 local
+    // (aunque el servidor ya esté en 2026-03-02 UTC).
+    mocks.userFindUnique.mockResolvedValue({
+      highScore: 0,
+      dailyStreak: 5,
+      lastDailyDate: '2026-02-28',
+    });
+
+    const { server, baseUrl } = startServer();
+    const ids = await getDailyQuestionIds(baseUrl);
+    const answers = ids.map((questionId) => ({ questionId, answer: 'A' }));
+
+    const response = await fetch(`${baseUrl}/api/game/daily/submit`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ answers, clientDate: '2026-03-01' }),
+    });
+    const body = (await response.json()) as { result: { dailyStreak: number } };
+    server.close();
+
+    expect(response.status).toBe(200);
+    // Racha continúa (5 -> 6), no se resetea a 1 por el desfase UTC.
+    expect(body.result.dailyStreak).toBe(6);
+    expect(mocks.userUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ dailyStreak: 6, lastDailyDate: '2026-03-01' }),
+      })
+    );
+  });
+
+  it('(b) clientDate spoofeado 3+ días de diferencia se ignora y cae al fallback UTC', async () => {
+    mocks.userFindUnique.mockResolvedValue({
+      highScore: 0,
+      dailyStreak: 5,
+      // "Ayer" respecto al fallback UTC (2026-03-02) es 2026-03-01.
+      lastDailyDate: '2026-03-01',
+    });
+
+    const { server, baseUrl } = startServer();
+    const ids = await getDailyQuestionIds(baseUrl);
+    const answers = ids.map((questionId) => ({ questionId, answer: 'A' }));
+
+    // Intento de spoofing: clientDate 5 días adelante del servidor.
+    const response = await fetch(`${baseUrl}/api/game/daily/submit`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ answers, clientDate: '2026-03-07' }),
+    });
+    const body = (await response.json()) as { result: { dailyStreak: number } };
+    server.close();
+
+    expect(response.status).toBe(200);
+    // Se ignora el clientDate spoofeado: usa el fallback UTC (2026-03-02),
+    // que SÍ es "hoy" tras "ayer" (2026-03-01) -> la racha continúa (5 -> 6).
+    expect(body.result.dailyStreak).toBe(6);
+    expect(mocks.userUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ dailyStreak: 6, lastDailyDate: '2026-03-02' }),
+      })
+    );
+  });
+
+  it('(c) una racha genuinamente rota reporta previousStreak y streakLost', async () => {
+    mocks.userFindUnique.mockResolvedValue({
+      highScore: 0,
+      dailyStreak: 4,
+      // Hace 3 días — ni "hoy" ni "ayer" respecto al día resuelto (2026-03-01).
+      lastDailyDate: '2026-02-26',
+    });
+
+    const { server, baseUrl } = startServer();
+    const ids = await getDailyQuestionIds(baseUrl);
+    const answers = ids.map((questionId) => ({ questionId, answer: 'A' }));
+
+    const response = await fetch(`${baseUrl}/api/game/daily/submit`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ answers, clientDate: '2026-03-01' }),
+    });
+    const body = (await response.json()) as {
+      result: { dailyStreak: number; previousStreak?: number; streakLost?: boolean };
+    };
+    server.close();
+
+    expect(response.status).toBe(200);
+    expect(body.result.dailyStreak).toBe(1);
+    expect(body.result.previousStreak).toBe(4);
+    expect(body.result.streakLost).toBe(true);
+  });
+
+  it('perder una racha de 1 día no marca streakLost (no vale la pena flaggear)', async () => {
+    mocks.userFindUnique.mockResolvedValue({
+      highScore: 0,
+      dailyStreak: 1,
+      lastDailyDate: '2026-02-26',
+    });
+
+    const { server, baseUrl } = startServer();
+    const ids = await getDailyQuestionIds(baseUrl);
+    const answers = ids.map((questionId) => ({ questionId, answer: 'A' }));
+
+    const response = await fetch(`${baseUrl}/api/game/daily/submit`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ answers, clientDate: '2026-03-01' }),
+    });
+    const body = (await response.json()) as { result: { streakLost?: boolean; previousStreak?: number } };
+    server.close();
+
+    expect(response.status).toBe(200);
+    expect(body.result.streakLost).toBeUndefined();
+    expect(body.result.previousStreak).toBeUndefined();
+  });
+
+  it('(d) sin clientDate sigue funcionando exactamente como antes (compatibilidad con PWA cacheada)', async () => {
+    mocks.userFindUnique.mockResolvedValue({
+      highScore: 0,
+      dailyStreak: 5,
+      // "Ayer" respecto al fallback UTC (2026-03-02) es 2026-03-01.
+      lastDailyDate: '2026-03-01',
+    });
+
+    const { server, baseUrl } = startServer();
+    const ids = await getDailyQuestionIds(baseUrl);
+    const answers = ids.map((questionId) => ({ questionId, answer: 'A' }));
+
+    const response = await fetch(`${baseUrl}/api/game/daily/submit`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ answers }),
+    });
+    const body = (await response.json()) as { result: { dailyStreak: number } };
+    server.close();
+
+    expect(response.status).toBe(200);
+    expect(body.result.dailyStreak).toBe(6);
+    expect(mocks.userUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ dailyStreak: 6, lastDailyDate: '2026-03-02' }),
+      })
+    );
+  });
+});

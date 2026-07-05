@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useUiStore } from '../store/useUiStore';
 
 interface StreakComboProps {
   combo: number;
@@ -19,6 +20,7 @@ export function StreakCombo({
   className,
   'aria-label': ariaLabel,
 }: StreakComboProps) {
+  const prefersReducedMotion = useUiStore((state) => state.prefersReducedMotion);
   const [popKey, setPopKey] = useState(0);
   const prevRef = useRef(combo);
   const milestone = combo > 0 && combo % 5 === 0 && combo !== prevRef.current;
@@ -40,7 +42,7 @@ export function StreakCombo({
   return (
     <div
       className={`inline-flex items-center gap-2 rounded-2xl border bg-gradient-to-br px-3 py-1.5 shadow-lg ${tone} ${
-        milestone ? 'combo-flash' : ''
+        milestone && !prefersReducedMotion ? 'combo-flash' : ''
       } ${className ?? ''}`}
       aria-label={ariaLabel ?? `${label} ${combo}`}
       role="status"

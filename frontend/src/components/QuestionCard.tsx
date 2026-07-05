@@ -11,9 +11,28 @@ interface QuestionCardProps {
   totalQuestions: number;
   compact?: boolean;
   onImageError?: () => void;
+  /**
+   * true cuando el intento de reemplazar la pregunta (tras el fallo de imagen)
+   * TAMBIÉN falló — a diferencia de `hasImageError` (estado local de la propia
+   * imagen), esto lo controla el padre porque depende de un fetch async fuera
+   * de este componente. Cuando es true mostramos Reintentar/Saltar en vez del
+   * fallback silencioso.
+   */
+  replacementFailed?: boolean;
+  onRetryImage?: () => void;
+  onSkipQuestion?: () => void;
 }
 
-export function QuestionCard({ question, questionNumber, totalQuestions, compact = false, onImageError }: QuestionCardProps) {
+export function QuestionCard({
+  question,
+  questionNumber,
+  totalQuestions,
+  compact = false,
+  onImageError,
+  replacementFailed = false,
+  onRetryImage,
+  onSkipQuestion,
+}: QuestionCardProps) {
   const { t, i18n } = useTranslation();
 
   // Texto de la pregunta localizado. Antes esta lógica vivía aquí inline y
@@ -141,6 +160,38 @@ export function QuestionCard({ question, questionNumber, totalQuestions, compact
                   {t(getDifficultyKey())}
                 </span>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* Reemplazo de pregunta también falló: en vez del fallback silencioso,
+            damos control real al usuario (Reintentar / Saltar) en lugar de
+            dejarlo atascado con el timer corriendo sobre una pregunta vacía. */}
+        {hasImageError && onImageError && replacementFailed && (
+          <div className={compact ? 'mb-1' : 'mb-6'}>
+            <div className="media-box media-box--compact mx-auto flex flex-col items-center justify-center gap-3 rounded-xl border border-app-border/70 bg-app-muted/50 px-3 py-3">
+              <span className="text-4xl opacity-40">🖼️</span>
+              <p className="text-xs text-app-subtle">{t('game.imageErrorTitle', 'No pudimos cargar esta imagen 🖼️')}</p>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                {onRetryImage && (
+                  <button
+                    type="button"
+                    onClick={onRetryImage}
+                    className="rounded-lg border border-app-border bg-app-surface px-3 py-1.5 text-xs font-semibold text-app-text hover:bg-app-muted"
+                  >
+                    {t('game.imageErrorRetry', 'Reintentar')}
+                  </button>
+                )}
+                {onSkipQuestion && (
+                  <button
+                    type="button"
+                    onClick={onSkipQuestion}
+                    className="rounded-lg border border-app-border bg-app-surface px-3 py-1.5 text-xs font-semibold text-app-text hover:bg-app-muted"
+                  >
+                    {t('game.imageErrorSkip', 'Saltar pregunta')}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         )}

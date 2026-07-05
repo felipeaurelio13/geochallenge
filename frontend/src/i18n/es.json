@@ -62,13 +62,22 @@
     "show": "Mostrar",
     "hide": "Ocultar",
     "completeFieldsHint": "Completa correo y contraseña para continuar.",
-    "invalidEmail": "Ingresa un correo válido (ej. tu@correo.com).",
+    "invalidEmail": "Ese correo no parece completo — algo como tu@correo.com",
     "passwordRequired": "Ingresa tu contraseña.",
-    "loginFailed": "Email o contraseña incorrectos. Verifica e intenta de nuevo.",
-    "rateLimitError": "Demasiados intentos. Intenta de nuevo en {{minutes}} min.",
+    "loginFailed": "Ese correo y contraseña no coinciden. ¿Lo intentamos de nuevo?",
+    "rateLimitError": "Por seguridad pausamos los intentos un momento. Prueba de nuevo en {{minutes}} min",
     "emailPlaceholder": "tu@correo.com",
     "passwordPlaceholder": "Tu contraseña",
-    "usernamePlaceholder": "Tu nombre de usuario"
+    "usernamePlaceholder": "Tu nombre de usuario",
+    "forgotTitle": "¿Olvidaste tu contraseña?",
+    "forgotSubtitle": "Te ayudamos a recuperar el acceso en un momento",
+    "forgotSent": "Si existe una cuenta con ese correo, te enviamos un enlace. Revisa también spam 📬",
+    "resetTitle": "Restablecer contraseña",
+    "newPassword": "Nueva contraseña",
+    "confirmNewPassword": "Confirmar nueva contraseña",
+    "resetSuccess": "Tu contraseña fue actualizada. Ya puedes iniciar sesión.",
+    "resetTokenInvalid": "Este enlace ya no es válido. Puede que haya expirado.",
+    "resetRequestNew": "Pedir uno nuevo"
   },
   "menu": {
     "dailyChallenge": "Reto del día",
@@ -83,7 +92,7 @@
     "challenge": "Desafíos",
     "challengeDesc": "2–8 jugadores · asíncrono · con amigos",
     "streak": "Racha",
-    "streakDesc": "Sin fin · 1 fallo termina · supera tu récord",
+    "streakDesc": "¿Cuántas seguidas puedes acertar? 🔥",
     "rankings": "Rankings",
     "rankingsDesc": "Mira el top global y tu posición",
     "yourStats": "Tu perfil",
@@ -106,7 +115,42 @@
     "survivalDesc": "Multijugador · 2 vidas · último en pie gana",
     "flagMaster": "Maestro de Banderas",
     "flagMasterBadge": "Difícil",
-    "flagMasterDesc": "10 rondas · sin color, recortes y trampas · multiplicadores hasta x2.5"
+    "flagMasterDesc": "10 rondas · sin color, recortes y trampas · multiplicadores hasta x2.5",
+    "howToPlay": "Cómo se juega",
+    "howToPlayAria": "Cómo se juega {{mode}}",
+    "letsPlay": "¡Jugar!"
+  },
+  "howto": {
+    "flash": {
+      "objective": "Responde tantas preguntas como puedas en 60 segundos.",
+      "rule": "El tiempo corre para toda la partida, no por pregunta.",
+      "tip": "Encadena aciertos para subir el combo hasta x10."
+    },
+    "single": {
+      "objective": "Responde 10 preguntas a tu propio ritmo.",
+      "rule": "Tienes 10 segundos por pregunta.",
+      "tip": "Ideal para entrenar sin presión antes de un duelo."
+    },
+    "duel": {
+      "objective": "Compite en tiempo real contra otro jugador.",
+      "rule": "Ambos responden las mismas 10 preguntas; gana quien sume más puntos.",
+      "tip": "La velocidad también suma puntos, no solo acertar."
+    },
+    "streak": {
+      "objective": "Acierta la mayor cantidad de preguntas seguidas posible.",
+      "rule": "Un error termina la racha — no hay límite de preguntas.",
+      "tip": "Usa el Escudo de racha si tienes uno disponible antes de arriesgar."
+    },
+    "survival": {
+      "objective": "Sé el último jugador en pie.",
+      "rule": "Empiezas con 2 vidas; cada error te quita una.",
+      "tip": "4 aciertos seguidos te dan una vida extra."
+    },
+    "challenge": {
+      "objective": "Compite de forma asíncrona contra tus amigos.",
+      "rule": "Cada participante juega la misma configuración cuando quiera.",
+      "tip": "Invita a más jugadores para hacerlo más competitivo."
+    }
   },
   "flagMaster": {
     "question": "¿A qué país pertenece esta bandera?",
@@ -159,7 +203,11 @@
   },
   "serverWakeUp": {
     "title": "Cargando GeoChallenge…",
-    "body": "Esto puede tomar unos segundos la primera vez."
+    "body": "Esto puede tomar unos segundos la primera vez.",
+    "rotating1": "Despertando el servidor…",
+    "rotating2": "Ya casi…",
+    "rotating3": "Los servidores gratis se toman su siesta 😴",
+    "tooLong": "Está tardando más de lo normal — puedes seguir esperando o probar el modo offline"
   },
   "survival": {
     "title": "Supervivencia",
@@ -195,7 +243,11 @@
     "gameOver": "Fin del juego",
     "survivedRounds": "{{rounds}} rondas jugadas",
     "playAgain": "Jugar de nuevo",
-    "backToMenu": "Volver al menú"
+    "backToMenu": "Volver al menú",
+    "autoStartHint": "La partida arranca sola cuando se llene la sala",
+    "eliminatedWarm": "Llegaste a la ronda {{round}} de {{total}} 💪 Quédate a ver el final",
+    "spectatingHeader": "👀 Modo espectador — sobreviviste {{round}} rondas",
+    "finalPlacement": "Terminaste {{place}}º de {{players}}"
   },
   "categories": {
     "mixed": "Mixto",
@@ -244,7 +296,7 @@
     "incorrectLabel": "Incorrecta",
     "next": "Siguiente",
     "seeResults": "Ver resultados",
-    "streakBroken": "¡Racha terminada! Esta era la respuesta correcta.",
+    "streakBroken": "Se cortó en {{count}} 💛 La respuesta era:",
     "difficulty": {
       "easy": "Fácil",
       "medium": "Medio",
@@ -268,7 +320,14 @@
     "timeRemaining": "Tiempo restante {{seconds}}s segundos",
     "shortGameConfirm": "Solo hay {{available}} preguntas disponibles (de {{requested}} solicitadas). ¿Quieres jugar igualmente?",
     "shortGameCancelled": "Partida cancelada. Prueba con otra categoría o configuración para obtener más preguntas.",
-    "startError": "Error al iniciar el juego"
+    "startError": "Error al iniciar el juego",
+    "offlineBadge": "📴 Sin conexión — puedes seguir jugando",
+    "imageErrorTitle": "No pudimos cargar esta imagen 🖼️",
+    "imageErrorRetry": "Reintentar",
+    "imageErrorSkip": "Saltar pregunta"
+  },
+  "map": {
+    "keyboardInstructions": "Usa las flechas para mover el mapa, + y - para hacer zoom, Enter para marcar tu respuesta en el centro"
   },
   "results": {
     "shareStreakButton": "Compartir mi racha",
@@ -294,7 +353,18 @@
     "basePoints": "Base",
     "timeBonus": "Velocidad",
     "comboBonus": "Racha",
-    "accuracyBonus": "Precisión mapa"
+    "accuracyBonus": "Precisión mapa",
+    "achievementUnlocked": "🏅 ¡Logro desbloqueado!",
+    "moreAchievements": "+{{count}} logros más",
+    "pendingSync": "📡 Resultado guardado en este dispositivo — se sincronizará automáticamente",
+    "streakHeadline": "Racha de {{count}} 🔥",
+    "streakShort": "Todos empiezan así. Una más y le agarras el ritmo.",
+    "streakMid": "¡Sólida racha! Tu récord está a la vista.",
+    "streakLong": "Racha enorme. Eso ya es nivel experto 👏",
+    "yourBest": "Tu mejor: {{best}}",
+    "playAgainStreak": "Otra racha",
+    "growthMindset": "Las primeras partidas son las más difíciles — cada una te enseña banderas nuevas 🌱",
+    "tryEasy": "Prueba dificultad Fácil"
   },
   "duel": {
     "searching": "Buscando oponente...",
@@ -319,7 +389,17 @@
     "reconnectedSearching": "Conexión restablecida. Volvimos a buscar oponente.",
     "reconnectedSyncing": "Conexión restablecida. Sincronizando la ronda...",
     "searchTimeout": "No se encontró oponente. Intenta de nuevo más tarde.",
-    "opponent": "Oponente"
+    "opponent": "Oponente",
+    "connectionErrorNotice": "No pudimos conectar al servidor de partidas. Reintentando…",
+    "backToMenu": "Volver al menú",
+    "syncingLong": "Sincronizando con la partida… tu progreso está a salvo",
+    "expectedWait": "La mayoría encuentra rival en menos de 1 min",
+    "searchTimeoutWarm": "No apareció nadie esta vez 😅 Prueba otra categoría o vuelve en unos minutos",
+    "changeCategory": "Cambiar categoría",
+    "almostWon": "Quedaste a solo {{diff}} puntos 🔥",
+    "rematchNudge": "{{opponent}} estuvo fuerte hoy. La revancha es tuya cuando quieras.",
+    "rematch": "Revancha",
+    "wonByForfeit": "{{opponent}} abandonó la partida. Victoria para ti — cuenta igual para tu ranking ✓"
   },
   "challenges": {
     "title": "Desafíos",
@@ -340,6 +420,7 @@
       "joinable": "Para unirme"
     },
     "empty": "No hay desafíos",
+    "emptyWithAction": "Aún no hay desafíos por aquí. ¡Crea el primero e invita a alguien!",
     "from": "De",
     "to": "Para",
     "status": {
@@ -389,6 +470,8 @@
     "loadError": "Error al cargar rankings",
     "empty": "Aún no hay jugadores en el ranking",
     "noSearchResults": "No hay resultados para esta búsqueda",
+    "yourPositionSummary": "Tu posición: #{{rank}} de {{total}} — top {{percent}}%",
+    "playFirstGame": "Juega tu primera partida para aparecer aquí 🚀",
     "you": "Tu",
     "stats": "Estadísticas",
     "totalPlayers": "Jugadores totales",
@@ -462,7 +545,11 @@
     "hapticsLabel": "Vibración háptica",
     "hapticsDescription": "Feedback táctil en toques, aciertos y errores",
     "soundLabel": "Sonidos",
-    "soundDescription": "Efectos de sonido al responder (próximamente)"
+    "soundDescription": "Efectos de sonido al responder (próximamente)",
+    "extendedTime": "Más tiempo por pregunta (+50%)",
+    "extendedTimeHint": "Ideal si necesitas más tiempo para pensar",
+    "emptyHistory": "Tu primera partida está a un click 🚀",
+    "emptyDuels": "Tu primer duelo te espera ⚔️"
   },
   "share": {
     "shared": "¡Compartido!",
@@ -471,14 +558,16 @@
     "error": "No se pudo compartir"
   },
   "daily": {
-    "alreadyPlayed": "Ya jugaste hoy",
-    "comeBackTomorrow": "Vuelve mañana para el siguiente reto",
+    "alreadyPlayed": "¡Reto de hoy completado! 🎯",
+    "comeBackTomorrow": "Mañana hay uno nuevo esperándote",
     "streak": "Racha",
     "days": "días",
     "streakStart": "¡día! Vuelve mañana para seguir la racha",
     "streakDays": "días seguidos",
     "complete": "¡Reto del día completado!",
-    "finish": "Ver resultado"
+    "finish": "Ver resultado",
+    "streakLostNotice": "Tu racha de {{count}} días se cortó 💛 — hoy empieza una nueva. Lo importante es volver.",
+    "nextChallengeAt": "El próximo reto abre a medianoche (tu hora)"
   },
   "install": {
     "title": "Instala GeoChallenge",
@@ -525,7 +614,12 @@
     "streakShield": "Escudo de racha",
     "available": "Disponible",
     "consumed": "Consumido",
-    "streakShieldTriggered": "Escudo activado: la racha continúa, pero esta ronda no suma."
+    "streakShieldTriggered": "🛡️ ¡Tu escudo salvó la racha! Sigue con todo",
+    "streakShieldTriggeredDetail": "Esta ronda no suma puntos.",
+    "intel5050Tooltip": "Elimina 2 opciones incorrectas — 1 por partida",
+    "focusTimeTooltip": "Suma 3 segundos extra al reloj — 1 por partida",
+    "streakShieldTooltip": "Protege tu racha ante un error — 1 por partida",
+    "coachmarkTitle": "Tus ayudas 👇 tócalas cuando las necesites"
   },
   "stats": {
     "highScore": "Mejor puntuación",
@@ -547,6 +641,7 @@
     "save": "Guardar",
     "processing": "Procesando...",
     "skipToMainAction": "Ir a las acciones principales",
+    "skipToAnswerOptions": "Saltar a las opciones de respuesta",
     "search": "Buscar"
   },
   "duelHistory": {
@@ -622,5 +717,44 @@
       "HARD": "Difícil"
     },
     "unavailableCombination": "Esta combinación de filtros no tiene suficientes preguntas ({{available}} disponibles, mínimo {{required}})."
+  },
+  "a11y": {
+    "dismissToast": "Cerrar notificación",
+    "correctAnswer": "Correcta",
+    "incorrectAnswer": "Incorrecta",
+    "eliminatedOption": "Eliminada",
+    "hurryUp": "Quedan {{seconds}} segundos"
+  },
+  "socket": {
+    "connectionError": "No pudimos conectar al servidor de partidas. Reintentando…",
+    "connectionTimeout": "Esto está tomando más de lo esperado. Revisa tu conexión.",
+    "retry": "Reintentar",
+    "backToMenu": "Volver al menú"
+  },
+  "sync": {
+    "done": "Tus partidas pendientes se sincronizaron ✓"
+  },
+  "pwa": {
+    "updateAvailable": "GeoChallenge se actualizó ✨ Los cambios se aplicarán al recargar"
+  },
+  "apiErrors": {
+    "VALIDATION_FAILED": "Algo en el formulario no cuadra — revisa los campos marcados",
+    "AUTH_INVALID_CREDENTIALS": "Ese correo y contraseña no coinciden. ¿Lo intentamos de nuevo?",
+    "AUTH_EMAIL_TAKEN": "Ese correo ya tiene una cuenta — ¿quieres iniciar sesión?",
+    "AUTH_USERNAME_TAKEN": "Ese nombre de usuario ya está en uso, prueba otro",
+    "AUTH_RESET_TOKEN_INVALID": "Este enlace no es válido. Puede que ya se haya usado.",
+    "AUTH_RESET_TOKEN_EXPIRED": "Este enlace ya expiró — pide uno nuevo",
+    "CHALLENGE_PLAYER_RANGE": "Los desafíos son entre {{min}} y {{max}} jugadores",
+    "CHALLENGE_NOT_ENOUGH_QUESTIONS": "No alcanzan las preguntas para esos filtros — prueba con más categorías 🗺️",
+    "CHALLENGE_ALREADY_JOINED": "Ya te uniste a este desafío",
+    "CHALLENGE_NOT_FOUND": "No encontramos ese desafío — puede que haya expirado",
+    "CHALLENGE_FULL": "Este desafío ya está completo",
+    "GAME_NOT_ENOUGH_QUESTIONS": "Solo hay {{available}} preguntas disponibles (de {{requested}} solicitadas)",
+    "GAME_INSUFFICIENT_QUESTIONS_SHORT": "No hay suficientes preguntas para esta configuración — prueba otra categoría",
+    "DUEL_RATE_LIMITED": "Vas muy rápido — espera un momento antes de volver a intentarlo",
+    "DUEL_ERROR_GENERIC": "No pudimos continuar el duelo. Intenta nuevamente.",
+    "SURVIVAL_ERROR_GENERIC": "Algo falló en la partida de supervivencia. Intenta nuevamente.",
+    "RATE_LIMITED": "Por seguridad pausamos los intentos un momento. Prueba de nuevo en {{minutes}} min",
+    "INTERNAL": "Algo falló de nuestro lado 😓 Ya quedó registrado (ref: {{requestId}}). Intenta de nuevo en un momento."
   }
 }

@@ -3,6 +3,7 @@ import { Category, Prisma } from '@prisma/client';
 import { updateLeaderboardScore, updateSeasonLeaderboardScore } from './leaderboard.service.js';
 import { QuestionFilters } from './game.service.js';
 import { evaluateTimedAnswers, SubmittedAnswer } from '../utils/answerEvaluation.js';
+import { AppError } from '../utils/appError.js';
 
 const CHALLENGE_EXPIRY_DAYS = 7;
 const QUESTIONS_PER_CHALLENGE = 10;
@@ -44,11 +45,18 @@ export class ChallengeService {
     filters?: QuestionFilters
   ) {
     if (maxPlayers < 2 || maxPlayers > 8) {
-      throw new Error('El desafío debe ser para entre 2 y 8 personas');
+      throw new AppError('CHALLENGE_PLAYER_RANGE', 400, 'El desafío debe ser para entre 2 y 8 personas', {
+        min: 2,
+        max: 8,
+      });
     }
 
     if (!ALLOWED_TIME_SECONDS.includes(answerTimeSeconds as (typeof ALLOWED_TIME_SECONDS)[number])) {
-      throw new Error('El tiempo por pregunta debe ser 10, 20 o 30 segundos');
+      throw new AppError(
+        'CHALLENGE_INVALID_ANSWER_TIME',
+        400,
+        'El tiempo por pregunta debe ser 10, 20 o 30 segundos'
+      );
     }
 
     const selectedCategories: Category[] = categories?.length ? categories : ['MIXED'];
@@ -69,7 +77,11 @@ export class ChallengeService {
     });
 
     if (questions.length < QUESTIONS_PER_CHALLENGE) {
-      throw new Error('No hay suficientes preguntas para las categorías seleccionadas');
+      throw new AppError(
+        'CHALLENGE_NOT_ENOUGH_QUESTIONS',
+        400,
+        'No hay suficientes preguntas para las categorías seleccionadas'
+      );
     }
 
     const shuffled = questions.sort(() => Math.random() - 0.5);
@@ -143,7 +155,7 @@ export class ChallengeService {
     });
 
     if (!challenge) {
-      throw new Error('Desafío no encontrado');
+      throw new AppError('CHALLENGE_NOT_FOUND', 404, 'Desafío no encontrado');
     }
 
     const isParticipant = challenge.participants.some((p) => p.userId === userId);
@@ -153,7 +165,7 @@ export class ChallengeService {
       challenge.participants.length < challenge.maxPlayers;
 
     if (!isParticipant && !isJoinable) {
-      throw new Error('No tienes acceso a este desafío');
+      throw new AppError('CHALLENGE_ACCESS_DENIED', 403, 'No tienes acceso a este desafío');
     }
 
     return this.toChallengeView(challenge, userId);
@@ -166,24 +178,24 @@ export class ChallengeService {
     });
 
     if (!challenge) {
-      throw new Error('Desafío no encontrado');
+      throw new AppError('CHALLENGE_NOT_FOUND', 404, 'Desafío no encontrado');
     }
 
     if (challenge.status !== 'PENDING') {
-      throw new Error('Este desafío ya no está disponible para unirse');
+      throw new AppError('CHALLENGE_NOT_JOINABLE', 400, 'Este desafío ya no está disponible para unirse');
     }
 
     if (challenge.expiresAt < new Date()) {
       await prisma.challenge.update({ where: { id: challengeId }, data: { status: 'EXPIRED' } });
-      throw new Error('Este desafío ha expirado');
+      throw new AppError('CHALLENGE_EXPIRED', 400, 'Este desafío ha expirado');
     }
 
     if (challenge.participants.some((p) => p.userId === userId)) {
-      throw new Error('Ya estás dentro de este desafío');
+      throw new AppError('CHALLENGE_ALREADY_JOINED', 400, 'Ya estás dentro de este desafío');
     }
 
     if (challenge.participants.length >= challenge.maxPlayers) {
-      throw new Error('El desafío ya completó el cupo de jugadores');
+      throw new AppError('CHALLENGE_FULL', 400, 'El desafío ya completó el cupo de jugadores');
     }
 
     const joined = await prisma.challenge.update({
@@ -206,16 +218,16 @@ export class ChallengeService {
     });
 
     if (!challenge) {
-      throw new Error('Desafío no encontrado');
+      throw new AppError('CHALLENGE_NOT_FOUND', 404, 'Desafío no encontrado');
     }
 
     if (!challenge.participants.some((p) => p.userId === userId)) {
-      throw new Error('Debes unirte al desafío para jugar');
+      throw new AppError('CHALLENGE_NOT_JOINED', 403, 'Debes unirte al desafío para jugar');
     }
 
     if (challenge.status === 'PENDING') {
       if (challenge.participants.length < challenge.maxPlayers) {
-        throw new Error('El desafío aún no completó el cupo de jugadores');
+        throw new AppError('CHALLENGE_NOT_FULL', 400, 'El desafío aún no completó el cupo de jugadores');
       }
 
       await prisma.challenge.update({
@@ -225,7 +237,7 @@ export class ChallengeService {
     }
 
     if (challenge.status !== 'ACCEPTED' && challenge.status !== 'COMPLETED') {
-      throw new Error('El desafío no está en estado jugable');
+      throw new AppError('CHALLENGE_NOT_PLAYABLE', 400, 'El desafío no está en estado jugable');
     }
 
     const participant = challenge.participants.find((p) => p.userId === userId);
@@ -255,21 +267,21 @@ export class ChallengeService {
     });
 
     if (!challenge) {
-      throw new Error('Desafío no encontrado');
+      throw new AppError('CHALLENGE_NOT_FOUND', 404, 'Desafío no encontrado');
     }
 
     if (challenge.status !== 'ACCEPTED') {
-      throw new Error('El desafío no está en estado jugable');
+      throw new AppError('CHALLENGE_NOT_PLAYABLE', 400, 'El desafío no está en estado jugable');
     }
 
     const participant = challenge.participants.find((p) => p.userId === userId);
 
     if (!participant) {
-      throw new Error('No participas en este desafío');
+      throw new AppError('CHALLENGE_NOT_PARTICIPANT', 403, 'No participas en este desafío');
     }
 
     if (participant.score !== null) {
-      throw new Error('Ya has jugado este desafío');
+      throw new AppError('CHALLENGE_ALREADY_PLAYED', 400, 'Ya has jugado este desafío');
     }
 
     const questions = await prisma.question.findMany({
@@ -298,7 +310,7 @@ export class ChallengeService {
     });
 
     if (!updatedChallenge) {
-      throw new Error('Desafío no encontrado');
+      throw new AppError('CHALLENGE_NOT_FOUND', 404, 'Desafío no encontrado');
     }
 
     const everyonePlayed = updatedChallenge.participants.every((p) => p.score !== null);

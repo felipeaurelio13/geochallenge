@@ -7,20 +7,51 @@ import { LoadingSpinner, ShareButton } from '../components';
 import { AnswerStatusBadge } from '../components/AnswerStatusBadge';
 import { Button } from '../components/atoms/Button';
 import { useStreakShareImage } from '../hooks/useStreakShareImage';
+import { uiStoreActions, useUiStore } from '../store/useUiStore';
+import { getAchievementDisplay } from '../utils/achievements';
 
 export function ResultsPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const isStreakMode = searchParams.get('gameType') === 'streak';
   const category = searchParams.get('category') ?? 'MIXED';
-  const { state, resetGame } = useGame();
+  // Part 1.2: bandera de navegación cuando finishGame no llegó al servidor
+  // (dos intentos agotados) y el resultado se guardó localmente para reintentar.
+  const isPendingSync = searchParams.get('pendingSync') === '1';
+  const { state, resetGame, lastNewAchievements } = useGame();
   const { share: shareStreakImage, status: streakShareStatus } = useStreakShareImage();
   const [streakShareFeedback, setStreakShareFeedback] = useState<string>('');
   const feedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const prefersReducedMotion = useUiStore((s) => s.prefersReducedMotion);
+  const hasToastedAchievements = useRef(false);
 
   const { score, questions, results } = state;
   const correctAnswers = results.filter((r) => r.isCorrect).length;
+
+  const currentLanguage = i18n?.language ?? 'es';
+  const unlockedAchievements = useMemo(
+    () => (lastNewAchievements ?? []).map((key) => getAchievementDisplay(key, currentLanguage)),
+    [lastNewAchievements, currentLanguage]
+  );
+
+  useEffect(() => {
+    if (hasToastedAchievements.current || unlockedAchievements.length === 0) return;
+    hasToastedAchievements.current = true;
+
+    const toastCap = 2;
+    unlockedAchievements.slice(0, toastCap).forEach((achievement) => {
+      uiStoreActions.pushToast({ type: 'achievement', message: `${achievement.icon} ${achievement.name}` });
+    });
+
+    const extraCount = unlockedAchievements.length - toastCap;
+    if (extraCount > 0) {
+      uiStoreActions.pushToast({
+        type: 'achievement',
+        message: t('results.moreAchievements', { count: extraCount }),
+      });
+    }
+  }, [unlockedAchievements, t]);
 
   const [userRank, setUserRank] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
@@ -79,7 +110,19 @@ export function ResultsPage() {
     [t, score, correctAnswers, totalQuestions, percentage]
   );
 
+  // Part 5.2: en modo streak, un "1 acierto + 1 fallo" (50%) mostraba
+  // "🏆 ¡Excelente! 100%" porque el cálculo era % de aciertos SOBRE lo
+  // respondido, no la racha en sí. En streak, el conteo de correctas ES la
+  // racha (todo streak run es [correcta, correcta, ..., la que la cortó]),
+  // así que bypasseamos el cálculo por porcentaje enteramente.
+  const streakCount = correctAnswers;
+
   const getPerformanceEmoji = () => {
+    if (isStreakMode) {
+      if (streakCount >= 10) return '👏';
+      if (streakCount >= 3) return '🔥';
+      return '🌱';
+    }
     if (percentage >= 90) return '🏆';
     if (percentage >= 70) return '🎉';
     if (percentage >= 50) return '👍';
@@ -88,11 +131,20 @@ export function ResultsPage() {
   };
 
   const getPerformanceMessage = () => {
+    if (isStreakMode) {
+      if (streakCount >= 10) return t('results.streakLong');
+      if (streakCount >= 3) return t('results.streakMid');
+      return t('results.streakShort');
+    }
     if (percentage >= 90) return t('results.excellent');
     if (percentage >= 70) return t('results.great');
     if (percentage >= 50) return t('results.good');
     if (percentage >= 30) return t('results.keepPracticing');
-    return t('results.tryAgain');
+    // Part 5.4: growth-mindset framing en vez del genérico "¡Puedes hacerlo
+    // mejor!" que sonaba a regaño. `results.tryAgain` se conserva intacto
+    // (otros lugares/tests pueden referenciarlo) — esta pantalla usa la nueva
+    // key directamente.
+    return t('results.growthMindset');
   };
 
   const handleShareStreak = useCallback(async () => {
@@ -115,6 +167,21 @@ export function ResultsPage() {
     navigate('/menu');
   };
 
+  // Part 5.2: CTA primaria en streak — arranca otra racha directo, sin pasar
+  // por el menú (mismo patrón que GamePage arma su URL de streak).
+  const handlePlayAgainStreak = () => {
+    resetGame();
+    navigate(`/game/single?category=${category}&gameType=streak`);
+  };
+
+  // Part 5.4: score === 0 ofrece una salida concreta en vez de solo "vuelve a
+  // intentarlo" — dificultad Fácil preseleccionada vía query param, que
+  // GamePage ya sabe leer (evita tocar MenuPage, fuera de nuestro scope).
+  const handleTryEasy = () => {
+    resetGame();
+    navigate(`/game/single?category=${category}&difficulty=EASY`);
+  };
+
   if (questions.length === 0 && !loading) {
     navigate('/menu');
     return null;
@@ -126,8 +193,47 @@ export function ResultsPage() {
         <section className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 text-center shadow-2xl shadow-black/30 sm:p-8">
           <div className="text-6xl sm:text-7xl mb-3 animate-scale-in" aria-hidden="true">{getPerformanceEmoji()}</div>
 
-          <h1 className="text-3xl font-bold text-[var(--color-text-primary)] sm:text-4xl">{t('results.gameOver')}</h1>
+          {/* Part 5.2: en streak, el titular es la racha misma — no el genérico
+              "Partida terminada" + un % que no representa nada útil en este modo. */}
+          <h1 className="text-3xl font-bold text-[var(--color-text-primary)] sm:text-4xl">
+            {isStreakMode ? t('results.streakHeadline', { count: streakCount }) : t('results.gameOver')}
+          </h1>
           <p className="mt-2 text-lg text-[var(--color-text-secondary)] sm:text-xl">{getPerformanceMessage()}</p>
+
+          {isPendingSync && (
+            <p className="mt-3 text-sm text-sky-300" role="status">
+              {t('results.pendingSync')}
+            </p>
+          )}
+
+          {unlockedAchievements.length > 0 && (
+            <div
+              className={`mt-6 rounded-2xl border border-amber-400/40 bg-gradient-to-br from-amber-500/15 to-orange-500/10 p-4 text-left ${
+                prefersReducedMotion ? '' : 'animate-scale-in'
+              }`}
+              data-testid="results-achievements"
+            >
+              <p className="text-center text-sm font-bold text-amber-300 sm:text-base">
+                {t('results.achievementUnlocked')}
+              </p>
+              <ul className="mt-3 space-y-2">
+                {unlockedAchievements.map((achievement) => (
+                  <li
+                    key={achievement.key}
+                    className="flex items-center gap-3 rounded-xl border border-amber-400/20 bg-[var(--color-surface)]/70 px-3 py-2"
+                  >
+                    <span className="text-2xl" aria-hidden="true">{achievement.icon}</span>
+                    <div className="min-w-0">
+                      <div className="text-sm font-semibold text-app-text">{achievement.name}</div>
+                      {achievement.description && (
+                        <div className="text-xs text-[var(--color-text-muted)]">{achievement.description}</div>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           <div className="mt-6 rounded-2xl border border-primary/35 bg-[var(--color-surface-muted)] p-5">
             <p className="text-sm font-medium uppercase tracking-wide text-primary/80">{t('game.score')}</p>
@@ -265,14 +371,38 @@ export function ResultsPage() {
           data-testid="results-action-tray"
         >
           <div className="flex flex-col gap-2.5">
-            <Button
-              onClick={handlePlayAgain}
-              variant="primary"
-              size="lg"
-              fullWidth
-            >
-              {t('results.playAgain')}
-            </Button>
+            {isStreakMode ? (
+              <Button
+                onClick={handlePlayAgainStreak}
+                variant="primary"
+                size="lg"
+                fullWidth
+              >
+                {t('results.playAgainStreak')}
+              </Button>
+            ) : (
+              <Button
+                onClick={handlePlayAgain}
+                variant="primary"
+                size="lg"
+                fullWidth
+              >
+                {t('results.playAgain')}
+              </Button>
+            )}
+            {/* Part 5.4: score 0 en modo normal ofrece una salida concreta —
+                dificultad Fácil preseleccionada — en vez de dejar solo el CTA
+                genérico "Jugar de nuevo" que repite la misma dificultad. */}
+            {!isStreakMode && score === 0 && (
+              <Button
+                onClick={handleTryEasy}
+                variant="secondary"
+                size="lg"
+                fullWidth
+              >
+                {t('results.tryEasy')}
+              </Button>
+            )}
             <Button
               onClick={() => navigate('/rankings')}
               variant="secondary"

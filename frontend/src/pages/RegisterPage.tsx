@@ -19,6 +19,21 @@ const registerSchema = z
     message: 'Las contraseñas no coinciden',
   });
 
+// QA fix: detecta email/username ya registrados incluso antes de que el
+// backend mande `code: 'AUTH_EMAIL_TAKEN' | 'AUTH_USERNAME_TAKEN'` — hace
+// fallback a un match de texto sobre el mensaje en español/inglés.
+const ACCOUNT_TAKEN_CODES = new Set(['AUTH_EMAIL_TAKEN', 'AUTH_USERNAME_TAKEN']);
+const ACCOUNT_TAKEN_TEXT_HINTS = ['ya está registrado', 'ya existe', 'already registered', 'already exists', 'already taken'];
+
+function isAccountTakenError(err: any, message: string): boolean {
+  const code = err?.response?.data?.code;
+  if (code && ACCOUNT_TAKEN_CODES.has(code)) {
+    return true;
+  }
+  const normalized = message.toLowerCase();
+  return ACCOUNT_TAKEN_TEXT_HINTS.some((hint) => normalized.includes(hint));
+}
+
 export function RegisterPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -31,10 +46,14 @@ export function RegisterPage() {
     confirmPassword: '',
   });
   const [error, setError] = useState('');
+  const [showAccountTakenLink, setShowAccountTakenLink] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setShowAccountTakenLink(false);
 
     if (!validate()) {
       return;
@@ -44,7 +63,9 @@ export function RegisterPage() {
       await register(values.username, values.email, values.password);
       navigate('/menu');
     } catch (err: any) {
-      setError(err?.response?.data?.error || t('auth.registerError'));
+      const message = err?.response?.data?.error || t('auth.registerError');
+      setError(message);
+      setShowAccountTakenLink(isAccountTakenError(err, message));
     }
   };
 
@@ -63,7 +84,18 @@ export function RegisterPage() {
         </div>
       }
     >
-      {error && <Alert type="error" className="mb-6">{error}</Alert>}
+      {error && (
+        <Alert type="error" className="mb-6">
+          <p>{error}</p>
+          {showAccountTakenLink && (
+            <p className="mt-1">
+              <Link to="/login" className="font-semibold underline">
+                {t('auth.hasAccount')} {t('auth.loginHere')}
+              </Link>
+            </p>
+          )}
+        </Alert>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-5" noValidate>
         <FormField.Root id="username" error={errors.username}>
@@ -94,15 +126,28 @@ export function RegisterPage() {
 
         <FormField.Root id="password" error={errors.password}>
           <FormField.Label>{t('auth.password')}</FormField.Label>
-          <FormField.Input
-            type="password"
-            name="password"
-            value={values.password}
-            onChange={handleChange}
-            required
-            minLength={6}
-            placeholder={t("auth.passwordPlaceholder", "Your password")}
-          />
+          <div className="relative">
+            <FormField.Input
+              type={showPassword ? 'text' : 'password'}
+              name="password"
+              value={values.password}
+              onChange={handleChange}
+              required
+              minLength={6}
+              autoComplete="new-password"
+              className="pr-24"
+              placeholder={t("auth.passwordPlaceholder", "Your password")}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute inset-y-1 right-1 flex min-h-11 min-w-11 items-center justify-center rounded-lg px-3 text-xs font-semibold text-primary hover:bg-gray-700/60 focus:outline-none focus:ring-2 focus:ring-primary/70"
+              aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
+              aria-pressed={showPassword}
+            >
+              {showPassword ? t('auth.hide') : t('auth.show')}
+            </button>
+          </div>
           <FormField.Hint>{t('auth.passwordHint')}</FormField.Hint>
         </FormField.Root>
 
@@ -116,14 +161,27 @@ export function RegisterPage() {
           }
         >
           <FormField.Label>{t('auth.confirmPassword')}</FormField.Label>
-          <FormField.Input
-            type="password"
-            name="confirmPassword"
-            value={values.confirmPassword}
-            onChange={handleChange}
-            required
-            placeholder={t("auth.passwordPlaceholder", "Your password")}
-          />
+          <div className="relative">
+            <FormField.Input
+              type={showConfirmPassword ? 'text' : 'password'}
+              name="confirmPassword"
+              value={values.confirmPassword}
+              onChange={handleChange}
+              required
+              autoComplete="new-password"
+              className="pr-24"
+              placeholder={t("auth.passwordPlaceholder", "Your password")}
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword((prev) => !prev)}
+              className="absolute inset-y-1 right-1 flex min-h-11 min-w-11 items-center justify-center rounded-lg px-3 text-xs font-semibold text-primary hover:bg-gray-700/60 focus:outline-none focus:ring-2 focus:ring-primary/70"
+              aria-label={showConfirmPassword ? t('auth.hidePassword') : t('auth.showPassword')}
+              aria-pressed={showConfirmPassword}
+            >
+              {showConfirmPassword ? t('auth.hide') : t('auth.show')}
+            </button>
+          </div>
         </FormField.Root>
 
         <Button type="submit" disabled={isLoading} fullWidth size="lg">

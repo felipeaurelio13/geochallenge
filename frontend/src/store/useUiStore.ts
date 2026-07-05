@@ -1,5 +1,14 @@
 import { useSyncExternalStore } from 'react';
 
+export type ToastType = 'success' | 'info' | 'achievement';
+
+export type Toast = {
+  id: string;
+  type: ToastType;
+  message: string;
+  durationMs?: number;
+};
+
 type UiState = {
   isMobile: boolean;
   viewport: {
@@ -9,10 +18,13 @@ type UiState = {
   prefersReducedMotion: boolean;
   hapticsEnabled: boolean;
   soundEnabled: boolean;
+  extendedTimeEnabled: boolean;
+  toasts: Toast[];
 };
 
 const HAPTICS_STORAGE_KEY = 'geochallenge:haptics-enabled';
 const SOUND_STORAGE_KEY = 'geochallenge:sound-enabled';
+const EXTENDED_TIME_STORAGE_KEY = 'geochallenge:extended-time-enabled';
 
 const readBoolPref = (key: string, fallback: boolean): boolean => {
   if (typeof window === 'undefined') return fallback;
@@ -38,8 +50,20 @@ let state: UiState = {
   isMobile: false,
   viewport: { width: 0, height: 0 },
   prefersReducedMotion: false,
-  hapticsEnabled: readBoolPref(HAPTICS_STORAGE_KEY, true),
+  // Defaults to false: vestibular/motor-sensitive users should opt in to haptics,
+  // not opt out. Only applies to brand-new users/devices with no stored
+  // preference yet — anyone with an explicit stored value keeps their choice.
+  hapticsEnabled: readBoolPref(HAPTICS_STORAGE_KEY, false),
   soundEnabled: readBoolPref(SOUND_STORAGE_KEY, false),
+  extendedTimeEnabled: readBoolPref(EXTENDED_TIME_STORAGE_KEY, false),
+  toasts: [],
+};
+
+let toastIdCounter = 0;
+
+const generateToastId = (): string => {
+  toastIdCounter += 1;
+  return `toast-${Date.now()}-${toastIdCounter}`;
 };
 
 const listeners = new Set<() => void>();
@@ -64,6 +88,18 @@ export const uiStoreActions = {
   setSoundEnabled: (value: boolean) => {
     writeBoolPref(SOUND_STORAGE_KEY, value);
     setState({ soundEnabled: value });
+  },
+  setExtendedTimeEnabled: (value: boolean) => {
+    writeBoolPref(EXTENDED_TIME_STORAGE_KEY, value);
+    setState({ extendedTimeEnabled: value });
+  },
+  pushToast: (toast: Omit<Toast, 'id'>): string => {
+    const id = generateToastId();
+    setState({ toasts: [...state.toasts, { ...toast, id }] });
+    return id;
+  },
+  dismissToast: (id: string): void => {
+    setState({ toasts: state.toasts.filter((toast) => toast.id !== id) });
   },
 };
 

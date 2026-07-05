@@ -16,6 +16,7 @@ import {
 } from '../types';
 import { useHaptics, useImagePreloader } from '../hooks';
 import { toAppPath } from '../utils/routing';
+import { getSocketErrorMessage } from '../utils/apiError';
 
 const MapInteractive = lazy(() =>
   import('../components/MapInteractive').then((m) => ({ default: m.MapInteractive }))
@@ -24,6 +25,7 @@ const MapInteractive = lazy(() =>
 const SURVIVAL_CATEGORIES: Category[] = ['FLAG', 'CAPITAL', 'MAP', 'SILHOUETTE', 'MONUMENT', 'CINEMA_GEO', 'MIXED'];
 const MAX_LIVES = 4;
 const SEARCH_TIMEOUT_SECONDS = 120;
+const SOCKET_CONNECT_TIMEOUT_MS = 10000;
 
 type PageStatus =
   | 'idle'
@@ -125,9 +127,41 @@ export function SurvivalPage() {
 
   const fillTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const searchTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const connectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hasAnsweredRef = useRef(false);
   const answerDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [hasSubmittedThisRound, setHasSubmittedThisRound] = useState(false);
+  // Part 1.1: mismo pub-sub de conexión que DuelPage.
+  const [connectionError, setConnectionError] = useState(false);
+  // Part 5.3: ronda en la que ESTE usuario fue eliminado (para "Llegaste a la
+  // ronda X de Y"). Se captura cuando su userId aparece en eliminatedThisRound.
+  const [eliminatedAtRound, setEliminatedAtRound] = useState<number | null>(null);
+
+  // Part 1.1: pub-sub de conexión — si el socket entra en error mientras
+  // estamos en cola/sala/jugando, mostramos un aviso con Reintentar/Menú en
+  // vez de dejar la pantalla congelada sin explicación.
+  useEffect(() => {
+    const unsubscribe = socketService.onConnectionStateChange((newState) => {
+      setConnectionError(newState === 'error');
+      if (newState === 'connected' && connectTimeoutRef.current) {
+        clearTimeout(connectTimeoutRef.current);
+        connectTimeoutRef.current = null;
+      }
+    });
+    return unsubscribe;
+  }, []);
+
+  // Timeout de conexión inicial de 10s (Part 1.1).
+  useEffect(() => {
+    connectTimeoutRef.current = setTimeout(() => {
+      if (!socketService.isConnected()) {
+        setConnectionError(true);
+      }
+    }, SOCKET_CONNECT_TIMEOUT_MS);
+    return () => {
+      if (connectTimeoutRef.current) clearTimeout(connectTimeoutRef.current);
+    };
+  }, []);
 
   // ── Socket events ──────────────────────────────────────────────────────────
 
@@ -263,6 +297,7 @@ export function SurvivalPage() {
       }
 
       if (data.eliminatedThisRound.includes(user?.id ?? '')) {
+        setEliminatedAtRound(data.round);
         setTimeout(() => setStatus('spectating'), 1800);
       }
     });
@@ -309,8 +344,8 @@ export function SurvivalPage() {
       else haptics.error();
     });
 
-    socket.on('survival:error', (data: { message: string }) => {
-      setNotice(data.message);
+    socket.on('survival:error', (data: { message: string; code?: string; params?: Record<string, unknown> }) => {
+      setNotice(getSocketErrorMessage(data, t('survival.errorGeneric', 'Algo falló en la partida de supervivencia. Intenta de nuevo.')));
     });
 
     socket.on('survival:dequeued', () => {
@@ -394,6 +429,16 @@ export function SurvivalPage() {
     }, 100);
   }, [category]);
 
+  // Part 1.1: reconectar el socket y volver a intentar la acción según el
+  // estado actual (re-conectar → re-queue si estábamos buscando).
+  const retryConnection = useCallback(() => {
+    setConnectionError(false);
+    socketService.connect();
+    if (status === 'queued' || status === 'idle') {
+      socketService.socket?.emit('survival:queue', { category });
+    }
+  }, [status, category]);
+
   const handleLocationSelect = useCallback((lat: number, lng: number) => {
     setMapLocation({ lat, lng });
   }, []);
@@ -463,6 +508,27 @@ export function SurvivalPage() {
       ← {t('survival.backToMenu')}
     </button>
   );
+
+  // Part 1.1: mismo patrón que DuelPage — banner no bloqueante con Reintentar/Menú.
+  const connectionBanner = connectionError ? (
+    <div className="mb-4 w-full max-w-sm rounded-lg border border-red-500/50 bg-red-500/10 px-4 py-3 text-left text-sm text-[var(--color-error-500)]">
+      <p className="font-medium">{t('socket.connectionError')}</p>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <button
+          onClick={retryConnection}
+          className="rounded-md border border-app-border bg-app-muted px-3 py-1.5 text-xs font-semibold text-app-text hover:bg-app-surface"
+        >
+          {t('socket.retry')}
+        </button>
+        <button
+          onClick={() => navigate(toAppPath('/menu'))}
+          className="rounded-md border border-app-border bg-app-muted px-3 py-1.5 text-xs font-semibold text-app-text hover:bg-app-surface"
+        >
+          {t('socket.backToMenu')}
+        </button>
+      </div>
+    </div>
+  ) : null;
 
   // ── Screens ────────────────────────────────────────────────────────────────
 
@@ -555,6 +621,7 @@ export function SurvivalPage() {
           </>
         ) : (
           <>
+            {connectionBanner}
             <div>
               <h2 className="text-xl font-bold text-app-text">{t('survival.searching')}</h2>
               <p className="mt-1 text-sm text-app-secondary tabular-nums">{searchTime}s</p>
@@ -571,11 +638,13 @@ export function SurvivalPage() {
   if (status === 'filling') {
     return (
       <div className="h-full min-h-0 bg-[var(--color-bg-app)] flex flex-col items-center justify-center px-4 gap-5 text-center">
+        {connectionBanner}
         <div>
           <h2 className="text-xl font-bold text-app-text">{t('survival.roomFound')}</h2>
           <p className="text-sm text-app-secondary">
             {t('survival.waitingForPlayers', { current: players.length, max: maxPlayers })}
           </p>
+          <p className="mt-1 text-xs text-app-subtle">{t('survival.autoStartHint')}</p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -633,18 +702,34 @@ export function SurvivalPage() {
   if (status === 'finished') {
     const myRanking = rankings.find((r) => r.userId === user?.id);
     const isWinner = myRanking?.finalRank === 1;
+    // Part 5.3: si el usuario fue eliminado (no ganó), la ronda de eliminación
+    // ya viene en su propio SurvivalRanking — reemplaza el genérico "Fin del
+    // juego" por un reconocimiento de hasta dónde llegó, más el placement
+    // final (dato ya disponible en finalRank/rankings.length, sin inventar
+    // nada nuevo del backend).
+    const eliminatedRound = myRanking?.eliminatedRound ?? null;
+    const showEliminatedWarm = !isWinner && eliminatedRound != null;
 
     return (
       <div className="h-full min-h-0 bg-[var(--color-bg-app)] flex flex-col items-center justify-center px-4">
         <div className="w-full max-w-sm flex flex-col items-center gap-5 text-center">
-          <div className="text-5xl">{isWinner ? '🏆' : '💀'}</div>
+          <div className="text-5xl">{isWinner ? '🏆' : showEliminatedWarm ? '💪' : '💀'}</div>
           <div>
             <h2 className="text-2xl font-bold text-app-text">
-              {isWinner ? t('survival.youWon') : t('survival.gameOver')}
+              {isWinner
+                ? t('survival.youWon')
+                : showEliminatedWarm
+                  ? t('survival.eliminatedWarm', { round: eliminatedRound, total: totalRounds })
+                  : t('survival.gameOver')}
             </h2>
             <p className="mt-1 text-sm text-app-secondary">
               {t('survival.survivedRounds', { rounds: totalRounds })}
             </p>
+            {myRanking && (
+              <p className="mt-1 text-sm text-app-secondary">
+                {t('survival.finalPlacement', { place: myRanking.finalRank, players: rankings.length })}
+              </p>
+            )}
           </div>
 
           <div className="w-full space-y-2">
@@ -741,9 +826,14 @@ export function SurvivalPage() {
 
           {/* Player cards row */}
           <div className="mx-auto mt-2 max-w-4xl">
+            {connectionError && (
+              <div className="mb-1.5">{connectionBanner}</div>
+            )}
             {isSpectating && (
               <div className="mb-1.5 rounded-lg border border-red-800/50 bg-red-950/30 px-3 py-1 text-center text-xs font-semibold text-red-400">
-                💀 {t('survival.youEliminated')}
+                {eliminatedAtRound != null
+                  ? t('survival.spectatingHeader', { round: eliminatedAtRound })
+                  : `💀 ${t('survival.youEliminated')}`}
               </div>
             )}
             {lifeGainedNotice && showResult && (

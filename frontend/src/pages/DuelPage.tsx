@@ -20,6 +20,7 @@ import { GAME_CONSTANTS } from '../constants/game';
 import { useHaptics, useImagePreloader } from '../hooks';
 import { areMechanicsV2Enabled } from '../config/featureFlags';
 import { trackUxEvent } from '../utils/uxTelemetry';
+import { getSocketErrorMessage } from '../utils/apiError';
 
 const MapInteractive = lazy(() =>
   import('../components/MapInteractive').then((m) => ({ default: m.MapInteractive }))
@@ -32,10 +33,13 @@ interface DuelResult {
   myScore: number;
   opponentScore: number;
   opponentName: string;
+  wonByForfeit?: boolean;
 }
 
 const { TIME_PER_QUESTION } = GAME_CONSTANTS;
 const SEARCH_TIMEOUT_SECONDS = 120;
+const SOCKET_CONNECT_TIMEOUT_MS = 10000;
+const SYNCING_LONG_THRESHOLD_MS = 5000;
 const DUEL_CATEGORIES: Category[] = ['FLAG', 'CAPITAL', 'MAP', 'SILHOUETTE', 'MONUMENT', 'CINEMA_GEO', 'MIXED'];
 
 function parseDuelCategory(value: string | null): Category {
@@ -84,7 +88,11 @@ export function DuelPage() {
   });
   const [hasSubmittedThisQuestion, setHasSubmittedThisQuestion] = useState(false);
   const [duelImageUrls, setDuelImageUrls] = useState<string[]>([]);
+  // Part 1.1: reassurance cuando isSyncingRound se alarga + timeout de conexión inicial.
+  const [showSyncingLongHint, setShowSyncingLongHint] = useState(false);
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const connectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const syncingLongTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scoreRef = useRef(0);
   const opponentRef = useRef<{ id: string; username: string } | null>(null);
   const duelStateRef = useRef<DuelState>('searching');
@@ -137,6 +145,52 @@ export function DuelPage() {
       socketService.ready();
     }
   }, [duelCategory, duelFilters]);
+
+  // Part 1.1: pub-sub de socketService — si el estado pasa a 'error' mientras
+  // estamos buscando/emparejados/jugando, mostramos el banner con Reintentar.
+  // Antes connect_error solo hacía console.error y el usuario se quedaba
+  // viendo "Buscando rival..." para siempre sin ninguna explicación.
+  useEffect(() => {
+    const unsubscribe = socketService.onConnectionStateChange((newState) => {
+      if (newState === 'error' && duelStateRef.current !== 'finished') {
+        showConnectionMessage('error', t('duel.connectionErrorNotice'), true);
+      }
+    });
+    return unsubscribe;
+  }, [showConnectionMessage, t]);
+
+  // Timeout de conexión inicial: si a los 10s el socket no llegó a 'connected',
+  // no dejamos al usuario esperando indefinidamente sin explicación.
+  useEffect(() => {
+    connectTimeoutRef.current = setTimeout(() => {
+      if (socketService.isConnected()) return;
+      if (duelStateRef.current === 'finished') return;
+      showConnectionMessage('error', t('duel.connectionErrorNotice'), true);
+    }, SOCKET_CONNECT_TIMEOUT_MS);
+    return () => {
+      if (connectTimeoutRef.current) clearTimeout(connectTimeoutRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Si isSyncingRound se alarga más de ~5s, texto tranquilizador extra —
+  // sincronizar una ronda de duelo no debería sentirse como progreso perdido.
+  useEffect(() => {
+    if (!isSyncingRound) {
+      setShowSyncingLongHint(false);
+      if (syncingLongTimeoutRef.current) {
+        clearTimeout(syncingLongTimeoutRef.current);
+        syncingLongTimeoutRef.current = null;
+      }
+      return;
+    }
+    syncingLongTimeoutRef.current = setTimeout(() => {
+      setShowSyncingLongHint(true);
+    }, SYNCING_LONG_THRESHOLD_MS);
+    return () => {
+      if (syncingLongTimeoutRef.current) clearTimeout(syncingLongTimeoutRef.current);
+    };
+  }, [isSyncingRound]);
 
   // Connect to socket and join queue
   useEffect(() => {
@@ -252,12 +306,13 @@ export function DuelPage() {
         myScore: scoreRef.current,
         opponentScore: 0,
         opponentName: opponentRef.current?.username || t('duel.opponent'),
+        wonByForfeit: true,
       });
       setDuelState('finished');
     };
 
-    const handleDuelError = (data: { message?: string }) => {
-      showConnectionMessage('error', data?.message || t('duel.errorGeneric'), true);
+    const handleDuelError = (data: { message?: string; code?: string; params?: Record<string, unknown> }) => {
+      showConnectionMessage('error', getSocketErrorMessage(data, t('duel.errorGeneric')), true);
     };
 
     const handleDisconnect = () => {
@@ -522,13 +577,30 @@ export function DuelPage() {
               </p>
             )}
             <p className="text-[var(--color-text-secondary)] mt-1">{t('duel.averageWaitHint')}</p>
+            <p className="text-primary/80 mt-1 text-xs">{t('duel.expectedWait')}</p>
             <p className="text-[var(--color-text-muted)] mt-1">{t('duel.cancelHint')}</p>
           </div>
 
           {searchTimedOut && (
-            <Alert type="warning" className="mb-4 w-full">
-              <p className="font-medium">{t('duel.searchTimeout')}</p>
-            </Alert>
+            <div className="mb-4 w-full rounded-2xl border border-amber-500/40 bg-amber-500/10 p-4 text-left">
+              <p className="font-medium text-amber-700 dark:text-amber-300">{t('duel.searchTimeoutWarm')}</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Button onClick={() => navigate('/menu')} variant="secondary" size="sm">
+                  {t('duel.changeCategory')}
+                </Button>
+                <Button
+                  onClick={() => {
+                    setSearchTimedOut(false);
+                    setSearchTime(0);
+                    socketService.joinDuelQueue(duelCategory, duelFilters);
+                  }}
+                  variant="primary"
+                  size="sm"
+                >
+                  {t('duel.retry')}
+                </Button>
+              </div>
+            </div>
           )}
 
           <Button
@@ -587,6 +659,19 @@ export function DuelPage() {
   if (duelState === 'finished' && duelResult) {
     const isWinner = duelResult.winner === user?.id;
     const isTie = duelResult.myScore === duelResult.opponentScore;
+    const pointDiff = Math.abs(duelResult.myScore - duelResult.opponentScore);
+    // Part 5.1: ninguna pantalla de derrota lidera con una palabra fría — la
+    // palabra "Perdiste" sigue visible (el hecho no se esconde) pero solo como
+    // texto secundario junto al score; el titular es contextual y ofrece
+    // una acción concreta (Revancha).
+    const isCloseLoss = !isWinner && !isTie && pointDiff <= 200;
+
+    const rematch = () => {
+      setDuelState('searching');
+      setSearchTime(0);
+      setSearchTimedOut(false);
+      socketService.joinDuelQueue(duelCategory, duelFilters);
+    };
 
     return (
       <div className="h-full min-h-0 bg-[var(--color-bg-app)] flex items-center justify-center px-4">
@@ -600,14 +685,25 @@ export function DuelPage() {
           {connectionBanner}
 
           <div className={`text-6xl mb-3 ${isWinner && !prefersReducedMotion ? 'animate-bounce' : ''}`}>
-            {isTie ? '🤝' : isWinner ? '🏆' : '💪'}
+            {isTie ? '🤝' : isWinner ? '🏆' : isCloseLoss ? '🔥' : '💪'}
           </div>
 
           <h1 className={`text-3xl font-black mb-1 ${isWinner ? 'text-yellow-400' : isTie ? 'text-[var(--color-text-primary)]' : 'text-[var(--color-text-primary)]'}`}>
-            {isTie ? t('duel.tie') : isWinner ? t('duel.youWin') : t('duel.youLose')}
+            {isTie
+              ? t('duel.tie')
+              : isWinner
+                ? t('duel.youWin')
+                : isCloseLoss
+                  ? t('duel.almostWon', { diff: pointDiff })
+                  : t('duel.rematchNudge', { opponent: duelResult.opponentName })}
           </h1>
           {!isTie && !isWinner && (
-            <p className="text-sm text-[var(--color-text-muted)] mb-4">{t('duel.goodGame', '¡Buen juego! Intenta de nuevo.')}</p>
+            <p className="text-sm text-[var(--color-text-muted)] mb-4">{t('duel.youLose')}</p>
+          )}
+          {isWinner && duelResult.wonByForfeit && (
+            <p className="text-sm text-[var(--color-text-muted)] mb-4">
+              {t('duel.wonByForfeit', { opponent: duelResult.opponentName })}
+            </p>
           )}
 
           <div className="my-6 grid grid-cols-[1fr_auto_1fr] items-center gap-4">
@@ -628,17 +724,12 @@ export function DuelPage() {
 
           <div className="flex flex-col gap-2.5">
             <Button
-              onClick={() => {
-                setDuelState('searching');
-                setSearchTime(0);
-                setSearchTimedOut(false);
-                socketService.joinDuelQueue(duelCategory, duelFilters);
-              }}
+              onClick={rematch}
               variant="primary"
               size="lg"
               fullWidth
             >
-              {t('duel.playAgain')}
+              {isWinner || isTie ? t('duel.playAgain') : t('duel.rematch')}
             </Button>
             <Button
               onClick={() => navigate('/menu')}
@@ -697,7 +788,15 @@ export function DuelPage() {
             {t('game.questionOf', { current: questionNumber, total: totalQuestions })}
           </span>
           {isSyncingRound && (
-            <p className="mt-1 text-xs text-sky-300">{t('duel.reconnectedSyncing')}</p>
+            <p className="mt-1 text-xs text-sky-300">
+              {showSyncingLongHint ? t('duel.syncingLong') : t('duel.reconnectedSyncing')}
+            </p>
+          )}
+          {/* Solo el banner de error (con Reintentar) se repite acá — los avisos
+              info/warning (reconectando, sincronizando) ya tienen su propio texto
+              inline arriba; duplicarlos se sentía redundante (mismo string 2x). */}
+          {connectionNotice?.type === 'error' && (
+            <div className="mt-2">{connectionBanner}</div>
           )}
         </div>
       }

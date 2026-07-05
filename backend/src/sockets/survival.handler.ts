@@ -10,6 +10,8 @@ import {
 } from '../services/game.service.js';
 import { updateLeaderboardScore, updateSeasonLeaderboardScore } from '../services/leaderboard.service.js';
 import { prisma } from '../config/database.js';
+import { AppError } from '../utils/appError.js';
+import { emitSocketError } from '../utils/respondWithError.js';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -472,7 +474,11 @@ export function setupSurvivalHandlers(io: SocketIOServer, socket: Socket): void 
 
   socket.on('survival:queue', async (data?: { category?: Category }) => {
     if (isRateLimited(socket.id, 'survival:queue', 10)) {
-      socket.emit('survival:error', { message: 'Demasiadas solicitudes' });
+      emitSocketError(
+        socket,
+        'survival:error',
+        new AppError('SURVIVAL_RATE_LIMITED', 429, 'Demasiadas solicitudes')
+      );
       return;
     }
 
@@ -480,7 +486,11 @@ export function setupSurvivalHandlers(io: SocketIOServer, socket: Socket): void 
     if (existingMatchId) {
       const existing = activeMatches.get(existingMatchId);
       if (existing && existing.status !== 'finished') {
-        socket.emit('survival:error', { message: 'Ya estás en una partida activa' });
+        emitSocketError(
+          socket,
+          'survival:error',
+          new AppError('SURVIVAL_ALREADY_IN_PROGRESS', 409, 'Ya estás en una partida activa')
+        );
         return;
       }
       // Match no longer active — clear stale entry so the player can queue again

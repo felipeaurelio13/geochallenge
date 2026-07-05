@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
@@ -10,9 +10,14 @@ import { UserAvatar } from '../components/atoms/UserAvatar';
 import { CategorySelector } from '../components/molecules/CategorySelector';
 import { GameModeCard } from '../components/molecules/GameModeCard';
 import { FilterDrawer } from '../components/molecules/FilterDrawer';
+import { Modal } from '../components/organisms/Modal';
 import { hasActiveFilters, filtersToParams, type Difficulty, type GameFilters } from '../types';
 import { api } from '../services/api';
 import { CONTINENT_IDS, DIFFICULTY_IDS } from '../constants/filters';
+
+type GameModeId = 'flash' | 'single' | 'duel' | 'challenge' | 'streak' | 'survival';
+
+const HOWTO_SEEN_KEY_PREFIX = 'howto_seen_';
 
 type Category = 'FLAG' | 'CAPITAL' | 'MAP' | 'SILHOUETTE' | 'MONUMENT' | 'CINEMA_GEO' | 'MIXED';
 
@@ -80,11 +85,115 @@ function buildUrl(base: string, params: Record<string, string>) {
   return search ? `${base}?${search}` : base;
 }
 
+function hasSeenHowTo(mode: GameModeId): boolean {
+  if (typeof window === 'undefined') return true;
+  try {
+    return window.localStorage.getItem(`${HOWTO_SEEN_KEY_PREFIX}${mode}`) === '1';
+  } catch {
+    return true;
+  }
+}
+
+function markHowToSeen(mode: GameModeId): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(`${HOWTO_SEEN_KEY_PREFIX}${mode}`, '1');
+  } catch {
+    // noop: storage unavailable (private mode, quota)
+  }
+}
+
+// "?" overlay button — no editamos GameModeCard (molécula compartida), sólo
+// envolvemos la card en un contenedor relative y superponemos el botón.
+function GameModeCardWithHelp({
+  mode,
+  modeLabel,
+  onOpenHelp,
+  children,
+}: {
+  mode: GameModeId;
+  modeLabel: string;
+  onOpenHelp: (mode: GameModeId) => void;
+  children: ReactNode;
+}) {
+  const { t } = useTranslation();
+  return (
+    <div className="relative">
+      {children}
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onOpenHelp(mode);
+        }}
+        aria-label={t('menu.howToPlayAria', { mode: modeLabel })}
+        className="pressable absolute right-1 top-1 flex min-h-7 min-w-7 items-center justify-center rounded-full border border-app-border bg-app-surface/90 text-xs font-bold text-app-subtle shadow-sm transition-colors hover:border-primary/60 hover:text-primary"
+      >
+        ?
+      </button>
+    </div>
+  );
+}
+
+function HowToPlayModal({
+  mode,
+  modeLabel,
+  onClose,
+  onPlay,
+}: {
+  mode: GameModeId | null;
+  modeLabel: string;
+  onClose: () => void;
+  onPlay: () => void;
+}) {
+  const { t } = useTranslation();
+
+  return (
+    <Modal.Root isOpen={mode !== null} onClose={onClose}>
+      <Modal.Panel>
+        {mode && (
+          <>
+            <div className="flex items-start justify-between gap-2">
+              <Modal.Title>{modeLabel}</Modal.Title>
+              <Modal.CloseButton>✕</Modal.CloseButton>
+            </div>
+            <ul className="mt-4 space-y-3 text-sm text-app-secondary">
+              <li>
+                <span className="font-semibold text-app-text">🎯 {t('howto.objectiveLabel', 'Objetivo')}: </span>
+                {t(`howto.${mode}.objective`)}
+              </li>
+              <li>
+                <span className="font-semibold text-app-text">📏 {t('howto.ruleLabel', 'Regla')}: </span>
+                {t(`howto.${mode}.rule`)}
+              </li>
+              <li>
+                <span className="font-semibold text-app-text">💡 {t('howto.tipLabel', 'Tip')}: </span>
+                {t(`howto.${mode}.tip`)}
+              </li>
+            </ul>
+            <div className="mt-5">
+              <Button type="button" fullWidth size="lg" onClick={onPlay}>
+                {t('menu.letsPlay')}
+              </Button>
+            </div>
+          </>
+        )}
+      </Modal.Panel>
+    </Modal.Root>
+  );
+}
+
 export function MenuPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [howToMode, setHowToMode] = useState<GameModeId | null>(null);
+  // Distingue "el usuario tocó el ?" de "lo abrimos automáticamente la
+  // primera vez" — sólo marcamos `howto_seen_*` y navegamos al confirmar en
+  // el segundo caso; si el usuario sólo estaba consultando, cerrar no navega.
+  const [howToAutoOpened, setHowToAutoOpened] = useState(false);
+  const [pendingAutoPlay, setPendingAutoPlay] = useState<{ path: string; extra: Record<string, string> } | null>(null);
   const [canPlaySelection, setCanPlaySelection] = useState(true);
   const [requiredQuestions, setRequiredQuestions] = useState(10);
   const [availableQuestions, setAvailableQuestions] = useState<number | null>(null);
@@ -109,6 +218,56 @@ export function MenuPage() {
     if (!canPlaySelection) return;
     navigate(buildUrl(path, { ...fp, ...extra }));
   }
+
+  // La primera vez que el usuario toca un modo, mostramos el modal de
+  // "cómo se juega" en vez de navegar directo. Confirmar en el modal
+  // ("¡Jugar!") sí navega; cerrar sin confirmar no lo hace.
+  function goMode(mode: GameModeId, path: string, extra: Record<string, string> = {}) {
+    if (!canPlaySelection) return;
+    if (!hasSeenHowTo(mode)) {
+      setPendingAutoPlay({ path, extra });
+      setHowToAutoOpened(true);
+      setHowToMode(mode);
+      return;
+    }
+    go(path, extra);
+  }
+
+  function handleOpenHelp(mode: GameModeId) {
+    setHowToAutoOpened(false);
+    setPendingAutoPlay(null);
+    setHowToMode(mode);
+  }
+
+  function handleCloseHowTo() {
+    if (howToAutoOpened && howToMode) {
+      markHowToSeen(howToMode);
+    }
+    setHowToMode(null);
+    setHowToAutoOpened(false);
+    setPendingAutoPlay(null);
+  }
+
+  function handleConfirmHowTo() {
+    if (howToMode) {
+      markHowToSeen(howToMode);
+    }
+    if (pendingAutoPlay) {
+      go(pendingAutoPlay.path, pendingAutoPlay.extra);
+    }
+    setHowToMode(null);
+    setHowToAutoOpened(false);
+    setPendingAutoPlay(null);
+  }
+
+  const MODE_LABELS: Record<GameModeId, string> = {
+    flash: t('menu.flash'),
+    single: t('menu.singlePlayer'),
+    duel: t('menu.duel'),
+    challenge: t('menu.challenge'),
+    streak: t('menu.streak'),
+    survival: t('menu.survival'),
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -271,50 +430,62 @@ export function MenuPage() {
             Lo removemos para acortar la página y reducir ruido visual. La
             sección sigue siendo identificable por su grid de cards. */}
         <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 sm:gap-2">
-          <GameModeCard
-            icon="⚡"
-            title={t('menu.flash')}
-            description={t('menu.flashDesc')}
-            onClick={() => go(`/game/flash`, { category: selectedCategory })}
-            disabled={selectedCategory === 'MAP'}
-            disabledHint={selectedCategory === 'MAP' ? t('menu.flashNoMap') : undefined}
-            accent={GAME_MODE_ACCENTS.flash}
-          />
-          <GameModeCard
-            icon="🎯"
-            title={t('menu.singlePlayer')}
-            description={t('menu.singlePlayerDesc')}
-            onClick={() => go(`/game/single`, { category: selectedCategory })}
-            accent={GAME_MODE_ACCENTS.single}
-          />
-          <GameModeCard
-            icon="⚔️"
-            title={t('menu.duel')}
-            description={t('menu.duelDesc')}
-            onClick={() => go(`/duel`, { category: selectedCategory })}
-            accent={GAME_MODE_ACCENTS.duel}
-          />
-          <GameModeCard
-            icon="🏁"
-            title={t('menu.challenge')}
-            description={t('menu.challengeDesc')}
-            onClick={() => go(`/challenges`, { category: selectedCategory, openCreate: '1' })}
-            accent={GAME_MODE_ACCENTS.challenge}
-          />
-          <GameModeCard
-            icon="🔥"
-            title={t('menu.streak')}
-            description={t('menu.streakDesc')}
-            onClick={() => go(`/game/single`, { category: selectedCategory, mode: 'streak' })}
-            accent={GAME_MODE_ACCENTS.streak}
-          />
-          <GameModeCard
-            icon="☠️"
-            title={t('menu.survival')}
-            description={t('menu.survivalDesc')}
-            onClick={() => go(`/survival`, { category: selectedCategory })}
-            accent={GAME_MODE_ACCENTS.survival}
-          />
+          <GameModeCardWithHelp mode="flash" modeLabel={MODE_LABELS.flash} onOpenHelp={handleOpenHelp}>
+            <GameModeCard
+              icon="⚡"
+              title={t('menu.flash')}
+              description={t('menu.flashDesc')}
+              onClick={() => goMode('flash', `/game/flash`, { category: selectedCategory })}
+              disabled={selectedCategory === 'MAP'}
+              disabledHint={selectedCategory === 'MAP' ? t('menu.flashNoMap') : undefined}
+              accent={GAME_MODE_ACCENTS.flash}
+            />
+          </GameModeCardWithHelp>
+          <GameModeCardWithHelp mode="single" modeLabel={MODE_LABELS.single} onOpenHelp={handleOpenHelp}>
+            <GameModeCard
+              icon="🎯"
+              title={t('menu.singlePlayer')}
+              description={t('menu.singlePlayerDesc')}
+              onClick={() => goMode('single', `/game/single`, { category: selectedCategory })}
+              accent={GAME_MODE_ACCENTS.single}
+            />
+          </GameModeCardWithHelp>
+          <GameModeCardWithHelp mode="duel" modeLabel={MODE_LABELS.duel} onOpenHelp={handleOpenHelp}>
+            <GameModeCard
+              icon="⚔️"
+              title={t('menu.duel')}
+              description={t('menu.duelDesc')}
+              onClick={() => goMode('duel', `/duel`, { category: selectedCategory })}
+              accent={GAME_MODE_ACCENTS.duel}
+            />
+          </GameModeCardWithHelp>
+          <GameModeCardWithHelp mode="challenge" modeLabel={MODE_LABELS.challenge} onOpenHelp={handleOpenHelp}>
+            <GameModeCard
+              icon="🏁"
+              title={t('menu.challenge')}
+              description={t('menu.challengeDesc')}
+              onClick={() => goMode('challenge', `/challenges`, { category: selectedCategory, openCreate: '1' })}
+              accent={GAME_MODE_ACCENTS.challenge}
+            />
+          </GameModeCardWithHelp>
+          <GameModeCardWithHelp mode="streak" modeLabel={MODE_LABELS.streak} onOpenHelp={handleOpenHelp}>
+            <GameModeCard
+              icon="🔥"
+              title={t('menu.streak')}
+              description={t('menu.streakDesc')}
+              onClick={() => goMode('streak', `/game/single`, { category: selectedCategory, mode: 'streak' })}
+              accent={GAME_MODE_ACCENTS.streak}
+            />
+          </GameModeCardWithHelp>
+          <GameModeCardWithHelp mode="survival" modeLabel={MODE_LABELS.survival} onOpenHelp={handleOpenHelp}>
+            <GameModeCard
+              icon="☠️"
+              title={t('menu.survival')}
+              description={t('menu.survivalDesc')}
+              onClick={() => goMode('survival', `/survival`, { category: selectedCategory })}
+              accent={GAME_MODE_ACCENTS.survival}
+            />
+          </GameModeCardWithHelp>
         </div>
       </section>
 
@@ -401,6 +572,13 @@ export function MenuPage() {
           disabledOptions={disabledOptions}
         />
       )}
+
+      <HowToPlayModal
+        mode={howToMode}
+        modeLabel={howToMode ? MODE_LABELS[howToMode] : ''}
+        onClose={handleCloseHowTo}
+        onPlay={handleConfirmHowTo}
+      />
     </PageTemplate>
   );
 }

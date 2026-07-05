@@ -28,6 +28,41 @@ import { toAppPath } from '../utils/routing';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
+/**
+ * Fecha calendario LOCAL del dispositivo en formato YYYY-MM-DD. A propósito
+ * NO usa `.toISOString()` — eso da la fecha en UTC, que puede ser el día
+ * anterior o siguiente según la zona horaria del usuario (el bug de raíz de
+ * "perdí mi racha diaria a la medianoche equivocada"). Se arma manualmente
+ * con getFullYear/getMonth/getDate (métodos locales) + zero-padding.
+ */
+function getLocalDateString(date: Date = new Date()): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+/**
+ * Error enriquecido con el código estructurado que el backend adjunta de
+ * forma aditiva (`code`/`params`) junto al mensaje de siempre. Los
+ * interceptores lo usan en vez de un `Error` plano para que `getApiErrorMessage`
+ * (en `utils/apiError.ts`) pueda resolver copy localizado por código incluso
+ * cuando el error ya no es un AxiosError (porque este interceptor lo convirtió).
+ */
+export class ApiError extends Error {
+  code?: string;
+  params?: Record<string, unknown>;
+  status?: number;
+
+  constructor(message: string, options?: { code?: string; params?: Record<string, unknown>; status?: number }) {
+    super(message);
+    this.name = 'ApiError';
+    this.code = options?.code;
+    this.params = options?.params;
+    this.status = options?.status;
+  }
+}
+
 // Reintentos para GETs idempotentes: el backend en Render free tier tiene
 // cold starts de ~30s, así que un timeout o 502/503/504 transitorio no debe
 // romper la experiencia. Backoff exponencial: 1s, 2s, 4s.
@@ -98,7 +133,9 @@ class ApiService {
           return Promise.reject(new Error('Sin conexión a internet. Verifica tu red.'));
         }
 
-        const responseData = error.response.data as { error?: string; message?: string } | undefined;
+        const responseData = error.response.data as
+          | { error?: string; message?: string; code?: string; params?: Record<string, unknown>; retryAfterSeconds?: unknown }
+          | undefined;
         const isShortGameAvailabilityError =
           typeof responseData?.error === 'string' &&
           typeof (responseData as { available?: unknown }).available === 'number' &&
@@ -109,8 +146,21 @@ class ApiService {
         }
 
         const backendMessage = responseData?.error || responseData?.message;
+
+        // 429 en cualquier ruta: si el backend adjunta retryAfterSeconds (top-level,
+        // como hoy hace /auth/login) lo normalizamos dentro de `params` para que
+        // getApiErrorMessage lo interpole aunque el código no lo traiga ya incluido.
+        // Así ninguna página necesita manejo especial — antes solo LoginPage lo hacía.
+        let params = responseData?.params;
+        if (error.response.status === 429 && typeof responseData?.retryAfterSeconds === 'number') {
+          params = { retryAfterSeconds: responseData.retryAfterSeconds, ...params };
+        }
+        const code = responseData?.code ?? (error.response.status === 429 && !responseData?.code ? 'RATE_LIMITED' : undefined);
+
         if (typeof backendMessage === 'string' && backendMessage.trim().length > 0) {
-          return Promise.reject(new Error(backendMessage));
+          return Promise.reject(
+            new ApiError(backendMessage, { code, params, status: error.response.status })
+          );
         }
 
         return Promise.reject(error);
@@ -161,6 +211,19 @@ class ApiService {
   async getMe() {
     const response = await this.client.get<{ user: User }>('/auth/me');
     return response.data.user;
+  }
+
+  async forgotPassword(email: string) {
+    const response = await this.client.post<{ message: string }>('/auth/forgot-password', { email });
+    return response.data;
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    const response = await this.client.post<{ message: string }>('/auth/reset-password', {
+      token,
+      newPassword,
+    });
+    return response.data;
   }
 
   async updateProfile(data: { username?: string; preferredLanguage?: 'es' | 'en' }) {
@@ -373,7 +436,7 @@ class ApiService {
       today: string;
       alreadyPlayed: boolean;
       result?: DailyResult;
-    }>('/game/daily');
+    }>('/game/daily', { params: { clientDate: getLocalDateString() } });
     return response.data;
   }
 
@@ -382,7 +445,7 @@ class ApiService {
       result: DailyResult;
       newAchievements: string[];
       message: string;
-    }>('/game/daily/submit', data);
+    }>('/game/daily/submit', { ...data, clientDate: getLocalDateString() });
     return response.data;
   }
 

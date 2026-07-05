@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useMediaQuery, useWindowSize } from '../hooks';
+import { usePwaUpdateNotice } from '../hooks/usePwaUpdateNotice';
 import { uiStoreActions } from '../store/useUiStore';
 import { InstallPromptBanner } from './InstallPromptBanner';
+import { ToastHost } from './organisms/ToastHost';
 
 // AppRoot provides stable viewport sizing and safe-area padding for mobile browsers.
 export function AppRoot({ children }: { children: React.ReactNode }) {
@@ -9,6 +11,7 @@ export function AppRoot({ children }: { children: React.ReactNode }) {
   const isMobile = useMediaQuery('(max-width: 640px)');
   const prefersReducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
   const { setIsMobile, setViewport, setPrefersReducedMotion } = uiStoreActions;
+  usePwaUpdateNotice();
   const [isOffline, setIsOffline] = useState(
     typeof navigator !== 'undefined' ? !navigator.onLine : false
   );
@@ -50,6 +53,7 @@ export function AppRoot({ children }: { children: React.ReactNode }) {
       )}
       {children}
       <InstallPromptBanner />
+      <ToastHost />
     </div>
   );
 }

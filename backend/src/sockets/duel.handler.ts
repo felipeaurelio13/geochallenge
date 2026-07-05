@@ -20,6 +20,8 @@ import {
   shouldForceStartDuel,
   shouldResolveQuestion,
 } from './duel.utils.js';
+import { AppError } from '../utils/appError.js';
+import { emitSocketError } from '../utils/respondWithError.js';
 
 interface QueuedPlayer {
   userId: string;
@@ -195,7 +197,11 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
   // Unirse a la cola de matchmaking
   socket.on('duel:queue', async (data?: { category?: Category; filters?: QuestionFilters }) => {
     if (isRateLimited(user.userId, 'duel:queue', 10)) {
-      socket.emit('duel:error', { message: 'Demasiadas solicitudes, intenta más tarde' });
+      emitSocketError(
+        socket,
+        'duel:error',
+        new AppError('DUEL_RATE_LIMITED', 429, 'Demasiadas solicitudes, intenta más tarde')
+      );
       return;
     }
 
@@ -206,7 +212,11 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
     if (existingDuelId) {
       const existingDuel = activeDuels.get(existingDuelId);
       if (existingDuel && existingDuel.status !== 'finished') {
-        socket.emit('duel:error', { message: 'Ya estás en un duelo activo' });
+        emitSocketError(
+          socket,
+          'duel:error',
+          new AppError('DUEL_ALREADY_IN_PROGRESS', 409, 'Ya estás en un duelo activo')
+        );
         return;
       }
       // Stale entry: el duelo ya no existe o está finished. Limpiar y dejar pasar.
@@ -285,7 +295,11 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
     coordinates?: { lat: number; lng: number };
   }) => {
     if (isRateLimited(user.userId, 'duel:answer', 60)) {
-      socket.emit('duel:error', { message: 'Demasiadas solicitudes, intenta más tarde' });
+      emitSocketError(
+        socket,
+        'duel:error',
+        new AppError('DUEL_RATE_LIMITED', 429, 'Demasiadas solicitudes, intenta más tarde')
+      );
       return;
     }
 
@@ -662,14 +676,22 @@ function sendQuestion(io: SocketIOServer, duel: ActiveDuel) {
           console.error(`Error auto-closing question ${questionIndex} for duel ${duel.id}:`, err);
           const currentDuel = activeDuels.get(duel.id);
           if (currentDuel && currentDuel.status !== 'finished') {
-            io.to(duel.id).emit('duel:error', { message: 'Error procesando pregunta' });
+            emitSocketError(
+              io.to(duel.id),
+              'duel:error',
+              new AppError('DUEL_ERROR_GENERIC', 500, 'Error procesando pregunta')
+            );
           }
         }
       })();
     }, (config.game.timePerQuestion + 2) * 1000); // +2 segundos de buffer
   } catch (error) {
     console.error(`Error sending question for duel ${duel.id}:`, error);
-    io.to(duel.id).emit('duel:error', { message: 'Error al enviar pregunta' });
+    emitSocketError(
+      io.to(duel.id),
+      'duel:error',
+      new AppError('DUEL_ERROR_GENERIC', 500, 'Error al enviar pregunta')
+    );
     // End the duel to avoid leaving it stuck
     const winnerId = null;
     endDuel(io, duel, winnerId, 'cancelled');

@@ -13,9 +13,10 @@ import {
 import { Button } from '../components/atoms/Button';
 import { MonumentAttribution } from '../components/MonumentAttribution';
 import { generateFunFact } from '../utils/funFacts';
-import { getQuestionDuration } from '../utils/questionTiming';
+import { applyExtendedTime, getQuestionDuration } from '../utils/questionTiming';
 import { useStreakShareImage } from '../hooks/useStreakShareImage';
 import { useConfirmDialog } from '../hooks/useConfirmDialog';
+import { useUiStore } from '../store/useUiStore';
 import type { Question, DailyResult } from '../types';
 
 const ANSWER_TIME = 20;
@@ -47,9 +48,14 @@ export function DailyChallengePage() {
   const [shareFeedback, setShareFeedback] = useState('');
   const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const extendedTimeEnabled = useUiStore((s) => s.extendedTimeEnabled);
+
   const currentQuestion = questions[currentIndex] ?? null;
   const isLastQuestion = currentIndex === questions.length - 1;
-  const roundDuration = getQuestionDuration(currentQuestion?.category, ANSWER_TIME);
+  const roundDuration = applyExtendedTime(
+    getQuestionDuration(currentQuestion?.category, ANSWER_TIME),
+    extendedTimeEnabled
+  );
   const [timeRemaining, setTimeRemaining] = useState(roundDuration);
   const score = correctCount * 100;
   const previousScore = score - (results.length > 0 && results[results.length - 1]?.isCorrect ? 100 : 0);
@@ -73,9 +79,9 @@ export function DailyChallengePage() {
   // El <Timer> componente maneja el tick interno, sólo lo re-inicializamos.
   useEffect(() => {
     if (pageState !== 'playing' || showResult) return;
-    setTimeRemaining(getQuestionDuration(currentQuestion?.category, ANSWER_TIME));
+    setTimeRemaining(applyExtendedTime(getQuestionDuration(currentQuestion?.category, ANSWER_TIME), extendedTimeEnabled));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentIndex, pageState, showResult]);
+  }, [currentIndex, pageState, showResult, extendedTimeEnabled]);
 
   function handleSubmit(forcedAnswer?: string) {
     if (showResult) return;
@@ -154,8 +160,8 @@ export function DailyChallengePage() {
             "JUL 17" hardcoded en muchos OS (QA design audit lo marcó como raro).
             El spiral es genérico, sin fecha. */}
         <div className="text-6xl">🗓️</div>
-        <h1 className="text-2xl font-bold text-app-text">{t('daily.alreadyPlayed', 'Ya jugaste hoy')}</h1>
-        <p className="text-[var(--color-text-secondary)]">{t('daily.comeBackTomorrow', 'Vuelve mañana para el siguiente reto')}</p>
+        <h1 className="text-2xl font-bold text-app-text">{t('daily.alreadyPlayed', '¡Reto de hoy completado! 🎯')}</h1>
+        <p className="text-[var(--color-text-secondary)]">{t('daily.comeBackTomorrow', 'Mañana hay uno nuevo esperándote')}</p>
         <div className="w-full max-w-sm rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
           <div className="text-4xl font-black text-app-text">{previousResult.correctCount}/{previousResult.totalQuestions}</div>
           <div className="mt-1 text-[var(--color-text-secondary)]">{pct}% {t('results.accuracy')}</div>
@@ -168,6 +174,7 @@ export function DailyChallengePage() {
             </div>
           )}
         </div>
+        <p className="text-xs text-[var(--color-text-muted)]">{t('daily.nextChallengeAt', 'El próximo reto abre a medianoche (tu hora)')}</p>
         <Button onClick={() => handleShare(previousResult.correctCount)} disabled={shareStatus === 'sharing'} variant="primary" size="lg">
           📸 {t('results.shareStreakButton', 'Compartir resultado')}
         </Button>
@@ -181,10 +188,22 @@ export function DailyChallengePage() {
     const result = finalResult;
     const pct = result ? Math.round((result.correctCount / result.totalQuestions) * 100) : 0;
     const emoji = pct >= 90 ? '🏆' : pct >= 70 ? '🎉' : pct >= 50 ? '👍' : '💪';
+    // El streak se cortó (Part 2): solo mostramos el aviso cálido cuando la
+    // racha anterior era significativa (>=2) — la misma racha de 0/1 no
+    // amerita un mensaje de "pérdida", sería ruido.
+    const showStreakLostNotice = Boolean(result?.streakLost) && (result?.previousStreak ?? 0) >= 2;
     return (
       <div className="flex h-full flex-col items-center justify-center gap-6 bg-[var(--color-bg-app)] px-6 py-8 text-center">
         <div className="text-6xl">{emoji}</div>
         <h1 className="text-2xl font-bold text-app-text">{t('daily.complete', '¡Reto del día completado!')}</h1>
+        {showStreakLostNotice && (
+          <p className="max-w-sm text-sm text-[var(--color-text-secondary)]">
+            {t('daily.streakLostNotice', {
+              count: result?.previousStreak,
+              defaultValue: 'Tu racha de {{count}} días se cortó 💛 — hoy empieza una nueva. Lo importante es volver.',
+            })}
+          </p>
+        )}
         {result && (
           <div className="w-full max-w-sm rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
             <div className="text-5xl font-black text-app-text">{result.correctCount}/{result.totalQuestions}</div>
@@ -208,6 +227,7 @@ export function DailyChallengePage() {
             )}
           </div>
         )}
+        <p className="text-xs text-[var(--color-text-muted)]">{t('daily.nextChallengeAt', 'El próximo reto abre a medianoche (tu hora)')}</p>
         <Button
           onClick={() => result && handleShare(result.correctCount)}
           disabled={shareStatus === 'sharing'}
@@ -232,6 +252,9 @@ export function DailyChallengePage() {
   return (
     <>
     {confirmDialog}
+    <a href="#game-options" className="skip-link">
+      {t('common.skipToAnswerOptions')}
+    </a>
     <GameRoundScaffold
       header={
         <header className="sticky top-0 z-30 border-b border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 pb-2 pt-3 backdrop-blur sm:px-4 sm:pb-3 sm:pt-4">

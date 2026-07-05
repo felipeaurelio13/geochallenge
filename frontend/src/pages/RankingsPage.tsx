@@ -9,11 +9,11 @@ import type {
   LeaderboardFilters,
 } from '../types';
 import { useApi, useDebounce } from '../hooks';
-import { LoadingSpinner } from '../components';
 import { PageHeader } from '../components/molecules/PageHeader';
 import { EmptyState } from '../components/molecules/EmptyState';
 import { Button } from '../components/atoms/Button';
 import { Input } from '../components/atoms/Input';
+import { SkeletonLine, SkeletonRow } from '../components/atoms/Skeleton';
 
 interface LeaderboardEntry {
   rank: number;
@@ -50,6 +50,10 @@ const CATEGORY_OPTIONS: LeaderboardCategoryFilter[] = [
 const MIN_GAMES_OPTIONS = [1, 3, 5, 10] as const;
 
 const RANKING_NEIGHBORS_ENABLED = import.meta.env.VITE_RANKING_NEIGHBORS_ENABLED === 'true';
+// A partir de este rank mostramos el contexto "vecinos" (±3) por defecto,
+// sin click extra — a esa distancia del top el usuario ya no se ve a sí
+// mismo en la lista visible y necesita ese ancla para ubicarse.
+const NEIGHBORS_AUTO_SHOW_RANK_THRESHOLD = 100;
 
 const PODIUM_COLORS = {
   1: {
@@ -170,6 +174,35 @@ function EntryMeta({
   );
 }
 
+function RankingsSkeleton() {
+  return (
+    <div aria-hidden="true">
+      {/* Podium skeleton mimicking the top-3 layout */}
+      <div className="mb-8 flex items-end justify-center gap-3 px-4">
+        {[
+          { height: 'h-16', width: 'w-14' },
+          { height: 'h-24', width: 'w-14' },
+          { height: 'h-12', width: 'w-14' },
+        ].map((block, i) => (
+          <div key={i} className="flex min-w-0 flex-1 flex-col items-center gap-2">
+            <SkeletonLine className={`h-14 w-14 rounded-full ${block.width}`} />
+            <SkeletonLine className="h-3 w-12" />
+            <SkeletonLine className="h-3 w-8" />
+            <SkeletonLine className={`w-full rounded-t-lg ${block.height}`} />
+          </div>
+        ))}
+      </div>
+
+      {/* Rest-of-list rows */}
+      <div className="space-y-2">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <SkeletonRow key={i} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function FilterChip({
   label,
   active,
@@ -265,10 +298,13 @@ export function RankingsPage() {
     setNeighborEntries([]);
   }, [scope, modeFilter, categoryFilter, minGames]);
 
+  const isFarFromTop = (data?.userRank ?? 0) > NEIGHBORS_AUTO_SHOW_RANK_THRESHOLD;
+  const shouldShowNeighborsPanel = RANKING_NEIGHBORS_ENABLED || isFarFromTop;
+
   useEffect(() => {
     if (!data) return;
 
-    const shouldLoadRankContext = !!user && (RANKING_NEIGHBORS_ENABLED || data.userRank === null);
+    const shouldLoadRankContext = !!user && (shouldShowNeighborsPanel || data.userRank === null);
     if (!shouldLoadRankContext) return;
 
     let cancelled = false;
@@ -284,13 +320,13 @@ export function RankingsPage() {
           setDeferredUserScore(rankContext.userRank?.score ?? null);
         }
 
-        if (RANKING_NEIGHBORS_ENABLED) {
+        if (shouldShowNeighborsPanel) {
           setNeighborEntries(rankContext.neighbors ?? []);
         }
       })
       .catch(() => {
         if (cancelled) return;
-        if (RANKING_NEIGHBORS_ENABLED) setNeighborEntries([]);
+        if (shouldShowNeighborsPanel) setNeighborEntries([]);
       })
       .finally(() => {
         if (!cancelled) setNeighborsLoading(false);
@@ -299,7 +335,7 @@ export function RankingsPage() {
     return () => {
       cancelled = true;
     };
-  }, [data, scope, user, activeFilters]);
+  }, [data, scope, user, activeFilters, shouldShowNeighborsPanel]);
 
   const resolvedUserRank = data?.userRank ?? deferredUserRank;
   const resolvedUserScore = data?.userScore ?? deferredUserScore;
@@ -466,27 +502,43 @@ export function RankingsPage() {
           </p>
         )}
 
-        {/* My rank card — only when outside top 50 */}
-        {resolvedUserRank && resolvedUserRank > 50 && (
-          <div className="mb-6 p-4 bg-primary/10 border border-primary/50 rounded-2xl flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary/20 border border-primary/50 flex items-center justify-center text-lg font-black text-primary">
-                {user?.username?.charAt(0).toUpperCase()}
+        {/* Your position summary — siempre visible cuando hay datos, para que
+            el usuario nunca tenga que hacer scroll o buscarse en la lista
+            para saber dónde está. Sin humillación: si no tiene partidas,
+            mostramos una invitación a jugar en vez de un bloque vacío. */}
+        {!isLoading && !error && user && (
+          <div className="mb-6 p-4 bg-primary/10 border border-primary/50 rounded-2xl">
+            {resolvedUserRank ? (
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-primary/20 border border-primary/50 flex items-center justify-center text-lg font-black text-primary">
+                    {user?.username?.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wide">{t('rankings.yourPosition')}</p>
+                    <p className="text-app-text font-semibold">
+                      {t('rankings.yourPositionSummary', {
+                        rank: resolvedUserRank,
+                        total: data?.totalPlayers ?? resolvedUserRank,
+                        percent: Math.min(100, Math.max(1, Math.ceil((resolvedUserRank / (data?.totalPlayers || resolvedUserRank)) * 100))),
+                      })}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-2xl font-black text-primary">#{resolvedUserRank}</p>
+                  <p className="text-sm text-[var(--color-text-muted)]">{resolvedUserScore?.toLocaleString()} pts</p>
+                </div>
               </div>
-              <div>
-                <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wide">{t('rankings.yourPosition')}</p>
-                <p className="text-app-text font-semibold">{user?.username}</p>
-              </div>
-            </div>
-            <div className="text-right">
-              <p className="text-2xl font-black text-primary">#{resolvedUserRank}</p>
-              <p className="text-sm text-[var(--color-text-muted)]">{resolvedUserScore?.toLocaleString()} pts</p>
-            </div>
+            ) : (
+              <p className="text-center text-sm font-medium text-app-text">{t('rankings.playFirstGame')}</p>
+            )}
           </div>
         )}
 
-        {/* Nearby context */}
-        {!isLoading && !error && RANKING_NEIGHBORS_ENABLED && (
+        {/* Nearby context — visible por defecto cuando el usuario está lejos
+            del top (rank > 100) para que no tenga que hacer click extra. */}
+        {!isLoading && !error && shouldShowNeighborsPanel && (
           <section className="mb-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4" aria-live="polite">
             <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">{t('rankings.nearbyContext')}</h2>
             {neighborsLoading ? (
@@ -532,9 +584,10 @@ export function RankingsPage() {
 
         {/* Loading */}
         {isLoading && (
-          <div className="flex justify-center py-16">
-            <LoadingSpinner size="lg" text={t('rankings.loading')} />
-          </div>
+          <>
+            <span className="sr-only" role="status">{t('rankings.loading')}</span>
+            <RankingsSkeleton />
+          </>
         )}
 
         {/* Error */}

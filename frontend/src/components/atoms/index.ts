@@ -7,5 +7,6 @@ export { Icon } from './Icon';
 export { Input } from './Input';
 export { LanguageSwitcher } from './LanguageSwitcher';
 export { SectionTitle } from './SectionTitle';
+export { SkeletonLine, SkeletonCard, SkeletonRow } from './Skeleton';
 export { StatCard } from './StatCard';
 export { UserAvatar } from './UserAvatar';

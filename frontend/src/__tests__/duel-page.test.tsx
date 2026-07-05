@@ -29,6 +29,8 @@ const mocks = vi.hoisted(() => {
     joinDuelQueueMock: vi.fn(),
     cancelDuelQueueMock: vi.fn(),
     submitDuelAnswerMock: vi.fn(),
+    onConnectionStateChangeMock: vi.fn(() => () => {}),
+    isConnectedMock: vi.fn(() => true),
   };
 });
 
@@ -112,6 +114,8 @@ vi.mock('../services/socket', () => ({
     cancelDuelQueue: mocks.cancelDuelQueueMock,
     ready: mocks.readyMock,
     submitDuelAnswer: mocks.submitDuelAnswerMock,
+    onConnectionStateChange: mocks.onConnectionStateChangeMock,
+    isConnected: mocks.isConnectedMock,
   },
 }));
 

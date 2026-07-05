@@ -7,11 +7,11 @@ import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import { getApiErrorMessage } from '../utils/apiError';
 import { useGameFilters } from '../hooks/useGameFilters';
-import { LoadingSpinner } from '../components';
 import { PageHeader } from '../components/molecules/PageHeader';
 import { EmptyState } from '../components/molecules/EmptyState';
 import { Alert } from '../components/atoms/Alert';
 import { Button } from '../components/atoms/Button';
+import { SkeletonCard } from '../components/atoms/Skeleton';
 import { Modal } from '../components/organisms/Modal';
 
 interface ChallengeParticipant {
@@ -219,9 +219,17 @@ export function ChallengesPage() {
             botón en EmptyState. Removimos la helper-card (redundante con el
             botón del header) y dejamos sólo header + empty-state cuando no
             hay desafíos. La descripción se muestra ahora dentro del modal. */}
-        {loading ? <LoadingSpinner size="lg" /> : filteredChallenges.length === 0 ? (
+        {loading ? (
+          <div className="space-y-3" aria-hidden="true">
+            <span className="sr-only" role="status">{t('common.loading')}</span>
+            <SkeletonCard className="h-28" />
+            <SkeletonCard className="h-28" />
+            <SkeletonCard className="h-28" />
+          </div>
+        ) : filteredChallenges.length === 0 ? (
           <EmptyState
-            message={t('challenges.empty')}
+            emoji="🏁"
+            message={t('challenges.emptyWithAction')}
             action={
               <Button
                 onClick={() => setShowCreateModal(true)}

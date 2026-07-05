@@ -34,6 +34,10 @@ module.exports = {
       },
     },
     {
+      files: ['**/*.tsx'],
+      extends: ['plugin:jsx-a11y/recommended'],
+    },
+    {
       files: ['**/*.{test,spec}.{ts,tsx}', '**/__tests__/**/*.{ts,tsx}'],
       rules: {
         'no-console': 'off',

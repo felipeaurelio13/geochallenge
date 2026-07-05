@@ -10,7 +10,7 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('react-router-dom', () => ({
-  Link: ({ children }: { children: any }) => <a>{children}</a>,
+  Link: ({ children, to }: { children: any; to: string }) => <a href={to}>{children}</a>,
   useNavigate: () => mocks.navigate,
   useSearchParams: () => [mocks.searchParams, vi.fn()],
 }));

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { triggerHaptic } from '../hooks/useHaptics';
 
 interface OptionButtonProps {
@@ -31,6 +32,7 @@ export const OptionButton = React.memo(function OptionButton({
   isCorrect,
   showResult,
 }: OptionButtonProps) {
+  const { t } = useTranslation();
   const renderedLabel = displayLabel ?? option;
   // focus-visible: only show focus ring on KEYBOARD navigation, not on touch/click.
   // Antes el browser dejaba un focus ring azul sobre la última opción tras click
@@ -106,6 +108,9 @@ export const OptionButton = React.memo(function OptionButton({
         }`}
       >
         {showResult && isCorrect ? '✓' : showResult && selected && !isCorrect ? '✕' : eliminated ? '—' : optionLetters[index]}
+        {showResult && isCorrect && <span className="sr-only">{t('a11y.correctAnswer')}</span>}
+        {showResult && selected && !isCorrect && <span className="sr-only">{t('a11y.incorrectAnswer')}</span>}
+        {!showResult && eliminated && <span className="sr-only">{t('a11y.eliminatedOption')}</span>}
       </span>
 
       <div className="flex min-w-0 flex-1 items-center">

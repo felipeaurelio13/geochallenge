@@ -159,6 +159,8 @@ export interface DailyResult {
   totalQuestions: number;
   dailyStreak?: number;
   playedAt: string;
+  previousStreak?: number;
+  streakLost?: boolean;
 }
 
 export interface EarnedAchievement {
@@ -242,6 +244,9 @@ export interface GameResult {
   accuracy: number;
   isHighScore: boolean;
   details: AnswerResult[];
+  newAchievements?: string[];
+  /** true cuando finishGame no pudo llegar al servidor y el resultado se guardó localmente para reintentar más tarde. */
+  pendingSync?: boolean;
 }
 
 // Leaderboard types

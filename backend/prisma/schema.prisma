@@ -31,9 +31,25 @@ model User {
   duelMatchesWon     DuelMatch[] @relation("DuelMatchAsWinner")
   achievements       UserAchievement[]
   survivalParticipations SurvivalParticipant[]
+  passwordResetTokens PasswordResetToken[]
 
   @@index([highScore(sort: Desc)])
   @@map("users")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tokenHash])
+  @@index([userId])
+  @@map("password_reset_tokens")
 }
 
 model Question {

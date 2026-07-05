@@ -118,7 +118,6 @@ export function LoginPage() {
             value={values.email}
             onChange={handleChange}
             required
-            autoFocus={typeof window !== 'undefined' && !('ontouchstart' in window)}
             autoComplete="email"
             inputMode="email"
             spellCheck={false}
@@ -142,7 +141,7 @@ export function LoginPage() {
             <button
               type="button"
               onClick={() => setShowPassword((prev) => !prev)}
-              className="absolute inset-y-1 right-1 min-h-10 rounded-lg px-3 text-xs font-semibold text-primary hover:bg-gray-700/60 focus:outline-none focus:ring-2 focus:ring-primary/70"
+              className="absolute inset-y-1 right-1 flex min-h-11 min-w-11 items-center justify-center rounded-lg px-3 text-xs font-semibold text-primary hover:bg-gray-700/60 focus:outline-none focus:ring-2 focus:ring-primary/70"
               aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
               aria-pressed={showPassword}
             >
@@ -150,6 +149,12 @@ export function LoginPage() {
             </button>
           </div>
         </FormField.Root>
+
+        <div className="text-right">
+          <Link to="/forgot-password" className="text-xs font-medium text-primary hover:underline">
+            {t('auth.forgotPassword')}
+          </Link>
+        </div>
 
         {helperKey && !isBusy ? <p className="text-xs text-gray-500">{t(helperKey)}</p> : null}
 
