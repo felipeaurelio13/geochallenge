@@ -16,6 +16,7 @@ import gameController from './controllers/game.controller.js';
 import flagMasterController from './controllers/flagMaster.controller.js';
 import leaderboardController from './controllers/leaderboard.controller.js';
 import challengeController from './controllers/challenge.controller.js';
+import geoChallengeController from './controllers/geoChallenge.controller.js';
 import { globalLimiter } from './middleware/rateLimit.js';
 
 // Socket handlers
@@ -83,6 +84,7 @@ app.use('/api', globalLimiter);
 // API Routes
 app.use('/api/auth', authController);
 app.use('/api/game/flag-master', flagMasterController);
+app.use('/api/game/geo-challenges', geoChallengeController);
 app.use('/api/game', gameController);
 app.use('/api/leaderboard', leaderboardController);
 app.use('/api/challenges', challengeController);

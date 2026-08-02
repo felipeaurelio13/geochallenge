@@ -18,6 +18,7 @@ import {
   ChallengeResultsPage,
   SurvivalPage,
   FlagMasterPage,
+  GeoChallengesPage,
 } from './pages';
 import { DailyChallengePage } from './pages/DailyChallengePage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
@@ -180,6 +181,10 @@ export const appRoutes = [
       {
         path: '/flag-master',
         element: <ProtectedRoute><FlagMasterPage /></ProtectedRoute>,
+      },
+      {
+        path: '/geo-challenges',
+        element: <ProtectedRoute><GeoChallengesPage /></ProtectedRoute>,
       },
       {
         path: '*',

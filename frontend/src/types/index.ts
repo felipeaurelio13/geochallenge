@@ -26,6 +26,59 @@ export type GameMechanicKey = 'intel5050' | 'focusTime' | 'streakShield';
 
 export type Difficulty = 'EASY' | 'MEDIUM' | 'HARD';
 
+// ─── GeoRetos ──────────────────────────────────────────────────────────────
+
+export type GeoChallengeKind =
+  | 'EXTREME'
+  | 'HIGHER_LOWER'
+  | 'COMMON_NEIGHBOR'
+  | 'ODD_ONE_OUT'
+  | 'NORTH_TO_SOUTH';
+
+export interface LocalizedText {
+  es: string;
+  en: string;
+}
+
+export interface GeoChallengeOption {
+  id: string;
+  label: LocalizedText;
+}
+
+export interface GeoChallengeRound {
+  id: string;
+  kind: GeoChallengeKind;
+  prompt: LocalizedText;
+  instruction: LocalizedText;
+  selectionMode: 'single' | 'ordered';
+  options: GeoChallengeOption[];
+}
+
+export interface GeoChallengeStartResponse {
+  gameId: string;
+  sessionToken: string;
+  timePerRound: number;
+  dataVersion: string;
+  dataUpdatedAt: string;
+  rounds: GeoChallengeRound[];
+}
+
+export interface GeoChallengeAnswerResponse {
+  roundId: string;
+  isCorrect: boolean;
+  correctOptionIds: string[];
+  explanation: LocalizedText;
+  points: number;
+}
+
+export interface GeoChallengeFinishResponse {
+  gameId: string;
+  correctCount: number;
+  totalRounds: number;
+  totalScore: number;
+  details: Array<{ roundId: string; isCorrect: boolean }>;
+}
+
 export interface GameFilters {
   continent?: string;
   isInsular?: boolean;

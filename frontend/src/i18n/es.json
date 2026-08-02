@@ -117,6 +117,9 @@
     "flagMaster": "Maestro de Banderas",
     "flagMasterBadge": "Difícil",
     "flagMasterDesc": "10 rondas · sin color, recortes y trampas · multiplicadores hasta x2.5",
+    "geoChallenges": "GeoRetos",
+    "geoChallengesBadge": "Nuevo",
+    "geoChallengesDesc": "5 retos · extremos, comparaciones, fronteras y orden geográfico",
     "howToPlay": "Cómo se juega",
     "howToPlayAria": "Cómo se juega {{mode}}",
     "letsPlay": "¡Jugar!"
@@ -644,6 +647,35 @@
     "skipToMainAction": "Ir a las acciones principales",
     "skipToAnswerOptions": "Saltar a las opciones de respuesta",
     "search": "Buscar"
+  },
+  "geoChallenges": {
+    "title": "GeoRetos",
+    "preparing": "Preparando cinco desafíos geográficos...",
+    "errorTitle": "No se pudo iniciar GeoRetos",
+    "errorLoading": "No se pudo preparar la partida",
+    "errorAnswering": "No se pudo validar la respuesta. Intenta nuevamente.",
+    "sessionExpired": "La partida expiró. Inicia un nuevo GeoReto.",
+    "confirm": "Confirmar respuesta",
+    "undo": "Deshacer",
+    "orderProgress": "Orden seleccionado: {{current}}/{{total}}",
+    "selectedPosition": "{{country}}, posición {{position}}",
+    "correctOrder": "Respuesta correcta",
+    "seeResults": "Ver resultados",
+    "complete": "¡GeoReto completado!",
+    "completeDesc": "Cinco formas distintas de pensar el mundo.",
+    "score": "{{score}} puntos",
+    "resultPattern": "Patrón de resultados",
+    "share": "Compartir GeoReto",
+    "shareText": "Hice {{correct}}/{{total}} en GeoRetos de GeoChallenge",
+    "playAgain": "Jugar otra vez",
+    "dataNote": "Datos geográficos versionados · actualización {{date}}",
+    "kinds": {
+      "EXTREME": "Extremos",
+      "HIGHER_LOWER": "Mayor o menor",
+      "COMMON_NEIGHBOR": "Vecino común",
+      "ODD_ONE_OUT": "El intruso",
+      "NORTH_TO_SOUTH": "Norte a sur"
+    }
   },
   "duelHistory": {
     "title": "Historial de Duelos",

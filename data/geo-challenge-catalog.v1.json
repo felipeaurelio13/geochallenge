@@ -1,0 +1,5488 @@
+{
+  "version": "v1",
+  "generatedAt": "2026-08-01",
+  "source": {
+    "name": "REST Countries v3.1 dataset",
+    "repository": "https://gitlab.com/restcountries/restcountries",
+    "license": "MPL-2.0",
+    "note": "Nombres canónicos, estado y flags se conservan desde country-catalog.v1.json."
+  },
+  "countries": [
+    {
+      "iso2": "AF",
+      "iso3": "AFG",
+      "nameEn": "Afghanistan",
+      "nameEs": "Afganistán",
+      "capital": "Kabul",
+      "capitalLat": 34.52,
+      "capitalLng": 69.18,
+      "continent": "Asia",
+      "subregion": "South Asia",
+      "isLandlocked": true,
+      "population": 43844000,
+      "areaKm2": 652230,
+      "languages": [
+        {
+          "code": "prs",
+          "name": "Dari"
+        },
+        {
+          "code": "pus",
+          "name": "Pashto"
+        },
+        {
+          "code": "tuk",
+          "name": "Turkmen"
+        }
+      ],
+      "neighbors": [
+        "CN",
+        "IR",
+        "PK",
+        "TJ",
+        "TM",
+        "UZ"
+      ]
+    },
+    {
+      "iso2": "AL",
+      "iso3": "ALB",
+      "nameEn": "Albania",
+      "nameEs": "Albania",
+      "capital": "Tirana",
+      "capitalLat": 41.32,
+      "capitalLng": 19.82,
+      "continent": "Europe",
+      "subregion": "Southern Europe",
+      "isLandlocked": false,
+      "population": 2363314,
+      "areaKm2": 28748,
+      "languages": [
+        {
+          "code": "sqi",
+          "name": "Albanian"
+        }
+      ],
+      "neighbors": [
+        "GR",
+        "ME",
+        "MK",
+        "XK"
+      ]
+    },
+    {
+      "iso2": "DZ",
+      "iso3": "DZA",
+      "nameEn": "Algeria",
+      "nameEs": "Argelia",
+      "capital": "Algiers",
+      "capitalLat": 36.75,
+      "capitalLng": 3.05,
+      "continent": "Africa",
+      "subregion": "Northern Africa",
+      "isLandlocked": false,
+      "population": 47400000,
+      "areaKm2": 2381741,
+      "languages": [
+        {
+          "code": "ara",
+          "name": "Arabic"
+        }
+      ],
+      "neighbors": [
+        "LY",
+        "MA",
+        "ML",
+        "MR",
+        "NE",
+        "TN"
+      ]
+    },
+    {
+      "iso2": "AD",
+      "iso3": "AND",
+      "nameEn": "Andorra",
+      "nameEs": "Andorra",
+      "capital": "Andorra la Vella",
+      "capitalLat": 42.5,
+      "capitalLng": 1.52,
+      "continent": "Europe",
+      "subregion": "Southern Europe",
+      "isLandlocked": true,
+      "population": 88406,
+      "areaKm2": 468,
+      "languages": [
+        {
+          "code": "cat",
+          "name": "Catalan"
+        }
+      ],
+      "neighbors": [
+        "ES",
+        "FR"
+      ]
+    },
+    {
+      "iso2": "AO",
+      "iso3": "AGO",
+      "nameEn": "Angola",
+      "nameEs": "Angola",
+      "capital": "Luanda",
+      "capitalLat": -8.83,
+      "capitalLng": 13.22,
+      "continent": "Africa",
+      "subregion": "Central Africa",
+      "isLandlocked": false,
+      "population": 36170961,
+      "areaKm2": 1246700,
+      "languages": [
+        {
+          "code": "por",
+          "name": "Portuguese"
+        }
+      ],
+      "neighbors": [
+        "CD",
+        "CG",
+        "NA",
+        "ZM"
+      ]
+    },
+    {
+      "iso2": "AG",
+      "iso3": "ATG",
+      "nameEn": "Antigua and Barbuda",
+      "nameEs": "Antigua y Barbuda",
+      "capital": "Saint John's",
+      "capitalLat": 17.12,
+      "capitalLng": -61.85,
+      "continent": "North America",
+      "subregion": "Caribbean",
+      "isLandlocked": false,
+      "population": 103603,
+      "areaKm2": 442,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        }
+      ],
+      "neighbors": []
+    },
+    {
+      "iso2": "AR",
+      "iso3": "ARG",
+      "nameEn": "Argentina",
+      "nameEs": "Argentina",
+      "capital": "Buenos Aires",
+      "capitalLat": -34.58,
+      "capitalLng": -58.67,
+      "continent": "South America",
+      "subregion": "South America",
+      "isLandlocked": false,
+      "population": 46735004,
+      "areaKm2": 2780400,
+      "languages": [
+        {
+          "code": "grn",
+          "name": "Guaraní"
+        },
+        {
+          "code": "spa",
+          "name": "Spanish"
+        }
+      ],
+      "neighbors": [
+        "BO",
+        "BR",
+        "CL",
+        "PY",
+        "UY"
+      ]
+    },
+    {
+      "iso2": "AM",
+      "iso3": "ARM",
+      "nameEn": "Armenia",
+      "nameEs": "Armenia",
+      "capital": "Yerevan",
+      "capitalLat": 40.17,
+      "capitalLng": 44.5,
+      "continent": "Asia",
+      "subregion": "Western Asia",
+      "isLandlocked": true,
+      "population": 3076200,
+      "areaKm2": 29743,
+      "languages": [
+        {
+          "code": "hye",
+          "name": "Armenian"
+        }
+      ],
+      "neighbors": [
+        "AZ",
+        "GE",
+        "IR",
+        "TR"
+      ]
+    },
+    {
+      "iso2": "AU",
+      "iso3": "AUS",
+      "nameEn": "Australia",
+      "nameEs": "Australia",
+      "capital": "Canberra",
+      "capitalLat": -35.27,
+      "capitalLng": 149.13,
+      "continent": "Oceania",
+      "subregion": "Australia and New Zealand",
+      "isLandlocked": false,
+      "population": 27536874,
+      "areaKm2": 7692024,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        }
+      ],
+      "neighbors": []
+    },
+    {
+      "iso2": "AT",
+      "iso3": "AUT",
+      "nameEn": "Austria",
+      "nameEs": "Austria",
+      "capital": "Vienna",
+      "capitalLat": 48.2,
+      "capitalLng": 16.37,
+      "continent": "Europe",
+      "subregion": "Western Europe",
+      "isLandlocked": true,
+      "population": 9200931,
+      "areaKm2": 83871,
+      "languages": [
+        {
+          "code": "deu",
+          "name": "German"
+        }
+      ],
+      "neighbors": [
+        "CH",
+        "CZ",
+        "DE",
+        "HU",
+        "IT",
+        "LI",
+        "SI",
+        "SK"
+      ]
+    },
+    {
+      "iso2": "AZ",
+      "iso3": "AZE",
+      "nameEn": "Azerbaijan",
+      "nameEs": "Azerbaiyán",
+      "capital": "Baku",
+      "capitalLat": 40.38,
+      "capitalLng": 49.87,
+      "continent": "Asia",
+      "subregion": "Western Asia",
+      "isLandlocked": true,
+      "population": 10241722,
+      "areaKm2": 86600,
+      "languages": [
+        {
+          "code": "aze",
+          "name": "Azerbaijani"
+        }
+      ],
+      "neighbors": [
+        "AM",
+        "GE",
+        "IR",
+        "RU",
+        "TR"
+      ]
+    },
+    {
+      "iso2": "BS",
+      "iso3": "BHS",
+      "nameEn": "Bahamas",
+      "nameEs": "Bahamas",
+      "capital": "Nassau",
+      "capitalLat": 25.08,
+      "capitalLng": -77.35,
+      "continent": "North America",
+      "subregion": "Caribbean",
+      "isLandlocked": false,
+      "population": 398165,
+      "areaKm2": 13943,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        }
+      ],
+      "neighbors": []
+    },
+    {
+      "iso2": "BH",
+      "iso3": "BHR",
+      "nameEn": "Bahrain",
+      "nameEs": "Bahrein",
+      "capital": "Manama",
+      "capitalLat": 26.23,
+      "capitalLng": 50.57,
+      "continent": "Asia",
+      "subregion": "Western Asia",
+      "isLandlocked": false,
+      "population": 1594654,
+      "areaKm2": 765,
+      "languages": [
+        {
+          "code": "ara",
+          "name": "Arabic"
+        }
+      ],
+      "neighbors": []
+    },
+    {
+      "iso2": "BD",
+      "iso3": "BGD",
+      "nameEn": "Bangladesh",
+      "nameEs": "Bangladesh",
+      "capital": "Dhaka",
+      "capitalLat": 23.72,
+      "capitalLng": 90.4,
+      "continent": "Asia",
+      "subregion": "South Asia",
+      "isLandlocked": false,
+      "population": 169828911,
+      "areaKm2": 147570,
+      "languages": [
+        {
+          "code": "ben",
+          "name": "Bengali"
+        }
+      ],
+      "neighbors": [
+        "IN",
+        "MM"
+      ]
+    },
+    {
+      "iso2": "BB",
+      "iso3": "BRB",
+      "nameEn": "Barbados",
+      "nameEs": "Barbados",
+      "capital": "Bridgetown",
+      "capitalLat": 13.1,
+      "capitalLng": -59.62,
+      "continent": "North America",
+      "subregion": "Caribbean",
+      "isLandlocked": false,
+      "population": 267800,
+      "areaKm2": 430,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        }
+      ],
+      "neighbors": []
+    },
+    {
+      "iso2": "BY",
+      "iso3": "BLR",
+      "nameEn": "Belarus",
+      "nameEs": "Bielorrusia",
+      "capital": "Minsk",
+      "capitalLat": 53.9,
+      "capitalLng": 27.57,
+      "continent": "Europe",
+      "subregion": "Eastern Europe",
+      "isLandlocked": true,
+      "population": 9109280,
+      "areaKm2": 207600,
+      "languages": [
+        {
+          "code": "bel",
+          "name": "Belarusian"
+        },
+        {
+          "code": "rus",
+          "name": "Russian"
+        }
+      ],
+      "neighbors": [
+        "LT",
+        "LV",
+        "PL",
+        "RU",
+        "UA"
+      ]
+    },
+    {
+      "iso2": "BE",
+      "iso3": "BEL",
+      "nameEn": "Belgium",
+      "nameEs": "Bélgica",
+      "capital": "Brussels",
+      "capitalLat": 50.83,
+      "capitalLng": 4.33,
+      "continent": "Europe",
+      "subregion": "Western Europe",
+      "isLandlocked": false,
+      "population": 11825551,
+      "areaKm2": 30528,
+      "languages": [
+        {
+          "code": "deu",
+          "name": "German"
+        },
+        {
+          "code": "fra",
+          "name": "French"
+        },
+        {
+          "code": "nld",
+          "name": "Dutch"
+        }
+      ],
+      "neighbors": [
+        "DE",
+        "FR",
+        "LU",
+        "NL"
+      ]
+    },
+    {
+      "iso2": "BZ",
+      "iso3": "BLZ",
+      "nameEn": "Belize",
+      "nameEs": "Belice",
+      "capital": "Belmopan",
+      "capitalLat": 17.25,
+      "capitalLng": -88.77,
+      "continent": "North America",
+      "subregion": "Central America",
+      "isLandlocked": false,
+      "population": 417634,
+      "areaKm2": 22966,
+      "languages": [
+        {
+          "code": "bjz",
+          "name": "Belizean Creole"
+        },
+        {
+          "code": "eng",
+          "name": "English"
+        },
+        {
+          "code": "spa",
+          "name": "Spanish"
+        }
+      ],
+      "neighbors": [
+        "GT",
+        "MX"
+      ]
+    },
+    {
+      "iso2": "BJ",
+      "iso3": "BEN",
+      "nameEn": "Benin",
+      "nameEs": "Benín",
+      "capital": "Porto-Novo",
+      "capitalLat": 6.48,
+      "capitalLng": 2.62,
+      "continent": "Africa",
+      "subregion": "Western Africa",
+      "isLandlocked": false,
+      "population": 13224860,
+      "areaKm2": 112622,
+      "languages": [
+        {
+          "code": "fra",
+          "name": "French"
+        }
+      ],
+      "neighbors": [
+        "BF",
+        "NE",
+        "NG",
+        "TG"
+      ]
+    },
+    {
+      "iso2": "BT",
+      "iso3": "BTN",
+      "nameEn": "Bhutan",
+      "nameEs": "Bután",
+      "capital": "Thimphu",
+      "capitalLat": 27.47,
+      "capitalLng": 89.63,
+      "continent": "Asia",
+      "subregion": "South Asia",
+      "isLandlocked": true,
+      "population": 784043,
+      "areaKm2": 38394,
+      "languages": [
+        {
+          "code": "dzo",
+          "name": "Dzongkha"
+        }
+      ],
+      "neighbors": [
+        "CN",
+        "IN"
+      ]
+    },
+    {
+      "iso2": "BO",
+      "iso3": "BOL",
+      "nameEn": "Bolivia",
+      "nameEs": "Bolivia",
+      "capital": "Sucre",
+      "capitalLat": -19.02,
+      "capitalLng": -65.26,
+      "continent": "South America",
+      "subregion": "South America",
+      "isLandlocked": true,
+      "population": 11365333,
+      "areaKm2": 1098581,
+      "languages": [
+        {
+          "code": "aym",
+          "name": "Aymara"
+        },
+        {
+          "code": "grn",
+          "name": "Guaraní"
+        },
+        {
+          "code": "que",
+          "name": "Quechua"
+        },
+        {
+          "code": "spa",
+          "name": "Spanish"
+        }
+      ],
+      "neighbors": [
+        "AR",
+        "BR",
+        "CL",
+        "PE",
+        "PY"
+      ]
+    },
+    {
+      "iso2": "BA",
+      "iso3": "BIH",
+      "nameEn": "Bosnia and Herzegovina",
+      "nameEs": "Bosnia y Herzegovina",
+      "capital": "Sarajevo",
+      "capitalLat": 43.87,
+      "capitalLng": 18.42,
+      "continent": "Europe",
+      "subregion": "Southern Europe",
+      "isLandlocked": false,
+      "population": 3422000,
+      "areaKm2": 51209,
+      "languages": [
+        {
+          "code": "bos",
+          "name": "Bosnian"
+        },
+        {
+          "code": "hrv",
+          "name": "Croatian"
+        },
+        {
+          "code": "srp",
+          "name": "Serbian"
+        }
+      ],
+      "neighbors": [
+        "HR",
+        "ME",
+        "RS"
+      ]
+    },
+    {
+      "iso2": "BW",
+      "iso3": "BWA",
+      "nameEn": "Botswana",
+      "nameEs": "Botswana",
+      "capital": "Gaborone",
+      "capitalLat": -24.63,
+      "capitalLng": 25.9,
+      "continent": "Africa",
+      "subregion": "Southern Africa",
+      "isLandlocked": true,
+      "population": 2359609,
+      "areaKm2": 582000,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        },
+        {
+          "code": "tsn",
+          "name": "Tswana"
+        }
+      ],
+      "neighbors": [
+        "NA",
+        "ZA",
+        "ZM",
+        "ZW"
+      ]
+    },
+    {
+      "iso2": "BR",
+      "iso3": "BRA",
+      "nameEn": "Brazil",
+      "nameEs": "Brasil",
+      "capital": "Brasília",
+      "capitalLat": -15.79,
+      "capitalLng": -47.88,
+      "continent": "South America",
+      "subregion": "South America",
+      "isLandlocked": false,
+      "population": 213421037,
+      "areaKm2": 8515767,
+      "languages": [
+        {
+          "code": "por",
+          "name": "Portuguese"
+        }
+      ],
+      "neighbors": [
+        "AR",
+        "BO",
+        "CO",
+        "GY",
+        "PE",
+        "PY",
+        "SR",
+        "UY",
+        "VE"
+      ]
+    },
+    {
+      "iso2": "BN",
+      "iso3": "BRN",
+      "nameEn": "Brunei",
+      "nameEs": "Brunei",
+      "capital": "Bandar Seri Begawan",
+      "capitalLat": 4.88,
+      "capitalLng": 114.93,
+      "continent": "Asia",
+      "subregion": "Southeast Asia",
+      "isLandlocked": false,
+      "population": 455500,
+      "areaKm2": 5765,
+      "languages": [
+        {
+          "code": "msa",
+          "name": "Malay"
+        }
+      ],
+      "neighbors": [
+        "MY"
+      ]
+    },
+    {
+      "iso2": "BG",
+      "iso3": "BGR",
+      "nameEn": "Bulgaria",
+      "nameEs": "Bulgaria",
+      "capital": "Sofia",
+      "capitalLat": 42.68,
+      "capitalLng": 23.32,
+      "continent": "Europe",
+      "subregion": "Eastern Europe",
+      "isLandlocked": false,
+      "population": 6437360,
+      "areaKm2": 110879,
+      "languages": [
+        {
+          "code": "bul",
+          "name": "Bulgarian"
+        }
+      ],
+      "neighbors": [
+        "GR",
+        "MK",
+        "RO",
+        "RS",
+        "TR"
+      ]
+    },
+    {
+      "iso2": "BF",
+      "iso3": "BFA",
+      "nameEn": "Burkina Faso",
+      "nameEs": "Burkina Faso",
+      "capital": "Ouagadougou",
+      "capitalLat": 12.37,
+      "capitalLng": -1.52,
+      "continent": "Africa",
+      "subregion": "Western Africa",
+      "isLandlocked": true,
+      "population": 24070553,
+      "areaKm2": 272967,
+      "languages": [
+        {
+          "code": "fra",
+          "name": "French"
+        }
+      ],
+      "neighbors": [
+        "BJ",
+        "CI",
+        "GH",
+        "ML",
+        "NE",
+        "TG"
+      ]
+    },
+    {
+      "iso2": "BI",
+      "iso3": "BDI",
+      "nameEn": "Burundi",
+      "nameEs": "Burundi",
+      "capital": "Gitega",
+      "capitalLat": -3.43,
+      "capitalLng": 29.93,
+      "continent": "Africa",
+      "subregion": "Eastern Africa",
+      "isLandlocked": true,
+      "population": 12332788,
+      "areaKm2": 27834,
+      "languages": [
+        {
+          "code": "fra",
+          "name": "French"
+        },
+        {
+          "code": "run",
+          "name": "Kirundi"
+        }
+      ],
+      "neighbors": [
+        "CD",
+        "RW",
+        "TZ"
+      ]
+    },
+    {
+      "iso2": "KH",
+      "iso3": "KHM",
+      "nameEn": "Cambodia",
+      "nameEs": "Camboya",
+      "capital": "Phnom Penh",
+      "capitalLat": 11.55,
+      "capitalLng": 104.92,
+      "continent": "Asia",
+      "subregion": "Southeast Asia",
+      "isLandlocked": false,
+      "population": 17577760,
+      "areaKm2": 181035,
+      "languages": [
+        {
+          "code": "khm",
+          "name": "Khmer"
+        }
+      ],
+      "neighbors": [
+        "LA",
+        "TH",
+        "VN"
+      ]
+    },
+    {
+      "iso2": "CM",
+      "iso3": "CMR",
+      "nameEn": "Cameroon",
+      "nameEs": "Camerún",
+      "capital": "Yaoundé",
+      "capitalLat": 3.85,
+      "capitalLng": 11.5,
+      "continent": "Africa",
+      "subregion": "Central Africa",
+      "isLandlocked": false,
+      "population": 29442327,
+      "areaKm2": 475442,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        },
+        {
+          "code": "fra",
+          "name": "French"
+        }
+      ],
+      "neighbors": [
+        "CF",
+        "CG",
+        "GA",
+        "GQ",
+        "NG",
+        "TD"
+      ]
+    },
+    {
+      "iso2": "CA",
+      "iso3": "CAN",
+      "nameEn": "Canada",
+      "nameEs": "Canadá",
+      "capital": "Ottawa",
+      "capitalLat": 45.42,
+      "capitalLng": -75.7,
+      "continent": "North America",
+      "subregion": "Northern America",
+      "isLandlocked": false,
+      "population": 41651653,
+      "areaKm2": 9984670,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        },
+        {
+          "code": "fra",
+          "name": "French"
+        }
+      ],
+      "neighbors": [
+        "US"
+      ]
+    },
+    {
+      "iso2": "CV",
+      "iso3": "CPV",
+      "nameEn": "Cape Verde",
+      "nameEs": "Cabo Verde",
+      "capital": "Praia",
+      "capitalLat": 14.92,
+      "capitalLng": -23.52,
+      "continent": "Africa",
+      "subregion": "Western Africa",
+      "isLandlocked": false,
+      "population": 491233,
+      "areaKm2": 4033,
+      "languages": [
+        {
+          "code": "por",
+          "name": "Portuguese"
+        }
+      ],
+      "neighbors": []
+    },
+    {
+      "iso2": "CF",
+      "iso3": "CAF",
+      "nameEn": "Central African Republic",
+      "nameEs": "República Centroafricana",
+      "capital": "Bangui",
+      "capitalLat": 4.37,
+      "capitalLng": 18.58,
+      "continent": "Africa",
+      "subregion": "Central Africa",
+      "isLandlocked": true,
+      "population": 6470307,
+      "areaKm2": 622984,
+      "languages": [
+        {
+          "code": "fra",
+          "name": "French"
+        },
+        {
+          "code": "sag",
+          "name": "Sango"
+        }
+      ],
+      "neighbors": [
+        "CD",
+        "CG",
+        "CM",
+        "SD",
+        "SS",
+        "TD"
+      ]
+    },
+    {
+      "iso2": "TD",
+      "iso3": "TCD",
+      "nameEn": "Chad",
+      "nameEs": "Chad",
+      "capital": "N'Djamena",
+      "capitalLat": 12.1,
+      "capitalLng": 15.03,
+      "continent": "Africa",
+      "subregion": "Central Africa",
+      "isLandlocked": true,
+      "population": 19340757,
+      "areaKm2": 1284000,
+      "languages": [
+        {
+          "code": "ara",
+          "name": "Arabic"
+        },
+        {
+          "code": "fra",
+          "name": "French"
+        }
+      ],
+      "neighbors": [
+        "CF",
+        "CM",
+        "LY",
+        "NE",
+        "NG",
+        "SD"
+      ]
+    },
+    {
+      "iso2": "CL",
+      "iso3": "CHL",
+      "nameEn": "Chile",
+      "nameEs": "Chile",
+      "capital": "Santiago",
+      "capitalLat": -33.45,
+      "capitalLng": -70.67,
+      "continent": "South America",
+      "subregion": "South America",
+      "isLandlocked": false,
+      "population": 20206953,
+      "areaKm2": 756102,
+      "languages": [
+        {
+          "code": "spa",
+          "name": "Spanish"
+        }
+      ],
+      "neighbors": [
+        "AR",
+        "BO",
+        "PE"
+      ]
+    },
+    {
+      "iso2": "CN",
+      "iso3": "CHN",
+      "nameEn": "China",
+      "nameEs": "China",
+      "capital": "Beijing",
+      "capitalLat": 39.92,
+      "capitalLng": 116.38,
+      "continent": "Asia",
+      "subregion": "East Asia",
+      "isLandlocked": false,
+      "population": 1408280000,
+      "areaKm2": 9706961,
+      "languages": [
+        {
+          "code": "zho",
+          "name": "Chinese"
+        }
+      ],
+      "neighbors": [
+        "AF",
+        "BT",
+        "IN",
+        "KG",
+        "KP",
+        "KZ",
+        "LA",
+        "MM",
+        "MN",
+        "NP",
+        "PK",
+        "RU",
+        "TJ",
+        "VN"
+      ]
+    },
+    {
+      "iso2": "CO",
+      "iso3": "COL",
+      "nameEn": "Colombia",
+      "nameEs": "Colombia",
+      "capital": "Bogotá",
+      "capitalLat": 4.71,
+      "capitalLng": -74.07,
+      "continent": "South America",
+      "subregion": "South America",
+      "isLandlocked": false,
+      "population": 53057212,
+      "areaKm2": 1141748,
+      "languages": [
+        {
+          "code": "spa",
+          "name": "Spanish"
+        }
+      ],
+      "neighbors": [
+        "BR",
+        "EC",
+        "PA",
+        "PE",
+        "VE"
+      ]
+    },
+    {
+      "iso2": "KM",
+      "iso3": "COM",
+      "nameEn": "Comoros",
+      "nameEs": "Comoras",
+      "capital": "Moroni",
+      "capitalLat": -11.7,
+      "capitalLng": 43.23,
+      "continent": "Africa",
+      "subregion": "Eastern Africa",
+      "isLandlocked": false,
+      "population": 919901,
+      "areaKm2": 1862,
+      "languages": [
+        {
+          "code": "ara",
+          "name": "Arabic"
+        },
+        {
+          "code": "fra",
+          "name": "French"
+        },
+        {
+          "code": "zdj",
+          "name": "Comorian"
+        }
+      ],
+      "neighbors": []
+    },
+    {
+      "iso2": "CR",
+      "iso3": "CRI",
+      "nameEn": "Costa Rica",
+      "nameEs": "Costa Rica",
+      "capital": "San José",
+      "capitalLat": 9.93,
+      "capitalLng": -84.09,
+      "continent": "North America",
+      "subregion": "Central America",
+      "isLandlocked": false,
+      "population": 5309625,
+      "areaKm2": 51100,
+      "languages": [
+        {
+          "code": "spa",
+          "name": "Spanish"
+        }
+      ],
+      "neighbors": [
+        "NI",
+        "PA"
+      ]
+    },
+    {
+      "iso2": "HR",
+      "iso3": "HRV",
+      "nameEn": "Croatia",
+      "nameEs": "Croacia",
+      "capital": "Zagreb",
+      "capitalLat": 45.8,
+      "capitalLng": 16,
+      "continent": "Europe",
+      "subregion": "Southern Europe",
+      "isLandlocked": false,
+      "population": 3866233,
+      "areaKm2": 56594,
+      "languages": [
+        {
+          "code": "hrv",
+          "name": "Croatian"
+        }
+      ],
+      "neighbors": [
+        "BA",
+        "HU",
+        "ME",
+        "RS",
+        "SI"
+      ]
+    },
+    {
+      "iso2": "CU",
+      "iso3": "CUB",
+      "nameEn": "Cuba",
+      "nameEs": "Cuba",
+      "capital": "Havana",
+      "capitalLat": 23.12,
+      "capitalLng": -82.35,
+      "continent": "North America",
+      "subregion": "Caribbean",
+      "isLandlocked": false,
+      "population": 9748007,
+      "areaKm2": 109884,
+      "languages": [
+        {
+          "code": "spa",
+          "name": "Spanish"
+        }
+      ],
+      "neighbors": []
+    },
+    {
+      "iso2": "CY",
+      "iso3": "CYP",
+      "nameEn": "Cyprus",
+      "nameEs": "Chipre",
+      "capital": "Nicosia",
+      "capitalLat": 35.17,
+      "capitalLng": 33.37,
+      "continent": "Europe",
+      "subregion": "Western Asia",
+      "isLandlocked": false,
+      "population": 1442614,
+      "areaKm2": 9251,
+      "languages": [
+        {
+          "code": "ell",
+          "name": "Greek"
+        },
+        {
+          "code": "tur",
+          "name": "Turkish"
+        }
+      ],
+      "neighbors": []
+    },
+    {
+      "iso2": "CZ",
+      "iso3": "CZE",
+      "nameEn": "Czech Republic",
+      "nameEs": "Chequia",
+      "capital": "Prague",
+      "capitalLat": 50.08,
+      "capitalLng": 14.47,
+      "continent": "Europe",
+      "subregion": "Eastern Europe",
+      "isLandlocked": true,
+      "population": 10882341,
+      "areaKm2": 78865,
+      "languages": [
+        {
+          "code": "ces",
+          "name": "Czech"
+        },
+        {
+          "code": "slk",
+          "name": "Slovak"
+        }
+      ],
+      "neighbors": [
+        "AT",
+        "DE",
+        "PL",
+        "SK"
+      ]
+    },
+    {
+      "iso2": "CD",
+      "iso3": "COD",
+      "nameEn": "Democratic Republic of the Congo",
+      "nameEs": "Congo (Rep. Dem.)",
+      "capital": "Kinshasa",
+      "capitalLat": -4.32,
+      "capitalLng": 15.3,
+      "continent": "Africa",
+      "subregion": "Central Africa",
+      "isLandlocked": false,
+      "population": 112832000,
+      "areaKm2": 2344858,
+      "languages": [
+        {
+          "code": "fra",
+          "name": "French"
+        },
+        {
+          "code": "kon",
+          "name": "Kikongo"
+        },
+        {
+          "code": "lin",
+          "name": "Lingala"
+        },
+        {
+          "code": "lua",
+          "name": "Tshiluba"
+        },
+        {
+          "code": "swa",
+          "name": "Swahili"
+        }
+      ],
+      "neighbors": [
+        "AO",
+        "BI",
+        "CF",
+        "CG",
+        "RW",
+        "SS",
+        "TZ",
+        "UG",
+        "ZM"
+      ]
+    },
+    {
+      "iso2": "DK",
+      "iso3": "DNK",
+      "nameEn": "Denmark",
+      "nameEs": "Dinamarca",
+      "capital": "Copenhagen",
+      "capitalLat": 55.67,
+      "capitalLng": 12.58,
+      "continent": "Europe",
+      "subregion": "Northern Europe",
+      "isLandlocked": false,
+      "population": 6011488,
+      "areaKm2": 43094,
+      "languages": [
+        {
+          "code": "dan",
+          "name": "Danish"
+        }
+      ],
+      "neighbors": [
+        "DE"
+      ]
+    },
+    {
+      "iso2": "DJ",
+      "iso3": "DJI",
+      "nameEn": "Djibouti",
+      "nameEs": "Djibouti",
+      "capital": "Djibouti",
+      "capitalLat": 11.58,
+      "capitalLng": 43.15,
+      "continent": "Africa",
+      "subregion": "Eastern Africa",
+      "isLandlocked": false,
+      "population": 1066809,
+      "areaKm2": 23200,
+      "languages": [
+        {
+          "code": "ara",
+          "name": "Arabic"
+        },
+        {
+          "code": "fra",
+          "name": "French"
+        }
+      ],
+      "neighbors": [
+        "ER",
+        "ET",
+        "SO"
+      ]
+    },
+    {
+      "iso2": "DM",
+      "iso3": "DMA",
+      "nameEn": "Dominica",
+      "nameEs": "Dominica",
+      "capital": "Roseau",
+      "capitalLat": 15.3,
+      "capitalLng": -61.4,
+      "continent": "North America",
+      "subregion": "Caribbean",
+      "isLandlocked": false,
+      "population": 67408,
+      "areaKm2": 751,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        }
+      ],
+      "neighbors": []
+    },
+    {
+      "iso2": "DO",
+      "iso3": "DOM",
+      "nameEn": "Dominican Republic",
+      "nameEs": "República Dominicana",
+      "capital": "Santo Domingo",
+      "capitalLat": 18.47,
+      "capitalLng": -69.9,
+      "continent": "North America",
+      "subregion": "Caribbean",
+      "isLandlocked": false,
+      "population": 10771504,
+      "areaKm2": 48671,
+      "languages": [
+        {
+          "code": "spa",
+          "name": "Spanish"
+        }
+      ],
+      "neighbors": [
+        "HT"
+      ]
+    },
+    {
+      "iso2": "TL",
+      "iso3": "TLS",
+      "nameEn": "East Timor",
+      "nameEs": "Timor Oriental",
+      "capital": "Dili",
+      "capitalLat": -8.58,
+      "capitalLng": 125.6,
+      "continent": "Asia",
+      "subregion": "Southeast Asia",
+      "isLandlocked": false,
+      "population": 1391221,
+      "areaKm2": 14874,
+      "languages": [
+        {
+          "code": "por",
+          "name": "Portuguese"
+        },
+        {
+          "code": "tet",
+          "name": "Tetum"
+        }
+      ],
+      "neighbors": [
+        "ID"
+      ]
+    },
+    {
+      "iso2": "EC",
+      "iso3": "ECU",
+      "nameEn": "Ecuador",
+      "nameEs": "Ecuador",
+      "capital": "Quito",
+      "capitalLat": -0.22,
+      "capitalLng": -78.5,
+      "continent": "South America",
+      "subregion": "South America",
+      "isLandlocked": false,
+      "population": 18103660,
+      "areaKm2": 276841,
+      "languages": [
+        {
+          "code": "spa",
+          "name": "Spanish"
+        }
+      ],
+      "neighbors": [
+        "CO",
+        "PE"
+      ]
+    },
+    {
+      "iso2": "EG",
+      "iso3": "EGY",
+      "nameEn": "Egypt",
+      "nameEs": "Egipto",
+      "capital": "Cairo",
+      "capitalLat": 30.05,
+      "capitalLng": 31.25,
+      "continent": "Africa",
+      "subregion": "Northern Africa",
+      "isLandlocked": false,
+      "population": 107271260,
+      "areaKm2": 1002450,
+      "languages": [
+        {
+          "code": "ara",
+          "name": "Arabic"
+        }
+      ],
+      "neighbors": [
+        "IL",
+        "LY",
+        "PS",
+        "SD"
+      ]
+    },
+    {
+      "iso2": "SV",
+      "iso3": "SLV",
+      "nameEn": "El Salvador",
+      "nameEs": "El Salvador",
+      "capital": "San Salvador",
+      "capitalLat": 13.7,
+      "capitalLng": -89.2,
+      "continent": "North America",
+      "subregion": "Central America",
+      "isLandlocked": false,
+      "population": 6029976,
+      "areaKm2": 21041,
+      "languages": [
+        {
+          "code": "spa",
+          "name": "Spanish"
+        }
+      ],
+      "neighbors": [
+        "GT",
+        "HN"
+      ]
+    },
+    {
+      "iso2": "GQ",
+      "iso3": "GNQ",
+      "nameEn": "Equatorial Guinea",
+      "nameEs": "Guinea Ecuatorial",
+      "capital": "Malabo",
+      "capitalLat": 1.35,
+      "capitalLng": 10.49,
+      "continent": "Africa",
+      "subregion": "Central Africa",
+      "isLandlocked": false,
+      "population": 1668768,
+      "areaKm2": 28051,
+      "languages": [
+        {
+          "code": "fra",
+          "name": "French"
+        },
+        {
+          "code": "por",
+          "name": "Portuguese"
+        },
+        {
+          "code": "spa",
+          "name": "Spanish"
+        }
+      ],
+      "neighbors": [
+        "CM",
+        "GA"
+      ]
+    },
+    {
+      "iso2": "ER",
+      "iso3": "ERI",
+      "nameEn": "Eritrea",
+      "nameEs": "Eritrea",
+      "capital": "Asmara",
+      "capitalLat": 15.33,
+      "capitalLng": 38.93,
+      "continent": "Africa",
+      "subregion": "Eastern Africa",
+      "isLandlocked": false,
+      "population": 3607000,
+      "areaKm2": 117600,
+      "languages": [
+        {
+          "code": "ara",
+          "name": "Arabic"
+        },
+        {
+          "code": "eng",
+          "name": "English"
+        },
+        {
+          "code": "tir",
+          "name": "Tigrinya"
+        }
+      ],
+      "neighbors": [
+        "DJ",
+        "ET",
+        "SD"
+      ]
+    },
+    {
+      "iso2": "EE",
+      "iso3": "EST",
+      "nameEn": "Estonia",
+      "nameEs": "Estonia",
+      "capital": "Tallinn",
+      "capitalLat": 59.43,
+      "capitalLng": 24.72,
+      "continent": "Europe",
+      "subregion": "Northern Europe",
+      "isLandlocked": false,
+      "population": 1369995,
+      "areaKm2": 45227,
+      "languages": [
+        {
+          "code": "est",
+          "name": "Estonian"
+        }
+      ],
+      "neighbors": [
+        "LV",
+        "RU"
+      ]
+    },
+    {
+      "iso2": "SZ",
+      "iso3": "SWZ",
+      "nameEn": "Eswatini",
+      "nameEs": "Suazilandia",
+      "capital": "Mbabane",
+      "capitalLat": -26.32,
+      "capitalLng": 31.13,
+      "continent": "Africa",
+      "subregion": "Southern Africa",
+      "isLandlocked": true,
+      "population": 1235549,
+      "areaKm2": 17364,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        },
+        {
+          "code": "ssw",
+          "name": "Swazi"
+        }
+      ],
+      "neighbors": [
+        "MZ",
+        "ZA"
+      ]
+    },
+    {
+      "iso2": "ET",
+      "iso3": "ETH",
+      "nameEn": "Ethiopia",
+      "nameEs": "Etiopía",
+      "capital": "Addis Ababa",
+      "capitalLat": 9.03,
+      "capitalLng": 38.7,
+      "continent": "Africa",
+      "subregion": "Eastern Africa",
+      "isLandlocked": true,
+      "population": 111652998,
+      "areaKm2": 1104300,
+      "languages": [
+        {
+          "code": "amh",
+          "name": "Amharic"
+        }
+      ],
+      "neighbors": [
+        "DJ",
+        "ER",
+        "KE",
+        "SD",
+        "SO",
+        "SS"
+      ]
+    },
+    {
+      "iso2": "FJ",
+      "iso3": "FJI",
+      "nameEn": "Fiji",
+      "nameEs": "Fiyi",
+      "capital": "Suva",
+      "capitalLat": -18.13,
+      "capitalLng": 178.42,
+      "continent": "Oceania",
+      "subregion": "Melanesia",
+      "isLandlocked": false,
+      "population": 900869,
+      "areaKm2": 18272,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        },
+        {
+          "code": "fij",
+          "name": "Fijian"
+        },
+        {
+          "code": "hif",
+          "name": "Fiji Hindi"
+        }
+      ],
+      "neighbors": []
+    },
+    {
+      "iso2": "FI",
+      "iso3": "FIN",
+      "nameEn": "Finland",
+      "nameEs": "Finlandia",
+      "capital": "Helsinki",
+      "capitalLat": 60.17,
+      "capitalLng": 24.93,
+      "continent": "Europe",
+      "subregion": "Northern Europe",
+      "isLandlocked": false,
+      "population": 5650325,
+      "areaKm2": 338455,
+      "languages": [
+        {
+          "code": "fin",
+          "name": "Finnish"
+        },
+        {
+          "code": "swe",
+          "name": "Swedish"
+        }
+      ],
+      "neighbors": [
+        "NO",
+        "RU",
+        "SE"
+      ]
+    },
+    {
+      "iso2": "FR",
+      "iso3": "FRA",
+      "nameEn": "France",
+      "nameEs": "Francia",
+      "capital": "Paris",
+      "capitalLat": 48.87,
+      "capitalLng": 2.33,
+      "continent": "Europe",
+      "subregion": "Western Europe",
+      "isLandlocked": false,
+      "population": 66351959,
+      "areaKm2": 543908,
+      "languages": [
+        {
+          "code": "fra",
+          "name": "French"
+        }
+      ],
+      "neighbors": [
+        "AD",
+        "BE",
+        "CH",
+        "DE",
+        "ES",
+        "IT",
+        "LU",
+        "MC"
+      ]
+    },
+    {
+      "iso2": "GA",
+      "iso3": "GAB",
+      "nameEn": "Gabon",
+      "nameEs": "Gabón",
+      "capital": "Libreville",
+      "capitalLat": 0.38,
+      "capitalLng": 9.45,
+      "continent": "Africa",
+      "subregion": "Central Africa",
+      "isLandlocked": false,
+      "population": 2469296,
+      "areaKm2": 267668,
+      "languages": [
+        {
+          "code": "fra",
+          "name": "French"
+        }
+      ],
+      "neighbors": [
+        "CG",
+        "CM",
+        "GQ"
+      ]
+    },
+    {
+      "iso2": "GM",
+      "iso3": "GMB",
+      "nameEn": "Gambia",
+      "nameEs": "Gambia",
+      "capital": "Banjul",
+      "capitalLat": 13.45,
+      "capitalLng": -16.57,
+      "continent": "Africa",
+      "subregion": "Western Africa",
+      "isLandlocked": false,
+      "population": 2422712,
+      "areaKm2": 10689,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        }
+      ],
+      "neighbors": [
+        "SN"
+      ]
+    },
+    {
+      "iso2": "GE",
+      "iso3": "GEO",
+      "nameEn": "Georgia",
+      "nameEs": "Georgia",
+      "capital": "Tbilisi",
+      "capitalLat": 41.68,
+      "capitalLng": 44.83,
+      "continent": "Asia",
+      "subregion": "Western Asia",
+      "isLandlocked": false,
+      "population": 4000921,
+      "areaKm2": 69700,
+      "languages": [
+        {
+          "code": "kat",
+          "name": "Georgian"
+        }
+      ],
+      "neighbors": [
+        "AM",
+        "AZ",
+        "RU",
+        "TR"
+      ]
+    },
+    {
+      "iso2": "DE",
+      "iso3": "DEU",
+      "nameEn": "Germany",
+      "nameEs": "Alemania",
+      "capital": "Berlin",
+      "capitalLat": 52.52,
+      "capitalLng": 13.4,
+      "continent": "Europe",
+      "subregion": "Western Europe",
+      "isLandlocked": false,
+      "population": 83491249,
+      "areaKm2": 357114,
+      "languages": [
+        {
+          "code": "deu",
+          "name": "German"
+        }
+      ],
+      "neighbors": [
+        "AT",
+        "BE",
+        "CH",
+        "CZ",
+        "DK",
+        "FR",
+        "LU",
+        "NL",
+        "PL"
+      ]
+    },
+    {
+      "iso2": "GH",
+      "iso3": "GHA",
+      "nameEn": "Ghana",
+      "nameEs": "Ghana",
+      "capital": "Accra",
+      "capitalLat": 5.55,
+      "capitalLng": -0.22,
+      "continent": "Africa",
+      "subregion": "Western Africa",
+      "isLandlocked": false,
+      "population": 33742380,
+      "areaKm2": 238533,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        }
+      ],
+      "neighbors": [
+        "BF",
+        "CI",
+        "TG"
+      ]
+    },
+    {
+      "iso2": "GR",
+      "iso3": "GRC",
+      "nameEn": "Greece",
+      "nameEs": "Grecia",
+      "capital": "Athens",
+      "capitalLat": 37.98,
+      "capitalLng": 23.73,
+      "continent": "Europe",
+      "subregion": "Southern Europe",
+      "isLandlocked": false,
+      "population": 10400720,
+      "areaKm2": 131990,
+      "languages": [
+        {
+          "code": "ell",
+          "name": "Greek"
+        }
+      ],
+      "neighbors": [
+        "AL",
+        "BG",
+        "MK",
+        "TR"
+      ]
+    },
+    {
+      "iso2": "GD",
+      "iso3": "GRD",
+      "nameEn": "Grenada",
+      "nameEs": "Grenada",
+      "capital": "Saint George's",
+      "capitalLat": 32.38,
+      "capitalLng": -64.68,
+      "continent": "North America",
+      "subregion": "Caribbean",
+      "isLandlocked": false,
+      "population": 109021,
+      "areaKm2": 344,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        }
+      ],
+      "neighbors": []
+    },
+    {
+      "iso2": "GT",
+      "iso3": "GTM",
+      "nameEn": "Guatemala",
+      "nameEs": "Guatemala",
+      "capital": "Guatemala City",
+      "capitalLat": 14.62,
+      "capitalLng": -90.52,
+      "continent": "North America",
+      "subregion": "Central America",
+      "isLandlocked": false,
+      "population": 18079810,
+      "areaKm2": 108889,
+      "languages": [
+        {
+          "code": "spa",
+          "name": "Spanish"
+        }
+      ],
+      "neighbors": [
+        "BZ",
+        "HN",
+        "MX",
+        "SV"
+      ]
+    },
+    {
+      "iso2": "GN",
+      "iso3": "GIN",
+      "nameEn": "Guinea",
+      "nameEs": "Guinea",
+      "capital": "Conakry",
+      "capitalLat": 9.5,
+      "capitalLng": -13.7,
+      "continent": "Africa",
+      "subregion": "Western Africa",
+      "isLandlocked": false,
+      "population": 14363931,
+      "areaKm2": 245857,
+      "languages": [
+        {
+          "code": "fra",
+          "name": "French"
+        }
+      ],
+      "neighbors": [
+        "CI",
+        "GW",
+        "LR",
+        "ML",
+        "SL",
+        "SN"
+      ]
+    },
+    {
+      "iso2": "GW",
+      "iso3": "GNB",
+      "nameEn": "Guinea-Bissau",
+      "nameEs": "Guinea-Bisáu",
+      "capital": "Bissau",
+      "capitalLat": 11.85,
+      "capitalLng": -15.58,
+      "continent": "Africa",
+      "subregion": "Western Africa",
+      "isLandlocked": false,
+      "population": 1781308,
+      "areaKm2": 36125,
+      "languages": [
+        {
+          "code": "por",
+          "name": "Portuguese"
+        },
+        {
+          "code": "pov",
+          "name": "Upper Guinea Creole"
+        }
+      ],
+      "neighbors": [
+        "GN",
+        "SN"
+      ]
+    },
+    {
+      "iso2": "GY",
+      "iso3": "GUY",
+      "nameEn": "Guyana",
+      "nameEs": "Guyana",
+      "capital": "Georgetown",
+      "capitalLat": 6.8,
+      "capitalLng": -58.15,
+      "continent": "South America",
+      "subregion": "South America",
+      "isLandlocked": false,
+      "population": 772975,
+      "areaKm2": 214969,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        }
+      ],
+      "neighbors": [
+        "BR",
+        "SR",
+        "VE"
+      ]
+    },
+    {
+      "iso2": "HT",
+      "iso3": "HTI",
+      "nameEn": "Haiti",
+      "nameEs": "Haití",
+      "capital": "Port-au-Prince",
+      "capitalLat": 18.53,
+      "capitalLng": -72.33,
+      "continent": "North America",
+      "subregion": "Caribbean",
+      "isLandlocked": false,
+      "population": 11867032,
+      "areaKm2": 27750,
+      "languages": [
+        {
+          "code": "fra",
+          "name": "French"
+        },
+        {
+          "code": "hat",
+          "name": "Haitian Creole"
+        }
+      ],
+      "neighbors": [
+        "DO"
+      ]
+    },
+    {
+      "iso2": "HN",
+      "iso3": "HND",
+      "nameEn": "Honduras",
+      "nameEs": "Honduras",
+      "capital": "Tegucigalpa",
+      "capitalLat": 14.1,
+      "capitalLng": -87.22,
+      "continent": "North America",
+      "subregion": "Central America",
+      "isLandlocked": false,
+      "population": 9892632,
+      "areaKm2": 112492,
+      "languages": [
+        {
+          "code": "spa",
+          "name": "Spanish"
+        }
+      ],
+      "neighbors": [
+        "GT",
+        "NI",
+        "SV"
+      ]
+    },
+    {
+      "iso2": "HU",
+      "iso3": "HUN",
+      "nameEn": "Hungary",
+      "nameEs": "Hungría",
+      "capital": "Budapest",
+      "capitalLat": 47.5,
+      "capitalLng": 19.08,
+      "continent": "Europe",
+      "subregion": "Eastern Europe",
+      "isLandlocked": true,
+      "population": 9539502,
+      "areaKm2": 93028,
+      "languages": [
+        {
+          "code": "hun",
+          "name": "Hungarian"
+        }
+      ],
+      "neighbors": [
+        "AT",
+        "HR",
+        "RO",
+        "RS",
+        "SI",
+        "SK",
+        "UA"
+      ]
+    },
+    {
+      "iso2": "IS",
+      "iso3": "ISL",
+      "nameEn": "Iceland",
+      "nameEs": "Islandia",
+      "capital": "Reykjavik",
+      "capitalLat": 64.15,
+      "capitalLng": -21.95,
+      "continent": "Europe",
+      "subregion": "Northern Europe",
+      "isLandlocked": false,
+      "population": 391810,
+      "areaKm2": 103000,
+      "languages": [
+        {
+          "code": "isl",
+          "name": "Icelandic"
+        }
+      ],
+      "neighbors": []
+    },
+    {
+      "iso2": "IN",
+      "iso3": "IND",
+      "nameEn": "India",
+      "nameEs": "India",
+      "capital": "New Delhi",
+      "capitalLat": 28.6,
+      "capitalLng": 77.2,
+      "continent": "Asia",
+      "subregion": "South Asia",
+      "isLandlocked": false,
+      "population": 1417492000,
+      "areaKm2": 3287263,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        },
+        {
+          "code": "hin",
+          "name": "Hindi"
+        },
+        {
+          "code": "tam",
+          "name": "Tamil"
+        }
+      ],
+      "neighbors": [
+        "BD",
+        "BT",
+        "CN",
+        "MM",
+        "NP",
+        "PK"
+      ]
+    },
+    {
+      "iso2": "ID",
+      "iso3": "IDN",
+      "nameEn": "Indonesia",
+      "nameEs": "Indonesia",
+      "capital": "Jakarta",
+      "capitalLat": -6.17,
+      "capitalLng": 106.82,
+      "continent": "Asia",
+      "subregion": "Southeast Asia",
+      "isLandlocked": false,
+      "population": 284438782,
+      "areaKm2": 1904569,
+      "languages": [
+        {
+          "code": "ind",
+          "name": "Indonesian"
+        }
+      ],
+      "neighbors": [
+        "MY",
+        "PG",
+        "TL"
+      ]
+    },
+    {
+      "iso2": "IR",
+      "iso3": "IRN",
+      "nameEn": "Iran",
+      "nameEs": "Iran",
+      "capital": "Tehran",
+      "capitalLat": 35.7,
+      "capitalLng": 51.42,
+      "continent": "Asia",
+      "subregion": "Western Asia",
+      "isLandlocked": false,
+      "population": 85961000,
+      "areaKm2": 1648195,
+      "languages": [
+        {
+          "code": "fas",
+          "name": "Persian (Farsi)"
+        }
+      ],
+      "neighbors": [
+        "AF",
+        "AM",
+        "AZ",
+        "IQ",
+        "PK",
+        "TM",
+        "TR"
+      ]
+    },
+    {
+      "iso2": "IQ",
+      "iso3": "IRQ",
+      "nameEn": "Iraq",
+      "nameEs": "Irak",
+      "capital": "Baghdad",
+      "capitalLat": 33.33,
+      "capitalLng": 44.4,
+      "continent": "Asia",
+      "subregion": "Western Asia",
+      "isLandlocked": false,
+      "population": 46118793,
+      "areaKm2": 438317,
+      "languages": [
+        {
+          "code": "ara",
+          "name": "Arabic"
+        },
+        {
+          "code": "arc",
+          "name": "Aramaic"
+        },
+        {
+          "code": "ckb",
+          "name": "Sorani"
+        }
+      ],
+      "neighbors": [
+        "IR",
+        "JO",
+        "KW",
+        "SA",
+        "SY",
+        "TR"
+      ]
+    },
+    {
+      "iso2": "IE",
+      "iso3": "IRL",
+      "nameEn": "Ireland",
+      "nameEs": "Irlanda",
+      "capital": "Dublin",
+      "capitalLat": 53.32,
+      "capitalLng": -6.23,
+      "continent": "Europe",
+      "subregion": "Northern Europe",
+      "isLandlocked": false,
+      "population": 5458600,
+      "areaKm2": 70273,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        },
+        {
+          "code": "gle",
+          "name": "Irish"
+        }
+      ],
+      "neighbors": [
+        "GB"
+      ]
+    },
+    {
+      "iso2": "IL",
+      "iso3": "ISR",
+      "nameEn": "Israel",
+      "nameEs": "Israel",
+      "capital": "Jerusalem",
+      "capitalLat": 31.77,
+      "capitalLng": 35.23,
+      "continent": "Asia",
+      "subregion": "Western Asia",
+      "isLandlocked": false,
+      "population": 10134800,
+      "areaKm2": 21937,
+      "languages": [
+        {
+          "code": "ara",
+          "name": "Arabic"
+        },
+        {
+          "code": "heb",
+          "name": "Hebrew"
+        }
+      ],
+      "neighbors": [
+        "EG",
+        "JO",
+        "LB",
+        "PS",
+        "SY"
+      ]
+    },
+    {
+      "iso2": "IT",
+      "iso3": "ITA",
+      "nameEn": "Italy",
+      "nameEs": "Italia",
+      "capital": "Rome",
+      "capitalLat": 41.9,
+      "capitalLng": 12.48,
+      "continent": "Europe",
+      "subregion": "Southern Europe",
+      "isLandlocked": false,
+      "population": 58927633,
+      "areaKm2": 301336,
+      "languages": [
+        {
+          "code": "ita",
+          "name": "Italian"
+        },
+        {
+          "code": "cat",
+          "name": "Catalan"
+        }
+      ],
+      "neighbors": [
+        "AT",
+        "CH",
+        "FR",
+        "SI",
+        "SM",
+        "VA"
+      ]
+    },
+    {
+      "iso2": "CI",
+      "iso3": "CIV",
+      "nameEn": "Ivory Coast",
+      "nameEs": "Costa de Marfil",
+      "capital": "Yamoussoukro",
+      "capitalLat": 6.82,
+      "capitalLng": -5.27,
+      "continent": "Africa",
+      "subregion": "Western Africa",
+      "isLandlocked": false,
+      "population": 31719275,
+      "areaKm2": 322463,
+      "languages": [
+        {
+          "code": "fra",
+          "name": "French"
+        }
+      ],
+      "neighbors": [
+        "BF",
+        "GH",
+        "GN",
+        "LR",
+        "ML"
+      ]
+    },
+    {
+      "iso2": "JM",
+      "iso3": "JAM",
+      "nameEn": "Jamaica",
+      "nameEs": "Jamaica",
+      "capital": "Kingston",
+      "capitalLat": 17.99702,
+      "capitalLng": -76.79358,
+      "continent": "North America",
+      "subregion": "Caribbean",
+      "isLandlocked": false,
+      "population": 2825544,
+      "areaKm2": 10991,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        },
+        {
+          "code": "jam",
+          "name": "Jamaican Patois"
+        }
+      ],
+      "neighbors": []
+    },
+    {
+      "iso2": "JP",
+      "iso3": "JPN",
+      "nameEn": "Japan",
+      "nameEs": "Japón",
+      "capital": "Tokyo",
+      "capitalLat": 35.68,
+      "capitalLng": 139.75,
+      "continent": "Asia",
+      "subregion": "East Asia",
+      "isLandlocked": false,
+      "population": 123210000,
+      "areaKm2": 377930,
+      "languages": [
+        {
+          "code": "jpn",
+          "name": "Japanese"
+        }
+      ],
+      "neighbors": []
+    },
+    {
+      "iso2": "JO",
+      "iso3": "JOR",
+      "nameEn": "Jordan",
+      "nameEs": "Jordania",
+      "capital": "Amman",
+      "capitalLat": 31.95,
+      "capitalLng": 35.93,
+      "continent": "Asia",
+      "subregion": "Western Asia",
+      "isLandlocked": false,
+      "population": 11734000,
+      "areaKm2": 89342,
+      "languages": [
+        {
+          "code": "ara",
+          "name": "Arabic"
+        }
+      ],
+      "neighbors": [
+        "IL",
+        "IQ",
+        "PS",
+        "SA",
+        "SY"
+      ]
+    },
+    {
+      "iso2": "KZ",
+      "iso3": "KAZ",
+      "nameEn": "Kazakhstan",
+      "nameEs": "Kazajistán",
+      "capital": "Astana",
+      "capitalLat": 51.16,
+      "capitalLng": 71.45,
+      "continent": "Asia",
+      "subregion": "Central Asia",
+      "isLandlocked": true,
+      "population": 20426568,
+      "areaKm2": 2724900,
+      "languages": [
+        {
+          "code": "kaz",
+          "name": "Kazakh"
+        },
+        {
+          "code": "rus",
+          "name": "Russian"
+        }
+      ],
+      "neighbors": [
+        "CN",
+        "KG",
+        "RU",
+        "TM",
+        "UZ"
+      ]
+    },
+    {
+      "iso2": "KE",
+      "iso3": "KEN",
+      "nameEn": "Kenya",
+      "nameEs": "Kenia",
+      "capital": "Nairobi",
+      "capitalLat": -1.28,
+      "capitalLng": 36.82,
+      "continent": "Africa",
+      "subregion": "Eastern Africa",
+      "isLandlocked": false,
+      "population": 53330978,
+      "areaKm2": 580367,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        },
+        {
+          "code": "swa",
+          "name": "Swahili"
+        }
+      ],
+      "neighbors": [
+        "ET",
+        "SO",
+        "SS",
+        "TZ",
+        "UG"
+      ]
+    },
+    {
+      "iso2": "KI",
+      "iso3": "KIR",
+      "nameEn": "Kiribati",
+      "nameEs": "Kiribati",
+      "capital": "Tarawa",
+      "capitalLat": 1.33,
+      "capitalLng": 172.98,
+      "continent": "Oceania",
+      "subregion": "Micronesia",
+      "isLandlocked": false,
+      "population": 120740,
+      "areaKm2": 811,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        },
+        {
+          "code": "gil",
+          "name": "Gilbertese"
+        }
+      ],
+      "neighbors": []
+    },
+    {
+      "iso2": "XK",
+      "iso3": "UNK",
+      "nameEn": "Kosovo",
+      "nameEs": "Kosovo",
+      "capital": "Pristina",
+      "capitalLat": 42.67,
+      "capitalLng": 21.17,
+      "continent": "Europe",
+      "subregion": "Southern Europe",
+      "isLandlocked": true,
+      "population": 1585566,
+      "areaKm2": 10908,
+      "languages": [
+        {
+          "code": "sqi",
+          "name": "Albanian"
+        },
+        {
+          "code": "srp",
+          "name": "Serbian"
+        }
+      ],
+      "neighbors": [
+        "AL",
+        "ME",
+        "MK",
+        "RS"
+      ]
+    },
+    {
+      "iso2": "KW",
+      "iso3": "KWT",
+      "nameEn": "Kuwait",
+      "nameEs": "Kuwait",
+      "capital": "Kuwait City",
+      "capitalLat": 29.37,
+      "capitalLng": 47.97,
+      "continent": "Asia",
+      "subregion": "Western Asia",
+      "isLandlocked": false,
+      "population": 4881254,
+      "areaKm2": 17818,
+      "languages": [
+        {
+          "code": "ara",
+          "name": "Arabic"
+        }
+      ],
+      "neighbors": [
+        "IQ",
+        "SA"
+      ]
+    },
+    {
+      "iso2": "KG",
+      "iso3": "KGZ",
+      "nameEn": "Kyrgyzstan",
+      "nameEs": "Kirguizistán",
+      "capital": "Bishkek",
+      "capitalLat": 42.87,
+      "capitalLng": 74.6,
+      "continent": "Asia",
+      "subregion": "Central Asia",
+      "isLandlocked": true,
+      "population": 7281800,
+      "areaKm2": 199951,
+      "languages": [
+        {
+          "code": "kir",
+          "name": "Kyrgyz"
+        },
+        {
+          "code": "rus",
+          "name": "Russian"
+        }
+      ],
+      "neighbors": [
+        "CN",
+        "KZ",
+        "TJ",
+        "UZ"
+      ]
+    },
+    {
+      "iso2": "LA",
+      "iso3": "LAO",
+      "nameEn": "Laos",
+      "nameEs": "Laos",
+      "capital": "Vientiane",
+      "capitalLat": 17.97,
+      "capitalLng": 102.6,
+      "continent": "Asia",
+      "subregion": "Southeast Asia",
+      "isLandlocked": true,
+      "population": 7647000,
+      "areaKm2": 236800,
+      "languages": [
+        {
+          "code": "lao",
+          "name": "Lao"
+        }
+      ],
+      "neighbors": [
+        "CN",
+        "KH",
+        "MM",
+        "TH",
+        "VN"
+      ]
+    },
+    {
+      "iso2": "LV",
+      "iso3": "LVA",
+      "nameEn": "Latvia",
+      "nameEs": "Letonia",
+      "capital": "Riga",
+      "capitalLat": 56.95,
+      "capitalLng": 24.1,
+      "continent": "Europe",
+      "subregion": "Northern Europe",
+      "isLandlocked": false,
+      "population": 1829000,
+      "areaKm2": 64559,
+      "languages": [
+        {
+          "code": "lav",
+          "name": "Latvian"
+        }
+      ],
+      "neighbors": [
+        "BY",
+        "EE",
+        "LT",
+        "RU"
+      ]
+    },
+    {
+      "iso2": "LB",
+      "iso3": "LBN",
+      "nameEn": "Lebanon",
+      "nameEs": "Líbano",
+      "capital": "Beirut",
+      "capitalLat": 33.87,
+      "capitalLng": 35.5,
+      "continent": "Asia",
+      "subregion": "Western Asia",
+      "isLandlocked": false,
+      "population": 5490000,
+      "areaKm2": 10452,
+      "languages": [
+        {
+          "code": "ara",
+          "name": "Arabic"
+        },
+        {
+          "code": "fra",
+          "name": "French"
+        }
+      ],
+      "neighbors": [
+        "IL",
+        "SY"
+      ]
+    },
+    {
+      "iso2": "LS",
+      "iso3": "LSO",
+      "nameEn": "Lesotho",
+      "nameEs": "Lesotho",
+      "capital": "Maseru",
+      "capitalLat": -29.32,
+      "capitalLng": 27.48,
+      "continent": "Africa",
+      "subregion": "Southern Africa",
+      "isLandlocked": true,
+      "population": 2116427,
+      "areaKm2": 30355,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        },
+        {
+          "code": "sot",
+          "name": "Sotho"
+        }
+      ],
+      "neighbors": [
+        "ZA"
+      ]
+    },
+    {
+      "iso2": "LR",
+      "iso3": "LBR",
+      "nameEn": "Liberia",
+      "nameEs": "Liberia",
+      "capital": "Monrovia",
+      "capitalLat": 6.3,
+      "capitalLng": -10.8,
+      "continent": "Africa",
+      "subregion": "Western Africa",
+      "isLandlocked": false,
+      "population": 5248621,
+      "areaKm2": 111369,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        }
+      ],
+      "neighbors": [
+        "CI",
+        "GN",
+        "SL"
+      ]
+    },
+    {
+      "iso2": "LY",
+      "iso3": "LBY",
+      "nameEn": "Libya",
+      "nameEs": "Libia",
+      "capital": "Tripoli",
+      "capitalLat": 32.88,
+      "capitalLng": 13.17,
+      "continent": "Africa",
+      "subregion": "Northern Africa",
+      "isLandlocked": false,
+      "population": 7459000,
+      "areaKm2": 1759540,
+      "languages": [
+        {
+          "code": "ara",
+          "name": "Arabic"
+        }
+      ],
+      "neighbors": [
+        "DZ",
+        "EG",
+        "NE",
+        "SD",
+        "TD",
+        "TN"
+      ]
+    },
+    {
+      "iso2": "LI",
+      "iso3": "LIE",
+      "nameEn": "Liechtenstein",
+      "nameEs": "Liechtenstein",
+      "capital": "Vaduz",
+      "capitalLat": 47.13,
+      "capitalLng": 9.52,
+      "continent": "Europe",
+      "subregion": "Western Europe",
+      "isLandlocked": true,
+      "population": 40900,
+      "areaKm2": 160,
+      "languages": [
+        {
+          "code": "deu",
+          "name": "German"
+        }
+      ],
+      "neighbors": [
+        "AT",
+        "CH"
+      ]
+    },
+    {
+      "iso2": "LT",
+      "iso3": "LTU",
+      "nameEn": "Lithuania",
+      "nameEs": "Lituania",
+      "capital": "Vilnius",
+      "capitalLat": 54.68,
+      "capitalLng": 25.32,
+      "continent": "Europe",
+      "subregion": "Northern Europe",
+      "isLandlocked": false,
+      "population": 2894886,
+      "areaKm2": 65300,
+      "languages": [
+        {
+          "code": "lit",
+          "name": "Lithuanian"
+        }
+      ],
+      "neighbors": [
+        "BY",
+        "LV",
+        "PL",
+        "RU"
+      ]
+    },
+    {
+      "iso2": "LU",
+      "iso3": "LUX",
+      "nameEn": "Luxembourg",
+      "nameEs": "Luxemburgo",
+      "capital": "Luxembourg City",
+      "capitalLat": 49.6,
+      "capitalLng": 6.12,
+      "continent": "Europe",
+      "subregion": "Western Europe",
+      "isLandlocked": true,
+      "population": 681973,
+      "areaKm2": 2586,
+      "languages": [
+        {
+          "code": "deu",
+          "name": "German"
+        },
+        {
+          "code": "fra",
+          "name": "French"
+        },
+        {
+          "code": "ltz",
+          "name": "Luxembourgish"
+        }
+      ],
+      "neighbors": [
+        "BE",
+        "DE",
+        "FR"
+      ]
+    },
+    {
+      "iso2": "MG",
+      "iso3": "MDG",
+      "nameEn": "Madagascar",
+      "nameEs": "Madagascar",
+      "capital": "Antananarivo",
+      "capitalLat": -18.92,
+      "capitalLng": 47.52,
+      "continent": "Africa",
+      "subregion": "Eastern Africa",
+      "isLandlocked": false,
+      "population": 31727042,
+      "areaKm2": 587041,
+      "languages": [
+        {
+          "code": "fra",
+          "name": "French"
+        },
+        {
+          "code": "mlg",
+          "name": "Malagasy"
+        }
+      ],
+      "neighbors": []
+    },
+    {
+      "iso2": "MW",
+      "iso3": "MWI",
+      "nameEn": "Malawi",
+      "nameEs": "Malawi",
+      "capital": "Lilongwe",
+      "capitalLat": -13.97,
+      "capitalLng": 33.78,
+      "continent": "Africa",
+      "subregion": "Eastern Africa",
+      "isLandlocked": true,
+      "population": 20734262,
+      "areaKm2": 118484,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        },
+        {
+          "code": "nya",
+          "name": "Chewa"
+        }
+      ],
+      "neighbors": [
+        "MZ",
+        "TZ",
+        "ZM"
+      ]
+    },
+    {
+      "iso2": "MY",
+      "iso3": "MYS",
+      "nameEn": "Malaysia",
+      "nameEs": "Malasia",
+      "capital": "Kuala Lumpur",
+      "capitalLat": 3.17,
+      "capitalLng": 101.7,
+      "continent": "Asia",
+      "subregion": "Southeast Asia",
+      "isLandlocked": false,
+      "population": 34231700,
+      "areaKm2": 330803,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        },
+        {
+          "code": "msa",
+          "name": "Malay"
+        }
+      ],
+      "neighbors": [
+        "BN",
+        "ID",
+        "TH"
+      ]
+    },
+    {
+      "iso2": "MV",
+      "iso3": "MDV",
+      "nameEn": "Maldives",
+      "nameEs": "Maldivas",
+      "capital": "Malé",
+      "capitalLat": 4.17,
+      "capitalLng": 73.51,
+      "continent": "Asia",
+      "subregion": "South Asia",
+      "isLandlocked": false,
+      "population": 515132,
+      "areaKm2": 300,
+      "languages": [
+        {
+          "code": "div",
+          "name": "Maldivian"
+        }
+      ],
+      "neighbors": []
+    },
+    {
+      "iso2": "ML",
+      "iso3": "MLI",
+      "nameEn": "Mali",
+      "nameEs": "Mali",
+      "capital": "Bamako",
+      "capitalLat": 12.65,
+      "capitalLng": -8,
+      "continent": "Africa",
+      "subregion": "Western Africa",
+      "isLandlocked": true,
+      "population": 22395489,
+      "areaKm2": 1240192,
+      "languages": [
+        {
+          "code": "fra",
+          "name": "French"
+        }
+      ],
+      "neighbors": [
+        "BF",
+        "CI",
+        "DZ",
+        "GN",
+        "MR",
+        "NE",
+        "SN"
+      ]
+    },
+    {
+      "iso2": "MT",
+      "iso3": "MLT",
+      "nameEn": "Malta",
+      "nameEs": "Malta",
+      "capital": "Valletta",
+      "capitalLat": 35.88,
+      "capitalLng": 14.5,
+      "continent": "Europe",
+      "subregion": "Southern Europe",
+      "isLandlocked": false,
+      "population": 574250,
+      "areaKm2": 316,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        },
+        {
+          "code": "mlt",
+          "name": "Maltese"
+        }
+      ],
+      "neighbors": []
+    },
+    {
+      "iso2": "MH",
+      "iso3": "MHL",
+      "nameEn": "Marshall Islands",
+      "nameEs": "Islas Marshall",
+      "capital": "Majuro",
+      "capitalLat": 7.1,
+      "capitalLng": 171.38,
+      "continent": "Oceania",
+      "subregion": "Micronesia",
+      "isLandlocked": false,
+      "population": 42418,
+      "areaKm2": 181,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        },
+        {
+          "code": "mah",
+          "name": "Marshallese"
+        }
+      ],
+      "neighbors": []
+    },
+    {
+      "iso2": "MR",
+      "iso3": "MRT",
+      "nameEn": "Mauritania",
+      "nameEs": "Mauritania",
+      "capital": "Nouakchott",
+      "capitalLat": 18.07,
+      "capitalLng": -15.97,
+      "continent": "Africa",
+      "subregion": "Western Africa",
+      "isLandlocked": false,
+      "population": 4927532,
+      "areaKm2": 1030700,
+      "languages": [
+        {
+          "code": "ara",
+          "name": "Arabic"
+        }
+      ],
+      "neighbors": [
+        "DZ",
+        "ML",
+        "SN"
+      ]
+    },
+    {
+      "iso2": "MU",
+      "iso3": "MUS",
+      "nameEn": "Mauritius",
+      "nameEs": "Mauricio",
+      "capital": "Port Louis",
+      "capitalLat": -20.15,
+      "capitalLng": 57.48,
+      "continent": "Africa",
+      "subregion": "Eastern Africa",
+      "isLandlocked": false,
+      "population": 1243741,
+      "areaKm2": 2040,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        },
+        {
+          "code": "fra",
+          "name": "French"
+        },
+        {
+          "code": "mfe",
+          "name": "Mauritian Creole"
+        }
+      ],
+      "neighbors": []
+    },
+    {
+      "iso2": "MX",
+      "iso3": "MEX",
+      "nameEn": "Mexico",
+      "nameEs": "México",
+      "capital": "Mexico City",
+      "capitalLat": 19.43,
+      "capitalLng": -99.13,
+      "continent": "North America",
+      "subregion": "Northern America",
+      "isLandlocked": false,
+      "population": 130575786,
+      "areaKm2": 1964375,
+      "languages": [
+        {
+          "code": "spa",
+          "name": "Spanish"
+        }
+      ],
+      "neighbors": [
+        "BZ",
+        "GT",
+        "US"
+      ]
+    },
+    {
+      "iso2": "FM",
+      "iso3": "FSM",
+      "nameEn": "Micronesia",
+      "nameEs": "Micronesia",
+      "capital": "Palikir",
+      "capitalLat": 6.92,
+      "capitalLng": 158.15,
+      "continent": "Oceania",
+      "subregion": "Micronesia",
+      "isLandlocked": false,
+      "population": 105564,
+      "areaKm2": 702,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        }
+      ],
+      "neighbors": []
+    },
+    {
+      "iso2": "MD",
+      "iso3": "MDA",
+      "nameEn": "Moldova",
+      "nameEs": "Moldavia",
+      "capital": "Chișinău",
+      "capitalLat": 47.01,
+      "capitalLng": 28.9,
+      "continent": "Europe",
+      "subregion": "Eastern Europe",
+      "isLandlocked": true,
+      "population": 2749076,
+      "areaKm2": 33847,
+      "languages": [
+        {
+          "code": "ron",
+          "name": "Romanian"
+        }
+      ],
+      "neighbors": [
+        "RO",
+        "UA"
+      ]
+    },
+    {
+      "iso2": "MC",
+      "iso3": "MCO",
+      "nameEn": "Monaco",
+      "nameEs": "Mónaco",
+      "capital": "Monaco",
+      "capitalLat": 43.73,
+      "capitalLng": 7.42,
+      "continent": "Europe",
+      "subregion": "Western Europe",
+      "isLandlocked": false,
+      "population": 38423,
+      "areaKm2": 2.02,
+      "languages": [
+        {
+          "code": "fra",
+          "name": "French"
+        }
+      ],
+      "neighbors": [
+        "FR"
+      ]
+    },
+    {
+      "iso2": "MN",
+      "iso3": "MNG",
+      "nameEn": "Mongolia",
+      "nameEs": "Mongolia",
+      "capital": "Ulaanbaatar",
+      "capitalLat": 47.92,
+      "capitalLng": 106.91,
+      "continent": "Asia",
+      "subregion": "East Asia",
+      "isLandlocked": true,
+      "population": 3544835,
+      "areaKm2": 1564110,
+      "languages": [
+        {
+          "code": "mon",
+          "name": "Mongolian"
+        }
+      ],
+      "neighbors": [
+        "CN",
+        "RU"
+      ]
+    },
+    {
+      "iso2": "ME",
+      "iso3": "MNE",
+      "nameEn": "Montenegro",
+      "nameEs": "Montenegro",
+      "capital": "Podgorica",
+      "capitalLat": 42.43,
+      "capitalLng": 19.27,
+      "continent": "Europe",
+      "subregion": "Southern Europe",
+      "isLandlocked": false,
+      "population": 623327,
+      "areaKm2": 13812,
+      "languages": [
+        {
+          "code": "cnr",
+          "name": "Montenegrin"
+        }
+      ],
+      "neighbors": [
+        "AL",
+        "BA",
+        "HR",
+        "RS",
+        "XK"
+      ]
+    },
+    {
+      "iso2": "MA",
+      "iso3": "MAR",
+      "nameEn": "Morocco",
+      "nameEs": "Marruecos",
+      "capital": "Rabat",
+      "capitalLat": 34.02,
+      "capitalLng": -6.82,
+      "continent": "Africa",
+      "subregion": "Northern Africa",
+      "isLandlocked": false,
+      "population": 36828330,
+      "areaKm2": 446550,
+      "languages": [
+        {
+          "code": "ara",
+          "name": "Arabic"
+        },
+        {
+          "code": "ber",
+          "name": "Berber"
+        }
+      ],
+      "neighbors": [
+        "DZ",
+        "ES"
+      ]
+    },
+    {
+      "iso2": "MZ",
+      "iso3": "MOZ",
+      "nameEn": "Mozambique",
+      "nameEs": "Mozambique",
+      "capital": "Maputo",
+      "capitalLat": -25.95,
+      "capitalLng": 32.58,
+      "continent": "Africa",
+      "subregion": "Eastern Africa",
+      "isLandlocked": false,
+      "population": 34090466,
+      "areaKm2": 801590,
+      "languages": [
+        {
+          "code": "por",
+          "name": "Portuguese"
+        }
+      ],
+      "neighbors": [
+        "MW",
+        "SZ",
+        "TZ",
+        "ZA",
+        "ZM",
+        "ZW"
+      ]
+    },
+    {
+      "iso2": "MM",
+      "iso3": "MMR",
+      "nameEn": "Myanmar",
+      "nameEs": "Myanmar",
+      "capital": "Naypyidaw",
+      "capitalLat": 19.76,
+      "capitalLng": 96.07,
+      "continent": "Asia",
+      "subregion": "Southeast Asia",
+      "isLandlocked": false,
+      "population": 51316756,
+      "areaKm2": 676578,
+      "languages": [
+        {
+          "code": "mya",
+          "name": "Burmese"
+        }
+      ],
+      "neighbors": [
+        "BD",
+        "CN",
+        "IN",
+        "LA",
+        "TH"
+      ]
+    },
+    {
+      "iso2": "NA",
+      "iso3": "NAM",
+      "nameEn": "Namibia",
+      "nameEs": "Namibia",
+      "capital": "Windhoek",
+      "capitalLat": -22.57,
+      "capitalLng": 17.08,
+      "continent": "Africa",
+      "subregion": "Southern Africa",
+      "isLandlocked": false,
+      "population": 3022401,
+      "areaKm2": 825615,
+      "languages": [
+        {
+          "code": "afr",
+          "name": "Afrikaans"
+        },
+        {
+          "code": "deu",
+          "name": "German"
+        },
+        {
+          "code": "eng",
+          "name": "English"
+        },
+        {
+          "code": "her",
+          "name": "Herero"
+        },
+        {
+          "code": "hgm",
+          "name": "Khoekhoe"
+        },
+        {
+          "code": "kwn",
+          "name": "Kwangali"
+        },
+        {
+          "code": "loz",
+          "name": "Lozi"
+        },
+        {
+          "code": "ndo",
+          "name": "Ndonga"
+        },
+        {
+          "code": "tsn",
+          "name": "Tswana"
+        }
+      ],
+      "neighbors": [
+        "AO",
+        "BW",
+        "ZA",
+        "ZM"
+      ]
+    },
+    {
+      "iso2": "NR",
+      "iso3": "NRU",
+      "nameEn": "Nauru",
+      "nameEs": "Nauru",
+      "capital": "Yaren",
+      "capitalLat": -0.55,
+      "capitalLng": 166.92,
+      "continent": "Oceania",
+      "subregion": "Micronesia",
+      "isLandlocked": false,
+      "population": 11680,
+      "areaKm2": 21,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        },
+        {
+          "code": "nau",
+          "name": "Nauru"
+        }
+      ],
+      "neighbors": []
+    },
+    {
+      "iso2": "NP",
+      "iso3": "NPL",
+      "nameEn": "Nepal",
+      "nameEs": "Nepal",
+      "capital": "Kathmandu",
+      "capitalLat": 27.72,
+      "capitalLng": 85.32,
+      "continent": "Asia",
+      "subregion": "South Asia",
+      "isLandlocked": true,
+      "population": 29911840,
+      "areaKm2": 147181,
+      "languages": [
+        {
+          "code": "nep",
+          "name": "Nepali"
+        }
+      ],
+      "neighbors": [
+        "CN",
+        "IN"
+      ]
+    },
+    {
+      "iso2": "NL",
+      "iso3": "NLD",
+      "nameEn": "Netherlands",
+      "nameEs": "Países Bajos",
+      "capital": "Amsterdam",
+      "capitalLat": 52.35,
+      "capitalLng": 4.92,
+      "continent": "Europe",
+      "subregion": "Western Europe",
+      "isLandlocked": false,
+      "population": 18100436,
+      "areaKm2": 41865,
+      "languages": [
+        {
+          "code": "nld",
+          "name": "Dutch"
+        }
+      ],
+      "neighbors": [
+        "BE",
+        "DE"
+      ]
+    },
+    {
+      "iso2": "NZ",
+      "iso3": "NZL",
+      "nameEn": "New Zealand",
+      "nameEs": "Nueva Zelanda",
+      "capital": "Wellington",
+      "capitalLat": -41.3,
+      "capitalLng": 174.78,
+      "continent": "Oceania",
+      "subregion": "Australia and New Zealand",
+      "isLandlocked": false,
+      "population": 5324700,
+      "areaKm2": 268838,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        },
+        {
+          "code": "mri",
+          "name": "Māori"
+        },
+        {
+          "code": "nzs",
+          "name": "New Zealand Sign Language"
+        }
+      ],
+      "neighbors": []
+    },
+    {
+      "iso2": "NI",
+      "iso3": "NIC",
+      "nameEn": "Nicaragua",
+      "nameEs": "Nicaragua",
+      "capital": "Managua",
+      "capitalLat": 12.13,
+      "capitalLng": -86.25,
+      "continent": "North America",
+      "subregion": "Central America",
+      "isLandlocked": false,
+      "population": 6803886,
+      "areaKm2": 130373,
+      "languages": [
+        {
+          "code": "spa",
+          "name": "Spanish"
+        }
+      ],
+      "neighbors": [
+        "CR",
+        "HN"
+      ]
+    },
+    {
+      "iso2": "NE",
+      "iso3": "NER",
+      "nameEn": "Niger",
+      "nameEs": "Níger",
+      "capital": "Niamey",
+      "capitalLat": 13.52,
+      "capitalLng": 2.12,
+      "continent": "Africa",
+      "subregion": "Western Africa",
+      "isLandlocked": true,
+      "population": 26312034,
+      "areaKm2": 1267000,
+      "languages": [
+        {
+          "code": "fra",
+          "name": "French"
+        }
+      ],
+      "neighbors": [
+        "BF",
+        "BJ",
+        "DZ",
+        "LY",
+        "ML",
+        "NG",
+        "TD"
+      ]
+    },
+    {
+      "iso2": "NG",
+      "iso3": "NGA",
+      "nameEn": "Nigeria",
+      "nameEs": "Nigeria",
+      "capital": "Abuja",
+      "capitalLat": 9.08,
+      "capitalLng": 7.53,
+      "continent": "Africa",
+      "subregion": "Western Africa",
+      "isLandlocked": false,
+      "population": 223800000,
+      "areaKm2": 923768,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        }
+      ],
+      "neighbors": [
+        "BJ",
+        "CM",
+        "NE",
+        "TD"
+      ]
+    },
+    {
+      "iso2": "KP",
+      "iso3": "PRK",
+      "nameEn": "North Korea",
+      "nameEs": "Corea del Norte",
+      "capital": "Pyongyang",
+      "capitalLat": 39.02,
+      "capitalLng": 125.75,
+      "continent": "Asia",
+      "subregion": "East Asia",
+      "isLandlocked": false,
+      "population": 25950000,
+      "areaKm2": 120538,
+      "languages": [
+        {
+          "code": "kor",
+          "name": "Korean"
+        }
+      ],
+      "neighbors": [
+        "CN",
+        "KR",
+        "RU"
+      ]
+    },
+    {
+      "iso2": "MK",
+      "iso3": "MKD",
+      "nameEn": "North Macedonia",
+      "nameEs": "Macedonia del Norte",
+      "capital": "Skopje",
+      "capitalLat": 42,
+      "capitalLng": 21.43,
+      "continent": "Europe",
+      "subregion": "Southern Europe",
+      "isLandlocked": true,
+      "population": 1822612,
+      "areaKm2": 25713,
+      "languages": [
+        {
+          "code": "mkd",
+          "name": "Macedonian"
+        }
+      ],
+      "neighbors": [
+        "AL",
+        "BG",
+        "GR",
+        "RS",
+        "XK"
+      ]
+    },
+    {
+      "iso2": "NO",
+      "iso3": "NOR",
+      "nameEn": "Norway",
+      "nameEs": "Noruega",
+      "capital": "Oslo",
+      "capitalLat": 59.92,
+      "capitalLng": 10.75,
+      "continent": "Europe",
+      "subregion": "Northern Europe",
+      "isLandlocked": false,
+      "population": 5606944,
+      "areaKm2": 386224,
+      "languages": [
+        {
+          "code": "nno",
+          "name": "Norwegian Nynorsk"
+        },
+        {
+          "code": "nob",
+          "name": "Norwegian Bokmål"
+        },
+        {
+          "code": "smi",
+          "name": "Sami"
+        }
+      ],
+      "neighbors": [
+        "FI",
+        "RU",
+        "SE"
+      ]
+    },
+    {
+      "iso2": "OM",
+      "iso3": "OMN",
+      "nameEn": "Oman",
+      "nameEs": "Omán",
+      "capital": "Muscat",
+      "capitalLat": 23.62,
+      "capitalLng": 58.58,
+      "continent": "Asia",
+      "subregion": "Western Asia",
+      "isLandlocked": false,
+      "population": 5343630,
+      "areaKm2": 309500,
+      "languages": [
+        {
+          "code": "ara",
+          "name": "Arabic"
+        }
+      ],
+      "neighbors": [
+        "AE",
+        "SA",
+        "YE"
+      ]
+    },
+    {
+      "iso2": "PK",
+      "iso3": "PAK",
+      "nameEn": "Pakistan",
+      "nameEs": "Pakistán",
+      "capital": "Islamabad",
+      "capitalLat": 33.68,
+      "capitalLng": 73.05,
+      "continent": "Asia",
+      "subregion": "South Asia",
+      "isLandlocked": false,
+      "population": 241499431,
+      "areaKm2": 796095,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        },
+        {
+          "code": "urd",
+          "name": "Urdu"
+        }
+      ],
+      "neighbors": [
+        "AF",
+        "CN",
+        "IN",
+        "IR"
+      ]
+    },
+    {
+      "iso2": "PW",
+      "iso3": "PLW",
+      "nameEn": "Palau",
+      "nameEs": "Palau",
+      "capital": "Ngerulmud",
+      "capitalLat": 7.5,
+      "capitalLng": 134.62,
+      "continent": "Oceania",
+      "subregion": "Micronesia",
+      "isLandlocked": false,
+      "population": 16733,
+      "areaKm2": 459,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        },
+        {
+          "code": "pau",
+          "name": "Palauan"
+        }
+      ],
+      "neighbors": []
+    },
+    {
+      "iso2": "PS",
+      "iso3": "PSE",
+      "nameEn": "Palestine",
+      "nameEs": "Palestina",
+      "capital": "Ramallah",
+      "capitalLat": 31.9,
+      "capitalLng": 35.2,
+      "continent": "Asia",
+      "subregion": "Western Asia",
+      "isLandlocked": false,
+      "population": 5483450,
+      "areaKm2": 6220,
+      "languages": [
+        {
+          "code": "ara",
+          "name": "Arabic"
+        }
+      ],
+      "neighbors": [
+        "EG",
+        "IL",
+        "JO"
+      ]
+    },
+    {
+      "iso2": "PA",
+      "iso3": "PAN",
+      "nameEn": "Panama",
+      "nameEs": "Panamá",
+      "capital": "Panama City",
+      "capitalLat": 8.97,
+      "capitalLng": -79.53,
+      "continent": "North America",
+      "subregion": "Central America",
+      "isLandlocked": false,
+      "population": 4064780,
+      "areaKm2": 75417,
+      "languages": [
+        {
+          "code": "spa",
+          "name": "Spanish"
+        }
+      ],
+      "neighbors": [
+        "CO",
+        "CR"
+      ]
+    },
+    {
+      "iso2": "PG",
+      "iso3": "PNG",
+      "nameEn": "Papua New Guinea",
+      "nameEs": "Papúa Nueva Guinea",
+      "capital": "Port Moresby",
+      "capitalLat": -9.45,
+      "capitalLng": 147.18,
+      "continent": "Oceania",
+      "subregion": "Melanesia",
+      "isLandlocked": false,
+      "population": 11781559,
+      "areaKm2": 462840,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        },
+        {
+          "code": "hmo",
+          "name": "Hiri Motu"
+        },
+        {
+          "code": "tpi",
+          "name": "Tok Pisin"
+        }
+      ],
+      "neighbors": [
+        "ID"
+      ]
+    },
+    {
+      "iso2": "PY",
+      "iso3": "PRY",
+      "nameEn": "Paraguay",
+      "nameEs": "Paraguay",
+      "capital": "Asunción",
+      "capitalLat": -25.28,
+      "capitalLng": -57.57,
+      "continent": "South America",
+      "subregion": "South America",
+      "isLandlocked": true,
+      "population": 6109644,
+      "areaKm2": 406752,
+      "languages": [
+        {
+          "code": "grn",
+          "name": "Guaraní"
+        },
+        {
+          "code": "spa",
+          "name": "Spanish"
+        }
+      ],
+      "neighbors": [
+        "AR",
+        "BO",
+        "BR"
+      ]
+    },
+    {
+      "iso2": "PE",
+      "iso3": "PER",
+      "nameEn": "Peru",
+      "nameEs": "Perú",
+      "capital": "Lima",
+      "capitalLat": -12.05,
+      "capitalLng": -77.05,
+      "continent": "South America",
+      "subregion": "South America",
+      "isLandlocked": false,
+      "population": 34350244,
+      "areaKm2": 1285216,
+      "languages": [
+        {
+          "code": "aym",
+          "name": "Aymara"
+        },
+        {
+          "code": "que",
+          "name": "Quechua"
+        },
+        {
+          "code": "spa",
+          "name": "Spanish"
+        }
+      ],
+      "neighbors": [
+        "BO",
+        "BR",
+        "CL",
+        "CO",
+        "EC"
+      ]
+    },
+    {
+      "iso2": "PH",
+      "iso3": "PHL",
+      "nameEn": "Philippines",
+      "nameEs": "Filipinas",
+      "capital": "Manila",
+      "capitalLat": 14.6,
+      "capitalLng": 120.97,
+      "continent": "Asia",
+      "subregion": "Southeast Asia",
+      "isLandlocked": false,
+      "population": 114123600,
+      "areaKm2": 342353,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        },
+        {
+          "code": "fil",
+          "name": "Filipino"
+        }
+      ],
+      "neighbors": []
+    },
+    {
+      "iso2": "PL",
+      "iso3": "POL",
+      "nameEn": "Poland",
+      "nameEs": "Polonia",
+      "capital": "Warsaw",
+      "capitalLat": 52.25,
+      "capitalLng": 21,
+      "continent": "Europe",
+      "subregion": "Eastern Europe",
+      "isLandlocked": false,
+      "population": 37392000,
+      "areaKm2": 312679,
+      "languages": [
+        {
+          "code": "pol",
+          "name": "Polish"
+        }
+      ],
+      "neighbors": [
+        "BY",
+        "CZ",
+        "DE",
+        "LT",
+        "RU",
+        "SK",
+        "UA"
+      ]
+    },
+    {
+      "iso2": "PT",
+      "iso3": "PRT",
+      "nameEn": "Portugal",
+      "nameEs": "Portugal",
+      "capital": "Lisbon",
+      "capitalLat": 38.72,
+      "capitalLng": -9.13,
+      "continent": "Europe",
+      "subregion": "Southern Europe",
+      "isLandlocked": false,
+      "population": 10749635,
+      "areaKm2": 92090,
+      "languages": [
+        {
+          "code": "por",
+          "name": "Portuguese"
+        }
+      ],
+      "neighbors": [
+        "ES"
+      ]
+    },
+    {
+      "iso2": "QA",
+      "iso3": "QAT",
+      "nameEn": "Qatar",
+      "nameEs": "Catar",
+      "capital": "Doha",
+      "capitalLat": 25.28,
+      "capitalLng": 51.53,
+      "continent": "Asia",
+      "subregion": "Western Asia",
+      "isLandlocked": false,
+      "population": 3173024,
+      "areaKm2": 11586,
+      "languages": [
+        {
+          "code": "ara",
+          "name": "Arabic"
+        }
+      ],
+      "neighbors": [
+        "SA"
+      ]
+    },
+    {
+      "iso2": "CG",
+      "iso3": "COG",
+      "nameEn": "Republic of the Congo",
+      "nameEs": "Congo",
+      "capital": "Brazzaville",
+      "capitalLat": -4.25,
+      "capitalLng": 15.28,
+      "continent": "Africa",
+      "subregion": "Central Africa",
+      "isLandlocked": false,
+      "population": 6142180,
+      "areaKm2": 342000,
+      "languages": [
+        {
+          "code": "fra",
+          "name": "French"
+        },
+        {
+          "code": "kon",
+          "name": "Kikongo"
+        },
+        {
+          "code": "lin",
+          "name": "Lingala"
+        }
+      ],
+      "neighbors": [
+        "AO",
+        "CD",
+        "CF",
+        "CM",
+        "GA"
+      ]
+    },
+    {
+      "iso2": "RO",
+      "iso3": "ROU",
+      "nameEn": "Romania",
+      "nameEs": "Rumania",
+      "capital": "Bucharest",
+      "capitalLat": 44.43,
+      "capitalLng": 26.1,
+      "continent": "Europe",
+      "subregion": "Eastern Europe",
+      "isLandlocked": false,
+      "population": 19036031,
+      "areaKm2": 238391,
+      "languages": [
+        {
+          "code": "ron",
+          "name": "Romanian"
+        }
+      ],
+      "neighbors": [
+        "BG",
+        "HU",
+        "MD",
+        "RS",
+        "UA"
+      ]
+    },
+    {
+      "iso2": "RU",
+      "iso3": "RUS",
+      "nameEn": "Russia",
+      "nameEs": "Rusia",
+      "capital": "Moscow",
+      "capitalLat": 55.75,
+      "capitalLng": 37.6,
+      "continent": "Europe",
+      "subregion": "Eastern Europe",
+      "isLandlocked": false,
+      "population": 146028325,
+      "areaKm2": 17098246,
+      "languages": [
+        {
+          "code": "rus",
+          "name": "Russian"
+        }
+      ],
+      "neighbors": [
+        "AZ",
+        "BY",
+        "CN",
+        "EE",
+        "FI",
+        "GE",
+        "KP",
+        "KZ",
+        "LT",
+        "LV",
+        "MN",
+        "NO",
+        "PL",
+        "UA"
+      ]
+    },
+    {
+      "iso2": "RW",
+      "iso3": "RWA",
+      "nameEn": "Rwanda",
+      "nameEs": "Ruanda",
+      "capital": "Kigali",
+      "capitalLat": -1.95,
+      "capitalLng": 30.05,
+      "continent": "Africa",
+      "subregion": "Eastern Africa",
+      "isLandlocked": true,
+      "population": 14104969,
+      "areaKm2": 26338,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        },
+        {
+          "code": "fra",
+          "name": "French"
+        },
+        {
+          "code": "kin",
+          "name": "Kinyarwanda"
+        }
+      ],
+      "neighbors": [
+        "BI",
+        "CD",
+        "TZ",
+        "UG"
+      ]
+    },
+    {
+      "iso2": "KN",
+      "iso3": "KNA",
+      "nameEn": "Saint Kitts and Nevis",
+      "nameEs": "San Cristóbal y Nieves",
+      "capital": "Basseterre",
+      "capitalLat": 17.3,
+      "capitalLng": -62.72,
+      "continent": "North America",
+      "subregion": "Caribbean",
+      "isLandlocked": false,
+      "population": 51320,
+      "areaKm2": 261,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        }
+      ],
+      "neighbors": []
+    },
+    {
+      "iso2": "LC",
+      "iso3": "LCA",
+      "nameEn": "Saint Lucia",
+      "nameEs": "Santa Lucía",
+      "capital": "Castries",
+      "capitalLat": 14,
+      "capitalLng": -61,
+      "continent": "North America",
+      "subregion": "Caribbean",
+      "isLandlocked": false,
+      "population": 184100,
+      "areaKm2": 616,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        }
+      ],
+      "neighbors": []
+    },
+    {
+      "iso2": "VC",
+      "iso3": "VCT",
+      "nameEn": "Saint Vincent and the Grenadines",
+      "nameEs": "San Vicente y Granadinas",
+      "capital": "Kingstown",
+      "capitalLat": 13.13,
+      "capitalLng": -61.22,
+      "continent": "North America",
+      "subregion": "Caribbean",
+      "isLandlocked": false,
+      "population": 110872,
+      "areaKm2": 389,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        }
+      ],
+      "neighbors": []
+    },
+    {
+      "iso2": "WS",
+      "iso3": "WSM",
+      "nameEn": "Samoa",
+      "nameEs": "Samoa",
+      "capital": "Apia",
+      "capitalLat": -13.82,
+      "capitalLng": -171.77,
+      "continent": "Oceania",
+      "subregion": "Polynesia",
+      "isLandlocked": false,
+      "population": 205557,
+      "areaKm2": 2842,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        },
+        {
+          "code": "smo",
+          "name": "Samoan"
+        }
+      ],
+      "neighbors": []
+    },
+    {
+      "iso2": "SM",
+      "iso3": "SMR",
+      "nameEn": "San Marino",
+      "nameEs": "San Marino",
+      "capital": "San Marino",
+      "capitalLat": 43.94,
+      "capitalLng": 12.45,
+      "continent": "Europe",
+      "subregion": "Southern Europe",
+      "isLandlocked": true,
+      "population": 34132,
+      "areaKm2": 61,
+      "languages": [
+        {
+          "code": "ita",
+          "name": "Italian"
+        }
+      ],
+      "neighbors": [
+        "IT"
+      ]
+    },
+    {
+      "iso2": "ST",
+      "iso3": "STP",
+      "nameEn": "São Tomé and Príncipe",
+      "nameEs": "Santo Tomé y Príncipe",
+      "capital": "São Tomé",
+      "capitalLat": 0.34,
+      "capitalLng": 6.73,
+      "continent": "Africa",
+      "subregion": "Central Africa",
+      "isLandlocked": false,
+      "population": 209607,
+      "areaKm2": 964,
+      "languages": [
+        {
+          "code": "por",
+          "name": "Portuguese"
+        }
+      ],
+      "neighbors": []
+    },
+    {
+      "iso2": "SA",
+      "iso3": "SAU",
+      "nameEn": "Saudi Arabia",
+      "nameEs": "Arabia Saudí",
+      "capital": "Riyadh",
+      "capitalLat": 24.65,
+      "capitalLng": 46.7,
+      "continent": "Asia",
+      "subregion": "Western Asia",
+      "isLandlocked": false,
+      "population": 35300280,
+      "areaKm2": 2149690,
+      "languages": [
+        {
+          "code": "ara",
+          "name": "Arabic"
+        }
+      ],
+      "neighbors": [
+        "AE",
+        "IQ",
+        "JO",
+        "KW",
+        "OM",
+        "QA",
+        "YE"
+      ]
+    },
+    {
+      "iso2": "SN",
+      "iso3": "SEN",
+      "nameEn": "Senegal",
+      "nameEs": "Senegal",
+      "capital": "Dakar",
+      "capitalLat": 14.73,
+      "capitalLng": -17.63,
+      "continent": "Africa",
+      "subregion": "Western Africa",
+      "isLandlocked": false,
+      "population": 18593258,
+      "areaKm2": 196722,
+      "languages": [
+        {
+          "code": "fra",
+          "name": "French"
+        }
+      ],
+      "neighbors": [
+        "GM",
+        "GN",
+        "GW",
+        "ML",
+        "MR"
+      ]
+    },
+    {
+      "iso2": "RS",
+      "iso3": "SRB",
+      "nameEn": "Serbia",
+      "nameEs": "Serbia",
+      "capital": "Belgrade",
+      "capitalLat": 44.83,
+      "capitalLng": 20.5,
+      "continent": "Europe",
+      "subregion": "Southern Europe",
+      "isLandlocked": true,
+      "population": 6567783,
+      "areaKm2": 77589,
+      "languages": [
+        {
+          "code": "srp",
+          "name": "Serbian"
+        }
+      ],
+      "neighbors": [
+        "BA",
+        "BG",
+        "HR",
+        "HU",
+        "ME",
+        "MK",
+        "RO",
+        "XK"
+      ]
+    },
+    {
+      "iso2": "SC",
+      "iso3": "SYC",
+      "nameEn": "Seychelles",
+      "nameEs": "Seychelles",
+      "capital": "Victoria",
+      "capitalLat": -4.62,
+      "capitalLng": 55.45,
+      "continent": "Africa",
+      "subregion": "Eastern Africa",
+      "isLandlocked": false,
+      "population": 122729,
+      "areaKm2": 452,
+      "languages": [
+        {
+          "code": "crs",
+          "name": "Seychellois Creole"
+        },
+        {
+          "code": "eng",
+          "name": "English"
+        },
+        {
+          "code": "fra",
+          "name": "French"
+        }
+      ],
+      "neighbors": []
+    },
+    {
+      "iso2": "SL",
+      "iso3": "SLE",
+      "nameEn": "Sierra Leone",
+      "nameEs": "Sierra Leone",
+      "capital": "Freetown",
+      "capitalLat": 8.48,
+      "capitalLng": -13.23,
+      "continent": "Africa",
+      "subregion": "Western Africa",
+      "isLandlocked": false,
+      "population": 9077691,
+      "areaKm2": 71740,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        }
+      ],
+      "neighbors": [
+        "GN",
+        "LR"
+      ]
+    },
+    {
+      "iso2": "SG",
+      "iso3": "SGP",
+      "nameEn": "Singapore",
+      "nameEs": "Singapur",
+      "capital": "Singapore",
+      "capitalLat": 1.28,
+      "capitalLng": 103.85,
+      "continent": "Asia",
+      "subregion": "Southeast Asia",
+      "isLandlocked": false,
+      "population": 6110200,
+      "areaKm2": 710,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        },
+        {
+          "code": "zho",
+          "name": "Chinese"
+        },
+        {
+          "code": "msa",
+          "name": "Malay"
+        },
+        {
+          "code": "tam",
+          "name": "Tamil"
+        }
+      ],
+      "neighbors": []
+    },
+    {
+      "iso2": "SK",
+      "iso3": "SVK",
+      "nameEn": "Slovakia",
+      "nameEs": "República Eslovaca",
+      "capital": "Bratislava",
+      "capitalLat": 48.15,
+      "capitalLng": 17.12,
+      "continent": "Europe",
+      "subregion": "Eastern Europe",
+      "isLandlocked": true,
+      "population": 5413813,
+      "areaKm2": 49037,
+      "languages": [
+        {
+          "code": "slk",
+          "name": "Slovak"
+        }
+      ],
+      "neighbors": [
+        "AT",
+        "CZ",
+        "HU",
+        "PL",
+        "UA"
+      ]
+    },
+    {
+      "iso2": "SI",
+      "iso3": "SVN",
+      "nameEn": "Slovenia",
+      "nameEs": "Eslovenia",
+      "capital": "Ljubljana",
+      "capitalLat": 46.05,
+      "capitalLng": 14.52,
+      "continent": "Europe",
+      "subregion": "Southern Europe",
+      "isLandlocked": false,
+      "population": 2130638,
+      "areaKm2": 20273,
+      "languages": [
+        {
+          "code": "slv",
+          "name": "Slovene"
+        }
+      ],
+      "neighbors": [
+        "AT",
+        "HR",
+        "HU",
+        "IT"
+      ]
+    },
+    {
+      "iso2": "SB",
+      "iso3": "SLB",
+      "nameEn": "Solomon Islands",
+      "nameEs": "Islas Salomón",
+      "capital": "Honiara",
+      "capitalLat": -9.43,
+      "capitalLng": 159.95,
+      "continent": "Oceania",
+      "subregion": "Melanesia",
+      "isLandlocked": false,
+      "population": 750325,
+      "areaKm2": 28896,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        }
+      ],
+      "neighbors": []
+    },
+    {
+      "iso2": "SO",
+      "iso3": "SOM",
+      "nameEn": "Somalia",
+      "nameEs": "Somalia",
+      "capital": "Mogadishu",
+      "capitalLat": 2.07,
+      "capitalLng": 45.33,
+      "continent": "Africa",
+      "subregion": "Eastern Africa",
+      "isLandlocked": false,
+      "population": 19655000,
+      "areaKm2": 637657,
+      "languages": [
+        {
+          "code": "ara",
+          "name": "Arabic"
+        },
+        {
+          "code": "som",
+          "name": "Somali"
+        }
+      ],
+      "neighbors": [
+        "DJ",
+        "ET",
+        "KE"
+      ]
+    },
+    {
+      "iso2": "ZA",
+      "iso3": "ZAF",
+      "nameEn": "South Africa",
+      "nameEs": "Sudáfrica",
+      "capital": "Pretoria",
+      "capitalLat": -25.7,
+      "capitalLng": 28.22,
+      "continent": "Africa",
+      "subregion": "Southern Africa",
+      "isLandlocked": false,
+      "population": 63100945,
+      "areaKm2": 1221037,
+      "languages": [
+        {
+          "code": "afr",
+          "name": "Afrikaans"
+        },
+        {
+          "code": "eng",
+          "name": "English"
+        },
+        {
+          "code": "nbl",
+          "name": "Southern Ndebele"
+        },
+        {
+          "code": "nso",
+          "name": "Northern Sotho"
+        },
+        {
+          "code": "sot",
+          "name": "Southern Sotho"
+        },
+        {
+          "code": "ssw",
+          "name": "Swazi"
+        },
+        {
+          "code": "tsn",
+          "name": "Tswana"
+        },
+        {
+          "code": "tso",
+          "name": "Tsonga"
+        },
+        {
+          "code": "ven",
+          "name": "Venda"
+        },
+        {
+          "code": "xho",
+          "name": "Xhosa"
+        },
+        {
+          "code": "zul",
+          "name": "Zulu"
+        }
+      ],
+      "neighbors": [
+        "BW",
+        "LS",
+        "MZ",
+        "NA",
+        "SZ",
+        "ZW"
+      ]
+    },
+    {
+      "iso2": "KR",
+      "iso3": "KOR",
+      "nameEn": "South Korea",
+      "nameEs": "Corea del Sur",
+      "capital": "Seoul",
+      "capitalLat": 37.55,
+      "capitalLng": 126.98,
+      "continent": "Asia",
+      "subregion": "East Asia",
+      "isLandlocked": false,
+      "population": 51159889,
+      "areaKm2": 100210,
+      "languages": [
+        {
+          "code": "kor",
+          "name": "Korean"
+        }
+      ],
+      "neighbors": [
+        "KP"
+      ]
+    },
+    {
+      "iso2": "SS",
+      "iso3": "SSD",
+      "nameEn": "South Sudan",
+      "nameEs": "Sudán del Sur",
+      "capital": "Juba",
+      "capitalLat": 4.85,
+      "capitalLng": 31.62,
+      "continent": "Africa",
+      "subregion": "Eastern Africa",
+      "isLandlocked": true,
+      "population": 15786898,
+      "areaKm2": 619745,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        }
+      ],
+      "neighbors": [
+        "CD",
+        "CF",
+        "ET",
+        "KE",
+        "SD",
+        "UG"
+      ]
+    },
+    {
+      "iso2": "ES",
+      "iso3": "ESP",
+      "nameEn": "Spain",
+      "nameEs": "España",
+      "capital": "Madrid",
+      "capitalLat": 40.4,
+      "capitalLng": -3.68,
+      "continent": "Europe",
+      "subregion": "Southern Europe",
+      "isLandlocked": false,
+      "population": 49315949,
+      "areaKm2": 505992,
+      "languages": [
+        {
+          "code": "spa",
+          "name": "Spanish"
+        },
+        {
+          "code": "cat",
+          "name": "Catalan"
+        },
+        {
+          "code": "eus",
+          "name": "Basque"
+        },
+        {
+          "code": "glc",
+          "name": "Galician"
+        }
+      ],
+      "neighbors": [
+        "AD",
+        "FR",
+        "MA",
+        "PT"
+      ]
+    },
+    {
+      "iso2": "LK",
+      "iso3": "LKA",
+      "nameEn": "Sri Lanka",
+      "nameEs": "Sri Lanka",
+      "capital": "Sri Jayawardenepura Kotte",
+      "capitalLat": 6.89,
+      "capitalLng": 79.9,
+      "continent": "Asia",
+      "subregion": "South Asia",
+      "isLandlocked": false,
+      "population": 21763170,
+      "areaKm2": 65610,
+      "languages": [
+        {
+          "code": "sin",
+          "name": "Sinhala"
+        },
+        {
+          "code": "tam",
+          "name": "Tamil"
+        }
+      ],
+      "neighbors": []
+    },
+    {
+      "iso2": "SD",
+      "iso3": "SDN",
+      "nameEn": "Sudan",
+      "nameEs": "Sudán",
+      "capital": "Khartoum",
+      "capitalLat": 15.6,
+      "capitalLng": 32.53,
+      "continent": "Africa",
+      "subregion": "Northern Africa",
+      "isLandlocked": false,
+      "population": 51662000,
+      "areaKm2": 1886068,
+      "languages": [
+        {
+          "code": "ara",
+          "name": "Arabic"
+        },
+        {
+          "code": "eng",
+          "name": "English"
+        }
+      ],
+      "neighbors": [
+        "CF",
+        "EG",
+        "ER",
+        "ET",
+        "LY",
+        "SS",
+        "TD"
+      ]
+    },
+    {
+      "iso2": "SR",
+      "iso3": "SUR",
+      "nameEn": "Suriname",
+      "nameEs": "Surinam",
+      "capital": "Paramaribo",
+      "capitalLat": 5.83,
+      "capitalLng": -55.17,
+      "continent": "South America",
+      "subregion": "South America",
+      "isLandlocked": false,
+      "population": 616500,
+      "areaKm2": 163820,
+      "languages": [
+        {
+          "code": "nld",
+          "name": "Dutch"
+        }
+      ],
+      "neighbors": [
+        "BR",
+        "GY"
+      ]
+    },
+    {
+      "iso2": "SE",
+      "iso3": "SWE",
+      "nameEn": "Sweden",
+      "nameEs": "Suecia",
+      "capital": "Stockholm",
+      "capitalLat": 59.33,
+      "capitalLng": 18.05,
+      "continent": "Europe",
+      "subregion": "Northern Europe",
+      "isLandlocked": false,
+      "population": 10605098,
+      "areaKm2": 450295,
+      "languages": [
+        {
+          "code": "swe",
+          "name": "Swedish"
+        }
+      ],
+      "neighbors": [
+        "FI",
+        "NO"
+      ]
+    },
+    {
+      "iso2": "CH",
+      "iso3": "CHE",
+      "nameEn": "Switzerland",
+      "nameEs": "Suiza",
+      "capital": "Bern",
+      "capitalLat": 46.92,
+      "capitalLng": 7.47,
+      "continent": "Europe",
+      "subregion": "Western Europe",
+      "isLandlocked": true,
+      "population": 9082848,
+      "areaKm2": 41284,
+      "languages": [
+        {
+          "code": "fra",
+          "name": "French"
+        },
+        {
+          "code": "gsw",
+          "name": "Swiss German"
+        },
+        {
+          "code": "ita",
+          "name": "Italian"
+        },
+        {
+          "code": "roh",
+          "name": "Romansh"
+        }
+      ],
+      "neighbors": [
+        "AT",
+        "DE",
+        "FR",
+        "IT",
+        "LI"
+      ]
+    },
+    {
+      "iso2": "SY",
+      "iso3": "SYR",
+      "nameEn": "Syria",
+      "nameEs": "Siria",
+      "capital": "Damascus",
+      "capitalLat": 33.5,
+      "capitalLng": 36.3,
+      "continent": "Asia",
+      "subregion": "Western Asia",
+      "isLandlocked": false,
+      "population": 25620000,
+      "areaKm2": 185180,
+      "languages": [
+        {
+          "code": "ara",
+          "name": "Arabic"
+        }
+      ],
+      "neighbors": [
+        "IL",
+        "IQ",
+        "JO",
+        "LB",
+        "TR"
+      ]
+    },
+    {
+      "iso2": "TW",
+      "iso3": "TWN",
+      "nameEn": "Taiwan",
+      "nameEs": "Taiwán",
+      "capital": "Taipei",
+      "capitalLat": 25.03,
+      "capitalLng": 121.52,
+      "continent": "Asia",
+      "subregion": "East Asia",
+      "isLandlocked": false,
+      "population": 23317031,
+      "areaKm2": 36197,
+      "languages": [
+        {
+          "code": "zho",
+          "name": "Chinese"
+        }
+      ],
+      "neighbors": []
+    },
+    {
+      "iso2": "TJ",
+      "iso3": "TJK",
+      "nameEn": "Tajikistan",
+      "nameEs": "Tayikistán",
+      "capital": "Dushanbe",
+      "capitalLat": 38.55,
+      "capitalLng": 68.77,
+      "continent": "Asia",
+      "subregion": "Central Asia",
+      "isLandlocked": true,
+      "population": 10499000,
+      "areaKm2": 143100,
+      "languages": [
+        {
+          "code": "rus",
+          "name": "Russian"
+        },
+        {
+          "code": "tgk",
+          "name": "Tajik"
+        }
+      ],
+      "neighbors": [
+        "AF",
+        "CN",
+        "KG",
+        "UZ"
+      ]
+    },
+    {
+      "iso2": "TZ",
+      "iso3": "TZA",
+      "nameEn": "Tanzania",
+      "nameEs": "Tanzania",
+      "capital": "Dodoma",
+      "capitalLat": -6.16,
+      "capitalLng": 35.75,
+      "continent": "Africa",
+      "subregion": "Eastern Africa",
+      "isLandlocked": false,
+      "population": 68153004,
+      "areaKm2": 947303,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        },
+        {
+          "code": "swa",
+          "name": "Swahili"
+        }
+      ],
+      "neighbors": [
+        "BI",
+        "CD",
+        "KE",
+        "MW",
+        "MZ",
+        "RW",
+        "UG",
+        "ZM"
+      ]
+    },
+    {
+      "iso2": "TH",
+      "iso3": "THA",
+      "nameEn": "Thailand",
+      "nameEs": "Tailandia",
+      "capital": "Bangkok",
+      "capitalLat": 13.75,
+      "capitalLng": 100.52,
+      "continent": "Asia",
+      "subregion": "Southeast Asia",
+      "isLandlocked": false,
+      "population": 65859640,
+      "areaKm2": 513120,
+      "languages": [
+        {
+          "code": "tha",
+          "name": "Thai"
+        }
+      ],
+      "neighbors": [
+        "KH",
+        "LA",
+        "MM",
+        "MY"
+      ]
+    },
+    {
+      "iso2": "TG",
+      "iso3": "TGO",
+      "nameEn": "Togo",
+      "nameEs": "Togo",
+      "capital": "Lomé",
+      "capitalLat": 6.14,
+      "capitalLng": 1.21,
+      "continent": "Africa",
+      "subregion": "Western Africa",
+      "isLandlocked": false,
+      "population": 8095498,
+      "areaKm2": 56785,
+      "languages": [
+        {
+          "code": "fra",
+          "name": "French"
+        }
+      ],
+      "neighbors": [
+        "BF",
+        "BJ",
+        "GH"
+      ]
+    },
+    {
+      "iso2": "TO",
+      "iso3": "TON",
+      "nameEn": "Tonga",
+      "nameEs": "Tonga",
+      "capital": "Nukualofa",
+      "capitalLat": -21.13,
+      "capitalLng": -175.2,
+      "continent": "Oceania",
+      "subregion": "Polynesia",
+      "isLandlocked": false,
+      "population": 100179,
+      "areaKm2": 747,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        },
+        {
+          "code": "ton",
+          "name": "Tongan"
+        }
+      ],
+      "neighbors": []
+    },
+    {
+      "iso2": "TT",
+      "iso3": "TTO",
+      "nameEn": "Trinidad and Tobago",
+      "nameEs": "Trinidad y Tobago",
+      "capital": "Port of Spain",
+      "capitalLat": 10.65,
+      "capitalLng": -61.52,
+      "continent": "North America",
+      "subregion": "Caribbean",
+      "isLandlocked": false,
+      "population": 1367764,
+      "areaKm2": 5130,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        }
+      ],
+      "neighbors": []
+    },
+    {
+      "iso2": "TN",
+      "iso3": "TUN",
+      "nameEn": "Tunisia",
+      "nameEs": "Túnez",
+      "capital": "Tunis",
+      "capitalLat": 36.8,
+      "capitalLng": 10.18,
+      "continent": "Africa",
+      "subregion": "Northern Africa",
+      "isLandlocked": false,
+      "population": 11972169,
+      "areaKm2": 163610,
+      "languages": [
+        {
+          "code": "ara",
+          "name": "Arabic"
+        }
+      ],
+      "neighbors": [
+        "DZ",
+        "LY"
+      ]
+    },
+    {
+      "iso2": "TR",
+      "iso3": "TUR",
+      "nameEn": "Turkey",
+      "nameEs": "Turquía",
+      "capital": "Ankara",
+      "capitalLat": 39.93,
+      "capitalLng": 32.87,
+      "continent": "Asia",
+      "subregion": "Western Asia",
+      "isLandlocked": false,
+      "population": 85664944,
+      "areaKm2": 783562,
+      "languages": [
+        {
+          "code": "tur",
+          "name": "Turkish"
+        }
+      ],
+      "neighbors": [
+        "AM",
+        "AZ",
+        "BG",
+        "GE",
+        "GR",
+        "IQ",
+        "IR",
+        "SY"
+      ]
+    },
+    {
+      "iso2": "TM",
+      "iso3": "TKM",
+      "nameEn": "Turkmenistan",
+      "nameEs": "Turkmenistán",
+      "capital": "Ashgabat",
+      "capitalLat": 37.95,
+      "capitalLng": 58.38,
+      "continent": "Asia",
+      "subregion": "Central Asia",
+      "isLandlocked": true,
+      "population": 7057841,
+      "areaKm2": 488100,
+      "languages": [
+        {
+          "code": "rus",
+          "name": "Russian"
+        },
+        {
+          "code": "tuk",
+          "name": "Turkmen"
+        }
+      ],
+      "neighbors": [
+        "AF",
+        "IR",
+        "KZ",
+        "UZ"
+      ]
+    },
+    {
+      "iso2": "TV",
+      "iso3": "TUV",
+      "nameEn": "Tuvalu",
+      "nameEs": "Tuvalu",
+      "capital": "Funafuti",
+      "capitalLat": -8.52,
+      "capitalLng": 179.22,
+      "continent": "Oceania",
+      "subregion": "Polynesia",
+      "isLandlocked": false,
+      "population": 10643,
+      "areaKm2": 26,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        },
+        {
+          "code": "tvl",
+          "name": "Tuvaluan"
+        }
+      ],
+      "neighbors": []
+    },
+    {
+      "iso2": "UG",
+      "iso3": "UGA",
+      "nameEn": "Uganda",
+      "nameEs": "Uganda",
+      "capital": "Kampala",
+      "capitalLat": 0.32,
+      "capitalLng": 32.55,
+      "continent": "Africa",
+      "subregion": "Eastern Africa",
+      "isLandlocked": true,
+      "population": 45905417,
+      "areaKm2": 241550,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        },
+        {
+          "code": "swa",
+          "name": "Swahili"
+        }
+      ],
+      "neighbors": [
+        "CD",
+        "KE",
+        "RW",
+        "SS",
+        "TZ"
+      ]
+    },
+    {
+      "iso2": "UA",
+      "iso3": "UKR",
+      "nameEn": "Ukraine",
+      "nameEs": "Ucrania",
+      "capital": "Kyiv",
+      "capitalLat": 50.43,
+      "capitalLng": 30.52,
+      "continent": "Europe",
+      "subregion": "Eastern Europe",
+      "isLandlocked": false,
+      "population": 32862000,
+      "areaKm2": 603550,
+      "languages": [
+        {
+          "code": "ukr",
+          "name": "Ukrainian"
+        }
+      ],
+      "neighbors": [
+        "BY",
+        "HU",
+        "MD",
+        "PL",
+        "RO",
+        "RU",
+        "SK"
+      ]
+    },
+    {
+      "iso2": "AE",
+      "iso3": "ARE",
+      "nameEn": "United Arab Emirates",
+      "nameEs": "Emiratos Árabes Unidos",
+      "capital": "Abu Dhabi",
+      "capitalLat": 24.47,
+      "capitalLng": 54.37,
+      "continent": "Asia",
+      "subregion": "Western Asia",
+      "isLandlocked": false,
+      "population": 11294243,
+      "areaKm2": 83600,
+      "languages": [
+        {
+          "code": "ara",
+          "name": "Arabic"
+        }
+      ],
+      "neighbors": [
+        "OM",
+        "SA"
+      ]
+    },
+    {
+      "iso2": "GB",
+      "iso3": "GBR",
+      "nameEn": "United Kingdom",
+      "nameEs": "Reino Unido",
+      "capital": "London",
+      "capitalLat": 51.5,
+      "capitalLng": -0.08,
+      "continent": "Europe",
+      "subregion": "Northern Europe",
+      "isLandlocked": false,
+      "population": 69281437,
+      "areaKm2": 244376,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        }
+      ],
+      "neighbors": [
+        "IE"
+      ]
+    },
+    {
+      "iso2": "US",
+      "iso3": "USA",
+      "nameEn": "United States",
+      "nameEs": "Estados Unidos",
+      "capital": "Washington, D.C.",
+      "capitalLat": 38.89,
+      "capitalLng": -77.05,
+      "continent": "North America",
+      "subregion": "Northern America",
+      "isLandlocked": false,
+      "population": 340110988,
+      "areaKm2": 9525067,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        }
+      ],
+      "neighbors": [
+        "CA",
+        "MX"
+      ]
+    },
+    {
+      "iso2": "UY",
+      "iso3": "URY",
+      "nameEn": "Uruguay",
+      "nameEs": "Uruguay",
+      "capital": "Montevideo",
+      "capitalLat": -34.85,
+      "capitalLng": -56.17,
+      "continent": "South America",
+      "subregion": "South America",
+      "isLandlocked": false,
+      "population": 3499451,
+      "areaKm2": 181034,
+      "languages": [
+        {
+          "code": "spa",
+          "name": "Spanish"
+        }
+      ],
+      "neighbors": [
+        "AR",
+        "BR"
+      ]
+    },
+    {
+      "iso2": "UZ",
+      "iso3": "UZB",
+      "nameEn": "Uzbekistan",
+      "nameEs": "Uzbekistán",
+      "capital": "Tashkent",
+      "capitalLat": 41.32,
+      "capitalLng": 69.25,
+      "continent": "Asia",
+      "subregion": "Central Asia",
+      "isLandlocked": true,
+      "population": 37859698,
+      "areaKm2": 447400,
+      "languages": [
+        {
+          "code": "rus",
+          "name": "Russian"
+        },
+        {
+          "code": "uzb",
+          "name": "Uzbek"
+        }
+      ],
+      "neighbors": [
+        "AF",
+        "KG",
+        "KZ",
+        "TJ",
+        "TM"
+      ]
+    },
+    {
+      "iso2": "VU",
+      "iso3": "VUT",
+      "nameEn": "Vanuatu",
+      "nameEs": "Vanuatu",
+      "capital": "Port Vila",
+      "capitalLat": -17.73,
+      "capitalLng": 168.32,
+      "continent": "Oceania",
+      "subregion": "Melanesia",
+      "isLandlocked": false,
+      "population": 321409,
+      "areaKm2": 12189,
+      "languages": [
+        {
+          "code": "bis",
+          "name": "Bislama"
+        },
+        {
+          "code": "eng",
+          "name": "English"
+        },
+        {
+          "code": "fra",
+          "name": "French"
+        }
+      ],
+      "neighbors": []
+    },
+    {
+      "iso2": "VA",
+      "iso3": "VAT",
+      "nameEn": "Vatican City",
+      "nameEs": "Ciudad del Vaticano",
+      "capital": "Vatican City",
+      "capitalLat": 41.9,
+      "capitalLng": 12.45,
+      "continent": "Europe",
+      "subregion": "Southern Europe",
+      "isLandlocked": true,
+      "population": 882,
+      "areaKm2": 0.49,
+      "languages": [
+        {
+          "code": "ita",
+          "name": "Italian"
+        },
+        {
+          "code": "lat",
+          "name": "Latin"
+        }
+      ],
+      "neighbors": [
+        "IT"
+      ]
+    },
+    {
+      "iso2": "VE",
+      "iso3": "VEN",
+      "nameEn": "Venezuela",
+      "nameEs": "Venezuela",
+      "capital": "Caracas",
+      "capitalLat": 10.48,
+      "capitalLng": -66.87,
+      "continent": "South America",
+      "subregion": "South America",
+      "isLandlocked": false,
+      "population": 28517000,
+      "areaKm2": 916445,
+      "languages": [
+        {
+          "code": "spa",
+          "name": "Spanish"
+        }
+      ],
+      "neighbors": [
+        "BR",
+        "CO",
+        "GY"
+      ]
+    },
+    {
+      "iso2": "VN",
+      "iso3": "VNM",
+      "nameEn": "Vietnam",
+      "nameEs": "Vietnam",
+      "capital": "Hanoi",
+      "capitalLat": 21.03,
+      "capitalLng": 105.85,
+      "continent": "Asia",
+      "subregion": "Southeast Asia",
+      "isLandlocked": false,
+      "population": 101343800,
+      "areaKm2": 331212,
+      "languages": [
+        {
+          "code": "vie",
+          "name": "Vietnamese"
+        }
+      ],
+      "neighbors": [
+        "CN",
+        "KH",
+        "LA"
+      ]
+    },
+    {
+      "iso2": "YE",
+      "iso3": "YEM",
+      "nameEn": "Yemen",
+      "nameEs": "Yemen",
+      "capital": "Sanaa",
+      "capitalLat": 15.37,
+      "capitalLng": 44.19,
+      "continent": "Asia",
+      "subregion": "Western Asia",
+      "isLandlocked": false,
+      "population": 32684503,
+      "areaKm2": 527968,
+      "languages": [
+        {
+          "code": "ara",
+          "name": "Arabic"
+        }
+      ],
+      "neighbors": [
+        "OM",
+        "SA"
+      ]
+    },
+    {
+      "iso2": "ZM",
+      "iso3": "ZMB",
+      "nameEn": "Zambia",
+      "nameEs": "Zambia",
+      "capital": "Lusaka",
+      "capitalLat": -15.42,
+      "capitalLng": 28.28,
+      "continent": "Africa",
+      "subregion": "Eastern Africa",
+      "isLandlocked": true,
+      "population": 19693423,
+      "areaKm2": 752612,
+      "languages": [
+        {
+          "code": "eng",
+          "name": "English"
+        }
+      ],
+      "neighbors": [
+        "AO",
+        "BW",
+        "CD",
+        "MW",
+        "MZ",
+        "NA",
+        "TZ",
+        "ZW"
+      ]
+    },
+    {
+      "iso2": "ZW",
+      "iso3": "ZWE",
+      "nameEn": "Zimbabwe",
+      "nameEs": "Zimbabue",
+      "capital": "Harare",
+      "capitalLat": -17.82,
+      "capitalLng": 31.03,
+      "continent": "Africa",
+      "subregion": "Eastern Africa",
+      "isLandlocked": true,
+      "population": 17073087,
+      "areaKm2": 390757,
+      "languages": [
+        {
+          "code": "bwg",
+          "name": "Chibarwe"
+        },
+        {
+          "code": "eng",
+          "name": "English"
+        },
+        {
+          "code": "kck",
+          "name": "Kalanga"
+        },
+        {
+          "code": "khi",
+          "name": "Khoisan"
+        },
+        {
+          "code": "ndc",
+          "name": "Ndau"
+        },
+        {
+          "code": "nde",
+          "name": "Northern Ndebele"
+        },
+        {
+          "code": "nya",
+          "name": "Chewa"
+        },
+        {
+          "code": "sna",
+          "name": "Shona"
+        },
+        {
+          "code": "sot",
+          "name": "Sotho"
+        },
+        {
+          "code": "toi",
+          "name": "Tonga"
+        },
+        {
+          "code": "tsn",
+          "name": "Tswana"
+        },
+        {
+          "code": "tso",
+          "name": "Tsonga"
+        },
+        {
+          "code": "ven",
+          "name": "Venda"
+        },
+        {
+          "code": "xho",
+          "name": "Xhosa"
+        },
+        {
+          "code": "zib",
+          "name": "Zimbabwean Sign Language"
+        }
+      ],
+      "neighbors": [
+        "BW",
+        "MZ",
+        "ZA",
+        "ZM"
+      ]
+    }
+  ]
+}

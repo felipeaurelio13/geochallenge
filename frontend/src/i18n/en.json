@@ -117,6 +117,9 @@
     "flagMaster": "Flag Master",
     "flagMasterBadge": "Hard",
     "flagMasterDesc": "10 rounds · no color, cropped, lookalike traps · multipliers up to x2.5",
+    "geoChallenges": "Geo Challenges",
+    "geoChallengesBadge": "New",
+    "geoChallengesDesc": "5 challenges · extremes, comparisons, borders and geographic order",
     "howToPlay": "How to play",
     "howToPlayAria": "How to play {{mode}}",
     "letsPlay": "Let's play!"
@@ -644,6 +647,35 @@
     "skipToMainAction": "Skip to main actions",
     "skipToAnswerOptions": "Skip to answer options",
     "search": "Search"
+  },
+  "geoChallenges": {
+    "title": "Geo Challenges",
+    "preparing": "Preparing five geography challenges...",
+    "errorTitle": "Geo Challenges could not start",
+    "errorLoading": "The game could not be prepared",
+    "errorAnswering": "The answer could not be checked. Try again.",
+    "sessionExpired": "This game expired. Start a new Geo Challenge.",
+    "confirm": "Confirm answer",
+    "undo": "Undo",
+    "orderProgress": "Selected order: {{current}}/{{total}}",
+    "selectedPosition": "{{country}}, position {{position}}",
+    "correctOrder": "Correct answer",
+    "seeResults": "See results",
+    "complete": "Geo Challenge complete!",
+    "completeDesc": "Five different ways to think about the world.",
+    "score": "{{score}} points",
+    "resultPattern": "Results pattern",
+    "share": "Share Geo Challenge",
+    "shareText": "I scored {{correct}}/{{total}} in GeoChallenge's Geo Challenges",
+    "playAgain": "Play again",
+    "dataNote": "Versioned geography data · updated {{date}}",
+    "kinds": {
+      "EXTREME": "Extremes",
+      "HIGHER_LOWER": "Higher or lower",
+      "COMMON_NEIGHBOR": "Common neighbor",
+      "ODD_ONE_OUT": "Odd one out",
+      "NORTH_TO_SOUTH": "North to south"
+    }
   },
   "duelHistory": {
     "title": "Duel History",

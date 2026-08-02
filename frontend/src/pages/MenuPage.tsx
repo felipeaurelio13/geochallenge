@@ -489,6 +489,28 @@ export function MenuPage() {
         </div>
       </section>
 
+      {/* GeoRetos — cinco mecánicas relacionales en una partida corta. Se
+          mantiene como banner dedicado para no mezclarlo con el selector de
+          categorías tradicional (no depende de la categoría activa). */}
+      <Link
+        to="/geo-challenges"
+        className="mt-4 flex items-center gap-4 rounded-2xl border border-fuchsia-500/70 bg-gradient-to-r from-fuchsia-700 to-indigo-700 px-4 py-3.5 text-white shadow-md shadow-fuchsia-900/30 transition-all hover:from-fuchsia-600 hover:to-indigo-600 hover:shadow-lg pressable"
+      >
+        <span aria-hidden="true" className="shrink-0 text-3xl leading-none drop-shadow">🧠</span>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-white">{t('menu.geoChallenges')}</span>
+            <span className="rounded-full border border-white/40 bg-white/15 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-white">
+              {t('menu.geoChallengesBadge')}
+            </span>
+          </div>
+          <div className="mt-0.5 text-xs text-white/85">{t('menu.geoChallengesDesc')}</div>
+        </div>
+        <span aria-hidden="true" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/20 text-base font-bold text-white">
+          →
+        </span>
+      </Link>
+
       {/* Flag Master Banner — modo dedicado de banderas con dificultad escalada.
           Contraste fuerte: gradiente opaco rojo→ámbar, texto blanco. Funciona en
           light y dark mode sin depender de variables del tema. */}

@@ -56,6 +56,9 @@ vi.mock('react-i18next', () => ({
         'menu.challengeDesc': 'Envía desafíos a tus amigos',
         'menu.streak': 'Racha',
         'menu.streakDesc': 'Sigue hasta fallar y rompe tu récord',
+        'menu.geoChallenges': 'GeoRetos',
+        'menu.geoChallengesBadge': 'Nuevo',
+        'menu.geoChallengesDesc': '5 retos geográficos',
         'categories.flags': 'Banderas',
         'categories.capitals': 'Capitales',
         'categories.maps': 'Mapas',
@@ -187,6 +190,19 @@ describe('MenuPage', () => {
 
     expect(mockNavigate).toHaveBeenCalledTimes(1);
     expect(mockNavigate).toHaveBeenCalledWith('/game/single?category=MAP&mode=streak');
+  });
+
+  it('expone GeoRetos como modo independiente de la categoría activa', () => {
+    render(
+      <MemoryRouter future={routerFutureConfig}>
+        <Screen>
+          <MenuPage />
+        </Screen>
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole('link', { name: /georetos[\s\S]*5 retos geográficos/i }))
+      .toHaveAttribute('href', '/geo-challenges');
   });
 
   it('elimina textos redundantes de categoría activa y mantiene footer con versión visible', () => {

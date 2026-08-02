@@ -21,6 +21,9 @@ import type {
   FlagMasterStartResponse,
   FlagMasterFinishResponse,
   FlagMasterAvailability,
+  GeoChallengeStartResponse,
+  GeoChallengeAnswerResponse,
+  GeoChallengeFinishResponse,
 } from '../types';
 import { filtersToParams } from '../types';
 import { testAuthBypass } from '../utils/testAuthBypass';
@@ -255,6 +258,28 @@ class ApiService {
       gameConfig: GameConfig & { durationSeconds?: number };
       questions: Question[];
     }>('/game/flash/start', { params: { category, ...filtersToParams(filters) } });
+    return response.data;
+  }
+
+  async startGeoChallenges() {
+    const response = await this.client.get<GeoChallengeStartResponse>('/game/geo-challenges/start');
+    return response.data;
+  }
+
+  async submitGeoChallengeAnswer(data: {
+    sessionToken: string;
+    roundId: string;
+    selectedOptionIds: string[];
+  }) {
+    const response = await this.client.post<GeoChallengeAnswerResponse>('/game/geo-challenges/answer', data);
+    return response.data;
+  }
+
+  async finishGeoChallenges(data: {
+    sessionToken: string;
+    answers: Array<{ roundId: string; selectedOptionIds: string[] }>;
+  }) {
+    const response = await this.client.post<GeoChallengeFinishResponse>('/game/geo-challenges/finish', data);
     return response.data;
   }
 
