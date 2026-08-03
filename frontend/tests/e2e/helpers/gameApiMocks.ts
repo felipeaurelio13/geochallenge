@@ -21,6 +21,20 @@ const gameStartPayload = {
 };
 
 export async function mockGameApis(page: Page) {
+  await page.addInitScript(() => {
+    window.localStorage.setItem('token', 'e2e-token');
+  });
+
+  for (const healthPath of ['**/health', '**/ping']) {
+    await page.route(healthPath, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ status: 'healthy' }),
+      });
+    });
+  }
+
   await page.route('**/api/auth/me', async (route) => {
     await route.fulfill({
       status: 200,

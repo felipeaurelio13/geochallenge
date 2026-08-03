@@ -6,11 +6,10 @@ test.describe('layout de ronda mobile', () => {
     await mockGameApis(page);
   });
 
-  test('mantiene CTA visible, media contenida y alternativas accesibles', async ({ page }) => {
+  test('mantiene alternativas de autoenvío visibles y media contenida', async ({ page }) => {
     await page.goto('/game/single?category=FLAG');
 
-    const confirmButton = page.getByRole('button', { name: 'Confirmar' });
-    await expect(confirmButton).toBeVisible();
+    await expect(page.getByTestId('mobile-action-tray')).toBeVisible();
 
     const optionButtons = page.locator('.game-options-wrap button');
     await expect(optionButtons).toHaveCount(4);
@@ -21,6 +20,7 @@ test.describe('layout de ronda mobile', () => {
     });
 
     await expect(optionButtons.last()).toBeInViewport();
+    await expect(page.getByRole('button', { name: 'Argentina' })).toBeEnabled();
 
     const media = page.locator('.media-box img');
     await expect(media).toBeVisible();

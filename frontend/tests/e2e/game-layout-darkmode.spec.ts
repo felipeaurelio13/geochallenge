@@ -7,10 +7,10 @@ test.describe('layout de ronda mobile dark mode', () => {
     await page.emulateMedia({ colorScheme: 'dark' });
   });
 
-  test('mantiene CTA visible y sin overflow horizontal accidental en tema oscuro', async ({ page }, testInfo) => {
+  test('mantiene alternativas accesibles y sin overflow horizontal accidental en tema oscuro', async ({ page }, testInfo) => {
     await page.goto('/game/single?category=FLAG');
 
-    await expect(page.getByRole('button', { name: 'Confirmar' })).toBeVisible();
+    await expect(page.getByTestId('mobile-action-tray')).toBeVisible();
     await expect(page.locator('.game-options-wrap button')).toHaveCount(4);
 
     const hasHorizontalOverflow = await page.evaluate(() => {
