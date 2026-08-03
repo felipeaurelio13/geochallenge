@@ -19,11 +19,16 @@ const mocks = vi.hoisted(() => ({
       'common.skipToAnswerOptions': 'Saltar a las opciones',
       'geoChallenges.title': 'GeoRetos',
       'geoChallenges.preparing': 'Preparando...',
+      'geoChallenges.startJourney': 'Comenzar la vuelta al mundo',
+      'geoChallenges.playDuel': 'Jugar duelo de 10 preguntas',
       'geoChallenges.confirm': 'Confirmar respuesta',
       'geoChallenges.correctOrder': 'Respuesta correcta',
       'geoChallenges.seeResults': 'Ver resultados',
       'geoChallenges.complete': '¡GeoReto completado!',
       'geoChallenges.completeDesc': 'Cinco formas distintas de pensar el mundo.',
+      'geoChallenges.passportComplete': 'Pasaporte geográfico completo',
+      'geoChallenges.roundRecap': 'Repaso de la partida',
+      'geoChallenges.performance.perfect': '¡Dominaste las cinco regiones del planeta!',
       'geoChallenges.playAgain': 'Jugar otra vez',
       'geoChallenges.share': 'Compartir GeoReto',
       'geoChallenges.resultPattern': 'Patrón de resultados',
@@ -77,6 +82,8 @@ function round(
   return {
     id,
     kind,
+    region: ({ r1: 'AFRICA', r2: 'AMERICAS', r3: 'ASIA', r4: 'EUROPE', r5: 'OCEANIA' } as const)[id as 'r1' | 'r2' | 'r3' | 'r4' | 'r5'],
+    difficulty: 'MEDIUM',
     selectionMode,
     prompt: { es: `Pregunta ${id}`, en: `Question ${id}` },
     instruction: { es: `Instrucción ${id}`, en: `Instruction ${id}` },
@@ -135,8 +142,17 @@ describe('GeoChallengesPage', () => {
     }));
   });
 
+  it('ofrece entrar al duelo de 10 preguntas desde el briefing', async () => {
+    render(<GeoChallengesPage />);
+
+    fireEvent.click(await screen.findByRole('button', { name: /Jugar duelo de 10 preguntas/i }));
+
+    expect(mocks.navigate).toHaveBeenCalledWith('/duel?mode=geo-challenge');
+  });
+
   it('completes all five mechanics and preserves the ordered final answer', async () => {
     render(<GeoChallengesPage />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Comenzar la vuelta al mundo' }));
 
     for (const [choice, next] of [
       ['Chile', 'Siguiente'],
@@ -158,6 +174,8 @@ describe('GeoChallengesPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Ver resultados' }));
 
     expect(await screen.findByRole('heading', { name: '¡GeoReto completado!' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Pasaporte geográfico completo' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Repaso de la partida' })).toBeInTheDocument();
     await waitFor(() => {
       expect(mocks.finish).toHaveBeenCalledWith({
         sessionToken: 'signed-session',

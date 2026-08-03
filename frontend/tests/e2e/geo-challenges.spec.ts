@@ -5,6 +5,8 @@ const rounds = [
   {
     id: 'r1',
     kind: 'EXTREME',
+    region: 'AMERICAS',
+    difficulty: 'MEDIUM',
     selectionMode: 'single',
     prompt: { es: '¿Cuál tiene la capital más al sur?', en: 'Which has the southernmost capital?' },
     instruction: { es: 'Elige un país.', en: 'Choose one country.' },
@@ -18,6 +20,8 @@ const rounds = [
   ...(['HIGHER_LOWER', 'COMMON_NEIGHBOR', 'ODD_ONE_OUT'] as const).map((kind, index) => ({
     id: `r${index + 2}`,
     kind,
+    region: (['AFRICA', 'ASIA', 'EUROPE'] as const)[index],
+    difficulty: 'MEDIUM' as const,
     selectionMode: 'single' as const,
     prompt: { es: `Pregunta ${index + 2}`, en: `Question ${index + 2}` },
     instruction: { es: 'Elige un país.', en: 'Choose one country.' },
@@ -29,6 +33,8 @@ const rounds = [
   {
     id: 'r5',
     kind: 'NORTH_TO_SOUTH',
+    region: 'OCEANIA',
+    difficulty: 'HARD',
     selectionMode: 'ordered',
     prompt: { es: 'Ordena de norte a sur.', en: 'Order from north to south.' },
     instruction: { es: 'Tócalos en orden.', en: 'Tap them in order.' },
@@ -99,6 +105,7 @@ test.describe('GeoRetos mobile', () => {
 
   test('keeps all options and the primary action reachable', async ({ page }) => {
     await page.goto('/geo-challenges');
+    await page.getByRole('button', { name: /Comenzar la vuelta al mundo|Start the world tour/ }).click();
 
     const confirmButton = page.getByRole('button', { name: /Confirmar respuesta|Confirm answer/ });
     await expect(confirmButton).toBeVisible();
@@ -113,9 +120,20 @@ test.describe('GeoRetos mobile', () => {
     await expect(confirmButton).toBeEnabled();
   });
 
+  test('offers the 10-question duel from the briefing', async ({ page }) => {
+    await page.goto('/geo-challenges');
+
+    const duelButton = page.getByRole('button', { name: /duelo de 10 preguntas|10-question duel/i });
+    await expect(duelButton).toBeVisible();
+    await duelButton.click();
+
+    await expect(page).toHaveURL(/\/duel\?mode=geo-challenge$/);
+  });
+
   test('has no accidental horizontal overflow in dark mode', async ({ page }, testInfo) => {
     await page.emulateMedia({ colorScheme: 'dark' });
     await page.goto('/geo-challenges');
+    await page.getByRole('button', { name: /Comenzar la vuelta al mundo|Start the world tour/ }).click();
 
     await expect(page.getByRole('button', { name: /Confirmar respuesta|Confirm answer/ })).toBeVisible();
     const hasHorizontalOverflow = await page.evaluate(() =>

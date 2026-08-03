@@ -31,18 +31,20 @@ const mocks = vi.hoisted(() => {
     submitDuelAnswerMock: vi.fn(),
     onConnectionStateChangeMock: vi.fn(() => () => {}),
     isConnectedMock: vi.fn(() => true),
+    searchParams: 'category=FLAG',
   };
 });
 
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigateMock,
-  useSearchParams: () => [new URLSearchParams('category=FLAG')],
+  useSearchParams: () => [new URLSearchParams(mocks.searchParams)],
 }));
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string, params?: Record<string, string | number>) =>
       params ? `${key}:${JSON.stringify(params)}` : key,
+    i18n: { language: 'es' },
   }),
 }));
 
@@ -96,6 +98,9 @@ vi.mock('../components', () => ({
       </main>
     </div>
   ),
+  UniversalGameLayout: ({ header, progress, content, footer }: any) => (
+    <div>{header}{progress}{content}{footer}</div>
+  ),
 }));
 
 vi.mock('../components/MapInteractive', () => ({
@@ -123,6 +128,7 @@ describe('DuelPage socket flow', () => {
   beforeEach(() => {
     mocks.handlers.clear();
     vi.clearAllMocks();
+    mocks.searchParams = 'category=FLAG';
   });
 
   it('registra listeners antes de entrar a la cola y avanza al recibir oponente', async () => {
@@ -135,7 +141,7 @@ describe('DuelPage socket flow', () => {
     const joinCallOrder = mocks.joinDuelQueueMock.mock.invocationCallOrder[0];
 
     expect(registerCallOrder).toBeLessThan(joinCallOrder);
-    expect(mocks.joinDuelQueueMock).toHaveBeenCalledWith('FLAG', {});
+    expect(mocks.joinDuelQueueMock).toHaveBeenCalledWith('FLAG', {}, 'classic');
 
     act(() => {
       mocks.handlers.get('duel:matched')?.forEach((cb) => cb({ duelId: 'd1' }));
@@ -152,6 +158,54 @@ describe('DuelPage socket flow', () => {
     });
 
     expect(await screen.findByText('rival')).toBeInTheDocument();
+  });
+
+  it('juega GeoRetos en duelo con 10 rondas y conserva el orden seleccionado', async () => {
+    mocks.searchParams = 'mode=geo-challenge';
+    render(<DuelPage />);
+
+    expect(mocks.joinDuelQueueMock).toHaveBeenCalledWith('MIXED', {}, 'geo-challenge');
+
+    act(() => {
+      mocks.handlers.get('duel:question')?.forEach((cb) => cb({
+        questionIndex: 0,
+        totalQuestions: 10,
+        timeLimit: 25,
+        question: {
+          id: 'geo-1',
+          category: 'MIXED',
+          questionText: 'Ordena los países',
+          options: ['CA', 'US', 'MX', 'GT'],
+          correctAnswer: '',
+          geoChallenge: {
+            id: 'geo-1',
+            kind: 'NORTH_TO_SOUTH',
+            region: 'AMERICAS',
+            difficulty: 'MEDIUM',
+            selectionMode: 'ordered',
+            prompt: { es: 'Ordena los países', en: 'Order the countries' },
+            instruction: { es: 'De norte a sur', en: 'North to south' },
+            options: [
+              { id: 'CA', label: { es: 'Canadá', en: 'Canada' } },
+              { id: 'US', label: { es: 'Estados Unidos', en: 'United States' } },
+              { id: 'MX', label: { es: 'México', en: 'Mexico' } },
+              { id: 'GT', label: { es: 'Guatemala', en: 'Guatemala' } },
+            ],
+          },
+        },
+      }));
+    });
+
+    for (const country of ['Canadá', 'Estados Unidos', 'México', 'Guatemala']) {
+      fireEvent.click(await screen.findByRole('button', { name: country }));
+    }
+    fireEvent.click(screen.getByRole('button', { name: 'geoChallenges.confirm' }));
+
+    expect(mocks.submitDuelAnswerMock).toHaveBeenCalledWith(
+      'geo-1',
+      'CA,US,MX,GT',
+      25,
+    );
   });
 
   it('muestra contexto empático durante la búsqueda del duelo', async () => {

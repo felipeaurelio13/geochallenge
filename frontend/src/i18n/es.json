@@ -120,6 +120,8 @@
     "geoChallenges": "GeoRetos",
     "geoChallengesBadge": "Nuevo",
     "geoChallengesDesc": "5 retos · extremos, comparaciones, fronteras y orden geográfico",
+    "geoChallengesDuel": "GeoRetos en duelo",
+    "geoChallengesDuelDesc": "10 preguntas · 1 contra 1",
     "howToPlay": "Cómo se juega",
     "howToPlayAria": "Cómo se juega {{mode}}",
     "letsPlay": "¡Jugar!"
@@ -384,6 +386,7 @@
     "tie": "¡Empate!",
     "playAgain": "Buscar otro duelo",
     "queueCategory": "Buscando en {{category}}",
+    "geoQueue": "Buscando rival para GeoRetos · 10 preguntas",
     "averageWaitHint": "Normalmente toma menos de 30 segundos. Gracias por esperar.",
     "cancelHint": "Puedes cancelar la búsqueda en cualquier momento.",
     "retry": "Reintentar",
@@ -655,6 +658,14 @@
     "errorLoading": "No se pudo preparar la partida",
     "errorAnswering": "No se pudo validar la respuesta. Intenta nuevamente.",
     "sessionExpired": "La partida expiró. Inicia un nuevo GeoReto.",
+    "briefingBadge": "Vuelta al mundo",
+    "briefingDesc": "Cinco retos, cinco formas de razonar y una ruta equilibrada por todo el planeta. En cada partida visitarás todas las macroregiones sin repetir países.",
+    "regionalCoverage": "Cobertura geográfica de la partida",
+    "balancedRoute": "Una ronda por cada macroregión",
+    "mechanicsPreview": "Mecánicas de esta partida",
+    "briefingRules": "5 rondas · {{seconds}} segundos por ronda · La explicación aparece después de responder",
+    "startJourney": "Comenzar la vuelta al mundo",
+    "playDuel": "Jugar duelo de 10 preguntas",
     "confirm": "Confirmar respuesta",
     "undo": "Deshacer",
     "orderProgress": "Orden seleccionado: {{current}}/{{total}}",
@@ -663,12 +674,31 @@
     "seeResults": "Ver resultados",
     "complete": "¡GeoReto completado!",
     "completeDesc": "Cinco formas distintas de pensar el mundo.",
+    "passportComplete": "Pasaporte geográfico completo",
+    "roundRecap": "Repaso de la partida",
     "score": "{{score}} puntos",
     "resultPattern": "Patrón de resultados",
     "share": "Compartir GeoReto",
     "shareText": "Hice {{correct}}/{{total}} en GeoRetos de GeoChallenge",
     "playAgain": "Jugar otra vez",
     "dataNote": "Datos geográficos versionados · actualización {{date}}",
+    "performance": {
+      "perfect": "¡Dominaste las cinco regiones del planeta!",
+      "strong": "Gran vuelta al mundo. Tu criterio geográfico está afilado.",
+      "explorer": "Cada explicación suma una nueva pista para la próxima vuelta."
+    },
+    "regions": {
+      "AFRICA": "África",
+      "AMERICAS": "Américas",
+      "ASIA": "Asia",
+      "EUROPE": "Europa",
+      "OCEANIA": "Oceanía"
+    },
+    "difficulties": {
+      "EASY": "Accesible",
+      "MEDIUM": "Intermedio",
+      "HARD": "Experto"
+    },
     "kinds": {
       "EXTREME": "Extremos",
       "HIGHER_LOWER": "Mayor o menor",

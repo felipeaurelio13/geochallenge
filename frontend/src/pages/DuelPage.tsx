@@ -10,12 +10,22 @@ import {
   GameRoundScaffold,
   RoundActionTray,
   MechanicsHud,
+  UniversalGameLayout,
 } from '../components';
 import { UserAvatar } from '../components/atoms/UserAvatar';
 import { Alert } from '../components/atoms/Alert';
 import { Button } from '../components/atoms/Button';
 import { MonumentAttribution } from '../components/MonumentAttribution';
-import { Category, GameFilters, MechanicUsage, Question } from '../types';
+import {
+  Category,
+  DuelMode,
+  GameFilters,
+  GeoChallengeKind,
+  GeoChallengeRegion,
+  LocalizedText,
+  MechanicUsage,
+  Question,
+} from '../types';
 import { GAME_CONSTANTS } from '../constants/game';
 import { useHaptics, useImagePreloader } from '../hooks';
 import { areMechanicsV2Enabled } from '../config/featureFlags';
@@ -42,6 +52,32 @@ const SOCKET_CONNECT_TIMEOUT_MS = 10000;
 const SYNCING_LONG_THRESHOLD_MS = 5000;
 const DUEL_CATEGORIES: Category[] = ['FLAG', 'CAPITAL', 'MAP', 'SILHOUETTE', 'MONUMENT', 'CINEMA_GEO', 'MIXED'];
 
+const GEO_KIND_ICONS: Record<GeoChallengeKind, string> = {
+  EXTREME: '🧭',
+  HIGHER_LOWER: '⚖️',
+  COMMON_NEIGHBOR: '🔗',
+  ODD_ONE_OUT: '🕵️',
+  NORTH_TO_SOUTH: '↕️',
+};
+
+const GEO_REGION_ICONS: Record<GeoChallengeRegion, string> = {
+  AFRICA: '🌍',
+  AMERICAS: '🌎',
+  ASIA: '🌏',
+  EUROPE: '🧭',
+  OCEANIA: '🏝️',
+};
+
+function localizeGeoText(text: LocalizedText, language: string): string {
+  return language.startsWith('en') ? text.en : text.es;
+}
+
+function flagFromIso2(iso2: string): string {
+  return iso2.toUpperCase().split('')
+    .map((character) => String.fromCodePoint(127397 + character.charCodeAt(0)))
+    .join('');
+}
+
 function parseDuelCategory(value: string | null): Category {
   if (!value) {
     return 'MIXED';
@@ -51,7 +87,7 @@ function parseDuelCategory(value: string | null): Category {
 }
 
 export function DuelPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
@@ -64,7 +100,13 @@ export function DuelPage() {
   const [myScore, setMyScore] = useState(0);
   const [opponentScore, setOpponentScore] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(TIME_PER_QUESTION);
+  const [questionTimeLimit, setQuestionTimeLimit] = useState(TIME_PER_QUESTION);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+  const [geoSelectionIds, setGeoSelectionIds] = useState<string[]>([]);
+  const [geoFeedback, setGeoFeedback] = useState<{
+    correctOptionIds: string[];
+    explanation: LocalizedText;
+  } | null>(null);
   const [mapLocation, setMapLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [lastAnswerCorrect, setLastAnswerCorrect] = useState(false);
@@ -100,7 +142,15 @@ export function DuelPage() {
   const duelMechanicsFeatureEnabled = areMechanicsV2Enabled('duel');
   const prefersReducedMotion = useUiStore((s) => s.prefersReducedMotion);
   const duelCategory = parseDuelCategory(searchParams.get('category'));
-  const hasSelection = Boolean(selectedAnswer || mapLocation);
+  const duelMode: DuelMode = searchParams.get('mode') === 'geo-challenge' ? 'geo-challenge' : 'classic';
+  const geoRound = currentQuestion?.geoChallenge;
+  const isGeoDuel = duelMode === 'geo-challenge';
+  const hasCompleteGeoSelection = geoRound ? (
+    geoRound.selectionMode === 'ordered'
+      ? geoSelectionIds.length === geoRound.options.length
+      : geoSelectionIds.length === 1
+  ) : false;
+  const hasSelection = isGeoDuel ? hasCompleteGeoSelection : Boolean(selectedAnswer || mapLocation);
   useImagePreloader(duelImageUrls, 0); // skip=0: aún no hay ninguna imagen mostrándose
 
   const duelFilters = useMemo<GameFilters>(() => {
@@ -137,14 +187,14 @@ export function DuelPage() {
     setShowRetryAction(false);
 
     if (duelStateRef.current === 'searching') {
-      socketService.joinDuelQueue(duelCategory, duelFilters);
+      socketService.joinDuelQueue(duelCategory, duelFilters, duelMode);
       return;
     }
 
     if (duelStateRef.current === 'matched') {
       socketService.ready();
     }
-  }, [duelCategory, duelFilters]);
+  }, [duelCategory, duelFilters, duelMode]);
 
   // Part 1.1: pub-sub de socketService — si el estado pasa a 'error' mientras
   // estamos buscando/emparejados/jugando, mostramos el banner con Reintentar.
@@ -210,6 +260,9 @@ export function DuelPage() {
 
     // Event handlers
     const handleMatched = (data: any) => {
+      if (typeof data.timePerQuestion === 'number') {
+        setQuestionTimeLimit(data.timePerQuestion);
+      }
       if (data.opponent) {
         setOpponent(data.opponent);
       }
@@ -248,8 +301,12 @@ export function DuelPage() {
       setCurrentQuestion(data.question);
       setQuestionNumber((data.questionIndex ?? 0) + 1);
       setTotalQuestions(data.totalQuestions);
-      setTimeRemaining(TIME_PER_QUESTION);
+      const nextTimeLimit = typeof data.timeLimit === 'number' ? data.timeLimit : TIME_PER_QUESTION;
+      setQuestionTimeLimit(nextTimeLimit);
+      setTimeRemaining(nextTimeLimit);
       setSelectedAnswer(null);
+      setGeoSelectionIds([]);
+      setGeoFeedback(null);
       setMapLocation(null);
       setShowResult(false);
       setIsSyncingRound(false);
@@ -270,6 +327,7 @@ export function DuelPage() {
       setIsSyncingRound(false);
       hasSubmittedCurrentQuestionRef.current = true;
       const wasCorrect = Boolean(myResult?.answer?.isCorrect);
+      setGeoFeedback(data.geoChallenge ?? null);
       setLastAnswerCorrect(wasCorrect);
       setMyScore(myResult?.totalScore ?? 0);
       setOpponentScore(rivalResult?.totalScore ?? 0);
@@ -323,7 +381,7 @@ export function DuelPage() {
       const currentState = duelStateRef.current;
 
       if (currentState === 'searching') {
-        socketService.joinDuelQueue(duelCategory, duelFilters);
+        socketService.joinDuelQueue(duelCategory, duelFilters, duelMode);
         showConnectionMessage('info', t('duel.reconnectedSearching'), false);
         return;
       }
@@ -348,7 +406,7 @@ export function DuelPage() {
     socketService.socket?.on('connect', handleConnect);
 
     // Join matchmaking queue after listeners are active
-    socketService.joinDuelQueue(duelCategory, duelFilters);
+    socketService.joinDuelQueue(duelCategory, duelFilters, duelMode);
 
     return () => {
       clearInterval(searchTimer);
@@ -369,7 +427,7 @@ export function DuelPage() {
       socketService.socket?.off('disconnect', handleDisconnect);
       socketService.socket?.off('connect', handleConnect);
     };
-  }, [duelCategory, showConnectionMessage, user?.id]);
+  }, [duelCategory, duelMode, showConnectionMessage, user?.id]);
 
   useEffect(() => {
     if (duelState === 'matched') {
@@ -378,17 +436,26 @@ export function DuelPage() {
   }, [duelState]);
 
   // Handle time complete
-  const handleTimeComplete = useCallback(() => {
+  const handleTimeComplete = () => {
     if (duelState === 'playing' && !showResult) {
       handleSubmitAnswer();
     }
-  }, [duelState, showResult]);
+  };
 
   // Submit answer — used for MAP confirm button and timer expiry (non-MAP: no-op if already auto-submitted)
   const handleSubmitAnswer = () => {
     if (!currentQuestion || showResult || isSyncingRound || hasSubmittedCurrentQuestionRef.current) return;
 
-    if (currentQuestion.category === 'MAP') {
+    if (isGeoDuel) {
+      hasSubmittedCurrentQuestionRef.current = true;
+      setHasSubmittedThisQuestion(true);
+      socketService.submitDuelAnswer(
+        currentQuestion.id,
+        geoSelectionIds.join(','),
+        timeRemaining,
+      );
+      setDuelState('waiting');
+    } else if (currentQuestion.category === 'MAP') {
       const coordinates = mapLocation || undefined;
       const answer = mapLocation ? `${mapLocation.lat},${mapLocation.lng}` : '0,0';
       hasSubmittedCurrentQuestionRef.current = true;
@@ -417,6 +484,14 @@ export function DuelPage() {
   // Option selection handler: auto-submits for non-MAP, plain select for MAP
   const handleOptionSelectDuel = (option: string) => {
     if (showResult || isSyncingRound) return;
+    if (isGeoDuel && geoRound) {
+      setGeoSelectionIds((current) => geoRound.selectionMode === 'ordered'
+        ? current.includes(option)
+          ? current.filter((optionId) => optionId !== option)
+          : [...current, option]
+        : [option]);
+      return;
+    }
     setSelectedAnswer(option);
     if (currentQuestion?.category !== 'MAP' && option !== selectedAnswer) {
       handleAutoSubmitAnswer(option);
@@ -546,8 +621,10 @@ export function DuelPage() {
 
           <div className="mb-5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-left text-sm">
             <p className="text-primary font-semibold mb-1">
-              {t('duel.queueCategory', {
-                category: t(
+              {isGeoDuel
+                ? t('duel.geoQueue')
+                : t('duel.queueCategory', {
+                  category: t(
                   `categories.${
                     duelCategory === 'FLAG'
                       ? 'flags'
@@ -563,10 +640,10 @@ export function DuelPage() {
                       ? 'cinemaGeo'
                       : 'mixed'
                   }`
-                ),
-              })}
+                  ),
+                })}
             </p>
-            {(duelFilters.continent || duelFilters.isInsular || duelFilters.isLandlocked || duelFilters.difficulty) && (
+            {!isGeoDuel && (duelFilters.continent || duelFilters.isInsular || duelFilters.isLandlocked || duelFilters.difficulty) && (
               <p className="mt-0.5 text-xs text-[var(--color-text-muted)]">
                 {[
                   duelFilters.continent && t(`filters.continents.${duelFilters.continent.replace(' ', '_')}`),
@@ -592,7 +669,7 @@ export function DuelPage() {
                   onClick={() => {
                     setSearchTimedOut(false);
                     setSearchTime(0);
-                    socketService.joinDuelQueue(duelCategory, duelFilters);
+                    socketService.joinDuelQueue(duelCategory, duelFilters, duelMode);
                   }}
                   variant="primary"
                   size="sm"
@@ -670,7 +747,7 @@ export function DuelPage() {
       setDuelState('searching');
       setSearchTime(0);
       setSearchTimedOut(false);
-      socketService.joinDuelQueue(duelCategory, duelFilters);
+      socketService.joinDuelQueue(duelCategory, duelFilters, duelMode);
     };
 
     return (
@@ -756,6 +833,137 @@ export function DuelPage() {
   }
 
   const isMapQuestion = currentQuestion.category === 'MAP';
+  if (isGeoDuel && geoRound) {
+    const correctAnswer = geoFeedback?.correctOptionIds
+      .map((optionId) => geoRound.options.find((option) => option.id === optionId))
+      .filter((option): option is NonNullable<typeof option> => Boolean(option))
+      .map((option) => localizeGeoText(option.label, i18n.language))
+      .join(' → ');
+
+    return (
+      <UniversalGameLayout
+        className="bg-[var(--color-bg-app)]"
+        header={
+          <header className="border-b border-app-border bg-app-surface/95 px-3 py-2 pt-[calc(env(safe-area-inset-top)+0.5rem)] backdrop-blur sm:px-4">
+            <div className="mx-auto flex max-w-4xl items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-2">
+                <UserAvatar username={user?.username ?? ''} size="sm" />
+                <span className="text-xl font-black text-primary">{myScore}</span>
+              </div>
+              <Timer
+                key={currentQuestion.id}
+                duration={questionTimeLimit}
+                timeRemaining={timeRemaining}
+                onTick={setTimeRemaining}
+                onComplete={handleTimeComplete}
+                isActive={duelState === 'playing' && !showResult}
+              />
+              <div className="flex min-w-0 items-center gap-2">
+                <span className="text-xl font-black text-red-400">{opponentScore}</span>
+                <UserAvatar username={opponent?.username ?? ''} size="sm" color="bg-red-500" />
+              </div>
+            </div>
+          </header>
+        }
+        progress={
+          <div className="bg-app-muted/65 px-3 py-1.5 text-center">
+            <span className="text-sm text-app-secondary">
+              {t('game.questionOf', { current: questionNumber, total: totalQuestions })}
+            </span>
+            <span className="ml-2 text-xs font-bold text-fuchsia-300">
+              {GEO_REGION_ICONS[geoRound.region]} {t(`geoChallenges.regions.${geoRound.region}`)}
+            </span>
+          </div>
+        }
+        content={
+          <main className="mx-auto flex h-full min-h-0 w-full max-w-4xl flex-col px-3 py-3 sm:px-4">
+            <section className="shrink-0 rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-fuchsia-500/10 to-indigo-500/5 p-3 text-center sm:p-4">
+              <div className="text-2xl" aria-hidden="true">{GEO_KIND_ICONS[geoRound.kind]}</div>
+              <h1 className="mt-1 text-base font-black leading-snug text-app-text sm:text-xl">
+                {localizeGeoText(geoRound.prompt, i18n.language)}
+              </h1>
+              <p className="mt-1 text-xs text-app-subtle">
+                {localizeGeoText(geoRound.instruction, i18n.language)}
+              </p>
+            </section>
+
+            <section id="game-options" className="mt-3 min-h-0 flex-1 overflow-y-auto">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {geoRound.options.map((option) => {
+                  const position = geoSelectionIds.indexOf(option.id) + 1;
+                  const isSelected = position > 0;
+                  const isCorrectOption = Boolean(geoFeedback?.correctOptionIds.includes(option.id));
+                  const isWrongSelection = showResult && isSelected && !isCorrectOption;
+                  const stateClass = showResult
+                    ? isCorrectOption
+                      ? 'border-green-500 bg-green-500/15 text-green-100'
+                      : isWrongSelection
+                        ? 'border-red-500 bg-red-500/15 text-red-100'
+                        : 'border-app-border bg-app-surface/60 text-app-subtle opacity-65'
+                    : isSelected
+                      ? 'border-fuchsia-400 bg-fuchsia-500/20 text-app-text ring-1 ring-fuchsia-400/60'
+                      : 'border-app-border bg-app-surface text-app-text hover:border-fuchsia-500/60';
+
+                  return (
+                    <button
+                      key={option.id}
+                      type="button"
+                      onClick={() => handleOptionSelectDuel(option.id)}
+                      disabled={showResult || isSyncingRound || hasSubmittedThisQuestion}
+                      aria-pressed={isSelected}
+                      className={`pressable flex min-h-14 items-center gap-3 rounded-2xl border px-4 py-3 text-left text-sm font-bold transition-all ${stateClass}`}
+                    >
+                      {geoRound.selectionMode === 'ordered' && isSelected && (
+                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-fuchsia-500 text-sm font-black text-white">
+                          {position}
+                        </span>
+                      )}
+                      <span className="text-2xl" aria-hidden="true">{flagFromIso2(option.id)}</span>
+                      <span className="min-w-0 flex-1">{localizeGeoText(option.label, i18n.language)}</span>
+                      {showResult && isCorrectOption && <span className="text-green-400" aria-hidden="true">✓</span>}
+                      {isWrongSelection && <span className="text-red-400" aria-hidden="true">✕</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+          </main>
+        }
+        footer={
+          <RoundActionTray
+            mode="duel"
+            showResult={showResult}
+            canSubmit={hasCompleteGeoSelection && !isSyncingRound}
+            isWaiting={hasSubmittedThisQuestion && !showResult}
+            autoSubmit={false}
+            submitLabel={t('geoChallenges.confirm')}
+            waitingLabel={t('duel.waitingForOpponent')}
+            resultLabel={lastAnswerCorrect ? t('game.correct') : t('game.incorrect')}
+            showResultBadge
+            isCorrect={lastAnswerCorrect}
+            correctAnswer={!lastAnswerCorrect ? correctAnswer : undefined}
+            resultHint={geoFeedback ? localizeGeoText(geoFeedback.explanation, i18n.language) : undefined}
+            onSubmit={handleSubmitAnswer}
+            summarySlot={geoRound.selectionMode === 'ordered' && !showResult && !hasSubmittedThisQuestion ? (
+              <div className="flex items-center justify-between gap-2 px-2 text-xs text-app-subtle sm:min-w-56">
+                <span>{t('geoChallenges.orderProgress', { current: geoSelectionIds.length, total: geoRound.options.length })}</span>
+                {geoSelectionIds.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setGeoSelectionIds((current) => current.slice(0, -1))}
+                    className="rounded-lg px-2 py-1 font-semibold text-fuchsia-300 hover:bg-fuchsia-500/10"
+                  >
+                    ↶ {t('geoChallenges.undo')}
+                  </button>
+                )}
+              </div>
+            ) : undefined}
+          />
+        }
+      />
+    );
+  }
+
   return (
     <GameRoundScaffold
       rootClassName="bg-[var(--color-bg-app)]"
@@ -768,7 +976,7 @@ export function DuelPage() {
             </div>
 
             <Timer
-              duration={TIME_PER_QUESTION}
+              duration={questionTimeLimit}
               timeRemaining={timeRemaining}
               onTick={setTimeRemaining}
               onComplete={handleTimeComplete}

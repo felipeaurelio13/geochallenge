@@ -22,6 +22,20 @@ import {
 } from './duel.utils.js';
 import { AppError } from '../utils/appError.js';
 import { emitSocketError } from '../utils/respondWithError.js';
+import {
+  buildGeoChallengeDuelGame,
+  GeoChallengeRound,
+  GeoChallengeRoundWithAnswer,
+  isGeoChallengeAnswerCorrect,
+  toPublicGeoChallengeRound,
+} from '../services/geoChallenge.service.js';
+import { calculateTimeBonus } from '../utils/scoring.js';
+
+export type DuelMode = 'classic' | 'geo-challenge';
+
+interface DuelQuestion extends GameQuestion {
+  geoChallenge?: GeoChallengeRound;
+}
 
 interface QueuedPlayer {
   userId: string;
@@ -30,12 +44,17 @@ interface QueuedPlayer {
   joinedAt: Date;
   category?: Category;
   filters?: QuestionFilters;
+  mode?: DuelMode;
 }
 
 const DUEL_CATEGORIES: Category[] = ['MAP', 'FLAG', 'CAPITAL', 'SILHOUETTE', 'MONUMENT', 'CINEMA_GEO', 'MIXED'];
 
 function isCompatibleCategory(categoryA: Category, categoryB: Category): boolean {
   return categoryA === categoryB;
+}
+
+function normalizeDuelMode(mode?: DuelMode): DuelMode {
+  return mode === 'geo-challenge' ? 'geo-challenge' : 'classic';
 }
 
 function isCompatibleFilters(a?: QuestionFilters, b?: QuestionFilters): boolean {
@@ -68,11 +87,13 @@ interface ActiveDuel {
     ready: boolean;
     pendingQuestionIndex?: number;
   }[];
-  questions: GameQuestion[];
+  questions: DuelQuestion[];
   questionsData: any[]; // Full questions with answers for validation
+  geoChallengeRounds?: GeoChallengeRoundWithAnswer[];
   currentQuestionIndex: number;
   status: 'waiting' | 'countdown' | 'playing' | 'finished';
   category?: Category;
+  mode: DuelMode;
   startedAt?: Date;
   questionStartedAt?: Date;
   resolvingQuestionIndex?: number;
@@ -88,6 +109,7 @@ export class MatchmakingQueue {
     this.queue.push({
       ...player,
       category: normalizeCategory(player.category),
+      mode: normalizeDuelMode(player.mode),
     });
   }
 
@@ -108,6 +130,10 @@ export class MatchmakingQueue {
         const player2 = this.queue[j];
         const player1Category = normalizeCategory(player1.category);
         const player2Category = normalizeCategory(player2.category);
+
+        if (normalizeDuelMode(player1.mode) !== normalizeDuelMode(player2.mode)) {
+          continue;
+        }
 
         if (!isCompatibleCategory(player1Category, player2Category)) {
           continue;
@@ -181,6 +207,10 @@ function isRateLimited(userId: string, event: string, maxPerMinute: number = 30)
 
 const READY_TIMEOUT_MS = 7000;
 
+function duelTimeLimit(duel: ActiveDuel): number {
+  return duel.mode === 'geo-challenge' ? 25 : config.game.timePerQuestion;
+}
+
 /**
  * Genera un ID único para el duelo
  */
@@ -195,7 +225,11 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
   const user = socket.user!;
 
   // Unirse a la cola de matchmaking
-  socket.on('duel:queue', async (data?: { category?: Category; filters?: QuestionFilters }) => {
+  socket.on('duel:queue', async (data?: {
+    category?: Category;
+    filters?: QuestionFilters;
+    mode?: DuelMode;
+  }) => {
     if (isRateLimited(user.userId, 'duel:queue', 10)) {
       emitSocketError(
         socket,
@@ -206,6 +240,7 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
     }
 
     const selectedCategory = normalizeCategory(data?.category);
+    const selectedMode = normalizeDuelMode(data?.mode);
 
     // Verificar si ya está en un duelo
     const existingDuelId = playerDuels.get(user.userId);
@@ -231,6 +266,7 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
       joinedAt: new Date(),
       category: selectedCategory,
       filters: data?.filters,
+      mode: selectedMode,
     });
 
     socket.emit('duel:queued', {
@@ -241,7 +277,14 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
     // Intentar encontrar match
     const match = queue.findMatch();
     if (match) {
-      await createDuel(io, match[0], match[1], normalizeCategory(match[0].category), match[0].filters);
+      await createDuel(
+        io,
+        match[0],
+        match[1],
+        normalizeCategory(match[0].category),
+        match[0].filters,
+        normalizeDuelMode(match[0].mode),
+      );
     }
   });
 
@@ -339,13 +382,33 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
 
       let result: AnswerResult;
       try {
-        // Validar respuesta
-        result = await validateAnswer(
-          data.questionId,
-          data.answer,
-          data.timeRemaining,
-          data.coordinates
-        );
+        if (duel.mode === 'geo-challenge') {
+          const round = duel.geoChallengeRounds?.[duel.currentQuestionIndex];
+          if (!round || round.id !== data.questionId) {
+            throw new Error('Ronda GeoRetos no encontrada');
+          }
+          const selectedOptionIds = data.answer ? data.answer.split(',').filter(Boolean) : [];
+          const isCorrect = isGeoChallengeAnswerCorrect(round.correctOptionIds, selectedOptionIds);
+          const safeTimeRemaining = Math.max(0, Math.min(duelTimeLimit(duel), data.timeRemaining));
+          const timeBonus = isCorrect ? calculateTimeBonus(safeTimeRemaining, duelTimeLimit(duel)) : 0;
+          result = {
+            questionId: round.id,
+            isCorrect,
+            correctAnswer: round.correctOptionIds.join(','),
+            userAnswer: data.answer,
+            points: isCorrect ? config.game.basePoints + timeBonus : 0,
+            basePoints: isCorrect ? config.game.basePoints : 0,
+            timeBonus,
+            timeRemaining: safeTimeRemaining,
+          };
+        } else {
+          result = await validateAnswer(
+            data.questionId,
+            data.answer,
+            data.timeRemaining,
+            data.coordinates
+          );
+        }
       } catch (error) {
         player.pendingQuestionIndex = undefined;
         console.error('Error validando respuesta en duelo:', error);
@@ -423,14 +486,10 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
       duelId,
       status: duel.status,
       currentQuestionIndex: duel.currentQuestionIndex,
-      question: currentQ
-        ? {
-            id: currentQ.id,
-            category: currentQ.category,
-            questionText: currentQ.questionText,
-            options: currentQ.options,
-          }
-        : null,
+      totalQuestions: duel.questions.length,
+      timeLimit: duelTimeLimit(duel),
+      mode: duel.mode,
+      question: currentQ ?? null,
       scores: duel.players.map((p) => ({ userId: p.userId, score: p.score })),
     });
   });
@@ -491,17 +550,28 @@ async function createDuel(
   player1: QueuedPlayer,
   player2: QueuedPlayer,
   category?: Category,
-  filters?: QuestionFilters
+  filters?: QuestionFilters,
+  mode: DuelMode = 'classic',
 ) {
   const duelId = generateDuelId();
 
-  // Obtener preguntas
-  const questions = await getQuestionsForGame(category, config.game.questionsPerGame, [], filters);
+  const geoChallengeGame = mode === 'geo-challenge' ? buildGeoChallengeDuelGame() : null;
+  const geoChallengeRounds = geoChallengeGame?.rounds;
+  const questions: DuelQuestion[] = geoChallengeRounds
+    ? geoChallengeRounds.map((round) => ({
+        id: round.id,
+        category: 'MIXED',
+        questionText: round.prompt.es,
+        options: round.options.map((option) => option.id),
+        correctAnswer: '',
+        difficulty: round.difficulty,
+        geoChallenge: toPublicGeoChallengeRound(round),
+      }))
+    : await getQuestionsForGame(category, config.game.questionsPerGame, [], filters);
 
-  // Obtener datos completos de preguntas para validación
-  const questionsData = await prisma.question.findMany({
-    where: { id: { in: questions.map((q) => q.id) } },
-  });
+  const questionsData = mode === 'classic'
+    ? await prisma.question.findMany({ where: { id: { in: questions.map((q) => q.id) } } })
+    : [];
 
   const duel: ActiveDuel = {
     id: duelId,
@@ -525,9 +595,11 @@ async function createDuel(
     ],
     questions,
     questionsData,
+    geoChallengeRounds,
     currentQuestionIndex: 0,
     status: 'waiting',
-    category,
+    category: mode === 'geo-challenge' ? undefined : category,
+    mode,
   };
 
   activeDuels.set(duelId, duel);
@@ -548,9 +620,10 @@ async function createDuel(
     duelId,
     opponent: null, // Se envía personalizado a cada uno
     questionsCount: questions.length,
-    timePerQuestion: config.game.timePerQuestion,
+    timePerQuestion: duelTimeLimit(duel),
     category: category || 'MIXED',
-    mechanics: getMechanicsConfigForMode('duel'),
+    mode,
+    mechanics: mode === 'classic' ? getMechanicsConfigForMode('duel') : { enabled: false, allowed: [], limits: {} },
     imageUrls: questions.map((q) => q.imageUrl).filter((url): url is string => !!url),
   });
 
@@ -644,8 +717,11 @@ function sendQuestion(io: SocketIOServer, duel: ActiveDuel) {
       questionIndex,
       totalQuestions: duel.questions.length,
       question,
-      timeLimit: config.game.timePerQuestion,
-      mechanics: getMechanicsConfigForMode('duel'),
+      timeLimit: duelTimeLimit(duel),
+      mode: duel.mode,
+      mechanics: duel.mode === 'classic'
+        ? getMechanicsConfigForMode('duel')
+        : { enabled: false, allowed: [], limits: {} },
     });
 
     // Timer para forzar fin de pregunta si no responden
@@ -684,7 +760,7 @@ function sendQuestion(io: SocketIOServer, duel: ActiveDuel) {
           }
         }
       })();
-    }, (config.game.timePerQuestion + 2) * 1000); // +2 segundos de buffer
+    }, (duelTimeLimit(duel) + 2) * 1000); // +2 segundos de buffer
   } catch (error) {
     console.error(`Error sending question for duel ${duel.id}:`, error);
     emitSocketError(
@@ -722,6 +798,12 @@ async function showQuestionResult(io: SocketIOServer, duel: ActiveDuel, question
   io.to(duel.id).emit('duel:questionResult', {
     questionIndex,
     correctAnswer: questionData?.correctAnswer,
+    geoChallenge: duel.mode === 'geo-challenge' && duel.geoChallengeRounds
+      ? {
+          correctOptionIds: duel.geoChallengeRounds[questionIndex].correctOptionIds,
+          explanation: duel.geoChallengeRounds[questionIndex].explanation,
+        }
+      : undefined,
     results,
   });
 

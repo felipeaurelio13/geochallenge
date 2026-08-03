@@ -4,6 +4,7 @@ import type {
   Question,
   DuelOpponent,
   DuelResult,
+  DuelMode,
   AnswerResult,
   MechanicUsage,
   MechanicsConfig,
@@ -20,6 +21,7 @@ type DuelEventHandlers = {
     questionsCount: number;
     timePerQuestion: number;
     category: Category;
+    mode?: DuelMode;
     opponent: DuelOpponent;
     mechanics?: MechanicsConfig;
   }) => void;
@@ -191,12 +193,12 @@ class SocketService {
   }
 
   // Duel actions
-  joinQueue(category?: Category, filters?: GameFilters): void {
-    this.socket?.emit('duel:queue', { category, filters });
+  joinQueue(category?: Category, filters?: GameFilters, mode: DuelMode = 'classic'): void {
+    this.socket?.emit('duel:queue', { category, filters, mode });
   }
 
-  joinDuelQueue(category?: Category, filters?: GameFilters): void {
-    this.joinQueue(category, filters);
+  joinDuelQueue(category?: Category, filters?: GameFilters, mode: DuelMode = 'classic'): void {
+    this.joinQueue(category, filters, mode);
   }
 
   cancelQueue(): void {

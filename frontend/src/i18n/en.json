@@ -120,6 +120,8 @@
     "geoChallenges": "Geo Challenges",
     "geoChallengesBadge": "New",
     "geoChallengesDesc": "5 challenges · extremes, comparisons, borders and geographic order",
+    "geoChallengesDuel": "Geo Challenges duel",
+    "geoChallengesDuelDesc": "10 questions · 1 vs 1",
     "howToPlay": "How to play",
     "howToPlayAria": "How to play {{mode}}",
     "letsPlay": "Let's play!"
@@ -384,6 +386,7 @@
     "tie": "It's a tie!",
     "playAgain": "Find another duel",
     "queueCategory": "Searching in {{category}}",
+    "geoQueue": "Finding a Geo Challenges rival · 10 questions",
     "averageWaitHint": "This usually takes under 30 seconds. Thanks for waiting.",
     "cancelHint": "You can cancel the search at any time.",
     "retry": "Retry",
@@ -655,6 +658,14 @@
     "errorLoading": "The game could not be prepared",
     "errorAnswering": "The answer could not be checked. Try again.",
     "sessionExpired": "This game expired. Start a new Geo Challenge.",
+    "briefingBadge": "Around the world",
+    "briefingDesc": "Five challenges, five ways to reason, and a balanced route across the planet. Every game visits all macro-regions without repeating countries.",
+    "regionalCoverage": "Game geographic coverage",
+    "balancedRoute": "One round in every macro-region",
+    "mechanicsPreview": "Mechanics in this game",
+    "briefingRules": "5 rounds · {{seconds}} seconds per round · The explanation appears after each answer",
+    "startJourney": "Start the world tour",
+    "playDuel": "Play a 10-question duel",
     "confirm": "Confirm answer",
     "undo": "Undo",
     "orderProgress": "Selected order: {{current}}/{{total}}",
@@ -663,12 +674,31 @@
     "seeResults": "See results",
     "complete": "Geo Challenge complete!",
     "completeDesc": "Five different ways to think about the world.",
+    "passportComplete": "Geographic passport complete",
+    "roundRecap": "Game recap",
     "score": "{{score}} points",
     "resultPattern": "Results pattern",
     "share": "Share Geo Challenge",
     "shareText": "I scored {{correct}}/{{total}} in GeoChallenge's Geo Challenges",
     "playAgain": "Play again",
     "dataNote": "Versioned geography data · updated {{date}}",
+    "performance": {
+      "perfect": "You mastered all five regions of the planet!",
+      "strong": "Great world tour. Your geographic instincts are sharp.",
+      "explorer": "Every explanation adds a new clue for your next tour."
+    },
+    "regions": {
+      "AFRICA": "Africa",
+      "AMERICAS": "Americas",
+      "ASIA": "Asia",
+      "EUROPE": "Europe",
+      "OCEANIA": "Oceania"
+    },
+    "difficulties": {
+      "EASY": "Approachable",
+      "MEDIUM": "Intermediate",
+      "HARD": "Expert"
+    },
     "kinds": {
       "EXTREME": "Extremes",
       "HIGHER_LOWER": "Higher or lower",

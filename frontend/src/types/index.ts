@@ -22,6 +22,7 @@ export interface AuthState {
 export type Category = 'MAP' | 'FLAG' | 'CAPITAL' | 'SILHOUETTE' | 'MONUMENT' | 'CINEMA_GEO' | 'MIXED';
 export type GameType = 'single' | 'streak' | 'flash';
 export type GameplayMode = GameType | 'duel' | 'challenge';
+export type DuelMode = 'classic' | 'geo-challenge';
 export type GameMechanicKey = 'intel5050' | 'focusTime' | 'streakShield';
 
 export type Difficulty = 'EASY' | 'MEDIUM' | 'HARD';
@@ -34,6 +35,10 @@ export type GeoChallengeKind =
   | 'COMMON_NEIGHBOR'
   | 'ODD_ONE_OUT'
   | 'NORTH_TO_SOUTH';
+
+export type GeoChallengeRegion = 'AFRICA' | 'AMERICAS' | 'ASIA' | 'EUROPE' | 'OCEANIA';
+
+export type GeoChallengeDifficulty = 'EASY' | 'MEDIUM' | 'HARD';
 
 export interface LocalizedText {
   es: string;
@@ -48,6 +53,8 @@ export interface GeoChallengeOption {
 export interface GeoChallengeRound {
   id: string;
   kind: GeoChallengeKind;
+  region: GeoChallengeRegion;
+  difficulty: GeoChallengeDifficulty;
   prompt: LocalizedText;
   instruction: LocalizedText;
   selectionMode: 'single' | 'ordered';
@@ -132,6 +139,7 @@ export interface Question {
   isLandlocked?: boolean;
   populationTier?: string;
   areaTier?: string;
+  geoChallenge?: GeoChallengeRound;
 }
 
 export interface CategoryStat {

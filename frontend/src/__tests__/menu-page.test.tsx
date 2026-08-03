@@ -59,6 +59,8 @@ vi.mock('react-i18next', () => ({
         'menu.geoChallenges': 'GeoRetos',
         'menu.geoChallengesBadge': 'Nuevo',
         'menu.geoChallengesDesc': '5 retos geográficos',
+        'menu.geoChallengesDuel': 'GeoRetos en duelo',
+        'menu.geoChallengesDuelDesc': '10 preguntas · 1 contra 1',
         'categories.flags': 'Banderas',
         'categories.capitals': 'Capitales',
         'categories.maps': 'Mapas',
@@ -203,6 +205,8 @@ describe('MenuPage', () => {
 
     expect(screen.getByRole('link', { name: /georetos[\s\S]*5 retos geográficos/i }))
       .toHaveAttribute('href', '/geo-challenges');
+    expect(screen.getByRole('link', { name: /georetos en duelo/i }))
+      .toHaveAttribute('href', '/duel?mode=geo-challenge');
   });
 
   it('elimina textos redundantes de categoría activa y mantiene footer con versión visible', () => {

@@ -511,6 +511,15 @@ export function MenuPage() {
         </span>
       </Link>
 
+      <Link
+        to="/duel?mode=geo-challenge"
+        className="mt-2 flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-fuchsia-500/45 bg-fuchsia-500/10 px-4 py-2.5 text-sm font-bold text-fuchsia-200 transition-colors hover:bg-fuchsia-500/20 pressable"
+      >
+        <span aria-hidden="true">⚔️</span>
+        <span>{t('menu.geoChallengesDuel')}</span>
+        <span className="text-xs font-semibold text-fuchsia-300/80">{t('menu.geoChallengesDuelDesc')}</span>
+      </Link>
+
       {/* Flag Master Banner — modo dedicado de banderas con dificultad escalada.
           Contraste fuerte: gradiente opaco rojo→ámbar, texto blanco. Funciona en
           light y dark mode sin depender de variables del tema. */}
