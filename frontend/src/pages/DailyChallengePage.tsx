@@ -46,6 +46,7 @@ export function DailyChallengePage() {
   const [previousResult, setPreviousResult] = useState<DailyResult | null>(null);
   const [finalResult, setFinalResult] = useState<DailyResult | null>(null);
   const [shareFeedback, setShareFeedback] = useState('');
+  const [lastCorrectAnswer, setLastCorrectAnswer] = useState('');
   const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const extendedTimeEnabled = useUiStore((s) => s.extendedTimeEnabled);
@@ -83,16 +84,25 @@ export function DailyChallengePage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentIndex, pageState, showResult, extendedTimeEnabled]);
 
-  function handleSubmit(forcedAnswer?: string) {
+  async function handleSubmit(forcedAnswer?: string) {
     if (showResult) return;
     const answer = forcedAnswer ?? selected ?? '';
-    const isCorrect = answer === currentQuestion?.correctAnswer;
     const isTimeout = !answer;
-    if (currentQuestion) {
-      answersRef.current.push({ questionId: currentQuestion.id, answer });
+    let isCorrect = false;
+    let correctAnswer = '';
+
+    if (currentQuestion && answer) {
+      try {
+        const res = await api.dailyAnswer({ questionId: currentQuestion.id, answer });
+        isCorrect = res.isCorrect;
+        correctAnswer = res.correctAnswer;
+        answersRef.current.push({ questionId: currentQuestion.id, answer });
+      } catch { /* offline fallback */ }
     }
+
     if (isCorrect) setCorrectCount((c) => c + 1);
     setResults((prev) => [...prev, { isCorrect, timedOut: isTimeout }]);
+    setLastCorrectAnswer(correctAnswer);
     setTimedOut(isTimeout);
     setShowResult(true);
   }
@@ -334,7 +344,7 @@ export function DailyChallengePage() {
           selectionAssistiveText={selected && !showResult ? t('game.selectionReadyShortHint') : undefined}
           showResultBadge
           isCorrect={lastAnswerCorrect}
-          correctAnswer={showResult && !lastAnswerCorrect ? currentQuestion.correctAnswer : undefined}
+          correctAnswer={showResult && !lastAnswerCorrect ? lastCorrectAnswer : undefined}
           onSubmit={() => handleSubmit()}
           onNext={handleNext}
         />
