@@ -43,12 +43,13 @@ export interface RedisGameSession {
   gameMode: GameMode;
   variant: GameVariant;
   category?: Category;
+  filters?: QuestionFilters;
   questionIds: string[];
-  correctAnswers: Record<string, string>;   // questionId → correctAnswer
-  optionsPerQuestion: Record<string, string[]>; // questionId → shuffled options (order the client sees)
+  correctAnswers: Record<string, string>;
+  optionsPerQuestion: Record<string, string[]>;
   answeredQuestionIds: string[];
-  questionResults: Record<string, AnswerResult>; // questionId → stored first answer (immutable)
-  mechanicsUsage: Record<string, number>;   // key → times used
+  questionResults: Record<string, AnswerResult>;
+  mechanicsUsage: Record<string, number>;
   createdAt: number;
   expiresAt: number;
 }
@@ -62,6 +63,7 @@ export async function createGameSession(data: {
   gameMode: GameMode;
   variant: GameVariant;
   category?: Category;
+  filters?: QuestionFilters;
   questions: GameQuestion[];
 }): Promise<string> {
   const sessionId = randomUUID();
@@ -147,7 +149,7 @@ export async function storeAnswerResult(
     return { stored: result, isFirstAnswer: true };
   } catch (err) {
     console.error('[game-session] Atomic answer storage failed:', err);
-    return { stored: result, isFirstAnswer: false };
+    throw new Error('GAME_STATE_UNAVAILABLE');
   }
 }
 
@@ -167,7 +169,7 @@ export async function recordMechanicUsageAtomic(
     const remaining = Math.max(0, max - newVal);
     return { allowed: newVal <= max, remaining };
   } catch {
-    return { allowed: true, remaining: 0 };
+    throw new Error('GAME_STATE_UNAVAILABLE');
   }
 }
 

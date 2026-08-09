@@ -392,7 +392,8 @@ router.post('/answer', optionalAuth, async (req: AuthRequest, res: Response) => 
       res.status(410).json({ error: 'La sesión expiró.', code: 'GAME_SESSION_EXPIRED' });
       return;
     }
-    if (session.userId && req.user && session.userId !== req.user!.userId) {
+    // Auth enforcement
+    if (session.userId && (!req.user || session.userId !== req.user!.userId)) {
       res.status(403).json({ error: 'La sesión pertenece a otro usuario.', code: 'SESSION_MISMATCH' });
       return;
     }
@@ -920,6 +921,47 @@ router.get('/daily', optionalAuth, async (req: AuthRequest, res: Response) => {
     res.json({ questions: formatted, today: dayKey, alreadyPlayed: false });
   } catch (error) {
     respondWithError(res, error);
+  }
+});
+
+/**
+ * POST /api/game/daily/answer
+ * Respuesta individual del Daily. Primera respuesta inmutable, atómica.
+ */
+router.post('/daily/answer', authenticateJWT, async (req: AuthRequest, res: Response) => {
+  try {
+    const schema = z.object({ questionId: z.string().min(1), answer: z.string(), clientDate: z.string().optional() });
+    const parsed = schema.safeParse(req.body);
+    if (!parsed.success) { res.status(400).json({ error: 'Datos inválidos' }); return; }
+
+    const { questionId, answer } = parsed.data;
+    const today = getTodayKey();
+    const redis = getRedis();
+    const userId = req.user!.userId;
+
+    let questionIds: string[] = [];
+    try {
+      const cached = await redis.get(`daily:questions:${today}`);
+      if (cached) questionIds = JSON.parse(cached);
+    } catch {}
+    if (questionIds.length === 0) questionIds = await generateDailyQuestionIds(today);
+    if (!questionIds.includes(questionId)) { res.status(400).json({ error: 'Pregunta inválida' }); return; }
+
+    const answerKey = `daily:answer:${userId}:${today}:${questionId}`;
+    const existing = await redis.get(answerKey);
+    if (existing) { res.json(JSON.parse(existing) as Record<string, unknown>); return; }
+
+    const q = await prisma.question.findUnique({ where: { id: questionId }, select: { correctAnswer: true } });
+    if (!q) { res.status(400).json({ error: 'Pregunta no encontrada' }); return; }
+
+    const isCorrect = answer.trim().toLowerCase() === q.correctAnswer.toLowerCase().trim();
+    const result = { questionId, isCorrect, correctAnswer: q.correctAnswer, points: isCorrect ? 100 : 0 };
+
+    await redis.set(answerKey, JSON.stringify(result), 'EX', DAILY_TTL_SECONDS, 'NX');
+
+    res.json(result);
+  } catch {
+    res.status(503).json({ error: 'Servicio no disponible.', code: 'GAME_STATE_UNAVAILABLE' });
   }
 });
 

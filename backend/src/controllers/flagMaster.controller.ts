@@ -132,6 +132,79 @@ router.post('/start', authenticateJWT, async (req: AuthRequest, res: Response) =
   }
 });
 
+const answerSchema = z.object({
+  gameId: z.string().min(1),
+  questionId: z.string().min(1),
+  answer: z.string(),
+  timeRemaining: z.number().min(0).max(config.game.timePerQuestion),
+});
+
+/**
+ * POST /api/game/flag-master/answer
+ * Server-authoritative: la respuesta se valida y almacena server-side.
+ * Primera respuesta inmutable, re-answer devuelve stored result.
+ */
+router.post('/answer', authenticateJWT, async (req: AuthRequest, res: Response) => {
+  try {
+    const parsed = answerSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: 'Datos inválidos' });
+      return;
+    }
+    const { gameId, questionId, answer, timeRemaining } = parsed.data;
+    const session = await loadCachedSession(gameId);
+    if (!session) {
+      res.status(503).json({ error: 'Servicio no disponible. Intenta de nuevo.', code: 'GAME_STATE_UNAVAILABLE' });
+      return;
+    }
+    if (session.userId !== req.user!.userId) {
+      res.status(403).json({ error: 'Sesión no pertenece al usuario' });
+      return;
+    }
+    const roundData = session.rounds.find((r) => r.questionId === questionId);
+    if (!roundData) {
+      res.status(400).json({ error: 'Pregunta no pertenece a esta partida' });
+      return;
+    }
+
+    // Atomic first answer
+    const answerKey = `flagMaster:answer:${gameId}:${questionId}`;
+    const redis = getRedis();
+
+    const existing = await redis.get(answerKey);
+    if (existing) {
+      res.json(JSON.parse(existing) as Record<string, unknown>);
+      return;
+    }
+
+    const isCorrect = answer.trim().toLowerCase() === roundData.correctAnswer.toLowerCase().trim();
+    const scoring = scoreFlagMasterAnswer(isCorrect, timeRemaining, roundData.multiplier, config.game.basePoints, config.game.maxTimeBonus, config.game.timePerQuestion);
+
+    const result = {
+      questionId,
+      isCorrect,
+      correctAnswer: roundData.correctAnswer,
+      points: scoring.points,
+      basePoints: scoring.basePoints,
+      timeBonus: scoring.timeBonus,
+      modifierBonus: scoring.modifierBonus,
+      multiplier: roundData.multiplier,
+      tier: roundData.tier,
+    };
+
+    // SET NX to prevent race
+    const nxResult = await redis.set(answerKey, JSON.stringify(result), 'EX', 3600, 'NX');
+    if (nxResult !== 'OK') {
+      const winner = await redis.get(answerKey);
+      if (winner) { res.json(JSON.parse(winner) as Record<string, unknown>); return; }
+    }
+
+    res.json(result);
+  } catch {
+    res.status(503).json({ error: 'Servicio no disponible. Intenta de nuevo.', code: 'GAME_STATE_UNAVAILABLE' });
+  }
+});
+
 const finishSchema = z.object({
   gameId: z.string().min(1),
   answers: z

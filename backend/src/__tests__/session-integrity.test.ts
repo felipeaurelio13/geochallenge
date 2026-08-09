@@ -82,7 +82,10 @@ vi.mock('../middleware/auth.js', () => ({
     req.user = { userId: 'user-1' };
     next();
   },
-  optionalAuth: (_req: unknown, _res: unknown, next: () => void) => next(),
+  optionalAuth: (req: { user?: { userId: string } }, _res: unknown, next: () => void) => {
+    req.user = { userId: 'user-1' };
+    next();
+  },
 }));
 
 vi.mock('../config/redis.js', () => ({

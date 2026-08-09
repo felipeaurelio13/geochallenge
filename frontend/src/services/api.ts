@@ -496,6 +496,16 @@ class ApiService {
     return response.data;
   }
 
+  async dailyAnswer(data: { questionId: string; answer: string }) {
+    const response = await this.client.post<{
+      questionId: string;
+      isCorrect: boolean;
+      correctAnswer: string;
+      points: number;
+    }>('/game/daily/answer', { ...data, clientDate: getLocalDateString() });
+    return response.data;
+  }
+
   async submitDaily(data: { answers: Array<{ questionId: string; answer: string }> }) {
     const response = await this.client.post<{
       result: DailyResult;
@@ -514,6 +524,26 @@ class ApiService {
 
   async startFlagMaster() {
     const response = await this.client.post<FlagMasterStartResponse>('/game/flag-master/start');
+    return response.data;
+  }
+
+  async flagMasterAnswer(data: {
+    gameId: string;
+    questionId: string;
+    answer: string;
+    timeRemaining: number;
+  }) {
+    const response = await this.client.post<{
+      questionId: string;
+      isCorrect: boolean;
+      correctAnswer: string;
+      points: number;
+      basePoints?: number;
+      timeBonus?: number;
+      modifierBonus?: number;
+      multiplier: number;
+      tier: number;
+    }>('/game/flag-master/answer', data);
     return response.data;
   }
 
