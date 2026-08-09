@@ -8,7 +8,6 @@ import {
   GameQuestion,
   QuestionFilters,
 } from '../services/game.service.js';
-import { updateLeaderboardScore, updateSeasonLeaderboardScore } from '../services/leaderboard.service.js';
 import { prisma } from '../config/database.js';
 import { AppError } from '../utils/appError.js';
 import { emitSocketError } from '../utils/respondWithError.js';
@@ -441,15 +440,7 @@ async function endGame(
       }
     });
 
-    // Leaderboards (Redis) fuera de la transacción: best-effort, pero logueado.
-    for (const p of matchSnapshot.players) {
-      await updateLeaderboardScore(p.userId, p.finalScore).catch((err) => {
-        console.error(`[survival] leaderboard update failed for ${p.userId}:`, err);
-      });
-      await updateSeasonLeaderboardScore(p.userId, p.finalScore).catch((err) => {
-        console.error(`[survival] season leaderboard update failed for ${p.userId}:`, err);
-      });
-    }
+    // Survival no actualiza el ranking global Classic.
   } catch (err) {
     console.error(`[survival] Error saving results for ${matchSnapshot.id}:`, err);
   }

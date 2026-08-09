@@ -16,6 +16,7 @@ import {
   type LeaderboardScope,
   type LeaderboardModeFilter,
   type LeaderboardCategoryFilter,
+  type LeaderboardVariantFilter,
   type LeaderboardFilters,
 } from '../services/leaderboard.service.js';
 
@@ -35,6 +36,13 @@ const SUPPORTED_CATEGORIES: readonly LeaderboardCategoryFilter[] = [
   'MONUMENT',
   'CINEMA_GEO',
   'MIXED',
+];
+const SUPPORTED_VARIANTS: readonly LeaderboardVariantFilter[] = [
+  'CLASSIC',
+  'STREAK',
+  'FLASH',
+  'FLAG_MASTER',
+  'GEO_CHALLENGE',
 ];
 
 function parseModeFilter(raw: unknown): LeaderboardModeFilter | undefined {
@@ -60,10 +68,19 @@ function parseMinGames(raw: unknown): number | undefined {
   return Math.min(parsed, 1000);
 }
 
+function parseVariantFilter(raw: unknown): LeaderboardVariantFilter | undefined {
+  if (typeof raw !== 'string') return undefined;
+  const normalized = raw.trim().toUpperCase();
+  return (SUPPORTED_VARIANTS as readonly string[]).includes(normalized)
+    ? (normalized as LeaderboardVariantFilter)
+    : undefined;
+}
+
 function parseFilters(req: Request): LeaderboardFilters {
   return {
     mode: parseModeFilter(req.query.mode),
     category: parseCategoryFilter(req.query.category),
+    variant: parseVariantFilter(req.query.variant),
     minGames: parseMinGames(req.query.minGames),
   };
 }
@@ -125,10 +142,11 @@ router.get('/', optionalAuth, async (req: AuthRequest, res: Response) => {
       userRank: userRank ? { rank: userRank.rank, score: userRank.score } : null,
       generatedAt: new Date().toISOString(),
       scope: scopeResolution.effectiveScope,
-      metric: isSeasonScope ? 'sum' : 'best',
+      metric: isSeasonScope ? 'max' : 'best',
       filters: {
         mode: filters.mode ?? null,
         category: filters.category ?? null,
+        variant: filters.variant ?? null,
         minGames: filters.minGames ?? 1,
       },
       queryMeta: {

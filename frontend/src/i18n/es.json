@@ -751,7 +751,14 @@
       "DUEL": "Duelo",
       "CHALLENGE": "Desafío"
     },
-    "accuracy": "{{correct}}/{{total}} correctas"
+    "accuracy": "{{correct}}/{{total}} correctas",
+    "variants": {
+      "CLASSIC": "🎯 Clásico",
+      "STREAK": "🔥 Racha",
+      "FLASH": "⚡ Flash",
+      "FLAG_MASTER": "🏴 Maestro de Banderas",
+      "GEO_CHALLENGE": "🧠 GeoRetos"
+    }
   },
   "filters": {
     "title": "Filtrar preguntas",

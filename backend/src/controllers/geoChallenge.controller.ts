@@ -1,8 +1,10 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'crypto';
 import { Router, Response } from 'express';
 import { z } from 'zod';
+import { GameMode, GameVariant, Prisma } from '@prisma/client';
 import { authenticateJWT, AuthRequest } from '../middleware/auth.js';
 import { config } from '../config/env.js';
+import { prisma } from '../config/database.js';
 import {
   buildGeoChallengeGame,
   isGeoChallengeAnswerCorrect,
@@ -14,6 +16,8 @@ const router = Router();
 
 interface SessionRound {
   id: string;
+  kind: string;
+  region: string;
   correctOptionIds: string[];
   explanation: LocalizedText;
 }
@@ -89,6 +93,8 @@ router.get('/start', authenticateJWT, (req: AuthRequest, res: Response) => {
     userId: req.user.userId,
     rounds: game.rounds.map((round) => ({
       id: round.id,
+      kind: round.kind,
+      region: round.region,
       correctOptionIds: round.correctOptionIds,
       explanation: round.explanation,
     })),
@@ -131,7 +137,7 @@ router.post('/answer', authenticateJWT, (req: AuthRequest, res: Response) => {
   }
 });
 
-router.post('/finish', authenticateJWT, (req: AuthRequest, res: Response) => {
+router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) => {
   const validation = finishSchema.safeParse(req.body);
   if (!validation.success) {
     res.status(400).json({ error: 'Resultado inválido', code: 'VALIDATION_FAILED' });
@@ -152,14 +158,42 @@ router.post('/finish', authenticateJWT, (req: AuthRequest, res: Response) => {
       const isCorrect = answer
         ? isGeoChallengeAnswerCorrect(round.correctOptionIds, answer.selectedOptionIds)
         : false;
-      return { roundId: round.id, isCorrect };
+      return { roundId: round.id, kind: round.kind, region: round.region, isCorrect };
     });
     const correctCount = details.filter((detail) => detail.isCorrect).length;
+    const totalScore = correctCount * 100;
+
+    // Persistir GameResult para GeoRetos (best-effort: el resultado se devuelve igual aunque la DB falle).
+    const userId = req.user!.userId;
+    try {
+      await prisma.$transaction(async (db) => {
+        await db.gameResult.create({
+          data: {
+            userId,
+            score: totalScore,
+            correctCount,
+            totalQuestions: session.rounds.length,
+            category: 'MIXED',
+            gameMode: GameMode.SINGLE,
+            variant: GameVariant.GEO_CHALLENGE,
+            details: { dataVersion: req.body.dataVersion, rounds: details } as unknown as Prisma.InputJsonValue,
+          },
+        });
+
+        await db.user.update({
+          where: { id: userId },
+          data: { gamesPlayed: { increment: 1 } },
+        });
+      });
+    } catch (err) {
+      console.error('[geo-challenge] Failed to persist game result:', err);
+    }
+
     res.json({
       gameId: session.gameId,
       correctCount,
       totalRounds: session.rounds.length,
-      totalScore: correctCount * 100,
+      totalScore,
       details,
     });
   } catch {

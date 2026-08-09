@@ -1,6 +1,6 @@
 import { prisma } from '../config/database.js';
 import { config } from '../config/env.js';
-import { Category, Difficulty, GameMode, Prisma } from '@prisma/client';
+import { Category, Difficulty, GameMode, GameVariant, Prisma } from '@prisma/client';
 import { haversineDistance } from '../utils/haversine.js';
 import { calculateScore, calculateMapScore, calculateTimeBonus, shuffleArray, selectRandom } from '../utils/scoring.js';
 
@@ -593,7 +593,8 @@ export async function saveGameResult(
   answers: AnswerResult[],
   category?: Category,
   gameMode: GameMode = GameMode.SINGLE,
-  txClient?: Prisma.TransactionClient
+  txClient?: Prisma.TransactionClient,
+  variant: GameVariant = GameVariant.CLASSIC
 ): Promise<{ gameId: string; totalScore: number; isHighScore: boolean }> {
   const totalScore = answers.reduce((sum, a) => sum + a.points, 0);
   const correctCount = answers.filter((a) => a.isCorrect).length;
@@ -607,6 +608,7 @@ export async function saveGameResult(
         totalQuestions: answers.length,
         category,
         gameMode,
+        variant,
         details: answers as unknown as Prisma.InputJsonValue,
       },
     });
@@ -616,7 +618,11 @@ export async function saveGameResult(
       select: { highScore: true, gamesPlayed: true },
     });
 
-    const isHighScore = totalScore > (user?.highScore || 0);
+    // highScore es legacy: solo se actualiza con partidas Single Classic.
+    const isHighScore =
+      gameMode === GameMode.SINGLE &&
+      variant === GameVariant.CLASSIC &&
+      totalScore > (user?.highScore || 0);
 
     await db.user.update({
       where: { id: userId },
@@ -653,6 +659,7 @@ export async function getUserGameHistory(
       totalQuestions: true,
       category: true,
       gameMode: true,
+      variant: true,
       createdAt: true,
     },
   });
@@ -909,7 +916,7 @@ export interface CategoryStat {
 
 export async function getCategoryStats(userId: string): Promise<CategoryStat[]> {
   const rows = await prisma.gameResult.findMany({
-    where: { userId, gameMode: 'SINGLE' },
+    where: { userId, gameMode: 'SINGLE', variant: GameVariant.CLASSIC },
     select: { category: true, correctCount: true, totalQuestions: true, score: true },
   });
 

@@ -292,7 +292,7 @@ describe('rebuildAllLeaderboards', () => {
 });
 
 describe('getSeasonLeaderboard', () => {
-  it('agrega SUM(score) por usuario y devuelve gamesPlayed + bestScore', async () => {
+  it('agrega MAX(score) por usuario y devuelve gamesPlayed + bestScore', async () => {
     prismaMock.gameResult.groupBy.mockResolvedValueOnce([
       { userId: 'u1', _sum: { score: 1800 }, _max: { score: 900 }, _count: { _all: 3 } },
       { userId: 'u2', _sum: { score: 500 }, _max: { score: 500 }, _count: { _all: 1 } },
@@ -304,7 +304,7 @@ describe('getSeasonLeaderboard', () => {
 
     const result = await getSeasonLeaderboard(10, '2025-01');
     expect(result).toEqual([
-      { rank: 1, userId: 'u1', username: 'eve', score: 1800, bestScore: 900, gamesPlayed: 3 },
+      { rank: 1, userId: 'u1', username: 'eve', score: 900, bestScore: 900, gamesPlayed: 3 },
       { rank: 2, userId: 'u2', username: 'mallory', score: 500, bestScore: 500, gamesPlayed: 1 },
     ]);
   });

@@ -25,6 +25,8 @@ export type GameplayMode = GameType | 'duel' | 'challenge';
 export type DuelMode = 'classic' | 'geo-challenge';
 export type GameMechanicKey = 'intel5050' | 'focusTime' | 'streakShield';
 
+export type GameVariant = 'CLASSIC' | 'STREAK' | 'FLASH' | 'FLAG_MASTER' | 'GEO_CHALLENGE';
+
 export type Difficulty = 'EASY' | 'MEDIUM' | 'HARD';
 
 // ─── GeoRetos ──────────────────────────────────────────────────────────────
@@ -323,9 +325,12 @@ export type LeaderboardCategoryFilter =
   | 'CINEMA_GEO'
   | 'MIXED';
 
+export type LeaderboardVariantFilter = 'CLASSIC' | 'STREAK' | 'FLASH' | 'FLAG_MASTER' | 'GEO_CHALLENGE';
+
 export interface LeaderboardFilters {
   mode?: LeaderboardModeFilter | null;
   category?: LeaderboardCategoryFilter | null;
+  variant?: LeaderboardVariantFilter | null;
   minGames?: number;
 }
 

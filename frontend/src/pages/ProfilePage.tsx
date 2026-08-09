@@ -34,15 +34,24 @@ interface GameHistoryEntry {
   totalQuestions: number;
   category: string | null;
   gameMode: 'SINGLE' | 'FLASH' | 'STREAK' | 'DUEL' | 'CHALLENGE';
+  variant?: 'CLASSIC' | 'STREAK' | 'FLASH' | 'FLAG_MASTER' | 'GEO_CHALLENGE' | null;
   createdAt: string;
 }
 
-const GAME_MODE_ICONS: Record<GameHistoryEntry['gameMode'], string> = {
-  SINGLE: '🎯',
-  FLASH: '⚡',
+const VARIANT_ICONS: Record<string, string> = {
+  CLASSIC: '🎯',
   STREAK: '🔥',
-  DUEL: '⚔️',
-  CHALLENGE: '🏁',
+  FLASH: '⚡',
+  FLAG_MASTER: '🏴',
+  GEO_CHALLENGE: '🧠',
+};
+
+const VARIANT_LABEL_KEYS: Record<string, string> = {
+  CLASSIC: 'gameHistory.variants.CLASSIC',
+  STREAK: 'gameHistory.variants.STREAK',
+  FLASH: 'gameHistory.variants.FLASH',
+  FLAG_MASTER: 'gameHistory.variants.FLAG_MASTER',
+  GEO_CHALLENGE: 'gameHistory.variants.GEO_CHALLENGE',
 };
 
 const CATEGORY_LABEL_KEY: Record<string, string> = {
@@ -708,14 +717,24 @@ export function ProfilePage() {
                     const categoryLabel = entry.category
                       ? t(CATEGORY_LABEL_KEY[entry.category] || 'categories.mixed')
                       : null;
+                    // Usar variant para el ícono y label si está disponible; si no, mantener compatibilidad con el gameMode legacy.
+                    const variantKey = entry.variant ?? entry.gameMode;
+                    const variantIcon = VARIANT_ICONS[variantKey] ?? '🎮';
+                    const hasLegacyMode = !entry.variant;
+                    const labelKey = entry.variant
+                      ? (VARIANT_LABEL_KEYS[variantKey] ?? `gameHistory.modes.${entry.gameMode}`)
+                      : `gameHistory.modes.${entry.gameMode}`;
                     return (
                       <li key={entry.id} className="flex items-center gap-3 px-4 py-3">
                         <span className="text-2xl leading-none" aria-hidden="true">
-                          {GAME_MODE_ICONS[entry.gameMode] ?? '🎮'}
+                          {variantIcon}
                         </span>
                         <div className="flex-1 min-w-0">
                           <div className="text-sm font-medium text-app-text truncate">
-                            {t(`gameHistory.modes.${entry.gameMode}`, entry.gameMode)}
+                            {t(labelKey, entry.gameMode)}
+                            {hasLegacyMode && (
+                              <span className="ml-1 text-[10px] text-[var(--color-text-muted)]">(legacy)</span>
+                            )}
                             {categoryLabel && (
                               <span className="ml-2 text-xs font-normal text-[var(--color-text-muted)]">
                                 · {categoryLabel}

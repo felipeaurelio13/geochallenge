@@ -1,6 +1,6 @@
 import { Router, Response } from 'express';
 import { z } from 'zod';
-import { Category, GameMode } from '@prisma/client';
+import { Category, GameMode, GameVariant } from '@prisma/client';
 import { authenticateJWT, optionalAuth, AuthRequest } from '../middleware/auth.js';
 import {
   getQuestionsForGame,
@@ -331,6 +331,12 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
 
     const { answers, category, gameType } = validation.data;
 
+    // Mapear gameType del cliente a GameVariant
+    const variant: GameVariant =
+      gameType === 'streak' ? GameVariant.STREAK
+        : gameType === 'flash' ? GameVariant.FLASH
+        : GameVariant.CLASSIC;
+
     // Validar todas las respuestas
     const results: AnswerResult[] = [];
     for (const answer of answers) {
@@ -349,14 +355,18 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
       req.user!.userId,
       results,
       category,
-      GameMode.SINGLE
+      GameMode.SINGLE,
+      undefined,
+      variant
     );
 
-    // Actualizar leaderboards (Redis); ambas funciones son idempotentes (max-only).
-    await Promise.all([
-      updateLeaderboardScore(req.user!.userId, totalScore),
-      updateSeasonLeaderboardScore(req.user!.userId, totalScore),
-    ]);
+    // Actualizar leaderboards (Redis); solo Classic participa en el ranking global.
+    if (variant === GameVariant.CLASSIC) {
+      await Promise.all([
+        updateLeaderboardScore(req.user!.userId, totalScore),
+        updateSeasonLeaderboardScore(req.user!.userId, totalScore),
+      ]);
+    }
 
     // Calcular estadísticas
     const correctCount = results.filter((r) => r.isCorrect).length;
@@ -849,7 +859,7 @@ router.post('/daily/submit', authenticateJWT, async (req: AuthRequest, res: Resp
     await prisma.$transaction(async (tx) => {
       await tx.user.update({ where: { id: userId }, data: updateData });
       await tx.gameResult.create({
-        data: { userId, score, correctCount, totalQuestions, gameMode: 'SINGLE', category: 'MIXED' },
+        data: { userId, score, correctCount, totalQuestions, gameMode: 'SINGLE', variant: GameVariant.CLASSIC, category: 'MIXED' },
       });
     });
 

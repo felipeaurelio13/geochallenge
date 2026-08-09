@@ -1,7 +1,7 @@
 import { Router, Response } from 'express';
 import { randomUUID } from 'crypto';
 import { z } from 'zod';
-import { Category, GameMode, Prisma } from '@prisma/client';
+import { Category, GameMode, GameVariant, Prisma } from '@prisma/client';
 import { authenticateJWT, AuthRequest } from '../middleware/auth.js';
 import {
   buildFlagMasterRounds,
@@ -13,10 +13,6 @@ import {
 import { config } from '../config/env.js';
 import { prisma } from '../config/database.js';
 import { getRedis } from '../config/redis.js';
-import {
-  updateLeaderboardScore,
-  updateSeasonLeaderboardScore,
-} from '../services/leaderboard.service.js';
 import { evaluateAchievementsAfterGame } from '../services/achievement.service.js';
 
 const router = Router();
@@ -368,7 +364,7 @@ async function persistGameResult(
     rounds: payload.rounds,
   };
 
-  const result = await prisma.$transaction(async (db) => {
+  const { gameId } = await prisma.$transaction(async (db) => {
     const gameResult = await db.gameResult.create({
       data: {
         userId,
@@ -377,31 +373,24 @@ async function persistGameResult(
         totalQuestions: payload.totalQuestions,
         category: Category.FLAG,
         gameMode: GameMode.SINGLE,
+        variant: GameVariant.FLAG_MASTER,
         details: details as unknown as Prisma.InputJsonValue,
       },
     });
 
-    const user = await db.user.findUnique({
-      where: { id: userId },
-      select: { highScore: true },
-    });
-    const isHighScore = payload.totalScore > (user?.highScore ?? 0);
-
+    // Flag Master no actualiza highScore (legacy: solo Classic Single).
     await db.user.update({
       where: { id: userId },
       data: {
         gamesPlayed: { increment: 1 },
-        ...(isHighScore && { highScore: payload.totalScore }),
       },
     });
 
-    return { gameId: gameResult.id, isHighScore };
+    return { gameId: gameResult.id };
   });
 
-  await Promise.all([
-    updateLeaderboardScore(userId, payload.totalScore),
-    updateSeasonLeaderboardScore(userId, payload.totalScore),
-  ]).catch(() => {});
+  // Flag Master no participa en el ranking global (solo Classic).
+  // Las actualizaciones de leaderboard se omiten intencionalmente.
 
   const newAchievements = await evaluateAchievementsAfterGame({
     userId,
@@ -413,12 +402,12 @@ async function persistGameResult(
   const accuracy = Math.round((payload.correctCount / payload.totalQuestions) * 100);
 
   return {
-    gameId: result.gameId,
+    gameId,
     totalScore: payload.totalScore,
     correctCount: payload.correctCount,
     totalQuestions: payload.totalQuestions,
     accuracy,
-    isHighScore: result.isHighScore,
+    isHighScore: false,
     newAchievements,
   };
 }

@@ -1,5 +1,5 @@
 import { Server as SocketIOServer, Socket } from 'socket.io';
-import { Category, GameMode } from '@prisma/client';
+import { Category, GameMode, GameVariant } from '@prisma/client';
 import { getRedis } from '../config/redis.js';
 import {
   getQuestionsForGame,
@@ -10,7 +10,6 @@ import {
   getMechanicsConfigForMode,
   QuestionFilters,
 } from '../services/game.service.js';
-import { updateLeaderboardScore, updateSeasonLeaderboardScore } from '../services/leaderboard.service.js';
 import { config } from '../config/env.js';
 import { prisma } from '../config/database.js';
 import {
@@ -876,16 +875,17 @@ async function endDuel(
 
   // Guardar resultados en la base de datos usando una transacción
   try {
-    const leaderboardUpdates: Array<{ userId: string; totalScore: number }> = [];
+    const dueloVariant = duel.mode === 'geo-challenge' ? GameVariant.GEO_CHALLENGE : GameVariant.CLASSIC;
 
     await prisma.$transaction(async (tx) => {
       for (const player of duel.players) {
-        const { totalScore } = await saveGameResult(
+        await saveGameResult(
           player.userId,
           player.answers,
           duel.category,
           GameMode.DUEL,
-          tx
+          tx,
+          dueloVariant
         );
 
         // Actualizar wins/losses
@@ -896,8 +896,6 @@ async function endDuel(
             losses: winnerId && player.userId !== winnerId ? { increment: 1 } : undefined,
           },
         });
-
-        leaderboardUpdates.push({ userId: player.userId, totalScore });
       }
 
       // Registrar el duelo completo para historial head-to-head
@@ -909,16 +907,12 @@ async function endDuel(
           player1Score: duel.players[0].score,
           player2Score: duel.players[1].score,
           category: duel.category ?? null,
+          variant: dueloVariant,
         },
       });
     });
 
-    // El historial de duelos no debe depender de disponibilidad de leaderboard/Redis.
-    // updateLeaderboardScore / updateSeasonLeaderboardScore son idempotentes y nunca lanzan.
-    for (const { userId, totalScore } of leaderboardUpdates) {
-      await updateLeaderboardScore(userId, totalScore);
-      await updateSeasonLeaderboardScore(userId, totalScore);
-    }
+    // Los duelos no actualizan el ranking global Classic.
   } catch (error) {
     console.error(`Error guardando resultados del duelo ${duel.id}:`, error);
   }

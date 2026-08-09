@@ -13,6 +13,7 @@ model User {
   email             String      @unique
   passwordHash      String
   preferredLanguage String      @default("es")
+  /// Legacy: exclusively the best-ever Classic Single score. Not updated by Streak, Flash, Flag Master, GeoRetos, Duel, Survival, or Challenges.
   highScore         Int         @default(0)
   gamesPlayed       Int         @default(0)
   wins              Int         @default(0)
@@ -78,19 +79,22 @@ model Question {
 }
 
 model GameResult {
-  id            String   @id @default(cuid())
+  id            String      @id @default(cuid())
   userId        String
   score         Int
   correctCount  Int
   totalQuestions Int
   category      Category?
-  gameMode      GameMode @default(SINGLE)
-  details       Json?    // Desglose de respuestas
-  createdAt     DateTime @default(now())
+  gameMode      GameMode    @default(SINGLE)
+  variant       GameVariant @default(CLASSIC)
+  details       Json?       // Desglose de respuestas
+  createdAt     DateTime    @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
+  @@index([userId, gameMode, variant, createdAt])
+  @@index([gameMode, variant, createdAt])
   @@map("game_results")
 }
 
@@ -155,15 +159,24 @@ enum GameMode {
   SURVIVAL
 }
 
+enum GameVariant {
+  CLASSIC
+  STREAK
+  FLASH
+  FLAG_MASTER
+  GEO_CHALLENGE
+}
+
 model DuelMatch {
-  id           String    @id @default(cuid())
+  id           String      @id @default(cuid())
   player1Id    String
   player2Id    String
   winnerId     String?
   player1Score Int
   player2Score Int
   category     Category?
-  createdAt    DateTime  @default(now())
+  variant      GameVariant @default(CLASSIC)
+  createdAt    DateTime    @default(now())
 
   player1 User  @relation("DuelMatchAsP1", fields: [player1Id], references: [id], onDelete: Cascade)
   player2 User  @relation("DuelMatchAsP2", fields: [player2Id], references: [id], onDelete: Cascade)

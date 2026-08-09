@@ -18,10 +18,12 @@ export type LeaderboardCategoryFilter =
   | 'MONUMENT'
   | 'CINEMA_GEO'
   | 'MIXED';
+export type LeaderboardVariantFilter = 'CLASSIC' | 'STREAK' | 'FLASH' | 'FLAG_MASTER' | 'GEO_CHALLENGE';
 
 export interface LeaderboardFilters {
   mode?: LeaderboardModeFilter;
   category?: LeaderboardCategoryFilter;
+  variant?: LeaderboardVariantFilter;
   minGames?: number;
 }
 
@@ -63,6 +65,7 @@ function hasFilters(filters?: LeaderboardFilters): boolean {
   if (!filters) return false;
   if (filters.mode) return true;
   if (filters.category) return true;
+  if (filters.variant) return true;
   if (typeof filters.minGames === 'number' && filters.minGames > 1) return true;
   return false;
 }
@@ -79,6 +82,7 @@ function buildGameResultWhere(
   }
   if (filters?.mode) where.gameMode = filters.mode;
   if (filters?.category) where.category = filters.category;
+  if (filters?.variant) where.variant = filters.variant;
   return where;
 }
 
@@ -92,7 +96,7 @@ interface AggregatedRow {
 /**
  * Aggregates GameResult rows into a ranked list.
  * - scope='global'  → score = MAX(score)         (best ever per user)
- * - scope='season'  → score = SUM(score)         (total in the period)
+ * - scope='season'  → score = MAX(score)         (best game in the period)
  * Both always include bestScore (MAX) and gamesPlayed (COUNT).
  * minGames filters out users with fewer plays after aggregation.
  */
@@ -120,7 +124,7 @@ async function aggregateRankedFromDb(opts: {
     const best = r._max.score ?? 0;
     const games = r._count._all ?? 0;
     if (games < minGames) continue;
-    const score = scope === 'season' ? sum : best;
+    const score = best;
     if (score <= 0) continue;
     aggregated.push({ userId: r.userId, score, bestScore: best, gamesPlayed: games });
   }
@@ -598,8 +602,10 @@ export async function recomputeAllHighScoresFromHistory(): Promise<{
   scanned: number;
   updated: number;
 }> {
+  // highScore es exclusivo de Single Classic — solo esas partidas cuentan.
   const grouped = await prisma.gameResult.groupBy({
     by: ['userId'],
+    where: { gameMode: 'SINGLE', variant: 'CLASSIC' },
     _max: { score: true },
   });
 

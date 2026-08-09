@@ -751,7 +751,14 @@
       "DUEL": "Duel",
       "CHALLENGE": "Challenge"
     },
-    "accuracy": "{{correct}}/{{total}} correct"
+    "accuracy": "{{correct}}/{{total}} correct",
+    "variants": {
+      "CLASSIC": "🎯 Classic",
+      "STREAK": "🔥 Streak",
+      "FLASH": "⚡ Flash",
+      "FLAG_MASTER": "🏴 Flag Master",
+      "GEO_CHALLENGE": "🧠 GeoRetos"
+    }
   },
   "filters": {
     "title": "Filter questions",
