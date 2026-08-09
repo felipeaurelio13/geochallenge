@@ -296,6 +296,7 @@ export interface AnswerResult {
   comboBonus?: number;
   accuracyBonus?: number;
   distance?: number; // Para preguntas de mapa
+  correctLocation?: { lat: number; lng: number }; // Solo MAP, post-answer feedback
   timeRemaining: number;
 }
 
@@ -738,6 +739,10 @@ export async function validateAnswer(
     timeBonus = isCorrect ? calculateTimeBonus(timeRemaining) : 0;
   }
 
+  const correctLocation = question.category === Category.MAP && question.latitude != null && question.longitude != null
+    ? { lat: question.latitude, lng: question.longitude }
+    : undefined;
+
   return {
     questionId,
     isCorrect,
@@ -748,6 +753,7 @@ export async function validateAnswer(
     timeBonus,
     accuracyBonus,
     distance,
+    correctLocation,
     timeRemaining: Math.max(0, timeRemaining),
   };
 }

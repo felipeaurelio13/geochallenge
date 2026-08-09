@@ -199,6 +199,7 @@ router.get('/start', optionalAuth, async (req: AuthRequest, res: Response) => {
       gameMode: GameMode.SINGLE,
       variant,
       category,
+      filters,
       questions,
     });
 
