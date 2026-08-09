@@ -334,19 +334,12 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     const { answers, config, isOffline, results, score } = stateRef.current;
 
     if (isOffline || !isOnline()) {
-      // Queue for later sync; return a local-only summary
-      if (config?.category) {
-        enqueuePendingSession({
-          category: config.category,
-          answers,
-          finishedAt: Date.now(),
-        });
-      }
+      // Offline-started: practice-only, no ranked queue
       const correctCount = results.filter((r) => r.isCorrect).length;
       const totalQuestions = results.length || answers.length || 1;
       setLastNewAchievements([]);
       return {
-        gameId: `offline-${Date.now()}`,
+        gameId: `practice-${Date.now()}`,
         totalScore: score,
         correctCount,
         totalQuestions,
@@ -357,40 +350,20 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       };
     }
 
-    // Estar online no garantiza que el request llegue (timeout, cold start de
-    // Render, blip de red). Reintentamos UNA vez antes de resignarnos a
-    // encolar localmente — así no perdemos partidas por un fallo transitorio.
+    // Online-started: retry with sessionId
     const sessionId = stateRef.current.sessionId ?? stateRef.current.config?.sessionId;
     try {
-      const result = await api.finishGame({
-        sessionId,
-        answers,
-        category: config?.category,
-        gameType: config?.gameType,
-      });
+      const result = await api.finishGame({ sessionId, answers, category: config?.category, gameType: config?.gameType });
       setLastNewAchievements(result.newAchievements ?? []);
       return result;
     } catch {
       try {
-        const result = await api.finishGame({
-          sessionId,
-          answers,
-          category: config?.category,
-          gameType: config?.gameType,
-        });
+        const result = await api.finishGame({ sessionId, answers, category: config?.category, gameType: config?.gameType });
         setLastNewAchievements(result.newAchievements ?? []);
         return result;
       } catch {
-        // Los dos intentos fallaron: encolamos exactamente como el path
-        // offline (mismo enqueuePendingSession) y devolvemos un resumen local
-        // marcado como pendiente de sync — GamePage navega con ?pendingSync=1
-        // y ResultsPage muestra el badge correspondiente.
-        if (config?.category) {
-          enqueuePendingSession({
-            category: config.category,
-            answers,
-            finishedAt: Date.now(),
-          });
+        if (config?.category && sessionId) {
+          enqueuePendingSession({ category: config.category, answers, sessionId, finishedAt: Date.now() });
         }
         const correctCount = results.filter((r) => r.isCorrect).length;
         const totalQuestions = results.length || answers.length || 1;

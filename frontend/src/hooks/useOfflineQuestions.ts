@@ -143,6 +143,7 @@ const PENDING_KEY = 'geochallenge:pending-offline-sessions';
 
 export interface PendingOfflineSession {
   category: Category;
+  sessionId?: string;
   answers: Array<{
     questionId: string;
     answer: string;
