@@ -167,20 +167,14 @@ router.post('/answer', authenticateJWT, async (req: AuthRequest, res: Response) 
       return;
     }
 
-    // Atomic first answer
+    // Atomic first answer: SET NX, fail-closed
     const answerKey = `flagMaster:answer:${gameId}:${questionId}`;
     const redis = getRedis();
-
-    const existing = await redis.get(answerKey);
-    if (existing) {
-      res.json(JSON.parse(existing) as Record<string, unknown>);
-      return;
-    }
 
     const isCorrect = answer.trim().toLowerCase() === roundData.correctAnswer.toLowerCase().trim();
     const scoring = scoreFlagMasterAnswer(isCorrect, timeRemaining, roundData.multiplier, config.game.basePoints, config.game.maxTimeBonus, config.game.timePerQuestion);
 
-    const result = {
+    const candidate = {
       questionId,
       isCorrect,
       correctAnswer: roundData.correctAnswer,
@@ -192,14 +186,13 @@ router.post('/answer', authenticateJWT, async (req: AuthRequest, res: Response) 
       tier: roundData.tier,
     };
 
-    // SET NX to prevent race
-    const nxResult = await redis.set(answerKey, JSON.stringify(result), 'EX', 3600, 'NX');
-    if (nxResult !== 'OK') {
-      const winner = await redis.get(answerKey);
-      if (winner) { res.json(JSON.parse(winner) as Record<string, unknown>); return; }
-    }
+    const nxResult = await redis.set(answerKey, JSON.stringify(candidate), 'EX', 3600, 'NX');
+    if (nxResult === 'OK') { res.json(candidate); return; }
 
-    res.json(result);
+    const winner = await redis.get(answerKey);
+    if (winner) { res.json(JSON.parse(winner) as Record<string, unknown>); return; }
+
+    res.json(candidate);
   } catch {
     res.status(503).json({ error: 'Servicio no disponible. Intenta de nuevo.', code: 'GAME_STATE_UNAVAILABLE' });
   }

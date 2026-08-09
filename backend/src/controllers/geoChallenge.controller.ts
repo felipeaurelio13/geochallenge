@@ -135,21 +135,18 @@ router.post('/answer', authenticateJWT, async (req: AuthRequest, res: Response) 
       return;
     }
 
-    // La primera respuesta es inmutable: si ya respondió, devolver resultado almacenado.
+    // SET NX atómico: solo la primera respuesta gana. Redis down → 503.
     const answerKey = geoAnswerKey(session.gameId, round.id);
+    let redis: ReturnType<typeof getRedis>;
     try {
-      const redis = getRedis();
-      const stored = await redis.get(answerKey);
-      if (stored) {
-        res.json(JSON.parse(stored));
-        return;
-      }
+      redis = getRedis();
     } catch {
-      // Redis caído: continuar sin protección anti-probing.
+      res.status(503).json({ error: 'Servicio no disponible.', code: 'GAME_STATE_UNAVAILABLE' });
+      return;
     }
 
     const isCorrect = isGeoChallengeAnswerCorrect(round.correctOptionIds, validation.data.selectedOptionIds);
-    const result = {
+    const candidate = {
       roundId: round.id,
       isCorrect,
       correctOptionIds: round.correctOptionIds,
@@ -157,15 +154,21 @@ router.post('/answer', authenticateJWT, async (req: AuthRequest, res: Response) 
       points: isCorrect ? 100 : 0,
     };
 
-    // Guardar primera respuesta en Redis (inmutable)
-    try {
-      const redis = getRedis();
-      await redis.set(answerKey, JSON.stringify(result), 'EX', GEO_ANSWER_TTL);
-    } catch {
-      // best-effort
+    const nxResult = await redis.set(answerKey, JSON.stringify(candidate), 'EX', GEO_ANSWER_TTL, 'NX');
+    if (nxResult === 'OK') {
+      res.json(candidate);
+      return;
     }
 
-    res.json(result);
+    // Lost the race: return the stored winner
+    const winner = await redis.get(answerKey);
+    if (winner) {
+      res.json(JSON.parse(winner));
+      return;
+    }
+
+    // Edge case: NX failed but no stored value → return candidate
+    res.json(candidate);
   } catch {
     res.status(403).json({ error: 'La sesión expiró. Inicia un nuevo GeoReto.', code: 'GEO_SESSION_EXPIRED' });
   }

@@ -111,12 +111,12 @@ describe('saveGameResult — variant + highScore isolation', () => {
     expect((updateCall?.data ?? {}).gamesPlayed).toEqual({ increment: 1 });
   });
 
-  it('idempotencia: runId duplicado devuelve resultado existente', async () => {
+  it('idempotencia: runId duplicado maneja P2002', async () => {
+    mocks.create.mockRejectedValueOnce({ code: 'P2002' });
     mocks.findUnique.mockResolvedValue({ id: 'gr-existing', score: 999 });
     const result = await saveGameResult('u1', [makeAnswerResult()], GameVariant.CLASSIC, GameMode.SINGLE, undefined, undefined, 'run-123');
     expect(result.gameId).toBe('gr-existing');
     expect(result.totalScore).toBe(999);
-    expect(mocks.create).not.toHaveBeenCalled();
   });
 });
 

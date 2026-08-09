@@ -668,16 +668,7 @@ export function GamePage() {
             selectedLocation={mapLocation}
             correctLocation={
               showResult && isMapQuestion && results.length > 0
-                ? (() => {
-                    const last = results[results.length - 1];
-                    if (last.distance !== undefined) {
-                      const parts = last.correctAnswer.split(',');
-                      if (parts.length === 2) {
-                        return { lat: parseFloat(parts[0]), lng: parseFloat(parts[1]) };
-                      }
-                    }
-                    return null;
-                  })()
+                ? results[results.length - 1].correctLocation ?? null
                 : null
             }
             showResult={showResult}
@@ -721,7 +712,7 @@ export function GamePage() {
           selectionAssistiveText={hasSelection && !showResult ? t('game.selectionReadyShortHint') : undefined}
           showResultBadge
           isCorrect={lastAnswerCorrect}
-          correctAnswer={showResult && !lastAnswerCorrect ? currentQuestion.correctAnswer : undefined}
+          correctAnswer={showResult && !lastAnswerCorrect ? results[results.length - 1]?.correctAnswer : undefined}
           onSubmit={handleSubmitAnswer}
           onNext={handleNextQuestion}
           summarySlot={

@@ -406,10 +406,10 @@ export function RankingsPage() {
         {/* Metric hint */}
         <div className="mb-3 flex items-center justify-between gap-2 text-xs text-[var(--color-text-muted)]">
           <span>
-            {scope === 'season' ? t('rankings.metric.sumHint') : t('rankings.metric.bestHint')}
+            {scope === 'season' ? t('rankings.metric.monthHint') : t('rankings.metric.bestHint')}
           </span>
           <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-2 py-0.5 font-semibold uppercase tracking-wide">
-            {scope === 'season' ? t('rankings.metric.sum') : t('rankings.metric.best')}
+            {t('rankings.metric.best')}
           </span>
         </div>
 

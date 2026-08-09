@@ -479,8 +479,12 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
       io.to(opponent.socketId).emit('duel:opponent-reconnected');
     }
 
-    // Send current game state
+    // Send current game state (public fields only)
     const currentQ = duel.questions[duel.currentQuestionIndex];
+    const publicQuestion = currentQ ? (() => {
+      const { correctAnswer: _c, ...q } = currentQ as unknown as Record<string, unknown>;
+      return q;
+    })() : null;
     socket.emit('duel:state', {
       duelId,
       status: duel.status,
@@ -488,7 +492,7 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
       totalQuestions: duel.questions.length,
       timeLimit: duelTimeLimit(duel),
       mode: duel.mode,
-      question: currentQ ?? null,
+      question: publicQuestion,
       scores: duel.players.map((p) => ({ userId: p.userId, score: p.score })),
     });
   });

@@ -334,6 +334,11 @@ router.post('/extend-session', optionalAuth, async (req: AuthRequest, res: Respo
       return;
     }
 
+    if (existingSession.userId && (!req.user || existingSession.userId !== req.user!.userId)) {
+      res.status(403).json({ error: 'Sesión no pertenece al usuario.', code: 'SESSION_MISMATCH' });
+      return;
+    }
+
     // Exclusivo de Streak
     if (existingSession.gameMode !== 'SINGLE' || existingSession.variant !== 'STREAK') {
       res.status(400).json({ error: 'extend-session solo disponible en modo Streak.', code: 'EXTEND_STREAK_ONLY' });
@@ -345,7 +350,8 @@ router.post('/extend-session', optionalAuth, async (req: AuthRequest, res: Respo
       existingSession.category as Category | undefined,
       existingSession.questionIds,
       3,
-      []
+      [],
+      existingSession.filters as QuestionFilters | undefined,
     );
     if (questions.length === 0) {
       res.status(409).json({ error: 'No hay más preguntas disponibles', code: 'GAME_NOT_ENOUGH_QUESTIONS' });
@@ -468,6 +474,12 @@ router.post('/mechanic', optionalAuth, async (req: AuthRequest, res: Response) =
     }
     if (!session.questionIds.includes(questionId)) {
       res.status(400).json({ error: 'La pregunta no pertenece a esta partida.', code: 'GAME_INVALID_QUESTION' });
+      return;
+    }
+
+    // Auth enforcement
+    if (session.userId && (!req.user || session.userId !== req.user!.userId)) {
+      res.status(403).json({ error: 'Sesión no pertenece al usuario.', code: 'SESSION_MISMATCH' });
       return;
     }
 
@@ -956,11 +968,15 @@ router.post('/daily/answer', authenticateJWT, async (req: AuthRequest, res: Resp
     if (!q) { res.status(400).json({ error: 'Pregunta no encontrada' }); return; }
 
     const isCorrect = answer.trim().toLowerCase() === q.correctAnswer.toLowerCase().trim();
-    const result = { questionId, isCorrect, correctAnswer: q.correctAnswer, points: isCorrect ? 100 : 0 };
+    const candidate = { questionId, isCorrect, correctAnswer: q.correctAnswer, points: isCorrect ? 100 : 0 };
 
-    await redis.set(answerKey, JSON.stringify(result), 'EX', DAILY_TTL_SECONDS, 'NX');
+    const nxResult = await redis.set(answerKey, JSON.stringify(candidate), 'EX', DAILY_TTL_SECONDS, 'NX');
+    if (nxResult === 'OK') { res.json(candidate); return; }
 
-    res.json(result);
+    const winner = await redis.get(answerKey);
+    if (winner) { res.json(JSON.parse(winner) as Record<string, unknown>); return; }
+
+    res.json(candidate);
   } catch {
     res.status(503).json({ error: 'Servicio no disponible.', code: 'GAME_STATE_UNAVAILABLE' });
   }

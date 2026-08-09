@@ -838,27 +838,29 @@ export async function saveGameResult(
   const correctCount = answers.filter((a) => a.isCorrect).length;
 
   const save = async (db: Prisma.TransactionClient) => {
-    // Idempotencia: si runId ya existe, devolver el resultado existente.
-    if (runId) {
-      const existing = await db.gameResult.findUnique({ where: { runId } });
-      if (existing) {
-        return { gameId: existing.id, totalScore: existing.score, isHighScore: false };
+    let gameResult: { id: string; score: number };
+    try {
+      gameResult = await db.gameResult.create({
+        data: {
+          userId,
+          score: totalScore,
+          correctCount,
+          totalQuestions: answers.length,
+          category,
+          gameMode,
+          variant,
+          runId,
+          details: answers as unknown as Prisma.InputJsonValue,
+        },
+      });
+    } catch (err) {
+      // P2002: unique violation on runId → concurrent finish, return existing
+      if (runId && (err as { code?: string }).code === 'P2002') {
+        const existing = await db.gameResult.findUnique({ where: { runId } });
+        if (existing) return { gameId: existing.id, totalScore: existing.score, isHighScore: false };
       }
+      throw err;
     }
-
-    const gameResult = await db.gameResult.create({
-      data: {
-        userId,
-        score: totalScore,
-        correctCount,
-        totalQuestions: answers.length,
-        category,
-        gameMode,
-        variant,
-        runId,
-        details: answers as unknown as Prisma.InputJsonValue,
-      },
-    });
 
     const user = await db.user.findUnique({
       where: { id: userId },

@@ -689,6 +689,11 @@ export function setupSurvivalHandlers(io: SocketIOServer, socket: Socket): void 
 
     socket.to(matchId).emit('survival:player-reconnected', { userId: user.userId });
 
+    const currentQ = match.status === 'playing' ? match.questions[match.currentRound - 1] : null;
+    const publicQ = currentQ ? (() => {
+      const { correctAnswer: _c, latitude: _lat, longitude: _lng, ...q } = currentQ as unknown as Record<string, unknown>;
+      return q;
+    })() : null;
     socket.emit('survival:state', {
       matchId,
       status: match.status,
@@ -704,7 +709,7 @@ export function setupSurvivalHandlers(io: SocketIOServer, socket: Socket): void 
         eliminated: p.eliminated,
         eliminatedRound: p.eliminatedRound,
       })),
-      currentQuestion: match.status === 'playing' ? match.questions[match.currentRound - 1] : null,
+      currentQuestion: publicQ,
     });
   });
 

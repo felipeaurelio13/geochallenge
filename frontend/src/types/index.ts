@@ -287,6 +287,7 @@ export interface AnswerResult {
   comboBonus?: number;
   accuracyBonus?: number;
   distance?: number;
+  correctLocation?: { lat: number; lng: number };
 }
 
 export interface GameConfig {
@@ -313,7 +314,7 @@ export interface MechanicsState {
 export interface GameState {
   status: 'idle' | 'loading' | 'playing' | 'reviewing' | 'finished';
   sessionId?: string;
-  questions: Question[];
+  questions: PublicQuestion[];
   currentIndex: number;
   answers: Answer[];
   results: AnswerResult[];

@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
 import type {
   User,
-  Question,
+  PublicQuestion,
   GameResult,
   LeaderboardEntry,
   LeaderboardScope,
@@ -247,7 +247,7 @@ class ApiService {
     const response = await this.client.get<{
       sessionId: string;
       gameConfig: GameConfig;
-      questions: Question[];
+      questions: PublicQuestion[];
     }>('/game/start', {
       params: { category, questionCount, gameType, excludeIds, excludeQuestionKeys, ...filtersToParams(filters), acceptShortGame },
     });
@@ -258,7 +258,7 @@ class ApiService {
     const response = await this.client.get<{
       sessionId: string;
       gameConfig: GameConfig & { durationSeconds?: number };
-      questions: Question[];
+      questions: PublicQuestion[];
     }>('/game/flash/start', { params: { category, ...filtersToParams(filters) } });
     return response.data;
   }
@@ -271,7 +271,7 @@ class ApiService {
     excludeQuestionKeys?: string[];
   }) {
     const response = await this.client.post<{
-      questions: Question[];
+      questions: PublicQuestion[];
     }>('/game/extend-session', data);
     return response.data;
   }
@@ -488,7 +488,7 @@ class ApiService {
 
   async getDaily() {
     const response = await this.client.get<{
-      questions: Question[];
+      questions: PublicQuestion[];
       today: string;
       alreadyPlayed: boolean;
       result?: DailyResult;
