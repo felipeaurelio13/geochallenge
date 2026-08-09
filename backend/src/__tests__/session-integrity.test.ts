@@ -88,7 +88,26 @@ vi.mock('../middleware/auth.js', () => ({
 vi.mock('../config/redis.js', () => ({
   getRedis: () => ({
     get: mocks.redisGet,
-    set: mocks.redisSet,
+    set: vi.fn((key: string, value: string, ...args: string[]) => {
+      if (args.includes('NX')) {
+        if (mocks.redisStore.has(key)) return Promise.resolve(null);
+        mocks.redisStore.set(key, value);
+        return Promise.resolve('OK');
+      }
+      mocks.redisStore.set(key, value);
+      // Sync session keys to sessionStore for GET access
+      if (key.startsWith('game:session:')) {
+        const sid = key.replace('game:session:', '');
+        mocks.sessionStore.set(sid, JSON.parse(value));
+      }
+      return Promise.resolve('OK');
+    }),
+    incr: vi.fn((key: string) => {
+      const prev = parseInt(mocks.redisStore.get(key) ?? '0', 10);
+      mocks.redisStore.set(key, String(prev + 1));
+      return Promise.resolve(prev + 1);
+    }),
+    expire: vi.fn(() => Promise.resolve(1)),
     pipeline: () => ({ zadd: () => ({ exec: async () => [] }) }),
     zadd: async () => 1, zscore: async () => null, zrevrange: async () => [],
     zcard: async () => 0, del: async () => 1, zrevrank: async () => null, exec: async () => [],
@@ -108,7 +127,10 @@ vi.mock('../config/database.js', () => {
       findUnique: vi.fn().mockResolvedValue({ highScore: 500, gamesPlayed: 10 }),
       update: vi.fn().mockResolvedValue({}),
     },
-    gameResult: { create: vi.fn().mockResolvedValue({ id: 'gr-1' }) },
+    gameResult: {
+      create: vi.fn().mockResolvedValue({ id: 'gr-1' }),
+      findUnique: vi.fn().mockResolvedValue(null), // runId not found → create
+    },
     $transaction: async (fn: (tx: unknown) => Promise<unknown>) => fn(prismaObj),
   };
   return { prisma: prismaObj };
@@ -348,10 +370,28 @@ describe('GET /game/daily — no correctAnswer leakage', () => {
 describe('POST /game/extend-session — streak refill', () => {
   it('extends session with new questions (no correctAnswer leaked)', async () => {
     const { server, baseUrl } = startServer();
+    // Create a STREAK session
+    const sessionStore = mocks.sessionStore;
+    const streakSession = {
+      sessionId: 'streak-session',
+      userId: 'user-1',
+      gameMode: 'SINGLE',
+      variant: 'STREAK',
+      category: 'CAPITAL',
+      questionIds: mocks.TEST_QUESTIONS.map((q: { id: string }) => q.id),
+      correctAnswers: Object.fromEntries(mocks.TEST_QUESTIONS.map((q: { id: string; correctAnswer: string }) => [q.id, q.correctAnswer])),
+      optionsPerQuestion: Object.fromEntries(mocks.TEST_QUESTIONS.map((q: { id: string; options: string[] }) => [q.id, [...q.options]])),
+      answeredQuestionIds: [],
+      questionResults: {},
+      mechanicsUsage: {},
+      createdAt: Date.now(),
+      expiresAt: Date.now() + 7200000,
+    };
+    sessionStore.set('streak-session', streakSession);
     try {
       const res = await fetch(`${baseUrl}/api/game/extend-session`, {
         method: 'POST', headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ sessionId: 'test-session-1', category: 'CAPITAL', questionCount: 3 }),
+        body: JSON.stringify({ sessionId: 'streak-session' }),
       });
       expect(res.status).toBe(200);
       const body = await res.json() as { questions: Array<Record<string, unknown>> };
@@ -360,12 +400,25 @@ describe('POST /game/extend-session — streak refill', () => {
     } finally { server.close(); }
   });
 
+  it('rejects Classic session (extend only for STREAK)', async () => {
+    const { server, baseUrl } = startServer();
+    primeSession();
+    try {
+      const res = await fetch(`${baseUrl}/api/game/extend-session`, {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ sessionId: 'test-session-1' }),
+      });
+      expect(res.status).toBe(400);
+      const body = await res.json() as { code: string };
+      expect(body.code).toBe('EXTEND_STREAK_ONLY');
+    } finally { server.close(); }
+  });
   it('rejects unknown session → 410', async () => {
     const { server, baseUrl } = startServer();
     try {
       const res = await fetch(`${baseUrl}/api/game/extend-session`, {
         method: 'POST', headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ sessionId: 'no-such', category: 'CAPITAL' }),
+        body: JSON.stringify({ sessionId: 'no-such' }),
       });
       expect(res.status).toBe(410);
     } finally { server.close(); }

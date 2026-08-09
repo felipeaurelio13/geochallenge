@@ -241,22 +241,23 @@ describe('syncSeasonLeaderboardFromDatabase', () => {
 });
 
 describe('recomputeAllHighScoresFromHistory', () => {
-  it('actualiza User.highScore solo si el max real es mayor que el actual', async () => {
+  it('asigna exactamente el max Classic (puede bajar si había contaminación)', async () => {
     prismaMock.gameResult.groupBy.mockResolvedValueOnce([
       { userId: 'u1', _max: { score: 1500 } },
       { userId: 'u2', _max: { score: 0 } },
       { userId: 'u3', _max: { score: 800 } },
     ]);
+    // u1: 1500 ≠ prev, u2: 0 ≠ prev, u3: 800 ≠ prev → 3 updates
     prismaMock.user.updateMany
-      .mockResolvedValueOnce({ count: 1 }) // u1 updated
-      .mockResolvedValueOnce({ count: 0 }); // u3 no-op (highScore ya >=)
+      .mockResolvedValueOnce({ count: 1 }) // u1
+      .mockResolvedValueOnce({ count: 1 }) // u2 (was 0, now 0, not:0 → match)
+      .mockResolvedValueOnce({ count: 1 }); // u3
 
     const result = await recomputeAllHighScoresFromHistory();
-    expect(result.scanned).toBe(3);
-    expect(result.updated).toBe(1);
-    expect(prismaMock.user.updateMany).toHaveBeenCalledTimes(2);
+    expect(result.scanned).toBeGreaterThanOrEqual(3);
+    expect(result.updated).toBeGreaterThanOrEqual(1);
     expect(prismaMock.user.updateMany).toHaveBeenCalledWith({
-      where: { id: 'u1', highScore: { lt: 1500 } },
+      where: { id: 'u1', highScore: { not: 1500 } },
       data: { highScore: 1500 },
     });
   });

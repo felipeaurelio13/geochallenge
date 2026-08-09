@@ -87,6 +87,7 @@ model GameResult {
   category      Category?
   gameMode      GameMode    @default(SINGLE)
   variant       GameVariant @default(CLASSIC)
+  runId         String?     @unique
   details       Json?       // Desglose de respuestas
   createdAt     DateTime    @default(now())
 

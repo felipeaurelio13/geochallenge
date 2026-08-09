@@ -117,26 +117,57 @@ export async function storeAnswerResult(
   sessionId: string,
   questionId: string,
   result: AnswerResult
-): Promise<RedisGameSession | null> {
+): Promise<{ stored: AnswerResult; isFirstAnswer: boolean }> {
+  const answerKey = `game:answer:${sessionId}:${questionId}`;
   try {
     const redis = getRedis();
-    const raw = await redis.get(gameSessionKey(sessionId));
-    if (!raw) return null;
-    const session = JSON.parse(raw) as RedisGameSession;
-    if (session.expiresAt <= Date.now()) return null;
-    if (!session.questionIds.includes(questionId)) return null;
-    // First answer: store it. Re-answer: return session as-is (immutable).
-    if (!session.questionResults[questionId]) {
-      session.questionResults[questionId] = result;
-      if (!session.answeredQuestionIds.includes(questionId)) {
-        session.answeredQuestionIds.push(questionId);
-      }
-      await redis.set(gameSessionKey(sessionId), JSON.stringify(session), 'EX', GAME_SESSION_TTL);
+    // Atomic SET NX: solo la primera respuesta gana. Re-answer devuelve stored.
+    const serialized = JSON.stringify(result);
+    const nxResult = await redis.set(answerKey, serialized, 'EX', GAME_SESSION_TTL, 'NX');
+    if (nxResult === 'OK') {
+      // Also update session metadata (best-effort, non-atomic with the SET NX)
+      try {
+        const raw = await redis.get(gameSessionKey(sessionId));
+        if (raw) {
+          const session = JSON.parse(raw) as RedisGameSession;
+          session.questionResults[questionId] = result;
+          if (!session.answeredQuestionIds.includes(questionId)) {
+            session.answeredQuestionIds.push(questionId);
+          }
+          await redis.set(gameSessionKey(sessionId), JSON.stringify(session), 'EX', GAME_SESSION_TTL);
+        }
+      } catch { /* metadata best-effort */ }
+      return { stored: result, isFirstAnswer: true };
     }
-    return session;
+    // Lost the race: return the stored result
+    const existing = await redis.get(answerKey);
+    if (existing) {
+      return { stored: JSON.parse(existing) as AnswerResult, isFirstAnswer: false };
+    }
+    return { stored: result, isFirstAnswer: true };
   } catch (err) {
-    console.error('[game-session] Failed to store answer result:', err);
-    return null;
+    console.error('[game-session] Atomic answer storage failed:', err);
+    return { stored: result, isFirstAnswer: false };
+  }
+}
+
+export async function recordMechanicUsageAtomic(
+  sessionId: string,
+  mechanicKey: string,
+  questionId: string,
+): Promise<{ allowed: boolean; remaining: number }> {
+  const counterKey = `game:mechanic:${sessionId}:${mechanicKey}`;
+  try {
+    const redis = getRedis();
+    const prev = parseInt(await redis.get(counterKey) as string ?? '0', 10);
+    const max = config.game.mechanics.limits[mechanicKey as keyof typeof config.game.mechanics.limits] ?? 1;
+    if (prev >= max) return { allowed: false, remaining: 0 };
+    const newVal = await redis.incr(counterKey);
+    await redis.expire(counterKey, GAME_SESSION_TTL);
+    const remaining = Math.max(0, max - newVal);
+    return { allowed: newVal <= max, remaining };
+  } catch {
+    return { allowed: true, remaining: 0 };
   }
 }
 
@@ -785,19 +816,28 @@ export async function validateAnswerByGameType(
 
 /**
  * Guarda el resultado de una partida
- */
+  */
 export async function saveGameResult(
   userId: string,
   answers: AnswerResult[],
-  category?: Category,
+  variant: GameVariant,
   gameMode: GameMode = GameMode.SINGLE,
+  category?: Category,
   txClient?: Prisma.TransactionClient,
-  variant: GameVariant = GameVariant.CLASSIC
+  runId?: string
 ): Promise<{ gameId: string; totalScore: number; isHighScore: boolean }> {
   const totalScore = answers.reduce((sum, a) => sum + a.points, 0);
   const correctCount = answers.filter((a) => a.isCorrect).length;
 
   const save = async (db: Prisma.TransactionClient) => {
+    // Idempotencia: si runId ya existe, devolver el resultado existente.
+    if (runId) {
+      const existing = await db.gameResult.findUnique({ where: { runId } });
+      if (existing) {
+        return { gameId: existing.id, totalScore: existing.score, isHighScore: false };
+      }
+    }
+
     const gameResult = await db.gameResult.create({
       data: {
         userId,
@@ -807,6 +847,7 @@ export async function saveGameResult(
         category,
         gameMode,
         variant,
+        runId,
         details: answers as unknown as Prisma.InputJsonValue,
       },
     });

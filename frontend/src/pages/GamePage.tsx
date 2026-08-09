@@ -409,13 +409,7 @@ export function GamePage() {
           const usedQuestionKeys = questions.map((question) => buildQuestionUniquenessKey(question));
           const sessionId = state.config?.sessionId;
           const refillResponse = sessionId
-            ? await api.extendSession({
-                sessionId,
-                category: category as Category,
-                questionCount: 10,
-                excludeIds: usedQuestionIds,
-                excludeQuestionKeys: usedQuestionKeys,
-              })
+            ? await api.extendSession({ sessionId })
             : await api.startGame(
                 category as Category,
                 10,

@@ -27,9 +27,11 @@ import {
   extendGameSession,
   updateSessionToAuthenticated,
   recordMechanicUsage,
+  recordMechanicUsageAtomic,
   AnswerResult,
   QuestionFilters,
   type GameQuestion,
+  type SoloGameType,
 } from '../services/game.service.js';
 import { shuffleArray } from '../utils/scoring.js';
 import { getRedis } from '../config/redis.js';
@@ -309,16 +311,12 @@ router.get('/flash/start', optionalAuth, async (req: AuthRequest, res: Response)
 
 /**
  * POST /api/game/extend-session
- * Extiende una sesión existente con más preguntas (para streak mode).
+ * Extiende una sesión existente con más preguntas. Exclusivo de STREAK.
  */
 router.post('/extend-session', optionalAuth, async (req: AuthRequest, res: Response) => {
   try {
     const schema = z.object({
       sessionId: z.string().min(1),
-      category: z.nativeEnum(Category).optional().default(Category.MIXED),
-      questionCount: z.coerce.number().min(1).max(10).optional().default(3),
-      excludeIds: z.array(z.string()).optional().default([]),
-      excludeQuestionKeys: z.array(z.string()).optional().default([]),
     });
     const validation = schema.safeParse(req.body);
 
@@ -327,7 +325,7 @@ router.post('/extend-session', optionalAuth, async (req: AuthRequest, res: Respo
       return;
     }
 
-    const { sessionId, category, questionCount, excludeIds, excludeQuestionKeys } = validation.data;
+    const { sessionId } = validation.data;
 
     const existingSession = await getGameSession(sessionId);
     if (!existingSession) {
@@ -335,8 +333,19 @@ router.post('/extend-session', optionalAuth, async (req: AuthRequest, res: Respo
       return;
     }
 
-    const allExcludeIds = [...new Set([...existingSession.questionIds, ...excludeIds])];
-    const questions = await getQuestionsForStreakGame(category, allExcludeIds, questionCount, excludeQuestionKeys);
+    // Exclusivo de Streak
+    if (existingSession.gameMode !== 'SINGLE' || existingSession.variant !== 'STREAK') {
+      res.status(400).json({ error: 'extend-session solo disponible en modo Streak.', code: 'EXTEND_STREAK_ONLY' });
+      return;
+    }
+
+    // Categoría y filtros derivados de la sesión, no del cliente
+    const questions = await getQuestionsForStreakGame(
+      existingSession.category as Category | undefined,
+      existingSession.questionIds,
+      3,
+      []
+    );
     if (questions.length === 0) {
       res.status(409).json({ error: 'No hay más preguntas disponibles', code: 'GAME_NOT_ENOUGH_QUESTIONS' });
       return;
@@ -371,7 +380,7 @@ router.post('/answer', optionalAuth, async (req: AuthRequest, res: Response) => 
       return;
     }
 
-    const { questionId, answer, timeRemaining, coordinates, gameType, combo, sessionId } = validation.data;
+    const { questionId, answer, timeRemaining, coordinates, sessionId } = validation.data;
 
     if (!sessionId) {
       res.status(400).json({ error: 'sessionId es obligatorio.', code: 'SESSION_REQUIRED' });
@@ -380,7 +389,7 @@ router.post('/answer', optionalAuth, async (req: AuthRequest, res: Response) => 
 
     const session = await getGameSession(sessionId);
     if (!session) {
-      res.status(410).json({ error: 'La sesión expiró. Inicia una nueva partida.', code: 'GAME_SESSION_EXPIRED' });
+      res.status(410).json({ error: 'La sesión expiró.', code: 'GAME_SESSION_EXPIRED' });
       return;
     }
     if (session.userId && req.user && session.userId !== req.user!.userId) {
@@ -392,26 +401,38 @@ router.post('/answer', optionalAuth, async (req: AuthRequest, res: Response) => 
       return;
     }
 
-    // Idempotencia: si ya respondió, devolver el resultado almacenado.
-    const storedResult = await getStoredAnswerResult(sessionId, questionId);
-    if (storedResult) {
-      res.json(storedResult);
-      return;
+    // Derivar gameType y scoring strategy del variant de sesión (nunca del cliente)
+    const sessionGameType: SoloGameType =
+      session.variant === 'STREAK' ? 'streak'
+      : session.variant === 'FLASH' ? 'flash'
+      : 'single';
+
+    // Derivar combo Flash desde session.questionResults (historial server-side)
+    let flashCombo: number | undefined;
+    if (sessionGameType === 'flash') {
+      let combo = 0;
+      for (const qid of session.questionIds) {
+        const r = session.questionResults[qid];
+        if (!r) break;
+        if (r.isCorrect) combo++; else combo = 0;
+      }
+      flashCombo = combo;
     }
 
-    // Primera respuesta: validar y guardar como inmutable.
+    // Validar respuesta contra la sesión
     const result = await validateAnswerByGameType(
       questionId,
       answer,
-      timeRemaining,
+      Math.min(Math.max(0, timeRemaining), 30),
       coordinates,
-      gameType,
-      combo !== undefined ? { combo } : undefined
+      sessionGameType,
+      flashCombo !== undefined ? { combo: flashCombo } : undefined
     );
 
-    await storeAnswerResult(sessionId, questionId, result);
+    // Almacenamiento atómico: SET NX previene race condition
+    const { stored } = await storeAnswerResult(sessionId, questionId, result);
 
-    res.json(result);
+    res.json(stored);
   } catch (error) {
     respondWithError(res, error);
   }
@@ -448,11 +469,8 @@ router.post('/mechanic', optionalAuth, async (req: AuthRequest, res: Response) =
       return;
     }
 
-    const usage = await recordMechanicUsage(sessionId, mechanic);
-    if (!usage) {
-      res.status(410).json({ error: 'Sesión inválida.', code: 'GAME_SESSION_EXPIRED' });
-      return;
-    }
+    // Atomic counter para 50/50: no puede usarse más de {max} veces.
+    const usage = await recordMechanicUsageAtomic(sessionId, mechanic, questionId);
     if (!usage.allowed) {
       res.status(400).json({ error: 'Mecánica agotada.', code: 'MECHANIC_UNAVAILABLE' });
       return;
@@ -538,10 +556,11 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
     const { gameId, totalScore, isHighScore } = await saveGameResult(
       req.user!.userId,
       results,
-      category,
+      variant,
       session.gameMode,
+      category,
       undefined,
-      variant
+      session.sessionId, // runId = sessionId para idempotencia
     );
 
     // Actualizar leaderboards (Redis); solo Classic participa en el ranking global.

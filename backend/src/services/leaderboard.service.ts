@@ -616,17 +616,18 @@ export async function recomputeAllHighScoresFromHistory(): Promise<{
   });
 
   let updated = 0;
+
+  // Asignar exactamente el max Classic a cada usuario (puede bajar si había contaminación).
   for (const row of grouped) {
     const max = row._max.score ?? 0;
-    if (max <= 0) continue;
     const result = await prisma.user.updateMany({
-      where: { id: row.userId, highScore: { lt: max } },
+      where: { id: row.userId, highScore: { not: max } },
       data: { highScore: max },
     });
     if (result.count > 0) updated += result.count;
   }
 
-  // Resetear highScore de usuarios sin partidas Classic (ej. FlagMaster contaminaba antes)
+  // Resetear highScore de usuarios sin partidas Classic (ej. FlagMaster contaminaba antes).
   const scoredIds = new Set(grouped.map((r) => r.userId));
   const allWithScores = await prisma.user.findMany({
     where: { highScore: { gt: 0 } },

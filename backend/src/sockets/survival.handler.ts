@@ -1,5 +1,5 @@
 import { Server as SocketIOServer, Socket } from 'socket.io';
-import { Category, Difficulty, GameMode } from '@prisma/client';
+import { Category, Difficulty, GameMode, GameVariant } from '@prisma/client';
 import {
   getQuestionsForGame,
   validateAnswer,
@@ -439,7 +439,7 @@ async function endGame(
       });
 
       for (const p of matchSnapshot.players) {
-        await saveGameResult(p.userId, p.answers, matchSnapshot.category, GameMode.SURVIVAL, tx);
+        await saveGameResult(p.userId, p.answers, GameVariant.CLASSIC, GameMode.SURVIVAL, matchSnapshot.category, tx);
       }
     });
 

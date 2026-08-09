@@ -885,10 +885,10 @@ async function endDuel(
         await saveGameResult(
           player.userId,
           player.answers,
-          duel.category,
+          dueloVariant,
           GameMode.DUEL,
+          duel.category,
           tx,
-          dueloVariant
         );
 
         // Actualizar wins/losses
