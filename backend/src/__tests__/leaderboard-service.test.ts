@@ -281,7 +281,11 @@ describe('rebuildAllLeaderboards', () => {
       .mockResolvedValueOnce([{ userId: 'u1', _max: { score: 2000 } }]) // recompute
       .mockResolvedValueOnce([{ userId: 'u1', _max: { score: 2000 } }]); // first season sync
     prismaMock.user.updateMany.mockResolvedValueOnce({ count: 1 });
-    prismaMock.user.findMany.mockResolvedValueOnce([{ id: 'u1', highScore: 2000 }]);
+    // recomputeAllHighScores also checks for stale highScores (users with score but no Classic games)
+    // 1st: stale check (recompute), 2nd: syncLeaderboard
+    prismaMock.user.findMany
+      .mockResolvedValueOnce([]) // stale: no users to reset
+      .mockResolvedValueOnce([{ id: 'u1', highScore: 2000 }]); // sync global
     prismaMock.$queryRaw.mockResolvedValueOnce([{ season: '2026-05' }]);
 
     const result = await rebuildAllLeaderboards();

@@ -29,7 +29,7 @@ export interface GameQuestion {
 export type PublicGameQuestion = Omit<GameQuestion, 'correctAnswer'>;
 
 export function toPublicQuestion(question: GameQuestion): PublicGameQuestion {
-  const { correctAnswer: _correctAnswer, ...publicQuestion } = question;
+  const { correctAnswer: _correctAnswer, latitude: _lat, longitude: _lng, ...publicQuestion } = question;
   return publicQuestion;
 }
 
@@ -45,7 +45,9 @@ export interface RedisGameSession {
   category?: Category;
   questionIds: string[];
   correctAnswers: Record<string, string>;   // questionId → correctAnswer
+  optionsPerQuestion: Record<string, string[]>; // questionId → shuffled options (order the client sees)
   answeredQuestionIds: string[];
+  questionResults: Record<string, AnswerResult>; // questionId → stored first answer (immutable)
   mechanicsUsage: Record<string, number>;   // key → times used
   createdAt: number;
   expiresAt: number;
@@ -65,8 +67,10 @@ export async function createGameSession(data: {
   const sessionId = randomUUID();
   const now = Date.now();
   const correctAnswers: Record<string, string> = {};
+  const optionsPerQuestion: Record<string, string[]> = {};
   for (const q of data.questions) {
     correctAnswers[q.id] = q.correctAnswer;
+    optionsPerQuestion[q.id] = q.options;
   }
 
   const session: RedisGameSession = {
@@ -77,7 +81,9 @@ export async function createGameSession(data: {
     category: data.category,
     questionIds: data.questions.map((q) => q.id),
     correctAnswers,
+    optionsPerQuestion,
     answeredQuestionIds: [],
+    questionResults: {},
     mechanicsUsage: {},
     createdAt: now,
     expiresAt: now + GAME_SESSION_TTL * 1000,
@@ -107,10 +113,10 @@ export async function getGameSession(sessionId: string): Promise<RedisGameSessio
   }
 }
 
-export async function markQuestionAnswered(
+export async function storeAnswerResult(
   sessionId: string,
   questionId: string,
-  result: Record<string, unknown>
+  result: AnswerResult
 ): Promise<RedisGameSession | null> {
   try {
     const redis = getRedis();
@@ -119,14 +125,73 @@ export async function markQuestionAnswered(
     const session = JSON.parse(raw) as RedisGameSession;
     if (session.expiresAt <= Date.now()) return null;
     if (!session.questionIds.includes(questionId)) return null;
-    if (!session.answeredQuestionIds.includes(questionId)) {
-      session.answeredQuestionIds.push(questionId);
+    // First answer: store it. Re-answer: return session as-is (immutable).
+    if (!session.questionResults[questionId]) {
+      session.questionResults[questionId] = result;
+      if (!session.answeredQuestionIds.includes(questionId)) {
+        session.answeredQuestionIds.push(questionId);
+      }
+      await redis.set(gameSessionKey(sessionId), JSON.stringify(session), 'EX', GAME_SESSION_TTL);
+    }
+    return session;
+  } catch (err) {
+    console.error('[game-session] Failed to store answer result:', err);
+    return null;
+  }
+}
+
+export async function getStoredAnswerResult(
+  sessionId: string,
+  questionId: string
+): Promise<AnswerResult | null> {
+  try {
+    const session = await getGameSession(sessionId);
+    if (!session) return null;
+    return session.questionResults[questionId] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Extiende una sesión existente con más preguntas (para streak mode).
+ */
+export async function extendGameSession(
+  sessionId: string,
+  questions: GameQuestion[]
+): Promise<RedisGameSession | null> {
+  try {
+    const redis = getRedis();
+    const raw = await redis.get(gameSessionKey(sessionId));
+    if (!raw) return null;
+    const session = JSON.parse(raw) as RedisGameSession;
+    if (session.expiresAt <= Date.now()) return null;
+    for (const q of questions) {
+      if (!session.questionIds.includes(q.id)) {
+        session.questionIds.push(q.id);
+        session.correctAnswers[q.id] = q.correctAnswer;
+        session.optionsPerQuestion[q.id] = q.options;
+      }
     }
     await redis.set(gameSessionKey(sessionId), JSON.stringify(session), 'EX', GAME_SESSION_TTL);
     return session;
   } catch (err) {
-    console.error('[game-session] Failed to mark answer in session:', err);
+    console.error('[game-session] Failed to extend session:', err);
     return null;
+  }
+}
+
+export async function updateSessionToAuthenticated(sessionId: string, userId: string): Promise<void> {
+  try {
+    const redis = getRedis();
+    const raw = await redis.get(gameSessionKey(sessionId));
+    if (!raw) return;
+    const session = JSON.parse(raw) as RedisGameSession;
+    if (session.userId) return; // already bound
+    session.userId = userId;
+    await redis.set(gameSessionKey(sessionId), JSON.stringify(session), 'EX', GAME_SESSION_TTL);
+  } catch {
+    // best-effort
   }
 }
 

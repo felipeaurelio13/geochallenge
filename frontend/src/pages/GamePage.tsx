@@ -407,14 +407,24 @@ export function GamePage() {
         try {
           const usedQuestionIds = questions.map((question) => question.id);
           const usedQuestionKeys = questions.map((question) => buildQuestionUniquenessKey(question));
-          const refillResponse = await api.startGame(
-            category as Category,
-            10,
-            'streak',
-            usedQuestionIds,
-            usedQuestionKeys,
-            gameFilters
-          );
+          const sessionId = state.config?.sessionId;
+          const refillResponse = sessionId
+            ? await api.extendSession({
+                sessionId,
+                category: category as Category,
+                questionCount: 10,
+                excludeIds: usedQuestionIds,
+                excludeQuestionKeys: usedQuestionKeys,
+              })
+            : await api.startGame(
+                category as Category,
+                10,
+                'streak',
+                usedQuestionIds,
+                usedQuestionKeys,
+                gameFilters
+              );
+          appendQuestions(refillResponse.questions);
           appendQuestions(refillResponse.questions);
           bufferedQuestionCount += refillResponse.questions.length;
         } catch (err) {

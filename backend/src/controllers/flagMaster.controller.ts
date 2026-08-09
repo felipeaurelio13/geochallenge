@@ -110,7 +110,6 @@ router.post('/start', authenticateJWT, async (req: AuthRequest, res: Response) =
         category: r.category,
         questionText: r.questionText,
         options: r.options,
-        correctAnswer: r.correctAnswer,
         difficulty: r.difficulty,
         imageUrl: r.imageUrl,
         questionData: r.questionData,

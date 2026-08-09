@@ -1,6 +1,5 @@
 import { prisma } from '../config/database.js';
 import { Category, Prisma } from '@prisma/client';
-import { updateLeaderboardScore, updateSeasonLeaderboardScore } from './leaderboard.service.js';
 import { QuestionFilters } from './game.service.js';
 import { evaluateTimedAnswers, SubmittedAnswer } from '../utils/answerEvaluation.js';
 import { AppError } from '../utils/appError.js';
@@ -248,8 +247,21 @@ export class ChallengeService {
       .map((id) => questions.find((q) => q.id === id))
       .filter(Boolean);
 
+    const safeQuestions = orderedQuestions.filter((q): q is NonNullable<typeof q> => q != null);
+
     return {
-      questions: orderedQuestions,
+      questions: safeQuestions.map((q) => ({
+        id: q.id,
+        category: q.category,
+        questionText: q.questionData,
+        options: q.options,
+        imageUrl: q.imageUrl,
+        questionData: q.questionData,
+        continent: q.continent,
+        subregion: q.subregion,
+        isInsular: q.isInsular,
+        isLandlocked: q.isLandlocked,
+      })),
       alreadyPlayed,
       answerTimeSeconds: challenge.answerTimeSeconds,
       challenge,
@@ -334,35 +346,20 @@ export class ChallengeService {
         for (const p of updatedChallenge.participants) {
           const isWinner = winnerId === p.userId;
           const isLoss = winnerId !== null && winnerId !== p.userId;
-          const user = await tx.user.findUnique({
-            where: { id: p.userId },
-            select: { highScore: true },
-          });
-          const newScore = p.score ?? 0;
-          const isHighScore = newScore > (user?.highScore ?? 0);
 
+          // Challenge NO actualiza highScore (legacy: solo Classic Single).
           await tx.user.update({
             where: { id: p.userId },
             data: {
               gamesPlayed: { increment: 1 },
               wins: isWinner ? { increment: 1 } : undefined,
               losses: isLoss ? { increment: 1 } : undefined,
-              highScore: isHighScore ? newScore : undefined,
             },
           });
         }
       });
 
-      // Leaderboards (Redis) fuera de la transacción: best-effort, pero logueado.
-      for (const p of updatedChallenge.participants) {
-        const newScore = p.score ?? 0;
-        await Promise.all([
-          updateLeaderboardScore(p.userId, newScore),
-          updateSeasonLeaderboardScore(p.userId, newScore),
-        ]).catch((err) => {
-          console.error(`[challenge] leaderboard update failed for ${p.userId}:`, err);
-        });
-      }
+      // Challenge NO actualiza leaderboard global (solo Classic Single).
     }
 
     const finalChallenge = await prisma.challenge.findUnique({

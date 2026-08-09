@@ -360,8 +360,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     // Estar online no garantiza que el request llegue (timeout, cold start de
     // Render, blip de red). Reintentamos UNA vez antes de resignarnos a
     // encolar localmente — así no perdemos partidas por un fallo transitorio.
+    const sessionId = stateRef.current.sessionId ?? stateRef.current.config?.sessionId;
     try {
       const result = await api.finishGame({
+        sessionId,
         answers,
         category: config?.category,
         gameType: config?.gameType,
@@ -371,6 +373,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     } catch {
       try {
         const result = await api.finishGame({
+          sessionId,
           answers,
           category: config?.category,
           gameType: config?.gameType,

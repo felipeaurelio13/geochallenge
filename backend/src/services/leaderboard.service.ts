@@ -75,14 +75,16 @@ function buildGameResultWhere(
   seasonId: string,
   filters?: LeaderboardFilters
 ): Prisma.GameResultWhereInput {
-  const where: Prisma.GameResultWhereInput = {};
+  const where: Prisma.GameResultWhereInput = {
+    // Default: Classic Single only. Filters can override this for specific leaderboards.
+    gameMode: filters?.mode ?? 'SINGLE',
+    variant: filters?.variant ?? 'CLASSIC',
+  };
   if (scope === 'season') {
     const { startDate, endDate } = seasonRange(seasonId);
     where.createdAt = { gte: startDate, lt: endDate };
   }
-  if (filters?.mode) where.gameMode = filters.mode;
   if (filters?.category) where.category = filters.category;
-  if (filters?.variant) where.variant = filters.variant;
   return where;
 }
 
@@ -576,7 +578,11 @@ export async function syncSeasonLeaderboardFromDatabase(
     const { startDate, endDate } = seasonRange(seasonId);
     const rows = await prisma.gameResult.groupBy({
       by: ['userId'],
-      where: { createdAt: { gte: startDate, lt: endDate } },
+      where: {
+        createdAt: { gte: startDate, lt: endDate },
+        gameMode: 'SINGLE',
+        variant: 'CLASSIC',
+      },
       _max: { score: true },
     });
     const aggregates = rows
@@ -620,7 +626,22 @@ export async function recomputeAllHighScoresFromHistory(): Promise<{
     if (result.count > 0) updated += result.count;
   }
 
-  return { scanned: grouped.length, updated };
+  // Resetear highScore de usuarios sin partidas Classic (ej. FlagMaster contaminaba antes)
+  const scoredIds = new Set(grouped.map((r) => r.userId));
+  const allWithScores = await prisma.user.findMany({
+    where: { highScore: { gt: 0 } },
+    select: { id: true },
+  });
+  const staleIds = allWithScores.filter((u) => !scoredIds.has(u.id)).map((u) => u.id);
+  if (staleIds.length > 0) {
+    const resetResult = await prisma.user.updateMany({
+      where: { id: { in: staleIds } },
+      data: { highScore: 0 },
+    });
+    updated += resetResult.count;
+  }
+
+  return { scanned: grouped.length + staleIds.length, updated };
 }
 
 export async function listSeasonsWithActivity(): Promise<string[]> {

@@ -263,6 +263,19 @@ class ApiService {
     return response.data;
   }
 
+  async extendSession(data: {
+    sessionId: string;
+    category?: Category;
+    questionCount?: number;
+    excludeIds?: string[];
+    excludeQuestionKeys?: string[];
+  }) {
+    const response = await this.client.post<{
+      questions: Question[];
+    }>('/game/extend-session', data);
+    return response.data;
+  }
+
   async startGeoChallenges() {
     const response = await this.client.get<GeoChallengeStartResponse>('/game/geo-challenges/start');
     return response.data;
@@ -352,6 +365,7 @@ class ApiService {
   }
 
   async finishGame(data: {
+    sessionId?: string;
     answers: {
       questionId: string;
       answer: string;

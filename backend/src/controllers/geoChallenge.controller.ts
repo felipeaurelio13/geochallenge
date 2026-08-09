@@ -5,6 +5,7 @@ import { GameMode, GameVariant, Prisma } from '@prisma/client';
 import { authenticateJWT, AuthRequest } from '../middleware/auth.js';
 import { config } from '../config/env.js';
 import { prisma } from '../config/database.js';
+import { getRedis } from '../config/redis.js';
 import {
   buildGeoChallengeGame,
   isGeoChallengeAnswerCorrect,
@@ -14,18 +15,26 @@ import {
 
 const router = Router();
 
+const GEO_ANSWER_TTL = 60 * 60 * 2; // 2h
+
+function geoAnswerKey(gameId: string, roundId: string): string {
+  return `geo:answer:${gameId}:${roundId}`;
+}
+
 interface SessionRound {
   id: string;
   kind: string;
   region: string;
   correctOptionIds: string[];
   explanation: LocalizedText;
+  answeredOptionIds?: string[]; // primera respuesta, inmutable después de /answer
 }
 
 interface GeoChallengeSessionPayload {
   scope: 'geo-challenges';
   gameId: string;
   userId: string;
+  dataVersion: string;
   expiresAt: number;
   rounds: SessionRound[];
 }
@@ -91,6 +100,7 @@ router.get('/start', authenticateJWT, (req: AuthRequest, res: Response) => {
     scope: 'geo-challenges',
     gameId: game.gameId,
     userId: req.user.userId,
+    dataVersion: game.dataVersion,
     rounds: game.rounds.map((round) => ({
       id: round.id,
       kind: round.kind,
@@ -110,7 +120,7 @@ router.get('/start', authenticateJWT, (req: AuthRequest, res: Response) => {
   });
 });
 
-router.post('/answer', authenticateJWT, (req: AuthRequest, res: Response) => {
+router.post('/answer', authenticateJWT, async (req: AuthRequest, res: Response) => {
   const validation = answerSchema.safeParse(req.body);
   if (!validation.success) {
     res.status(400).json({ error: 'Respuesta inválida', code: 'VALIDATION_FAILED' });
@@ -124,14 +134,38 @@ router.post('/answer', authenticateJWT, (req: AuthRequest, res: Response) => {
       res.status(404).json({ error: 'Ronda no encontrada', code: 'GEO_ROUND_NOT_FOUND' });
       return;
     }
+
+    // La primera respuesta es inmutable: si ya respondió, devolver resultado almacenado.
+    const answerKey = geoAnswerKey(session.gameId, round.id);
+    try {
+      const redis = getRedis();
+      const stored = await redis.get(answerKey);
+      if (stored) {
+        res.json(JSON.parse(stored));
+        return;
+      }
+    } catch {
+      // Redis caído: continuar sin protección anti-probing.
+    }
+
     const isCorrect = isGeoChallengeAnswerCorrect(round.correctOptionIds, validation.data.selectedOptionIds);
-    res.json({
+    const result = {
       roundId: round.id,
       isCorrect,
       correctOptionIds: round.correctOptionIds,
       explanation: round.explanation,
       points: isCorrect ? 100 : 0,
-    });
+    };
+
+    // Guardar primera respuesta en Redis (inmutable)
+    try {
+      const redis = getRedis();
+      await redis.set(answerKey, JSON.stringify(result), 'EX', GEO_ANSWER_TTL);
+    } catch {
+      // best-effort
+    }
+
+    res.json(result);
   } catch {
     res.status(403).json({ error: 'La sesión expiró. Inicia un nuevo GeoReto.', code: 'GEO_SESSION_EXPIRED' });
   }
@@ -146,20 +180,39 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
 
   try {
     const session = verifySession(validation.data.sessionToken, req.user?.userId);
-    const submittedByRound = new Map(validation.data.answers.map((answer) => [answer.roundId, answer]));
-    const sessionRoundIds = new Set(session.rounds.map((round) => round.id));
-    const hasOnlySessionRounds = [...submittedByRound.keys()].every((roundId) => sessionRoundIds.has(roundId));
-    if (submittedByRound.size !== session.rounds.length || !hasOnlySessionRounds) {
-      res.status(400).json({ error: 'Faltan rondas por responder', code: 'GEO_INCOMPLETE_GAME' });
-      return;
+
+    // Consolidar desde las respuestas almacenadas en Redis (anti-probing: ignorar /finish arbitrario)
+    const details: Array<{ roundId: string; kind: string; region: string; isCorrect: boolean }> = [];
+    let redisAvailable = true;
+
+    try {
+      const redis = getRedis();
+      for (const round of session.rounds) {
+        const answerKey = geoAnswerKey(session.gameId, round.id);
+        const stored = await redis.get(answerKey);
+        if (stored) {
+          const parsed = JSON.parse(stored) as { isCorrect: boolean };
+          details.push({ roundId: round.id, kind: round.kind, region: round.region, isCorrect: parsed.isCorrect });
+        } else {
+          // Ronda nunca respondida: considerarla incorrecta.
+          details.push({ roundId: round.id, kind: round.kind, region: round.region, isCorrect: false });
+        }
+      }
+    } catch {
+      redisAvailable = false;
     }
-    const details = session.rounds.map((round) => {
-      const answer = submittedByRound.get(round.id);
-      const isCorrect = answer
-        ? isGeoChallengeAnswerCorrect(round.correctOptionIds, answer.selectedOptionIds)
-        : false;
-      return { roundId: round.id, kind: round.kind, region: round.region, isCorrect };
-    });
+
+    // Fallback sin Redis: confiar en las respuestas del cliente (modo legacy).
+    if (!redisAvailable) {
+      const submittedByRound = new Map(validation.data.answers.map((a: { roundId: string; selectedOptionIds: string[] }) => [a.roundId, a]));
+      for (const round of session.rounds) {
+        const answer = submittedByRound.get(round.id);
+        const isCorrect = answer
+          ? isGeoChallengeAnswerCorrect(round.correctOptionIds, answer.selectedOptionIds)
+          : false;
+        details.push({ roundId: round.id, kind: round.kind, region: round.region, isCorrect });
+      }
+    }
     const correctCount = details.filter((detail) => detail.isCorrect).length;
     const totalScore = correctCount * 100;
 
@@ -176,7 +229,7 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
             category: 'MIXED',
             gameMode: GameMode.SINGLE,
             variant: GameVariant.GEO_CHALLENGE,
-            details: { dataVersion: req.body.dataVersion, rounds: details } as unknown as Prisma.InputJsonValue,
+            details: { dataVersion: session.dataVersion, rounds: details } as unknown as Prisma.InputJsonValue,
           },
         });
 

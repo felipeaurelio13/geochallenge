@@ -712,10 +712,13 @@ function sendQuestion(io: SocketIOServer, duel: ActiveDuel) {
     const question = duel.questions[questionIndex];
     duel.questionStartedAt = new Date();
 
+    // Strip correctAnswer from emitted question
+    const { correctAnswer: _correctAnswer, ...publicQuestion } = question as unknown as Record<string, unknown>;
+
     io.to(duel.id).emit('duel:question', {
       questionIndex,
       totalQuestions: duel.questions.length,
-      question,
+      question: publicQuestion,
       timeLimit: duelTimeLimit(duel),
       mode: duel.mode,
       mechanics: duel.mode === 'classic'

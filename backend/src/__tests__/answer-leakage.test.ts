@@ -67,7 +67,7 @@ describe('toPublicQuestion — answer leakage prevention', () => {
     expect(result.isLandlocked).toBe(false);
   });
 
-  it('preserves MAP-specific fields (latitude, longitude) for rendering', () => {
+  it('strips latitude and longitude (solution coordinates) from all questions', () => {
     const q = makeQuestion({
       category: Category.MAP,
       latitude: -33.4489,
@@ -75,19 +75,18 @@ describe('toPublicQuestion — answer leakage prevention', () => {
     });
     const result = toPublicQuestion(q);
     expect(result).not.toHaveProperty('correctAnswer');
-    expect(result.latitude).toBe(-33.4489);
-    expect(result.longitude).toBe(-70.6693);
+    expect(result).not.toHaveProperty('latitude');
+    expect(result).not.toHaveProperty('longitude');
   });
 
-  it('does NOT include latitude/longitude for non-MAP questions (privacy)', () => {
+  it('non-MAP question fields remain intact', () => {
     const q = makeQuestion({
       category: Category.FLAG,
-      latitude: 10,
-      longitude: 20,
     });
     const result = toPublicQuestion(q);
     expect(result).not.toHaveProperty('correctAnswer');
-    // Non-MAP questions shouldn't have coords — this depends on getQuestionsForGame, not the mapper,
-    // but the mapper should at least not add them.
+    expect(result).not.toHaveProperty('latitude');
+    expect(result).not.toHaveProperty('longitude');
+    expect(result.category).toBe(Category.FLAG);
   });
 });

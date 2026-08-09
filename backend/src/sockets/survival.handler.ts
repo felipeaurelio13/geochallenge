@@ -240,9 +240,12 @@ function sendQuestion(io: SocketIOServer, match: ActiveSurvivalMatch): void {
   const difficulty = getDifficultyForRound(round);
   const timeLimit = TIME_PER_DIFFICULTY[difficulty];
 
+  // Strip correctAnswer and MAP coordinates from emitted question
+  const { correctAnswer: _correctAnswer, latitude: _lat, longitude: _lng, ...publicQuestion } = question as unknown as Record<string, unknown>;
+
   io.to(match.id).emit('survival:question', {
     round,
-    question,
+    question: publicQuestion,
     difficulty,
     timeLimit,
     players: getActivePlayers(match).map((p) => ({

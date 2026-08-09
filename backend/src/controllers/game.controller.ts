@@ -22,7 +22,10 @@ import {
   toPublicQuestion,
   createGameSession,
   getGameSession,
-  markQuestionAnswered,
+  storeAnswerResult,
+  getStoredAnswerResult,
+  extendGameSession,
+  updateSessionToAuthenticated,
   recordMechanicUsage,
   AnswerResult,
   QuestionFilters,
@@ -122,6 +125,7 @@ const answerSchema = z.object({
 });
 
 const finishGameSchema = z.object({
+  sessionId: z.string().min(1),
   answers: z.array(
     z.object({
       questionId: z.string(),
@@ -134,7 +138,7 @@ const finishGameSchema = z.object({
         })
         .optional(),
     })
-  ),
+  ).optional(),
   gameType: gameTypeSchema.optional().default('single'),
   category: z.nativeEnum(Category).optional(),
 });
@@ -304,9 +308,54 @@ router.get('/flash/start', optionalAuth, async (req: AuthRequest, res: Response)
 });
 
 /**
+ * POST /api/game/extend-session
+ * Extiende una sesión existente con más preguntas (para streak mode).
+ */
+router.post('/extend-session', optionalAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const schema = z.object({
+      sessionId: z.string().min(1),
+      category: z.nativeEnum(Category).optional().default(Category.MIXED),
+      questionCount: z.coerce.number().min(1).max(10).optional().default(3),
+      excludeIds: z.array(z.string()).optional().default([]),
+      excludeQuestionKeys: z.array(z.string()).optional().default([]),
+    });
+    const validation = schema.safeParse(req.body);
+
+    if (!validation.success) {
+      res.status(400).json({ error: 'Parámetros inválidos', code: 'VALIDATION_FAILED' });
+      return;
+    }
+
+    const { sessionId, category, questionCount, excludeIds, excludeQuestionKeys } = validation.data;
+
+    const existingSession = await getGameSession(sessionId);
+    if (!existingSession) {
+      res.status(410).json({ error: 'Sesión expirada', code: 'GAME_SESSION_EXPIRED' });
+      return;
+    }
+
+    const allExcludeIds = [...new Set([...existingSession.questionIds, ...excludeIds])];
+    const questions = await getQuestionsForStreakGame(category, allExcludeIds, questionCount, excludeQuestionKeys);
+    if (questions.length === 0) {
+      res.status(409).json({ error: 'No hay más preguntas disponibles', code: 'GAME_NOT_ENOUGH_QUESTIONS' });
+      return;
+    }
+
+    await extendGameSession(sessionId, questions);
+
+    res.json({
+      questions: questions.map(toPublicQuestion),
+    });
+  } catch (error) {
+    respondWithError(res, error);
+  }
+});
+
+/**
  * POST /api/game/answer
- * Server-authoritative: valida la respuesta contra la sesión, nunca expone
- * correctAnswer antes de que el cliente haya respondido.
+ * Server-authoritative. sessionId obligatorio. Primera respuesta inmutable.
+ * Re-answer devuelve el resultado almacenado (idempotencia).
  */
 router.post('/answer', optionalAuth, async (req: AuthRequest, res: Response) => {
   try {
@@ -324,25 +373,33 @@ router.post('/answer', optionalAuth, async (req: AuthRequest, res: Response) => 
 
     const { questionId, answer, timeRemaining, coordinates, gameType, combo, sessionId } = validation.data;
 
-    // Validar contra la sesión si se provee sessionId
-    if (sessionId) {
-      const session = await getGameSession(sessionId);
-      if (!session) {
-        res.status(410).json({ error: 'La sesión expiró. Inicia una nueva partida.', code: 'GAME_SESSION_EXPIRED' });
-        return;
-      }
-      if (!session.questionIds.includes(questionId)) {
-        res.status(400).json({ error: 'La pregunta no pertenece a esta partida.', code: 'GAME_INVALID_QUESTION' });
-        return;
-      }
-      if (session.answeredQuestionIds.includes(questionId)) {
-        // Idempotencia: devolver el mismo resultado que antes (volvemos a calcular)
-        // o simplemente permitimos recalcular — el server decide.
-      }
-
-      await markQuestionAnswered(sessionId, questionId, { answer });
+    if (!sessionId) {
+      res.status(400).json({ error: 'sessionId es obligatorio.', code: 'SESSION_REQUIRED' });
+      return;
     }
 
+    const session = await getGameSession(sessionId);
+    if (!session) {
+      res.status(410).json({ error: 'La sesión expiró. Inicia una nueva partida.', code: 'GAME_SESSION_EXPIRED' });
+      return;
+    }
+    if (session.userId && req.user && session.userId !== req.user!.userId) {
+      res.status(403).json({ error: 'La sesión pertenece a otro usuario.', code: 'SESSION_MISMATCH' });
+      return;
+    }
+    if (!session.questionIds.includes(questionId)) {
+      res.status(400).json({ error: 'La pregunta no pertenece a esta partida.', code: 'GAME_INVALID_QUESTION' });
+      return;
+    }
+
+    // Idempotencia: si ya respondió, devolver el resultado almacenado.
+    const storedResult = await getStoredAnswerResult(sessionId, questionId);
+    if (storedResult) {
+      res.json(storedResult);
+      return;
+    }
+
+    // Primera respuesta: validar y guardar como inmutable.
     const result = await validateAnswerByGameType(
       questionId,
       answer,
@@ -352,7 +409,9 @@ router.post('/answer', optionalAuth, async (req: AuthRequest, res: Response) => 
       combo !== undefined ? { combo } : undefined
     );
 
-    res.json({ ...result, sessionId });
+    await storeAnswerResult(sessionId, questionId, result);
+
+    res.json(result);
   } catch (error) {
     respondWithError(res, error);
   }
@@ -399,24 +458,15 @@ router.post('/mechanic', optionalAuth, async (req: AuthRequest, res: Response) =
       return;
     }
 
-    // Cargar la pregunta y decidir qué opciones ocultar (50/50)
+    // Usar las opciones en el orden exacto que ve el cliente (almacenadas en la sesión)
+    const options = session.optionsPerQuestion[questionId];
+    if (!options) {
+      res.status(400).json({ error: 'Opciones no encontradas en la sesión.', code: 'GAME_INVALID_QUESTION' });
+      return;
+    }
+
     const correctAnswer = session.correctAnswers[questionId];
-    if (!correctAnswer) {
-      res.status(400).json({ error: 'Pregunta no encontrada en la sesión.', code: 'GAME_INVALID_QUESTION' });
-      return;
-    }
-
-    // Buscar los índices de las opciones incorrectas (sin exponer correctAnswer)
-    const question = await prisma.question.findUnique({
-      where: { id: questionId },
-      select: { options: true },
-    });
-    if (!question) {
-      res.status(400).json({ error: 'Pregunta no encontrada.', code: 'GAME_INVALID_QUESTION' });
-      return;
-    }
-
-    const incorrectIndexes = question.options
+    const incorrectIndexes = options
       .map((opt: string, idx: number) => ({ opt, idx }))
       .filter(({ opt }: { opt: string }) => opt.toLowerCase().trim() !== correctAnswer.toLowerCase().trim())
       .map(({ idx }: { idx: number }) => idx);
@@ -436,7 +486,7 @@ router.post('/mechanic', optionalAuth, async (req: AuthRequest, res: Response) =
 
 /**
  * POST /api/game/finish
- * Terminar partida y guardar resultado
+ * Terminar partida y guardar resultado. Deriva preguntas y resultados de la sesión.
  */
 router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) => {
   try {
@@ -452,33 +502,44 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
       return;
     }
 
-    const { answers, category, gameType } = validation.data;
+    const { sessionId } = validation.data;
 
-    // Mapear gameType del cliente a GameVariant
-    const variant: GameVariant =
-      gameType === 'streak' ? GameVariant.STREAK
-        : gameType === 'flash' ? GameVariant.FLASH
-        : GameVariant.CLASSIC;
-
-    // Validar todas las respuestas
-    const results: AnswerResult[] = [];
-    for (const answer of answers) {
-      const result = await validateAnswerByGameType(
-        answer.questionId,
-        answer.answer,
-        answer.timeRemaining,
-        answer.coordinates,
-        gameType
-      );
-      results.push(result);
+    if (!sessionId) {
+      res.status(400).json({ error: 'sessionId es obligatorio.', code: 'SESSION_REQUIRED' });
+      return;
     }
+
+    const session = await getGameSession(sessionId);
+    if (!session) {
+      res.status(410).json({ error: 'La sesión expiró. Inicia una nueva partida.', code: 'GAME_SESSION_EXPIRED' });
+      return;
+    }
+    if (session.userId && session.userId !== req.user!.userId) {
+      res.status(403).json({ error: 'La sesión pertenece a otro usuario.', code: 'SESSION_MISMATCH' });
+      return;
+    }
+
+    // Vincular sesión al usuario si aún no lo estaba (start antes del login)
+    await updateSessionToAuthenticated(sessionId, req.user!.userId);
+
+    // Derivar resultados de la sesión, no del body del cliente
+    const results: AnswerResult[] = [];
+    for (const questionId of session.questionIds) {
+      const stored = session.questionResults[questionId];
+      if (stored) {
+        results.push(stored);
+      }
+    }
+
+    const category = session.category;
+    const variant = session.variant;
 
     // Guardar resultado
     const { gameId, totalScore, isHighScore } = await saveGameResult(
       req.user!.userId,
       results,
       category,
-      GameMode.SINGLE,
+      session.gameMode,
       undefined,
       variant
     );
@@ -493,17 +554,17 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
 
     // Calcular estadísticas
     const correctCount = results.filter((r) => r.isCorrect).length;
-    const accuracy = Math.round((correctCount / results.length) * 100);
+    const accuracy = results.length > 0 ? Math.round((correctCount / results.length) * 100) : 0;
 
-    // Evaluar achievements (sin bloquear la respuesta)
-    const streakLength = gameType === 'streak' ? correctCount : undefined;
+    // Evaluar achievements
+    const streakLength = variant === GameVariant.STREAK ? correctCount : undefined;
     const newAchievements = await evaluateAchievementsAfterGame({
       userId: req.user!.userId,
       correctCount,
       totalQuestions: results.length,
       score: totalScore,
       streakLength,
-      isStreakMode: gameType === 'streak',
+      isStreakMode: variant === GameVariant.STREAK,
     }).catch(() => []);
 
     res.json({
@@ -827,7 +888,6 @@ router.get('/daily', optionalAuth, async (req: AuthRequest, res: Response) => {
       category: q.category,
       questionText: generateQuestionText(q),
       options: shuffleArray(q.options),
-      correctAnswer: q.correctAnswer,
       imageUrl: q.imageUrl,
       questionData: q.questionData,
       continent: q.continent,
@@ -974,15 +1034,13 @@ router.post('/daily/submit', authenticateJWT, async (req: AuthRequest, res: Resp
       lastDailyDate: dayKey,
       gamesPlayed: { increment: 1 },
     };
-    if (userRow && score > (userRow.highScore ?? 0)) {
-      updateData.highScore = score;
-    }
+    // Daily NO actualiza highScore (legacy: exclusivo de Single Classic).
 
     // Atómico: o queda el usuario actualizado Y el resultado en el historial, o nada.
     await prisma.$transaction(async (tx) => {
       await tx.user.update({ where: { id: userId }, data: updateData });
       await tx.gameResult.create({
-        data: { userId, score, correctCount, totalQuestions, gameMode: 'SINGLE', variant: GameVariant.CLASSIC, category: 'MIXED' },
+        data: { userId, score, correctCount, totalQuestions, gameMode: 'SINGLE', variant: GameVariant.DAILY, category: 'MIXED' },
       });
     });
 
@@ -1004,13 +1062,7 @@ router.post('/daily/submit', authenticateJWT, async (req: AuthRequest, res: Resp
       // best-effort: User.lastDailyDate ya quedó persistido como fuente de verdad
     }
 
-    // Update leaderboard (Redis): best-effort, pero logueado para observabilidad.
-    await Promise.all([
-      updateLeaderboardScore(userId, score),
-      updateSeasonLeaderboardScore(userId, score),
-    ]).catch((err) => {
-      console.error(`[daily] leaderboard update failed for ${userId}:`, err);
-    });
+    // Daily NO participa en el ranking global (solo Classic Single).
 
     // Evaluate achievements
     const newAchievements = await evaluateAchievementsAfterDaily(userId, newStreak).catch(() => []);

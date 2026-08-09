@@ -165,6 +165,7 @@ enum GameVariant {
   FLASH
   FLAG_MASTER
   GEO_CHALLENGE
+  DAILY
 }
 
 model DuelMatch {
