@@ -54,6 +54,7 @@ export function FlashGamePage() {
   const [status, setStatus] = useState<Status>('loading');
   const [error, setError] = useState<string | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [flashSessionId, setFlashSessionId] = useState('');
   const flashImageUrls = useMemo(() => questions.map((q) => q.imageUrl ?? ''), [questions]);
   useImagePreloader(flashImageUrls); // preload masivo en background durante la pantalla intro
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -94,6 +95,7 @@ export function FlashGamePage() {
         const response = await api.startFlashGame(category, gameFilters);
         if (cancelled) return;
         setQuestions(response.questions);
+        setFlashSessionId(response.sessionId ?? '');
         const duration = response.gameConfig.durationSeconds ?? FALLBACK_DURATION_SECONDS;
         setDurationSeconds(duration);
         setTimeRemaining(duration);
@@ -116,13 +118,19 @@ export function FlashGamePage() {
     };
   }, [category, gameFilters]);
 
-  const finish = useCallback(() => {
+  const finish = useCallback(async () => {
     if (statusRef.current === 'finished') return;
     setStatus('finished');
     if (intervalRef.current) clearInterval(intervalRef.current);
     intervalRef.current = null;
+    // Submit to server if we have a session
+    if (flashSessionId) {
+      try {
+        await api.finishGame({ sessionId: flashSessionId, answers: [], gameType: 'flash' });
+      } catch { /* best-effort */ }
+    }
     haptics.celebrate();
-  }, [haptics]);
+  }, [haptics, flashSessionId]);
 
   // Timer
   useEffect(() => {
@@ -170,7 +178,7 @@ export function FlashGamePage() {
   const canUseMechanics = mechanicsRuntimeEnabled && status === 'playing';
 
   const handleAnswer = useCallback(
-    (option: string) => {
+    async (option: string) => {
       if (!currentQuestion || status !== 'playing') return;
       if (disabledOption && option === disabledOption) {
         trackUxEvent('option_mis_tap', {
@@ -180,13 +188,20 @@ export function FlashGamePage() {
         });
         return;
       }
-      const isCorrect =
-        option.trim().toLowerCase() === (currentQuestion.correctAnswer ?? '').trim().toLowerCase();
+      let isCorrect = false;
+      let points = 0;
+
+      if (flashSessionId) {
+        try {
+          const server = await api.submitAnswer({ sessionId: flashSessionId, questionId: currentQuestion.id, answer: option, timeRemaining: 0 });
+          isCorrect = server.isCorrect;
+          points = server.points ?? 0;
+        } catch { /* continue */ }
+      }
 
       const prevCombo = combo;
       const effectiveCombo = isCorrect ? prevCombo + 1 : 0;
-      const multiplier = flashMultiplier(prevCombo);
-      const points = isCorrect ? FLASH_BASE_POINTS * multiplier : 0;
+      if (points === 0 && isCorrect) points = FLASH_BASE_POINTS * flashMultiplier(prevCombo);
 
       setCombo(effectiveCombo);
       setMaxCombo((prev) => Math.max(prev, effectiveCombo));
@@ -221,29 +236,23 @@ export function FlashGamePage() {
         });
       }, FEEDBACK_MS);
     },
-    [combo, currentQuestion, disabledOption, finish, haptics, questions.length, status]
+    [combo, currentQuestion, disabledOption, finish, flashSessionId, haptics, questions.length, status]
   );
 
-  const handleUseIntel5050 = useCallback(() => {
+  const handleUseIntel5050 = useCallback(async () => {
     if (!currentQuestion || mechanicsAvailable.intel5050 <= 0 || !canUseMechanics || feedback) return;
-    const wrongOption = currentQuestion.options.find(
-      (option) => option.trim().toLowerCase() !== (currentQuestion.correctAnswer ?? '').trim().toLowerCase()
-    );
-    if (!wrongOption) return;
-
-    setDisabledOption(wrongOption);
-    setMechanicsAvailable((prev) => ({
-      ...prev,
-      intel5050: Math.max(0, prev.intel5050 - 1),
-    }));
-    trackUxEvent('mechanic_used', {
-      mode: 'flash',
-      questionId: currentQuestion.id,
-      value: 1,
-      meta: { key: 'intel5050' },
-    });
-    haptics.tap();
-  }, [canUseMechanics, currentQuestion, feedback, haptics, mechanicsAvailable.intel5050]);
+    if (flashSessionId) {
+      try {
+        const result = await api.useMechanic({ sessionId: flashSessionId, questionId: currentQuestion.id, mechanic: 'intel5050' });
+        const hidden = result.hiddenOptionIndexes?.[0];
+        if (hidden != null) setDisabledOption(currentQuestion.options[hidden] ?? null);
+        setMechanicsAvailable((prev) => ({ ...prev, intel5050: result.remaining }));
+        trackUxEvent('mechanic_used', { mode: 'flash', questionId: currentQuestion.id, value: 1, meta: { key: 'intel5050' } });
+        haptics.tap();
+        return;
+      } catch { /* fallback disabled */ }
+    }
+  }, [canUseMechanics, currentQuestion, feedback, flashSessionId, haptics, mechanicsAvailable.intel5050]);
 
   const handleUseFocusTime = useCallback(() => {
     if (mechanicsAvailable.focusTime <= 0 || !canUseMechanics || feedback) return;
