@@ -976,7 +976,7 @@ router.post('/daily/answer', authenticateJWT, async (req: AuthRequest, res: Resp
     const winner = await redis.get(answerKey);
     if (winner) { res.json(JSON.parse(winner) as Record<string, unknown>); return; }
 
-    res.json(candidate);
+    res.status(503).json({ error: 'Servicio no disponible.', code: 'GAME_STATE_UNAVAILABLE' });
   } catch {
     res.status(503).json({ error: 'Servicio no disponible.', code: 'GAME_STATE_UNAVAILABLE' });
   }

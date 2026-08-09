@@ -48,7 +48,7 @@ function buildQuestionUniquenessKey(question: Question): string {
     normalizeQuestionPart(question.category),
     normalizeQuestionPart(question.imageUrl),
     normalizeQuestionPart(questionData),
-    normalizeQuestionPart(question.correctAnswer),
+    question.id, // ID as fallback uniqueness since correctAnswer not available client-side
   ].join('|');
 }
 

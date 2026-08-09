@@ -96,6 +96,7 @@ export async function createGameSession(data: {
     await redis.set(gameSessionKey(sessionId), JSON.stringify(session), 'EX', GAME_SESSION_TTL);
   } catch (err) {
     console.error('[game-session] Failed to create session in Redis:', err);
+    throw new Error('GAME_STATE_UNAVAILABLE');
   }
 
   return sessionId;

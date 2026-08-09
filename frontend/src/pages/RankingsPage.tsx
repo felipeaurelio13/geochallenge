@@ -34,7 +34,7 @@ type RankingsResponse = {
   userScore: number | null;
   scope: LeaderboardScope;
   season?: string | null;
-  metric?: 'sum' | 'best';
+  metric?: string;
 };
 
 const MODE_OPTIONS: LeaderboardModeFilter[] = ['SINGLE', 'DUEL', 'CHALLENGE', 'SURVIVAL'];

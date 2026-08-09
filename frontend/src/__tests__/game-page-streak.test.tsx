@@ -57,7 +57,7 @@ const mocks = vi.hoisted(() => ({
     score: 100,
     results: [],
     status: 'playing',
-    config: null as null | Record<string, unknown>,
+    config: {} as null | Record<string, unknown>,
   },
 }));
 
@@ -181,9 +181,9 @@ describe('GamePage streak mode', () => {
         'streak',
         ['q1', 'q2', 'q3'],
         [
-          'capital|||santiago',
-          'capital|||lima',
-          'capital|||quito',
+          'capital|||q1',
+          'capital|||q2',
+          'capital|||q3',
         ],
         {}
       );
@@ -209,9 +209,9 @@ describe('GamePage streak mode', () => {
         'streak',
         ['q1', 'q2', 'q3'],
         [
-          'capital|||santiago',
-          'capital|||lima',
-          'capital|||quito',
+          'capital|||q1',
+          'capital|||q2',
+          'capital|||q3',
         ],
         {}
       );

@@ -99,8 +99,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       (async () => {
         let syncedCount = 0;
         for (const session of pending) {
+          if (!session.sessionId) continue; // legacy: discard, not re-enqueue
           try {
-            await api.finishGame({ answers: session.answers, category: session.category });
+            await api.finishGame({ sessionId: session.sessionId, answers: session.answers, category: session.category });
             syncedCount += 1;
           } catch {
             // Si el reenvío falla de nuevo, la re-encolamos para el próximo online.
@@ -262,6 +263,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           comboBonus: result.comboBonus,
           accuracyBonus: result.accuracyBonus,
           distance: result.distance,
+          correctLocation: (result as { correctLocation?: { lat: number; lng: number } }).correctLocation,
         };
       }
 

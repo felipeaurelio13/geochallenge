@@ -229,23 +229,7 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
     const session = await loadCachedSession(gameId);
 
     if (!session) {
-      // Redis caído o sesión expirada. Degradamos: validamos las respuestas
-      // contra DB y aplicamos multiplicador 1.0 a todo (no inflar score sin
-      // poder verificar qué tier le tocó).
-      const fallbackResult = await scoreWithoutSession(answers);
-      const persisted = await persistGameResult(
-        req.user!.userId,
-        fallbackResult,
-        { flagMaster: true, degraded: true }
-      );
-      // Sin `message` en payload: el frontend traduce desde la clave
-      // `flagMaster.degraded` con el idioma del usuario. Antes mandábamos texto
-      // en español hardcodeado que aparecía dentro de UIs en inglés (QA bug).
-      res.json({
-        ...persisted,
-        rounds: fallbackResult.rounds,
-        degraded: true,
-      });
+      res.status(503).json({ error: 'Servicio no disponible.', code: 'GAME_STATE_UNAVAILABLE' });
       return;
     }
 
@@ -254,69 +238,79 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
       return;
     }
 
-    if (answers.length !== session.rounds.length) {
-      res.status(400).json({
-        error: `Se esperaban ${session.rounds.length} respuestas, llegaron ${answers.length}`,
-      });
-      return;
+    // Consolidar stored answers server-side (no confiar en body del cliente)
+    const rounds: FlagMasterRoundResult[] = [];
+    let totalScore = 0;
+    let correctCount = 0;
+    const redis = getRedis();
+
+    for (const slot of session.rounds) {
+      const answerKey = `flagMaster:answer:${gameId}:${slot.questionId}`;
+      const stored = await redis.get(answerKey);
+      if (stored) {
+        const a = JSON.parse(stored) as { isCorrect: boolean; points: number; correctAnswer: string; multiplier: number; basePoints?: number; timeBonus?: number; modifierBonus?: number };
+        rounds.push({
+          questionId: slot.questionId,
+          isCorrect: a.isCorrect,
+          correctAnswer: a.correctAnswer,
+          userAnswer: '',
+          modifier: slot.modifier,
+          multiplier: slot.multiplier,
+          basePoints: a.basePoints ?? 0,
+          timeBonus: a.timeBonus ?? 0,
+          modifierBonus: a.modifierBonus ?? 0,
+          points: a.points,
+          tier: slot.tier,
+        });
+        totalScore += a.points;
+        if (a.isCorrect) correctCount++;
+      } else {
+        rounds.push({
+          questionId: slot.questionId, isCorrect: false, correctAnswer: slot.correctAnswer,
+          userAnswer: '', modifier: slot.modifier, multiplier: slot.multiplier,
+          basePoints: 0, timeBonus: 0, modifierBonus: 0, points: 0, tier: slot.tier,
+        });
+      }
     }
-
-    // Validar orden: cada respuesta debe corresponder al questionId de su slot.
-    const orderMismatch = answers.findIndex(
-      (a, idx) => a.questionId !== session.rounds[idx].questionId
-    );
-    if (orderMismatch !== -1) {
-      res.status(400).json({
-        error: `Respuesta ${orderMismatch + 1} no corresponde a la pregunta esperada.`,
-      });
-      return;
-    }
-
-    const rounds: FlagMasterRoundResult[] = answers.map((a, idx) => {
-      const slot = session.rounds[idx];
-      const isCorrect =
-        a.answer.toLowerCase().trim() === slot.correctAnswer.toLowerCase().trim();
-      const { basePoints, timeBonus, modifierBonus, points } = scoreFlagMasterAnswer(
-        isCorrect,
-        a.timeRemaining,
-        slot.multiplier,
-        config.game.basePoints,
-        config.game.maxTimeBonus,
-        config.game.timePerQuestion
-      );
-      return {
-        questionId: a.questionId,
-        isCorrect,
-        correctAnswer: slot.correctAnswer,
-        userAnswer: a.answer,
-        modifier: slot.modifier,
-        multiplier: slot.multiplier,
-        basePoints,
-        timeBonus,
-        modifierBonus,
-        points,
-        tier: slot.tier,
-      };
-    });
-
-    const totalScore = rounds.reduce((s, r) => s + r.points, 0);
-    const correctCount = rounds.filter((r) => r.isCorrect).length;
-
-    const persisted = await persistGameResult(
-      req.user!.userId,
-      { totalScore, correctCount, totalQuestions: rounds.length, rounds },
-      { flagMaster: true }
-    );
 
     await deleteCachedSession(gameId);
 
+    const { prisma: db } = await import('../config/database.js');
+    const result = await db.gameResult.upsert({
+      where: { runId: gameId },
+      create: {
+        userId: req.user!.userId,
+        score: totalScore,
+        correctCount,
+        totalQuestions: session.rounds.length,
+        category: 'FLAG',
+        gameMode: 'SINGLE',
+        variant: 'FLAG_MASTER',
+        runId: gameId,
+        details: { flagMaster: true, rounds: rounds as unknown as Prisma.InputJsonValue },
+      },
+      update: {},
+    });
+
+    await db.user.update({ where: { id: req.user!.userId }, data: { gamesPlayed: { increment: 1 } } });
+
+    const newAchievements = await evaluateAchievementsAfterGame({
+      userId: req.user!.userId, correctCount, totalQuestions: session.rounds.length, score: totalScore,
+    }).catch(() => []);
+
     res.json({
-      ...persisted,
+      gameId: result.id,
+      totalScore,
+      correctCount,
+      totalQuestions: session.rounds.length,
+      accuracy: Math.round((correctCount / session.rounds.length) * 100),
+      isHighScore: false,
+      newAchievements,
       rounds,
     });
   } catch (error) {
     console.error('Error al finalizar Flag Master:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    res.status(503).json({ error: 'Servicio no disponible.', code: 'GAME_STATE_UNAVAILABLE' });
   }
 });
 
