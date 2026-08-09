@@ -181,7 +181,7 @@ export function FlashGamePage() {
         return;
       }
       const isCorrect =
-        option.trim().toLowerCase() === currentQuestion.correctAnswer.trim().toLowerCase();
+        option.trim().toLowerCase() === (currentQuestion.correctAnswer ?? '').trim().toLowerCase();
 
       const prevCombo = combo;
       const effectiveCombo = isCorrect ? prevCombo + 1 : 0;
@@ -227,7 +227,7 @@ export function FlashGamePage() {
   const handleUseIntel5050 = useCallback(() => {
     if (!currentQuestion || mechanicsAvailable.intel5050 <= 0 || !canUseMechanics || feedback) return;
     const wrongOption = currentQuestion.options.find(
-      (option) => option.trim().toLowerCase() !== currentQuestion.correctAnswer.trim().toLowerCase()
+      (option) => option.trim().toLowerCase() !== (currentQuestion.correctAnswer ?? '').trim().toLowerCase()
     );
     if (!wrongOption) return;
 

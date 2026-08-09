@@ -17,7 +17,7 @@ export function MonumentAttribution({ question }: MonumentAttributionProps) {
   const variantPayload = parseMonumentQuestionData(question.questionData);
   const monument = variantPayload
     ? getMonumentBySlug(variantPayload.slug)
-    : getMonumentByEnName(question.correctAnswer);
+    : getMonumentByEnName(question.correctAnswer ?? '');
 
   if (!monument) return null;
   const { author, license, sourceUrl } = monument.attribution;

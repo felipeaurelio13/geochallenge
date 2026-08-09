@@ -129,12 +129,33 @@ export interface Question {
   category: Category;
   questionText: string;
   options: string[];
-  correctAnswer: string;
+  /** @deprecated Never available client-side. Use AnswerResult.correctAnswer after server response. */
+  correctAnswer?: string;
   difficulty?: Difficulty;
   questionData?: QuestionData;
   imageUrl?: string;
+  /** @deprecated Never available client-side. Use AnswerResult for MAP feedback. */
   latitude?: number;
+  /** @deprecated Never available client-side. Use AnswerResult for MAP feedback. */
   longitude?: number;
+  continent?: string;
+  subregion?: string;
+  isInsular?: boolean;
+  isLandlocked?: boolean;
+  populationTier?: string;
+  areaTier?: string;
+  geoChallenge?: GeoChallengeRound;
+}
+
+/** PublicQuestion: what the client actually receives. Never includes solution data. */
+export interface PublicQuestion {
+  id: string;
+  category: Category;
+  questionText: string;
+  options: string[];
+  difficulty?: Difficulty;
+  questionData?: QuestionData;
+  imageUrl?: string;
   continent?: string;
   subregion?: string;
   isInsular?: boolean;

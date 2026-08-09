@@ -194,24 +194,13 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
           const parsed = JSON.parse(stored) as { isCorrect: boolean };
           details.push({ roundId: round.id, kind: round.kind, region: round.region, isCorrect: parsed.isCorrect });
         } else {
-          // Ronda nunca respondida: considerarla incorrecta.
           details.push({ roundId: round.id, kind: round.kind, region: round.region, isCorrect: false });
         }
       }
     } catch {
-      redisAvailable = false;
-    }
-
-    // Fallback sin Redis: confiar en las respuestas del cliente (modo legacy).
-    if (!redisAvailable) {
-      const submittedByRound = new Map(validation.data.answers.map((a: { roundId: string; selectedOptionIds: string[] }) => [a.roundId, a]));
-      for (const round of session.rounds) {
-        const answer = submittedByRound.get(round.id);
-        const isCorrect = answer
-          ? isGeoChallengeAnswerCorrect(round.correctOptionIds, answer.selectedOptionIds)
-          : false;
-        details.push({ roundId: round.id, kind: round.kind, region: round.region, isCorrect });
-      }
+      // Redis unavailable → no trusted state. Reject, do not fall back to client input.
+      res.status(503).json({ error: 'Servicio no disponible. Intenta de nuevo.', code: 'GAME_STATE_UNAVAILABLE' });
+      return;
     }
     const correctCount = details.filter((detail) => detail.isCorrect).length;
     const totalScore = correctCount * 100;
@@ -229,6 +218,7 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
             category: 'MIXED',
             gameMode: GameMode.SINGLE,
             variant: GameVariant.GEO_CHALLENGE,
+            runId: session.gameId, // idempotencia: un GameResult por partida
             details: { dataVersion: session.dataVersion, rounds: details } as unknown as Prisma.InputJsonValue,
           },
         });

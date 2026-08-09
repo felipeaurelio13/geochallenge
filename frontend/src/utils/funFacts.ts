@@ -54,7 +54,7 @@ const POP_TIER_EN: Record<string, string> = {
 
 function getCountryName(q: Question): string | null {
   if (q.category === 'FLAG' || q.category === 'SILHOUETTE') {
-    return q.correctAnswer;
+    return q.correctAnswer ?? null;
   }
   if (q.category === 'CAPITAL' || q.category === 'MAP') {
     if (typeof q.questionData === 'string') return q.questionData;

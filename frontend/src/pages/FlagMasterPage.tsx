@@ -203,7 +203,7 @@ export function FlagMasterPage() {
       if (!currentRound) return;
       const isCorrect =
         answer.trim().length > 0 &&
-        answer.trim().toLowerCase() === currentRound.correctAnswer.trim().toLowerCase();
+        answer.trim().toLowerCase() === (currentRound.correctAnswer ?? '').trim().toLowerCase();
       const recorded: RecordedAnswer = {
         questionId: currentRound.id,
         answer,

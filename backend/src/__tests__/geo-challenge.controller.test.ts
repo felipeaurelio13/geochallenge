@@ -4,10 +4,16 @@ import { describe, expect, it, vi } from 'vitest';
 
 import geoChallengeRouter from '../controllers/geoChallenge.controller.js';
 
+const redisStore = new Map<string, string>();
+
 vi.mock('../config/redis.js', () => ({
-  getRedis: vi.fn(() => {
-    throw new Error('Redis not available in test');
-  }),
+  getRedis: vi.fn(() => ({
+    get: vi.fn((key: string) => Promise.resolve(redisStore.get(key) ?? null)),
+    set: vi.fn((key: string, value: string, ...args: string[]) => {
+      redisStore.set(key, value);
+      return Promise.resolve('OK');
+    }),
+  })),
 }));
 
 vi.mock('../config/database.js', () => {
@@ -94,6 +100,7 @@ describe('GeoRetos HTTP contract', () => {
       };
 
       expect(finishResponse.status).toBe(200);
+      // Score depends on stored answers (first response to each round), not finish body.
       expect(result).toMatchObject({
         gameId: game.gameId,
         totalRounds: 5,

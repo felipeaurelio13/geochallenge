@@ -667,8 +667,17 @@ export function GamePage() {
             onLocationSelect={handleMapSelect}
             selectedLocation={mapLocation}
             correctLocation={
-              showResult && currentQuestion.latitude && currentQuestion.longitude
-                ? { lat: currentQuestion.latitude, lng: currentQuestion.longitude }
+              showResult && isMapQuestion && results.length > 0
+                ? (() => {
+                    const last = results[results.length - 1];
+                    if (last.distance !== undefined) {
+                      const parts = last.correctAnswer.split(',');
+                      if (parts.length === 2) {
+                        return { lat: parseFloat(parts[0]), lng: parseFloat(parts[1]) };
+                      }
+                    }
+                    return null;
+                  })()
                 : null
             }
             showResult={showResult}
