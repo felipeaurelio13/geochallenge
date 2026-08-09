@@ -159,13 +159,17 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
       setState({
         status: 'playing',
+        sessionId: response.sessionId,
         questions: response.questions,
         currentIndex: 0,
         answers: [],
         results: [],
         score: 0,
         timeRemaining: getQuestionDuration(response.questions?.[0]?.category, response.gameConfig.timePerQuestion),
-        config: response.gameConfig,
+        config: {
+          ...response.gameConfig,
+          sessionId: response.sessionId,
+        },
         isOffline: false,
       });
       setStreakAlive(true);
@@ -226,20 +230,27 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       let answerResult: AnswerResult;
 
       if (isOffline || !isOnline()) {
-        // Local-only validation (cannot contact server)
-        const isCorrect =
-          answer.trim().toLowerCase() === currentQuestion.correctAnswer.trim().toLowerCase();
+        // Offline: ya no podemos leer correctAnswer del frontend (Plan 2).
+        // Devolvemos un resultado placeholder; la partida se encola para sync.
         answerResult = {
           questionId: currentQuestion.id,
-          isCorrect,
-          correctAnswer: currentQuestion.correctAnswer,
+          isCorrect: false,
+          correctAnswer: '',
           userAnswer: answer,
-          points: isCorrect ? 100 : 0,
-          basePoints: isCorrect ? 100 : 0,
+          points: 0,
+          basePoints: 0,
           timeBonus: 0,
         };
       } else {
-        const result = await api.submitAnswer(newAnswer);
+        const sessionId = stateRef.current.sessionId ?? stateRef.current.config?.sessionId;
+        const result = await api.submitAnswer({
+          sessionId,
+          questionId: currentQuestion.id,
+          answer,
+          timeRemaining: reportedTimeRemaining,
+          mechanicUsage,
+          coordinates,
+        });
         answerResult = {
           questionId: currentQuestion.id,
           isCorrect: result.isCorrect,

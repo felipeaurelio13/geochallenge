@@ -1,8 +1,10 @@
 import { prisma } from '../config/database.js';
 import { config } from '../config/env.js';
+import { getRedis } from '../config/redis.js';
 import { Category, Difficulty, GameMode, GameVariant, Prisma } from '@prisma/client';
 import { haversineDistance } from '../utils/haversine.js';
 import { calculateScore, calculateMapScore, calculateTimeBonus, shuffleArray, selectRandom } from '../utils/scoring.js';
+import { randomUUID } from 'crypto';
 
 export interface GameQuestion {
   id: string;
@@ -21,6 +23,137 @@ export interface GameQuestion {
   isLandlocked?: boolean;
   populationTier?: string;
   areaTier?: string;
+}
+
+/** PublicGameQuestion: identical to GameQuestion but without the correct answer. */
+export type PublicGameQuestion = Omit<GameQuestion, 'correctAnswer'>;
+
+export function toPublicQuestion(question: GameQuestion): PublicGameQuestion {
+  const { correctAnswer: _correctAnswer, ...publicQuestion } = question;
+  return publicQuestion;
+}
+
+// ─── Redis Game Session ───────────────────────────────────────────────────────
+
+const GAME_SESSION_TTL = 60 * 60 * 2; // 2 hours, generous margin over any game
+
+export interface RedisGameSession {
+  sessionId: string;
+  userId: string | null;
+  gameMode: GameMode;
+  variant: GameVariant;
+  category?: Category;
+  questionIds: string[];
+  correctAnswers: Record<string, string>;   // questionId → correctAnswer
+  answeredQuestionIds: string[];
+  mechanicsUsage: Record<string, number>;   // key → times used
+  createdAt: number;
+  expiresAt: number;
+}
+
+function gameSessionKey(sessionId: string): string {
+  return `game:session:${sessionId}`;
+}
+
+export async function createGameSession(data: {
+  userId: string | null;
+  gameMode: GameMode;
+  variant: GameVariant;
+  category?: Category;
+  questions: GameQuestion[];
+}): Promise<string> {
+  const sessionId = randomUUID();
+  const now = Date.now();
+  const correctAnswers: Record<string, string> = {};
+  for (const q of data.questions) {
+    correctAnswers[q.id] = q.correctAnswer;
+  }
+
+  const session: RedisGameSession = {
+    sessionId,
+    userId: data.userId,
+    gameMode: data.gameMode,
+    variant: data.variant,
+    category: data.category,
+    questionIds: data.questions.map((q) => q.id),
+    correctAnswers,
+    answeredQuestionIds: [],
+    mechanicsUsage: {},
+    createdAt: now,
+    expiresAt: now + GAME_SESSION_TTL * 1000,
+  };
+
+  try {
+    const redis = getRedis();
+    await redis.set(gameSessionKey(sessionId), JSON.stringify(session), 'EX', GAME_SESSION_TTL);
+  } catch (err) {
+    console.error('[game-session] Failed to create session in Redis:', err);
+  }
+
+  return sessionId;
+}
+
+export async function getGameSession(sessionId: string): Promise<RedisGameSession | null> {
+  try {
+    const redis = getRedis();
+    const raw = await redis.get(gameSessionKey(sessionId));
+    if (!raw) return null;
+    const session = JSON.parse(raw) as RedisGameSession;
+    if (session.expiresAt <= Date.now()) return null;
+    return session;
+  } catch (err) {
+    console.error('[game-session] Failed to read session from Redis:', err);
+    return null;
+  }
+}
+
+export async function markQuestionAnswered(
+  sessionId: string,
+  questionId: string,
+  result: Record<string, unknown>
+): Promise<RedisGameSession | null> {
+  try {
+    const redis = getRedis();
+    const raw = await redis.get(gameSessionKey(sessionId));
+    if (!raw) return null;
+    const session = JSON.parse(raw) as RedisGameSession;
+    if (session.expiresAt <= Date.now()) return null;
+    if (!session.questionIds.includes(questionId)) return null;
+    if (!session.answeredQuestionIds.includes(questionId)) {
+      session.answeredQuestionIds.push(questionId);
+    }
+    await redis.set(gameSessionKey(sessionId), JSON.stringify(session), 'EX', GAME_SESSION_TTL);
+    return session;
+  } catch (err) {
+    console.error('[game-session] Failed to mark answer in session:', err);
+    return null;
+  }
+}
+
+export async function recordMechanicUsage(
+  sessionId: string,
+  mechanicKey: string,
+): Promise<{ allowed: boolean; remaining: number } | null> {
+  try {
+    const redis = getRedis();
+    const raw = await redis.get(gameSessionKey(sessionId));
+    if (!raw) return null;
+    const session = JSON.parse(raw) as RedisGameSession;
+    if (session.expiresAt <= Date.now()) return null;
+
+    const max = config.game.mechanics.limits[mechanicKey as keyof typeof config.game.mechanics.limits] ?? 1;
+    const used = session.mechanicsUsage[mechanicKey] ?? 0;
+    if (used >= max) {
+      return { allowed: false, remaining: 0 };
+    }
+
+    session.mechanicsUsage[mechanicKey] = used + 1;
+    await redis.set(gameSessionKey(sessionId), JSON.stringify(session), 'EX', GAME_SESSION_TTL);
+    return { allowed: true, remaining: max - (used + 1) };
+  } catch (err) {
+    console.error('[game-session] Failed to record mechanic usage:', err);
+    return null;
+  }
 }
 
 export interface QuestionFilters {

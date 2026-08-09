@@ -269,11 +269,13 @@ export interface AnswerResult {
 }
 
 export interface GameConfig {
+  sessionId?: string;
   questionsCount: number;
   timePerQuestion: number;
   category: Category;
   gameType: GameType;
   mechanics?: MechanicsConfig;
+  durationSeconds?: number;
 }
 
 export interface MechanicsConfig {
@@ -289,6 +291,7 @@ export interface MechanicsState {
 
 export interface GameState {
   status: 'idle' | 'loading' | 'playing' | 'reviewing' | 'finished';
+  sessionId?: string;
   questions: Question[];
   currentIndex: number;
   answers: Answer[];

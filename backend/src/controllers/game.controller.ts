@@ -19,8 +19,14 @@ import {
   getDuelHeadToHead,
   getCategoryStats,
   generateQuestionText,
+  toPublicQuestion,
+  createGameSession,
+  getGameSession,
+  markQuestionAnswered,
+  recordMechanicUsage,
   AnswerResult,
   QuestionFilters,
+  type GameQuestion,
 } from '../services/game.service.js';
 import { shuffleArray } from '../utils/scoring.js';
 import { getRedis } from '../config/redis.js';
@@ -92,6 +98,7 @@ export const startGameSchema = z.object({
 });
 
 const answerSchema = z.object({
+  sessionId: z.string().optional(),
   questionId: z.string(),
   answer: z.string(),
   timeRemaining: z.number().min(0).max(config.game.timePerQuestion),
@@ -174,8 +181,24 @@ router.get('/start', optionalAuth, async (req: AuthRequest, res: Response) => {
       return;
     }
 
+    // Mapear gameType a variant para la sesión
+    const variant: GameVariant =
+      gameType === 'streak' ? GameVariant.STREAK
+        : gameType === 'flash' ? GameVariant.FLASH
+        : GameVariant.CLASSIC;
+
+    // Crear sesión en Redis: guarda correctAnswers, nunca se envían al cliente
+    const sessionId = await createGameSession({
+      userId: req.user?.userId ?? null,
+      gameMode: GameMode.SINGLE,
+      variant,
+      category,
+      questions,
+    });
+
     res.json({
       message: 'Partida iniciada',
+      sessionId,
       gameConfig: {
         questionsCount: questions.length,
         timePerQuestion: config.game.timePerQuestion,
@@ -183,7 +206,7 @@ router.get('/start', optionalAuth, async (req: AuthRequest, res: Response) => {
         gameType,
         mechanics: getMechanicsConfigForMode(gameType),
       },
-      questions,
+      questions: questions.map(toPublicQuestion),
     });
   } catch (error) {
     respondWithError(res, error);
@@ -254,8 +277,17 @@ router.get('/flash/start', optionalAuth, async (req: AuthRequest, res: Response)
       return;
     }
 
+    const sessionId = await createGameSession({
+      userId: req.user?.userId ?? null,
+      gameMode: GameMode.SINGLE,
+      variant: GameVariant.FLASH,
+      category: flashCategory || Category.MIXED,
+      questions,
+    });
+
     res.json({
       message: 'Flash iniciado',
+      sessionId,
       gameConfig: {
         questionsCount: questions.length,
         timePerQuestion: config.game.timePerQuestion,
@@ -264,7 +296,7 @@ router.get('/flash/start', optionalAuth, async (req: AuthRequest, res: Response)
         durationSeconds: getFlashDurationSeconds(),
         mechanics: getMechanicsConfigForMode('flash'),
       },
-      questions,
+      questions: questions.map(toPublicQuestion),
     });
   } catch (error) {
     respondWithError(res, error);
@@ -273,28 +305,43 @@ router.get('/flash/start', optionalAuth, async (req: AuthRequest, res: Response)
 
 /**
  * POST /api/game/answer
- * Validar una respuesta individual
+ * Server-authoritative: valida la respuesta contra la sesión, nunca expone
+ * correctAnswer antes de que el cliente haya respondido.
  */
 router.post('/answer', optionalAuth, async (req: AuthRequest, res: Response) => {
   try {
     const validation = answerSchema.safeParse(req.body);
 
     if (!validation.success) {
-      console.error('Answer validation failed:', {
-        body: req.body,
-        errors: validation.error.errors,
-      });
       res.status(400).json({
         error: 'Datos inválidos',
         code: 'VALIDATION_FAILED',
         params: { fields: mapZodIssuesToFields(validation.error.errors) },
         details: validation.error.errors,
-        debug: process.env.NODE_ENV !== 'production' ? { timeRemaining: req.body.timeRemaining } : undefined,
       });
       return;
     }
 
-    const { questionId, answer, timeRemaining, coordinates, gameType, combo } = validation.data;
+    const { questionId, answer, timeRemaining, coordinates, gameType, combo, sessionId } = validation.data;
+
+    // Validar contra la sesión si se provee sessionId
+    if (sessionId) {
+      const session = await getGameSession(sessionId);
+      if (!session) {
+        res.status(410).json({ error: 'La sesión expiró. Inicia una nueva partida.', code: 'GAME_SESSION_EXPIRED' });
+        return;
+      }
+      if (!session.questionIds.includes(questionId)) {
+        res.status(400).json({ error: 'La pregunta no pertenece a esta partida.', code: 'GAME_INVALID_QUESTION' });
+        return;
+      }
+      if (session.answeredQuestionIds.includes(questionId)) {
+        // Idempotencia: devolver el mismo resultado que antes (volvemos a calcular)
+        // o simplemente permitimos recalcular — el server decide.
+      }
+
+      await markQuestionAnswered(sessionId, questionId, { answer });
+    }
 
     const result = await validateAnswerByGameType(
       questionId,
@@ -305,7 +352,83 @@ router.post('/answer', optionalAuth, async (req: AuthRequest, res: Response) => 
       combo !== undefined ? { combo } : undefined
     );
 
-    res.json(result);
+    res.json({ ...result, sessionId });
+  } catch (error) {
+    respondWithError(res, error);
+  }
+});
+
+/**
+ * POST /api/game/mechanic
+ * Server-authoritative: ejecuta mecánicas (50/50, focusTime) server-side.
+ * Nunca expone la respuesta correcta.
+ */
+router.post('/mechanic', optionalAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const schema = z.object({
+      sessionId: z.string().min(1),
+      questionId: z.string().min(1),
+      mechanic: z.enum(['intel5050']),
+    });
+    const validation = schema.safeParse(req.body);
+
+    if (!validation.success) {
+      res.status(400).json({ error: 'Datos inválidos', code: 'VALIDATION_FAILED' });
+      return;
+    }
+
+    const { sessionId, questionId, mechanic } = validation.data;
+
+    const session = await getGameSession(sessionId);
+    if (!session) {
+      res.status(410).json({ error: 'La sesión expiró. Inicia una nueva partida.', code: 'GAME_SESSION_EXPIRED' });
+      return;
+    }
+    if (!session.questionIds.includes(questionId)) {
+      res.status(400).json({ error: 'La pregunta no pertenece a esta partida.', code: 'GAME_INVALID_QUESTION' });
+      return;
+    }
+
+    const usage = await recordMechanicUsage(sessionId, mechanic);
+    if (!usage) {
+      res.status(410).json({ error: 'Sesión inválida.', code: 'GAME_SESSION_EXPIRED' });
+      return;
+    }
+    if (!usage.allowed) {
+      res.status(400).json({ error: 'Mecánica agotada.', code: 'MECHANIC_UNAVAILABLE' });
+      return;
+    }
+
+    // Cargar la pregunta y decidir qué opciones ocultar (50/50)
+    const correctAnswer = session.correctAnswers[questionId];
+    if (!correctAnswer) {
+      res.status(400).json({ error: 'Pregunta no encontrada en la sesión.', code: 'GAME_INVALID_QUESTION' });
+      return;
+    }
+
+    // Buscar los índices de las opciones incorrectas (sin exponer correctAnswer)
+    const question = await prisma.question.findUnique({
+      where: { id: questionId },
+      select: { options: true },
+    });
+    if (!question) {
+      res.status(400).json({ error: 'Pregunta no encontrada.', code: 'GAME_INVALID_QUESTION' });
+      return;
+    }
+
+    const incorrectIndexes = question.options
+      .map((opt: string, idx: number) => ({ opt, idx }))
+      .filter(({ opt }: { opt: string }) => opt.toLowerCase().trim() !== correctAnswer.toLowerCase().trim())
+      .map(({ idx }: { idx: number }) => idx);
+
+    const shuffled = [...incorrectIndexes].sort(() => Math.random() - 0.5);
+    const hiddenOptionIndexes = shuffled.slice(0, Math.min(2, shuffled.length));
+
+    res.json({
+      mechanic,
+      hiddenOptionIndexes,
+      remaining: usage.remaining,
+    });
   } catch (error) {
     respondWithError(res, error);
   }

@@ -26,6 +26,18 @@ vi.mock('../services/game.service.js', () => ({
   validateAnswerByGameType: vi.fn(),
   saveGameResult: vi.fn(),
   getUserGameHistory: vi.fn(),
+  toPublicQuestion: vi.fn((q: Record<string, unknown>) => {
+    const { correctAnswer: _, ...rest } = q;
+    return rest;
+  }),
+  createGameSession: vi.fn().mockResolvedValue('test-session-id'),
+  getGameSession: vi.fn(),
+  markQuestionAnswered: vi.fn(),
+  recordMechanicUsage: vi.fn(),
+}));
+
+vi.mock('../config/redis.js', () => ({
+  getRedis: vi.fn(),
 }));
 
 vi.mock('../services/leaderboard.service.js', () => ({

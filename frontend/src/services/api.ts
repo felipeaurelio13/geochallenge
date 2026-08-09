@@ -245,6 +245,7 @@ class ApiService {
     acceptShortGame?: boolean
   ) {
     const response = await this.client.get<{
+      sessionId: string;
       gameConfig: GameConfig;
       questions: Question[];
     }>('/game/start', {
@@ -255,6 +256,7 @@ class ApiService {
 
   async startFlashGame(category?: string, filters?: GameFilters) {
     const response = await this.client.get<{
+      sessionId: string;
       gameConfig: GameConfig & { durationSeconds?: number };
       questions: Question[];
     }>('/game/flash/start', { params: { category, ...filtersToParams(filters) } });
@@ -295,6 +297,7 @@ class ApiService {
   }
 
   async submitFlashAnswer(data: {
+    sessionId?: string;
     questionId: string;
     answer: string;
     combo: number;
@@ -315,6 +318,7 @@ class ApiService {
   }
 
   async submitAnswer(data: {
+    sessionId?: string;
     questionId: string;
     answer: string;
     timeRemaining: number;
@@ -331,6 +335,19 @@ class ApiService {
       accuracyBonus?: number;
       distance?: number;
     }>('/game/answer', data);
+    return response.data;
+  }
+
+  async useMechanic(data: {
+    sessionId: string;
+    questionId: string;
+    mechanic: 'intel5050';
+  }) {
+    const response = await this.client.post<{
+      mechanic: string;
+      hiddenOptionIndexes: number[];
+      remaining: number;
+    }>('/game/mechanic', data);
     return response.data;
   }
 

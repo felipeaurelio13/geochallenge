@@ -104,17 +104,9 @@ export function GamePage() {
   });
   const [previousScore, setPreviousScore] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  // Part 1.3: guarda doble-submit + deshabilita opciones/submit durante el round-trip.
   const [isSubmitting, setIsSubmitting] = useState(false);
-  // Part 4.1: feedback optimista — el veredicto local se muestra al instante;
-  // cuando llega la respuesta del servidor puede confirmar o corregir sin salto brusco.
-  const [optimisticCorrect, setOptimisticCorrect] = useState<boolean | null>(null);
-  const [isAwaitingServerResult, setIsAwaitingServerResult] = useState(false);
-  // Part 4.2: si el reemplazo de una imagen rota también falla, mostramos
-  // Reintentar/Saltar en vez de dejar la pregunta en blanco con el timer corriendo.
   const [imageReplacementFailed, setImageReplacementFailed] = useState(false);
   const [isRetryingImage, setIsRetryingImage] = useState(false);
-  // Part 1.2: chip persistente mientras no hay conexión durante la partida.
   const [isBrowserOffline, setIsBrowserOffline] = useState(!isOnlineNow());
   const prefersReducedMotion = useUiStore((s) => s.prefersReducedMotion);
   const extendedTimeEnabled = useUiStore((s) => s.extendedTimeEnabled);
@@ -277,39 +269,46 @@ export function GamePage() {
     }
   };
 
-  const handleUseIntel5050 = () => {
+  const handleUseIntel5050 = async () => {
     if (!currentQuestion || isMapQuestion || showResult || !mechanicsRuntimeEnabled) return;
     if (!mechanicsAllowed.has('intel5050') || mechanicsAvailable.intel5050 <= 0) return;
 
-    const selectedIndex = selectedAnswer ? currentQuestion.options.indexOf(selectedAnswer) : -1;
-    const incorrectIndexes = currentQuestion.options
-      .map((option, index) => ({ option, index }))
-      .filter(({ option, index }) => option !== currentQuestion.correctAnswer && index !== selectedIndex)
-      .map(({ index }) => index);
+    const sessionId = state.config?.sessionId;
+    if (sessionId) {
+      try {
+        const result = await api.useMechanic({
+          sessionId,
+          questionId: currentQuestion.id,
+          mechanic: 'intel5050',
+        });
+        setDisabledOptionIndexes(result.hiddenOptionIndexes);
+        setMechanicsAvailable((prev) => ({
+          ...prev,
+          intel5050: result.remaining,
+        }));
+        setPendingMechanicUsage({
+          key: 'intel5050',
+          action: 'trigger',
+          questionId: currentQuestion.id,
+          roundIndex: currentIndex,
+          value: result.hiddenOptionIndexes.length,
+        });
+        trackUxEvent('mechanic_used', {
+          mode: gameType,
+          questionId: currentQuestion.id,
+          value: result.hiddenOptionIndexes.length,
+          meta: { key: 'intel5050' },
+        });
+        haptics.tap();
+        return;
+      } catch {
+        // fallback: comportamiento local defectivo (menos seguro, pero permite
+        // que la mecánica funcione aunque Redis esté caído)
+      }
+    }
 
-    if (incorrectIndexes.length === 0) return;
-
-    const randomized = [...incorrectIndexes].sort(() => Math.random() - 0.5);
-    const removedIndexes = randomized.slice(0, Math.min(2, randomized.length));
-    setDisabledOptionIndexes(removedIndexes);
-    setMechanicsAvailable((prev) => ({
-      ...prev,
-      intel5050: Math.max(0, prev.intel5050 - 1),
-    }));
-    setPendingMechanicUsage({
-      key: 'intel5050',
-      action: 'trigger',
-      questionId: currentQuestion.id,
-      roundIndex: currentIndex,
-      value: removedIndexes.length,
-    });
-    trackUxEvent('mechanic_used', {
-      mode: gameType,
-      questionId: currentQuestion.id,
-      value: removedIndexes.length,
-      meta: { key: 'intel5050' },
-    });
-    haptics.tap();
+    // Fallback sin sesión (offline o Redis caído): no sabe la respuesta correcta.
+    // No puede ocultar opciones sin exponer información.
   };
 
   const handleUseFocusTime = () => {
@@ -341,8 +340,6 @@ export function GamePage() {
 
   // Submit answer
   const handleSubmitAnswer = async () => {
-    // Part 1.3: guarda contra doble-submit (doble tap, Enter + click, timeout
-    // disparando junto con un click manual) mientras el round-trip está en vuelo.
     if (!currentQuestion || showResult || isSubmitting) return;
 
     let answer: string;
@@ -355,25 +352,6 @@ export function GamePage() {
     setPreviousScore(score);
     setIsSubmitting(true);
 
-    // Part 4.1: feedback optimista. La validación local (misma comparación
-    // case-insensitive que GameContext usa en el path offline) se muestra
-    // AL INSTANTE — no esperamos el round-trip del servidor para pintar
-    // correcto/incorrecto ni para pausar el timer. Solo aplica a preguntas de
-    // opciones: MAP se resuelve por distancia/haversine en el servidor y no
-    // tiene un veredicto local confiable.
-    if (!isMapQuestion) {
-      const localIsCorrect = answer.trim().toLowerCase() === currentQuestion.correctAnswer.trim().toLowerCase();
-      setOptimisticCorrect(localIsCorrect);
-      setLastAnswerCorrect(localIsCorrect);
-      setIsAwaitingServerResult(true);
-      setShowResult(true);
-      if (localIsCorrect) {
-        haptics.success();
-      } else {
-        haptics.error();
-      }
-    }
-
     try {
       const result = await submitAnswer(answer, mapLocation || undefined, pendingMechanicUsage);
       setPendingMechanicUsage(undefined);
@@ -383,24 +361,12 @@ export function GamePage() {
         value: result.points,
       });
 
-      if (isMapQuestion) {
-        // MAP nunca tuvo veredicto optimista — el haptic corre acá, en el único momento real.
-        if (result.isCorrect) {
-          haptics.success();
-        } else {
-          haptics.error();
-        }
-      } else if (result.isCorrect !== optimisticCorrect) {
-        // Caso raro: el servidor discrepa del check local (edge case de datos).
-        // El servidor gana, sin flash — solo actualizamos el veredicto final.
-        if (result.isCorrect) {
-          haptics.success();
-        } else {
-          haptics.error();
-        }
+      if (result.isCorrect) {
+        haptics.success();
+      } else {
+        haptics.error();
       }
 
-      setIsAwaitingServerResult(false);
       setIsSubmitting(false);
 
       if (shouldUseStreakFlow && !result.isCorrect) {
@@ -421,10 +387,7 @@ export function GamePage() {
       setFunFact(generateFunFact(currentQuestion, i18n.language === 'en' ? 'en' : 'es'));
     } catch (err: any) {
       console.error('Error submitting answer:', err);
-      setIsAwaitingServerResult(false);
       setIsSubmitting(false);
-      setOptimisticCorrect(null);
-      setShowResult(false);
       setError(err.message || t('game.error'));
     }
   };
@@ -482,8 +445,6 @@ export function GamePage() {
       setDisabledOptionIndexes([]);
       setPendingMechanicUsage(undefined);
       setIsSubmitting(false);
-      setOptimisticCorrect(null);
-      setIsAwaitingServerResult(false);
       setImageReplacementFailed(false);
     }
   };
@@ -622,12 +583,12 @@ export function GamePage() {
                 showAnimation={showResult}
                 lastResult={results[results.length - 1] ?? null}
               />
-              {isAwaitingServerResult && (
+              {isSubmitting && (
                 <p
                   className={`mt-0.5 text-xs text-[var(--color-text-muted)] ${prefersReducedMotion ? '' : 'animate-pulse'}`}
                   aria-live="polite"
                 >
-                  +…
+                  {t('game.validating')}
                 </p>
               )}
               {hasActiveFilters(gameFilters) && (
