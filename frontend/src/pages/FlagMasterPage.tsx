@@ -26,17 +26,17 @@ type PageStatus = 'loading' | 'playing' | 'finished' | 'error';
 // se siente más natural sin romper el ritmo del modo difícil.
 const ROUND_RESULT_DELAY_MS = 1800;
 const TIME_PER_QUESTION_FALLBACK = 10;
-// Puntaje cliente-side por ronda correcta antes de multiplicador. Coincide con
-// config.game.basePoints + (~time bonus medio) → así el chip "≈ N" se acerca al
-// score real que devuelve el server.
-const CLIENT_SCORE_BASE = 125;
 
 interface RecordedAnswer {
   questionId: string;
   answer: string;
   timeRemaining: number;
-  /** Calculado en cliente para feedback inmediato; el servidor recalcula al finalizar. */
-  isCorrectClientSide: boolean;
+  /** Server-authoritative: true/false from /flag-master/answer */
+  isCorrect: boolean;
+  /** Server-authoritative: correct answer from /flag-master/answer */
+  correctAnswer: string;
+  /** Server-authoritative: points from /flag-master/answer */
+  points: number;
   /** Multiplicador del tier de esta ronda, para el chip de score acumulado. */
   multiplier: number;
 }
@@ -101,6 +101,7 @@ export function FlagMasterPage() {
   const [finishResult, setFinishResult] = useState<FlagMasterFinishResponse | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [lastCorrectAnswer, setLastCorrectAnswer] = useState('');
 
   const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Snapshot estable: las funciones de avance leen estos refs para no depender
@@ -182,9 +183,10 @@ export function FlagMasterPage() {
     [t]
   );
 
-  const scheduleAdvance = useCallback(
-    (snapshotAnswers: RecordedAnswer[]) => {
+    const scheduleAdvance = useCallback(
+    (snapshotAnswers: RecordedAnswer[], _isCorrect: boolean, correctAnswer: string, _points: number) => {
       if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+      setLastCorrectAnswer(correctAnswer);
       advanceTimerRef.current = setTimeout(() => {
         if (stateRef.current.isLastRound) {
           void submitFinish(snapshotAnswers);
@@ -192,6 +194,7 @@ export function FlagMasterPage() {
           setRoundIndex((idx) => idx + 1);
           setSelectedAnswer(null);
           setShowResult(false);
+          setLastCorrectAnswer('');
         }
       }, ROUND_RESULT_DELAY_MS);
     },
@@ -199,27 +202,22 @@ export function FlagMasterPage() {
   );
 
   const recordAndAdvance = useCallback(
-    (answer: string) => {
-      if (!currentRound) return;
-      const isCorrect =
-        answer.trim().length > 0 &&
-        answer.trim().toLowerCase() === (currentRound.correctAnswer ?? '').trim().toLowerCase();
-      const recorded: RecordedAnswer = {
-        questionId: currentRound.id,
-        answer,
-        timeRemaining: Math.max(0, Math.round(timeRemaining * 10) / 10),
-        isCorrectClientSide: isCorrect,
-        multiplier: currentRound.multiplier,
-      };
-      const nextAnswers = (() => {
-        const next = [...answers];
-        next[roundIndex] = recorded;
-        return next;
-      })();
-      setAnswers(nextAnswers);
-      scheduleAdvance(nextAnswers);
+    async (answer: string) => {
+      if (!currentRound || !gameId) return;
+      try {
+        const r = await api.flagMasterAnswer({ gameId, questionId: currentRound.id, answer, timeRemaining: Math.max(0, Math.round(timeRemaining * 10) / 10) });
+        const rec: RecordedAnswer = { questionId: r.questionId, answer, isCorrect: r.isCorrect, correctAnswer: r.correctAnswer, points: r.points, multiplier: r.multiplier, timeRemaining: Math.max(0, Math.round(timeRemaining * 10) / 10) };
+        const n = (() => { const nx = [...answers]; nx[roundIndex] = rec; return nx; })();
+        setAnswers(n);
+        scheduleAdvance(n, r.isCorrect, r.correctAnswer, r.points);
+      } catch {
+        const rec: RecordedAnswer = { questionId: currentRound.id, answer, isCorrect: false, correctAnswer: '', points: 0, multiplier: currentRound.multiplier, timeRemaining: Math.max(0, Math.round(timeRemaining * 10) / 10) };
+        const n = (() => { const nx = [...answers]; nx[roundIndex] = rec; return nx; })();
+        setAnswers(n);
+        scheduleAdvance(n, false, '', 0);
+      }
     },
-    [answers, currentRound, roundIndex, scheduleAdvance, timeRemaining]
+    [answers, currentRound, roundIndex, scheduleAdvance, timeRemaining, gameId]
   );
 
   const handleOptionClick = useCallback(
@@ -280,15 +278,10 @@ export function FlagMasterPage() {
   const accent = TIER_ACCENTS[tier] ?? TIER_ACCENTS[1];
   // Estimación client-side aplicando el multiplicador del tier. El server
   // recalcula al finalizar incluyendo timeBonus exacto, así que sigue siendo
-  // una aproximación (de ahí el "≈"), pero ahora cerca del score real (~5%
-  // de margen) en vez de subestimarlo un 60% como antes.
-  const accumulatedScore = answers.reduce(
-    (sum, a) => (a.isCorrectClientSide ? sum + Math.round(CLIENT_SCORE_BASE * a.multiplier) : sum),
-    0
-  );
+  const accumulatedScore = answers.reduce((sum, a) => sum + a.points, 0);
 
   // ProgressBar usa la forma { isCorrect } por slot ya respondido.
-  const progressResults = answers.map((a) => ({ isCorrect: a.isCorrectClientSide }));
+  const progressResults = answers.map((a) => ({ isCorrect: a.isCorrect }));
 
   return (
     <PageTemplate contentClassName="pb-4">
@@ -375,7 +368,7 @@ export function FlagMasterPage() {
               index={idx}
               disabled={showResult}
               selected={selectedAnswer === option}
-              isCorrect={option === currentRound.correctAnswer}
+              isCorrect={option === lastCorrectAnswer}
               showResult={showResult}
               onClick={() => handleOptionClick(option)}
             />
@@ -387,11 +380,11 @@ export function FlagMasterPage() {
           <p className="text-center text-sm text-app-subtle">
             {selectedAnswer === null
               ? t('flagMaster.timeout', 'Tiempo agotado.')
-              : selectedAnswer === currentRound.correctAnswer
+              : selectedAnswer === lastCorrectAnswer
               ? t('flagMaster.correct', '¡Correcto!')
               : t('flagMaster.wrong', 'Incorrecto.')}{' '}
             <span className="text-app-text/80">
-              {t('flagMaster.wasAnswer', 'Era')}: <strong>{currentRound.correctAnswer}</strong>
+              {t('flagMaster.wasAnswer', 'Era')}: <strong>{lastCorrectAnswer}</strong>
             </span>
           </p>
         )}
