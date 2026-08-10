@@ -129,14 +129,11 @@ export interface Question {
   category: Category;
   questionText: string;
   options: string[];
-  /** @deprecated Never available client-side. Use AnswerResult.correctAnswer after server response. */
   correctAnswer?: string;
   difficulty?: Difficulty;
   questionData?: QuestionData;
   imageUrl?: string;
-  /** @deprecated Never available client-side. Use AnswerResult for MAP feedback. */
   latitude?: number;
-  /** @deprecated Never available client-side. Use AnswerResult for MAP feedback. */
   longitude?: number;
   continent?: string;
   subregion?: string;
@@ -145,6 +142,13 @@ export interface Question {
   populationTier?: string;
   areaTier?: string;
   geoChallenge?: GeoChallengeRound;
+}
+
+/** Socket.IO legacy payloads may include private fields */
+export interface SocketPayloadQuestion extends PublicQuestion {
+  correctAnswer?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 /** PublicQuestion: what the client actually receives. Never includes solution data. */
@@ -183,7 +187,7 @@ export interface FlagMasterRound {
   category: 'FLAG';
   questionText: string;
   options: string[];
-  correctAnswer: string;
+  correctAnswer?: string;
   difficulty: Difficulty;
   imageUrl?: string;
   questionData?: string;

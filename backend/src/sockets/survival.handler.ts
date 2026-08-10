@@ -7,6 +7,7 @@ import {
   AnswerResult,
   GameQuestion,
   QuestionFilters,
+  toPublicSocketPayload,
 } from '../services/game.service.js';
 import { prisma } from '../config/database.js';
 import { AppError } from '../utils/appError.js';
@@ -241,7 +242,7 @@ function sendQuestion(io: SocketIOServer, match: ActiveSurvivalMatch): void {
   const timeLimit = TIME_PER_DIFFICULTY[difficulty];
 
   // Strip correctAnswer and MAP coordinates from emitted question
-  const { correctAnswer: _correctAnswer, latitude: _lat, longitude: _lng, ...publicQuestion } = question as unknown as Record<string, unknown>;
+  const publicQuestion = toPublicSocketPayload(question as unknown as Record<string, unknown>);
 
   io.to(match.id).emit('survival:question', {
     round,
@@ -690,10 +691,7 @@ export function setupSurvivalHandlers(io: SocketIOServer, socket: Socket): void 
     socket.to(matchId).emit('survival:player-reconnected', { userId: user.userId });
 
     const currentQ = match.status === 'playing' ? match.questions[match.currentRound - 1] : null;
-    const publicQ = currentQ ? (() => {
-      const { correctAnswer: _c, latitude: _lat, longitude: _lng, ...q } = currentQ as unknown as Record<string, unknown>;
-      return q;
-    })() : null;
+    const publicQ = currentQ ? toPublicSocketPayload(currentQ as unknown as Record<string, unknown>) : null;
     socket.emit('survival:state', {
       matchId,
       status: match.status,

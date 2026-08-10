@@ -33,6 +33,12 @@ export function toPublicQuestion(question: GameQuestion): PublicGameQuestion {
   return publicQuestion;
 }
 
+/** Strips correctAnswer, latitude, longitude from any question-like object for socket emission. */
+export function toPublicSocketPayload<T extends Record<string, unknown>>(obj: T): Omit<T, 'correctAnswer' | 'latitude' | 'longitude'> {
+  const { correctAnswer: _, latitude: __, longitude: ___, ...rest } = obj as Record<string, unknown>;
+  return rest as unknown as Omit<T, 'correctAnswer' | 'latitude' | 'longitude'>;
+}
+
 // ─── Redis Game Session ───────────────────────────────────────────────────────
 
 const GAME_SESSION_TTL = 60 * 60 * 2; // 2 hours, generous margin over any game
@@ -148,7 +154,7 @@ export async function storeAnswerResult(
     if (existing) {
       return { stored: JSON.parse(existing) as AnswerResult, isFirstAnswer: false };
     }
-    return { stored: result, isFirstAnswer: true };
+    throw new Error('GAME_STATE_UNAVAILABLE');
   } catch (err) {
     console.error('[game-session] Atomic answer storage failed:', err);
     throw new Error('GAME_STATE_UNAVAILABLE');

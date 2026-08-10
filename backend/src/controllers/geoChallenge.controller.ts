@@ -128,50 +128,37 @@ router.post('/answer', authenticateJWT, async (req: AuthRequest, res: Response) 
     return;
   }
 
+  let session: GeoChallengeSessionPayload;
   try {
-    const session = verifySession(validation.data.sessionToken, req.user?.userId);
-    const round = session.rounds.find((candidate) => candidate.id === validation.data.roundId);
-    if (!round) {
-      res.status(404).json({ error: 'Ronda no encontrada', code: 'GEO_ROUND_NOT_FOUND' });
-      return;
-    }
-
-    // SET NX atómico: solo la primera respuesta gana. Redis down → 503.
-    const answerKey = geoAnswerKey(session.gameId, round.id);
-    let redis: ReturnType<typeof getRedis>;
-    try {
-      redis = getRedis();
-    } catch {
-      res.status(503).json({ error: 'Servicio no disponible.', code: 'GAME_STATE_UNAVAILABLE' });
-      return;
-    }
-
-    const isCorrect = isGeoChallengeAnswerCorrect(round.correctOptionIds, validation.data.selectedOptionIds);
-    const candidate = {
-      roundId: round.id,
-      isCorrect,
-      correctOptionIds: round.correctOptionIds,
-      explanation: round.explanation,
-      points: isCorrect ? 100 : 0,
-    };
-
-    const nxResult = await redis.set(answerKey, JSON.stringify(candidate), 'EX', GEO_ANSWER_TTL, 'NX');
-    if (nxResult === 'OK') {
-      res.json(candidate);
-      return;
-    }
-
-    // Lost the race: return the stored winner
-    const winner = await redis.get(answerKey);
-    if (winner) {
-      res.json(JSON.parse(winner));
-      return;
-    }
-
-    // Edge case: NX failed but no stored value → fail closed
-    res.status(503).json({ error: 'Servicio no disponible.', code: 'GAME_STATE_UNAVAILABLE' });
+    session = verifySession(validation.data.sessionToken, req.user?.userId);
   } catch {
     res.status(403).json({ error: 'La sesión expiró. Inicia un nuevo GeoReto.', code: 'GEO_SESSION_EXPIRED' });
+    return;
+  }
+
+  const round = session.rounds.find((candidate) => candidate.id === validation.data.roundId);
+  if (!round) {
+    res.status(404).json({ error: 'Ronda no encontrada', code: 'GEO_ROUND_NOT_FOUND' });
+    return;
+  }
+
+  const answerKey = geoAnswerKey(session.gameId, round.id);
+  const isCorrect = isGeoChallengeAnswerCorrect(round.correctOptionIds, validation.data.selectedOptionIds);
+  const candidate = {
+    roundId: round.id, isCorrect,
+    correctOptionIds: round.correctOptionIds, explanation: round.explanation,
+    points: isCorrect ? 100 : 0,
+  };
+
+  try {
+    const redis = getRedis();
+    const nxResult = await redis.set(answerKey, JSON.stringify(candidate), 'EX', GEO_ANSWER_TTL, 'NX');
+    if (nxResult === 'OK') { res.json(candidate); return; }
+    const winner = await redis.get(answerKey);
+    if (winner) { res.json(JSON.parse(winner)); return; }
+    res.status(503).json({ error: 'Servicio no disponible.', code: 'GAME_STATE_UNAVAILABLE' });
+  } catch {
+    res.status(503).json({ error: 'Servicio no disponible.', code: 'GAME_STATE_UNAVAILABLE' });
   }
 });
 

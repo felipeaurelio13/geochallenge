@@ -9,6 +9,7 @@ import {
   GameQuestion,
   getMechanicsConfigForMode,
   QuestionFilters,
+  toPublicSocketPayload,
 } from '../services/game.service.js';
 import { config } from '../config/env.js';
 import { prisma } from '../config/database.js';
@@ -481,10 +482,7 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
 
     // Send current game state (public fields only)
     const currentQ = duel.questions[duel.currentQuestionIndex];
-    const publicQuestion = currentQ ? (() => {
-      const { correctAnswer: _c, ...q } = currentQ as unknown as Record<string, unknown>;
-      return q;
-    })() : null;
+    const publicQuestion = currentQ ? toPublicSocketPayload(currentQ as unknown as Record<string, unknown>) : null;
     socket.emit('duel:state', {
       duelId,
       status: duel.status,
@@ -717,7 +715,7 @@ function sendQuestion(io: SocketIOServer, duel: ActiveDuel) {
     duel.questionStartedAt = new Date();
 
     // Strip correctAnswer from emitted question
-    const { correctAnswer: _correctAnswer, ...publicQuestion } = question as unknown as Record<string, unknown>;
+    const publicQuestion = toPublicSocketPayload(question as unknown as Record<string, unknown>);
 
     io.to(duel.id).emit('duel:question', {
       questionIndex,
