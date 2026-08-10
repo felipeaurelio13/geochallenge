@@ -401,7 +401,7 @@ class ApiService {
       window?: string | null;
       generatedAt?: string;
       scope: LeaderboardScope;
-      metric?: 'sum' | 'best';
+      metric?: 'best' | 'max';
       filters?: {
         mode: import('../types').LeaderboardModeFilter | null;
         category: import('../types').LeaderboardCategoryFilter | null;

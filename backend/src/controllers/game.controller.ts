@@ -1073,14 +1073,12 @@ router.post('/daily/submit', authenticateJWT, async (req: AuthRequest, res: Resp
     let correctCount = 0;
     let totalAnswered = 0;
     for (const qid of questionIds) {
-      try {
-        const stored = await redis.get(`daily:answer:${userId}:${today}:${qid}`);
-        if (stored) {
-          const a = JSON.parse(stored) as { isCorrect: boolean };
-          if (a.isCorrect) correctCount++;
-          totalAnswered++;
-        }
-      } catch { /* Redis failure handled below */ }
+      const stored = await redis.get(`daily:answer:${userId}:${today}:${qid}`);
+      if (stored === null) continue; // key inexistente = unanswered → incorrecta
+      // key exists or error → parse
+      const a = JSON.parse(stored) as { isCorrect: boolean };
+      if (a.isCorrect) correctCount++;
+      totalAnswered++;
     }
     const score = correctCount * DAILY_POINTS_PER_CORRECT;
     const totalQuestions = questionIds.length;

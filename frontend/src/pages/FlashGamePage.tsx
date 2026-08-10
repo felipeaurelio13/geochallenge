@@ -15,7 +15,6 @@ const FALLBACK_DURATION_SECONDS = 60;
 const FEEDBACK_MS = 320;
 const FOCUS_TIME_BONUS_SECONDS = 5;
 const FLASH_COMBO_TIERS = [1, 1, 2, 2, 3, 3, 5, 5, 8, 8, 10];
-const FLASH_BASE_POINTS = 10;
 
 function flashMultiplier(combo: number): number {
   const index = Math.max(0, Math.floor(combo));
@@ -120,15 +119,15 @@ export function FlashGamePage() {
 
   const finish = useCallback(async () => {
     if (statusRef.current === 'finished') return;
-    setStatus('finished');
     if (intervalRef.current) clearInterval(intervalRef.current);
     intervalRef.current = null;
-    // Submit to server if we have a session
     if (flashSessionId) {
       try {
-        await api.finishGame({ sessionId: flashSessionId, answers: [], gameType: 'flash' });
-      } catch { /* best-effort */ }
+        const result = await api.finishGame({ sessionId: flashSessionId, answers: [], gameType: 'flash' });
+        setScore(result.totalScore);
+      } catch { return; } // retryable, don't show as success
     }
+    setStatus('finished');
     haptics.celebrate();
   }, [haptics, flashSessionId]);
 
@@ -196,12 +195,11 @@ export function FlashGamePage() {
           const server = await api.submitAnswer({ sessionId: flashSessionId, questionId: currentQuestion.id, answer: option, timeRemaining: 0 });
           isCorrect = server.isCorrect;
           points = server.points ?? 0;
-        } catch { /* continue */ }
+        } catch { return; } // server failure: don't advance or score
       }
 
       const prevCombo = combo;
       const effectiveCombo = isCorrect ? prevCombo + 1 : 0;
-      if (points === 0 && isCorrect) points = FLASH_BASE_POINTS * flashMultiplier(prevCombo);
 
       setCombo(effectiveCombo);
       setMaxCombo((prev) => Math.max(prev, effectiveCombo));

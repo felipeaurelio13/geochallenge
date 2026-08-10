@@ -6,6 +6,7 @@ import { authenticateJWT, AuthRequest } from '../middleware/auth.js';
 import { config } from '../config/env.js';
 import { prisma } from '../config/database.js';
 import { getRedis } from '../config/redis.js';
+import { respondWithError } from '../utils/respondWithError.js';
 import {
   buildGeoChallengeGame,
   isGeoChallengeAnswerCorrect,
@@ -167,8 +168,8 @@ router.post('/answer', authenticateJWT, async (req: AuthRequest, res: Response) 
       return;
     }
 
-    // Edge case: NX failed but no stored value → return candidate
-    res.json(candidate);
+    // Edge case: NX failed but no stored value → fail closed
+    res.status(503).json({ error: 'Servicio no disponible.', code: 'GAME_STATE_UNAVAILABLE' });
   } catch {
     res.status(403).json({ error: 'La sesión expiró. Inicia un nuevo GeoReto.', code: 'GEO_SESSION_EXPIRED' });
   }
@@ -249,8 +250,8 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
       totalScore,
       details,
     });
-  } catch {
-    res.status(403).json({ error: 'La sesión expiró. Inicia un nuevo GeoReto.', code: 'GEO_SESSION_EXPIRED' });
+  } catch (err) {
+    respondWithError(res, err as Error);
   }
 });
 

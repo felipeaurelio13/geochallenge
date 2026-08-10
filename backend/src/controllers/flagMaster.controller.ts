@@ -192,7 +192,7 @@ router.post('/answer', authenticateJWT, async (req: AuthRequest, res: Response) 
     const winner = await redis.get(answerKey);
     if (winner) { res.json(JSON.parse(winner) as Record<string, unknown>); return; }
 
-    res.json(candidate);
+    res.status(503).json({ error: 'Servicio no disponible. Intenta de nuevo.', code: 'GAME_STATE_UNAVAILABLE' });
   } catch {
     res.status(503).json({ error: 'Servicio no disponible. Intenta de nuevo.', code: 'GAME_STATE_UNAVAILABLE' });
   }
@@ -226,6 +226,20 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
     }
 
     const { gameId, answers } = parsed.data;
+
+    // Retry idempotent: si ya se persistió, devolver resultado existente.
+    const existing = await prisma.gameResult.findUnique({ where: { runId: gameId } });
+    if (existing && existing.userId === req.user!.userId && existing.variant === 'FLAG_MASTER') {
+      const detail = existing.details as { rounds?: FlagMasterRoundResult[] } | null;
+      res.json({
+        gameId: existing.id, totalScore: existing.score, correctCount: existing.correctCount,
+        totalQuestions: existing.totalQuestions,
+        accuracy: Math.round((existing.correctCount / existing.totalQuestions) * 100),
+        isHighScore: false, newAchievements: [], rounds: detail?.rounds ?? [],
+      });
+      return;
+    }
+
     const session = await loadCachedSession(gameId);
 
     if (!session) {
