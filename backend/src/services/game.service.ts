@@ -26,7 +26,7 @@ export interface GameQuestion {
 }
 
 /** PublicGameQuestion: identical to GameQuestion but without the correct answer. */
-export type PublicGameQuestion = Omit<GameQuestion, 'correctAnswer'>;
+export type PublicGameQuestion = Omit<GameQuestion, 'correctAnswer' | 'latitude' | 'longitude'>;
 
 export function toPublicQuestion(question: GameQuestion): PublicGameQuestion {
   const { correctAnswer: _correctAnswer, latitude: _lat, longitude: _lng, ...publicQuestion } = question;

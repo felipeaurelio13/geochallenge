@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Question } from '../types';
-import { getMonumentByEnName, parseMonumentQuestionData, getMonumentBySlug } from '../data/monuments';
+import { parseMonumentQuestionData, getMonumentBySlug } from '../data/monuments';
 
 interface MonumentAttributionProps {
   question: Question;
@@ -17,7 +17,7 @@ export function MonumentAttribution({ question }: MonumentAttributionProps) {
   const variantPayload = parseMonumentQuestionData(question.questionData);
   const monument = variantPayload
     ? getMonumentBySlug(variantPayload.slug)
-    : getMonumentByEnName(question.correctAnswer ?? '');
+    : null;
 
   if (!monument) return null;
   const { author, license, sourceUrl } = monument.attribution;

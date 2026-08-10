@@ -25,6 +25,7 @@ import {
   LocalizedText,
   MechanicUsage,
   Question,
+  SocketPayloadQuestion,
 } from '../types';
 import { GAME_CONSTANTS } from '../constants/game';
 import { useHaptics, useImagePreloader } from '../hooks';
@@ -503,9 +504,10 @@ export function DuelPage() {
     if (!mechanicsEnabled || !mechanicsAllowed.includes('intel5050') || mechanicsAvailable.intel5050 <= 0) return;
 
     const selectedIndex = selectedAnswer ? currentQuestion.options.indexOf(selectedAnswer) : -1;
+    const sq = currentQuestion as unknown as SocketPayloadQuestion;
     const incorrectIndexes = currentQuestion.options
       .map((option, index) => ({ option, index }))
-      .filter(({ option, index }) => option !== currentQuestion.correctAnswer && index !== selectedIndex)
+      .filter(({ option, index }) => option !== sq.correctAnswer && index !== selectedIndex)
       .map(({ index }) => index);
 
     if (incorrectIndexes.length === 0) return;
@@ -1019,9 +1021,11 @@ export function DuelPage() {
             onLocationSelect={(lat, lng) => setMapLocation({ lat, lng })}
             selectedLocation={mapLocation}
             correctLocation={
-              showResult && currentQuestion.latitude && currentQuestion.longitude
-                ? { lat: currentQuestion.latitude, lng: currentQuestion.longitude }
-                : null
+              (() => {
+                const sq = currentQuestion as unknown as SocketPayloadQuestion;
+                if (showResult && sq.latitude && sq.longitude) return { lat: sq.latitude, lng: sq.longitude };
+                return null;
+              })()
             }
             showResult={showResult}
             disabled={showResult || duelState === 'waiting'}
@@ -1052,7 +1056,7 @@ export function DuelPage() {
           }
           showResultBadge
           isCorrect={lastAnswerCorrect}
-          correctAnswer={showResult && !lastAnswerCorrect ? currentQuestion?.correctAnswer : undefined}
+          correctAnswer={showResult && !lastAnswerCorrect ? (currentQuestion as unknown as SocketPayloadQuestion)?.correctAnswer : undefined}
           onSubmit={handleSubmitAnswer}
           summarySlot={
             mechanicsEnabled ? (

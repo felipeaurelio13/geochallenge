@@ -98,7 +98,7 @@ export function GameRoundScaffold({
               disabled={showResult || disableOptions || imageReplacementFailed || hiddenOptionIndexes.includes(index)}
               eliminated={hiddenOptionIndexes.includes(index)}
               selected={selectedAnswer === option}
-              isCorrect={option === question.correctAnswer}
+              isCorrect={false}
               showResult={showResult}
             />
             ))}

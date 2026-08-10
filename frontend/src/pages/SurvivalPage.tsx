@@ -10,6 +10,7 @@ import {
   Category,
   Difficulty,
   Question,
+  SocketPayloadQuestion,
   SurvivalPlayerInfo,
   SurvivalPlayerResult,
   SurvivalRanking,
@@ -870,9 +871,11 @@ export function SurvivalPage() {
             onLocationSelect={handleLocationSelect}
             selectedLocation={mapLocation}
             correctLocation={
-              showResult && currentQuestion.latitude != null
-                ? { lat: currentQuestion.latitude, lng: currentQuestion.longitude! }
-                : null
+              (() => {
+                const sq = currentQuestion as unknown as SocketPayloadQuestion;
+                if (showResult && sq.latitude != null) return { lat: sq.latitude, lng: sq.longitude! };
+                return null;
+              })()
             }
             showResult={showResult}
             disabled={showResult || isSpectating}
@@ -901,7 +904,7 @@ export function SurvivalPage() {
           }
           showResultBadge
           isCorrect={myLastAnswerCorrect}
-          correctAnswer={showResult && !myLastAnswerCorrect ? currentQuestion.correctAnswer : undefined}
+          correctAnswer={showResult && !myLastAnswerCorrect ? (currentQuestion as unknown as SocketPayloadQuestion).correctAnswer : undefined}
           onSubmit={handleSubmitAnswer}
         />
       }

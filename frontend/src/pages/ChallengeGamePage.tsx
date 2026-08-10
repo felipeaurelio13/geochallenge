@@ -13,7 +13,7 @@ import {
 } from '../components';
 import { FullScreenError } from '../components/molecules/FullScreenError';
 import { MonumentAttribution } from '../components/MonumentAttribution';
-import { Question } from '../types';
+import { Question, SocketPayloadQuestion } from '../types';
 import { GAME_CONSTANTS } from '../constants/game';
 import { getApiErrorMessage } from '../utils/apiError';
 import { useHaptics } from '../hooks';
@@ -133,14 +133,15 @@ export function ChallengeGamePage() {
     let mapDistance: number | undefined;
 
     if (isMapQuestion) {
-      if (mapLocation && currentQuestion.latitude && currentQuestion.longitude) {
+      const sq = currentQuestion as unknown as SocketPayloadQuestion;
+      if (mapLocation && sq.latitude && sq.longitude) {
         const R = 6371;
-        const dLat = ((currentQuestion.latitude - mapLocation.lat) * Math.PI) / 180;
-        const dLon = ((currentQuestion.longitude - mapLocation.lng) * Math.PI) / 180;
+        const dLat = ((sq.latitude - mapLocation.lat) * Math.PI) / 180;
+        const dLon = ((sq.longitude - mapLocation.lng) * Math.PI) / 180;
         const a =
           Math.sin(dLat / 2) * Math.sin(dLat / 2) +
           Math.cos((mapLocation.lat * Math.PI) / 180) *
-            Math.cos((currentQuestion.latitude * Math.PI) / 180) *
+            Math.cos((sq.latitude * Math.PI) / 180) *
             Math.sin(dLon / 2) *
             Math.sin(dLon / 2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
@@ -148,7 +149,7 @@ export function ChallengeGamePage() {
         isCorrect = mapDistance < MAP_CORRECT_THRESHOLD_KM;
       }
     } else {
-      isCorrect = selectedAnswer === currentQuestion.correctAnswer;
+      isCorrect = selectedAnswer === (currentQuestion as unknown as SocketPayloadQuestion).correctAnswer;
     }
 
     const points = calculatePoints(isCorrect, mapDistance);
@@ -186,7 +187,7 @@ export function ChallengeGamePage() {
     const selectedIndex = selectedAnswer ? currentQuestion.options.indexOf(selectedAnswer) : -1;
     const incorrectIndexes = currentQuestion.options
       .map((option, index) => ({ option, index }))
-      .filter(({ option, index }) => option !== currentQuestion.correctAnswer && index !== selectedIndex)
+      .filter(({ option, index }) => option !== (currentQuestion as unknown as SocketPayloadQuestion).correctAnswer && index !== selectedIndex)
       .map(({ index }) => index);
     if (incorrectIndexes.length === 0) return;
 
@@ -347,9 +348,11 @@ export function ChallengeGamePage() {
             onLocationSelect={(lat, lng) => setMapLocation({ lat, lng })}
             selectedLocation={mapLocation}
             correctLocation={
-              showResult && currentQuestion.latitude && currentQuestion.longitude
-                ? { lat: currentQuestion.latitude, lng: currentQuestion.longitude }
-                : null
+              (() => {
+                const sq = currentQuestion as unknown as SocketPayloadQuestion;
+                if (showResult && sq.latitude && sq.longitude) return { lat: sq.latitude, lng: sq.longitude };
+                return null;
+              })()
             }
             showResult={showResult}
             disabled={showResult}

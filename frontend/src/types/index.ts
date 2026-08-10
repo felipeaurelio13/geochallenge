@@ -129,12 +129,9 @@ export interface Question {
   category: Category;
   questionText: string;
   options: string[];
-  correctAnswer?: string;
   difficulty?: Difficulty;
   questionData?: QuestionData;
   imageUrl?: string;
-  latitude?: number;
-  longitude?: number;
   continent?: string;
   subregion?: string;
   isInsular?: boolean;
@@ -187,7 +184,6 @@ export interface FlagMasterRound {
   category: 'FLAG';
   questionText: string;
   options: string[];
-  correctAnswer?: string;
   difficulty: Difficulty;
   imageUrl?: string;
   questionData?: string;
