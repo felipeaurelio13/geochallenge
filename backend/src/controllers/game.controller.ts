@@ -1057,22 +1057,19 @@ router.post('/daily/submit', authenticateJWT, async (req: AuthRequest, res: Resp
       questionIds = await generateDailyQuestionIds(today);
     }
 
-    const validIds = new Set(questionIds);
-    const seen = new Set<string>();
-    for (const a of answers) {
-      if (!validIds.has(a.questionId) || seen.has(a.questionId)) {
-        res.status(400).json({ error: 'Datos inválidos' });
-        return;
-      }
-      seen.add(a.questionId);
+    // Consolidar respuestas stored de /daily/answer (ignorar body del cliente)
+    let correctCount = 0;
+    let totalAnswered = 0;
+    for (const qid of questionIds) {
+      try {
+        const stored = await redis.get(`daily:answer:${userId}:${today}:${qid}`);
+        if (stored) {
+          const a = JSON.parse(stored) as { isCorrect: boolean };
+          if (a.isCorrect) correctCount++;
+          totalAnswered++;
+        }
+      } catch { /* Redis failure handled below */ }
     }
-
-    const dailyQuestions = await prisma.question.findMany({
-      where: { id: { in: questionIds } },
-      select: { id: true, correctAnswer: true },
-    });
-    const correctById = new Map(dailyQuestions.map((q) => [q.id, q.correctAnswer]));
-    const correctCount = answers.filter((a) => a.answer === correctById.get(a.questionId)).length;
     const score = correctCount * DAILY_POINTS_PER_CORRECT;
     const totalQuestions = questionIds.length;
 

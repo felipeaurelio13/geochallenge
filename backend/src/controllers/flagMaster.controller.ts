@@ -273,33 +273,60 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
       }
     }
 
+    // Persistir en transacción: GameResult + gamesPlayed juntos.
+    // Solo el request que crea el registro incrementa gamesPlayed.
+    const { prisma: db } = await import('../config/database.js');
+    let persistedGameId: string;
+    let created = false;
+
+    try {
+      const result = await db.$transaction(async (tx) => {
+        // Verificar si ya existe (finish concurrente)
+        const existing = await tx.gameResult.findUnique({ where: { runId: gameId as string } });
+        if (existing) return { id: existing.id, created: false };
+
+        const created = await tx.gameResult.create({
+          data: {
+            userId: req.user!.userId,
+            score: totalScore,
+            correctCount,
+            totalQuestions: session.rounds.length,
+            category: 'FLAG',
+            gameMode: 'SINGLE',
+            variant: 'FLAG_MASTER',
+            runId: gameId as string,
+            details: { flagMaster: true, rounds: rounds as unknown as Prisma.InputJsonValue },
+          },
+        });
+
+        await tx.user.update({
+          where: { id: req.user!.userId },
+          data: { gamesPlayed: { increment: 1 } },
+        });
+
+        return { id: created.id, created: true };
+      });
+
+      persistedGameId = result.id;
+      created = result.created;
+    } catch (err) {
+      if ((err as { code?: string }).code === 'P2002') {
+        const existing = await db.gameResult.findUnique({ where: { runId: gameId } });
+        if (existing) { persistedGameId = existing.id; created = false; }
+        else throw err;
+      } else throw err;
+    }
+
     await deleteCachedSession(gameId);
 
-    const { prisma: db } = await import('../config/database.js');
-    const result = await db.gameResult.upsert({
-      where: { runId: gameId },
-      create: {
-        userId: req.user!.userId,
-        score: totalScore,
-        correctCount,
-        totalQuestions: session.rounds.length,
-        category: 'FLAG',
-        gameMode: 'SINGLE',
-        variant: 'FLAG_MASTER',
-        runId: gameId,
-        details: { flagMaster: true, rounds: rounds as unknown as Prisma.InputJsonValue },
-      },
-      update: {},
-    });
-
-    await db.user.update({ where: { id: req.user!.userId }, data: { gamesPlayed: { increment: 1 } } });
-
-    const newAchievements = await evaluateAchievementsAfterGame({
-      userId: req.user!.userId, correctCount, totalQuestions: session.rounds.length, score: totalScore,
-    }).catch(() => []);
+    const newAchievements = created
+      ? await evaluateAchievementsAfterGame({
+          userId: req.user!.userId, correctCount, totalQuestions: session.rounds.length, score: totalScore,
+        }).catch(() => [])
+      : [];
 
     res.json({
-      gameId: result.id,
+      gameId: persistedGameId,
       totalScore,
       correctCount,
       totalQuestions: session.rounds.length,

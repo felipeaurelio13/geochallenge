@@ -81,6 +81,7 @@ export async function createGameSession(data: {
     gameMode: data.gameMode,
     variant: data.variant,
     category: data.category,
+    filters: data.filters,
     questionIds: data.questions.map((q) => q.id),
     correctAnswers,
     optionsPerQuestion,

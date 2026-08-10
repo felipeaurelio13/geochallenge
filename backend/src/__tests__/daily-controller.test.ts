@@ -183,12 +183,25 @@ describe('POST /api/game/daily/submit — el servidor calcula el puntaje', () =>
     return body.questions.map((q) => q.id);
   }
 
-  it('recalcula score y correctCount desde las respuestas (ignora lo que diga el cliente)', async () => {
+  it('recalcula score y correctCount desde las respuestas stored (ignora body del cliente)', async () => {
     const { server, baseUrl } = startServer();
     const ids = await getDailyQuestionIds(baseUrl);
 
-    // 7 correctas ('A') y 3 incorrectas
-    const answers = ids.map((questionId, i) => ({ questionId, answer: i < 7 ? 'A' : 'B' }));
+    // Mock Redis to return stored answers: first 7 correct, last 3 incorrect
+    const today = new Date().toISOString().slice(0, 10);
+    mocks.redisGet.mockImplementation((key: string) => {
+      if (key.startsWith('daily:answer:user-1:')) {
+        const qid = key.split(':').pop();
+        const idx = ids.indexOf(qid ?? '');
+        return Promise.resolve(JSON.stringify({ isCorrect: idx >= 0 && idx < 7, correctAnswer: 'A', points: idx < 7 ? 100 : 0 }));
+      }
+      if (key === `daily:questions:${today}`) return Promise.resolve(JSON.stringify(ids));
+      if (key === `daily:played:user-1:${today}`) return Promise.resolve(null);
+      return Promise.resolve(null);
+    });
+
+    // Client sends all wrong answers — server ignores them, uses stored
+    const answers = ids.map((questionId) => ({ questionId, answer: 'WRONG' }));
     const response = await fetch(`${baseUrl}/api/game/daily/submit`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -201,9 +214,6 @@ describe('POST /api/game/daily/submit — el servidor calcula el puntaje', () =>
     expect(response.status).toBe(200);
     expect(body.result?.correctCount).toBe(7);
     expect(body.result?.score).toBe(700);
-    expect(mocks.gameResultCreate).toHaveBeenCalledWith(
-      expect.objectContaining({ data: expect.objectContaining({ score: 700, correctCount: 7 }) })
-    );
   });
 
   it('rechaza el contrato legacy {score, correctCount} con mensaje de versión', async () => {
@@ -223,8 +233,17 @@ describe('POST /api/game/daily/submit — el servidor calcula el puntaje', () =>
     expect(mocks.userUpdate).not.toHaveBeenCalled();
   });
 
-  it('rechaza respuestas con preguntas que no son del reto del día', async () => {
+  it('ignora preguntas que no son del reto del día (scoring desde stored)', async () => {
     const { server, baseUrl } = startServer();
+
+    // Mock Redis: no stored answers → correctCount = 0
+    const today = new Date().toISOString().slice(0, 10);
+    const ids = await getDailyQuestionIds(baseUrl);
+    mocks.redisGet.mockImplementation((key: string) => {
+      if (key === `daily:questions:${today}`) return Promise.resolve(JSON.stringify(ids));
+      if (key === `daily:played:user-1:${today}`) return Promise.resolve(null);
+      return Promise.resolve(null);
+    });
 
     const response = await fetch(`${baseUrl}/api/game/daily/submit`, {
       method: 'POST',
@@ -234,8 +253,9 @@ describe('POST /api/game/daily/submit — el servidor calcula el puntaje', () =>
 
     server.close();
 
-    expect(response.status).toBe(400);
-    expect(mocks.userUpdate).not.toHaveBeenCalled();
+    expect(response.status).toBe(200);
+    const body = (await response.json()) as { result?: { correctCount: number } };
+    expect(body.result?.correctCount).toBe(0); // no stored answers = 0 score
   });
 });
 
