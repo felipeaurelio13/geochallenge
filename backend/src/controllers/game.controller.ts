@@ -483,6 +483,18 @@ router.post('/mechanic', optionalAuth, async (req: AuthRequest, res: Response) =
       return;
     }
 
+    // Variant check: mechanics not allowed for STREAK
+    if (session.variant === 'STREAK') {
+      res.status(400).json({ error: 'Mecánicas no disponibles en este modo.', code: 'MECHANIC_VARIANT_REJECTED' });
+      return;
+    }
+
+    // Post-answer check: mechanic not allowed after answering
+    if (session.answeredQuestionIds.includes(questionId)) {
+      res.status(400).json({ error: 'No puedes usar mecánicas después de responder.', code: 'MECHANIC_POST_ANSWER' });
+      return;
+    }
+
     // Atomic counter para 50/50: no puede usarse más de {max} veces.
     const usage = await recordMechanicUsageAtomic(sessionId, mechanic, questionId);
     if (!usage.allowed) {

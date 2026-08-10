@@ -208,10 +208,13 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
     const correctCount = details.filter((detail) => detail.isCorrect).length;
     const totalScore = correctCount * 100;
 
-    // Persistir GameResult para GeoRetos (best-effort: el resultado se devuelve igual aunque la DB falle).
+    // Persistir GameResult con runId=gameId para idempotencia concurrente.
     const userId = req.user!.userId;
     try {
       await prisma.$transaction(async (db) => {
+        const existing = await db.gameResult.findUnique({ where: { runId: session.gameId } });
+        if (existing) return; // already persisted, no side effects
+
         await db.gameResult.create({
           data: {
             userId,
@@ -221,7 +224,7 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
             category: 'MIXED',
             gameMode: GameMode.SINGLE,
             variant: GameVariant.GEO_CHALLENGE,
-            runId: session.gameId, // idempotencia: un GameResult por partida
+            runId: session.gameId,
             details: { dataVersion: session.dataVersion, rounds: details } as unknown as Prisma.InputJsonValue,
           },
         });
@@ -232,7 +235,11 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
         });
       });
     } catch (err) {
-      console.error('[geo-challenge] Failed to persist game result:', err);
+      if ((err as { code?: string }).code === 'P2002') {
+        // concurrent finish: already persisted, no side effects
+      } else {
+        throw err;
+      }
     }
 
     res.json({

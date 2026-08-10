@@ -420,6 +420,7 @@ class ApiService {
         ...(filters?.mode ? { mode: filters.mode } : {}),
         ...(filters?.category ? { category: filters.category } : {}),
         ...(filters?.minGames && filters.minGames > 1 ? { minGames: filters.minGames } : {}),
+        ...(filters?.variant ? { variant: filters.variant } : {}),
       },
     });
     return response.data;
@@ -438,6 +439,7 @@ class ApiService {
         scope,
         ...(filters?.mode ? { mode: filters.mode } : {}),
         ...(filters?.category ? { category: filters.category } : {}),
+        ...(filters?.variant ? { variant: filters.variant } : {}),
         ...(filters?.minGames && filters.minGames > 1 ? { minGames: filters.minGames } : {}),
       },
     });
