@@ -12,6 +12,7 @@ import { FullScreenError } from '../components/molecules/FullScreenError';
 import { PageTemplate } from '../components/templates/PageTemplate';
 import { useConfirmDialog } from '../hooks/useConfirmDialog';
 import { api } from '../services/api';
+import { trackUxEvent } from '../utils/uxTelemetry';
 import type {
   FlagMasterFinishResponse,
   FlagMasterRound,
@@ -107,6 +108,8 @@ export function FlagMasterPage() {
   // Snapshot estable: las funciones de avance leen estos refs para no depender
   // de la closure (que cambia en cada render y rompe scheduleAdvance).
   const stateRef = useRef({ roundIndex: 0, isLastRound: false, gameId: null as string | null });
+  const statusRef = useRef<PageStatus>(status);
+  statusRef.current = status;
 
   const currentRound: FlagMasterRound | null = rounds[roundIndex] ?? null;
   const isLastRound = rounds.length > 0 && roundIndex >= rounds.length - 1;
@@ -139,6 +142,19 @@ export function FlagMasterPage() {
       mounted = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (statusRef.current === 'playing') {
+        trackUxEvent('game_abandoned', {
+          mode: 'single',
+          variant: 'FLAG_MASTER',
+          roundIndex,
+          reason: 'navigation',
+        });
+      }
+    };
   }, []);
 
   // ─── Reset time when round changes ───────────────────────────────────────
@@ -293,6 +309,7 @@ export function FlagMasterPage() {
             type="button"
             onClick={async () => {
               if (await confirm(t('flagMaster.confirmExit', '¿Seguro? Perderás tu progreso.'))) {
+                trackUxEvent('game_abandoned', { mode: 'single', variant: 'FLAG_MASTER', roundIndex, reason: 'navigation' });
                 navigate('/menu');
               }
             }}

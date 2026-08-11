@@ -46,6 +46,7 @@ import { config } from '../config/env.js';
 import { AppError } from '../utils/appError.js';
 import { respondWithError } from '../utils/respondWithError.js';
 import { mapZodIssuesToFields } from '../utils/zodIssueMapper.js';
+import { trackServerEvent } from '../services/telemetry.service.js';
 
 const router = Router();
 const gameTypeSchema = z.enum(['single', 'streak', 'flash']);
@@ -203,6 +204,19 @@ router.get('/start', optionalAuth, async (req: AuthRequest, res: Response) => {
       questions,
     });
 
+    trackServerEvent({
+      name: 'game_started',
+      userId: req.user?.userId ?? null,
+      runId: sessionId,
+      gameMode: GameMode.SINGLE,
+      variant,
+      category,
+      properties: {
+        questionCount: questions.length,
+        filters: filters ? JSON.stringify(filters) : undefined,
+      },
+    });
+
     res.json({
       message: 'Partida iniciada',
       sessionId,
@@ -290,6 +304,16 @@ router.get('/flash/start', optionalAuth, async (req: AuthRequest, res: Response)
       variant: GameVariant.FLASH,
       category: flashCategory || Category.MIXED,
       questions,
+    });
+
+    trackServerEvent({
+      name: 'game_started',
+      userId: req.user?.userId ?? null,
+      runId: sessionId,
+      gameMode: GameMode.SINGLE,
+      variant: GameVariant.FLASH,
+      category: flashCategory || Category.MIXED,
+      properties: { questionCount: questions.length },
     });
 
     res.json({
@@ -438,7 +462,31 @@ router.post('/answer', optionalAuth, async (req: AuthRequest, res: Response) => 
     );
 
     // Almacenamiento atómico: SET NX previene race condition
-    const { stored } = await storeAnswerResult(sessionId, questionId, result);
+    const { stored, isFirstAnswer } = await storeAnswerResult(sessionId, questionId, result);
+
+    if (isFirstAnswer) {
+      const distanceBucket = stored.distance !== undefined
+        ? (stored.distance < 100 ? '<100km' : stored.distance < 500 ? '100-500km' : stored.distance < 1000 ? '500-1000km' : stored.distance < 2000 ? '1000-2000km' : '>2000km')
+        : undefined;
+      trackServerEvent({
+        name: 'question_answered',
+        userId: session.userId,
+        runId: sessionId,
+        questionId,
+        gameMode: session.gameMode,
+        variant: session.variant,
+        category: session.questionMeta?.[questionId]?.category,
+        properties: {
+          isCorrect: stored.isCorrect,
+          points: stored.points,
+          timeRemaining: stored.timeRemaining,
+          difficulty: session.questionMeta?.[questionId]?.difficulty,
+          continent: session.questionMeta?.[questionId]?.continent,
+          distanceBucket,
+          roundIndex: session.answeredQuestionIds.length - 1,
+        },
+      });
+    }
 
     res.json(stored);
   } catch (error) {
@@ -501,6 +549,20 @@ router.post('/mechanic', optionalAuth, async (req: AuthRequest, res: Response) =
       res.status(400).json({ error: 'Mecánica agotada.', code: 'MECHANIC_UNAVAILABLE' });
       return;
     }
+
+    trackServerEvent({
+      name: 'mechanic_used',
+      userId: session.userId,
+      runId: sessionId,
+      questionId,
+      gameMode: session.gameMode,
+      variant: session.variant,
+      category: session.questionMeta?.[questionId]?.category,
+      properties: {
+        mechanic,
+        remaining: usage.remaining,
+      },
+    });
 
     // Usar las opciones en el orden exacto que ve el cliente (almacenadas en la sesión)
     const options = session.optionsPerQuestion[questionId];
@@ -589,6 +651,25 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
       session.sessionId, // runId = sessionId para idempotencia
     );
 
+    // Calcular estadísticas
+    const correctCount = results.filter((r) => r.isCorrect).length;
+    const accuracy = results.length > 0 ? Math.round((correctCount / results.length) * 100) : 0;
+
+    trackServerEvent({
+      name: 'game_finished',
+      userId: req.user!.userId,
+      runId: sessionId,
+      gameMode: session.gameMode,
+      variant,
+      category,
+      properties: {
+        score: totalScore,
+        correctCount,
+        totalQuestions: results.length,
+        accuracy,
+      },
+    });
+
     // Actualizar leaderboards (Redis); solo Classic participa en el ranking global.
     if (variant === GameVariant.CLASSIC) {
       await Promise.all([
@@ -596,10 +677,6 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
         updateSeasonLeaderboardScore(req.user!.userId, totalScore),
       ]);
     }
-
-    // Calcular estadísticas
-    const correctCount = results.filter((r) => r.isCorrect).length;
-    const accuracy = results.length > 0 ? Math.round((correctCount / results.length) * 100) : 0;
 
     // Evaluar achievements
     const streakLength = variant === GameVariant.STREAK ? correctCount : undefined;
@@ -943,6 +1020,19 @@ router.get('/daily', optionalAuth, async (req: AuthRequest, res: Response) => {
       areaTier: q.areaTier,
     }));
 
+    if (userId) {
+      const runId = `daily:${userId}:${dayKey}`;
+      trackServerEvent({
+        name: 'game_started',
+        userId,
+        runId,
+        gameMode: GameMode.SINGLE,
+        variant: GameVariant.DAILY,
+        category: Category.MIXED,
+        properties: { questionCount: questionIds.length, dayKey },
+      });
+    }
+
     res.json({ questions: formatted, today: dayKey, alreadyPlayed: false });
   } catch (error) {
     respondWithError(res, error);
@@ -983,7 +1073,19 @@ router.post('/daily/answer', authenticateJWT, async (req: AuthRequest, res: Resp
     const candidate = { questionId, isCorrect, correctAnswer: q.correctAnswer, points: isCorrect ? 100 : 0 };
 
     const nxResult = await redis.set(answerKey, JSON.stringify(candidate), 'EX', DAILY_TTL_SECONDS, 'NX');
-    if (nxResult === 'OK') { res.json(candidate); return; }
+    if (nxResult === 'OK') {
+      const runId = `daily:${userId}:${resolveDayKey(parsed.data.clientDate)}`;
+      trackServerEvent({
+        name: 'question_answered',
+        userId,
+        runId,
+        questionId,
+        gameMode: GameMode.SINGLE,
+        variant: GameVariant.DAILY,
+        properties: { isCorrect, points: candidate.points },
+      });
+      res.json(candidate); return;
+    }
 
     const winner = await redis.get(answerKey);
     if (winner) { res.json(JSON.parse(winner) as Record<string, unknown>); return; }
@@ -1127,6 +1229,23 @@ router.post('/daily/submit', authenticateJWT, async (req: AuthRequest, res: Resp
       await tx.gameResult.create({
         data: { userId, score, correctCount, totalQuestions, gameMode: 'SINGLE', variant: GameVariant.DAILY, category: 'MIXED' },
       });
+    });
+
+    const runId = `daily:${userId}:${dayKey}`;
+    trackServerEvent({
+      name: 'game_finished',
+      userId,
+      runId,
+      gameMode: GameMode.SINGLE,
+      variant: GameVariant.DAILY,
+      category: Category.MIXED,
+      properties: {
+        score,
+        correctCount,
+        totalQuestions,
+        dailyStreak: newStreak,
+        dayKey,
+      },
     });
 
     const result: Record<string, unknown> = {

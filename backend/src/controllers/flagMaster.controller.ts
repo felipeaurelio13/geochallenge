@@ -14,6 +14,7 @@ import { config } from '../config/env.js';
 import { prisma } from '../config/database.js';
 import { getRedis } from '../config/redis.js';
 import { evaluateAchievementsAfterGame } from '../services/achievement.service.js';
+import { trackServerEvent } from '../services/telemetry.service.js';
 
 const router = Router();
 
@@ -98,6 +99,16 @@ router.post('/start', authenticateJWT, async (req: AuthRequest, res: Response) =
     };
 
     await tryCacheSession(gameId, session);
+
+    trackServerEvent({
+      name: 'game_started',
+      userId: req.user!.userId,
+      runId: gameId,
+      gameMode: GameMode.SINGLE,
+      variant: GameVariant.FLAG_MASTER,
+      category: Category.FLAG,
+      properties: { totalRounds: rounds.length },
+    });
 
     res.json({
       gameId,
@@ -187,7 +198,26 @@ router.post('/answer', authenticateJWT, async (req: AuthRequest, res: Response) 
     };
 
     const nxResult = await redis.set(answerKey, JSON.stringify(candidate), 'EX', 3600, 'NX');
-    if (nxResult === 'OK') { res.json(candidate); return; }
+    if (nxResult === 'OK') {
+      trackServerEvent({
+        name: 'question_answered',
+        userId: session.userId,
+        runId: gameId,
+        questionId,
+        gameMode: GameMode.SINGLE,
+        variant: GameVariant.FLAG_MASTER,
+        category: Category.FLAG,
+        properties: {
+          isCorrect,
+          points: scoring.points,
+          timeRemaining,
+          tier: roundData.tier,
+          modifier: roundData.modifier,
+          multiplier: roundData.multiplier,
+        },
+      });
+      res.json(candidate); return;
+    }
 
     const winner = await redis.get(answerKey);
     if (winner) { res.json(JSON.parse(winner) as Record<string, unknown>); return; }
@@ -338,6 +368,23 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
           userId: req.user!.userId, correctCount, totalQuestions: session.rounds.length, score: totalScore,
         }).catch(() => [])
       : [];
+
+    if (created) {
+      trackServerEvent({
+        name: 'game_finished',
+        userId: req.user!.userId,
+        runId: gameId,
+        gameMode: GameMode.SINGLE,
+        variant: GameVariant.FLAG_MASTER,
+        category: Category.FLAG,
+        properties: {
+          score: totalScore,
+          correctCount,
+          totalQuestions: session.rounds.length,
+          accuracy: Math.round((correctCount / session.rounds.length) * 100),
+        },
+      });
+    }
 
     res.json({
       gameId: persistedGameId,

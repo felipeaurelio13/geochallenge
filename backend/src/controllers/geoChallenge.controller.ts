@@ -1,7 +1,7 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'crypto';
 import { Router, Response } from 'express';
 import { z } from 'zod';
-import { GameMode, GameVariant, Prisma } from '@prisma/client';
+import { GameMode, GameVariant, Category, Prisma } from '@prisma/client';
 import { authenticateJWT, AuthRequest } from '../middleware/auth.js';
 import { config } from '../config/env.js';
 import { prisma } from '../config/database.js';
@@ -13,6 +13,7 @@ import {
   LocalizedText,
   toPublicGeoChallengeRound,
 } from '../services/geoChallenge.service.js';
+import { trackServerEvent } from '../services/telemetry.service.js';
 
 const router = Router();
 
@@ -119,6 +120,16 @@ router.get('/start', authenticateJWT, (req: AuthRequest, res: Response) => {
     dataUpdatedAt: game.dataUpdatedAt,
     rounds: game.rounds.map(toPublicGeoChallengeRound),
   });
+
+  trackServerEvent({
+    name: 'game_started',
+    userId: req.user.userId,
+    runId: game.gameId,
+    gameMode: GameMode.SINGLE,
+    variant: GameVariant.GEO_CHALLENGE,
+    category: Category.MIXED,
+    properties: { totalRounds: game.rounds.length },
+  });
 });
 
 router.post('/answer', authenticateJWT, async (req: AuthRequest, res: Response) => {
@@ -153,7 +164,23 @@ router.post('/answer', authenticateJWT, async (req: AuthRequest, res: Response) 
   try {
     const redis = getRedis();
     const nxResult = await redis.set(answerKey, JSON.stringify(candidate), 'EX', GEO_ANSWER_TTL, 'NX');
-    if (nxResult === 'OK') { res.json(candidate); return; }
+    if (nxResult === 'OK') {
+      trackServerEvent({
+        name: 'question_answered',
+        userId: session.userId,
+        runId: session.gameId,
+        questionId: round.id,
+        gameMode: GameMode.SINGLE,
+        variant: GameVariant.GEO_CHALLENGE,
+        properties: {
+          isCorrect,
+          kind: round.kind,
+          region: round.region,
+          points: isCorrect ? 100 : 0,
+        },
+      });
+      res.json(candidate); return;
+    }
     const winner = await redis.get(answerKey);
     if (winner) { res.json(JSON.parse(winner)); return; }
     res.status(503).json({ error: 'Servicio no disponible.', code: 'GAME_STATE_UNAVAILABLE' });
@@ -229,6 +256,21 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
         throw err;
       }
     }
+
+    trackServerEvent({
+      name: 'game_finished',
+      userId,
+      runId: session.gameId,
+      gameMode: GameMode.SINGLE,
+      variant: GameVariant.GEO_CHALLENGE,
+      category: Category.MIXED,
+      properties: {
+        score: totalScore,
+        correctCount,
+        totalQuestions: session.rounds.length,
+        accuracy: Math.round((correctCount / session.rounds.length) * 100),
+      },
+    });
 
     res.json({
       gameId: session.gameId,

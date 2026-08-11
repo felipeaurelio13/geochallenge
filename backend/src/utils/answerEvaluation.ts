@@ -28,24 +28,31 @@ const MAP_CORRECT_THRESHOLD_KM = 500;
 const MAP_MAX_DISTANCE_KM = 2000;
 const CINEMA_GEO_EXTRA_READ_SECONDS = 5;
 
+export interface AnswerDetail {
+  questionId: string;
+  isCorrect: boolean;
+  points: number;
+  timeRemaining: number;
+  distanceBucket?: string;
+}
+
 export function evaluateTimedAnswers(
   questions: EvaluableQuestion[],
   answers: SubmittedAnswer[],
   answerTimeSeconds: number
-): { score: number; correctCount: number } {
+): { score: number; correctCount: number; details: AnswerDetail[] } {
   if (answers.length > questions.length) {
     throw new Error('Respuestas inválidas: más respuestas que preguntas');
   }
 
   const byId = new Map(questions.map((q) => [q.id, q]));
   const seen = new Set<string>();
-  // Focus Time (+Ns) se usa a lo más una vez por partida: permitimos un solo
-  // timeRemaining por encima de la duración de la ronda y recortamos el resto.
   let focusAllowance = 1;
   const focusBonus = config.game.mechanics.focusTimeBonusSeconds;
 
   let score = 0;
   let correctCount = 0;
+  const details: AnswerDetail[] = [];
 
   for (const submitted of answers) {
     const question = byId.get(submitted.questionId);
@@ -69,13 +76,16 @@ export function evaluateTimedAnswers(
         timeRemaining = duration;
       }
     }
-    // El tiempo extra de lectura de CINEMA_GEO no infla el bonus (espejo de
-    // clampTimeRemainingForScoring en el cliente).
     const scoringTime =
       question.category === 'CINEMA_GEO' ? Math.min(timeRemaining, answerTimeSeconds) : timeRemaining;
 
+    let questionPoints = 0;
+    let isCorrect = false;
+    let distanceBucket: string | undefined;
+
     if (question.category === 'MAP') {
       if (!submitted.mapAnswer || question.latitude == null || question.longitude == null) {
+        details.push({ questionId: submitted.questionId, isCorrect: false, points: 0, timeRemaining });
         continue;
       }
       const distanceKm = haversineDistance(
@@ -85,21 +95,36 @@ export function evaluateTimedAnswers(
         question.longitude
       );
       if (distanceKm < MAP_CORRECT_THRESHOLD_KM) {
-        correctCount += 1;
+        isCorrect = true;
         const accuracyFactor = Math.max(0, 1 - distanceKm / MAP_MAX_DISTANCE_KM);
         const accuracyPoints = Math.round(config.game.basePoints * accuracyFactor);
         const timePoints = Math.round(
           (scoringTime / answerTimeSeconds) * config.game.maxTimeBonus * accuracyFactor
         );
-        score += accuracyPoints + timePoints;
+        questionPoints = accuracyPoints + timePoints;
       }
+      if (distanceKm < 100) distanceBucket = '<100km';
+      else if (distanceKm < 500) distanceBucket = '100-500km';
+      else if (distanceKm < 1000) distanceBucket = '500-1000km';
+      else if (distanceKm < 2000) distanceBucket = '1000-2000km';
+      else distanceBucket = '>2000km';
     } else if (submitted.answer && submitted.answer === question.correctAnswer) {
-      correctCount += 1;
-      score +=
+      isCorrect = true;
+      questionPoints =
         config.game.basePoints +
         Math.round((scoringTime / answerTimeSeconds) * config.game.maxTimeBonus);
     }
+
+    score += questionPoints;
+    if (isCorrect) correctCount++;
+    details.push({
+      questionId: submitted.questionId,
+      isCorrect,
+      points: questionPoints,
+      timeRemaining,
+      distanceBucket,
+    });
   }
 
-  return { score, correctCount };
+  return { score, correctCount, details };
 }

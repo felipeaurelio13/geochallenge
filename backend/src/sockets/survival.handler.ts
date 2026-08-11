@@ -12,6 +12,7 @@ import {
 import { prisma } from '../config/database.js';
 import { AppError } from '../utils/appError.js';
 import { emitSocketError } from '../utils/respondWithError.js';
+import { trackServerEvent } from '../services/telemetry.service.js';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -226,6 +227,19 @@ async function startCountdown(io: SocketIOServer, match: ActiveSurvivalMatch): P
 function startGame(io: SocketIOServer, match: ActiveSurvivalMatch): void {
   match.status = 'playing';
   match.currentRound = 1;
+
+  for (const player of match.players) {
+    trackServerEvent({
+      name: 'game_started',
+      userId: player.userId,
+      runId: match.id,
+      gameMode: GameMode.SURVIVAL,
+      variant: GameVariant.CLASSIC,
+      category: match.category,
+      properties: { totalQuestions: match.questions.length, startLives: STARTING_LIVES },
+    });
+  }
+
   sendQuestion(io, match);
 }
 
@@ -355,6 +369,32 @@ function resolveRound(io: SocketIOServer, match: ActiveSurvivalMatch, round: num
     eliminatedThisRound,
   });
 
+  // Emit question_answered for each player
+  for (const player of match.players) {
+    const answer = player.answers[round - 1];
+    if (answer) {
+      const distanceBucket = answer.distance !== undefined
+        ? (answer.distance < 100 ? '<100km' : answer.distance < 500 ? '100-500km' : answer.distance < 1000 ? '500-1000km' : answer.distance < 2000 ? '1000-2000km' : '>2000km')
+        : undefined;
+      trackServerEvent({
+        name: 'question_answered',
+        userId: player.userId,
+        runId: match.id,
+        questionId: question?.id,
+        gameMode: GameMode.SURVIVAL,
+        variant: GameVariant.CLASSIC,
+        properties: {
+          isCorrect: answer.isCorrect,
+          points: answer.points,
+          timeRemaining: answer.timeRemaining,
+          roundIndex: round,
+          difficulty,
+          distanceBucket,
+        },
+      });
+    }
+  }
+
   setTimeout(() => {
     const m = activeMatches.get(match.id);
     if (!m || m.status !== 'playing' || m.currentRound !== round) return;
@@ -451,6 +491,26 @@ async function endGame(
     });
 
     // Survival no actualiza el ranking global Classic.
+
+    // Emit game_finished per player
+    for (const p of matchSnapshot.players) {
+      trackServerEvent({
+        name: 'game_finished',
+        userId: p.userId,
+        runId: matchSnapshot.id,
+        gameMode: GameMode.SURVIVAL,
+        variant: GameVariant.CLASSIC,
+        category: matchSnapshot.category,
+        properties: {
+          finalRank: p.finalRank,
+          score: p.finalScore,
+          correctCount: p.correctCount,
+          totalRounds: matchSnapshot.totalRounds,
+          peakPlayers: matchSnapshot.peakPlayers,
+          eliminationRound: p.eliminatedRound,
+        },
+      });
+    }
   } catch (err) {
     console.error(`[survival] Error saving results for ${matchSnapshot.id}:`, err);
   }

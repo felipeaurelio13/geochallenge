@@ -22,6 +22,7 @@ import { FullScreenError } from '../components/molecules/FullScreenError';
 import { useConfirmDialog } from '../hooks/useConfirmDialog';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { trackUxEvent } from '../utils/uxTelemetry';
 
 type PageStatus = 'loading' | 'briefing' | 'playing' | 'finished' | 'error';
 
@@ -101,6 +102,8 @@ export function GeoChallengesPage() {
   const [errorMessage, setErrorMessage] = useState('');
   const [roundError, setRoundError] = useState('');
   const roundLockedRef = useRef(false);
+  const statusRef = useRef<PageStatus>(status);
+  statusRef.current = status;
 
   const currentRound: GeoChallengeRound | null = game?.rounds[roundIndex] ?? null;
   const isLastRound = Boolean(game && roundIndex === game.rounds.length - 1);
@@ -147,6 +150,19 @@ export function GeoChallengesPage() {
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [status]);
+
+  useEffect(() => {
+    return () => {
+      if (statusRef.current === 'playing') {
+        trackUxEvent('game_abandoned', {
+          mode: 'single',
+          variant: 'GEO_CHALLENGE',
+          roundIndex,
+          reason: 'navigation',
+        });
+      }
+    };
+  }, []);
 
   const handleOptionClick = (optionId: string) => {
     if (!currentRound || feedback || isSubmitting) return;
@@ -457,7 +473,7 @@ export function GeoChallengesPage() {
               <button
                 type="button"
                 onClick={async () => {
-                  if (await confirm(t('game.confirmExit'))) navigate('/menu');
+                  if (await confirm(t('game.confirmExit'))) { trackUxEvent('game_abandoned', { mode: 'single', variant: 'GEO_CHALLENGE', roundIndex, reason: 'navigation' }); navigate('/menu'); }
                 }}
                 className="pressable min-h-10 rounded-xl border border-app-border bg-app-muted px-3 text-xs font-semibold text-app-secondary hover:text-app-text"
                 aria-label={t('game.exit')}

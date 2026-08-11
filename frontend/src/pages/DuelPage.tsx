@@ -419,6 +419,11 @@ export function DuelPage() {
       if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
       const stateOnCleanup = duelStateRef.current;
       if (stateOnCleanup === 'matched' || stateOnCleanup === 'playing' || stateOnCleanup === 'waiting') {
+        trackUxEvent('game_abandoned', {
+          mode: 'duel',
+          reason: 'navigation',
+          duelState: stateOnCleanup,
+        });
         socketService.socket?.emit('duel:leave');
       } else if (stateOnCleanup === 'searching') {
         socketService.cancelDuelQueue();
@@ -526,12 +531,6 @@ export function DuelPage() {
       questionId: currentQuestion?.id,
       roundIndex: questionNumber - 1,
       value: bonusSeconds,
-    });
-    trackUxEvent('mechanic_used', {
-      mode: 'duel',
-      questionId: currentQuestion?.id,
-      value: bonusSeconds,
-      meta: { key: 'focusTime' },
     });
     haptics.tap();
   };

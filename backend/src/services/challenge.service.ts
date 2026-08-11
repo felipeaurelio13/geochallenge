@@ -1,8 +1,9 @@
 import { prisma } from '../config/database.js';
-import { Category, Prisma } from '@prisma/client';
+import { Category, GameMode, GameVariant, Prisma } from '@prisma/client';
 import { QuestionFilters } from './game.service.js';
 import { evaluateTimedAnswers, SubmittedAnswer } from '../utils/answerEvaluation.js';
 import { AppError } from '../utils/appError.js';
+import { trackServerEvent } from './telemetry.service.js';
 
 const CHALLENGE_EXPIRY_DAYS = 7;
 const QUESTIONS_PER_CHALLENGE = 10;
@@ -301,7 +302,7 @@ export class ChallengeService {
       select: { id: true, category: true, correctAnswer: true, latitude: true, longitude: true },
     });
 
-    const { score, correctCount } = evaluateTimedAnswers(
+    const { score, correctCount, details } = evaluateTimedAnswers(
       questions,
       answers,
       challenge.answerTimeSeconds
@@ -314,6 +315,43 @@ export class ChallengeService {
         correctCount,
         completedAt: new Date(),
       },
+    });
+
+    // Telemetry: game_started idempotente + question_answered por cada detalle + game_finished
+    const runId = `challenge:${challengeId}:${userId}`;
+    trackServerEvent({
+      name: 'game_started',
+      userId,
+      runId,
+      gameMode: GameMode.CHALLENGE,
+      variant: GameVariant.CLASSIC,
+      properties: { questionCount: challenge.questionIds.length },
+    });
+
+    for (const detail of details) {
+      trackServerEvent({
+        name: 'question_answered',
+        userId,
+        runId,
+        questionId: detail.questionId,
+        gameMode: GameMode.CHALLENGE,
+        variant: GameVariant.CLASSIC,
+        properties: {
+          isCorrect: detail.isCorrect,
+          points: detail.points,
+          timeRemaining: detail.timeRemaining,
+          distanceBucket: detail.distanceBucket,
+        },
+      });
+    }
+
+    trackServerEvent({
+      name: 'game_finished',
+      userId,
+      runId,
+      gameMode: GameMode.CHALLENGE,
+      variant: GameVariant.CLASSIC,
+      properties: { score, correctCount, totalQuestions: details.length },
     });
 
     const updatedChallenge = await prisma.challenge.findUnique({

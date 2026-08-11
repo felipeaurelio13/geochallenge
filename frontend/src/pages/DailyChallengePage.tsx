@@ -17,6 +17,7 @@ import { applyExtendedTime, getQuestionDuration } from '../utils/questionTiming'
 import { useStreakShareImage } from '../hooks/useStreakShareImage';
 import { useConfirmDialog } from '../hooks/useConfirmDialog';
 import { useUiStore } from '../store/useUiStore';
+import { trackUxEvent } from '../utils/uxTelemetry';
 import type { Question, DailyResult } from '../types';
 
 const ANSWER_TIME = 20;
@@ -48,6 +49,8 @@ export function DailyChallengePage() {
   const [shareFeedback, setShareFeedback] = useState('');
   const [lastCorrectAnswer, setLastCorrectAnswer] = useState('');
   const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pageStateRef = useRef<PageState>(pageState);
+  pageStateRef.current = pageState;
 
   const extendedTimeEnabled = useUiStore((s) => s.extendedTimeEnabled);
 
@@ -74,6 +77,19 @@ export function DailyChallengePage() {
         }
       })
       .catch(() => setPageState('error'));
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (pageStateRef.current === 'playing') {
+        trackUxEvent('game_abandoned', {
+          mode: 'single',
+          variant: 'DAILY',
+          roundIndex: currentIndex,
+          reason: 'navigation',
+        });
+      }
+    };
   }, []);
 
   // QA fix HI-1: reset del time-remaining cuando cambia la pregunta.
@@ -270,7 +286,7 @@ export function DailyChallengePage() {
         <header className="sticky top-0 z-30 border-b border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 pb-2 pt-3 backdrop-blur sm:px-4 sm:pb-3 sm:pt-4">
           <div className="max-w-4xl mx-auto grid grid-cols-[auto_1fr_auto] items-center gap-2.5 sm:gap-4">
             <button
-              onClick={async () => { if (await confirm(t('game.confirmExit'))) navigate('/menu'); }}
+              onClick={async () => { if (await confirm(t('game.confirmExit'))) { trackUxEvent('game_abandoned', { mode: 'single', variant: 'DAILY', roundIndex: currentIndex, reason: 'navigation' }); navigate('/menu'); } }}
               className="pressable min-h-10 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 py-2 text-xs sm:text-sm text-[var(--color-text-secondary)] hover:border-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors"
               aria-label={t('game.exit')}
             >

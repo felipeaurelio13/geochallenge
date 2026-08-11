@@ -17,8 +17,8 @@ import { Question } from '../types';
 import { getApiErrorMessage } from '../utils/apiError';
 import { useHaptics } from '../hooks';
 import { areMechanicsV2Enabled } from '../config/featureFlags';
-import { trackUxEvent } from '../utils/uxTelemetry';
 import { getQuestionDuration } from '../utils/questionTiming';
+import { trackUxEvent } from '../utils/uxTelemetry';
 
 const MapInteractive = lazy(() =>
   import('../components/MapInteractive').then((m) => ({ default: m.MapInteractive }))
@@ -62,6 +62,7 @@ export function ChallengeGamePage() {
     streakShield: 0,
   });
   const mechanicsEnabled = areMechanicsV2Enabled('challenge');
+  const runStartedRef = useRef(false);
 
   const currentQuestion = questions[currentIndex];
   const isMapQuestion = currentQuestion?.category === 'MAP';
@@ -84,6 +85,7 @@ export function ChallengeGamePage() {
           setAlreadyPlayed(true);
         } else if (response.questions) {
           setQuestions(response.questions);
+          runStartedRef.current = true;
         }
       } catch (err: unknown) {
         setError(getApiErrorMessage(err, t('challenges.loadError')));
@@ -96,6 +98,19 @@ export function ChallengeGamePage() {
       fetchQuestions();
     }
   }, [id]);
+
+  useEffect(() => {
+    return () => {
+      if (runStartedRef.current && !isSubmitting) {
+        trackUxEvent('game_abandoned', {
+          mode: 'challenge',
+          variant: 'CLASSIC',
+          roundIndex: currentIndex,
+          reason: 'navigation',
+        });
+      }
+    };
+  }, [currentIndex, isSubmitting]);
 
   const handleTimeComplete = () => {
     if (!showResult) {
@@ -138,12 +153,6 @@ export function ChallengeGamePage() {
     const nextTime = Math.min(timePerQuestion + bonusSeconds, timeRemaining + bonusSeconds);
     setTimeRemaining(nextTime);
     setMechanicsAvailable((prev) => ({ ...prev, focusTime: Math.max(0, prev.focusTime - 1) }));
-    trackUxEvent('mechanic_used', {
-      mode: 'challenge',
-      questionId: currentQuestion?.id,
-      value: bonusSeconds,
-      meta: { key: 'focusTime' },
-    });
     haptics.tap();
   };
 
@@ -225,7 +234,7 @@ export function ChallengeGamePage() {
         <header className="sticky top-0 z-30 border-b border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 pb-2 pt-2 backdrop-blur sm:px-4">
           <div className="mx-auto flex w-full max-w-4xl items-center justify-between gap-3">
             <button
-              onClick={() => navigate('/challenges')}
+              onClick={() => { runStartedRef.current = false; navigate('/challenges'); }}
               className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm font-medium text-[var(--color-text-primary)] transition-colors hover:border-primary/60 hover:text-app-text"
             >
               ← {t('game.exit')}

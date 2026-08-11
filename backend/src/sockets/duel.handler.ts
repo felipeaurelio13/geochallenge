@@ -30,6 +30,7 @@ import {
   toPublicGeoChallengeRound,
 } from '../services/geoChallenge.service.js';
 import { calculateTimeBonus } from '../utils/scoring.js';
+import { trackServerEvent } from '../services/telemetry.service.js';
 
 export type DuelMode = 'classic' | 'geo-challenge';
 
@@ -697,6 +698,20 @@ function startDuel(io: SocketIOServer, duel: ActiveDuel) {
   duel.status = 'playing';
   duel.startedAt = new Date();
 
+  const dueloVariant = duel.mode === 'geo-challenge' ? GameVariant.GEO_CHALLENGE : GameVariant.CLASSIC;
+
+  for (const player of duel.players) {
+    trackServerEvent({
+      name: 'game_started',
+      userId: player.userId,
+      runId: duel.id,
+      gameMode: GameMode.DUEL,
+      variant: dueloVariant,
+      category: duel.category,
+      properties: { questionsCount: duel.questions.length, mode: duel.mode },
+    });
+  }
+
   io.to(duel.id).emit('duel:start', {
     message: '¡Comienza el duelo!',
   });
@@ -791,6 +806,29 @@ async function showQuestionResult(io: SocketIOServer, duel: ActiveDuel, question
   const questionData = duel.questionsData.find(
     (q) => q.id === duel.questions[questionIndex].id
   );
+
+  // Emit question_answered for each player (server-side authoritative)
+  const currentQuestion = duel.questions[questionIndex];
+  for (const player of duel.players) {
+    const answer = player.answers[questionIndex];
+    if (answer) {
+      trackServerEvent({
+        name: 'question_answered',
+        userId: player.userId,
+        runId: duel.id,
+        questionId: currentQuestion.id,
+        gameMode: GameMode.DUEL,
+        variant: duel.mode === 'geo-challenge' ? GameVariant.GEO_CHALLENGE : GameVariant.CLASSIC,
+        category: duel.category,
+        properties: {
+          isCorrect: answer.isCorrect,
+          points: answer.points,
+          timeRemaining: answer.timeRemaining,
+          roundIndex: questionIndex,
+        },
+      });
+    }
+  }
 
   const results = duel.players.map((p) => ({
     userId: p.userId,
@@ -924,6 +962,24 @@ async function endDuel(
     });
 
     // Los duelos no actualizan el ranking global Classic.
+
+    for (const player of duel.players) {
+      trackServerEvent({
+        name: 'game_finished',
+        userId: player.userId,
+        runId: duel.id,
+        gameMode: GameMode.DUEL,
+        variant: dueloVariant,
+        category: duel.category,
+        properties: {
+          score: player.score,
+          won: player.userId === winnerId,
+          opponentCount: 1,
+          finishReason: reason,
+          correctCount: player.answers.filter((a) => a.isCorrect).length,
+        },
+      });
+    }
   } catch (error) {
     console.error(`Error guardando resultados del duelo ${duel.id}:`, error);
   }

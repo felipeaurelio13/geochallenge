@@ -243,9 +243,8 @@ export function FlashGamePage() {
       try {
         const result = await api.useMechanic({ sessionId: flashSessionId, questionId: currentQuestion.id, mechanic: 'intel5050' });
         const hidden = result.hiddenOptionIndexes?.[0];
-        if (hidden != null) setDisabledOption(currentQuestion.options[hidden] ?? null);
+        if (hidden != null)         setDisabledOption(currentQuestion.options[hidden] ?? null);
         setMechanicsAvailable((prev) => ({ ...prev, intel5050: result.remaining }));
-        trackUxEvent('mechanic_used', { mode: 'flash', questionId: currentQuestion.id, value: 1, meta: { key: 'intel5050' } });
         haptics.tap();
         return;
       } catch { /* fallback disabled */ }
@@ -259,12 +258,6 @@ export function FlashGamePage() {
       ...prev,
       focusTime: Math.max(0, prev.focusTime - 1),
     }));
-    trackUxEvent('mechanic_used', {
-      mode: 'flash',
-      questionId: currentQuestion?.id,
-      value: FOCUS_TIME_BONUS_SECONDS,
-      meta: { key: 'focusTime' },
-    });
     haptics.tap();
   }, [canUseMechanics, currentQuestion?.id, durationSeconds, feedback, haptics, mechanicsAvailable.focusTime]);
 
@@ -279,6 +272,21 @@ export function FlashGamePage() {
       finish();
     }
   }, [currentIndex, finish, questions.length, status, t]);
+
+  // Abandonment tracking
+  const currentIndexRef = useRef(currentIndex);
+  currentIndexRef.current = currentIndex;
+  useEffect(() => {
+    return () => {
+      if (statusRef.current === 'playing' || statusRef.current === 'intro') {
+        trackUxEvent('game_abandoned', {
+          mode: 'flash',
+          roundIndex: currentIndexRef.current,
+          reason: 'navigation',
+        });
+      }
+    };
+  }, []);
 
   const progressPercent = useMemo(
     () => Math.max(0, Math.min(100, (timeRemaining / durationSeconds) * 100)),

@@ -33,6 +33,7 @@ model User {
   achievements       UserAchievement[]
   survivalParticipations SurvivalParticipant[]
   passwordResetTokens PasswordResetToken[]
+  telemetryEvents    TelemetryEvent[]
 
   @@index([highScore(sort: Desc)])
   @@map("users")
@@ -255,4 +256,41 @@ model UserAchievement {
 
   @@unique([userId, achievementId])
   @@map("user_achievements")
+}
+
+model TelemetryEvent {
+  id              String          @id @default(cuid())
+  eventKey        String          @unique
+  name            String
+  source          TelemetrySource
+  schemaVersion   Int             @default(1)
+
+  userId          String?
+  clientSessionId String?
+  runId           String?
+  gameResultId    String?
+
+  gameMode        GameMode?
+  variant         GameVariant?
+  category        Category?
+  questionId      String?
+
+  properties      Json?
+
+  occurredAt      DateTime
+  receivedAt      DateTime        @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([name, occurredAt])
+  @@index([userId, occurredAt])
+  @@index([variant, occurredAt])
+  @@index([gameMode, occurredAt])
+  @@index([runId])
+  @@map("telemetry_events")
+}
+
+enum TelemetrySource {
+  SERVER
+  CLIENT
 }

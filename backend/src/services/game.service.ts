@@ -56,6 +56,11 @@ export interface RedisGameSession {
   answeredQuestionIds: string[];
   questionResults: Record<string, AnswerResult>;
   mechanicsUsage: Record<string, number>;
+  questionMeta?: Record<string, {
+    category: Category;
+    difficulty?: string;
+    continent?: string;
+  }>;
   createdAt: number;
   expiresAt: number;
 }
@@ -81,6 +86,17 @@ export async function createGameSession(data: {
     optionsPerQuestion[q.id] = q.options;
   }
 
+  const questionMeta: Record<string, { category: Category; difficulty?: string; continent?: string }> = {};
+  for (const q of data.questions) {
+    correctAnswers[q.id] = q.correctAnswer;
+    optionsPerQuestion[q.id] = q.options;
+    questionMeta[q.id] = {
+      category: q.category,
+      difficulty: q.difficulty,
+      continent: q.continent,
+    };
+  }
+
   const session: RedisGameSession = {
     sessionId,
     userId: data.userId,
@@ -94,6 +110,7 @@ export async function createGameSession(data: {
     answeredQuestionIds: [],
     questionResults: {},
     mechanicsUsage: {},
+    questionMeta,
     createdAt: now,
     expiresAt: now + GAME_SESSION_TTL * 1000,
   };

@@ -13,6 +13,7 @@ import { FilterDrawer } from '../components/molecules/FilterDrawer';
 import { Modal } from '../components/organisms/Modal';
 import { hasActiveFilters, filtersToParams, type Difficulty, type GameFilters } from '../types';
 import { api } from '../services/api';
+import { trackUxEvent } from '../utils/uxTelemetry';
 import { CONTINENT_IDS, DIFFICULTY_IDS } from '../constants/filters';
 
 type GameModeId = 'flash' | 'single' | 'duel' | 'challenge' | 'streak' | 'survival';
@@ -214,8 +215,15 @@ export function MenuPage() {
   const filtersActive = hasActiveFilters(filters);
   const fp = filtersToParams(filters);
 
-  function go(path: string, extra: Record<string, string> = {}) {
+  function go(path: string, extra: Record<string, string> = {}, mode?: GameModeId) {
     if (!canPlaySelection) return;
+    if (mode) {
+      trackUxEvent('mode_selected', {
+        destination: path,
+        gameMode: mode,
+        category: selectedCategory,
+      });
+    }
     navigate(buildUrl(path, { ...fp, ...extra }));
   }
 
@@ -230,7 +238,7 @@ export function MenuPage() {
       setHowToMode(mode);
       return;
     }
-    go(path, extra);
+    go(path, extra, mode);
   }
 
   function handleOpenHelp(mode: GameModeId) {
@@ -253,7 +261,7 @@ export function MenuPage() {
       markHowToSeen(howToMode);
     }
     if (pendingAutoPlay) {
-      go(pendingAutoPlay.path, pendingAutoPlay.extra);
+      go(pendingAutoPlay.path, pendingAutoPlay.extra, howToMode ?? undefined);
     }
     setHowToMode(null);
     setHowToAutoOpened(false);
@@ -336,6 +344,17 @@ export function MenuPage() {
   const filterButtonLabel = filtersActive
     ? t('filters.openActiveFilters', { summary: activeFilterSummary })
     : t('filters.openFilters');
+
+  useEffect(() => {
+    const key = 'geochallenge:app-open-fired';
+    try {
+      if (window.sessionStorage.getItem(key) === '1') return;
+      window.sessionStorage.setItem(key, '1');
+      trackUxEvent('app_open');
+    } catch {
+      trackUxEvent('app_open');
+    }
+  }, []);
 
   return (
     <PageTemplate

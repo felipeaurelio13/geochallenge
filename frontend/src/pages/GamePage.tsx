@@ -293,12 +293,6 @@ export function GamePage() {
           roundIndex: currentIndex,
           value: result.hiddenOptionIndexes.length,
         });
-        trackUxEvent('mechanic_used', {
-          mode: gameType,
-          questionId: currentQuestion.id,
-          value: result.hiddenOptionIndexes.length,
-          meta: { key: 'intel5050' },
-        });
         haptics.tap();
         return;
       } catch {
@@ -329,12 +323,6 @@ export function GamePage() {
       roundIndex: currentIndex,
       value: FOCUS_TIME_BONUS_SECONDS,
     });
-    trackUxEvent('mechanic_used', {
-      mode: gameType,
-      questionId: currentQuestion?.id,
-      value: FOCUS_TIME_BONUS_SECONDS,
-      meta: { key: 'focusTime' },
-    });
     haptics.tap();
   };
 
@@ -355,11 +343,6 @@ export function GamePage() {
     try {
       const result = await submitAnswer(answer, mapLocation || undefined, pendingMechanicUsage);
       setPendingMechanicUsage(undefined);
-      trackUxEvent('round_submitted', {
-        mode: gameType,
-        questionId: currentQuestion.id,
-        value: result.points,
-      });
 
       if (result.isCorrect) {
         haptics.success();
@@ -500,10 +483,10 @@ export function GamePage() {
   // rota NUNCA entra a `answers`/`results` — no cuenta ni como acierto ni
   // como fallo en el tally final que ve finishGame()/ResultsPage.
   const handleSkipQuestion = () => {
-    trackUxEvent('round_abandon', {
+    trackUxEvent('game_abandoned', {
       mode: gameType,
       questionId: currentQuestion?.id,
-      value: currentIndex,
+      roundIndex: currentIndex,
     });
     setImageReplacementFailed(false);
     if (currentIndex >= questions.length - 1) {
@@ -565,7 +548,7 @@ export function GamePage() {
             <button
               onClick={async () => {
                 if (await confirm(t('game.confirmExit'))) {
-                  trackUxEvent('round_abandon', {
+                  trackUxEvent('game_abandoned', {
                     mode: gameType,
                     questionId: currentQuestion?.id,
                     value: currentIndex,

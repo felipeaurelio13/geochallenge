@@ -17,6 +17,7 @@ import {
 import { useHaptics, useImagePreloader } from '../hooks';
 import { toAppPath } from '../utils/routing';
 import { getSocketErrorMessage } from '../utils/apiError';
+import { trackUxEvent } from '../utils/uxTelemetry';
 
 const MapInteractive = lazy(() =>
   import('../components/MapInteractive').then((m) => ({ default: m.MapInteractive }))
@@ -138,6 +139,8 @@ export function SurvivalPage() {
   // Part 5.3: ronda en la que ESTE usuario fue eliminado (para "Llegaste a la
   // ronda X de Y"). Se captura cuando su userId aparece en eliminatedThisRound.
   const [eliminatedAtRound, setEliminatedAtRound] = useState<number | null>(null);
+  const statusRef = useRef<PageStatus>(status);
+  statusRef.current = status;
 
   // Part 1.1: pub-sub de conexión — si el socket entra en error mientras
   // estamos en cola/sala/jugando, mostramos un aviso con Reintentar/Menú en
@@ -403,6 +406,19 @@ export function SurvivalPage() {
     return () => {
       if (fillTimerRef.current) clearInterval(fillTimerRef.current);
       if (searchTimerRef.current) clearInterval(searchTimerRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      const st = statusRef.current;
+      if (st === 'filling' || st === 'countdown' || st === 'playing') {
+        trackUxEvent('game_abandoned', {
+          mode: 'survival',
+          roundIndex: currentRound,
+          reason: 'navigation',
+        });
+      }
     };
   }, []);
 
