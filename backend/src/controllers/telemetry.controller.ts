@@ -67,22 +67,14 @@ router.post('/events', optionalAuth, async (req: AuthRequest, res: Response) => 
       }
     }
 
-    // Assign userId from JWT. Ignore any userId sent by client.
-    const userId = req.user?.userId;
+    const userId = req.user?.userId ?? null;
 
-    const eventsWithUser = events.map((e) => ({
-      ...e,
-      properties: userId
-        ? { ...(e.properties || {}), userId }
-        : e.properties,
-    }));
-
-    const result = await insertClientEvents(eventsWithUser);
+    const result = await insertClientEvents(events as any, { userId });
 
     res.json({ inserted: result.inserted });
   } catch (error) {
     console.error('[telemetry] POST /events error:', error);
-    res.status(500).json({ error: 'Error interno', code: 'TELEMETRY_INTERNAL' });
+    res.status(503).json({ error: 'Servicio no disponible.', code: 'TELEMETRY_UNAVAILABLE' });
   }
 });
 

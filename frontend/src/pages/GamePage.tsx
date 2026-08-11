@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState, lazy, Suspense, useMemo } from 'react';
+import { useEffect, useCallback, useState, lazy, Suspense, useMemo, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
@@ -110,6 +110,7 @@ export function GamePage() {
   const [isBrowserOffline, setIsBrowserOffline] = useState(!isOnlineNow());
   const prefersReducedMotion = useUiStore((s) => s.prefersReducedMotion);
   const extendedTimeEnabled = useUiStore((s) => s.extendedTimeEnabled);
+  const abandonTrackedRef = useRef(false);
 
   const currentQuestion: Question | null = questions[currentIndex] || null;
   const isMapQuestion = currentQuestion?.category === 'MAP';
@@ -257,6 +258,20 @@ export function GamePage() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
 
+  useEffect(() => {
+    return () => {
+      if (!abandonTrackedRef.current && status === 'playing') {
+        abandonTrackedRef.current = true;
+        trackUxEvent('game_abandoned', {
+          mode: gameType,
+          questionId: currentQuestion?.id,
+          roundIndex: currentIndex,
+          reason: 'navigation',
+        });
+      }
+    };
+  }, []);
+
   // Handle time running out
   const handleTimeComplete = () => {
     if (!showResult && status === 'playing') {
@@ -357,6 +372,7 @@ export function GamePage() {
         setStreakGameOver(true);
         setLastAnswerCorrect(false);
         setShowResult(true);
+        abandonTrackedRef.current = true;
         finishGame()
           .then((gameResult) => {
             navigate(gameResult.pendingSync ? '/results?gameType=streak&pendingSync=1' : '/results?gameType=streak');
@@ -411,6 +427,7 @@ export function GamePage() {
     }
 
     if (currentIndex >= bufferedQuestionCount - 1) {
+      abandonTrackedRef.current = true;
       // Game finished. finishGame() ya retries una vez internamente y encola
       // localmente si ambos intentos fallan (Part 1.2) — pendingSync=1 le dice
       // a ResultsPage que muestre el badge "guardado en este dispositivo".
@@ -548,10 +565,12 @@ export function GamePage() {
             <button
               onClick={async () => {
                 if (await confirm(t('game.confirmExit'))) {
+                  abandonTrackedRef.current = true;
                   trackUxEvent('game_abandoned', {
                     mode: gameType,
                     questionId: currentQuestion?.id,
-                    value: currentIndex,
+                    roundIndex: currentIndex,
+                    reason: 'navigation',
                   });
                   resetGame();
                   navigate('/menu');

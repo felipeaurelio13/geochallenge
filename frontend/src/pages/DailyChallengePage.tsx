@@ -51,6 +51,7 @@ export function DailyChallengePage() {
   const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pageStateRef = useRef<PageState>(pageState);
   pageStateRef.current = pageState;
+  const abandonTrackedRef = useRef(false);
 
   const extendedTimeEnabled = useUiStore((s) => s.extendedTimeEnabled);
 
@@ -81,7 +82,8 @@ export function DailyChallengePage() {
 
   useEffect(() => {
     return () => {
-      if (pageStateRef.current === 'playing') {
+      if (!abandonTrackedRef.current && pageStateRef.current === 'playing') {
+        abandonTrackedRef.current = true;
         trackUxEvent('game_abandoned', {
           mode: 'single',
           variant: 'DAILY',
@@ -133,6 +135,7 @@ export function DailyChallengePage() {
       const score = correctCount * 100;
       setShowResult(false);
       setPageState('finished');
+      abandonTrackedRef.current = true;
       try {
         const result = await api.submitDaily({ answers: answersRef.current });
         setFinalResult(result.result);
@@ -286,7 +289,7 @@ export function DailyChallengePage() {
         <header className="sticky top-0 z-30 border-b border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 pb-2 pt-3 backdrop-blur sm:px-4 sm:pb-3 sm:pt-4">
           <div className="max-w-4xl mx-auto grid grid-cols-[auto_1fr_auto] items-center gap-2.5 sm:gap-4">
             <button
-              onClick={async () => { if (await confirm(t('game.confirmExit'))) { trackUxEvent('game_abandoned', { mode: 'single', variant: 'DAILY', roundIndex: currentIndex, reason: 'navigation' }); navigate('/menu'); } }}
+              onClick={async () => { if (await confirm(t('game.confirmExit'))) { abandonTrackedRef.current = true; trackUxEvent('game_abandoned', { mode: 'single', variant: 'DAILY', roundIndex: currentIndex, reason: 'navigation' }); navigate('/menu'); } }}
               className="pressable min-h-10 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 py-2 text-xs sm:text-sm text-[var(--color-text-secondary)] hover:border-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors"
               aria-label={t('game.exit')}
             >

@@ -30,6 +30,15 @@ function isClientEvent(name: string): name is ClientEventName {
   return (CLIENT_EVENT_NAMES as readonly string[]).includes(name);
 }
 
+const VALID_GAME_MODES = new Set<string>(Object.values(GameMode));
+const VALID_VARIANTS = new Set<string>(Object.values(GameVariant));
+const VALID_CATEGORIES = new Set<string>(Object.values(Category));
+
+function parseEnum<T extends string>(value: unknown, valid: Set<string>): T | undefined {
+  if (typeof value !== 'string') return undefined;
+  return valid.has(value) ? (value as T) : undefined;
+}
+
 interface ServerEventParams {
   name: ServerEventName;
   userId?: string | null;
@@ -49,7 +58,11 @@ interface ClientEventInput {
   properties?: Record<string, unknown>;
 }
 
-function distanceBucket(distanceKm?: number): string | undefined {
+interface InsertClientEventsOptions {
+  userId: string | null;
+}
+
+export function distanceBucket(distanceKm?: number): string | undefined {
   if (distanceKm === undefined || distanceKm === null) return undefined;
   if (distanceKm < 100) return '<100km';
   if (distanceKm < 500) return '100-500km';
@@ -156,15 +169,22 @@ export function trackServerEventSync(params: ServerEventParams): void {
 }
 
 export async function insertClientEvents(
-  events: Array<{ eventKey: string; name: string; clientSessionId: string; occurredAt: string; properties?: Record<string, unknown> }>
+  events: ClientEventInput[],
+  opts: InsertClientEventsOptions,
 ): Promise<{ inserted: number }> {
+  const { userId } = opts;
+
   const validEvents: Array<{
     eventKey: string;
     name: string;
     source: TelemetrySource;
+    userId: string | null;
     clientSessionId: string;
     occurredAt: Date;
-    properties?: Record<string, unknown>;
+    gameMode: GameMode | null;
+    variant: GameVariant | null;
+    category: Category | null;
+    properties: Record<string, unknown> | undefined;
   }> = [];
 
   for (const e of events) {
@@ -172,36 +192,48 @@ export async function insertClientEvents(
       console.warn(`[telemetry] Rejected non-client event from client: ${e.name}`);
       continue;
     }
+
+    const props = sanitizeProperties(e.properties);
+    const gameMode = parseEnum<GameMode>(props?.gameMode, VALID_GAME_MODES) ?? null;
+    const variant = parseEnum<GameVariant>(props?.variant, VALID_VARIANTS) ?? null;
+    const category = parseEnum<Category>(props?.category, VALID_CATEGORIES) ?? null;
+
+    // Strip userId from properties — never trust client-provided userId.
+    if (props?.userId) {
+      delete props.userId;
+    }
+
     validEvents.push({
       eventKey: e.eventKey,
       name: e.name,
       source: TelemetrySource.CLIENT,
+      userId,
       clientSessionId: e.clientSessionId,
       occurredAt: new Date(e.occurredAt),
-      properties: sanitizeProperties(e.properties),
+      gameMode,
+      variant,
+      category,
+      properties: Object.keys(props || {}).length > 0 ? props : undefined,
     });
   }
 
   if (validEvents.length === 0) return { inserted: 0 };
 
-  try {
-    const result = await prisma.telemetryEvent.createMany({
-      data: validEvents.map((e) => ({
-        eventKey: e.eventKey,
-        name: e.name,
-        source: e.source,
-        clientSessionId: e.clientSessionId,
-        occurredAt: e.occurredAt,
-        properties: e.properties ? (e.properties as Prisma.InputJsonValue) : Prisma.JsonNull,
-      })),
-      skipDuplicates: true,
-    });
-    return { inserted: result.count };
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    console.error('[telemetry] Failed to insert client events:', message);
-    return { inserted: 0 };
-  }
-}
+  const result = await prisma.telemetryEvent.createMany({
+    data: validEvents.map((e) => ({
+      eventKey: e.eventKey,
+      name: e.name,
+      source: e.source,
+      userId: e.userId,
+      clientSessionId: e.clientSessionId,
+      occurredAt: e.occurredAt,
+      gameMode: e.gameMode,
+      variant: e.variant,
+      category: e.category,
+      properties: e.properties ? (e.properties as Prisma.InputJsonValue) : Prisma.JsonNull,
+    })),
+    skipDuplicates: true,
+  });
 
-export { distanceBucket };
+  return { inserted: result.count };
+}

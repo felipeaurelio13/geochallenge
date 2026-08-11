@@ -147,7 +147,7 @@ describe('insertClientEvents', () => {
         clientSessionId: 'sess-1',
         occurredAt: new Date().toISOString(),
       },
-    ]);
+    ], { userId: null });
 
     expect(result.inserted).toBe(1);
     expect(mcm()).toHaveBeenCalledTimes(1);
@@ -157,11 +157,11 @@ describe('insertClientEvents', () => {
     const result = await insertClientEvents([
       {
         eventKey: 'clt-1',
-        name: 'game_finished',
+        name: 'game_finished' as any,
         clientSessionId: 'sess-1',
         occurredAt: new Date().toISOString(),
       },
-    ]);
+    ], { userId: null });
 
     expect(result.inserted).toBe(0);
   });
@@ -170,11 +170,11 @@ describe('insertClientEvents', () => {
     const result = await insertClientEvents([
       {
         eventKey: 'clt-1',
-        name: 'mechanic_used',
+        name: 'mechanic_used' as any,
         clientSessionId: 'sess-1',
         occurredAt: new Date().toISOString(),
       },
-    ]);
+    ], { userId: null });
 
     expect(result.inserted).toBe(0);
   });
@@ -189,7 +189,7 @@ describe('insertClientEvents', () => {
       },
       {
         eventKey: 'clt-2',
-        name: 'game_started',
+        name: 'game_started' as any,
         clientSessionId: 'sess-1',
         occurredAt: new Date().toISOString(),
       },
@@ -199,29 +199,81 @@ describe('insertClientEvents', () => {
         clientSessionId: 'sess-1',
         occurredAt: new Date().toISOString(),
       },
-    ]);
+    ], { userId: null });
 
     expect(result.inserted).toBe(1);
   });
 
-  it('survives DB errors gracefully', async () => {
+  it('throws on DB errors (fail-loud, controller returns 503)', async () => {
     mcm().mockRejectedValueOnce(new Error('DB down'));
 
-    const result = await insertClientEvents([
+    await expect(insertClientEvents([
       {
         eventKey: 'clt-1',
         name: 'app_open',
         clientSessionId: 'sess-1',
         occurredAt: new Date().toISOString(),
       },
-    ]);
-
-    expect(result.inserted).toBe(0);
+    ], { userId: null })).rejects.toThrow('DB down');
   });
 
   it('handles empty events array', async () => {
-    const result = await insertClientEvents([]);
+    const result = await insertClientEvents([], { userId: null });
     expect(result.inserted).toBe(0);
+  });
+
+  it('persists userId from JWT in column, ignores client-provided userId', async () => {
+    await insertClientEvents([
+      {
+        eventKey: 'clt-1',
+        name: 'app_open',
+        clientSessionId: 'sess-1',
+        occurredAt: new Date().toISOString(),
+        properties: { userId: 'fake-user' },
+      },
+    ], { userId: 'real-user-123' });
+
+    expect(mcm()).toHaveBeenCalledTimes(1);
+    const calls = mcm().mock.calls[0][0];
+    expect(calls.data[0].userId).toBe('real-user-123');
+    const props = calls.data[0].properties;
+    // userId stripped from properties
+    expect(props?.userId).toBeUndefined();
+  });
+
+  it('persists gameMode, variant, category from properties to columns', async () => {
+    await insertClientEvents([
+      {
+        eventKey: 'clt-1',
+        name: 'game_abandoned',
+        clientSessionId: 'sess-1',
+        occurredAt: new Date().toISOString(),
+        properties: { gameMode: 'SINGLE', variant: 'DAILY', category: 'MIXED' },
+      },
+    ], { userId: null });
+
+    expect(mcm()).toHaveBeenCalledTimes(1);
+    const calls = mcm().mock.calls[0][0];
+    expect(calls.data[0].gameMode).toBe('SINGLE');
+    expect(calls.data[0].variant).toBe('DAILY');
+    expect(calls.data[0].category).toBe('MIXED');
+  });
+
+  it('rejects invalid enum values for gameMode/variant/category', async () => {
+    await insertClientEvents([
+      {
+        eventKey: 'clt-1',
+        name: 'game_abandoned',
+        clientSessionId: 'sess-1',
+        occurredAt: new Date().toISOString(),
+        properties: { gameMode: 'INVALID', variant: 'FAKE' },
+      },
+    ], { userId: null });
+
+    expect(mcm()).toHaveBeenCalledTimes(1);
+    const calls = mcm().mock.calls[0][0];
+    expect(calls.data[0].gameMode).toBeNull();
+    expect(calls.data[0].variant).toBeNull();
   });
 });
 

@@ -110,6 +110,7 @@ export function FlagMasterPage() {
   const stateRef = useRef({ roundIndex: 0, isLastRound: false, gameId: null as string | null });
   const statusRef = useRef<PageStatus>(status);
   statusRef.current = status;
+  const abandonTrackedRef = useRef(false);
 
   const currentRound: FlagMasterRound | null = rounds[roundIndex] ?? null;
   const isLastRound = rounds.length > 0 && roundIndex >= rounds.length - 1;
@@ -146,7 +147,8 @@ export function FlagMasterPage() {
 
   useEffect(() => {
     return () => {
-      if (statusRef.current === 'playing') {
+      if (!abandonTrackedRef.current && statusRef.current === 'playing') {
+        abandonTrackedRef.current = true;
         trackUxEvent('game_abandoned', {
           mode: 'single',
           variant: 'FLAG_MASTER',
@@ -185,6 +187,7 @@ export function FlagMasterPage() {
         });
         setFinishResult(result);
         setStatus('finished');
+        abandonTrackedRef.current = true;
       } catch (err) {
         setErrorMessage(
           err instanceof Error
@@ -309,6 +312,7 @@ export function FlagMasterPage() {
             type="button"
             onClick={async () => {
               if (await confirm(t('flagMaster.confirmExit', '¿Seguro? Perderás tu progreso.'))) {
+                abandonTrackedRef.current = true;
                 trackUxEvent('game_abandoned', { mode: 'single', variant: 'FLAG_MASTER', roundIndex, reason: 'navigation' });
                 navigate('/menu');
               }

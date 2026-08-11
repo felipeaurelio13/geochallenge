@@ -141,6 +141,7 @@ export function SurvivalPage() {
   const [eliminatedAtRound, setEliminatedAtRound] = useState<number | null>(null);
   const statusRef = useRef<PageStatus>(status);
   statusRef.current = status;
+  const abandonTrackedRef = useRef(false);
 
   // Part 1.1: pub-sub de conexión — si el socket entra en error mientras
   // estamos en cola/sala/jugando, mostramos un aviso con Reintentar/Menú en
@@ -347,6 +348,7 @@ export function SurvivalPage() {
       setRankings(data.rankings);
       setTotalRounds(data.totalRounds);
       setStatus('finished');
+      abandonTrackedRef.current = true;
       const myRanking = data.rankings.find((r) => r.userId === user?.id);
       if (myRanking?.finalRank === 1) haptics.celebrate();
       else haptics.error();
@@ -412,7 +414,8 @@ export function SurvivalPage() {
   useEffect(() => {
     return () => {
       const st = statusRef.current;
-      if (st === 'filling' || st === 'countdown' || st === 'playing') {
+      if (!abandonTrackedRef.current && (st === 'filling' || st === 'countdown' || st === 'playing')) {
+        abandonTrackedRef.current = true;
         trackUxEvent('game_abandoned', {
           mode: 'survival',
           roundIndex: currentRound,

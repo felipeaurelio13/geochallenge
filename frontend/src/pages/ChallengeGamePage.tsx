@@ -63,6 +63,7 @@ export function ChallengeGamePage() {
   });
   const mechanicsEnabled = areMechanicsV2Enabled('challenge');
   const runStartedRef = useRef(false);
+  const abandonTrackedRef = useRef(false);
 
   const currentQuestion = questions[currentIndex];
   const isMapQuestion = currentQuestion?.category === 'MAP';
@@ -101,7 +102,8 @@ export function ChallengeGamePage() {
 
   useEffect(() => {
     return () => {
-      if (runStartedRef.current && !isSubmitting) {
+      if (!abandonTrackedRef.current && runStartedRef.current && !isSubmitting) {
+        abandonTrackedRef.current = true;
         trackUxEvent('game_abandoned', {
           mode: 'challenge',
           variant: 'CLASSIC',
@@ -160,6 +162,7 @@ export function ChallengeGamePage() {
     if (currentIndex >= questions.length - 1) {
       try {
         setIsSubmitting(true);
+        abandonTrackedRef.current = true;
         const response = await api.post<{ result?: { score: number; correctCount: number } }>(
           `/challenges/${id}/submit`,
           { answers: answersRef.current }
@@ -234,7 +237,7 @@ export function ChallengeGamePage() {
         <header className="sticky top-0 z-30 border-b border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 pb-2 pt-2 backdrop-blur sm:px-4">
           <div className="mx-auto flex w-full max-w-4xl items-center justify-between gap-3">
             <button
-              onClick={() => { runStartedRef.current = false; navigate('/challenges'); }}
+              onClick={() => { abandonTrackedRef.current = true; runStartedRef.current = false; navigate('/challenges'); }}
               className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm font-medium text-[var(--color-text-primary)] transition-colors hover:border-primary/60 hover:text-app-text"
             >
               ← {t('game.exit')}

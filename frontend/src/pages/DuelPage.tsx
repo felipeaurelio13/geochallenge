@@ -141,6 +141,7 @@ export function DuelPage() {
   const opponentRef = useRef<{ id: string; username: string } | null>(null);
   const duelStateRef = useRef<DuelState>('searching');
   const hasSubmittedCurrentQuestionRef = useRef(false);
+  const abandonTrackedRef = useRef(false);
   const duelMechanicsFeatureEnabled = areMechanicsV2Enabled('duel');
   const prefersReducedMotion = useUiStore((s) => s.prefersReducedMotion);
   const duelCategory = parseDuelCategory(searchParams.get('category'));
@@ -357,6 +358,7 @@ export function DuelPage() {
         opponentName: rivalResult?.username || opponent?.username || t('duel.opponent'),
       });
       setDuelState('finished');
+      abandonTrackedRef.current = true;
       if (data.winnerId === user?.id) {
         haptics.celebrate();
       } else if (data.winnerId && data.winnerId !== user?.id) {
@@ -373,6 +375,7 @@ export function DuelPage() {
         wonByForfeit: true,
       });
       setDuelState('finished');
+      abandonTrackedRef.current = true;
     };
 
     const handleDuelError = (data: { message?: string; code?: string; params?: Record<string, unknown> }) => {
@@ -419,11 +422,14 @@ export function DuelPage() {
       if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
       const stateOnCleanup = duelStateRef.current;
       if (stateOnCleanup === 'matched' || stateOnCleanup === 'playing' || stateOnCleanup === 'waiting') {
-        trackUxEvent('game_abandoned', {
-          mode: 'duel',
-          reason: 'navigation',
-          duelState: stateOnCleanup,
-        });
+        if (!abandonTrackedRef.current) {
+          abandonTrackedRef.current = true;
+          trackUxEvent('game_abandoned', {
+            mode: 'duel',
+            reason: 'navigation',
+            duelState: stateOnCleanup,
+          });
+        }
         socketService.socket?.emit('duel:leave');
       } else if (stateOnCleanup === 'searching') {
         socketService.cancelDuelQueue();

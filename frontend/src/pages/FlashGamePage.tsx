@@ -76,6 +76,7 @@ export function FlashGamePage() {
   const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const statusRef = useRef<Status>(status);
   const questionsRef = useRef(questions);
+  const abandonTrackedRef = useRef(false);
   const mechanicsFeatureEnabled = areMechanicsV2Enabled('flash');
 
   useEffect(() => {
@@ -128,6 +129,7 @@ export function FlashGamePage() {
       } catch { return; } // retryable, don't show as success
     }
     setStatus('finished');
+    abandonTrackedRef.current = true;
     haptics.celebrate();
   }, [haptics, flashSessionId]);
 
@@ -278,7 +280,8 @@ export function FlashGamePage() {
   currentIndexRef.current = currentIndex;
   useEffect(() => {
     return () => {
-      if (statusRef.current === 'playing' || statusRef.current === 'intro') {
+      if (!abandonTrackedRef.current && (statusRef.current === 'playing' || statusRef.current === 'intro')) {
+        abandonTrackedRef.current = true;
         trackUxEvent('game_abandoned', {
           mode: 'flash',
           roundIndex: currentIndexRef.current,

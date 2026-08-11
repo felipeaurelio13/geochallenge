@@ -104,6 +104,7 @@ async function flush(): Promise<void> {
       const sent = buffer.slice(0, 50).map((e) => e.eventKey);
       removeFromBuffer(sent);
     }
+    // On non-2xx (including 503 TELEMETRY_UNAVAILABLE), keep events in buffer.
   } catch {
     // network error: keep events in buffer for retry
   } finally {

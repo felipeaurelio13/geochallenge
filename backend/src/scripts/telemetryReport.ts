@@ -1,5 +1,4 @@
 import { prisma } from '../config/database.js';
-import { Prisma } from '@prisma/client';
 
 interface ReportArgs {
   days: number;
@@ -15,6 +14,9 @@ function parseArgs(): ReportArgs {
   }
   return { days };
 }
+
+type AccRow = { category: string; total: number; correct: number };
+type DiffRow = { difficulty: string; total: number; correct: number };
 
 async function run() {
   const { days } = parseArgs();
@@ -55,8 +57,7 @@ async function run() {
     console.log(`   ${s.variant}: ${finishCount}/${s._count} (${rate}%)`);
   }
 
-  // 4. Abandon rate by variant (CLIENT events)
-  // We can infer abandon rate from game_started - game_finished (server events per runId)
+  // 4. Abandon rate by variant
   const startedRuns = await prisma.telemetryEvent.groupBy({
     by: ['variant', 'runId'],
     where: { name: 'game_started', occurredAt: { gte: since }, variant: { not: null } },
@@ -83,7 +84,6 @@ async function run() {
     }
   }
 
-  // Also count explicit game_abandoned
   const abandonsByVariant = await prisma.telemetryEvent.groupBy({
     by: ['variant'],
     where: { name: 'game_abandoned', occurredAt: { gte: since }, variant: { not: null } },
@@ -98,75 +98,65 @@ async function run() {
     if (abandonCount > 0) console.log(`          ${abandonCount} explicit abandons`);
   }
 
-  // 5. Accuracy by category (from question_answered)
-  const answersByCategory = await prisma.$queryRaw<Array<{ category: string; total: bigint; correct: bigint }>>`
-    SELECT
-      CAST(t.properties->>'isCorrect' AS BOOLEAN) as is_correct,
-      t."category",
-      COUNT(*) as cnt
-    FROM "telemetry_events" t
-    WHERE t."name" = 'question_answered'
-      AND t."occurredAt" >= ${since}
-      AND t."category" IS NOT NULL
-    GROUP BY t."category", is_correct
-  `;
-
-  const byCat: Record<string, { total: number; correct: number }> = {};
-  for (const row of answersByCategory) {
-    if (!byCat[row.category]) byCat[row.category] = { total: 0, correct: 0 };
-    byCat[row.category].total += Number(row.total);
-    byCat[row.category].correct += Number(row.correct);
-  }
-
+  // 5. Accuracy by category
   console.log(`\n5. Accuracy by category:`);
-  for (const [cat, data] of Object.entries(byCat)) {
-    const acc = data.total > 0 ? Math.round((data.correct / data.total) * 100) : 0;
-    console.log(`   ${cat}: ${acc}% (${data.correct}/${data.total})`);
+  try {
+    const accByCat = await prisma.$queryRaw<AccRow[]>`
+      SELECT
+        "category",
+        COUNT(*)::int AS "total",
+        COUNT(*) FILTER (WHERE CAST(properties->>'isCorrect' AS BOOLEAN) = TRUE)::int AS "correct"
+      FROM "telemetry_events"
+      WHERE "name" = 'question_answered'
+        AND "occurredAt" >= ${since}
+        AND "category" IS NOT NULL
+      GROUP BY "category"
+    `;
+    for (const row of accByCat) {
+      const acc = row.total > 0 ? Math.round((row.correct / row.total) * 100) : 0;
+      console.log(`   ${row.category}: ${acc}% (${row.correct}/${row.total})`);
+    }
+  } catch (err) {
+    console.log('   (no data)');
   }
 
-  // 6. Accuracy by difficulty (from properties)
+  // 6. Accuracy by difficulty
+  console.log(`\n6. Accuracy by difficulty:`);
   try {
-    const answersByDifficulty = await prisma.$queryRaw<Array<{ difficulty: string; total: bigint; correct: bigint }>>`
+    const accByDiff = await prisma.$queryRaw<DiffRow[]>`
       SELECT
-        CAST(t.properties->>'isCorrect' AS BOOLEAN) as is_correct,
-        t.properties->>'difficulty' as difficulty,
-        COUNT(*) as cnt
-      FROM "telemetry_events" t
-      WHERE t."name" = 'question_answered'
-        AND t."occurredAt" >= ${since}
-        AND t.properties->>'difficulty' IS NOT NULL
-      GROUP BY difficulty, is_correct
+        properties->>'difficulty' AS "difficulty",
+        COUNT(*)::int AS "total",
+        COUNT(*) FILTER (WHERE CAST(properties->>'isCorrect' AS BOOLEAN) = TRUE)::int AS "correct"
+      FROM "telemetry_events"
+      WHERE "name" = 'question_answered'
+        AND "occurredAt" >= ${since}
+        AND properties->>'difficulty' IS NOT NULL
+      GROUP BY properties->>'difficulty'
     `;
-
-    const byDiff: Record<string, { total: number; correct: number }> = {};
-    for (const row of answersByDifficulty) {
-      if (!byDiff[row.difficulty]) byDiff[row.difficulty] = { total: 0, correct: 0 };
-      byDiff[row.difficulty].total += Number(row.total);
-      byDiff[row.difficulty].correct += Number(row.correct);
+    for (const row of accByDiff) {
+      const acc = row.total > 0 ? Math.round((row.correct / row.total) * 100) : 0;
+      console.log(`   ${row.difficulty}: ${acc}% (${row.correct}/${row.total})`);
     }
-
-    console.log(`\n6. Accuracy by difficulty:`);
-    for (const [diff, data] of Object.entries(byDiff)) {
-      const acc = data.total > 0 ? Math.round((data.correct / data.total) * 100) : 0;
-      console.log(`   ${diff}: ${acc}% (${data.correct}/${data.total})`);
-    }
-  } catch { console.log('\n6. Accuracy by difficulty: (no data)'); }
+  } catch {
+    console.log('   (no data)');
+  }
 
   // 7. Mechanic usage
+  console.log(`\n7. Mechanic usage:`);
   try {
-    const mechanicUsage = await prisma.$queryRaw<Array<{ mechanic: string; cnt: bigint }>>`
-      SELECT t.properties->>'mechanic' as mechanic, COUNT(*) as cnt
-      FROM "telemetry_events" t
-      WHERE t."name" = 'mechanic_used'
-        AND t."occurredAt" >= ${since}
+    const mechanicUsage = await prisma.$queryRaw<Array<{ mechanic: string; cnt: string }>>`
+      SELECT properties->>'mechanic' as mechanic, COUNT(*)::text as cnt
+      FROM "telemetry_events"
+      WHERE "name" = 'mechanic_used'
+        AND "occurredAt" >= ${since}
       GROUP BY mechanic
       ORDER BY cnt DESC
     `;
-    console.log(`\n7. Mechanic usage:`);
     for (const m of mechanicUsage) {
       console.log(`   ${m.mechanic}: ${m.cnt}`);
     }
-  } catch { console.log('\n7. Mechanic usage: (no data)'); }
+  } catch { console.log('   (no data)'); }
 
   // 8. Daily starts/completions
   const dailyStarts = await prisma.telemetryEvent.count({ where: { name: 'game_started', variant: 'DAILY', occurredAt: { gte: since } } });
@@ -192,12 +182,12 @@ async function run() {
   }
 
   // 10. Funnel mode_selected -> game_started -> game_finished
+  console.log(`\n10. Funnel:`);
   try {
     const modeSelected = await prisma.telemetryEvent.count({ where: { name: 'mode_selected', occurredAt: { gte: since } } });
     const allStarts = await prisma.telemetryEvent.count({ where: { name: 'game_started', occurredAt: { gte: since } } });
     const allFinishes = await prisma.telemetryEvent.count({ where: { name: 'game_finished', occurredAt: { gte: since } } });
 
-    console.log(`\n10. Funnel:`);
     console.log(`    mode_selected: ${modeSelected}`);
     console.log(`    game_started: ${allStarts}`);
     console.log(`    game_finished: ${allFinishes}`);
@@ -207,7 +197,7 @@ async function run() {
     if (allStarts > 0) {
       console.log(`    finish rate: ${Math.round((allFinishes / allStarts) * 100)}%`);
     }
-  } catch { console.log('\n10. Funnel: (no data)'); }
+  } catch { console.log('    (no data)'); }
 
   console.log('');
   await prisma.$disconnect();
