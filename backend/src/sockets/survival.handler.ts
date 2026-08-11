@@ -342,9 +342,15 @@ function resolveRound(io: SocketIOServer, match: ActiveSurvivalMatch, round: num
     player.finalRank = rankForEliminated;
   }
 
+  const correctLocation =
+    question?.latitude != null && question?.longitude != null
+      ? { lat: question.latitude, lng: question.longitude }
+      : undefined;
+
   io.to(match.id).emit('survival:question-result', {
     round,
     correctAnswer: question?.correctAnswer ?? '',
+    correctLocation,
     playerResults,
     eliminatedThisRound,
   });

@@ -190,30 +190,37 @@ function startServer() {
 }
 
 function primeSession() {
-  // Ensure test-session-1 exists in the mock store
-  if (!mocks.sessionStore.has('test-session-1')) {
-    const correctAnswers: Record<string, string> = {};
-    const optionsPerQuestion: Record<string, string[]> = {};
-    for (const q of mocks.TEST_QUESTIONS) {
-      correctAnswers[q.id] = q.correctAnswer;
-      optionsPerQuestion[q.id] = [...q.options];
-    }
-    mocks.sessionStore.set('test-session-1', {
-      sessionId: 'test-session-1',
-      userId: 'user-1',
-      gameMode: 'SINGLE',
-      variant: 'CLASSIC',
-      category: 'MIXED',
-      questionIds: mocks.TEST_QUESTIONS.map((q: { id: string }) => q.id),
-      correctAnswers,
-      optionsPerQuestion,
-      answeredQuestionIds: [],
-      questionResults: {},
-      mechanicsUsage: {},
-      createdAt: Date.now(),
-      expiresAt: Date.now() + 7200000,
-    });
+  // Re-create test-session-1 with a clean state for each caller.
+  // Also clear any stale SET-NX answer keys from prior tests.
+  const prefix = 'game:answer:test-session-1:';
+  for (const key of mocks.redisStore.keys()) {
+    if (key.startsWith(prefix)) mocks.redisStore.delete(key);
   }
+  const mechanicPrefix = 'game:mechanic:test-session-1:';
+  for (const key of mocks.redisStore.keys()) {
+    if (key.startsWith(mechanicPrefix)) mocks.redisStore.delete(key);
+  }
+  const correctAnswers: Record<string, string> = {};
+  const optionsPerQuestion: Record<string, string[]> = {};
+  for (const q of mocks.TEST_QUESTIONS) {
+    correctAnswers[q.id] = q.correctAnswer;
+    optionsPerQuestion[q.id] = [...q.options];
+  }
+  mocks.sessionStore.set('test-session-1', {
+    sessionId: 'test-session-1',
+    userId: 'user-1',
+    gameMode: 'SINGLE',
+    variant: 'CLASSIC',
+    category: 'MIXED',
+    questionIds: mocks.TEST_QUESTIONS.map((q: { id: string }) => q.id),
+    correctAnswers,
+    optionsPerQuestion,
+    answeredQuestionIds: [],
+    questionResults: {},
+    mechanicsUsage: {},
+    createdAt: Date.now(),
+    expiresAt: Date.now() + 7200000,
+  });
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -324,6 +331,7 @@ describe('POST /game/finish — session integrity', () => {
 describe('POST /game/mechanic — 50/50 server-side', () => {
   it('uses stored option order, never hides correct answer (index 0)', async () => {
     const { server, baseUrl } = startServer();
+    primeSession();
     try {
       const res = await fetch(`${baseUrl}/api/game/mechanic`, {
         method: 'POST', headers: { 'content-type': 'application/json' },
@@ -338,6 +346,7 @@ describe('POST /game/mechanic — 50/50 server-side', () => {
 
   it('rejects mechanic when exhausted (1 use only)', async () => {
     const { server, baseUrl } = startServer();
+    primeSession();
     try {
       await fetch(`${baseUrl}/api/game/mechanic`, {
         method: 'POST', headers: { 'content-type': 'application/json' },

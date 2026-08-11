@@ -799,9 +799,15 @@ async function showQuestionResult(io: SocketIOServer, duel: ActiveDuel, question
     totalScore: p.score,
   }));
 
+  const correctLocation =
+    questionData?.latitude != null && questionData?.longitude != null
+      ? { lat: questionData.latitude, lng: questionData.longitude }
+      : undefined;
+
   io.to(duel.id).emit('duel:questionResult', {
     questionIndex,
     correctAnswer: questionData?.correctAnswer,
+    correctLocation,
     geoChallenge: duel.mode === 'geo-challenge' && duel.geoChallengeRounds
       ? {
           correctOptionIds: duel.geoChallengeRounds[questionIndex].correctOptionIds,

@@ -18,7 +18,7 @@ vi.mock('../config/redis.js', () => ({
 
 vi.mock('../config/database.js', () => {
   const prismaStub = {
-    gameResult: { create: vi.fn() },
+    gameResult: { create: vi.fn(), findUnique: vi.fn().mockResolvedValue(null) },
     user: { update: vi.fn() },
   };
   return {

@@ -13,19 +13,18 @@ import {
 } from '../components';
 import { FullScreenError } from '../components/molecules/FullScreenError';
 import { MonumentAttribution } from '../components/MonumentAttribution';
-import { Question, SocketPayloadQuestion } from '../types';
-import { GAME_CONSTANTS } from '../constants/game';
+import { Question } from '../types';
 import { getApiErrorMessage } from '../utils/apiError';
 import { useHaptics } from '../hooks';
 import { areMechanicsV2Enabled } from '../config/featureFlags';
 import { trackUxEvent } from '../utils/uxTelemetry';
-import { getQuestionDuration, clampTimeRemainingForScoring } from '../utils/questionTiming';
+import { getQuestionDuration } from '../utils/questionTiming';
 
 const MapInteractive = lazy(() =>
   import('../components/MapInteractive').then((m) => ({ default: m.MapInteractive }))
 );
 
-const { TIME_PER_QUESTION, BASE_POINTS, MAX_TIME_BONUS, MAP_CORRECT_THRESHOLD_KM, MAP_MAX_DISTANCE_KM } = GAME_CONSTANTS;
+const TIME_PER_QUESTION = 10;
 
 export function ChallengeGamePage() {
   const { t } = useTranslation();
@@ -34,9 +33,8 @@ export function ChallengeGamePage() {
 
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [score, setScore] = useState(0);
-  const [correctAnswers, setCorrectAnswers] = useState(0);
-  const [results, setResults] = useState<Array<{ isCorrect: boolean }>>([]);
+  const [score, _setScore] = useState(0);
+  const [results, setResults] = useState<Array<{ isCorrect?: boolean }>>([]);
   // Respuestas crudas para el backend: el servidor las valida y calcula el score.
   const answersRef = useRef<
     Array<{
@@ -59,7 +57,7 @@ export function ChallengeGamePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [disabledOptionIndexes, setDisabledOptionIndexes] = useState<number[]>([]);
   const [mechanicsAvailable, setMechanicsAvailable] = useState({
-    intel5050: 1,
+    intel5050: 0,
     focusTime: 1,
     streakShield: 0,
   });
@@ -99,27 +97,6 @@ export function ChallengeGamePage() {
     }
   }, [id]);
 
-  const calculatePoints = (correct: boolean, mapDistanceKm?: number) => {
-    if (!correct) return 0;
-
-    // Clamp so CINEMA_GEO's extra read window doesn't inflate the time bonus.
-    const scoringTimeRemaining = clampTimeRemainingForScoring(
-      currentQuestion?.category,
-      timeRemaining,
-      timePerQuestion,
-    );
-
-    if (typeof mapDistanceKm === 'number') {
-      const accuracyFactor = Math.max(0, 1 - mapDistanceKm / MAP_MAX_DISTANCE_KM);
-      const accuracyPoints = Math.round(BASE_POINTS * accuracyFactor);
-      const timePoints = Math.round((scoringTimeRemaining / timePerQuestion) * MAX_TIME_BONUS * accuracyFactor);
-      return accuracyPoints + timePoints;
-    }
-
-    const timeBonus = Math.round((scoringTimeRemaining / timePerQuestion) * MAX_TIME_BONUS);
-    return BASE_POINTS + timeBonus;
-  };
-
   const handleTimeComplete = () => {
     if (!showResult) {
       handleSubmitAnswer();
@@ -128,31 +105,6 @@ export function ChallengeGamePage() {
 
   const handleSubmitAnswer = () => {
     if (!currentQuestion || showResult) return;
-
-    let isCorrect = false;
-    let mapDistance: number | undefined;
-
-    if (isMapQuestion) {
-      const sq = currentQuestion as unknown as SocketPayloadQuestion;
-      if (mapLocation && sq.latitude && sq.longitude) {
-        const R = 6371;
-        const dLat = ((sq.latitude - mapLocation.lat) * Math.PI) / 180;
-        const dLon = ((sq.longitude - mapLocation.lng) * Math.PI) / 180;
-        const a =
-          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-          Math.cos((mapLocation.lat * Math.PI) / 180) *
-            Math.cos((sq.latitude * Math.PI) / 180) *
-            Math.sin(dLon / 2) *
-            Math.sin(dLon / 2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        mapDistance = R * c;
-        isCorrect = mapDistance < MAP_CORRECT_THRESHOLD_KM;
-      }
-    } else {
-      isCorrect = selectedAnswer === (currentQuestion as unknown as SocketPayloadQuestion).correctAnswer;
-    }
-
-    const points = calculatePoints(isCorrect, mapDistance);
 
     if (answersRef.current.length <= currentIndex) {
       answersRef.current.push({
@@ -164,43 +116,20 @@ export function ChallengeGamePage() {
     }
 
     setPreviousScore(score);
-    if (isCorrect) {
-      setCorrectAnswers((prev) => prev + 1);
-      setScore((prev) => prev + points);
-      haptics.success();
-    } else {
-      haptics.error();
-    }
+    haptics.tap();
 
     setResults((prev) => {
       if (prev.length > currentIndex) {
         return prev;
       }
-      return [...prev, { isCorrect }];
+      return [...prev, {}];
     });
     setShowResult(true);
   };
 
   const handleUseIntel5050 = () => {
-    if (!mechanicsEnabled || !currentQuestion || isMapQuestion || showResult || mechanicsAvailable.intel5050 <= 0) return;
-
-    const selectedIndex = selectedAnswer ? currentQuestion.options.indexOf(selectedAnswer) : -1;
-    const incorrectIndexes = currentQuestion.options
-      .map((option, index) => ({ option, index }))
-      .filter(({ option, index }) => option !== (currentQuestion as unknown as SocketPayloadQuestion).correctAnswer && index !== selectedIndex)
-      .map(({ index }) => index);
-    if (incorrectIndexes.length === 0) return;
-
-    const removedIndexes = [...incorrectIndexes].sort(() => Math.random() - 0.5).slice(0, Math.min(2, incorrectIndexes.length));
-    setDisabledOptionIndexes(removedIndexes);
-    setMechanicsAvailable((prev) => ({ ...prev, intel5050: Math.max(0, prev.intel5050 - 1) }));
-    trackUxEvent('mechanic_used', {
-      mode: 'challenge',
-      questionId: currentQuestion.id,
-      value: removedIndexes.length,
-      meta: { key: 'intel5050' },
-    });
-    haptics.tap();
+    // Disabled in Challenge until server-authoritative mechanic support is available.
+    // Cannot determine incorrect options without access to correctAnswer from the server.
   };
 
   const handleUseFocusTime = () => {
@@ -229,7 +158,7 @@ export function ChallengeGamePage() {
         navigate(`/challenges/${id}/results`, {
           state: {
             score: response.result?.score ?? score,
-            correctAnswers: response.result?.correctCount ?? correctAnswers,
+            correctAnswers: response.result?.correctCount ?? 0,
             totalQuestions: questions.length,
           },
         });
@@ -347,13 +276,7 @@ export function ChallengeGamePage() {
             questionId={currentQuestion.id}
             onLocationSelect={(lat, lng) => setMapLocation({ lat, lng })}
             selectedLocation={mapLocation}
-            correctLocation={
-              (() => {
-                const sq = currentQuestion as unknown as SocketPayloadQuestion;
-                if (showResult && sq.latitude && sq.longitude) return { lat: sq.latitude, lng: sq.longitude };
-                return null;
-              })()
-            }
+            correctLocation={null}
             showResult={showResult}
             disabled={showResult}
           />
@@ -386,9 +309,6 @@ export function ChallengeGamePage() {
             ) : (
               <div className="flex items-center justify-between rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 py-2 text-sm text-[var(--color-text-secondary)] sm:max-w-xs">
                 <span>{t('game.questionOf', { current: currentIndex + 1, total: questions.length })}</span>
-                <span className="ml-3 rounded-full bg-green-500/20 px-2 py-0.5 text-xs font-semibold text-green-200">
-                  {correctAnswers}/{results.length || currentIndex + Number(showResult)}
-                </span>
               </div>
             )
           }

@@ -25,7 +25,6 @@ import {
   LocalizedText,
   MechanicUsage,
   Question,
-  SocketPayloadQuestion,
 } from '../types';
 import { GAME_CONSTANTS } from '../constants/game';
 import { useHaptics, useImagePreloader } from '../hooks';
@@ -111,6 +110,8 @@ export function DuelPage() {
   const [mapLocation, setMapLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [lastAnswerCorrect, setLastAnswerCorrect] = useState(false);
+  const [resultCorrectAnswer, setResultCorrectAnswer] = useState<string | undefined>(undefined);
+  const [resultCorrectLocation, setResultCorrectLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [duelResult, setDuelResult] = useState<DuelResult | null>(null);
   const [searchTime, setSearchTime] = useState(0);
   const [connectionNotice, setConnectionNotice] = useState<{
@@ -313,6 +314,8 @@ export function DuelPage() {
       setIsSyncingRound(false);
       setDisabledOptionIndexes([]);
       setPendingMechanicUsage(undefined);
+      setResultCorrectAnswer(undefined);
+      setResultCorrectLocation(null);
       hasSubmittedCurrentQuestionRef.current = false;
       setHasSubmittedThisQuestion(false);
       setConnectionNotice(null);
@@ -332,6 +335,8 @@ export function DuelPage() {
       setLastAnswerCorrect(wasCorrect);
       setMyScore(myResult?.totalScore ?? 0);
       setOpponentScore(rivalResult?.totalScore ?? 0);
+      setResultCorrectAnswer(data.correctAnswer ?? undefined);
+      setResultCorrectLocation(data.correctLocation ?? null);
       if (wasCorrect) {
         haptics.success();
       } else {
@@ -500,38 +505,8 @@ export function DuelPage() {
   };
 
   const handleUseIntel5050 = () => {
-    if (!currentQuestion || isMapQuestion || showResult || duelState !== 'playing') return;
-    if (!mechanicsEnabled || !mechanicsAllowed.includes('intel5050') || mechanicsAvailable.intel5050 <= 0) return;
-
-    const selectedIndex = selectedAnswer ? currentQuestion.options.indexOf(selectedAnswer) : -1;
-    const sq = currentQuestion as unknown as SocketPayloadQuestion;
-    const incorrectIndexes = currentQuestion.options
-      .map((option, index) => ({ option, index }))
-      .filter(({ option, index }) => option !== sq.correctAnswer && index !== selectedIndex)
-      .map(({ index }) => index);
-
-    if (incorrectIndexes.length === 0) return;
-    const removedIndexes = [...incorrectIndexes].sort(() => Math.random() - 0.5).slice(0, Math.min(2, incorrectIndexes.length));
-
-    setDisabledOptionIndexes(removedIndexes);
-    setMechanicsAvailable((prev) => ({
-      ...prev,
-      intel5050: Math.max(0, prev.intel5050 - 1),
-    }));
-    setPendingMechanicUsage({
-      key: 'intel5050',
-      action: 'trigger',
-      questionId: currentQuestion.id,
-      roundIndex: questionNumber - 1,
-      value: removedIndexes.length,
-    });
-    trackUxEvent('mechanic_used', {
-      mode: 'duel',
-      questionId: currentQuestion.id,
-      value: removedIndexes.length,
-      meta: { key: 'intel5050' },
-    });
-    haptics.tap();
+    // Disabled until server-authoritative mechanic support is available.
+    // Cannot determine incorrect options without access to correctAnswer from the question payload.
   };
 
   const handleUseFocusTime = () => {
@@ -1020,13 +995,7 @@ export function DuelPage() {
             questionId={currentQuestion.id}
             onLocationSelect={(lat, lng) => setMapLocation({ lat, lng })}
             selectedLocation={mapLocation}
-            correctLocation={
-              (() => {
-                const sq = currentQuestion as unknown as SocketPayloadQuestion;
-                if (showResult && sq.latitude && sq.longitude) return { lat: sq.latitude, lng: sq.longitude };
-                return null;
-              })()
-            }
+            correctLocation={showResult ? resultCorrectLocation : null}
             showResult={showResult}
             disabled={showResult || duelState === 'waiting'}
           />
@@ -1056,7 +1025,7 @@ export function DuelPage() {
           }
           showResultBadge
           isCorrect={lastAnswerCorrect}
-          correctAnswer={showResult && !lastAnswerCorrect ? (currentQuestion as unknown as SocketPayloadQuestion)?.correctAnswer : undefined}
+          correctAnswer={showResult && !lastAnswerCorrect ? resultCorrectAnswer : undefined}
           onSubmit={handleSubmitAnswer}
           summarySlot={
             mechanicsEnabled ? (

@@ -10,7 +10,6 @@ import {
   Category,
   Difficulty,
   Question,
-  SocketPayloadQuestion,
   SurvivalPlayerInfo,
   SurvivalPlayerResult,
   SurvivalRanking,
@@ -123,6 +122,8 @@ export function SurvivalPage() {
   const [notice, setNotice] = useState<string | null>(null);
   const [lifeGainedNotice, setLifeGainedNotice] = useState<string | null>(null);
   const [myLastAnswerCorrect, setMyLastAnswerCorrect] = useState(false);
+  const [resultCorrectAnswer, setResultCorrectAnswer] = useState<string>('');
+  const [resultCorrectLocation, setResultCorrectLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [survivalImageUrls, setSurvivalImageUrls] = useState<string[]>([]);
   useImagePreloader(survivalImageUrls, 0); // skip=0: aún no hay ninguna imagen mostrándose
 
@@ -266,10 +267,13 @@ export function SurvivalPage() {
     socket.on('survival:question-result', (data: {
       round: number;
       correctAnswer: string;
+      correctLocation?: { lat: number; lng: number } | null;
       playerResults: SurvivalPlayerResult[];
       eliminatedThisRound: string[];
     }) => {
       setShowResult(true);
+      setResultCorrectAnswer(data.correctAnswer ?? '');
+      setResultCorrectLocation(data.correctLocation ?? null);
 
       const myResult = data.playerResults.find((r) => r.userId === user?.id);
       setMyLastAnswerCorrect(myResult?.isCorrect ?? false);
@@ -870,13 +874,7 @@ export function SurvivalPage() {
             questionId={currentQuestion.id}
             onLocationSelect={handleLocationSelect}
             selectedLocation={mapLocation}
-            correctLocation={
-              (() => {
-                const sq = currentQuestion as unknown as SocketPayloadQuestion;
-                if (showResult && sq.latitude != null) return { lat: sq.latitude, lng: sq.longitude! };
-                return null;
-              })()
-            }
+            correctLocation={showResult ? resultCorrectLocation : null}
             showResult={showResult}
             disabled={showResult || isSpectating}
           />
@@ -904,7 +902,7 @@ export function SurvivalPage() {
           }
           showResultBadge
           isCorrect={myLastAnswerCorrect}
-          correctAnswer={showResult && !myLastAnswerCorrect ? (currentQuestion as unknown as SocketPayloadQuestion).correctAnswer : undefined}
+          correctAnswer={showResult && !myLastAnswerCorrect ? resultCorrectAnswer : undefined}
           onSubmit={handleSubmitAnswer}
         />
       }

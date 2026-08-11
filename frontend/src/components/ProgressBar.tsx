@@ -1,14 +1,14 @@
 interface ProgressBarProps {
   current: number;
   total: number;
-  results: Array<{ isCorrect: boolean }>;
+  results: Array<{ isCorrect?: boolean }>;
   showCurrentResult?: boolean;
 }
 
 export function getQuestionIndicatorStatus(
   index: number,
   current: number,
-  results: Array<{ isCorrect: boolean }>,
+  results: Array<{ isCorrect?: boolean }>,
   showCurrentResult = false
 ) {
   const currentIndex = Math.max(0, current - 1);
@@ -20,7 +20,7 @@ export function getQuestionIndicatorStatus(
   const answeredCount = showCurrentResult ? results.length : Math.min(results.length, currentIndex);
 
   if (index < answeredCount) {
-    return results[index]?.isCorrect ? 'correct' : 'incorrect';
+    return results[index]?.isCorrect === true ? 'correct' : results[index]?.isCorrect === false ? 'incorrect' : 'pending';
   }
 
   if (index === currentIndex) {
