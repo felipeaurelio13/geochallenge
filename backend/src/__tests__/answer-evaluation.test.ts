@@ -115,4 +115,75 @@ describe('evaluateTimedAnswers', () => {
     );
     expect(score).toBe(150);
   });
+
+  it('answers=[] produce un detail incorrecto por cada pregunta', () => {
+    const subset = QUESTIONS.slice(0, 3);
+    const result = evaluateTimedAnswers(subset, [], 10);
+
+    expect(result.score).toBe(0);
+    expect(result.correctCount).toBe(0);
+    expect(result.details).toHaveLength(3);
+    for (const d of result.details) {
+      expect(d.isCorrect).toBe(false);
+      expect(d.points).toBe(0);
+      expect(d.timeRemaining).toBe(0);
+    }
+  });
+
+  it('1 answer de 3 questions: 2 faltantes incorrectas', () => {
+    const subset = QUESTIONS.slice(0, 3);
+    const result = evaluateTimedAnswers(
+      subset,
+      [{ questionId: 'q1', answer: 'Chile', timeRemaining: 5 }],
+      10
+    );
+
+    expect(result.details).toHaveLength(3);
+    const answered = result.details.find((d) => d.questionId === 'q1');
+    expect(answered?.isCorrect).toBe(true);
+    expect(answered?.points).toBeGreaterThan(0);
+
+    const missing = result.details.filter((d) => d.questionId !== 'q1');
+    expect(missing).toHaveLength(2);
+    for (const d of missing) {
+      expect(d.isCorrect).toBe(false);
+      expect(d.points).toBe(0);
+      expect(d.timeRemaining).toBe(0);
+    }
+  });
+
+  it('3 answers de 3 questions: comportamiento existente intacto', () => {
+    const subset = QUESTIONS.slice(0, 3);
+    const result = evaluateTimedAnswers(
+      subset,
+      [
+        { questionId: 'q1', answer: 'Chile', timeRemaining: 5 },
+        { questionId: 'q2', answer: 'Lima', timeRemaining: 5 },
+        { questionId: 'q3', mapAnswer: { lat: -33.45, lng: -70.66 }, timeRemaining: 10 },
+      ],
+      10
+    );
+
+    expect(result.details).toHaveLength(3);
+    expect(result.correctCount).toBe(3);
+    expect(result.score).toBeGreaterThan(0);
+    for (const d of result.details) {
+      expect(d.isCorrect).toBe(true);
+      expect(d.points).toBeGreaterThan(0);
+    }
+  });
+
+  it('duplicate questionId sigue rechazándose', () => {
+    const subset = QUESTIONS.slice(0, 3);
+    expect(() =>
+      evaluateTimedAnswers(
+        subset,
+        [
+          { questionId: 'q1', answer: 'Chile', timeRemaining: 5 },
+          { questionId: 'q1', answer: 'Chile', timeRemaining: 5 },
+        ],
+        10
+      )
+    ).toThrow(/más de una vez/);
+  });
 });

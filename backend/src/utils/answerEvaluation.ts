@@ -126,5 +126,11 @@ export function evaluateTimedAnswers(
     });
   }
 
+  for (const question of questions) {
+    if (!seen.has(question.id)) {
+      details.push({ questionId: question.id, isCorrect: false, points: 0, timeRemaining: 0 });
+    }
+  }
+
   return { score, correctCount, details };
 }

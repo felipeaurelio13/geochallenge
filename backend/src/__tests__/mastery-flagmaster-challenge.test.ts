@@ -53,7 +53,6 @@ const mocks = vi.hoisted(() => {
 vi.mock('../config/database.js', () => ({ prisma: mocks.prismaStub }));
 
 import { applyMasteryAttemptsForRun } from '../services/mastery.service.js';
-import { challengeService } from '../services/challenge.service.js';
 
 describe('Challenge — $transaction wraps participant update + mastery', () => {
   beforeEach(() => {
@@ -167,5 +166,32 @@ describe('Challenge — $transaction wraps participant update + mastery', () => 
         expect.objectContaining({ skipDuplicates: true })
       );
     }
+  });
+
+  it('submitChallengeResult with answers=[] produces mastery for all questions', async () => {
+    // Verify that evaluateTimedAnswers returns details for ALL questions
+    // even when answers=[] — this is what challengeService passes to
+    // applyMasteryAttemptsForRun.
+    const { evaluateTimedAnswers } = await import('../utils/answerEvaluation.js');
+
+    const questions = [
+      { id: 'q1', category: 'FLAG', correctAnswer: 'Chile' },
+      { id: 'q2', category: 'CAPITAL', correctAnswer: 'Lima' },
+      { id: 'q3', category: 'FLAG', correctAnswer: 'Peru' },
+    ];
+
+    const { details } = evaluateTimedAnswers(questions, [], 10);
+
+    expect(details).toHaveLength(3);
+    expect(details.map(d => d.questionId).sort()).toEqual(['q1', 'q2', 'q3']);
+    for (const d of details) {
+      expect(d.isCorrect).toBe(false);
+      expect(d.points).toBe(0);
+    }
+
+    // Simulate what challengeService does:
+    const masteryAnswers = details.map((d) => ({ questionId: d.questionId, isCorrect: d.isCorrect }));
+    expect(masteryAnswers).toHaveLength(3);
+    expect(masteryAnswers.every(a => a.isCorrect === false)).toBe(true);
   });
 });
