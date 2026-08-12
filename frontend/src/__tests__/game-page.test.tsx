@@ -41,6 +41,15 @@ const mocks = vi.hoisted(() => ({
   },
 }));
 
+const uxMocks = vi.hoisted(() => ({
+  trackUxEvent: vi.fn(),
+}));
+
+const confirmDialogStable = vi.hoisted(() => ({
+  confirm: vi.fn().mockResolvedValue(true),
+  confirmDialog: null,
+}));
+
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigateMock,
   useSearchParams: () => [new URLSearchParams(mockedSearchParams)],
@@ -73,6 +82,18 @@ vi.mock('../context/GameContext', () => ({
     setTimeRemaining: mocks.setTimeRemainingMock,
   }),
 }));
+
+vi.mock('../utils/uxTelemetry', () => ({
+  trackUxEvent: uxMocks.trackUxEvent,
+}));
+
+vi.mock('../hooks', async () => {
+  const actual = await vi.importActual<typeof import('../hooks')>('../hooks');
+  return {
+    ...actual,
+    useConfirmDialog: () => confirmDialogStable,
+  };
+});
 
 vi.mock('../components', () => ({
   Timer: () => <div>timer</div>,
@@ -286,5 +307,81 @@ describe('GamePage ending flow', () => {
     fireEvent.click(screen.getByRole('button', { name: 'game.submit' }));
     await screen.findByText('game.correct');
     expect(screen.getByText('score:1')).toBeInTheDocument();
+  });
+});
+
+describe('GamePage abandonment guard', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockedSearchParams = 'category=MIXED';
+    mocks.gameState.questions = [
+      {
+        id: 'q1',
+        questionText: 'Capital de Chile',
+        options: ['Santiago', 'Lima', 'Bogotá', 'Quito'],
+        correctAnswer: 'Santiago',
+        category: 'CAPITAL',
+      },
+    ];
+    mocks.gameState.currentIndex = 0;
+    mocks.gameState.score = 100;
+    mocks.gameState.results = [{ isCorrect: true }];
+    mocks.gameState.status = 'playing';
+    mocks.submitAnswerMock.mockResolvedValue({ isCorrect: true });
+    confirmDialogStable.confirm.mockResolvedValue(true);
+  });
+
+  function abandonCallCount() {
+    return uxMocks.trackUxEvent.mock.calls.filter(
+      (call: unknown[]) => call[0] === 'game_abandoned'
+    ).length;
+  }
+
+  it('exit click + unmount: fires exactly 1 game_abandoned', async () => {
+    const { unmount } = render(<GamePage />);
+
+    await screen.findByRole('button', { name: 'game.exit' });
+
+    fireEvent.click(screen.getByRole('button', { name: 'game.exit' }));
+
+    await waitFor(() => {
+      expect(mocks.navigateMock).toHaveBeenCalledWith('/menu');
+    });
+
+    unmount();
+
+    expect(abandonCallCount()).toBe(1);
+  });
+
+  it('finish + unmount: fires 0 game_abandoned', async () => {
+    const { unmount } = render(<GamePage />);
+
+    await screen.findByRole('button', { name: 'game.exit' });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Santiago' }));
+    fireEvent.click(screen.getByRole('button', { name: 'game.submit' }));
+
+    await screen.findByText('game.correct');
+
+    const seeResultsButton = await screen.findByRole('button', { name: 'game.seeResults' });
+    fireEvent.click(seeResultsButton);
+
+    await waitFor(() => {
+      expect(mocks.finishGameMock).toHaveBeenCalledTimes(1);
+    });
+
+    unmount();
+
+    expect(abandonCallCount()).toBe(0);
+  });
+
+  it('unmount during game: fires exactly 1 game_abandoned', async () => {
+    const { unmount } = render(<GamePage />);
+
+    await screen.findByRole('button', { name: 'game.exit' });
+
+    unmount();
+
+    expect(abandonCallCount()).toBe(1);
   });
 });
