@@ -349,6 +349,21 @@ export async function selectAdaptivePracticeQuestions(
   const now = Date.now();
   const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
+  const recentAttempts = await prisma.masteryAttempt.findMany({
+    where: {
+      userId,
+      occurredAt: { gte: new Date(now - ONE_DAY_MS) },
+    },
+    select: { questionId: true, occurredAt: true },
+  });
+  const recentQuestionSeenAt = new Map<string, number>();
+  for (const a of recentAttempts) {
+    const existing = recentQuestionSeenAt.get(a.questionId);
+    if (!existing || a.occurredAt.getTime() > existing) {
+      recentQuestionSeenAt.set(a.questionId, a.occurredAt.getTime());
+    }
+  }
+
   const candidates: CandidateQuestion[] = questions
     .filter((q) => q.countryCode)
     .map((q) => {
@@ -359,7 +374,9 @@ export async function selectAdaptivePracticeQuestions(
 
       if (skillStats.lastIncorrect) priority += 35;
       if (skillStats.attempts === 0) priority += 15;
-      if (skillStats.lastSeenAt && (now - skillStats.lastSeenAt) < ONE_DAY_MS) priority -= 40;
+
+      const lastQuestionSeenAt = recentQuestionSeenAt.get(q.id);
+      if (lastQuestionSeenAt && (now - lastQuestionSeenAt) < ONE_DAY_MS) priority -= 40;
 
       priority += Math.random() * 5;
 

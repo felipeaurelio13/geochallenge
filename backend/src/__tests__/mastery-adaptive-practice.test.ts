@@ -159,17 +159,38 @@ describe('selectAdaptivePracticeQuestions', () => {
     ];
     mocks.questionFindMany.mockResolvedValue(questions);
 
-    // ALL categories for CL were answered recently, AR is untouched
+    // CL questions were answered recently (per-question recency), AR is untouched
     mocks.masteryAttemptFindMany.mockResolvedValue([
-      { countryCode: 'CL', category: 'FLAG', isCorrect: true, occurredAt: new Date() },
-      { countryCode: 'CL', category: 'CAPITAL', isCorrect: true, occurredAt: new Date() },
-      { countryCode: 'CL', category: 'MAP', isCorrect: true, occurredAt: new Date() },
+      { questionId: 'q_CL_0', countryCode: 'CL', category: 'FLAG', isCorrect: true, occurredAt: new Date() },
+      { questionId: 'q_CL_1', countryCode: 'CL', category: 'CAPITAL', isCorrect: true, occurredAt: new Date() },
+      { questionId: 'q_CL_2', countryCode: 'CL', category: 'MAP', isCorrect: true, occurredAt: new Date() },
     ]);
 
     const result = await selectAdaptivePracticeQuestions('u1', 2);
 
-    // AR should be preferred since CL was answered recently
+    // AR should be preferred since CL questions were answered recently
     expect(result[0]).toContain('AR');
+  });
+
+  it('recency penalty is per-question, not per-skill', async () => {
+    // Same country + same category: CL FLAG q1 answered 1h ago, q2 never answered
+    const clFlagQ1 = { id: 'q_CL_0', countryCode: 'CL', category: Category.FLAG, difficulty: Difficulty.MEDIUM, isAvailable: true };
+    const clFlagQ2 = { id: 'q_CL_1', countryCode: 'CL', category: Category.FLAG, difficulty: Difficulty.MEDIUM, isAvailable: true };
+    const arFlagQ1 = { id: 'q_AR_0', countryCode: 'AR', category: Category.FLAG, difficulty: Difficulty.MEDIUM, isAvailable: true };
+    const questions = [clFlagQ2, clFlagQ1, arFlagQ1];
+    mocks.questionFindMany.mockResolvedValue(questions);
+    mocks.masteryAttemptFindMany.mockResolvedValue([
+      { questionId: 'q_CL_0', countryCode: 'CL', category: 'FLAG', isCorrect: true, occurredAt: new Date() },
+    ]);
+
+    const result = await selectAdaptivePracticeQuestions('u1', 2);
+
+    // q_CL_0 was just answered → -40 recency penalty → lower priority
+    // q_CL_1 was NOT answered → no recency penalty → higher priority
+    // q_AR_0 → same base priority as q_CL_1 (both unseen) but jitter decides
+    // Result: q_CL_1 should be selected before q_CL_0
+    expect(result).toContain('q_CL_1');
+    expect(result[0]).not.toBe('q_CL_0');
   });
 
   it('preserves diversity by category when pool is sufficient', async () => {

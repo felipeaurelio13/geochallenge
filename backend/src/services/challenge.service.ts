@@ -309,19 +309,23 @@ export class ChallengeService {
       challenge.answerTimeSeconds
     );
 
-    await prisma.challengeParticipant.update({
-      where: { id: participant.id },
-      data: {
-        score,
-        correctCount,
-        completedAt: new Date(),
-      },
-    });
-
-    // Register mastery attempts
-    const runId = `challenge:${challengeId}:${userId}`;
     const masteryAnswers = details.map((d) => ({ questionId: d.questionId, isCorrect: d.isCorrect }));
-    await applyMasteryAttemptsForRun(prisma, userId, runId, GameMode.CHALLENGE, GameVariant.CLASSIC, masteryAnswers);
+    const runId = `challenge:${challengeId}:${userId}`;
+
+    // Atomic: participant update + mastery registration.
+    // If mastery fails, participant.score stays null and user can retry.
+    await prisma.$transaction(async (tx) => {
+      await tx.challengeParticipant.update({
+        where: { id: participant.id },
+        data: {
+          score,
+          correctCount,
+          completedAt: new Date(),
+        },
+      });
+
+      await applyMasteryAttemptsForRun(tx, userId, runId, GameMode.CHALLENGE, GameVariant.CLASSIC, masteryAnswers);
+    });
 
     // Telemetry: game_started idempotente + question_answered por cada detalle + game_finished
     trackServerEvent({

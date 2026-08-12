@@ -3,14 +3,6 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import React from 'react';
 
-const mockGameState = vi.hoisted(() => {
-  let _state: any = null;
-  return {
-    setState: (s: any) => { _state = s; },
-    getState: () => _state,
-  };
-});
-
 vi.mock('../context/GameContext', () => {
   const ctx = {
     state: {

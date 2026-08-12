@@ -457,14 +457,35 @@ export async function getQuestionsForGame(
   const selectedQuestions = selectRandom(questions, count);
 
   // Formatear para el cliente
-  return selectedQuestions.map((q) => ({
+  return selectedQuestions.map(formatGameQuestion);
+}
+
+function formatGameQuestion(q: {
+  id: string;
+  category: Category;
+  questionData: string | null;
+  options: string[];
+  correctAnswer: string;
+  difficulty: string | null;
+  imageUrl: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  continent: string | null;
+  subregion: string | null;
+  isInsular: boolean | null;
+  isLandlocked: boolean | null;
+  populationTier: string | null;
+  areaTier: string | null;
+  countryCode: string | null;
+}): GameQuestion {
+  return {
     id: q.id,
     category: q.category,
     questionText: generateQuestionText(q),
     options: shuffleArray(q.options),
     correctAnswer: q.correctAnswer,
-    difficulty: q.difficulty,
-    questionData: q.questionData,
+    difficulty: q.difficulty || undefined,
+    questionData: q.questionData || undefined,
     imageUrl: q.imageUrl || undefined,
     latitude: q.category === Category.MAP ? q.latitude || undefined : undefined,
     longitude: q.category === Category.MAP ? q.longitude || undefined : undefined,
@@ -475,7 +496,26 @@ export async function getQuestionsForGame(
     populationTier: q.populationTier || undefined,
     areaTier: q.areaTier || undefined,
     countryCode: q.countryCode || undefined,
-  }));
+  };
+}
+
+export async function getGameQuestionsByIds(questionIds: string[]): Promise<GameQuestion[]> {
+  if (questionIds.length === 0) return [];
+
+  const questions = await prisma.question.findMany({
+    where: {
+      id: { in: questionIds },
+      isAvailable: true,
+    },
+  });
+
+  const questionMap = new Map(questions.map((q) => [q.id, q]));
+
+  return questionIds.map((id) => {
+    const q = questionMap.get(id);
+    if (!q) return null;
+    return formatGameQuestion(q);
+  }).filter(Boolean) as GameQuestion[];
 }
 
 export async function getAvailableQuestionsCount(

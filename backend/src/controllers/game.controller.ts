@@ -143,7 +143,7 @@ const finishGameSchema = z.object({
         .optional(),
     })
   ).optional(),
-  gameType: gameTypeSchema.optional().default('single'),
+  gameType: z.string().optional(),
   category: z.nativeEnum(Category).optional(),
 });
 
@@ -532,8 +532,8 @@ router.post('/mechanic', optionalAuth, async (req: AuthRequest, res: Response) =
       return;
     }
 
-    // Variant check: mechanics not allowed for STREAK
-    if (session.variant === 'STREAK') {
+    // Variant check: mechanics not allowed for STREAK or PRACTICE
+    if (session.variant === 'STREAK' || session.variant === 'PRACTICE') {
       res.status(400).json({ error: 'Mecánicas no disponibles en este modo.', code: 'MECHANIC_VARIANT_REJECTED' });
       return;
     }

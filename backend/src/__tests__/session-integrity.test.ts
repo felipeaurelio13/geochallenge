@@ -360,6 +360,39 @@ describe('POST /game/mechanic — 50/50 server-side', () => {
       expect(((await res.json()) as { code: string }).code).toBe('MECHANIC_UNAVAILABLE');
     } finally { server.close(); }
   });
+
+  it('rejects mechanic for PRACTICE session → MECHANIC_VARIANT_REJECTED', async () => {
+    const { server, baseUrl } = startServer();
+    const correctAnswers: Record<string, string> = {};
+    const optionsPerQuestion: Record<string, string[]> = {};
+    for (const q of mocks.TEST_QUESTIONS) {
+      correctAnswers[q.id] = q.correctAnswer;
+      optionsPerQuestion[q.id] = [...q.options];
+    }
+    mocks.sessionStore.set('practice-session', {
+      sessionId: 'practice-session',
+      userId: 'user-1',
+      gameMode: 'SINGLE',
+      variant: 'PRACTICE',
+      category: 'MIXED',
+      questionIds: mocks.TEST_QUESTIONS.map((q: { id: string }) => q.id),
+      correctAnswers,
+      optionsPerQuestion,
+      answeredQuestionIds: [],
+      questionResults: {},
+      mechanicsUsage: {},
+      createdAt: Date.now(),
+      expiresAt: Date.now() + 7200000,
+    });
+    try {
+      const res = await fetch(`${baseUrl}/api/game/mechanic`, {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ sessionId: 'practice-session', questionId: 'q-1', mechanic: 'intel5050' }),
+      });
+      expect(res.status).toBe(400);
+      expect(((await res.json()) as { code: string }).code).toBe('MECHANIC_VARIANT_REJECTED');
+    } finally { server.close(); }
+  });
 });
 
 describe('GET /game/daily — no correctAnswer leakage', () => {

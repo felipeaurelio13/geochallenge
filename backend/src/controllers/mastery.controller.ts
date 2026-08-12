@@ -9,9 +9,8 @@ import {
 } from '../services/mastery.service.js';
 import {
   createGameSession,
-  getQuestionsForGame,
+  getGameQuestionsByIds,
   toPublicQuestion,
-  type GameQuestion,
 } from '../services/game.service.js';
 import { config } from '../config/env.js';
 import { respondWithError } from '../utils/respondWithError.js';
@@ -69,19 +68,23 @@ router.post('/practice/start', authenticateJWT, async (req: AuthRequest, res: Re
       return;
     }
 
-    const questions = await getQuestionsForGame(Category.MIXED, questionIds.length, []);
+    const questions = await getGameQuestionsByIds(questionIds);
 
-    const matchingQuestions = questions.filter((q) => questionIds.includes(q.id));
-    const orderedQuestions = questionIds
-      .map((id) => matchingQuestions.find((q) => q.id === id))
-      .filter(Boolean) as GameQuestion[];
+    if (questions.length < questionIds.length) {
+      res.status(409).json({
+        error: 'No se pudieron recuperar todas las preguntas seleccionadas. Intenta de nuevo.',
+        code: 'GAME_NOT_ENOUGH_QUESTIONS',
+        params: { available: questions.length, requested: questionIds.length },
+      });
+      return;
+    }
 
     const sessionId = await createGameSession({
       userId,
       gameMode: GameMode.SINGLE,
       variant: GameVariant.PRACTICE,
       category: Category.MIXED,
-      questions: orderedQuestions,
+      questions,
     });
 
     trackServerEvent({
@@ -92,16 +95,16 @@ router.post('/practice/start', authenticateJWT, async (req: AuthRequest, res: Re
       variant: GameVariant.PRACTICE,
       category: Category.MIXED,
       properties: {
-        questionCount: orderedQuestions.length,
+        questionCount: questions.length,
         countryCode: countryCode ?? null,
       },
     });
 
     res.json({
       sessionId,
-      questions: orderedQuestions.map(toPublicQuestion),
+      questions: questions.map(toPublicQuestion),
       gameConfig: {
-        questionsCount: orderedQuestions.length,
+        questionsCount: questions.length,
         timePerQuestion: config.game.timePerQuestion,
         category: Category.MIXED,
         gameType: 'practice',

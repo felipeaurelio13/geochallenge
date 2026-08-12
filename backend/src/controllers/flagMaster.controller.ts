@@ -318,9 +318,10 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
       }
     }
 
-    // Persistir en transacción: GameResult + gamesPlayed juntos.
-    // Solo el request que crea el registro incrementa gamesPlayed.
+    // Persistir en transacción: GameResult + MasteryAttempt + gamesPlayed juntos.
+    // Solo el request que crea el registro incrementa gamesPlayed y crea mastery.
     const { prisma: db } = await import('../config/database.js');
+    const masteryAnswers = rounds.map((r) => ({ questionId: r.questionId, isCorrect: r.isCorrect }));
     let persistedGameId: string;
     let created = false;
 
@@ -343,6 +344,15 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
             details: { flagMaster: true, rounds: rounds as unknown as Prisma.InputJsonValue },
           },
         });
+
+        await applyMasteryAttemptsForRun(
+          tx,
+          req.user!.userId,
+          gameId as string,
+          GameMode.SINGLE,
+          GameVariant.FLAG_MASTER,
+          masteryAnswers,
+        );
 
         await tx.user.update({
           where: { id: req.user!.userId },
