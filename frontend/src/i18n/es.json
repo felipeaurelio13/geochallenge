@@ -125,14 +125,76 @@
     "howToPlay": "Cómo se juega",
     "howToPlayAria": "Cómo se juega {{mode}}",
     "journey": {
-      "title": "Tu viaje",
-      "stamped": "países sellados",
+      "title": "Tu viaje por el mundo",
+      "startTitle": "Empieza tu viaje por el mundo",
+      "stamped": "países explorados",
       "ofWorld": "del mundo",
-      "continue": "Continuar viaje",
+      "mastered": "dominados",
+      "globalDominance": "Dominio global",
+      "continue": "Seguir explorando",
       "passport": "Pasaporte",
       "start": "Comienza tu viaje por el mundo",
       "startFirst": "Empezar a explorar",
-      "zeroStamps": "0 países sellados"
+      "zeroStamps": "0 de {{total}} países explorados",
+      "startDesc": "Cada partida te ayuda a descubrir y dominar nuevos países."
+    },
+    "daily": {
+      "title": "Reto del día",
+      "available": "Disponible",
+      "completed": "Completado",
+      "desc": "10 preguntas · mismas para todos · un intento",
+      "play": "Jugar reto de hoy",
+      "viewResult": "Ver resultado",
+      "todayScore": "Hoy: {{correct}} / {{total}}",
+      "streak": "Racha: {{days}} días",
+      "fallbackDesc": "10 preguntas para poner a prueba tu mundo.",
+      "fallbackPlay": "Jugar"
+    },
+    "choose": {
+      "title": "¿Qué quieres hacer?",
+      "practice": "Practicar",
+      "practiceDesc": "A tu manera",
+      "compete": "Competir",
+      "competeDesc": "Contra otros"
+    },
+    "practice": {
+      "title": "Practicar",
+      "subtitle": "Elige qué quieres entrenar.",
+      "categories": "Categorías",
+      "formats": "Formato",
+      "classic": "Clásico",
+      "classicDesc": "10 preguntas a tu ritmo",
+      "flash": "Flash",
+      "flashDesc": "Rápido · 2 opciones",
+      "streak": "Racha",
+      "streakDesc": "Sigue mientras aciertes",
+      "flashDisabledMap": "El modo Flash no admite mapas — elige otra categoría"
+    },
+    "compete": {
+      "title": "Competir",
+      "subtitle": "Pon a prueba lo que sabes contra otros.",
+      "category": "Categoría",
+      "duel": "Duelo",
+      "duelDesc": "En vivo · 1 vs 1",
+      "challenge": "Desafío",
+      "challengeDesc": "Invita a otros · juega cuando quieras",
+      "survival": "Supervivencia",
+      "survivalDesc": "Último jugador en pie"
+    },
+    "special": {
+      "flagMaster": "Maestro de Banderas",
+      "flagMasterDesc": "10 rondas · sin color, recortes y trampas",
+      "geoChallenges": "GeoRetos",
+      "geoChallengesDesc": "5 retos · extremos, comparaciones, fronteras",
+      "geoChallengesDuel": "GeoRetos Duel",
+      "geoChallengesDuelDesc": "10 preguntas · 1 contra 1"
+    },
+    "more": {
+      "title": "Más",
+      "rankings": "Rankings",
+      "rankingsDesc": "Mira el top global y tu posición",
+      "stats": "Mis estadísticas",
+      "statsDesc": "Estadísticas, duelos y rivales"
     },
     "letsPlay": "¡Jugar!"
   },

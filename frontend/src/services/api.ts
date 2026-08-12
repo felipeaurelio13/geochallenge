@@ -17,6 +17,7 @@ import type {
   GameFilters,
   CategoryStat,
   DailyResult,
+  DailyStatus,
   EarnedAchievement,
   FlagMasterStartResponse,
   FlagMasterFinishResponse,
@@ -498,6 +499,13 @@ class ApiService {
       alreadyPlayed: boolean;
       result?: DailyResult;
     }>('/game/daily', { params: { clientDate: getLocalDateString() } });
+    return response.data;
+  }
+
+  async getDailyStatus() {
+    const response = await this.client.get<DailyStatus>('/game/daily/status', {
+      params: { clientDate: getLocalDateString() },
+    });
     return response.data;
   }
 

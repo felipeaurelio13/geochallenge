@@ -7,6 +7,11 @@ const mockGetMasterySummary = vi.fn();
 vi.mock('../services/api', () => ({
   api: {
     getMasterySummary: (...args: any[]) => mockGetMasterySummary(...args),
+    getDailyStatus: vi.fn().mockResolvedValue({
+      today: '2026-08-12',
+      completed: false,
+      dailyStreak: 0,
+    }),
   },
 }));
 
@@ -50,14 +55,56 @@ vi.mock('react-i18next', () => ({
         'categories.monuments': 'Monumentos',
         'categories.cinemaGeo': 'Cine & Geo',
         'categories.mixed': 'Mixto',
-        'menu.journey.title': 'Tu viaje',
-        'menu.journey.stamped': 'países sellados',
-        'menu.journey.ofWorld': 'del mundo',
-        'menu.journey.continue': 'Continuar viaje',
+        'menu.journey.title': 'Tu viaje por el mundo',
+        'menu.journey.stamped': 'países explorados',
+        'menu.journey.mastered': 'dominados',
+        'menu.journey.globalDominance': 'Dominio global',
+        'menu.journey.continue': 'Seguir explorando',
         'menu.journey.passport': 'Pasaporte',
         'menu.journey.start': 'Comienza tu viaje por el mundo',
+        'menu.journey.startTitle': 'Empieza tu viaje por el mundo',
         'menu.journey.startFirst': 'Empezar a explorar',
-        'menu.journey.zeroStamps': '0 países sellados',
+        'menu.journey.zeroStamps': '0 de {{total}} países explorados',
+        'menu.journey.startDesc': 'Cada partida te ayuda a descubrir y dominar nuevos países.',
+        'menu.daily.title': 'Reto del día',
+        'menu.daily.available': 'Disponible',
+        'menu.daily.desc': '10 preguntas',
+        'menu.daily.play': 'Jugar reto de hoy',
+        'menu.choose.title': '¿Qué quieres hacer?',
+        'menu.choose.practice': 'Practicar',
+        'menu.choose.practiceDesc': 'A tu manera',
+        'menu.choose.compete': 'Competir',
+        'menu.choose.competeDesc': 'Contra otros',
+        'menu.practice.title': 'Practicar',
+        'menu.practice.subtitle': 'Elige qué quieres entrenar.',
+        'menu.practice.categories': 'Categorías',
+        'menu.practice.formats': 'Formato',
+        'menu.practice.classic': 'Clásico',
+        'menu.practice.classicDesc': '10 preguntas a tu ritmo',
+        'menu.practice.flash': 'Flash',
+        'menu.practice.flashDesc': 'Rápido · 2 opciones',
+        'menu.practice.streak': 'Racha',
+        'menu.practice.streakDesc': 'Sigue mientras aciertes',
+        'menu.compete.title': 'Competir',
+        'menu.compete.subtitle': 'Pon a prueba lo que sabes contra otros.',
+        'menu.compete.category': 'Categoría',
+        'menu.compete.duel': 'Duelo',
+        'menu.compete.duelDesc': 'En vivo · 1 vs 1',
+        'menu.compete.challenge': 'Desafío',
+        'menu.compete.challengeDesc': 'Invita a otros',
+        'menu.compete.survival': 'Supervivencia',
+        'menu.compete.survivalDesc': 'Último jugador en pie',
+        'menu.special.flagMaster': 'Maestro de Banderas',
+        'menu.special.flagMasterDesc': '10 rondas',
+        'menu.special.geoChallenges': 'GeoRetos',
+        'menu.special.geoChallengesDesc': '5 retos',
+        'menu.special.geoChallengesDuel': 'GeoRetos Duel',
+        'menu.special.geoChallengesDuelDesc': '10 preguntas',
+        'menu.more.title': 'Más',
+        'menu.more.rankings': 'Rankings',
+        'menu.more.rankingsDesc': 'Mira el top global',
+        'menu.more.stats': 'Mis estadísticas',
+        'menu.more.statsDesc': 'Estadísticas',
         'howto.flash.objective': 'Contesta 60 preguntas en 60s',
         'howto.flash.rule': '+1 punto por acierto',
         'howto.streak.objective': 'Sigue respondiendo',
@@ -72,12 +119,23 @@ vi.mock('react-i18next', () => ({
         'howto.survival.rule': 'Último en pie gana',
         'common.backToMenu': 'Volver',
         'common.ready': '¡Listo!',
+        'common.close': 'Cerrar',
         'auth.logout': 'Salir',
         'filters.filterBy': 'Filtros',
         'howto.objectiveLabel': 'Objetivo',
         'howto.ruleLabel': 'Regla',
+        'filters.openFilters': 'Abrir filtros',
+        'filters.openActiveFilters': 'Abrir filtros. Filtros activos: {{summary}}',
+        'filters.clearActive': 'Limpiar filtros',
+        'menu.howToPlayAria': 'Cómo se juega {{mode}}',
+        'menu.letsPlay': '¡Jugar!',
       };
-      return map[key] ?? key;
+      const template = map[key] ?? key;
+      if (!_options) return template;
+      return Object.entries(_options).reduce(
+        (acc, [optKey, optValue]) => acc.replace(`{{${optKey}}}`, String(optValue ?? '')),
+        template
+      );
     },
   }),
 }));
@@ -105,9 +163,8 @@ describe('MenuPage — journey card', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Comienza tu viaje por el mundo')).toBeDefined();
+      expect(screen.getByText('0 de 180 países explorados')).toBeDefined();
     });
-    expect(screen.getByText('0 países sellados')).toBeDefined();
     expect(screen.getByText('Empezar a explorar')).toBeDefined();
   });
 
@@ -127,9 +184,9 @@ describe('MenuPage — journey card', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Tu viaje')).toBeDefined();
+      expect(screen.getByText('Tu viaje por el mundo')).toBeDefined();
     });
-    expect(screen.getByText('Continuar viaje')).toBeDefined();
+    expect(screen.getByText('Seguir explorando')).toBeDefined();
     expect(screen.getByText('Pasaporte')).toBeDefined();
   });
 
@@ -149,10 +206,10 @@ describe('MenuPage — journey card', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Continuar viaje')).toBeDefined();
+      expect(screen.getByText('Seguir explorando')).toBeDefined();
     });
 
-    const continueBtn = screen.getByText('Continuar viaje');
+    const continueBtn = screen.getByText('Seguir explorando');
     expect(continueBtn).toBeDefined();
   });
 

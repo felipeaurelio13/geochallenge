@@ -1,84 +1,25 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { useLocalStorage } from '../hooks';
 import { useGameFilters } from '../hooks/useGameFilters';
-import { Button, Header, Icon, PageTemplate, SectionTitle } from '../components';
+import { Button, Header, Icon, PageTemplate } from '../components';
 import { LanguageSwitcher } from '../components/atoms/LanguageSwitcher';
 import { UserAvatar } from '../components/atoms/UserAvatar';
-import { CategorySelector } from '../components/molecules/CategorySelector';
-import { GameModeCard } from '../components/molecules/GameModeCard';
 import { FilterDrawer } from '../components/molecules/FilterDrawer';
 import { Modal } from '../components/organisms/Modal';
-import { hasActiveFilters, filtersToParams, type Difficulty, type GameFilters, type MasterySummary } from '../types';
+import { LobbyJourneyCard } from '../components/organisms/LobbyJourneyCard';
+import { LobbyModePanel } from '../components/organisms/LobbyModePanel';
+import { filtersToParams, type Category, type Difficulty, type GameFilters, type MasterySummary, type DailyStatus } from '../types';
 import { api } from '../services/api';
 import { trackUxEvent } from '../utils/uxTelemetry';
 import { CONTINENT_IDS, DIFFICULTY_IDS } from '../constants/filters';
 
 type GameModeId = 'flash' | 'single' | 'duel' | 'challenge' | 'streak' | 'survival';
+type LobbyPanel = 'practice' | 'compete' | null;
 
 const HOWTO_SEEN_KEY_PREFIX = 'howto_seen_';
-
-type Category = 'FLAG' | 'CAPITAL' | 'MAP' | 'SILHOUETTE' | 'MONUMENT' | 'CINEMA_GEO' | 'MIXED';
-
-const categories: { id: Category; icon: string; labelKey: string; accentClass: string }[] = [
-  { id: 'FLAG', icon: '🏳️', labelKey: 'categories.flags', accentClass: 'border-blue-500/50 bg-blue-500/15 text-blue-400' },
-  { id: 'CAPITAL', icon: '🏛️', labelKey: 'categories.capitals', accentClass: 'border-green-500/50 bg-green-500/15 text-green-400' },
-  { id: 'MAP', icon: '🗺️', labelKey: 'categories.maps', accentClass: 'border-teal-500/50 bg-teal-500/15 text-teal-400' },
-  { id: 'SILHOUETTE', icon: '🖼️', labelKey: 'categories.silhouettes', accentClass: 'border-violet-500/50 bg-violet-500/15 text-violet-400' },
-  { id: 'MONUMENT', icon: '🗿', labelKey: 'categories.monuments', accentClass: 'border-amber-500/50 bg-amber-500/15 text-amber-400' },
-  { id: 'CINEMA_GEO', icon: '🎬', labelKey: 'categories.cinemaGeo', accentClass: 'border-rose-500/50 bg-rose-500/15 text-rose-400' },
-  // QA fix HI-5: el accent previo (`text-slate-300` sobre `bg-slate-400/15`)
-  // daba contraste ~1.8:1 y se veía MÁS DÉBIL que el estado no-seleccionado.
-  // Usamos fuchsia para mantener la saturación 400 del resto del set y dar
-  // la lectura "categoría sin temática fija" sin grisearse.
-  { id: 'MIXED', icon: '🎲', labelKey: 'categories.mixed', accentClass: 'border-fuchsia-500/50 bg-fuchsia-500/15 text-fuchsia-400' },
-];
-
-const GAME_MODE_ACCENTS = {
-  flash: {
-    border: 'border-amber-500/30',
-    icon: 'text-amber-400',
-    hover: 'hover:border-amber-500/45 hover:bg-amber-500/10',
-  },
-  single: {
-    border: 'border-blue-500/30',
-    icon: 'text-blue-400',
-    hover: 'hover:border-blue-500/45 hover:bg-blue-500/10',
-  },
-  duel: {
-    border: 'border-orange-500/30',
-    icon: 'text-orange-400',
-    hover: 'hover:border-orange-500/45 hover:bg-orange-500/10',
-  },
-  challenge: {
-    border: 'border-violet-500/30',
-    icon: 'text-violet-400',
-    hover: 'hover:border-violet-500/45 hover:bg-violet-500/10',
-  },
-  streak: {
-    border: 'border-orange-600/30',
-    icon: 'text-orange-500',
-    hover: 'hover:border-orange-600/45 hover:bg-orange-600/10',
-  },
-  survival: {
-    border: 'border-rose-600/30',
-    icon: 'text-rose-500',
-    hover: 'hover:border-rose-600/45 hover:bg-rose-600/10',
-  },
-};
-
-const categorySerializer = {
-  parse: (value: string): Category => {
-    if (categories.some((cat) => cat.id === value)) {
-      return value as Category;
-    }
-
-    return 'MIXED';
-  },
-  stringify: (value: Category) => value,
-};
 
 function buildUrl(base: string, params: Record<string, string>) {
   const merged = { ...params };
@@ -100,40 +41,8 @@ function markHowToSeen(mode: GameModeId): void {
   try {
     window.localStorage.setItem(`${HOWTO_SEEN_KEY_PREFIX}${mode}`, '1');
   } catch {
-    // noop: storage unavailable (private mode, quota)
+    // noop: storage unavailable
   }
-}
-
-// "?" overlay button — no editamos GameModeCard (molécula compartida), sólo
-// envolvemos la card en un contenedor relative y superponemos el botón.
-function GameModeCardWithHelp({
-  mode,
-  modeLabel,
-  onOpenHelp,
-  children,
-}: {
-  mode: GameModeId;
-  modeLabel: string;
-  onOpenHelp: (mode: GameModeId) => void;
-  children: ReactNode;
-}) {
-  const { t } = useTranslation();
-  return (
-    <div className="relative">
-      {children}
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          onOpenHelp(mode);
-        }}
-        aria-label={t('menu.howToPlayAria', { mode: modeLabel })}
-        className="pressable absolute right-1 top-1 flex min-h-7 min-w-7 items-center justify-center rounded-full border border-app-border bg-app-surface/90 text-xs font-bold text-app-subtle shadow-sm transition-colors hover:border-primary/60 hover:text-primary"
-      >
-        ?
-      </button>
-    </div>
-  );
 }
 
 function HowToPlayModal({
@@ -190,9 +99,6 @@ export function MenuPage() {
   const { user, logout } = useAuth();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [howToMode, setHowToMode] = useState<GameModeId | null>(null);
-  // Distingue "el usuario tocó el ?" de "lo abrimos automáticamente la
-  // primera vez" — sólo marcamos `howto_seen_*` y navegamos al confirmar en
-  // el segundo caso; si el usuario sólo estaba consultando, cerrar no navega.
   const [howToAutoOpened, setHowToAutoOpened] = useState(false);
   const [pendingAutoPlay, setPendingAutoPlay] = useState<{ path: string; extra: Record<string, string> } | null>(null);
   const [canPlaySelection, setCanPlaySelection] = useState(true);
@@ -205,15 +111,17 @@ export function MenuPage() {
     isLandlocked?: boolean;
   }>({});
   const [masterySummary, setMasterySummary] = useState<MasterySummary | null>(null);
+  const [dailyStatus, setDailyStatus] = useState<DailyStatus | null>(null);
+  const [dailyLoading, setDailyLoading] = useState(false);
+  const [activePanel, setActivePanel] = useState<LobbyPanel>(null);
 
   const [selectedCategory, setSelectedCategory] = useLocalStorage<Category>(
     'geochallenge:last-category',
     'MIXED',
-    categorySerializer,
+    { parse: (v: string) => ['FLAG', 'CAPITAL', 'MAP', 'SILHOUETTE', 'MONUMENT', 'CINEMA_GEO', 'MIXED'].includes(v) ? v as Category : 'MIXED', stringify: (v: Category) => v },
   );
 
   const { filters, setFilters, clearFilters } = useGameFilters();
-  const filtersActive = hasActiveFilters(filters);
   const fp = filtersToParams(filters);
 
   function go(path: string, extra: Record<string, string> = {}, mode?: GameModeId) {
@@ -228,9 +136,6 @@ export function MenuPage() {
     navigate(buildUrl(path, { ...fp, ...extra }));
   }
 
-  // La primera vez que el usuario toca un modo, mostramos el modal de
-  // "cómo se juega" en vez de navegar directo. Confirmar en el modal
-  // ("¡Jugar!") sí navega; cerrar sin confirmar no lo hace.
   function goMode(mode: GameModeId, path: string, extra: Record<string, string> = {}) {
     if (!canPlaySelection) return;
     if (!hasSeenHowTo(mode)) {
@@ -278,7 +183,10 @@ export function MenuPage() {
     survival: t('menu.survival'),
   };
 
+  // Availability: only when a panel is open
   useEffect(() => {
+    if (activePanel === null) return;
+
     let mounted = true;
     const run = async () => {
       try {
@@ -330,22 +238,27 @@ export function MenuPage() {
     return () => {
       mounted = false;
     };
-  }, [filters, selectedCategory]);
+  }, [filters, selectedCategory, activePanel]);
 
-  function filterSummary(): string {
-    const parts: string[] = [];
-    if (filters.continent) parts.push(t(`filters.continents.${filters.continent.replace(' ', '_')}`));
-    if (filters.isInsular) parts.push(t('filters.insular'));
-    if (filters.isLandlocked) parts.push(t('filters.landlocked'));
-    if (filters.difficulty) parts.push(t(`filters.difficulties.${filters.difficulty}`));
-    return parts.join(' · ');
-  }
+  // Mastery summary
+  useEffect(() => {
+    if (!user) return;
+    api.getMasterySummary()
+      .then(setMasterySummary)
+      .catch(() => {});
+  }, [user]);
 
-  const activeFilterSummary = filterSummary();
-  const filterButtonLabel = filtersActive
-    ? t('filters.openActiveFilters', { summary: activeFilterSummary })
-    : t('filters.openFilters');
+  // Daily status
+  useEffect(() => {
+    if (!user) return;
+    setDailyLoading(true);
+    api.getDailyStatus()
+      .then(setDailyStatus)
+      .catch(() => {})
+      .finally(() => setDailyLoading(false));
+  }, [user]);
 
+  // app_open telemetry
   useEffect(() => {
     const key = 'geochallenge:app-open-fired';
     try {
@@ -357,12 +270,83 @@ export function MenuPage() {
     }
   }, []);
 
-  useEffect(() => {
-    if (!user) return;
-    api.getMasterySummary()
-      .then(setMasterySummary)
-      .catch(() => {});
-  }, [user]);
+  function togglePanel(panel: LobbyPanel) {
+    setActivePanel((prev) => (prev === panel ? null : panel));
+  }
+
+  function handleJourneyContinue() {
+    trackUxEvent('mode_selected', {
+      destination: '/game/single?gameType=practice',
+      gameMode: 'practice',
+      category: 'MIXED',
+    });
+    navigate('/game/single?gameType=practice');
+  }
+
+  function handleDailyPlay() {
+    trackUxEvent('mode_selected', {
+      destination: '/daily',
+      gameMode: 'daily',
+      category: 'MIXED',
+    });
+    navigate('/daily');
+  }
+
+  // Practice handlers
+  function handlePlayClassic() {
+    goMode('single', '/game/single', { category: selectedCategory });
+  }
+
+  function handlePlayFlash() {
+    goMode('flash', '/game/flash', { category: selectedCategory });
+  }
+
+  function handlePlayStreak() {
+    goMode('streak', '/game/single', { category: selectedCategory, mode: 'streak' });
+  }
+
+  // Compete handlers
+  function handlePlayDuel() {
+    goMode('duel', '/duel', { category: selectedCategory });
+  }
+
+  function handlePlayChallenge() {
+    goMode('challenge', '/challenges', { category: selectedCategory, openCreate: '1' });
+  }
+
+  function handlePlaySurvival() {
+    goMode('survival', '/survival', { category: selectedCategory });
+  }
+
+  function handleFlagMaster() {
+    trackUxEvent('mode_selected', {
+      destination: '/flag-master',
+      gameMode: 'flag_master',
+      category: 'MIXED',
+    });
+    navigate('/flag-master');
+  }
+
+  function handleGeoChallenges() {
+    trackUxEvent('mode_selected', {
+      destination: '/geo-challenges',
+      gameMode: 'geo_challenges',
+      category: 'MIXED',
+    });
+    navigate('/geo-challenges');
+  }
+
+  function handleGeoChallengesDuel() {
+    trackUxEvent('mode_selected', {
+      destination: '/duel?mode=geo-challenge',
+      gameMode: 'geo_challenges_duel',
+      category: 'MIXED',
+    });
+    navigate('/duel?mode=geo-challenge');
+  }
+
+  const practicePanelOpen = activePanel === 'practice';
+  const competePanelOpen = activePanel === 'compete';
 
   return (
     <PageTemplate
@@ -395,265 +379,178 @@ export function MenuPage() {
       }
       contentClassName="py-2.5 pb-4 sm:py-3 sm:pb-6"
     >
-      {/* Journey card */}
+      {/* Journey Hero */}
       {user && (
-        <section className="mb-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
-          {masterySummary && masterySummary.stampedCountries > 0 ? (
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-sm font-semibold text-[var(--color-text-primary)]">
-                  {t('menu.journey.title', 'Tu viaje')}
+        <div className="mb-3">
+          <LobbyJourneyCard
+            summary={masterySummary}
+            loading={!masterySummary}
+            onContinue={handleJourneyContinue}
+            onPassport={() => navigate('/passport')}
+          />
+        </div>
+      )}
+
+      {/* Daily Challenge */}
+      {user && (
+        <section className="mb-3 rounded-2xl border border-app-border bg-app-surface p-4">
+          <div className="flex items-start gap-3">
+            <span aria-hidden="true" className="shrink-0 text-2xl leading-none">📅</span>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <h2 className="text-sm font-semibold text-app-text">
+                  {t('menu.daily.title')}
                 </h2>
-                <p className="mt-1 text-xs text-[var(--color-text-secondary)]">
-                  {masterySummary.stampedCountries} {t('menu.journey.stamped', 'países sellados')} · {masterySummary.worldProgressPercent}% {t('menu.journey.ofWorld', 'del mundo')}
-                </p>
+                <span className={`rounded-full border px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide ${
+                  dailyStatus?.completed
+                    ? 'border-green-500/40 bg-green-500/15 text-green-400'
+                    : 'border-cyan-500/40 bg-cyan-500/15 text-cyan-400'
+                }`}>
+                  {dailyLoading
+                    ? '...'
+                    : dailyStatus?.completed
+                      ? t('menu.daily.completed')
+                      : t('menu.daily.available')}
+                </span>
               </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => navigate('/game/single?gameType=practice')}
-                  className="rounded-lg bg-[var(--color-accent)] px-3 py-1.5 text-xs font-semibold text-white"
-                >
-                  {t('menu.journey.continue', 'Continuar viaje')}
-                </button>
-                <button
-                  onClick={() => navigate('/passport')}
-                  className="rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text-secondary)]"
-                >
-                  {t('menu.journey.passport', 'Pasaporte')}
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="text-center">
-              <h2 className="text-sm font-semibold text-[var(--color-text-primary)]">
-                {t('menu.journey.start', 'Comienza tu viaje por el mundo')}
-              </h2>
-              <p className="mt-1 text-xs text-[var(--color-text-muted)]">
-                {t('menu.journey.zeroStamps', '0 países sellados')}
+              <p className="mt-0.5 text-xs text-app-subtle">
+                {t('menu.daily.desc')}
               </p>
-              <button
-                onClick={() => navigate('/game/single?gameType=practice')}
-                className="mt-3 rounded-lg bg-[var(--color-accent)] px-4 py-2 text-sm font-semibold text-white"
-              >
-                {t('menu.journey.startFirst', 'Empezar a explorar')}
-              </button>
+              {dailyStatus?.completed && dailyStatus.result && (
+                <p className="mt-1 text-xs text-app-secondary">
+                  {t('menu.daily.todayScore', {
+                    correct: dailyStatus.result.correctCount,
+                    total: dailyStatus.result.totalQuestions,
+                  })}
+                  {dailyStatus.dailyStreak > 0 && (
+                    <>
+                      {' · '}
+                      {t('menu.daily.streak', { days: dailyStatus.dailyStreak })}
+                    </>
+                  )}
+                </p>
+              )}
             </div>
-          )}
+          </div>
+          <button
+            type="button"
+            onClick={handleDailyPlay}
+            className="mt-3 w-full rounded-lg bg-[var(--color-accent)] py-2 text-sm font-semibold text-white pressable"
+          >
+            {dailyStatus?.completed
+              ? t('menu.daily.viewResult')
+              : t('menu.daily.play')}
+          </button>
         </section>
       )}
 
-      <section>
-        <SectionTitle variant="label" className="mb-2 px-1 sm:px-0">
-          {t('menu.selectCategory')}
-        </SectionTitle>
-        <p className="mb-2 px-1 text-xs text-app-subtle sm:px-0">
-          {t('menu.categoryHelper', 'Elige cómo quieres practicar hoy. Puedes cambiar esta categoría en cualquier momento.')}
-        </p>
-        <CategorySelector
-          categories={categories.map((cat) => ({ id: cat.id, icon: cat.icon, label: t(cat.labelKey), accentClass: cat.accentClass }))}
-          selected={selectedCategory}
-          onSelect={(id) => setSelectedCategory(id as Category)}
-          ariaLabel={t('menu.categorySelectorLabel')}
-        />
-      </section>
-
-      {/* Filter bar */}
-      <div className="mt-3 flex items-center gap-2">
-        <button
-          type="button"
-          onClick={() => setDrawerOpen(true)}
-          aria-label={filterButtonLabel}
-          aria-haspopup="dialog"
-          aria-expanded={drawerOpen}
-          className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
-            filtersActive
-              ? 'border-primary/60 bg-primary/15 text-primary'
-              : 'border-app-border bg-app-surface/80 text-app-subtle hover:border-app-border hover:text-app-secondary'
-          }`}
-        >
-          <span aria-hidden="true">🎚️</span>
-          <span>{filtersActive ? activeFilterSummary : t('filters.filterBy')}</span>
-          {!filtersActive && <span aria-hidden="true" className="opacity-50">▾</span>}
-        </button>
-        {filtersActive && (
+      {/* Choose: Practice / Compete */}
+      <div className="mb-3">
+        <h2 className="px-1 text-sm font-semibold text-app-text sm:px-0">
+          {t('menu.choose.title')}
+        </h2>
+        <div className="mt-2 grid grid-cols-2 gap-2">
           <button
             type="button"
-            onClick={clearFilters}
-            className="rounded-full border border-app-border bg-app-surface/80 px-2 py-1.5 text-xs text-app-subtle hover:text-red-400"
-            title={t('filters.clearActive')}
-            aria-label={t('filters.clearActive')}
+            onClick={() => togglePanel('practice')}
+            aria-expanded={practicePanelOpen}
+            aria-controls="panel-practice"
+            className={`rounded-xl border p-4 text-left transition-colors pressable ${
+              practicePanelOpen
+                ? 'border-primary/60 bg-primary/10'
+                : 'border-app-border bg-app-surface hover:border-primary/40 hover:bg-primary/5'
+            }`}
           >
-            <span aria-hidden="true">✕</span>
+            <span aria-hidden="true" className="text-2xl leading-none">🎯</span>
+            <div className="mt-2 text-sm font-semibold text-app-text">
+              {t('menu.choose.practice')}
+            </div>
+            <div className="text-xs text-app-subtle">
+              {t('menu.choose.practiceDesc')}
+            </div>
           </button>
-        )}
+
+          <button
+            type="button"
+            onClick={() => togglePanel('compete')}
+            aria-expanded={competePanelOpen}
+            aria-controls="panel-compete"
+            className={`rounded-xl border p-4 text-left transition-colors pressable ${
+              competePanelOpen
+                ? 'border-primary/60 bg-primary/10'
+                : 'border-app-border bg-app-surface hover:border-primary/40 hover:bg-primary/5'
+            }`}
+          >
+            <span aria-hidden="true" className="text-2xl leading-none">⚔️</span>
+            <div className="mt-2 text-sm font-semibold text-app-text">
+              {t('menu.choose.compete')}
+            </div>
+            <div className="text-xs text-app-subtle">
+              {t('menu.choose.competeDesc')}
+            </div>
+          </button>
+        </div>
       </div>
-      {!canPlaySelection && (
-        <p className="mt-2 text-xs text-amber-300">
-          {t('filters.unavailableCombination', {
-            required: requiredQuestions,
-            available: availableQuestions ?? 0,
-          })}
-        </p>
+
+      {/* Practice Panel */}
+      {practicePanelOpen && (
+        <div id="panel-practice" className="mb-3">
+          <LobbyModePanel
+            type="practice"
+            selectedCategory={selectedCategory}
+            onSelectCategory={setSelectedCategory}
+            filters={filters}
+            onFiltersChange={setFilters}
+            onClearFilters={clearFilters}
+            availability={canPlaySelection ? null : { canPlay: false, required: requiredQuestions, available: availableQuestions }}
+            disabledOptions={disabledOptions}
+            onPlayClassic={handlePlayClassic}
+            onPlayFlash={handlePlayFlash}
+            onPlayStreak={handlePlayStreak}
+            onOpenHelp={(mode) => handleOpenHelp(mode as GameModeId)}
+            onFlagMaster={handleFlagMaster}
+            onGeoChallenges={handleGeoChallenges}
+            onClose={() => setActivePanel(null)}
+          />
+        </div>
       )}
 
-
-      
-      <section className="mt-3" aria-label={t('menu.gameModes')}>
-        {/* QA round 3 design audit: el helper "Después elige el ritmo..." era
-            redundante con el de arriba ("Elige cómo quieres practicar hoy").
-            Lo removemos para acortar la página y reducir ruido visual. La
-            sección sigue siendo identificable por su grid de cards. */}
-        <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 sm:gap-2">
-          <GameModeCardWithHelp mode="flash" modeLabel={MODE_LABELS.flash} onOpenHelp={handleOpenHelp}>
-            <GameModeCard
-              icon="⚡"
-              title={t('menu.flash')}
-              description={t('menu.flashDesc')}
-              onClick={() => goMode('flash', `/game/flash`, { category: selectedCategory })}
-              disabled={selectedCategory === 'MAP'}
-              disabledHint={selectedCategory === 'MAP' ? t('menu.flashNoMap') : undefined}
-              accent={GAME_MODE_ACCENTS.flash}
-            />
-          </GameModeCardWithHelp>
-          <GameModeCardWithHelp mode="single" modeLabel={MODE_LABELS.single} onOpenHelp={handleOpenHelp}>
-            <GameModeCard
-              icon="🎯"
-              title={t('menu.singlePlayer')}
-              description={t('menu.singlePlayerDesc')}
-              onClick={() => goMode('single', `/game/single`, { category: selectedCategory })}
-              accent={GAME_MODE_ACCENTS.single}
-            />
-          </GameModeCardWithHelp>
-          <GameModeCardWithHelp mode="duel" modeLabel={MODE_LABELS.duel} onOpenHelp={handleOpenHelp}>
-            <GameModeCard
-              icon="⚔️"
-              title={t('menu.duel')}
-              description={t('menu.duelDesc')}
-              onClick={() => goMode('duel', `/duel`, { category: selectedCategory })}
-              accent={GAME_MODE_ACCENTS.duel}
-            />
-          </GameModeCardWithHelp>
-          <GameModeCardWithHelp mode="challenge" modeLabel={MODE_LABELS.challenge} onOpenHelp={handleOpenHelp}>
-            <GameModeCard
-              icon="🏁"
-              title={t('menu.challenge')}
-              description={t('menu.challengeDesc')}
-              onClick={() => goMode('challenge', `/challenges`, { category: selectedCategory, openCreate: '1' })}
-              accent={GAME_MODE_ACCENTS.challenge}
-            />
-          </GameModeCardWithHelp>
-          <GameModeCardWithHelp mode="streak" modeLabel={MODE_LABELS.streak} onOpenHelp={handleOpenHelp}>
-            <GameModeCard
-              icon="🔥"
-              title={t('menu.streak')}
-              description={t('menu.streakDesc')}
-              onClick={() => goMode('streak', `/game/single`, { category: selectedCategory, mode: 'streak' })}
-              accent={GAME_MODE_ACCENTS.streak}
-            />
-          </GameModeCardWithHelp>
-          <GameModeCardWithHelp mode="survival" modeLabel={MODE_LABELS.survival} onOpenHelp={handleOpenHelp}>
-            <GameModeCard
-              icon="☠️"
-              title={t('menu.survival')}
-              description={t('menu.survivalDesc')}
-              onClick={() => goMode('survival', `/survival`, { category: selectedCategory })}
-              accent={GAME_MODE_ACCENTS.survival}
-            />
-          </GameModeCardWithHelp>
+      {/* Compete Panel */}
+      {competePanelOpen && (
+        <div id="panel-compete" className="mb-3">
+          <LobbyModePanel
+            type="compete"
+            selectedCategory={selectedCategory}
+            onSelectCategory={setSelectedCategory}
+            filters={filters}
+            onFiltersChange={setFilters}
+            onClearFilters={clearFilters}
+            availability={canPlaySelection ? null : { canPlay: false, required: requiredQuestions, available: availableQuestions }}
+            disabledOptions={disabledOptions}
+            onPlayDuel={handlePlayDuel}
+            onPlayChallenge={handlePlayChallenge}
+            onPlaySurvival={handlePlaySurvival}
+            onOpenHelp={(mode) => handleOpenHelp(mode as GameModeId)}
+            onGeoChallengesDuel={handleGeoChallengesDuel}
+            onClose={() => setActivePanel(null)}
+          />
         </div>
-      </section>
+      )}
 
-      {/* GeoRetos — cinco mecánicas relacionales en una partida corta. Se
-          mantiene como banner dedicado para no mezclarlo con el selector de
-          categorías tradicional (no depende de la categoría activa). */}
-      <Link
-        to="/geo-challenges"
-        className="mt-4 flex items-center gap-4 rounded-2xl border border-fuchsia-500/70 bg-gradient-to-r from-fuchsia-700 to-indigo-700 px-4 py-3.5 text-white shadow-md shadow-fuchsia-900/30 transition-all hover:from-fuchsia-600 hover:to-indigo-600 hover:shadow-lg pressable"
-      >
-        <span aria-hidden="true" className="shrink-0 text-3xl leading-none drop-shadow">🧠</span>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-white">{t('menu.geoChallenges')}</span>
-            <span className="rounded-full border border-white/40 bg-white/15 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-white">
-              {t('menu.geoChallengesBadge')}
-            </span>
-          </div>
-          <div className="mt-0.5 text-xs text-white/85">{t('menu.geoChallengesDesc')}</div>
-        </div>
-        <span aria-hidden="true" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/20 text-base font-bold text-white">
-          →
-        </span>
-      </Link>
-
-      <Link
-        to="/duel?mode=geo-challenge"
-        className="mt-2 flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-fuchsia-500/45 bg-fuchsia-500/10 px-4 py-2.5 text-sm font-bold text-fuchsia-200 transition-colors hover:bg-fuchsia-500/20 pressable"
-      >
-        <span aria-hidden="true">⚔️</span>
-        <span>{t('menu.geoChallengesDuel')}</span>
-        <span className="text-xs font-semibold text-fuchsia-300/80">{t('menu.geoChallengesDuelDesc')}</span>
-      </Link>
-
-      {/* Flag Master Banner — modo dedicado de banderas con dificultad escalada.
-          Contraste fuerte: gradiente opaco rojo→ámbar, texto blanco. Funciona en
-          light y dark mode sin depender de variables del tema. */}
-      <Link
-        to="/flag-master"
-        className="mt-4 flex items-center gap-4 rounded-2xl border border-red-500/70 bg-gradient-to-r from-red-700 to-amber-700 px-4 py-3.5 text-white shadow-md shadow-red-900/30 transition-all hover:from-red-600 hover:to-amber-600 hover:shadow-lg pressable"
-      >
-        <span aria-hidden="true" className="shrink-0 text-3xl leading-none drop-shadow">🏴</span>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-white">{t('menu.flagMaster', 'Maestro de Banderas')}</span>
-            <span className="rounded-full border border-white/40 bg-white/15 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-white">
-              {t('menu.flagMasterBadge', 'Difícil')}
-            </span>
-          </div>
-          <div className="mt-0.5 text-xs text-white/85">
-            {t('menu.flagMasterDesc', '10 rondas · sin color, recortes y trampas · multiplicadores hasta x2.5')}
-          </div>
-        </div>
-        <span aria-hidden="true" className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white text-base font-bold">
-          →
-        </span>
-      </Link>
-
-      {/* Daily Challenge Banner. Mismo principio: gradiente opaco + texto blanco. */}
-      <Link
-        to="/daily"
-        className="mt-4 flex items-center gap-4 rounded-2xl border border-cyan-500/70 bg-gradient-to-r from-cyan-700 to-emerald-700 px-4 py-3.5 text-white shadow-md shadow-cyan-900/30 transition-all hover:from-cyan-600 hover:to-emerald-600 hover:shadow-lg pressable"
-      >
-        <span aria-hidden="true" className="shrink-0 text-3xl leading-none drop-shadow">📅</span>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-white">{t('menu.dailyChallenge', 'Reto del día')}</span>
-            <span className="rounded-full border border-white/40 bg-white/15 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-white">
-              {t('menu.dailyChallengeNew', 'Nuevo')}
-            </span>
-          </div>
-          <div className="mt-0.5 text-xs text-white/85">{t('menu.dailyChallengeDesc', '10 preguntas · mismas para todos · un intento')}</div>
-        </div>
-        <span aria-hidden="true" className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white text-base font-bold">
-          →
-        </span>
-      </Link>
-
-      <section className="mt-4" aria-label={t('menu.quickActions')}>
-        <SectionTitle variant="label" className="mb-2 px-1 sm:px-0">
-          {t('menu.quickActions')}
-        </SectionTitle>
-        <p className="mb-2 px-1 text-xs text-app-subtle sm:px-0">
-          {t('menu.quickActionsHelper', 'Si prefieres, entra directo a tus stats o al ranking global.')}
-        </p>
-        <div className="grid grid-cols-2 gap-2">
+      {/* More section */}
+      <section className="mt-2">
+        <h2 className="px-1 text-xs font-semibold text-app-subtle sm:px-0">
+          {t('menu.more.title')}
+        </h2>
+        <div className="mt-2 grid grid-cols-2 gap-2">
           <Link
             to="/rankings"
             className="pressable flex items-center gap-3 rounded-xl border border-app-border bg-app-surface/80 px-4 py-3 text-app-secondary transition-colors hover:border-primary/60 hover:bg-primary/10"
           >
             <span aria-hidden="true" className="text-2xl leading-none">🏆</span>
             <div className="min-w-0 flex-1">
-              <div className="text-sm font-semibold text-app-text">{t('menu.rankings')}</div>
-              <div className="truncate text-xs text-app-subtle">{t('menu.rankingsDesc')}</div>
+              <div className="text-sm font-semibold text-app-text">{t('menu.more.rankings')}</div>
+              <div className="truncate text-xs text-app-subtle">{t('menu.more.rankingsDesc')}</div>
             </div>
           </Link>
           <Link
@@ -662,8 +559,8 @@ export function MenuPage() {
           >
             <span aria-hidden="true" className="text-2xl leading-none">📊</span>
             <div className="min-w-0 flex-1">
-              <div className="text-sm font-semibold text-app-text">{t('menu.yourStats')}</div>
-              <div className="truncate text-xs text-app-subtle">{t('menu.yourStatsDesc')}</div>
+              <div className="text-sm font-semibold text-app-text">{t('menu.more.stats')}</div>
+              <div className="truncate text-xs text-app-subtle">{t('menu.more.statsDesc')}</div>
             </div>
           </Link>
         </div>

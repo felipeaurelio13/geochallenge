@@ -934,6 +934,82 @@ async function getDailyResultFromDb(userId: string, today: string) {
 }
 
 /**
+ * GET /api/game/daily/status
+ * Consulta sólo el estado del reto diario sin generar preguntas, crear sesión
+ * ni modificar DB. Respuesta ligera para el lobby.
+ */
+router.get('/daily/status', authenticateJWT, async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user!.userId;
+    const dayKey = resolveDayKey(req.query.clientDate);
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { lastDailyDate: true, dailyStreak: true },
+    });
+
+    const completed = user?.lastDailyDate === dayKey;
+    const dailyStreak = user?.dailyStreak ?? 0;
+
+    const status: {
+      today: string;
+      completed: boolean;
+      dailyStreak: number;
+      result?: {
+        score: number;
+        correctCount: number;
+        totalQuestions: number;
+        playedAt: string;
+      };
+    } = {
+      today: dayKey,
+      completed,
+      dailyStreak,
+    };
+
+    if (completed) {
+      const redis = getRedis();
+      const playedKey = `daily:played:${userId}:${dayKey}`;
+      let redisResult: string | null = null;
+      try {
+        redisResult = await redis.get(playedKey);
+      } catch {
+        // Redis down → fallback to DB
+      }
+
+      if (redisResult) {
+        const parsed = JSON.parse(redisResult) as {
+          score: number;
+          correctCount: number;
+          totalQuestions: number;
+          playedAt: string;
+        };
+        status.result = {
+          score: parsed.score,
+          correctCount: parsed.correctCount,
+          totalQuestions: parsed.totalQuestions,
+          playedAt: parsed.playedAt,
+        };
+      } else {
+        const dbResult = await getDailyResultFromDb(userId, dayKey);
+        if (dbResult) {
+          status.result = {
+            score: dbResult.score,
+            correctCount: dbResult.correctCount,
+            totalQuestions: dbResult.totalQuestions,
+            playedAt: dbResult.playedAt,
+          };
+        }
+      }
+    }
+
+    res.json(status);
+  } catch (error) {
+    respondWithError(res, error);
+  }
+});
+
+/**
  * GET /api/game/daily
  * Retorna las preguntas del reto del día (mismas para todos los usuarios).
  * Si el usuario ya jugó hoy, retorna sus resultados previos.

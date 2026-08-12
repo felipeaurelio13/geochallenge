@@ -125,14 +125,76 @@
     "howToPlay": "How to play",
     "howToPlayAria": "How to play {{mode}}",
     "journey": {
-      "title": "Your Journey",
-      "stamped": "stamped countries",
+      "title": "Your World Journey",
+      "startTitle": "Start Your World Journey",
+      "stamped": "explored countries",
       "ofWorld": "of the world",
-      "continue": "Continue journey",
+      "mastered": "mastered",
+      "globalDominance": "Global dominance",
+      "continue": "Keep exploring",
       "passport": "Passport",
       "start": "Start your world journey",
       "startFirst": "Start exploring",
-      "zeroStamps": "0 stamped countries"
+      "zeroStamps": "0 of {{total}} explored countries",
+      "startDesc": "Each game helps you discover and master new countries."
+    },
+    "daily": {
+      "title": "Daily Challenge",
+      "available": "Available",
+      "completed": "Completed",
+      "desc": "10 questions · same for everyone · one attempt",
+      "play": "Play today's challenge",
+      "viewResult": "View result",
+      "todayScore": "Today: {{correct}} / {{total}}",
+      "streak": "Streak: {{days}} days",
+      "fallbackDesc": "10 questions to test your world knowledge.",
+      "fallbackPlay": "Play"
+    },
+    "choose": {
+      "title": "What do you want to do?",
+      "practice": "Practice",
+      "practiceDesc": "Your way",
+      "compete": "Compete",
+      "competeDesc": "Against others"
+    },
+    "practice": {
+      "title": "Practice",
+      "subtitle": "Choose what you want to train.",
+      "categories": "Categories",
+      "formats": "Format",
+      "classic": "Classic",
+      "classicDesc": "10 questions at your pace",
+      "flash": "Flash",
+      "flashDesc": "Fast · 2 options",
+      "streak": "Streak",
+      "streakDesc": "Keep going while you're right",
+      "flashDisabledMap": "Flash mode does not support maps — pick another category"
+    },
+    "compete": {
+      "title": "Compete",
+      "subtitle": "Test your knowledge against others.",
+      "category": "Category",
+      "duel": "Duel",
+      "duelDesc": "Live · 1 vs 1",
+      "challenge": "Challenge",
+      "challengeDesc": "Invite others · play anytime",
+      "survival": "Survival",
+      "survivalDesc": "Last player standing"
+    },
+    "special": {
+      "flagMaster": "Flag Master",
+      "flagMasterDesc": "10 rounds · no color, crops, and traps",
+      "geoChallenges": "Geo Challenges",
+      "geoChallengesDesc": "5 challenges · extremes, comparisons, borders",
+      "geoChallengesDuel": "Geo Challenges Duel",
+      "geoChallengesDuelDesc": "10 questions · 1 vs 1"
+    },
+    "more": {
+      "title": "More",
+      "rankings": "Rankings",
+      "rankingsDesc": "See the global top and your position",
+      "stats": "My statistics",
+      "statsDesc": "Stats, duels and opponents"
     },
     "letsPlay": "Let's play!"
   },

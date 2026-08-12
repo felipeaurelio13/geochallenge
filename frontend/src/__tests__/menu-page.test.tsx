@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MenuPage } from '../pages/MenuPage';
@@ -9,14 +9,24 @@ const routerFutureConfig = {
   v7_relativeSplatPath: true,
 };
 
-const mockNavigate = vi.fn();
-const mockLogout = vi.fn();
+const mocks = vi.hoisted(() => ({
+  navigate: vi.fn(),
+  logout: vi.fn(),
+  getDailyStatus: vi.fn().mockResolvedValue({
+    today: '2026-08-12',
+    completed: false,
+    dailyStreak: 0,
+  }),
+}));
+
+const mockNavigate = mocks.navigate;
+const mockLogout = mocks.logout;
 
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom');
   return {
     ...actual,
-    useNavigate: () => mockNavigate,
+    useNavigate: () => mocks.navigate,
   };
 });
 
@@ -29,7 +39,7 @@ vi.mock('../context/AuthContext', () => ({
       wins: 5,
       losses: 3,
     },
-    logout: mockLogout,
+    logout: mocks.logout,
   }),
 }));
 
@@ -43,6 +53,7 @@ vi.mock('../services/api', () => ({
       masteredCountries: 0,
       skills: [],
     }),
+    getDailyStatus: mocks.getDailyStatus,
   },
 }));
 
@@ -54,24 +65,28 @@ vi.mock('react-i18next', () => ({
         'menu.gameModes': 'Modos de juego',
         'menu.categorySelectorLabel': 'Categorías de preguntas',
         'menu.flash': 'Flash',
-        'menu.flashDesc': '60s · combo x10',
+        'menu.flashDesc': '60s',
         'menu.singlePlayer': 'Un Jugador',
-        'menu.singlePlayerDesc': 'Juega solo y mejora tu puntuación',
+        'menu.singlePlayerDesc': 'Juega solo',
         'menu.duel': 'Duelo',
-        'menu.duelDesc': 'Compite en tiempo real contra otro jugador',
+        'menu.duelDesc': 'Compite',
         'menu.challenge': 'Desafíos',
-        'menu.challengeDesc': 'Envía desafíos a tus amigos',
+        'menu.challengeDesc': 'Envía desafíos',
         'menu.streak': 'Racha',
-        'menu.streakDesc': 'Sigue hasta fallar y rompe tu récord',
+        'menu.streakDesc': 'Sigue hasta fallar',
+        'menu.survival': 'Supervivencia',
+        'menu.survivalDesc': 'Sobrevive',
         'menu.geoChallenges': 'GeoRetos',
         'menu.geoChallengesBadge': 'Nuevo',
-        'menu.geoChallengesDesc': '5 retos geográficos',
+        'menu.geoChallengesDesc': '5 retos',
         'menu.geoChallengesDuel': 'GeoRetos en duelo',
         'menu.geoChallengesDuelDesc': '10 preguntas · 1 contra 1',
         'categories.flags': 'Banderas',
         'categories.capitals': 'Capitales',
         'categories.maps': 'Mapas',
         'categories.silhouettes': 'Siluetas',
+        'categories.monuments': 'Monumentos',
+        'categories.cinemaGeo': 'Cine & Geo',
         'categories.mixed': 'Mixto',
         'auth.logout': 'Cerrar sesión',
         'filters.filterBy': 'Filtrar',
@@ -98,6 +113,73 @@ vi.mock('react-i18next', () => ({
         'howto.survival.objective': 'Objetivo survival',
         'howto.survival.rule': 'Regla survival',
         'howto.survival.tip': 'Tip survival',
+        'menu.journey.title': 'Tu viaje por el mundo',
+        'menu.journey.stamped': 'países explorados',
+        'menu.journey.mastered': 'dominados',
+        'menu.journey.globalDominance': 'Dominio global',
+        'menu.journey.continue': 'Seguir explorando',
+        'menu.journey.passport': 'Pasaporte',
+        'menu.journey.startTitle': 'Empieza tu viaje por el mundo',
+        'menu.journey.startFirst': 'Empezar a explorar',
+        'menu.journey.zeroStamps': '0 de {{total}} países explorados',
+        'menu.journey.startDesc': 'Cada partida te ayuda a descubrir y dominar nuevos países.',
+        'menu.daily.title': 'Reto del día',
+        'menu.daily.available': 'Disponible',
+        'menu.daily.completed': 'Completado',
+        'menu.daily.desc': '10 preguntas · mismas para todos · un intento',
+        'menu.daily.play': 'Jugar reto de hoy',
+        'menu.daily.viewResult': 'Ver resultado',
+        'menu.daily.todayScore': 'Hoy: {{correct}} / {{total}}',
+        'menu.daily.streak': 'Racha: {{days}} días',
+        'menu.choose.title': '¿Qué quieres hacer?',
+        'menu.choose.practice': 'Practicar',
+        'menu.choose.practiceDesc': 'A tu manera',
+        'menu.choose.compete': 'Competir',
+        'menu.choose.competeDesc': 'Contra otros',
+        'menu.practice.title': 'Practicar',
+        'menu.practice.subtitle': 'Elige qué quieres entrenar.',
+        'menu.practice.categories': 'Categorías',
+        'menu.practice.formats': 'Formato',
+        'menu.practice.classic': 'Clásico',
+        'menu.practice.classicDesc': '10 preguntas a tu ritmo',
+        'menu.practice.flash': 'Flash',
+        'menu.practice.flashDesc': 'Rápido · 2 opciones',
+        'menu.practice.streak': 'Racha',
+        'menu.practice.streakDesc': 'Sigue mientras aciertes',
+        'menu.practice.flashDisabledMap': 'El modo Flash no admite mapas — elige otra categoría',
+        'menu.compete.title': 'Competir',
+        'menu.compete.subtitle': 'Pon a prueba lo que sabes contra otros.',
+        'menu.compete.category': 'Categoría',
+        'menu.compete.duel': 'Duelo',
+        'menu.compete.duelDesc': 'En vivo · 1 vs 1',
+        'menu.compete.challenge': 'Desafío',
+        'menu.compete.challengeDesc': 'Invita a otros · juega cuando quieras',
+        'menu.compete.survival': 'Supervivencia',
+        'menu.compete.survivalDesc': 'Último jugador en pie',
+        'menu.special.flagMaster': 'Maestro de Banderas',
+        'menu.special.flagMasterDesc': '10 rondas · sin color, recortes y trampas',
+        'menu.special.geoChallenges': 'GeoRetos',
+        'menu.special.geoChallengesDesc': '5 retos · extremos, comparaciones, fronteras',
+        'menu.special.geoChallengesDuel': 'GeoRetos Duel',
+        'menu.special.geoChallengesDuelDesc': '10 preguntas · 1 contra 1',
+        'menu.more.title': 'Más',
+        'menu.more.rankings': 'Rankings',
+        'menu.more.rankingsDesc': 'Mira el top global y tu posición',
+        'menu.more.stats': 'Mis estadísticas',
+        'menu.more.statsDesc': 'Estadísticas, duelos y rivales',
+        'common.close': 'Cerrar',
+        'filters.unavailableCombination': 'Esta combinación no tiene suficientes preguntas ({{available}} disponibles, mínimo {{required}}).',
+        'filters.insular': 'Islas',
+        'filters.landlocked': 'Sin salida al mar',
+        'filters.continents.Africa': 'África',
+        'filters.continents.Europe': 'Europa',
+        'filters.continents.Asia': 'Asia',
+        'filters.continents.North_America': 'América del Norte',
+        'filters.continents.South_America': 'América del Sur',
+        'filters.continents.Oceania': 'Oceanía',
+        'filters.difficulties.EASY': 'Fácil',
+        'filters.difficulties.MEDIUM': 'Medio',
+        'filters.difficulties.HARD': 'Difícil',
       };
       const template = translations[key] ?? key;
       if (!_options) return template;
@@ -109,17 +191,8 @@ vi.mock('react-i18next', () => ({
   }),
 }));
 
-// Todos los modos de juego que existen hoy en MenuPage — usados para simular
-// un usuario "recurrente" que ya vio el modal de "cómo se juega" de cada uno,
-// así los tests de navegación siguen probando el click directo sin que el
-// modal de primera vez intercepte el flujo.
 const ALL_GAME_MODES = ['flash', 'single', 'duel', 'challenge', 'streak', 'survival'];
 
-// `src/__tests__/setup.ts` (infra compartida, fuera de este scope) stubea
-// `window.localStorage` con getItem/setItem no-op que siempre devuelven
-// `null`. Eso es correcto para la mayoría de los tests, pero el modal de
-// "cómo se juega" SÍ necesita persistencia real entre el set y el get dentro
-// del mismo test. Instalamos un mock en memoria sólo para este archivo.
 function installInMemoryLocalStorage() {
   let store: Record<string, string> = {};
   Object.defineProperty(window, 'localStorage', {
@@ -143,16 +216,21 @@ function markAllHowToSeen() {
   ALL_GAME_MODES.forEach((mode) => window.localStorage.setItem(`howto_seen_${mode}`, '1'));
 }
 
-describe('MenuPage', () => {
+describe('MenuPage — lobby cerrado', () => {
   beforeEach(() => {
     mockNavigate.mockReset();
     mockLogout.mockReset();
+    mocks.getDailyStatus.mockResolvedValue({
+      today: '2026-08-12',
+      completed: false,
+      dailyStreak: 0,
+    });
     installInMemoryLocalStorage();
     window.localStorage.clear();
     markAllHowToSeen();
   });
 
-  it('envía la categoría seleccionada al iniciar un duelo', () => {
+  it('NO muestra CategorySelector cuando el lobby está cerrado', () => {
     render(
       <MemoryRouter future={routerFutureConfig}>
         <Screen>
@@ -161,16 +239,10 @@ describe('MenuPage', () => {
       </MemoryRouter>,
     );
 
-    const banderasButton = screen.getByRole('button', { name: /banderas/i });
-    fireEvent.click(banderasButton);
-
-    const duelModeButton = screen.getByRole('button', { name: /duelo[\s\S]*compite/i });
-    fireEvent.click(duelModeButton);
-
-    expect(mockNavigate).toHaveBeenCalledWith('/duel?category=FLAG');
+    expect(screen.queryByRole('group', { name: /categorías de preguntas/i })).not.toBeInTheDocument();
   });
 
-  it('abre desafíos con categoría preseleccionada para parametrizar rápido', () => {
+  it('NO muestra las 6 cards de modos antiguas', () => {
     render(
       <MemoryRouter future={routerFutureConfig}>
         <Screen>
@@ -179,13 +251,11 @@ describe('MenuPage', () => {
       </MemoryRouter>,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: /capitales/i }));
-    fireEvent.click(screen.getByRole('button', { name: /desafíos[\s\S]*envía/i }));
-
-    expect(mockNavigate).toHaveBeenCalledWith('/challenges?category=CAPITAL&openCreate=1');
+    expect(screen.queryByRole('button', { name: /un jugador[\s\S]*juega solo/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /duelo[\s\S]*compite/i })).not.toBeInTheDocument();
   });
 
-  it('navega a racha reutilizando GamePage con mode=streak', () => {
+  it('muestra Journey, Daily, Practice y Compete', async () => {
     render(
       <MemoryRouter future={routerFutureConfig}>
         <Screen>
@@ -194,14 +264,50 @@ describe('MenuPage', () => {
       </MemoryRouter>,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: /mapas/i }));
-    fireEvent.click(screen.getByRole('button', { name: /racha[\s\S]*sigue hasta fallar/i }));
-
-    expect(mockNavigate).toHaveBeenCalledTimes(1);
-    expect(mockNavigate).toHaveBeenCalledWith('/game/single?category=MAP&mode=streak');
+    // Wait for data to load
+    await waitFor(() => {
+      expect(screen.getByText('Reto del día')).toBeDefined();
+    });
+    // Default mock has stampedCountries=0, so it shows startTitle
+    expect(screen.getByText('Empieza tu viaje por el mundo')).toBeDefined();
+    expect(screen.getByText('Practicar')).toBeDefined();
+    expect(screen.getByText('Competir')).toBeDefined();
   });
 
-  it('expone GeoRetos como modo independiente de la categoría activa', () => {
+  it('Rankings accesible', () => {
+    render(
+      <MemoryRouter future={routerFutureConfig}>
+        <MenuPage />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole('link', { name: /rankings/i })).toHaveAttribute('href', '/rankings');
+  });
+
+  it('Stats accesible', () => {
+    render(
+      <MemoryRouter future={routerFutureConfig}>
+        <MenuPage />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole('link', { name: /mis estadísticas/i })).toHaveAttribute('href', '/profile');
+  });
+});
+
+describe('MenuPage — journey card', () => {
+  beforeEach(() => {
+    mockNavigate.mockReset();
+    mocks.getDailyStatus.mockResolvedValue({
+      today: '2026-08-12',
+      completed: false,
+      dailyStreak: 0,
+    });
+    installInMemoryLocalStorage();
+    window.localStorage.clear();
+  });
+
+  it('usuario nuevo → Journey 0 países', async () => {
     render(
       <MemoryRouter future={routerFutureConfig}>
         <Screen>
@@ -210,197 +316,385 @@ describe('MenuPage', () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByRole('link', { name: /georetos[\s\S]*5 retos geográficos/i }))
-      .toHaveAttribute('href', '/geo-challenges');
-    expect(screen.getByRole('link', { name: /georetos en duelo/i }))
-      .toHaveAttribute('href', '/duel?mode=geo-challenge');
+    await waitFor(() => {
+      expect(screen.getByText('0 de 180 países explorados')).toBeDefined();
+    });
+    expect(screen.getByText('Empezar a explorar')).toBeDefined();
   });
 
-  it('elimina textos redundantes de categoría activa y mantiene footer con versión visible', () => {
-    render(
-      <MemoryRouter future={routerFutureConfig}>
-        <Screen>
-          <MenuPage />
-        </Screen>
-      </MemoryRouter>,
-    );
-
-    fireEvent.click(screen.getByRole('button', { name: /capitales/i }));
-    fireEvent.click(screen.getByRole('button', { name: /un jugador[\s\S]*juega solo/i }));
-
-    expect(mockNavigate).toHaveBeenCalledWith('/game/single?category=CAPITAL');
-    expect(screen.queryByText('Desliza para ver más categorías')).not.toBeInTheDocument();
-    expect(screen.queryByText('Categoría activa:')).not.toBeInTheDocument();
-    expect(screen.queryByText('Acciones rápidas')).not.toBeInTheDocument();
-    expect(screen.getByText(/v\d+\.\d+\.\d+/i)).toHaveClass('app-footer__version');
-  });
-
-  it('muestra accesos rápidos a rankings y perfil en la sección de acciones rápidas', () => {
-    render(
-      <MemoryRouter future={routerFutureConfig}>
-        <MenuPage />
-      </MemoryRouter>,
-    );
-
-    expect(screen.queryByText('Tus estadísticas')).not.toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /rankings/i })).toBeInTheDocument();
-  });
-
-  it('aplica layout compacto mobile-first para reducir scroll sin recortar CTAs', () => {
-    const { container } = render(
-      <MemoryRouter future={routerFutureConfig}>
-        <MenuPage />
-      </MemoryRouter>,
-    );
-
-    expect(container.firstChild).toHaveClass('app-shell');
-
-    const main = container.querySelector('main');
-    expect(main?.className).toContain('py-2.5');
-
-    const categoryButton = screen.getByRole('button', { name: /^mixto$/i });
-    expect(categoryButton.className).toContain('min-h-[4.5rem]');
-
-    const singleModeButton = screen.getByRole('button', { name: /un jugador[\s\S]*juega solo/i });
-    expect(singleModeButton.className).toContain('py-2.5');
-
-    const modesSection = screen.getByRole('region', { name: /modos de juego/i });
-    const modeButtons = Array.from(modesSection.querySelectorAll('button'));
-    expect(modeButtons.length).toBeGreaterThanOrEqual(5);
-
-    expect(screen.queryByText(/¡hola.*explorar hoy/i)).not.toBeInTheDocument();
-    expect(screen.queryByRole('heading', { name: 'Modos de juego' })).not.toBeInTheDocument();
-  });
-
-  it('permite cambiar categoría en el carrusel sin textos redundantes', () => {
-    render(
-      <MemoryRouter future={routerFutureConfig}>
-        <MenuPage />
-      </MemoryRouter>,
-    );
-
-    fireEvent.click(screen.getByRole('button', { name: /mapas/i }));
-
-    expect(screen.getByRole('button', { name: /^mapas$/i })).toHaveAttribute(
-      'aria-pressed',
-      'true',
-    );
-  });
-
-  it('mantiene alineación consistente en selectores de categoría en reposo y seleccionado', () => {
-    render(
-      <MemoryRouter future={routerFutureConfig}>
-        <MenuPage />
-      </MemoryRouter>,
-    );
-
-    const mixedButton = screen.getByRole('button', { name: /^mixto$/i });
-    const flagsButton = screen.getByRole('button', { name: /^banderas$/i });
-
-    expect(mixedButton.className).toContain('menu-category-selector');
-    expect(flagsButton.className).toContain('menu-category-selector');
-    expect(mixedButton.querySelector('.menu-category-selector__icon')).toBeInTheDocument();
-    expect(flagsButton.querySelector('.menu-category-selector__icon')).toBeInTheDocument();
-    expect(mixedButton.querySelector('.menu-category-selector__label')).toBeInTheDocument();
-    expect(flagsButton.querySelector('.menu-category-selector__label')).toBeInTheDocument();
-
-    fireEvent.click(flagsButton);
-    expect(flagsButton).toHaveAttribute('aria-pressed', 'true');
-    expect(flagsButton.className).toContain('menu-category-selector');
-    expect(flagsButton.querySelector('.menu-category-selector__icon')).toBeInTheDocument();
-    expect(flagsButton.querySelector('.menu-category-selector__label')).toBeInTheDocument();
-  });
-
-  it('permite cambiar categoría y navegar a partida individual con categoría seleccionada', () => {
-    render(
-      <MemoryRouter future={routerFutureConfig}>
-        <MenuPage />
-      </MemoryRouter>,
-    );
-
-    const capitalesButton = screen.getByRole('button', { name: /capitales/i });
-    fireEvent.click(capitalesButton);
-
-    expect(capitalesButton).toHaveAttribute('aria-pressed', 'true');
-
-    const singleModeButton = screen.getByRole('button', { name: /un jugador[\s\S]*juega solo/i });
-    fireEvent.click(singleModeButton);
-
-    expect(mockNavigate).toHaveBeenCalledWith('/game/single?category=CAPITAL');
-  });
-
-  it('expone nombres accesibles claros para categorías y filtros', () => {
-    render(
-      <MemoryRouter future={routerFutureConfig}>
-        <MenuPage />
-      </MemoryRouter>,
-    );
-
-    expect(screen.getByRole('group', { name: /categorías de preguntas/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /^banderas$/i })).toBeInTheDocument();
-
-    const filterButton = screen.getByRole('button', { name: /abrir filtros de preguntas/i });
-    expect(filterButton).toHaveAttribute('aria-haspopup', 'dialog');
-    expect(filterButton).toHaveAttribute('aria-expanded', 'false');
-  });
-
-  describe('modal de "cómo se juega" la primera vez', () => {
-    beforeEach(() => {
-      // Este describe prueba explícitamente el estado "primera vez" —
-      // localStorage vacío, sin los flags que el resto del archivo setea.
-      window.localStorage.clear();
+  it('usuario con progreso → stamps correctos', async () => {
+    const { api } = await import('../services/api');
+    vi.mocked(api.getMasterySummary).mockResolvedValue({
+      worldProgressPercent: 3.7,
+      totalCountries: 180,
+      stampedCountries: 24,
+      masteredCountries: 2,
+      skills: [],
     });
 
-    it('abre el modal en vez de navegar la primera vez que se toca un modo, y navega recién al confirmar', () => {
-      render(
-        <MemoryRouter future={routerFutureConfig}>
+    render(
+      <MemoryRouter future={routerFutureConfig}>
+        <Screen>
           <MenuPage />
-        </MemoryRouter>,
-      );
+        </Screen>
+      </MemoryRouter>,
+    );
 
-      const singleModeButton = screen.getByRole('button', { name: /un jugador[\s\S]*juega solo/i });
-      fireEvent.click(singleModeButton);
+    await waitFor(() => {
+      expect(screen.getByText('Tu viaje por el mundo')).toBeDefined();
+    });
+    expect(screen.getByText(/24 países explorados/)).toBeDefined();
+    expect(screen.getByText(/2 dominados/)).toBeDefined();
+  });
 
-      expect(mockNavigate).not.toHaveBeenCalled();
-      expect(screen.getByText('Objetivo single')).toBeInTheDocument();
-
-      fireEvent.click(screen.getByRole('button', { name: '¡Jugar!' }));
-
-      expect(mockNavigate).toHaveBeenCalledWith('/game/single?category=MIXED');
-      expect(window.localStorage.getItem('howto_seen_single')).toBe('1');
+  it('Continue Journey → gameType=practice', async () => {
+    const { api } = await import('../services/api');
+    vi.mocked(api.getMasterySummary).mockResolvedValue({
+      worldProgressPercent: 1,
+      totalCountries: 180,
+      stampedCountries: 3,
+      masteredCountries: 0,
+      skills: [],
     });
 
-    it('no vuelve a auto-abrirse para el mismo modo una vez visto', () => {
-      window.localStorage.setItem('howto_seen_duel', '1');
-
-      render(
-        <MemoryRouter future={routerFutureConfig}>
+    render(
+      <MemoryRouter future={routerFutureConfig}>
+        <Screen>
           <MenuPage />
-        </MemoryRouter>,
-      );
+        </Screen>
+      </MemoryRouter>,
+    );
 
-      const duelModeButton = screen.getByRole('button', { name: /duelo[\s\S]*compite/i });
-      fireEvent.click(duelModeButton);
-
-      expect(mockNavigate).toHaveBeenCalledWith('/duel?category=MIXED');
-      expect(screen.queryByText('Objetivo duel')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Seguir explorando')).toBeDefined();
     });
 
-    it('abre el modal manualmente con el botón "?" sin navegar al cerrar sin confirmar', () => {
-      render(
-        <MemoryRouter future={routerFutureConfig}>
-          <MenuPage />
-        </MemoryRouter>,
-      );
+    fireEvent.click(screen.getByText('Seguir explorando'));
+    expect(mockNavigate).toHaveBeenCalledWith('/game/single?gameType=practice');
+  });
 
-      const helpButton = screen.getByRole('button', { name: 'Cómo se juega Un Jugador' });
-      fireEvent.click(helpButton);
-
-      expect(screen.getByText('Objetivo single')).toBeInTheDocument();
-
-      fireEvent.click(screen.getByRole('button', { name: '✕' }));
-
-      expect(mockNavigate).not.toHaveBeenCalled();
+  it('Passport → /passport', async () => {
+    const { api } = await import('../services/api');
+    vi.mocked(api.getMasterySummary).mockResolvedValue({
+      worldProgressPercent: 1,
+      totalCountries: 180,
+      stampedCountries: 3,
+      masteredCountries: 0,
+      skills: [],
     });
+
+    render(
+      <MemoryRouter future={routerFutureConfig}>
+        <Screen>
+          <MenuPage />
+        </Screen>
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Pasaporte')).toBeDefined();
+    });
+
+    fireEvent.click(screen.getByText('Pasaporte'));
+    expect(mockNavigate).toHaveBeenCalledWith('/passport');
+  });
+});
+
+describe('MenuPage — daily card', () => {
+  beforeEach(() => {
+    mockNavigate.mockReset();
+    mocks.getDailyStatus.mockResolvedValue({
+      today: '2026-08-12',
+      completed: false,
+      dailyStreak: 0,
+    });
+    installInMemoryLocalStorage();
+    window.localStorage.clear();
+    markAllHowToSeen();
+  });
+
+  it('Daily pendiente → CTA Jugar', async () => {
+    render(
+      <MemoryRouter future={routerFutureConfig}>
+        <Screen>
+          <MenuPage />
+        </Screen>
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Disponible')).toBeDefined();
+    });
+    expect(screen.getByText('Jugar reto de hoy')).toBeDefined();
+  });
+
+  it('Daily completado → score + streak', async () => {
+    mocks.getDailyStatus.mockResolvedValue({
+      today: '2026-08-12',
+      completed: true,
+      dailyStreak: 4,
+      result: {
+        score: 800,
+        correctCount: 8,
+        totalQuestions: 10,
+        playedAt: '2026-08-12T10:00:00.000Z',
+      },
+    });
+
+    render(
+      <MemoryRouter future={routerFutureConfig}>
+        <Screen>
+          <MenuPage />
+        </Screen>
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Completado')).toBeDefined();
+    });
+    expect(screen.getByText('Ver resultado')).toBeDefined();
+  });
+
+  it('fallo Daily status → lobby sigue usable', async () => {
+    mocks.getDailyStatus.mockRejectedValue(new Error('Network error'));
+
+    render(
+      <MemoryRouter future={routerFutureConfig}>
+        <Screen>
+          <MenuPage />
+        </Screen>
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Practicar')).toBeDefined();
+    });
+    expect(screen.getByText('Competir')).toBeDefined();
+  });
+});
+
+describe('MenuPage — panels', () => {
+  beforeEach(() => {
+    mockNavigate.mockReset();
+    mocks.getDailyStatus.mockResolvedValue({
+      today: '2026-08-12',
+      completed: false,
+      dailyStreak: 0,
+    });
+    installInMemoryLocalStorage();
+    window.localStorage.clear();
+    markAllHowToSeen();
+  });
+
+  it('click Practicar → abre panel', () => {
+    render(
+      <MemoryRouter future={routerFutureConfig}>
+        <Screen>
+          <MenuPage />
+        </Screen>
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByText('Practicar'));
+    expect(screen.getByText('Elige qué quieres entrenar.')).toBeDefined();
+  });
+
+  it('panel Practice → CategorySelector', () => {
+    render(
+      <MemoryRouter future={routerFutureConfig}>
+        <Screen>
+          <MenuPage />
+        </Screen>
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByText('Practicar'));
+    expect(screen.getByRole('group', { name: /categorías de preguntas/i })).toBeDefined();
+  });
+
+  it('panel Practice → Clásico/Flash/Racha', () => {
+    render(
+      <MemoryRouter future={routerFutureConfig}>
+        <Screen>
+          <MenuPage />
+        </Screen>
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByText('Practicar'));
+    expect(screen.getByText('Clásico')).toBeDefined();
+    expect(screen.getByText('Flash')).toBeDefined();
+    expect(screen.getByText('Racha')).toBeDefined();
+  });
+
+  it('MAP → Flash disabled', () => {
+    render(
+      <MemoryRouter future={routerFutureConfig}>
+        <Screen>
+          <MenuPage />
+        </Screen>
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByText('Practicar'));
+    fireEvent.click(screen.getByRole('button', { name: /^mapas$/i }));
+
+    expect(screen.getByText(/el modo flash no admite mapas/i)).toBeDefined();
+  });
+
+  it('Flag Master accesible desde Practice', () => {
+    render(
+      <MemoryRouter future={routerFutureConfig}>
+        <Screen>
+          <MenuPage />
+        </Screen>
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByText('Practicar'));
+    expect(screen.getByText('Maestro de Banderas')).toBeDefined();
+  });
+
+  it('GeoRetos accesible desde Practice', () => {
+    render(
+      <MemoryRouter future={routerFutureConfig}>
+        <Screen>
+          <MenuPage />
+        </Screen>
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByText('Practicar'));
+    expect(screen.getByText('GeoRetos')).toBeDefined();
+  });
+
+  it('click Competir → abre panel Competition', () => {
+    render(
+      <MemoryRouter future={routerFutureConfig}>
+        <Screen>
+          <MenuPage />
+        </Screen>
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByText('Competir'));
+    expect(screen.getByText('Pon a prueba lo que sabes contra otros.')).toBeDefined();
+  });
+
+  it('Competition → Duel/Challenge/Survival', () => {
+    render(
+      <MemoryRouter future={routerFutureConfig}>
+        <Screen>
+          <MenuPage />
+        </Screen>
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByText('Competir'));
+    expect(screen.getByText('Duelo')).toBeDefined();
+    expect(screen.getByText('Desafío')).toBeDefined();
+    expect(screen.getByText('Supervivencia')).toBeDefined();
+  });
+
+  it('GeoRetos Duel accesible desde Compete', () => {
+    render(
+      <MemoryRouter future={routerFutureConfig}>
+        <Screen>
+          <MenuPage />
+        </Screen>
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByText('Competir'));
+    expect(screen.getByText('GeoRetos Duel')).toBeDefined();
+  });
+
+  it('sólo un panel abierto a la vez', () => {
+    render(
+      <MemoryRouter future={routerFutureConfig}>
+        <Screen>
+          <MenuPage />
+        </Screen>
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByText('Practicar'));
+    expect(screen.getByText('Elige qué quieres entrenar.')).toBeDefined();
+
+    fireEvent.click(screen.getByText('Competir'));
+    expect(screen.queryByText('Elige qué quieres entrenar.')).not.toBeInTheDocument();
+    expect(screen.getByText('Pon a prueba lo que sabes contra otros.')).toBeDefined();
+  });
+});
+
+describe('MenuPage — HowTo first-run', () => {
+  beforeEach(() => {
+    mockNavigate.mockReset();
+    mocks.getDailyStatus.mockResolvedValue({
+      today: '2026-08-12',
+      completed: false,
+      dailyStreak: 0,
+    });
+    installInMemoryLocalStorage();
+    window.localStorage.clear();
+  });
+
+  it('abre modal en vez de navegar la primera vez que se toca un modo, y navega al confirmar', () => {
+    render(
+      <MemoryRouter future={routerFutureConfig}>
+        <Screen>
+          <MenuPage />
+        </Screen>
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByText('Practicar'));
+    fireEvent.click(screen.getByText('Clásico'));
+
+    expect(mockNavigate).not.toHaveBeenCalled();
+    expect(screen.getByText('Objetivo single')).toBeDefined();
+
+    fireEvent.click(screen.getByRole('button', { name: '¡Jugar!' }));
+    expect(mockNavigate).toHaveBeenCalled();
+    expect(window.localStorage.getItem('howto_seen_single')).toBe('1');
+  });
+
+  it('no vuelve a auto-abrirse para el mismo modo una vez visto', () => {
+    window.localStorage.setItem('howto_seen_single', '1');
+
+    render(
+      <MemoryRouter future={routerFutureConfig}>
+        <Screen>
+          <MenuPage />
+        </Screen>
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByText('Practicar'));
+    fireEvent.click(screen.getByText('Clásico'));
+
+    expect(mockNavigate).toHaveBeenCalled();
+    expect(screen.queryByText('Objetivo single')).not.toBeInTheDocument();
+  });
+
+  it('abre modal manualmente con "?" sin navegar al cerrar', () => {
+    window.localStorage.setItem('howto_seen_single', '1');
+
+    render(
+      <MemoryRouter future={routerFutureConfig}>
+        <Screen>
+          <MenuPage />
+        </Screen>
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByText('Practicar'));
+
+    const helpButton = screen.getByRole('button', { name: 'Cómo se juega Un Jugador' });
+    fireEvent.click(helpButton);
+
+    expect(screen.getByText('Objetivo single')).toBeDefined();
+    fireEvent.click(screen.getByRole('button', { name: '✕' }));
+    expect(mockNavigate).not.toHaveBeenCalled();
   });
 });

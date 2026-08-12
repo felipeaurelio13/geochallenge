@@ -442,3 +442,178 @@ describe('POST /api/game/daily/submit — clientDate y racha en zona horaria loc
     );
   });
 });
+
+describe('GET /api/game/daily/status — estado ligero para el lobby', () => {
+  const SERVER_NOW = '2026-08-12T12:00:00.000Z';
+  const TODAY = '2026-08-12';
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(SERVER_NOW));
+    mocks.redisGet.mockResolvedValue(null);
+    mocks.redisSet.mockResolvedValue('OK');
+    mocks.questionFindMany.mockResolvedValue([]);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  it('usuario que no jugó hoy → completed=false', async () => {
+    mocks.userFindUnique.mockResolvedValue({
+      dailyStreak: 3,
+      lastDailyDate: '2026-08-10',
+    });
+
+    const { server, baseUrl } = startServer();
+    const response = await fetch(`${baseUrl}/api/game/daily/status`);
+    const body = (await response.json()) as { completed: boolean; today: string; dailyStreak: number };
+    server.close();
+
+    expect(response.status).toBe(200);
+    expect(body.completed).toBe(false);
+    expect(body.today).toBe(TODAY);
+    expect(body.dailyStreak).toBe(3);
+    expect(body).not.toHaveProperty('result');
+  });
+
+  it('usuario que jugó hoy → completed=true', async () => {
+    mocks.userFindUnique.mockResolvedValue({
+      dailyStreak: 5,
+      lastDailyDate: TODAY,
+    });
+
+    const { server, baseUrl } = startServer();
+    const response = await fetch(`${baseUrl}/api/game/daily/status`);
+    const body = (await response.json()) as { completed: boolean };
+    server.close();
+
+    expect(response.status).toBe(200);
+    expect(body.completed).toBe(true);
+  });
+
+  it('devuelve dailyStreak del usuario', async () => {
+    mocks.userFindUnique.mockResolvedValue({
+      dailyStreak: 7,
+      lastDailyDate: null,
+    });
+
+    const { server, baseUrl } = startServer();
+    const response = await fetch(`${baseUrl}/api/game/daily/status`);
+    const body = (await response.json()) as { dailyStreak: number };
+    server.close();
+
+    expect(body.dailyStreak).toBe(7);
+  });
+
+  it('devuelve resultado desde Redis cuando existe', async () => {
+    mocks.userFindUnique.mockResolvedValue({
+      dailyStreak: 4,
+      lastDailyDate: TODAY,
+    });
+
+    const redisResult = {
+      score: 800,
+      correctCount: 8,
+      totalQuestions: 10,
+      playedAt: '2026-08-12T10:00:00.000Z',
+    };
+    mocks.redisGet.mockImplementation((key: string) => {
+      if (key === `daily:played:user-1:${TODAY}`) {
+        return Promise.resolve(JSON.stringify(redisResult));
+      }
+      return Promise.resolve(null);
+    });
+
+    const { server, baseUrl } = startServer();
+    const response = await fetch(`${baseUrl}/api/game/daily/status`);
+    const body = (await response.json()) as { result?: { score: number; correctCount: number } };
+    server.close();
+
+    expect(body.result?.score).toBe(800);
+    expect(body.result?.correctCount).toBe(8);
+  });
+
+  it('fallback a DB si Redis no tiene resultado', async () => {
+    mocks.userFindUnique.mockResolvedValue({
+      dailyStreak: 2,
+      lastDailyDate: TODAY,
+    });
+
+    mocks.redisGet.mockResolvedValue(null);
+
+    mocks.gameResultFindFirst.mockResolvedValue({
+      score: 600,
+      correctCount: 6,
+      totalQuestions: 10,
+      createdAt: new Date('2026-08-12T09:00:00.000Z'),
+    });
+
+    const { server, baseUrl } = startServer();
+    const response = await fetch(`${baseUrl}/api/game/daily/status`);
+    const body = (await response.json()) as { result?: { score: number } };
+    server.close();
+
+    expect(body.result?.score).toBe(600);
+  });
+
+  it('respeta clientDate cuando es válido', async () => {
+    mocks.userFindUnique.mockResolvedValue({
+      dailyStreak: 3,
+      lastDailyDate: '2026-08-11',
+    });
+
+    const { server, baseUrl } = startServer();
+    const response = await fetch(`${baseUrl}/api/game/daily/status?clientDate=2026-08-11`);
+    const body = (await response.json()) as { completed: boolean; today: string };
+    server.close();
+
+    expect(response.status).toBe(200);
+    expect(body.today).toBe('2026-08-11');
+    expect(body.completed).toBe(true);
+  });
+
+  it('NO consulta preguntas del día', async () => {
+    mocks.userFindUnique.mockResolvedValue({
+      dailyStreak: 0,
+      lastDailyDate: null,
+    });
+
+    const { server, baseUrl } = startServer();
+    await fetch(`${baseUrl}/api/game/daily/status`);
+    server.close();
+
+    expect(mocks.questionFindMany).not.toHaveBeenCalled();
+  });
+
+  it('NO emite game_started ni modifica DB', async () => {
+    mocks.userFindUnique.mockResolvedValue({
+      dailyStreak: 1,
+      lastDailyDate: null,
+    });
+
+    const { server, baseUrl } = startServer();
+    await fetch(`${baseUrl}/api/game/daily/status`);
+    server.close();
+
+    expect(mocks.userUpdate).not.toHaveBeenCalled();
+    expect(mocks.gameResultCreate).not.toHaveBeenCalled();
+  });
+
+  it('usuario nuevo sin lastDailyDate → completed=false, streak=0', async () => {
+    mocks.userFindUnique.mockResolvedValue({
+      dailyStreak: 0,
+      lastDailyDate: null,
+    });
+
+    const { server, baseUrl } = startServer();
+    const response = await fetch(`${baseUrl}/api/game/daily/status`);
+    const body = (await response.json()) as { completed: boolean; dailyStreak: number };
+    server.close();
+
+    expect(body.completed).toBe(false);
+    expect(body.dailyStreak).toBe(0);
+  });
+});

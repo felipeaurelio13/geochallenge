@@ -247,6 +247,18 @@ export interface DailyResult {
   streakLost?: boolean;
 }
 
+export interface DailyStatus {
+  today: string;
+  completed: boolean;
+  dailyStreak: number;
+  result?: {
+    score: number;
+    correctCount: number;
+    totalQuestions: number;
+    playedAt: string;
+  };
+}
+
 export interface EarnedAchievement {
   key: string;
   nameEs: string;
