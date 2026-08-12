@@ -3,6 +3,7 @@ import { GameMode, GameVariant } from '@prisma/client';
 
 const mocks = vi.hoisted(() => {
   const create = vi.fn();
+  const createMany = vi.fn();
   const findMany = vi.fn();
   const findUnique = vi.fn();
   const update = vi.fn();
@@ -14,9 +15,11 @@ const mocks = vi.hoisted(() => {
     ),
     gameResult: { create, findMany, findUnique },
     user: { findUnique, update },
+    question: { findMany: vi.fn().mockResolvedValue([]) },
+    masteryAttempt: { createMany: vi.fn().mockResolvedValue({ count: 0 }) },
   };
 
-  return { prismaStub, $transaction, create, findMany, findUnique, update };
+  return { prismaStub, $transaction, create, createMany, findMany, findUnique, update };
 });
 
 vi.mock('../config/database.js', () => ({ prisma: mocks.prismaStub }));

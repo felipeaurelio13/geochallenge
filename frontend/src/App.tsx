@@ -19,6 +19,7 @@ import {
   SurvivalPage,
   FlagMasterPage,
   GeoChallengesPage,
+  PassportPage,
 } from './pages';
 import { DailyChallengePage } from './pages/DailyChallengePage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
@@ -149,6 +150,10 @@ export const appRoutes = [
       {
         path: '/profile',
         element: <ProtectedRoute><ProfilePage /></ProtectedRoute>,
+      },
+      {
+        path: '/passport',
+        element: <ProtectedRoute><PassportPage /></ProtectedRoute>,
       },
       {
         path: '/game/flash',

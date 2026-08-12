@@ -24,6 +24,9 @@ import type {
   GeoChallengeStartResponse,
   GeoChallengeAnswerResponse,
   GeoChallengeFinishResponse,
+  MasterySummary,
+  PassportResponse,
+  AdaptivePracticeStartResponse,
 } from '../types';
 import { filtersToParams } from '../types';
 import { testAuthBypass } from '../utils/testAuthBypass';
@@ -563,6 +566,24 @@ class ApiService {
   async getFlagMasterAvailability() {
     const response = await this.client.get<FlagMasterAvailability>(
       '/game/flag-master/availability'
+    );
+    return response.data;
+  }
+
+  async getMasterySummary() {
+    const response = await this.client.get<MasterySummary>('/mastery/summary');
+    return response.data;
+  }
+
+  async getPassport() {
+    const response = await this.client.get<PassportResponse>('/mastery/passport');
+    return response.data;
+  }
+
+  async startAdaptivePractice(countryCode?: string, count?: number) {
+    const response = await this.client.post<AdaptivePracticeStartResponse>(
+      '/mastery/practice/start',
+      { count: count ?? 10, ...(countryCode ? { countryCode } : {}) }
     );
     return response.data;
   }

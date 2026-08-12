@@ -37,7 +37,7 @@ export async function ensureCinemaGeoQuestions(): Promise<void> {
     // Load existing CINEMA_GEO rows so we can upsert + prune in one pass.
     const existingRows = await prisma.question.findMany({
       where: { category: Category.CINEMA_GEO },
-      select: { id: true, questionData: true, options: true, correctAnswer: true, difficulty: true, latitude: true, longitude: true, continent: true },
+      select: { id: true, questionData: true, options: true, correctAnswer: true, difficulty: true, latitude: true, longitude: true, continent: true, countryCode: true },
     });
 
     // Map approved-question id → DB row (parsed from questionData.id)
@@ -76,6 +76,7 @@ export async function ensureCinemaGeoQuestions(): Promise<void> {
         populationTier: country?.populationTier ?? null,
         areaTier: country?.areaTier ?? null,
         flagComplexity: null,                            // not meaningful for cinema-geo
+        countryCode: country?.iso2 ?? null,
       };
 
       const existing = existingByCatalogId.get(q.id);
@@ -92,7 +93,8 @@ export async function ensureCinemaGeoQuestions(): Promise<void> {
         existing.difficulty !== newRow.difficulty ||
         existing.latitude !== newRow.latitude ||
         existing.longitude !== newRow.longitude ||
-        existing.continent !== newRow.continent;
+        existing.continent !== newRow.continent ||
+        existing.countryCode !== newRow.countryCode;
 
       if (hasChanged) {
         await prisma.question.update({ where: { id: existing.id }, data: newRow });

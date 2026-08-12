@@ -14,6 +14,7 @@ type ModeFlagSet = {
   flash: boolean;
   duel: boolean;
   challenge: boolean;
+  practice: boolean;
 };
 
 export const featureFlags = {
@@ -23,6 +24,7 @@ export const featureFlags = {
     flash: parseBoolFlag(import.meta.env.VITE_UX_V2_FLASH, true),
     duel: parseBoolFlag(import.meta.env.VITE_UX_V2_DUEL, false),
     challenge: parseBoolFlag(import.meta.env.VITE_UX_V2_CHALLENGE, false),
+    practice: true,
   } satisfies ModeFlagSet,
   mechanicsV2: {
     single: parseBoolFlag(import.meta.env.VITE_MECHANICS_V2_SINGLE, true),
@@ -30,6 +32,7 @@ export const featureFlags = {
     flash: parseBoolFlag(import.meta.env.VITE_MECHANICS_V2_FLASH, true),
     duel: parseBoolFlag(import.meta.env.VITE_MECHANICS_V2_DUEL, false),
     challenge: parseBoolFlag(import.meta.env.VITE_MECHANICS_V2_CHALLENGE, false),
+    practice: false,
   } satisfies ModeFlagSet,
   telemetry: {
     enabled: parseBoolFlag(import.meta.env.VITE_UX_TELEMETRY_ENABLED, true),

@@ -36,6 +36,13 @@ vi.mock('../context/AuthContext', () => ({
 vi.mock('../services/api', () => ({
   api: {
     getGameAvailability: vi.fn(() => new Promise(() => {})),
+    getMasterySummary: vi.fn().mockResolvedValue({
+      worldProgressPercent: 0,
+      totalCountries: 180,
+      stampedCountries: 0,
+      masteredCountries: 0,
+      skills: [],
+    }),
   },
 }));
 

@@ -4,6 +4,7 @@ import { getRedis } from '../config/redis.js';
 import { Category, Difficulty, GameMode, GameVariant, Prisma } from '@prisma/client';
 import { haversineDistance } from '../utils/haversine.js';
 import { calculateScore, calculateMapScore, calculateTimeBonus, shuffleArray, selectRandom } from '../utils/scoring.js';
+import { applyMasteryAttemptsForRun } from './mastery.service.js';
 import { randomUUID } from 'crypto';
 
 export interface GameQuestion {
@@ -23,20 +24,21 @@ export interface GameQuestion {
   isLandlocked?: boolean;
   populationTier?: string;
   areaTier?: string;
+  countryCode?: string;
 }
 
-/** PublicGameQuestion: identical to GameQuestion but without the correct answer. */
-export type PublicGameQuestion = Omit<GameQuestion, 'correctAnswer' | 'latitude' | 'longitude'>;
+/** PublicGameQuestion: identical to GameQuestion but without the correct answer, coordinates, or country code. */
+export type PublicGameQuestion = Omit<GameQuestion, 'correctAnswer' | 'latitude' | 'longitude' | 'countryCode'>;
 
 export function toPublicQuestion(question: GameQuestion): PublicGameQuestion {
-  const { correctAnswer: _correctAnswer, latitude: _lat, longitude: _lng, ...publicQuestion } = question;
+  const { correctAnswer: _correctAnswer, latitude: _lat, longitude: _lng, countryCode: _cc, ...publicQuestion } = question;
   return publicQuestion;
 }
 
-/** Strips correctAnswer, latitude, longitude from any question-like object for socket emission. */
-export function toPublicSocketPayload<T extends Record<string, unknown>>(obj: T): Omit<T, 'correctAnswer' | 'latitude' | 'longitude'> {
-  const { correctAnswer: _, latitude: __, longitude: ___, ...rest } = obj as Record<string, unknown>;
-  return rest as unknown as Omit<T, 'correctAnswer' | 'latitude' | 'longitude'>;
+/** Strips correctAnswer, latitude, longitude, countryCode from any question-like object for socket emission. */
+export function toPublicSocketPayload<T extends Record<string, unknown>>(obj: T): Omit<T, 'correctAnswer' | 'latitude' | 'longitude' | 'countryCode'> {
+  const { correctAnswer: _, latitude: __, longitude: ___, countryCode: ____, ...rest } = obj as Record<string, unknown>;
+  return rest as unknown as Omit<T, 'correctAnswer' | 'latitude' | 'longitude' | 'countryCode'>;
 }
 
 // ─── Redis Game Session ───────────────────────────────────────────────────────
@@ -60,6 +62,7 @@ export interface RedisGameSession {
     category: Category;
     difficulty?: string;
     continent?: string;
+    countryCode?: string;
   }>;
   createdAt: number;
   expiresAt: number;
@@ -86,7 +89,7 @@ export async function createGameSession(data: {
     optionsPerQuestion[q.id] = q.options;
   }
 
-  const questionMeta: Record<string, { category: Category; difficulty?: string; continent?: string }> = {};
+  const questionMeta: Record<string, { category: Category; difficulty?: string; continent?: string; countryCode?: string }> = {};
   for (const q of data.questions) {
     correctAnswers[q.id] = q.correctAnswer;
     optionsPerQuestion[q.id] = q.options;
@@ -94,6 +97,7 @@ export async function createGameSession(data: {
       category: q.category,
       difficulty: q.difficulty,
       continent: q.continent,
+      countryCode: q.countryCode,
     };
   }
 
@@ -470,6 +474,7 @@ export async function getQuestionsForGame(
     isLandlocked: q.isLandlocked ?? undefined,
     populationTier: q.populationTier || undefined,
     areaTier: q.areaTier || undefined,
+    countryCode: q.countryCode || undefined,
   }));
 }
 
@@ -540,6 +545,7 @@ export async function getQuestionsForFlashGame(category?: Category, filters?: Qu
       subregion: q.subregion || undefined,
       isInsular: q.isInsular ?? undefined,
       isLandlocked: q.isLandlocked ?? undefined,
+      countryCode: q.countryCode || undefined,
     };
   });
 }
@@ -905,6 +911,16 @@ export async function saveGameResult(
         ...(isHighScore && { highScore: totalScore }),
       },
     });
+
+    // Register mastery attempts within same transaction (skip for PRACTICE — its run
+    // already registered during session creation via game_started telemetry; mastery
+    // attempts will be created by the same applyMasteryAttempts logic).
+    const masteryRunId = runId ?? gameResult.id;
+    const masteryAnswers = answers.map((a) => ({
+      questionId: a.questionId,
+      isCorrect: a.isCorrect,
+    }));
+    await applyMasteryAttemptsForRun(db, userId, masteryRunId, gameMode, variant, masteryAnswers);
 
     return { gameId: gameResult.id, totalScore, isHighScore };
   };

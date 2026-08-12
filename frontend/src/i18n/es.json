@@ -124,6 +124,16 @@
     "geoChallengesDuelDesc": "10 preguntas · 1 contra 1",
     "howToPlay": "Cómo se juega",
     "howToPlayAria": "Cómo se juega {{mode}}",
+    "journey": {
+      "title": "Tu viaje",
+      "stamped": "países sellados",
+      "ofWorld": "del mundo",
+      "continue": "Continuar viaje",
+      "passport": "Pasaporte",
+      "start": "Comienza tu viaje por el mundo",
+      "startFirst": "Empezar a explorar",
+      "zeroStamps": "0 países sellados"
+    },
     "letsPlay": "¡Jugar!"
   },
   "howto": {
@@ -370,7 +380,11 @@
     "yourBest": "Tu mejor: {{best}}",
     "playAgainStreak": "Otra racha",
     "growthMindset": "Las primeras partidas son las más difíciles — cada una te enseña banderas nuevas 🌱",
-    "tryEasy": "Prueba dificultad Fácil"
+    "tryEasy": "Prueba dificultad Fácil",
+    "practiceTitle": "Práctica adaptativa",
+    "practiceSubtitle": "Tu progreso se ha guardado",
+    "continuePractice": "Seguir practicando",
+    "viewPassport": "Ver pasaporte"
   },
   "duel": {
     "searching": "Buscando oponente...",
@@ -721,7 +735,26 @@
       "year": "Año",
       "all": "Todo"
     },
-    "stats": {
+  "passport": {
+    "title": "Mi viaje",
+    "worldProgress": "del mundo",
+    "stamped": "países sellados",
+    "totalCountries": "países",
+    "mastered": "dominados",
+    "masteredLabel": "Dominado",
+    "empty": "Juega partidas para empezar a llenar tu pasaporte",
+    "practiceCountry": "Practicar {{country}}"
+  },
+  "mastery": {
+    "level": {
+      "unseen": "No jugado",
+      "learning": "Aprendiendo",
+      "familiar": "Conocido",
+      "strong": "Fuerte",
+      "mastered": "Dominado"
+    }
+  },
+  "stats": {
       "wins": "Victorias",
       "draws": "Empates",
       "losses": "Derrotas"

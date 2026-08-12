@@ -11,7 +11,7 @@ import { CategorySelector } from '../components/molecules/CategorySelector';
 import { GameModeCard } from '../components/molecules/GameModeCard';
 import { FilterDrawer } from '../components/molecules/FilterDrawer';
 import { Modal } from '../components/organisms/Modal';
-import { hasActiveFilters, filtersToParams, type Difficulty, type GameFilters } from '../types';
+import { hasActiveFilters, filtersToParams, type Difficulty, type GameFilters, type MasterySummary } from '../types';
 import { api } from '../services/api';
 import { trackUxEvent } from '../utils/uxTelemetry';
 import { CONTINENT_IDS, DIFFICULTY_IDS } from '../constants/filters';
@@ -204,6 +204,7 @@ export function MenuPage() {
     isInsular?: boolean;
     isLandlocked?: boolean;
   }>({});
+  const [masterySummary, setMasterySummary] = useState<MasterySummary | null>(null);
 
   const [selectedCategory, setSelectedCategory] = useLocalStorage<Category>(
     'geochallenge:last-category',
@@ -356,6 +357,13 @@ export function MenuPage() {
     }
   }, []);
 
+  useEffect(() => {
+    if (!user) return;
+    api.getMasterySummary()
+      .then(setMasterySummary)
+      .catch(() => {});
+  }, [user]);
+
   return (
     <PageTemplate
       header={
@@ -387,6 +395,53 @@ export function MenuPage() {
       }
       contentClassName="py-2.5 pb-4 sm:py-3 sm:pb-6"
     >
+      {/* Journey card */}
+      {user && (
+        <section className="mb-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+          {masterySummary && masterySummary.stampedCountries > 0 ? (
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-sm font-semibold text-[var(--color-text-primary)]">
+                  {t('menu.journey.title', 'Tu viaje')}
+                </h2>
+                <p className="mt-1 text-xs text-[var(--color-text-secondary)]">
+                  {masterySummary.stampedCountries} {t('menu.journey.stamped', 'países sellados')} · {masterySummary.worldProgressPercent}% {t('menu.journey.ofWorld', 'del mundo')}
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => navigate('/game/single?gameType=practice')}
+                  className="rounded-lg bg-[var(--color-accent)] px-3 py-1.5 text-xs font-semibold text-white"
+                >
+                  {t('menu.journey.continue', 'Continuar viaje')}
+                </button>
+                <button
+                  onClick={() => navigate('/passport')}
+                  className="rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text-secondary)]"
+                >
+                  {t('menu.journey.passport', 'Pasaporte')}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center">
+              <h2 className="text-sm font-semibold text-[var(--color-text-primary)]">
+                {t('menu.journey.start', 'Comienza tu viaje por el mundo')}
+              </h2>
+              <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+                {t('menu.journey.zeroStamps', '0 países sellados')}
+              </p>
+              <button
+                onClick={() => navigate('/game/single?gameType=practice')}
+                className="mt-3 rounded-lg bg-[var(--color-accent)] px-4 py-2 text-sm font-semibold text-white"
+              >
+                {t('menu.journey.startFirst', 'Empezar a explorar')}
+              </button>
+            </div>
+          )}
+        </section>
+      )}
+
       <section>
         <SectionTitle variant="label" className="mb-2 px-1 sm:px-0">
           {t('menu.selectCategory')}

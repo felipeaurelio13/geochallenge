@@ -4,6 +4,7 @@ import { QuestionFilters } from './game.service.js';
 import { evaluateTimedAnswers, SubmittedAnswer } from '../utils/answerEvaluation.js';
 import { AppError } from '../utils/appError.js';
 import { trackServerEvent } from './telemetry.service.js';
+import { applyMasteryAttemptsForRun } from './mastery.service.js';
 
 const CHALLENGE_EXPIRY_DAYS = 7;
 const QUESTIONS_PER_CHALLENGE = 10;
@@ -317,8 +318,12 @@ export class ChallengeService {
       },
     });
 
-    // Telemetry: game_started idempotente + question_answered por cada detalle + game_finished
+    // Register mastery attempts
     const runId = `challenge:${challengeId}:${userId}`;
+    const masteryAnswers = details.map((d) => ({ questionId: d.questionId, isCorrect: d.isCorrect }));
+    await applyMasteryAttemptsForRun(prisma, userId, runId, GameMode.CHALLENGE, GameVariant.CLASSIC, masteryAnswers);
+
+    // Telemetry: game_started idempotente + question_answered por cada detalle + game_finished
     trackServerEvent({
       name: 'game_started',
       userId,

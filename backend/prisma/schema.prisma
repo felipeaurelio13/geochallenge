@@ -34,6 +34,7 @@ model User {
   survivalParticipations SurvivalParticipant[]
   passwordResetTokens PasswordResetToken[]
   telemetryEvents    TelemetryEvent[]
+  masteryAttempts    MasteryAttempt[]
 
   @@index([highScore(sort: Desc)])
   @@map("users")
@@ -72,11 +73,34 @@ model Question {
   populationTier String?
   areaTier       String?
   flagComplexity String?
+  countryCode    String?
   createdAt      DateTime @default(now())
 
   @@index([category])
   @@index([isAvailable])
+  @@index([countryCode, category, isAvailable])
   @@map("questions")
+}
+
+model MasteryAttempt {
+  id          String      @id @default(cuid())
+  userId      String
+  runId       String
+  questionId  String
+  countryCode String
+  category    Category
+  difficulty  Difficulty?
+  isCorrect   Boolean
+  gameMode    GameMode
+  variant     GameVariant
+  occurredAt  DateTime    @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, runId, questionId])
+  @@index([userId, countryCode, category, occurredAt])
+  @@index([userId, occurredAt])
+  @@map("mastery_attempts")
 }
 
 model GameResult {
@@ -168,6 +192,7 @@ enum GameVariant {
   FLAG_MASTER
   GEO_CHALLENGE
   DAILY
+  PRACTICE
 }
 
 model DuelMatch {

@@ -15,6 +15,7 @@ import { prisma } from '../config/database.js';
 import { getRedis } from '../config/redis.js';
 import { evaluateAchievementsAfterGame } from '../services/achievement.service.js';
 import { trackServerEvent } from '../services/telemetry.service.js';
+import { applyMasteryAttemptsForRun } from '../services/mastery.service.js';
 
 const router = Router();
 
@@ -524,6 +525,12 @@ async function persistGameResult(
         details: details as unknown as Prisma.InputJsonValue,
       },
     });
+
+    const masteryAnswers = payload.rounds.map((r) => ({
+      questionId: r.questionId,
+      isCorrect: r.isCorrect,
+    }));
+    await applyMasteryAttemptsForRun(db, userId, gameResult.id, GameMode.SINGLE, GameVariant.FLAG_MASTER, masteryAnswers);
 
     // Flag Master no actualiza highScore (legacy: solo Classic Single).
     await db.user.update({

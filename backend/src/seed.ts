@@ -65,6 +65,7 @@ async function main() {
       populationTier: country.populationTier ?? null,
       areaTier: country.areaTier ?? null,
       flagComplexity: country.flagComplexity ?? null,
+      countryCode: country.iso2,
     });
   }
 
@@ -91,6 +92,7 @@ async function main() {
       populationTier: country.populationTier ?? null,
       areaTier: country.areaTier ?? null,
       flagComplexity: country.flagComplexity ?? null,
+      countryCode: country.iso2,
     });
   }
 
@@ -119,6 +121,7 @@ async function main() {
       populationTier: country.populationTier ?? null,
       areaTier: country.areaTier ?? null,
       flagComplexity: country.flagComplexity ?? null,
+      countryCode: country.iso2,
     });
     mapCount++;
   }
@@ -144,6 +147,7 @@ async function main() {
       populationTier: country.populationTier ?? null,
       areaTier: country.areaTier ?? null,
       flagComplexity: country.flagComplexity ?? null,
+      countryCode: country.iso2,
     });
   }
 
@@ -176,6 +180,7 @@ async function main() {
       populationTier: country.populationTier ?? null,
       areaTier: country.areaTier ?? null,
       flagComplexity: country.flagComplexity ?? null,
+      countryCode: country.iso2,
     });
 
     // Variante "country": pregunta en qué país está el monumento
@@ -196,6 +201,7 @@ async function main() {
       populationTier: country.populationTier ?? null,
       areaTier: country.areaTier ?? null,
       flagComplexity: country.flagComplexity ?? null,
+      countryCode: country.iso2,
     });
 
     monumentCount += 2;

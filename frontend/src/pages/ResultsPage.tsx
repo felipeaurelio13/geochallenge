@@ -15,6 +15,7 @@ export function ResultsPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const isStreakMode = searchParams.get('gameType') === 'streak';
+  const isPracticeMode = searchParams.get('gameType') === 'practice';
   const category = searchParams.get('category') ?? 'MIXED';
   // Part 1.2: bandera de navegación cuando finishGame no llegó al servidor
   // (dos intentos agotados) y el resultado se guardó localmente para reintentar.
@@ -196,9 +197,9 @@ export function ResultsPage() {
           {/* Part 5.2: en streak, el titular es la racha misma — no el genérico
               "Partida terminada" + un % que no representa nada útil en este modo. */}
           <h1 className="text-3xl font-bold text-[var(--color-text-primary)] sm:text-4xl">
-            {isStreakMode ? t('results.streakHeadline', { count: streakCount }) : t('results.gameOver')}
+            {isStreakMode ? t('results.streakHeadline', { count: streakCount }) : isPracticeMode ? t('results.practiceTitle', 'Práctica adaptativa') : t('results.gameOver')}
           </h1>
-          <p className="mt-2 text-lg text-[var(--color-text-secondary)] sm:text-xl">{getPerformanceMessage()}</p>
+          <p className="mt-2 text-lg text-[var(--color-text-secondary)] sm:text-xl">{isPracticeMode ? t('results.practiceSubtitle', 'Tu progreso se ha guardado') : getPerformanceMessage()}</p>
 
           {isPendingSync && (
             <p className="mt-3 text-sm text-sky-300" role="status">
@@ -393,7 +394,7 @@ export function ResultsPage() {
             {/* Part 5.4: score 0 en modo normal ofrece una salida concreta —
                 dificultad Fácil preseleccionada — en vez de dejar solo el CTA
                 genérico "Jugar de nuevo" que repite la misma dificultad. */}
-            {!isStreakMode && score === 0 && (
+            {!isStreakMode && !isPracticeMode && score === 0 && (
               <Button
                 onClick={handleTryEasy}
                 variant="secondary"
@@ -403,14 +404,35 @@ export function ResultsPage() {
                 {t('results.tryEasy')}
               </Button>
             )}
-            <Button
-              onClick={() => navigate('/rankings')}
-              variant="secondary"
-              size="lg"
-              fullWidth
-            >
-              {t('results.viewRankings')}
-            </Button>
+            {isPracticeMode ? (
+              <>
+                <Button
+                  onClick={() => { resetGame(); navigate('/game/single?gameType=practice'); }}
+                  variant="primary"
+                  size="lg"
+                  fullWidth
+                >
+                  {t('results.continuePractice', 'Seguir practicando')}
+                </Button>
+                <Button
+                  onClick={() => { resetGame(); navigate('/passport'); }}
+                  variant="secondary"
+                  size="lg"
+                  fullWidth
+                >
+                  {t('results.viewPassport', 'Ver pasaporte')}
+                </Button>
+              </>
+            ) : (
+              <Button
+                onClick={() => navigate('/rankings')}
+                variant="secondary"
+                size="lg"
+                fullWidth
+              >
+                {t('results.viewRankings')}
+              </Button>
+            )}
             <Button
               onClick={() => navigate('/menu')}
               variant="ghost"

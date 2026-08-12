@@ -47,6 +47,7 @@ import { AppError } from '../utils/appError.js';
 import { respondWithError } from '../utils/respondWithError.js';
 import { mapZodIssuesToFields } from '../utils/zodIssueMapper.js';
 import { trackServerEvent } from '../services/telemetry.service.js';
+import { applyMasteryAttemptsForRun } from '../services/mastery.service.js';
 
 const router = Router();
 const gameTypeSchema = z.enum(['single', 'streak', 'flash']);
@@ -1174,6 +1175,7 @@ router.post('/daily/submit', authenticateJWT, async (req: AuthRequest, res: Resp
     // Consolidar respuestas stored de /daily/answer (ignorar body del cliente)
     let correctCount = 0;
     let totalAnswered = 0;
+    const dailyAnswers: { questionId: string; isCorrect: boolean }[] = [];
     for (const qid of questionIds) {
       const stored = await redis.get(`daily:answer:${userId}:${today}:${qid}`);
       if (stored === null) continue; // key inexistente = unanswered → incorrecta
@@ -1181,6 +1183,7 @@ router.post('/daily/submit', authenticateJWT, async (req: AuthRequest, res: Resp
       const a = JSON.parse(stored) as { isCorrect: boolean };
       if (a.isCorrect) correctCount++;
       totalAnswered++;
+      dailyAnswers.push({ questionId: qid, isCorrect: a.isCorrect });
     }
     const score = correctCount * DAILY_POINTS_PER_CORRECT;
     const totalQuestions = questionIds.length;
@@ -1224,14 +1227,15 @@ router.post('/daily/submit', authenticateJWT, async (req: AuthRequest, res: Resp
     // Daily NO actualiza highScore (legacy: exclusivo de Single Classic).
 
     // Atómico: o queda el usuario actualizado Y el resultado en el historial, o nada.
+    const runId = `daily:${userId}:${dayKey}`;
     await prisma.$transaction(async (tx) => {
       await tx.user.update({ where: { id: userId }, data: updateData });
       await tx.gameResult.create({
         data: { userId, score, correctCount, totalQuestions, gameMode: 'SINGLE', variant: GameVariant.DAILY, category: 'MIXED' },
       });
+      await applyMasteryAttemptsForRun(tx, userId, runId, GameMode.SINGLE, GameVariant.DAILY, dailyAnswers);
     });
 
-    const runId = `daily:${userId}:${dayKey}`;
     trackServerEvent({
       name: 'game_finished',
       userId,

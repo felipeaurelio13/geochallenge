@@ -25,6 +25,7 @@ interface GameContextType {
   state: GameState;
   streakAlive: boolean;
   startGame: (category?: Category, questionCount?: number, gameType?: GameType, filters?: GameFilters, acceptShortGame?: boolean) => Promise<void>;
+  startPractice: (countryCode?: string) => Promise<void>;
   appendQuestions: (questions: Question[]) => void;
   setStreakAlive: (isAlive: boolean) => void;
   submitAnswer: (
@@ -186,6 +187,35 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         const served = await fallbackToOfflineCache();
         if (served) return;
       }
+      setState((prev) => ({ ...prev, status: 'idle' }));
+      throw error;
+    }
+  }, []);
+
+  const startPractice = useCallback(async (countryCode?: string) => {
+    setState((prev) => ({ ...prev, status: 'loading' }));
+
+    try {
+      const response = await api.startAdaptivePractice(countryCode);
+
+      setState({
+        status: 'playing',
+        sessionId: response.sessionId,
+        questions: response.questions,
+        currentIndex: 0,
+        answers: [],
+        results: [],
+        score: 0,
+        timeRemaining: getQuestionDuration(response.questions?.[0]?.category, response.gameConfig.timePerQuestion),
+        config: {
+          ...response.gameConfig,
+          sessionId: response.sessionId,
+          gameType: 'practice',
+        },
+        isOffline: false,
+      });
+      setStreakAlive(true);
+    } catch (error) {
       setState((prev) => ({ ...prev, status: 'idle' }));
       throw error;
     }
@@ -411,6 +441,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         state,
         streakAlive,
         startGame,
+        startPractice,
         appendQuestions,
         setStreakAlive,
         submitAnswer,

@@ -124,6 +124,16 @@
     "geoChallengesDuelDesc": "10 questions · 1 vs 1",
     "howToPlay": "How to play",
     "howToPlayAria": "How to play {{mode}}",
+    "journey": {
+      "title": "Your Journey",
+      "stamped": "stamped countries",
+      "ofWorld": "of the world",
+      "continue": "Continue journey",
+      "passport": "Passport",
+      "start": "Start your world journey",
+      "startFirst": "Start exploring",
+      "zeroStamps": "0 stamped countries"
+    },
     "letsPlay": "Let's play!"
   },
   "howto": {
@@ -370,7 +380,11 @@
     "yourBest": "Your best: {{best}}",
     "playAgainStreak": "Another streak",
     "growthMindset": "The first games are the hardest — each one teaches you new flags 🌱",
-    "tryEasy": "Try Easy difficulty"
+    "tryEasy": "Try Easy difficulty",
+    "practiceTitle": "Adaptive Practice",
+    "practiceSubtitle": "Your progress has been saved",
+    "continuePractice": "Continue practicing",
+    "viewPassport": "View passport"
   },
   "duel": {
     "searching": "Searching for opponent...",
@@ -721,7 +735,26 @@
       "year": "Year",
       "all": "All Time"
     },
-    "stats": {
+  "passport": {
+    "title": "My Journey",
+    "worldProgress": "of the world",
+    "stamped": "stamped countries",
+    "totalCountries": "countries",
+    "mastered": "mastered",
+    "masteredLabel": "Mastered",
+    "empty": "Play games to start filling your passport",
+    "practiceCountry": "Practice {{country}}"
+  },
+  "mastery": {
+    "level": {
+      "unseen": "Unplayed",
+      "learning": "Learning",
+      "familiar": "Familiar",
+      "strong": "Strong",
+      "mastered": "Mastered"
+    }
+  },
+  "stats": {
       "wins": "Wins",
       "draws": "Draws",
       "losses": "Losses"

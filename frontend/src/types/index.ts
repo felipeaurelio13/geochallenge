@@ -20,12 +20,12 @@ export interface AuthState {
 
 // Game types
 export type Category = 'MAP' | 'FLAG' | 'CAPITAL' | 'SILHOUETTE' | 'MONUMENT' | 'CINEMA_GEO' | 'MIXED';
-export type GameType = 'single' | 'streak' | 'flash';
+export type GameType = 'single' | 'streak' | 'flash' | 'practice';
 export type GameplayMode = GameType | 'duel' | 'challenge';
 export type DuelMode = 'classic' | 'geo-challenge';
 export type GameMechanicKey = 'intel5050' | 'focusTime' | 'streakShield';
 
-export type GameVariant = 'CLASSIC' | 'STREAK' | 'FLASH' | 'FLAG_MASTER' | 'GEO_CHALLENGE';
+export type GameVariant = 'CLASSIC' | 'STREAK' | 'FLASH' | 'FLAG_MASTER' | 'GEO_CHALLENGE' | 'PRACTICE';
 
 export type Difficulty = 'EASY' | 'MEDIUM' | 'HARD';
 
@@ -487,4 +487,55 @@ export interface HeadToHeadData {
   opponent: DuelOpponentSummary;
   periods: DuelPeriodStats;
   recentMatches: DuelMatchRecord[];
+}
+
+// ─── Mastery / Passport ────────────────────────────────────────────────────
+
+export type MasteryLevel = 'UNSEEN' | 'LEARNING' | 'FAMILIAR' | 'STRONG' | 'MASTERED';
+
+export interface SkillMastery {
+  category: Category;
+  availableQuestions: number;
+  attempts: number;
+  correct: number;
+  accuracy: number;
+  masteryScore: number;
+  level: MasteryLevel;
+}
+
+export interface CountryMastery {
+  countryCode: string;
+  name: string;
+  continent: string;
+  stamped: boolean;
+  mastered: boolean;
+  score: number;
+  attempts: number;
+  correct: number;
+  skills: SkillMastery[];
+}
+
+export interface MasterySummary {
+  worldProgressPercent: number;
+  totalCountries: number;
+  stampedCountries: number;
+  masteredCountries: number;
+  skills: {
+    category: Category;
+    attempts: number;
+    correct: number;
+    accuracy: number;
+    masteryScore: number;
+  }[];
+}
+
+export interface PassportResponse {
+  summary: MasterySummary;
+  countries: CountryMastery[];
+}
+
+export interface AdaptivePracticeStartResponse {
+  sessionId: string;
+  questions: PublicQuestion[];
+  gameConfig: GameConfig;
 }

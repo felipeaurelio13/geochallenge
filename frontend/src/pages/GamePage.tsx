@@ -58,7 +58,8 @@ export function GamePage() {
   const [searchParams] = useSearchParams();
   const category = searchParams.get('category') || 'MIXED';
   const gameTypeParam = searchParams.get('gameType') ?? searchParams.get('mode');
-  const gameType = gameTypeParam === 'streak' ? 'streak' : 'single';
+  const gameType = gameTypeParam === 'streak' ? 'streak' : gameTypeParam === 'practice' ? 'practice' : 'single';
+  const practiceCountryCode = searchParams.get('countryCode') || undefined;
 
   const gameFilters = useMemo<GameFilters>(() => {
     const f: GameFilters = {};
@@ -74,6 +75,7 @@ export function GamePage() {
   const {
     state,
     startGame,
+    startPractice,
     appendQuestions,
     setStreakAlive,
     submitAnswer,
@@ -184,8 +186,16 @@ export function GamePage() {
   useEffect(() => {
     const initGame = async () => {
       try {
-        await startGame(category as Category, undefined, gameType, gameFilters);
+        if (gameType === 'practice') {
+          await startPractice(practiceCountryCode);
+        } else {
+          await startGame(category as Category, undefined, gameType, gameFilters);
+        }
       } catch (err: any) {
+        if (gameType === 'practice') {
+          setError(err.message || t('game.error'));
+          return;
+        }
         const shortGameData = axios.isAxiosError(err)
           ? (err.response?.data as { available?: number; requested?: number; canStartShortGame?: boolean; error?: string } | undefined)
           : undefined;
@@ -222,7 +232,7 @@ export function GamePage() {
       }
     };
     initGame();
-  }, [category, gameType, gameFilters, startGame, confirm]);
+  }, [category, gameType, gameFilters, practiceCountryCode, startGame, startPractice, confirm]);
 
   // Keyboard shortcuts: A/B/C/D to select, Enter to submit/next
   const handleKeyDown = useCallback(
@@ -431,7 +441,11 @@ export function GamePage() {
       // Game finished. finishGame() ya retries una vez internamente y encola
       // localmente si ambos intentos fallan (Part 1.2) — pendingSync=1 le dice
       // a ResultsPage que muestre el badge "guardado en este dispositivo".
-      const base = shouldUseStreakFlow ? '/results?gameType=streak' : '/results';
+      const base = shouldUseStreakFlow
+        ? '/results?gameType=streak'
+        : gameType === 'practice'
+          ? '/results?gameType=practice'
+          : '/results';
       try {
         const gameResult = await finishGame();
         navigate(gameResult.pendingSync ? `${base}${base.includes('?') ? '&' : '?'}pendingSync=1` : base);

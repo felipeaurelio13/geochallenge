@@ -15,3 +15,4 @@ export { ChallengeResultsPage } from './ChallengeResultsPage';
 export { SurvivalPage } from './SurvivalPage';
 export { FlagMasterPage } from './FlagMasterPage';
 export { GeoChallengesPage } from './GeoChallengesPage';
+export { PassportPage } from './PassportPage';
