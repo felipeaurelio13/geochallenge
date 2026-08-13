@@ -12,6 +12,8 @@ import {
   isGeoChallengeAnswerCorrect,
   LocalizedText,
   toPublicGeoChallengeRound,
+  getGeoChallengeBasePoints,
+  GeoChallengeDifficulty,
 } from '../services/geoChallenge.service.js';
 import { trackServerEvent } from '../services/telemetry.service.js';
 
@@ -27,9 +29,10 @@ interface SessionRound {
   id: string;
   kind: string;
   region: string;
+  difficulty?: GeoChallengeDifficulty;
   correctOptionIds: string[];
   explanation: LocalizedText;
-  answeredOptionIds?: string[]; // primera respuesta, inmutable después de /answer
+  answeredOptionIds?: string[];
 }
 
 interface GeoChallengeSessionPayload {
@@ -37,6 +40,7 @@ interface GeoChallengeSessionPayload {
   gameId: string;
   userId: string;
   dataVersion: string;
+  engineVersion?: 'v1' | 'v2';
   expiresAt: number;
   rounds: SessionRound[];
 }
@@ -52,7 +56,7 @@ const finishSchema = z.object({
   answers: z.array(z.object({
     roundId: z.string().min(1),
     selectedOptionIds: z.array(z.string().min(1)).max(4),
-  })).length(5),
+  })).max(10).optional(),
 });
 
 const SESSION_DURATION_MS = 60 * 60 * 1000;
@@ -103,10 +107,12 @@ router.get('/start', authenticateJWT, (req: AuthRequest, res: Response) => {
     gameId: game.gameId,
     userId: req.user.userId,
     dataVersion: game.dataVersion,
+    engineVersion: game.engineVersion,
     rounds: game.rounds.map((round) => ({
       id: round.id,
       kind: round.kind,
       region: round.region,
+      difficulty: round.difficulty,
       correctOptionIds: round.correctOptionIds,
       explanation: round.explanation,
     })),
@@ -128,7 +134,10 @@ router.get('/start', authenticateJWT, (req: AuthRequest, res: Response) => {
     gameMode: GameMode.SINGLE,
     variant: GameVariant.GEO_CHALLENGE,
     category: Category.MIXED,
-    properties: { totalRounds: game.rounds.length },
+    properties: {
+      engineVersion: 'v2',
+      totalRounds: game.rounds.length,
+    },
   });
 });
 
@@ -155,10 +164,12 @@ router.post('/answer', authenticateJWT, async (req: AuthRequest, res: Response) 
 
   const answerKey = geoAnswerKey(session.gameId, round.id);
   const isCorrect = isGeoChallengeAnswerCorrect(round.correctOptionIds, validation.data.selectedOptionIds);
+  const basePoints = getGeoChallengeBasePoints(round.difficulty);
+  const points = isCorrect ? basePoints : 0;
   const candidate = {
     roundId: round.id, isCorrect,
     correctOptionIds: round.correctOptionIds, explanation: round.explanation,
-    points: isCorrect ? 100 : 0,
+    points,
   };
 
   try {
@@ -173,10 +184,12 @@ router.post('/answer', authenticateJWT, async (req: AuthRequest, res: Response) 
         gameMode: GameMode.SINGLE,
         variant: GameVariant.GEO_CHALLENGE,
         properties: {
+          engineVersion: 'v2',
           isCorrect,
           kind: round.kind,
           region: round.region,
-          points: isCorrect ? 100 : 0,
+          difficulty: round.difficulty,
+          points,
         },
       });
       res.json(candidate); return;
@@ -199,8 +212,14 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
   try {
     const session = verifySession(validation.data.sessionToken, req.user?.userId);
 
-    // Consolidar desde las respuestas almacenadas en Redis (anti-probing: ignorar /finish arbitrario)
-    const details: Array<{ roundId: string; kind: string; region: string; isCorrect: boolean }> = [];
+    const details: Array<{
+      roundId: string;
+      kind: string;
+      region: string;
+      difficulty?: GeoChallengeDifficulty;
+      isCorrect: boolean;
+      points: number;
+    }> = [];
     let redisAvailable = true;
 
     try {
@@ -209,26 +228,39 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
         const answerKey = geoAnswerKey(session.gameId, round.id);
         const stored = await redis.get(answerKey);
         if (stored) {
-          const parsed = JSON.parse(stored) as { isCorrect: boolean };
-          details.push({ roundId: round.id, kind: round.kind, region: round.region, isCorrect: parsed.isCorrect });
+          const parsed = JSON.parse(stored) as { isCorrect: boolean; points: number };
+          details.push({
+            roundId: round.id,
+            kind: round.kind,
+            region: round.region,
+            difficulty: round.difficulty,
+            isCorrect: parsed.isCorrect,
+            points: parsed.points ?? 0,
+          });
         } else {
-          details.push({ roundId: round.id, kind: round.kind, region: round.region, isCorrect: false });
+          details.push({
+            roundId: round.id,
+            kind: round.kind,
+            region: round.region,
+            difficulty: round.difficulty,
+            isCorrect: false,
+            points: 0,
+          });
         }
       }
     } catch {
-      // Redis unavailable → no trusted state. Reject, do not fall back to client input.
       res.status(503).json({ error: 'Servicio no disponible. Intenta de nuevo.', code: 'GAME_STATE_UNAVAILABLE' });
       return;
     }
-    const correctCount = details.filter((detail) => detail.isCorrect).length;
-    const totalScore = correctCount * 100;
 
-    // Persistir GameResult con runId=gameId para idempotencia concurrente.
+    const correctCount = details.filter((detail) => detail.isCorrect).length;
+    const totalScore = details.reduce((sum, detail) => sum + detail.points, 0);
+
     const userId = req.user!.userId;
     try {
       await prisma.$transaction(async (db) => {
         const existing = await db.gameResult.findUnique({ where: { runId: session.gameId } });
-        if (existing) return; // already persisted, no side effects
+        if (existing) return;
 
         await db.gameResult.create({
           data: {
@@ -240,7 +272,11 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
             gameMode: GameMode.SINGLE,
             variant: GameVariant.GEO_CHALLENGE,
             runId: session.gameId,
-            details: { dataVersion: session.dataVersion, rounds: details } as unknown as Prisma.InputJsonValue,
+            details: {
+              engineVersion: 'v2',
+              dataVersion: session.dataVersion,
+              rounds: details,
+            } as unknown as Prisma.InputJsonValue,
           },
         });
 
@@ -265,6 +301,7 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
       variant: GameVariant.GEO_CHALLENGE,
       category: Category.MIXED,
       properties: {
+        engineVersion: 'v2',
         score: totalScore,
         correctCount,
         totalQuestions: session.rounds.length,

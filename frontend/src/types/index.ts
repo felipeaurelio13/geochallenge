@@ -36,7 +36,11 @@ export type GeoChallengeKind =
   | 'HIGHER_LOWER'
   | 'COMMON_NEIGHBOR'
   | 'ODD_ONE_OUT'
-  | 'NORTH_TO_SOUTH';
+  | 'NORTH_TO_SOUTH'
+  | 'CAPITAL_PROXIMITY'
+  | 'ORDER_BY_METRIC'
+  | 'NEIGHBOR_COUNT'
+  | 'BORDER_CHAIN';
 
 export type GeoChallengeRegion = 'AFRICA' | 'AMERICAS' | 'ASIA' | 'EUROPE' | 'OCEANIA';
 

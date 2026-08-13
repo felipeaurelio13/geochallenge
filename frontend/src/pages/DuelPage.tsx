@@ -58,6 +58,10 @@ const GEO_KIND_ICONS: Record<GeoChallengeKind, string> = {
   COMMON_NEIGHBOR: '🔗',
   ODD_ONE_OUT: '🕵️',
   NORTH_TO_SOUTH: '↕️',
+  CAPITAL_PROXIMITY: '📍',
+  ORDER_BY_METRIC: '📊',
+  NEIGHBOR_COUNT: '🧩',
+  BORDER_CHAIN: '⛓️',
 };
 
 const GEO_REGION_ICONS: Record<GeoChallengeRegion, string> = {

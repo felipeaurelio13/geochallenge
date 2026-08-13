@@ -42,6 +42,10 @@ const KIND_ICONS: Record<GeoChallengeKind, string> = {
   COMMON_NEIGHBOR: '🔗',
   ODD_ONE_OUT: '🕵️',
   NORTH_TO_SOUTH: '↕️',
+  CAPITAL_PROXIMITY: '📍',
+  ORDER_BY_METRIC: '📊',
+  NEIGHBOR_COUNT: '🧩',
+  BORDER_CHAIN: '⛓️',
 };
 
 const REGION_ICONS: Record<GeoChallengeRegion, string> = {
@@ -96,6 +100,7 @@ export function GeoChallengesPage() {
   const [selectedOptionIds, setSelectedOptionIds] = useState<string[]>([]);
   const [answers, setAnswers] = useState<RecordedAnswer[]>([]);
   const [feedback, setFeedback] = useState<GeoChallengeAnswerResponse | null>(null);
+  const [finishError, setFinishError] = useState(false);
   const [finishResult, setFinishResult] = useState<GeoChallengeFinishResponse | null>(null);
   const [timeRemaining, setTimeRemaining] = useState(25);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -221,6 +226,7 @@ export function GeoChallengesPage() {
   const finishGame = useCallback(async (finalAnswers: RecordedAnswer[]) => {
     if (!game) return;
     setIsSubmitting(true);
+    setFinishError(false);
     try {
       const result = await api.finishGeoChallenges({
         sessionToken: game.sessionToken,
@@ -233,20 +239,33 @@ export function GeoChallengesPage() {
       setStatus('finished');
       abandonTrackedRef.current = true;
     } catch {
-      const correctCount = finalAnswers.filter((answer) => answer.isCorrect).length;
-      setFinishResult({
-        gameId: game.gameId,
-        correctCount,
-        totalRounds: game.rounds.length,
-        totalScore: correctCount * 100,
-        details: finalAnswers.map((answer) => ({ roundId: answer.roundId, isCorrect: answer.isCorrect })),
-      });
-      setStatus('finished');
-      abandonTrackedRef.current = true;
+      setFinishError(true);
     } finally {
       setIsSubmitting(false);
     }
   }, [game]);
+
+  const retryFinish = useCallback(async () => {
+    if (!game) return;
+    setFinishError(false);
+    setIsSubmitting(true);
+    try {
+      const result = await api.finishGeoChallenges({
+        sessionToken: game.sessionToken,
+        answers: answers.map(({ roundId, selectedOptionIds: ids }) => ({
+          roundId,
+          selectedOptionIds: ids,
+        })),
+      });
+      setFinishResult(result);
+      setStatus('finished');
+      abandonTrackedRef.current = true;
+    } catch {
+      setFinishError(true);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [game, answers]);
 
   const handleNext = async () => {
     if (!feedback || !game) return;
@@ -291,6 +310,8 @@ export function GeoChallengesPage() {
   }
 
   if (status === 'briefing' && game) {
+    const coveredRegions = new Set(game.rounds.map((r) => r.region));
+    const uniqueRegionList = [...coveredRegions] as GeoChallengeRegion[];
     return (
       <div className="flex h-full min-h-0 overflow-y-auto bg-[var(--color-bg-app)] px-4 py-5 pb-[calc(env(safe-area-inset-bottom)+1.25rem)] pt-[calc(env(safe-area-inset-top)+1.25rem)]">
         <main className="m-auto w-full max-w-lg">
@@ -311,21 +332,21 @@ export function GeoChallengesPage() {
             <p className="mt-2 text-sm leading-relaxed text-app-secondary">{t('geoChallenges.briefingDesc')}</p>
 
             <div className="mt-5 grid grid-cols-5 gap-1.5" aria-label={t('geoChallenges.regionalCoverage')}>
-              {game.rounds.map((round) => (
+              {uniqueRegionList.map((region) => (
                 <div
-                  key={round.region}
+                  key={region}
                   className="flex min-w-0 flex-col items-center rounded-xl border border-app-border bg-app-surface/75 px-1 py-2 text-center"
-                  title={t(`geoChallenges.regions.${round.region}`)}
+                  title={t(`geoChallenges.regions.${region}`)}
                 >
-                  <span className="text-xl" aria-hidden="true">{REGION_ICONS[round.region]}</span>
+                  <span className="text-xl" aria-hidden="true">{REGION_ICONS[region]}</span>
                   <span className="mt-1 w-full truncate text-[0.58rem] font-bold text-app-subtle">
-                    {t(`geoChallenges.regions.${round.region}`)}
+                    {t(`geoChallenges.regions.${region}`)}
                   </span>
                 </div>
               ))}
             </div>
             <p className="mt-2 text-center text-xs font-semibold text-emerald-300">
-              ✓ {t('geoChallenges.balancedRoute')}
+              ✓ {uniqueRegionList.length}/5 {t('geoChallenges.balancedRoute')}
             </p>
           </section>
 
@@ -346,7 +367,7 @@ export function GeoChallengesPage() {
           </section>
 
           <div className="mt-4 rounded-2xl border border-app-border bg-app-muted/70 p-3 text-center text-xs text-app-secondary">
-            {t('geoChallenges.briefingRules', { seconds: game.timePerRound })}
+            {t('geoChallenges.briefingRules', { rounds: game.rounds.length, seconds: game.timePerRound })}
           </div>
           <Button onClick={() => setStatus('playing')} fullWidth size="lg" className="mt-3">
             {t('geoChallenges.startJourney')}
@@ -365,11 +386,30 @@ export function GeoChallengesPage() {
     );
   }
 
+  if (finishError) {
+    return (
+      <div className="flex h-full min-h-0 items-center justify-center bg-[var(--color-bg-app)] px-4">
+        <main className="m-auto w-full max-w-md text-center">
+          <div className="text-6xl" aria-hidden="true">⚠️</div>
+          <h1 className="mt-3 text-2xl font-black text-app-text">{t('geoChallenges.errorFinishing')}</h1>
+          <p className="mt-2 text-sm text-app-secondary">
+            Tu progreso está guardado. Puedes reintentar guardar el resultado.
+          </p>
+          <Button onClick={() => void retryFinish()} disabled={isSubmitting} fullWidth size="lg" className="mt-4">
+            {isSubmitting ? t('common.loading') : t('geoChallenges.finishRetry')}
+          </Button>
+        </main>
+      </div>
+    );
+  }
+
   if (status === 'finished' && finishResult) {
     const percentage = Math.round((finishResult.correctCount / finishResult.totalRounds) * 100);
     const resultSymbols = finishResult.details.map((detail) => detail.isCorrect ? '🟩' : '🟥').join('');
     const emoji = percentage === 100 ? '🏆' : percentage >= 60 ? '🎉' : '🧭';
     const performanceKey = percentage === 100 ? 'perfect' : percentage >= 60 ? 'strong' : 'explorer';
+    const coveredRegions = new Set(game?.rounds.map((r) => r.region) ?? []);
+    const uniqueRegionList = [...coveredRegions] as GeoChallengeRegion[];
     return (
       <div className="flex h-full min-h-0 overflow-y-auto bg-[var(--color-bg-app)] px-4 py-6 pb-[calc(env(safe-area-inset-bottom)+1.5rem)]">
         <main className="m-auto flex w-full max-w-md flex-col items-center text-center">
@@ -392,14 +432,14 @@ export function GeoChallengesPage() {
           <section className="mt-4 w-full rounded-2xl border border-app-border bg-app-surface p-3 text-left">
             <div className="flex items-center justify-between gap-2">
               <h2 className="text-sm font-black text-app-text">{t('geoChallenges.passportComplete')}</h2>
-              <span className="text-xs font-bold text-emerald-300">5/5 ✓</span>
+              <span className="text-xs font-bold text-emerald-300">{uniqueRegionList.length}/5 ✓</span>
             </div>
             <div className="mt-3 grid grid-cols-5 gap-1.5">
-              {game?.rounds.map((round) => (
-                <div key={round.region} className="min-w-0 rounded-xl bg-app-muted px-1 py-2 text-center">
-                  <div className="text-xl" aria-hidden="true">{REGION_ICONS[round.region]}</div>
+              {uniqueRegionList.map((region) => (
+                <div key={region} className="min-w-0 rounded-xl bg-app-muted px-1 py-2 text-center">
+                  <div className="text-xl" aria-hidden="true">{REGION_ICONS[region]}</div>
                   <div className="mt-1 truncate text-[0.56rem] font-bold text-app-subtle">
-                    {t(`geoChallenges.regions.${round.region}`)}
+                    {t(`geoChallenges.regions.${region}`)}
                   </div>
                 </div>
               ))}
@@ -613,7 +653,10 @@ export function GeoChallengesPage() {
                   </div>
                   {!feedback.isCorrect && (
                     <p className="mt-1 text-center text-xs text-app-secondary">
-                      {t('geoChallenges.correctOrder')}: <span className="font-bold text-green-300">{correctAnswerLabel}</span>
+                      {isOrderedRound
+                        ? `${t('geoChallenges.correctOrder')}: `
+                        : `${t('geoChallenges.correctAnswer')}: `}
+                      <span className="font-bold text-green-300">{correctAnswerLabel}</span>
                     </p>
                   )}
                   <p className="mt-1 text-center text-xs leading-snug text-app-subtle">

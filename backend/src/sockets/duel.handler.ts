@@ -28,6 +28,7 @@ import {
   GeoChallengeRoundWithAnswer,
   isGeoChallengeAnswerCorrect,
   toPublicGeoChallengeRound,
+  getGeoChallengeBasePoints,
 } from '../services/geoChallenge.service.js';
 import { calculateTimeBonus } from '../utils/scoring.js';
 import { trackServerEvent } from '../services/telemetry.service.js';
@@ -391,14 +392,15 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
           const selectedOptionIds = data.answer ? data.answer.split(',').filter(Boolean) : [];
           const isCorrect = isGeoChallengeAnswerCorrect(round.correctOptionIds, selectedOptionIds);
           const safeTimeRemaining = Math.max(0, Math.min(duelTimeLimit(duel), data.timeRemaining));
+          const basePoints = isCorrect ? getGeoChallengeBasePoints(round.difficulty) : 0;
           const timeBonus = isCorrect ? calculateTimeBonus(safeTimeRemaining, duelTimeLimit(duel)) : 0;
           result = {
             questionId: round.id,
             isCorrect,
             correctAnswer: round.correctOptionIds.join(','),
             userAnswer: data.answer,
-            points: isCorrect ? config.game.basePoints + timeBonus : 0,
-            basePoints: isCorrect ? config.game.basePoints : 0,
+            points: basePoints + timeBonus,
+            basePoints,
             timeBonus,
             timeRemaining: safeTimeRemaining,
           };

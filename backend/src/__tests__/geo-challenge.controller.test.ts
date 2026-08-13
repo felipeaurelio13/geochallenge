@@ -64,7 +64,7 @@ describe('GeoRetos HTTP contract', () => {
       };
 
       expect(startResponse.status).toBe(200);
-      expect(game.rounds).toHaveLength(5);
+      expect(game.rounds).toHaveLength(7);
       expect(game.sessionToken).not.toContain(game.rounds[0].id);
       for (const round of game.rounds) {
         expect(round).not.toHaveProperty('correctOptionIds');
@@ -100,11 +100,9 @@ describe('GeoRetos HTTP contract', () => {
       };
 
       expect(finishResponse.status).toBe(200);
-      // Score depends on stored answers (first response to each round), not finish body.
       expect(result).toMatchObject({
         gameId: game.gameId,
-        totalRounds: 5,
-        totalScore: result.correctCount * 100,
+        totalRounds: 7,
       });
 
       // Tampered finish: even with forged round IDs, the server uses stored answers.

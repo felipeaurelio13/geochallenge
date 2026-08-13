@@ -208,6 +208,98 @@ describe('DuelPage socket flow', () => {
     );
   });
 
+  it('reconoce los 4 kinds nuevos en GeoRetos Duel: ORDER_BY_METRIC ordered', async () => {
+    mocks.searchParams = 'mode=geo-challenge';
+    render(<DuelPage />);
+
+    act(() => {
+      mocks.handlers.get('duel:question')?.forEach((cb) => cb({
+        questionIndex: 0,
+        totalQuestions: 10,
+        timeLimit: 25,
+        question: {
+          id: 'geo-oby',
+          category: 'MIXED',
+          questionText: 'Ordena por población',
+          options: ['BR', 'AR', 'CL', 'UY'],
+          correctAnswer: '',
+          geoChallenge: {
+            id: 'geo-oby',
+            kind: 'ORDER_BY_METRIC',
+            region: 'AMERICAS',
+            difficulty: 'MEDIUM',
+            selectionMode: 'ordered',
+            prompt: { es: 'Ordena de mayor a menor población', en: 'Order by population' },
+            instruction: { es: 'De mayor a menor', en: 'Largest to smallest' },
+            options: [
+              { id: 'BR', label: { es: 'Brasil', en: 'Brazil' } },
+              { id: 'AR', label: { es: 'Argentina', en: 'Argentina' } },
+              { id: 'CL', label: { es: 'Chile', en: 'Chile' } },
+              { id: 'UY', label: { es: 'Uruguay', en: 'Uruguay' } },
+            ],
+          },
+        },
+      }));
+    });
+
+    for (const country of ['Brasil', 'Argentina', 'Chile', 'Uruguay']) {
+      fireEvent.click(await screen.findByRole('button', { name: country }));
+    }
+    fireEvent.click(screen.getByRole('button', { name: 'geoChallenges.confirm' }));
+
+    expect(mocks.submitDuelAnswerMock).toHaveBeenCalledWith(
+      'geo-oby',
+      'BR,AR,CL,UY',
+      25,
+    );
+  });
+
+  it('reconoce BORDER_CHAIN como ordered en GeoRetos Duel', async () => {
+    mocks.searchParams = 'mode=geo-challenge';
+    render(<DuelPage />);
+
+    act(() => {
+      mocks.handlers.get('duel:question')?.forEach((cb) => cb({
+        questionIndex: 0,
+        totalQuestions: 10,
+        timeLimit: 25,
+        question: {
+          id: 'geo-bc',
+          category: 'MIXED',
+          questionText: 'Ruta terrestre',
+          options: ['PT', 'ES', 'FR', 'BE'],
+          correctAnswer: '',
+          geoChallenge: {
+            id: 'geo-bc',
+            kind: 'BORDER_CHAIN',
+            region: 'EUROPE',
+            difficulty: 'HARD',
+            selectionMode: 'ordered',
+            prompt: { es: 'Construye una ruta terrestre', en: 'Build a land route' },
+            instruction: { es: 'Cada país limita con el siguiente', en: 'Each borders the next' },
+            options: [
+              { id: 'PT', label: { es: 'Portugal', en: 'Portugal' } },
+              { id: 'ES', label: { es: 'España', en: 'Spain' } },
+              { id: 'FR', label: { es: 'Francia', en: 'France' } },
+              { id: 'BE', label: { es: 'Bélgica', en: 'Belgium' } },
+            ],
+          },
+        },
+      }));
+    });
+
+    for (const country of ['Portugal', 'España', 'Francia', 'Bélgica']) {
+      fireEvent.click(await screen.findByRole('button', { name: country }));
+    }
+    fireEvent.click(screen.getByRole('button', { name: 'geoChallenges.confirm' }));
+
+    expect(mocks.submitDuelAnswerMock).toHaveBeenCalledWith(
+      'geo-bc',
+      'PT,ES,FR,BE',
+      25,
+    );
+  });
+
   it('muestra contexto empático durante la búsqueda del duelo', async () => {
     render(<DuelPage />);
 
