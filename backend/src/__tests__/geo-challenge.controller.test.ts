@@ -59,11 +59,13 @@ describe('GeoRetos HTTP contract', () => {
       const startResponse = await fetch(`${baseUrl}/api/game/geo-challenges/start`);
       const game = await startResponse.json() as {
         gameId: string;
+        engineVersion: string;
         sessionToken: string;
         rounds: PublicRound[];
       };
 
       expect(startResponse.status).toBe(200);
+      expect(game.engineVersion).toBe('v2');
       expect(game.rounds).toHaveLength(7);
       expect(game.sessionToken).not.toContain(game.rounds[0].id);
       for (const round of game.rounds) {

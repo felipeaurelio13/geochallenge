@@ -788,6 +788,7 @@
     },
     "correctAnswer": "Correct answer",
     "finishRetry": "Retry",
+    "finishRetryDesc": "Your progress is safe. You can retry saving your result.",
     "errorFinishing": "We couldn't save your result."
   },
   "duelHistory": {

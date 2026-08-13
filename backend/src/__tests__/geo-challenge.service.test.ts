@@ -197,6 +197,31 @@ describe('GeoRetos V2 duel generation', () => {
       expect(game.rounds).toHaveLength(10);
     }
   });
+
+  it('duel composition is randomized (not restricted-first pattern)', () => {
+    const RESTRICTED = new Set(['COMMON_NEIGHBOR', 'ODD_ONE_OUT', 'NEIGHBOR_COUNT', 'BORDER_CHAIN']);
+    const restrictedFirstCounts: number[] = [];
+    const restrictedLastCounts: number[] = [];
+
+    for (let seed = 1; seed <= 100; seed += 1) {
+      const game = buildGeoChallengeDuelGame(seededRandom(seed));
+      const kinds = game.rounds.map((r) => r.kind);
+      const firstHalf = kinds.slice(0, 5);
+      const secondHalf = kinds.slice(5);
+      restrictedFirstCounts.push(firstHalf.filter((k) => RESTRICTED.has(k)).length);
+      restrictedLastCounts.push(secondHalf.filter((k) => RESTRICTED.has(k)).length);
+    }
+
+    const avgFirst = restrictedFirstCounts.reduce((a, b) => a + b, 0) / restrictedFirstCounts.length;
+    const avgLast = restrictedLastCounts.reduce((a, b) => a + b, 0) / restrictedLastCounts.length;
+
+    // If shuffle were noop, restricted would always be first (avg ~3.2 vs ~0.8)
+    // With proper shuffle, both halves should average ~2.0 (4 restricted / 10 rounds * 5 slots)
+    expect(avgFirst).toBeGreaterThan(1);
+    expect(avgFirst).toBeLessThan(3.5);
+    expect(avgLast).toBeGreaterThan(0.5);
+    expect(avgLast).toBeLessThan(3.5);
+  });
 });
 
 describe('GeoRetos V2 scoring', () => {

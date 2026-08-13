@@ -788,6 +788,7 @@
     },
     "correctAnswer": "Respuesta correcta",
     "finishRetry": "Reintentar",
+    "finishRetryDesc": "Tu progreso está guardado. Puedes reintentar guardar el resultado.",
     "errorFinishing": "No pudimos guardar tu resultado."
   },
   "duelHistory": {

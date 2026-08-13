@@ -393,7 +393,7 @@ export function GeoChallengesPage() {
           <div className="text-6xl" aria-hidden="true">⚠️</div>
           <h1 className="mt-3 text-2xl font-black text-app-text">{t('geoChallenges.errorFinishing')}</h1>
           <p className="mt-2 text-sm text-app-secondary">
-            Tu progreso está guardado. Puedes reintentar guardar el resultado.
+            {t('geoChallenges.finishRetryDesc')}
           </p>
           <Button onClick={() => void retryFinish()} disabled={isSubmitting} fullWidth size="lg" className="mt-4">
             {isSubmitting ? t('common.loading') : t('geoChallenges.finishRetry')}

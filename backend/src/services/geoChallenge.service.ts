@@ -864,7 +864,7 @@ function buildGeoChallengeDuelGameV2(rng: RandomSource = Math.random): GeoChalle
       const shuffledNonOceania = shuffle(nonOceaniaRegions, rng);
       const shuffledOceania = shuffle(oceaniaRegions, rng);
 
-      const kindRegionPairs: Array<{ kind: GeoChallengeKind; region: GeoChallengeRegion }> = [];
+      let kindRegionPairs: Array<{ kind: GeoChallengeKind; region: GeoChallengeRegion }> = [];
 
       for (let i = 0; i < restrictedKinds.length; i += 1) {
         kindRegionPairs.push({ kind: restrictedKinds[i], region: shuffledNonOceania[i] });
@@ -877,7 +877,7 @@ function buildGeoChallengeDuelGameV2(rng: RandomSource = Math.random): GeoChalle
         kindRegionPairs.push({ kind: flexibleKinds[i], region: shuffledRemaining[i] });
       }
 
-      shuffle(kindRegionPairs, rng);
+      kindRegionPairs = shuffle(kindRegionPairs, rng);
 
       let hasConsecutive = true;
       let swapAttempts = 0;

@@ -69,6 +69,7 @@ export interface GeoChallengeRound {
 
 export interface GeoChallengeStartResponse {
   gameId: string;
+  engineVersion: 'v2';
   sessionToken: string;
   timePerRound: number;
   dataVersion: string;

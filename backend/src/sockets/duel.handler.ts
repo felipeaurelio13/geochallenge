@@ -701,6 +701,7 @@ function startDuel(io: SocketIOServer, duel: ActiveDuel) {
   duel.startedAt = new Date();
 
   const dueloVariant = duel.mode === 'geo-challenge' ? GameVariant.GEO_CHALLENGE : GameVariant.CLASSIC;
+  const isGeoDuel = duel.mode === 'geo-challenge';
 
   for (const player of duel.players) {
     trackServerEvent({
@@ -710,7 +711,11 @@ function startDuel(io: SocketIOServer, duel: ActiveDuel) {
       gameMode: GameMode.DUEL,
       variant: dueloVariant,
       category: duel.category,
-      properties: { questionsCount: duel.questions.length, mode: duel.mode },
+      properties: {
+        questionsCount: duel.questions.length,
+        mode: duel.mode,
+        ...(isGeoDuel ? { engineVersion: 'v2' as const } : {}),
+      },
     });
   }
 
@@ -811,6 +816,8 @@ async function showQuestionResult(io: SocketIOServer, duel: ActiveDuel, question
 
   // Emit question_answered for each player (server-side authoritative)
   const currentQuestion = duel.questions[questionIndex];
+  const isGeoDuel = duel.mode === 'geo-challenge';
+  const geoRound = currentQuestion.geoChallenge;
   for (const player of duel.players) {
     const answer = player.answers[questionIndex];
     if (answer) {
@@ -827,6 +834,14 @@ async function showQuestionResult(io: SocketIOServer, duel: ActiveDuel, question
           points: answer.points,
           timeRemaining: answer.timeRemaining,
           roundIndex: questionIndex,
+          ...(isGeoDuel && geoRound
+            ? {
+                engineVersion: 'v2' as const,
+                kind: geoRound.kind,
+                region: geoRound.region,
+                difficulty: geoRound.difficulty,
+              }
+            : {}),
         },
       });
     }
@@ -927,6 +942,7 @@ async function endDuel(
   // Guardar resultados en la base de datos usando una transacción
   try {
     const dueloVariant = duel.mode === 'geo-challenge' ? GameVariant.GEO_CHALLENGE : GameVariant.CLASSIC;
+    const isGeoDuel = duel.mode === 'geo-challenge';
 
     await prisma.$transaction(async (tx) => {
       for (const player of duel.players) {
@@ -979,6 +995,7 @@ async function endDuel(
           opponentCount: 1,
           finishReason: reason,
           correctCount: player.answers.filter((a) => a.isCorrect).length,
+          ...(isGeoDuel ? { engineVersion: 'v2' as const } : {}),
         },
       });
     }

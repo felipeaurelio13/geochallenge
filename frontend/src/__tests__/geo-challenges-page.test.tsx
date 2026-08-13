@@ -120,6 +120,7 @@ function round(
 
 const game7: GeoChallengeStartResponse = {
   gameId: 'game-7',
+  engineVersion: 'v2',
   sessionToken: 'signed-session-7',
   timePerRound: 25,
   dataVersion: 'v1',

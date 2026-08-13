@@ -120,6 +120,7 @@ router.get('/start', authenticateJWT, (req: AuthRequest, res: Response) => {
 
   res.json({
     gameId: game.gameId,
+    engineVersion: game.engineVersion,
     sessionToken,
     timePerRound: game.timePerRound,
     dataVersion: game.dataVersion,
@@ -135,7 +136,7 @@ router.get('/start', authenticateJWT, (req: AuthRequest, res: Response) => {
     variant: GameVariant.GEO_CHALLENGE,
     category: Category.MIXED,
     properties: {
-      engineVersion: 'v2',
+      engineVersion: game.engineVersion,
       totalRounds: game.rounds.length,
     },
   });
@@ -184,7 +185,7 @@ router.post('/answer', authenticateJWT, async (req: AuthRequest, res: Response) 
         gameMode: GameMode.SINGLE,
         variant: GameVariant.GEO_CHALLENGE,
         properties: {
-          engineVersion: 'v2',
+          engineVersion: session.engineVersion ?? 'v1',
           isCorrect,
           kind: round.kind,
           region: round.region,
@@ -211,6 +212,7 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
 
   try {
     const session = verifySession(validation.data.sessionToken, req.user?.userId);
+    const engineVersion = session.engineVersion ?? 'v1';
 
     const details: Array<{
       roundId: string;
@@ -273,7 +275,7 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
             variant: GameVariant.GEO_CHALLENGE,
             runId: session.gameId,
             details: {
-              engineVersion: 'v2',
+              engineVersion,
               dataVersion: session.dataVersion,
               rounds: details,
             } as unknown as Prisma.InputJsonValue,
@@ -301,7 +303,7 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
       variant: GameVariant.GEO_CHALLENGE,
       category: Category.MIXED,
       properties: {
-        engineVersion: 'v2',
+        engineVersion,
         score: totalScore,
         correctCount,
         totalQuestions: session.rounds.length,
