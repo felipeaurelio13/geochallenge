@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Category } from '@prisma/client';
 import gameRouter from '../controllers/game.controller.js';
 import { evaluateAchievementsAfterDaily } from '../services/achievement.service.js';
+import { trackServerEvent } from '../services/telemetry.service.js';
 
 const QUESTION_POOL = Array.from({ length: 12 }, (_, i) => ({
   id: `daily-q${i + 1}`,
@@ -85,6 +86,10 @@ vi.mock('../services/achievement.service.js', () => ({
 vi.mock('../services/leaderboard.service.js', () => ({
   updateLeaderboardScore: vi.fn(),
   updateSeasonLeaderboardScore: vi.fn(),
+}));
+
+vi.mock('../services/telemetry.service.js', () => ({
+  trackServerEvent: vi.fn(),
 }));
 
 function startServer() {
@@ -600,6 +605,7 @@ describe('GET /api/game/daily/status — estado ligero para el lobby', () => {
 
     expect(mocks.userUpdate).not.toHaveBeenCalled();
     expect(mocks.gameResultCreate).not.toHaveBeenCalled();
+    expect(trackServerEvent).not.toHaveBeenCalled();
   });
 
   it('usuario nuevo sin lastDailyDate → completed=false, streak=0', async () => {
@@ -615,5 +621,38 @@ describe('GET /api/game/daily/status — estado ligero para el lobby', () => {
 
     expect(body.completed).toBe(false);
     expect(body.dailyStreak).toBe(0);
+  });
+
+  it('DB fallback devuelve resultado DAILY (no último juego del día)', async () => {
+    mocks.userFindUnique.mockResolvedValue({
+      dailyStreak: 3,
+      lastDailyDate: TODAY,
+    });
+
+    mocks.redisGet.mockResolvedValue(null);
+
+    // Simulate: most recent gameResult is a Classic (non-DAILY) played after the Daily
+    mocks.gameResultFindFirst.mockResolvedValue({
+      score: 700,
+      correctCount: 7,
+      totalQuestions: 10,
+      createdAt: new Date('2026-08-12T11:00:00.000Z'),
+    });
+
+    const { server, baseUrl } = startServer();
+    const response = await fetch(`${baseUrl}/api/game/daily/status`);
+    server.close();
+
+    // The query should filter by variant: DAILY, not by createdAt range
+    expect(mocks.gameResultFindFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          variant: 'DAILY',
+        }),
+      })
+    );
+    expect(response.status).toBe(200);
+    const body = (await response.json()) as { result?: { score: number } };
+    expect(body.result?.score).toBe(700);
   });
 });

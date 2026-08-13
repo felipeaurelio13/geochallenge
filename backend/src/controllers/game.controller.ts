@@ -920,7 +920,7 @@ async function getDailyResultFromDb(userId: string, today: string) {
   });
   if (user?.lastDailyDate !== today) return null;
   const last = await prisma.gameResult.findFirst({
-    where: { userId, createdAt: { gte: new Date(`${today}T00:00:00.000Z`) } },
+    where: { userId, variant: GameVariant.DAILY },
     orderBy: { createdAt: 'desc' },
     select: { score: true, correctCount: true, totalQuestions: true, createdAt: true },
   });

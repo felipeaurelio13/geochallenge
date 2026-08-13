@@ -111,6 +111,7 @@ export function MenuPage() {
     isLandlocked?: boolean;
   }>({});
   const [masterySummary, setMasterySummary] = useState<MasterySummary | null>(null);
+  const [masteryLoading, setMasteryLoading] = useState(true);
   const [dailyStatus, setDailyStatus] = useState<DailyStatus | null>(null);
   const [dailyLoading, setDailyLoading] = useState(false);
   const [activePanel, setActivePanel] = useState<LobbyPanel>(null);
@@ -243,9 +244,11 @@ export function MenuPage() {
   // Mastery summary
   useEffect(() => {
     if (!user) return;
+    setMasteryLoading(true);
     api.getMasterySummary()
       .then(setMasterySummary)
-      .catch(() => {});
+      .catch(() => setMasterySummary(null))
+      .finally(() => setMasteryLoading(false));
   }, [user]);
 
   // Daily status
@@ -384,7 +387,7 @@ export function MenuPage() {
         <div className="mb-3">
           <LobbyJourneyCard
             summary={masterySummary}
-            loading={!masterySummary}
+            loading={masteryLoading && !masterySummary}
             onContinue={handleJourneyContinue}
             onPassport={() => navigate('/passport')}
           />
@@ -500,10 +503,9 @@ export function MenuPage() {
             selectedCategory={selectedCategory}
             onSelectCategory={setSelectedCategory}
             filters={filters}
-            onFiltersChange={setFilters}
             onClearFilters={clearFilters}
+            onOpenFilters={() => setDrawerOpen(true)}
             availability={canPlaySelection ? null : { canPlay: false, required: requiredQuestions, available: availableQuestions }}
-            disabledOptions={disabledOptions}
             onPlayClassic={handlePlayClassic}
             onPlayFlash={handlePlayFlash}
             onPlayStreak={handlePlayStreak}
@@ -523,10 +525,9 @@ export function MenuPage() {
             selectedCategory={selectedCategory}
             onSelectCategory={setSelectedCategory}
             filters={filters}
-            onFiltersChange={setFilters}
             onClearFilters={clearFilters}
+            onOpenFilters={() => setDrawerOpen(true)}
             availability={canPlaySelection ? null : { canPlay: false, required: requiredQuestions, available: availableQuestions }}
-            disabledOptions={disabledOptions}
             onPlayDuel={handlePlayDuel}
             onPlayChallenge={handlePlayChallenge}
             onPlaySurvival={handlePlaySurvival}

@@ -15,15 +15,9 @@ interface LobbyModePanelProps {
   selectedCategory: Category;
   onSelectCategory: (id: Category) => void;
   filters: GameFilters;
-  onFiltersChange: (f: GameFilters) => void;
   onClearFilters: () => void;
+  onOpenFilters: () => void;
   availability: AvailabilityInfo | null;
-  disabledOptions?: {
-    continents?: string[];
-    difficulties?: string[];
-    isInsular?: boolean;
-    isLandlocked?: boolean;
-  };
   onPlayClassic?: () => void;
   onPlayFlash?: () => void;
   onPlayStreak?: () => void;
@@ -55,6 +49,7 @@ export function LobbyModePanel({
   onSelectCategory,
   filters,
   onClearFilters,
+  onOpenFilters,
   availability,
   onPlayClassic,
   onPlayFlash,
@@ -124,7 +119,7 @@ export function LobbyModePanel({
         <FilterButton
           label={filterButtonLabel}
           active={filtersActive}
-          onClick={() => {}}
+          onClick={onOpenFilters}
         />
         {filtersActive && (
           <button

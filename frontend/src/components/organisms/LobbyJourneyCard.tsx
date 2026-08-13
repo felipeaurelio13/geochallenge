@@ -31,7 +31,7 @@ export function LobbyJourneyCard({
           {t('menu.journey.title')}
         </h2>
         <p className="mt-1 text-xs text-app-subtle">
-          {t('menu.journey.startDesc', 'Descubre cuánto sabes del planeta.')}
+          {t('menu.journey.startDesc')}
         </p>
         <button
           onClick={onContinue}
@@ -43,7 +43,7 @@ export function LobbyJourneyCard({
     );
   }
 
-  const totalCountries = summary.totalCountries || 197;
+  const totalCountries = summary.totalCountries;
   const coveragePercent =
     totalCountries > 0
       ? (summary.stampedCountries / totalCountries) * 100

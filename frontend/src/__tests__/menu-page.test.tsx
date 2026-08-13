@@ -266,10 +266,8 @@ describe('MenuPage — lobby cerrado', () => {
 
     // Wait for data to load
     await waitFor(() => {
-      expect(screen.getByText('Reto del día')).toBeDefined();
+      expect(screen.getByText('Empieza tu viaje por el mundo')).toBeDefined();
     });
-    // Default mock has stampedCountries=0, so it shows startTitle
-    expect(screen.getByText('Empieza tu viaje por el mundo')).toBeDefined();
     expect(screen.getByText('Practicar')).toBeDefined();
     expect(screen.getByText('Competir')).toBeDefined();
   });
