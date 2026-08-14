@@ -1,0 +1,31 @@
+# GeoChallenge backend-only stack for a VPS.
+# Intended for GitHub Pages frontend + Tailscale Funnel/another HTTPS proxy.
+
+services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - geochallenge_redis_data:/data
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - redis
+    environment:
+      NODE_ENV: production
+      PORT: "3001"
+      DATABASE_URL: ${DATABASE_URL:?define DATABASE_URL en .env.backend}
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:?define JWT_SECRET en .env.backend}
+      JWT_EXPIRES_IN: "7d"
+      FRONTEND_URL: ${FRONTEND_URL:?define FRONTEND_URL en .env.backend}
+    ports:
+      - "127.0.0.1:${BACKEND_LOCAL_PORT:-3101}:3001"
+
+volumes:
+  geochallenge_redis_data:

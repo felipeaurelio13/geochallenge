@@ -11,7 +11,13 @@ describe('frontend deploy workflow', () => {
     expect(workflowContent).toContain('needs: quality-gate');
     expect(workflowContent).toContain('actions/deploy-pages@v4');
     expect(workflowContent).toContain('VITE_BASE_PATH: /${{ github.event.repository.name }}/');
-    expect(workflowContent).toContain("run: npm run ci:quality");
+    expect(workflowContent).toContain('VITE_API_URL: ${{ vars.VITE_API_URL }}');
+    expect(workflowContent).toContain('VITE_SOCKET_URL: ${{ vars.VITE_SOCKET_URL }}');
+    expect(workflowContent).toContain('test -n "$VITE_API_URL"');
+    expect(workflowContent).toContain('echo "::error::VITE_API_URL is not configured"');
+    expect(workflowContent).toContain('test -n "$VITE_SOCKET_URL"');
+    expect(workflowContent).toContain('echo "::error::VITE_SOCKET_URL is not configured"');
+    expect(workflowContent).toContain("npm run ci:quality");
     expect(workflowContent).toContain("paths:");
   });
 
