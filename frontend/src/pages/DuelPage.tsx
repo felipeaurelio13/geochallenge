@@ -156,8 +156,6 @@ export function DuelPage() {
   const connectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const syncingLongTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const ratingFallbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const scoreRef = useRef(0);
-  const opponentRef = useRef<{ id?: string; userId?: string; username: string; rating?: number } | null>(null);
   const duelStateRef = useRef<DuelState>('searching');
   const hasSubmittedCurrentQuestionRef = useRef(false);
   const abandonTrackedRef = useRef(false);
@@ -188,14 +186,6 @@ export function DuelPage() {
     return f;
   }, [searchParams]);
   const haptics = useHaptics();
-
-  useEffect(() => {
-    scoreRef.current = myScore;
-  }, [myScore]);
-
-  useEffect(() => {
-    opponentRef.current = opponent;
-  }, [opponent]);
 
   useEffect(() => {
     duelStateRef.current = duelState;
@@ -379,6 +369,7 @@ export function DuelPage() {
         myScore: myFinalScore,
         opponentScore: rivalFinalScore,
         opponentName: rivalResult?.username || opponent?.username || t('duel.opponent'),
+        wonByForfeit: data.reason === 'opponent_disconnected' && data.winnerId === user?.id,
         rated: finishedRated,
         ladder: finishedLadder,
       });
@@ -413,20 +404,12 @@ export function DuelPage() {
     };
 
     const handleOpponentDisconnected = () => {
-      setDuelResult({
-        winner: user?.id || null,
-        myScore: scoreRef.current,
-        opponentScore: 0,
-        opponentName: opponentRef.current?.username || t('duel.opponent'),
-        wonByForfeit: true,
-        rated: isRated,
-        ladder: rankedLadder,
-      });
-      if (isRated) {
-        setRatingDisplay({ status: 'pending' });
-      }
-      setDuelState('finished');
-      abandonTrackedRef.current = true;
+      showConnectionMessage('warning', t('duel.opponentDisconnectedGrace'), false);
+    };
+
+    const handleOpponentReconnected = () => {
+      setConnectionNotice(null);
+      setShowRetryAction(false);
     };
 
     const handleRating = (data: DuelRatingEvent) => {
@@ -474,6 +457,7 @@ export function DuelPage() {
     socketService.socket?.on('duel:finished', handleDuelFinished);
     socketService.socket?.on('duel:rating', handleRating);
     socketService.socket?.on('duel:opponent-disconnected', handleOpponentDisconnected);
+    socketService.socket?.on('duel:opponent-reconnected', handleOpponentReconnected);
     socketService.socket?.on('duel:error', handleDuelError);
     socketService.socket?.on('disconnect', handleDisconnect);
     socketService.socket?.on('connect', handleConnect);
@@ -506,6 +490,7 @@ export function DuelPage() {
       socketService.socket?.off('duel:finished', handleDuelFinished);
       socketService.socket?.off('duel:rating', handleRating);
       socketService.socket?.off('duel:opponent-disconnected', handleOpponentDisconnected);
+      socketService.socket?.off('duel:opponent-reconnected', handleOpponentReconnected);
       socketService.socket?.off('duel:error', handleDuelError);
       socketService.socket?.off('disconnect', handleDisconnect);
       socketService.socket?.off('connect', handleConnect);
@@ -987,6 +972,9 @@ export function DuelPage() {
             <span className="ml-2 text-xs font-bold text-fuchsia-300">
               {GEO_REGION_ICONS[geoRound.region]} {t(`geoChallenges.regions.${geoRound.region}`)}
             </span>
+            {connectionNotice && connectionNotice.type !== 'info' && (
+              <div className="mt-2">{connectionBanner}</div>
+            )}
           </div>
         }
         content={
@@ -1114,10 +1102,9 @@ export function DuelPage() {
               {showSyncingLongHint ? t('duel.syncingLong') : t('duel.reconnectedSyncing')}
             </p>
           )}
-          {/* Solo el banner de error (con Reintentar) se repite acá — los avisos
-              info/warning (reconectando, sincronizando) ya tienen su propio texto
-              inline arriba; duplicarlos se sentía redundante (mismo string 2x). */}
-          {connectionNotice?.type === 'error' && (
+          {/* Los errores y el aviso temporal de desconexión del rival necesitan
+              visibilidad dentro de la ronda; los estados info ya tienen texto inline. */}
+          {connectionNotice && connectionNotice.type !== 'info' && (
             <div className="mt-2">{connectionBanner}</div>
           )}
         </div>

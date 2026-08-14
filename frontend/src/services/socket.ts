@@ -63,6 +63,7 @@ type DuelEventHandlers = {
   onRating?: (data: DuelRatingEvent) => void;
   onError?: (data: SocketErrorPayload) => void;
   onOpponentDisconnected?: () => void;
+  onOpponentReconnected?: () => void;
 };
 
 /**
@@ -200,6 +201,10 @@ class SocketService {
 
     this.socket.on('duel:opponent-disconnected', () => {
       this.handlers.onOpponentDisconnected?.();
+    });
+
+    this.socket.on('duel:opponent-reconnected', () => {
+      this.handlers.onOpponentReconnected?.();
     });
   }
 

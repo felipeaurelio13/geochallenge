@@ -470,6 +470,7 @@
     "retry": "Reintentar",
     "errorGeneric": "No pudimos continuar el duelo. Intenta nuevamente.",
     "connectionLost": "Se perdió la conexión. Intentando reconectar...",
+    "opponentDisconnectedGrace": "El rival perdió la conexión. Esperando reconexión…",
     "reconnected": "Conexión restablecida.",
     "reconnectedSearching": "Conexión restablecida. Volvimos a buscar oponente.",
     "reconnectedSyncing": "Conexión restablecida. Sincronizando la ronda...",

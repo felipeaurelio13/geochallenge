@@ -470,6 +470,7 @@
     "retry": "Retry",
     "errorGeneric": "We couldn't continue the duel. Please try again.",
     "connectionLost": "Connection lost. Reconnecting...",
+    "opponentDisconnectedGrace": "Your opponent lost connection. Waiting for reconnection…",
     "reconnected": "Connection restored.",
     "reconnectedSearching": "Connection restored. We rejoined matchmaking.",
     "reconnectedSyncing": "Connection restored. Syncing the current round...",

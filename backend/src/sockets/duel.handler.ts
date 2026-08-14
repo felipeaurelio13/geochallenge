@@ -6,7 +6,6 @@ import {
   validateAnswer,
   AnswerResult,
   GameQuestion,
-  getMechanicsConfigForMode,
   QuestionFilters,
   toPublicSocketPayload,
 } from '../services/game.service.js';
@@ -15,6 +14,10 @@ import { prisma } from '../config/database.js';
 import {
   createUnansweredResult,
   determineDuelWinner,
+  duelMechanics,
+  duelTimeLimit,
+  getAuthoritativeDuelTimeRemaining,
+  shouldRejectRankedRepeatAnswer,
   shouldAutoCloseQuestion,
   shouldForceStartDuel,
   shouldResolveQuestion,
@@ -265,10 +268,6 @@ function isRateLimited(userId: string, event: string, maxPerMinute: number = 30)
 
 const READY_TIMEOUT_MS = 7000;
 
-function duelTimeLimit(duel: ActiveDuel): number {
-  return duel.mode === 'geo-challenge' ? 25 : config.game.timePerQuestion;
-}
-
 /**
  * Genera un ID único para el duelo
  */
@@ -435,6 +434,10 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
     // Si hay una validación en vuelo para esta pregunta, esperar
     if (player.pendingQuestionIndex === duel.currentQuestionIndex) return;
 
+    if (shouldRejectRankedRepeatAnswer(duel, player)) {
+      return;
+    }
+
     // Si ya respondió, permitir cambio solo si el round aún no se está resolviendo
     if (player.answers.length >= duel.currentQuestionIndex + 1) {
       if (duel.resolvingQuestionIndex === duel.currentQuestionIndex) return;
@@ -462,7 +465,9 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
           }
           const selectedOptionIds = data.answer ? data.answer.split(',').filter(Boolean) : [];
           const isCorrect = isGeoChallengeAnswerCorrect(round.correctOptionIds, selectedOptionIds);
-          const safeTimeRemaining = Math.max(0, Math.min(duelTimeLimit(duel), data.timeRemaining));
+          const safeTimeRemaining = duel.rated
+            ? getAuthoritativeDuelTimeRemaining(duel)
+            : Math.max(0, Math.min(duelTimeLimit(duel), data.timeRemaining));
           const basePoints = isCorrect ? getGeoChallengeBasePoints(round.difficulty) : 0;
           const timeBonus = isCorrect ? calculateTimeBonus(safeTimeRemaining, duelTimeLimit(duel)) : 0;
           result = {
@@ -476,10 +481,13 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
             timeRemaining: safeTimeRemaining,
           };
         } else {
+          const scoringTimeRemaining = duel.rated
+            ? getAuthoritativeDuelTimeRemaining(duel)
+            : data.timeRemaining;
           result = await validateAnswer(
             data.questionId,
             data.answer,
-            data.timeRemaining,
+            scoringTimeRemaining,
             data.coordinates
           );
         }
@@ -708,7 +716,7 @@ async function createDuel(
     mode,
     rated: duel.rated,
     ladder: duel.ladder,
-    mechanics: mode === 'classic' ? getMechanicsConfigForMode('duel') : { enabled: false, allowed: [], limits: {} },
+    mechanics: duelMechanics(duel),
     imageUrls: questions.map((q) => q.imageUrl).filter((url): url is string => !!url),
   });
 
@@ -832,9 +840,7 @@ function sendQuestion(io: SocketIOServer, duel: ActiveDuel) {
       question: publicQuestion,
       timeLimit: duelTimeLimit(duel),
       mode: duel.mode,
-      mechanics: duel.mode === 'classic'
-        ? getMechanicsConfigForMode('duel')
-        : { enabled: false, allowed: [], limits: {} },
+      mechanics: duelMechanics(duel),
     });
 
     // Timer para forzar fin de pregunta si no responden

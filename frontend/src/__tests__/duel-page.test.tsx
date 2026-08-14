@@ -487,7 +487,7 @@ describe('DuelPage socket flow', () => {
   it('mantiene una sola suscripción de sockets aunque cambie el score', async () => {
     render(<DuelPage />);
 
-    expect(mocks.socketMock.on).toHaveBeenCalledTimes(10);
+    expect(mocks.socketMock.on).toHaveBeenCalledTimes(11);
 
     act(() => {
       mocks.handlers.get('duel:questionResult')?.forEach((cb) =>
@@ -510,7 +510,7 @@ describe('DuelPage socket flow', () => {
       );
     });
 
-    expect(mocks.socketMock.on).toHaveBeenCalledTimes(10);
+    expect(mocks.socketMock.on).toHaveBeenCalledTimes(11);
   });
 
   it('casual finish no muestra rating', async () => {
@@ -575,6 +575,176 @@ describe('DuelPage socket flow', () => {
     expect(await screen.findByText('1084 → 1100')).toBeInTheDocument();
     expect(screen.getByText('+16')).toBeInTheDocument();
     expect(screen.getByText(/duel\.placementRemaining/)).toBeInTheDocument();
+  });
+
+  it('opponent-disconnected muestra aviso temporal sin terminar el duelo', async () => {
+    render(<DuelPage />);
+
+    act(() => {
+      mocks.handlers.get('duel:question')?.forEach((cb) =>
+        cb({
+          questionIndex: 0,
+          totalQuestions: 10,
+          question: {
+            id: 'dq1',
+            questionText: 'Capital de Chile',
+            options: ['Santiago', 'Lima', 'Bogotá', 'Quito'],
+            correctAnswer: 'Santiago',
+            category: 'CAPITAL',
+          },
+        })
+      );
+      mocks.handlers.get('duel:opponent-disconnected')?.forEach((cb) => cb());
+    });
+
+    expect(await screen.findByText('duel.opponentDisconnectedGrace')).toBeInTheDocument();
+    expect(screen.queryByText('duel.youWin')).not.toBeInTheDocument();
+    expect(screen.getByTestId('question-card')).toBeInTheDocument();
+  });
+
+  it('opponent-disconnected seguido de opponent-reconnected conserva partida y limpia aviso', async () => {
+    render(<DuelPage />);
+
+    act(() => {
+      mocks.handlers.get('duel:question')?.forEach((cb) =>
+        cb({
+          questionIndex: 0,
+          totalQuestions: 10,
+          question: {
+            id: 'dq1',
+            questionText: 'Capital de Chile',
+            options: ['Santiago', 'Lima', 'Bogotá', 'Quito'],
+            correctAnswer: 'Santiago',
+            category: 'CAPITAL',
+          },
+        })
+      );
+      mocks.handlers.get('duel:opponent-disconnected')?.forEach((cb) => cb());
+    });
+
+    expect(await screen.findByText('duel.opponentDisconnectedGrace')).toBeInTheDocument();
+
+    act(() => {
+      mocks.handlers.get('duel:opponent-reconnected')?.forEach((cb) => cb());
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByText('duel.opponentDisconnectedGrace')).not.toBeInTheDocument();
+    });
+    expect(screen.getByTestId('question-card')).toBeInTheDocument();
+  });
+
+  it('opponent-disconnected seguido de duel:finished termina solo con el evento final real', async () => {
+    render(<DuelPage />);
+
+    act(() => {
+      mocks.handlers.get('duel:question')?.forEach((cb) =>
+        cb({
+          questionIndex: 0,
+          totalQuestions: 10,
+          question: {
+            id: 'dq1',
+            questionText: 'Capital de Chile',
+            options: ['Santiago', 'Lima', 'Bogotá', 'Quito'],
+            correctAnswer: 'Santiago',
+            category: 'CAPITAL',
+          },
+        })
+      );
+      mocks.handlers.get('duel:opponent-disconnected')?.forEach((cb) => cb());
+      mocks.handlers.get('duel:finished')?.forEach((cb) =>
+        cb({
+          reason: 'opponent_disconnected',
+          rated: false,
+          winnerId: 'u1',
+          results: [
+            { userId: 'u1', username: 'player1', score: 200 },
+            { userId: 'u2', username: 'rival', score: 100 },
+          ],
+        })
+      );
+    });
+
+    expect(await screen.findByText('duel.youWin')).toBeInTheDocument();
+    expect(screen.getByText(/duel\.wonByForfeit/)).toBeInTheDocument();
+  });
+
+  it('ranked real forfeit espera rating y aplica duel:rating', async () => {
+    mocks.searchParams = 'rated=1&category=MIXED';
+    render(<DuelPage />);
+
+    act(() => {
+      mocks.handlers.get('duel:finished')?.forEach((cb) =>
+        cb({
+          reason: 'opponent_disconnected',
+          rated: true,
+          ladder: 'CLASSIC',
+          winnerId: 'u1',
+          results: [
+            { userId: 'u1', username: 'player1', score: 200 },
+            { userId: 'u2', username: 'rival', score: 100 },
+          ],
+        })
+      );
+    });
+
+    expect(await screen.findByText('duel.ratingUpdating')).toBeInTheDocument();
+
+    act(() => {
+      mocks.handlers.get('duel:rating')?.forEach((cb) =>
+        cb({
+          status: 'updated',
+          ladder: 'CLASSIC',
+          ratingBefore: 1000,
+          ratingDelta: 16,
+          ratingAfter: 1016,
+          peakRating: 1016,
+          gamesPlayed: 1,
+          provisional: true,
+          placementGamesRemaining: 4,
+          tier: 'CALIBRATING',
+        })
+      );
+    });
+
+    expect(await screen.findByText('1000 → 1016')).toBeInTheDocument();
+    expect(screen.getByText('+16')).toBeInTheDocument();
+  });
+
+  it('ranked temporary disconnect y reconnect no inventa victoria ni rating pending', async () => {
+    mocks.searchParams = 'rated=1&category=MIXED';
+    render(<DuelPage />);
+
+    act(() => {
+      mocks.handlers.get('duel:question')?.forEach((cb) =>
+        cb({
+          questionIndex: 0,
+          totalQuestions: 10,
+          question: {
+            id: 'dq1',
+            questionText: 'Capital de Chile',
+            options: ['Santiago', 'Lima', 'Bogotá', 'Quito'],
+            correctAnswer: 'Santiago',
+            category: 'CAPITAL',
+          },
+        })
+      );
+      mocks.handlers.get('duel:opponent-disconnected')?.forEach((cb) => cb());
+    });
+
+    expect(await screen.findByText('duel.opponentDisconnectedGrace')).toBeInTheDocument();
+    expect(screen.queryByText('duel.youWin')).not.toBeInTheDocument();
+    expect(screen.queryByText('duel.ratingUpdating')).not.toBeInTheDocument();
+
+    act(() => {
+      mocks.handlers.get('duel:opponent-reconnected')?.forEach((cb) => cb());
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByText('duel.opponentDisconnectedGrace')).not.toBeInTheDocument();
+    });
+    expect(screen.queryByText('duel.youWin')).not.toBeInTheDocument();
+    expect(screen.queryByText('duel.ratingUpdating')).not.toBeInTheDocument();
   });
 
   it('fallback de rating consulta overview tras 4s y no inventa delta', async () => {

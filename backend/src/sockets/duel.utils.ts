@@ -1,4 +1,61 @@
 import type { AnswerResult } from '../services/game.service.js';
+import { getMechanicsConfigForMode } from '../services/game.service.js';
+import { config } from '../config/env.js';
+
+export type DuelModeSummary = {
+  mode: 'classic' | 'geo-challenge';
+};
+
+export type DuelTimingSummary = DuelModeSummary & {
+  questionStartedAt?: Date;
+};
+
+export type DuelRankedAnswerSummary = {
+  rated: boolean;
+  currentQuestionIndex: number;
+};
+
+export type DuelAnswerPlayerSummary = {
+  answers: unknown[];
+};
+
+export function duelTimeLimit(duel: DuelModeSummary): number {
+  return duel.mode === 'geo-challenge' ? 25 : config.game.timePerQuestion;
+}
+
+export function getAuthoritativeDuelTimeRemaining(
+  duel: DuelTimingSummary,
+  nowMs = Date.now()
+): number {
+  if (!duel.questionStartedAt) return 0;
+
+  const elapsedSeconds = Math.max(0, (nowMs - duel.questionStartedAt.getTime()) / 1000);
+  return Math.max(0, duelTimeLimit(duel) - elapsedSeconds);
+}
+
+export function duelMechanics(duel: DuelModeSummary & { rated: boolean }) {
+  if (duel.rated) {
+    return { enabled: false, allowed: [], limits: {} };
+  }
+
+  return duel.mode === 'classic'
+    ? getMechanicsConfigForMode('duel')
+    : { enabled: false, allowed: [], limits: {} };
+}
+
+export function hasAnsweredCurrentDuelQuestion(
+  duel: DuelRankedAnswerSummary,
+  player: DuelAnswerPlayerSummary
+): boolean {
+  return player.answers.length >= duel.currentQuestionIndex + 1;
+}
+
+export function shouldRejectRankedRepeatAnswer(
+  duel: DuelRankedAnswerSummary,
+  player: DuelAnswerPlayerSummary
+): boolean {
+  return duel.rated && hasAnsweredCurrentDuelQuestion(duel, player);
+}
 
 export function shouldAutoCloseQuestion(
   duelStatus: 'waiting' | 'countdown' | 'playing' | 'finished',

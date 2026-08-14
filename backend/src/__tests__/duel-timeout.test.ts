@@ -1,11 +1,19 @@
 import { describe, expect, it } from 'vitest';
 import {
+  getMechanicsConfigForMode,
+} from '../services/game.service.js';
+import {
   createUnansweredResult,
   determineDuelWinner,
+  duelMechanics,
+  duelTimeLimit,
+  getAuthoritativeDuelTimeRemaining,
+  shouldRejectRankedRepeatAnswer,
   shouldAutoCloseQuestion,
   shouldResolveQuestion,
   shouldForceStartDuel,
 } from '../sockets/duel.utils.js';
+import { calculateScore, calculateTimeBonus } from '../utils/scoring.js';
 
 describe('duel timeout guard', () => {
   it('auto-cierra solo cuando sigue siendo la misma pregunta en juego', () => {
@@ -59,6 +67,134 @@ describe('duel ready timeout guard', () => {
   it('no fuerza inicio antes del timeout o fuera de estado waiting', () => {
     expect(shouldForceStartDuel('waiting', 1, 2, 6000, 7000)).toBe(false);
     expect(shouldForceStartDuel('playing', 1, 2, 9000, 7000)).toBe(false);
+  });
+});
+
+describe('ranked duel integrity helpers', () => {
+  it('usa tiempo restante autoritativo del servidor para Ranked Classic', () => {
+    const duel = {
+      mode: 'classic' as const,
+      questionStartedAt: new Date('2026-08-14T10:00:00.000Z'),
+    };
+
+    expect(getAuthoritativeDuelTimeRemaining(duel, Date.parse('2026-08-14T10:00:10.000Z')))
+      .toBe(duelTimeLimit(duel) - 10);
+  });
+
+  it('no permite bonus máximo en Ranked Classic tras 10s aunque el cliente mande max', () => {
+    const duel = {
+      mode: 'classic' as const,
+      questionStartedAt: new Date('2026-08-14T10:00:00.000Z'),
+    };
+    const serverTime = getAuthoritativeDuelTimeRemaining(duel, Date.parse('2026-08-14T10:00:10.000Z'));
+
+    expect(calculateScore(true, serverTime)).toBeLessThan(calculateScore(true, duelTimeLimit(duel)));
+  });
+
+  it('ignora tiempos negativos o enormes del cliente en Ranked', () => {
+    const duel = {
+      mode: 'classic' as const,
+      questionStartedAt: new Date('2026-08-14T10:00:05.000Z'),
+    };
+    const nowMs = Date.parse('2026-08-14T10:00:08.000Z');
+    const fromHugeClient = getAuthoritativeDuelTimeRemaining(duel, nowMs);
+    const fromNegativeClient = getAuthoritativeDuelTimeRemaining(duel, nowMs);
+
+    expect(fromHugeClient).toBe(fromNegativeClient);
+    expect(fromHugeClient).toBe(duelTimeLimit(duel) - 3);
+  });
+
+  it('usa tiempo autoritativo del servidor para Ranked GeoRetos', () => {
+    const duel = {
+      mode: 'geo-challenge' as const,
+      questionStartedAt: new Date('2026-08-14T10:00:00.000Z'),
+    };
+    const serverTime = getAuthoritativeDuelTimeRemaining(duel, Date.parse('2026-08-14T10:00:10.000Z'));
+
+    expect(serverTime).toBe(15);
+    expect(calculateTimeBonus(serverTime, duelTimeLimit(duel))).toBeLessThan(calculateTimeBonus(25, 25));
+  });
+
+  it('mantiene la semántica casual: el tiempo enviado por cliente sigue disponible para scoring', () => {
+    const clientTimeRemaining = 99999;
+
+    expect(calculateScore(true, clientTimeRemaining)).toBeGreaterThan(calculateScore(true, 0));
+  });
+
+  it('deshabilita mecánicas en Ranked Classic y conserva configuración casual Classic', () => {
+    expect(duelMechanics({ mode: 'classic', rated: true })).toEqual({
+      enabled: false,
+      allowed: [],
+      limits: {},
+    });
+
+    expect(duelMechanics({ mode: 'classic', rated: false })).toEqual(getMechanicsConfigForMode('duel'));
+  });
+
+  it('mantiene mecánicas deshabilitadas en GeoRetos', () => {
+    expect(duelMechanics({ mode: 'geo-challenge', rated: false })).toEqual({
+      enabled: false,
+      allowed: [],
+      limits: {},
+    });
+  });
+
+  it('hace first-answer-wins en Ranked Classic y GeoRetos', () => {
+    for (const mode of ['classic', 'geo-challenge'] as const) {
+      const duel = { rated: true, currentQuestionIndex: 0, mode };
+      const player = {
+        answers: [
+          {
+            questionId: 'q1',
+            isCorrect: false,
+            correctAnswer: 'A',
+            userAnswer: 'B',
+            points: 0,
+            timeRemaining: 5,
+          },
+        ],
+      };
+
+      expect(shouldRejectRankedRepeatAnswer(duel, player)).toBe(true);
+      expect(player.answers[0]).toMatchObject({ isCorrect: false, points: 0 });
+    }
+  });
+
+  it('permite que casual conserve reemplazo antes de resolución', () => {
+    const duel = { rated: false, currentQuestionIndex: 0 };
+    const player = { answers: [{ questionId: 'q1' }] };
+
+    expect(shouldRejectRankedRepeatAnswer(duel, player)).toBe(false);
+  });
+
+  it('rechaza duplicados ranked concurrentes cuando ya hay respuesta aceptada', () => {
+    const duel = { rated: true, currentQuestionIndex: 0 };
+    const player: { answers: Array<{ questionId: string }> } = { answers: [] };
+
+    expect(shouldRejectRankedRepeatAnswer(duel, player)).toBe(false);
+    player.answers.push({ questionId: 'q1' });
+    expect(shouldRejectRankedRepeatAnswer(duel, player)).toBe(true);
+    expect(player.answers).toHaveLength(1);
+  });
+
+  it('mantiene mismo resultado ranked con timing servidor idéntico aunque el cliente forje tiempo', () => {
+    const duel = {
+      mode: 'classic' as const,
+      questionStartedAt: new Date('2026-08-14T10:00:00.000Z'),
+    };
+    const nowMs = Date.parse('2026-08-14T10:00:07.000Z');
+    const forgedHugeClientTime = 999999;
+    const forgedZeroClientTime = 0;
+
+    const scoreA = calculateScore(true, getAuthoritativeDuelTimeRemaining(duel, nowMs));
+    const scoreB = calculateScore(true, getAuthoritativeDuelTimeRemaining(duel, nowMs));
+
+    expect(forgedHugeClientTime).not.toBe(forgedZeroClientTime);
+    expect(scoreA).toBe(scoreB);
+
+    const player = { answers: [{ questionId: 'q1', isCorrect: false, points: 0 }] };
+    expect(shouldRejectRankedRepeatAnswer({ rated: true, currentQuestionIndex: 0 }, player)).toBe(true);
+    expect(player.answers[0]).toMatchObject({ isCorrect: false, points: 0 });
   });
 });
 describe('duel winner tiebreak', () => {

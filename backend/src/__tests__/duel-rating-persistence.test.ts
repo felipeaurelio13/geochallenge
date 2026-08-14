@@ -297,6 +297,46 @@ describe('duel ranked persistence', () => {
     expect(Object.keys(state.competitiveRatings)).toHaveLength(0);
   });
 
+  it('ranked Elo no cambia por tiempos cliente forjados si el resultado servidor es idéntico', async () => {
+    const highClientTimeState = initialState();
+    const zeroClientTimeState = initialState();
+    const rankedDuelWithForgedTime = (id: string, timeRemaining: number) => makeDuel({
+      id,
+      players: [
+        {
+          userId: 'p1',
+          username: 'Uno',
+          answers: [{ ...answer('q1', true, 100), timeRemaining }],
+          score: 100,
+        },
+        {
+          userId: 'p2',
+          username: 'Dos',
+          answers: [{ ...answer('q1', false, 0), timeRemaining: 0 }],
+          score: 0,
+        },
+      ],
+    });
+
+    await persistDuelResults(
+      rankedDuelWithForgedTime('high-client-time', 999999),
+      'p1',
+      'completed',
+      makeDb(highClientTimeState) as any
+    );
+    await persistDuelResults(
+      rankedDuelWithForgedTime('zero-client-time', 0),
+      'p1',
+      'completed',
+      makeDb(zeroClientTimeState) as any
+    );
+
+    expect(highClientTimeState.competitiveRatingChanges.map((change) => change.ratingDelta))
+      .toEqual(zeroClientTimeState.competitiveRatingChanges.map((change) => change.ratingDelta));
+    expect(highClientTimeState.competitiveRatings[ratingKey('p1', CompetitiveLadder.CLASSIC)].rating)
+      .toBe(zeroClientTimeState.competitiveRatings[ratingKey('p1', CompetitiveLadder.CLASSIC)].rating);
+  });
+
   it('is idempotent for the same duelId and does not recalculate Elo on P2002', async () => {
     await persistDuelResults(makeDuel(), 'p1', 'completed', makeDb(state) as any);
     await persistDuelResults(makeDuel(), 'p1', 'completed', makeDb(state) as any);
