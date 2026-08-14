@@ -871,6 +871,13 @@ function resolveDayKey(clientDate: unknown): string {
   return clientDate;
 }
 
+function resolveDailyRequestDayKey(explicitDayKey: unknown, clientDate: unknown): string {
+  if (explicitDayKey !== undefined) {
+    return resolveDayKey(explicitDayKey);
+  }
+  return resolveDayKey(clientDate);
+}
+
 /**
  * Fallback cuando Redis no responde: reconstruye el resultado del reto diario
  * desde DB usando runId como fuente primaria.
@@ -883,10 +890,15 @@ async function getDailyResultFromDb(userId: string, dayKey: string) {
   });
   if (gr) {
     const details = (gr.details as { stops?: DailyTourStop[] } | null)?.stops;
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { dailyStreak: true },
+    });
     return {
       score: gr.score,
       correctCount: gr.correctCount,
       totalQuestions: gr.totalQuestions,
+      dailyStreak: user?.dailyStreak ?? undefined,
       playedAt: gr.createdAt.toISOString(),
       details: details ?? null,
     };
@@ -1002,6 +1014,7 @@ router.get('/daily', optionalAuth, async (req: AuthRequest, res: Response) => {
     // ¿Ya jugó hoy?
     if (userId) {
       const playedKey = `daily:played:${userId}:${dayKey}`;
+      let shouldCheckDb = false;
       try {
         const existing = await getRedis().get(playedKey);
         if (existing) {
@@ -1015,7 +1028,12 @@ router.get('/daily', optionalAuth, async (req: AuthRequest, res: Response) => {
           });
           return;
         }
+        shouldCheckDb = true;
       } catch {
+        shouldCheckDb = true;
+      }
+
+      if (shouldCheckDb) {
         const played = await getDailyResultFromDb(userId, dayKey);
         if (played) {
           res.json({
@@ -1114,9 +1132,7 @@ router.post('/daily/answer', authenticateJWT, async (req: AuthRequest, res: Resp
 
     const { questionId, answer } = parsed.data;
     const userId = req.user!.userId;
-    const resolvedDayKey = parsed.data.dayKey
-      ? parsed.data.dayKey
-      : resolveDayKey(parsed.data.clientDate);
+    const resolvedDayKey = resolveDailyRequestDayKey(parsed.data.dayKey, parsed.data.clientDate);
     const redis = getRedis();
 
     // Get the plan
@@ -1223,9 +1239,7 @@ router.post('/daily/submit', authenticateJWT, async (req: AuthRequest, res: Resp
     }
 
     const { dayKey: bodyDayKey, clientDate } = parsed.data;
-    const resolvedDayKey = bodyDayKey
-      ? bodyDayKey
-      : resolveDayKey(clientDate);
+    const resolvedDayKey = resolveDailyRequestDayKey(bodyDayKey, clientDate);
     const redis = getRedis();
     const userId = req.user!.userId;
     const playedKey = `daily:played:${userId}:${resolvedDayKey}`;
@@ -1354,11 +1368,15 @@ router.post('/daily/submit', authenticateJWT, async (req: AuthRequest, res: Resp
         });
         if (existing) {
           const existingDetails = (existing.details as { stops?: typeof details } | null)?.stops;
+          const currentUser = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { dailyStreak: true },
+          });
           concurrentResult = {
             score: existing.score,
             correctCount: existing.correctCount,
             totalQuestions: existing.totalQuestions,
-            dailyStreak: userRow?.dailyStreak ?? newStreak,
+            dailyStreak: currentUser?.dailyStreak ?? newStreak,
             playedAt: existing.createdAt.toISOString(),
             details: existingDetails ?? null,
           };

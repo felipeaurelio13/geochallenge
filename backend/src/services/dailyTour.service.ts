@@ -1,5 +1,6 @@
 import { Category, Difficulty } from '@prisma/client';
 import { prisma } from '../config/database.js';
+import { hashString, seededShuffle } from '../utils/hash.js';
 
 export const DAILY_TOUR_VERSION = 'world-tour-v1' as const;
 
@@ -46,25 +47,6 @@ interface PoolQuestion {
 interface PreviousDayData {
   questionIds: Set<string>;
   countryCodes: Set<string>;
-}
-
-function hashString(str: string): number {
-  let h = 0;
-  for (let i = 0; i < str.length; i++) {
-    h = ((h << 5) - h + str.charCodeAt(i)) | 0;
-  }
-  return h;
-}
-
-function seededShuffle<T>(arr: T[], seed: number): T[] {
-  const a = [...arr];
-  let s = seed;
-  for (let i = a.length - 1; i > 0; i--) {
-    s = ((s * 1664525) + 1013904223) & 0xffffffff;
-    const j = Math.abs(s) % (i + 1);
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
 }
 
 export function mapContinentToTourRegion(continent: string): DailyTourRegion | null {
@@ -173,8 +155,10 @@ function selectQuestionsForRegionOrder(
   dayKey: string,
 ): SelectionResult | null {
   for (let tier = 1; tier <= 4; tier++) {
-    const result = tryBuildTour(regionOrder, poolByRegion, previousDays, dayKey, tier);
-    if (result) return { stops: result, tier };
+    for (let attempt = 0; attempt < MAX_DAILY_ROUTE_ATTEMPTS; attempt++) {
+      const result = tryBuildTour(regionOrder, poolByRegion, previousDays, dayKey, tier, attempt);
+      if (result) return { stops: result, tier };
+    }
   }
   return null;
 }
@@ -185,6 +169,7 @@ function tryBuildTour(
   previousDays: PreviousDayData[],
   dayKey: string,
   tier: number,
+  attempt: number,
 ): DailyTourStop[] | null {
   const usedQuestions = new Set<string>();
   const usedCountries = new Set<string>();
@@ -194,19 +179,31 @@ function tryBuildTour(
   const excludeQuestions = new Set<string>();
   const excludeCountries = new Set<string>();
 
-  if (tier <= 1 || tier <= 2 || tier <= 3) {
-    const qLookback = tier <= 3 ? 3 : 7;
-    for (let i = 0; i < Math.min(previousDays.length, qLookback); i++) {
-      for (const qid of previousDays[i].questionIds) {
-        excludeQuestions.add(qid);
-      }
+  let questionLookback = 0;
+  let countryLookback = 0;
+  switch (tier) {
+    case 1:
+      questionLookback = 7;
+      countryLookback = 2;
+      break;
+    case 2:
+      questionLookback = 7;
+      break;
+    case 3:
+      questionLookback = 3;
+      break;
+    default:
+      break;
+  }
+
+  for (const previousDay of previousDays.slice(0, questionLookback)) {
+    for (const qid of previousDay.questionIds) {
+      excludeQuestions.add(qid);
     }
   }
-  if (tier <= 1) {
-    for (let i = 0; i < Math.min(previousDays.length, 2); i++) {
-      for (const cc of previousDays[i].countryCodes) {
-        excludeCountries.add(cc);
-      }
+  for (const previousDay of previousDays.slice(0, countryLookback)) {
+    for (const cc of previousDay.countryCodes) {
+      excludeCountries.add(cc);
     }
   }
 
@@ -226,7 +223,7 @@ function tryBuildTour(
 
     if (filtered.length === 0) return null;
 
-    const jitterSeed = hashString(`${dayKey}:slot:${i}`);
+    const jitterSeed = hashString(`${dayKey}:attempt:${attempt}:slot:${i}`);
     const shuffled = seededShuffle(filtered, jitterSeed);
 
     const prevCategory = i > 0 ? stops[i - 1].category : null;
@@ -239,7 +236,7 @@ function tryBuildTour(
       const catCount = categoryCounts.get(q.category) ?? 0;
       score -= catCount * 10;
       if (q.category === prevCategory) score -= 5;
-      score += hashString(`${dayKey}:${q.id}`) % 100;
+      score += hashString(`${dayKey}:attempt:${attempt}:${q.id}`) % 100;
       if (score > bestScore) {
         bestScore = score;
         best = q;

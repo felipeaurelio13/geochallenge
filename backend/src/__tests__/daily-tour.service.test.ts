@@ -55,6 +55,31 @@ function mockPreviousPlans(plans: Array<Partial<{ questionIds: string[]; stops: 
   );
 }
 
+function assertHardInvariants(plan: { stops: Array<{ region: string; countryCode: string; category: string }> }) {
+  expect(plan.stops).toHaveLength(10);
+
+  const regionCounts: Record<string, number> = {};
+  const categoryCounts: Record<string, number> = {};
+  const countries = new Set<string>();
+
+  for (const stop of plan.stops) {
+    regionCounts[stop.region] = (regionCounts[stop.region] ?? 0) + 1;
+    categoryCounts[stop.category] = (categoryCounts[stop.category] ?? 0) + 1;
+    countries.add(stop.countryCode);
+  }
+
+  expect(regionCounts['AFRICA']).toBe(2);
+  expect(regionCounts['AMERICAS']).toBe(2);
+  expect(regionCounts['ASIA']).toBe(2);
+  expect(regionCounts['EUROPE']).toBe(2);
+  expect(regionCounts['OCEANIA']).toBe(2);
+  expect(countries.size).toBe(10);
+  expect(Object.keys(categoryCounts).length).toBeGreaterThanOrEqual(4);
+  for (const count of Object.values(categoryCounts)) {
+    expect(count).toBeLessThanOrEqual(3);
+  }
+}
+
 describe('mapContinentToTourRegion', () => {
   it('maps Africa → AFRICA', () => {
     expect(mapContinentToTourRegion('Africa')).toBe('AFRICA');
@@ -322,12 +347,48 @@ describe('HISTORY', () => {
     );
 
     const { plan } = await buildDailyTour('2026-06-15');
-    // Hard invariants must hold regardless of tier
-    expect(plan.stops).toHaveLength(10);
-    const countries = new Set(plan.stops.map((s) => s.countryCode));
-    expect(countries.size).toBe(10);
-    const cats = new Set(plan.stops.map((s) => s.category));
-    expect(cats.size).toBeGreaterThanOrEqual(4);
+    assertHardInvariants(plan);
+  });
+
+  it('tier 2 relaxes recent countries but keeps 7-day question exclusion', async () => {
+    const africaCountries = POOL
+      .filter((q) => q.continent === 'Africa')
+      .map((q) => q.countryCode);
+    const excludedQuestionIds = ['q-2', 'q-3', 'q-4'];
+    mockPreviousPlans([
+      {
+        questionIds: excludedQuestionIds,
+        stops: africaCountries.map((countryCode, i) => ({
+          questionId: `country-blocker-${i}`,
+          countryCode,
+          category: Category.FLAG,
+          region: 'AFRICA',
+          difficulty: null,
+        })),
+      },
+    ]);
+
+    const { plan, tier } = await buildDailyTour('2026-06-15');
+    expect(tier).toBe(2);
+    assertHardInvariants(plan);
+    for (const questionId of excludedQuestionIds) {
+      expect(plan.questionIds).not.toContain(questionId);
+    }
+  });
+
+  it('tier 3 lowers question history from 7 days to 3 days', async () => {
+    const allQuestionIds = POOL.map((q) => q.id);
+    mockPreviousPlans([
+      { questionIds: [], stops: [] },
+      { questionIds: [], stops: [] },
+      { questionIds: [], stops: [] },
+      { questionIds: allQuestionIds, stops: [] },
+    ]);
+
+    const { plan, tier } = await buildDailyTour('2026-06-15');
+    expect(tier).toBe(3);
+    assertHardInvariants(plan);
+    expect(plan.questionIds.some((id) => allQuestionIds.includes(id))).toBe(true);
   });
 });
 
@@ -341,69 +402,90 @@ describe('365-DAY SIMULATION', () => {
     vi.restoreAllMocks();
   });
 
-  it('365/365 generated, 0 invalid tours', async () => {
+  it('365/365 generated, 0 invalid tours with rolling history', async () => {
     const startDate = new Date('2026-01-01T00:00:00.000Z');
     let generated = 0;
     let invalid = 0;
-    let regionFailures = 0;
-    let countryFailures = 0;
-    let categoryFailures = 0;
-    let tierRelaxations: Record<number, number> = {};
+    const tierCounts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0 };
+    const generatedPlans = new Map<string, { questionIds: string[]; stops: unknown[] }>();
+
+    mocks.dailyPlanFindMany.mockImplementation((args: { where?: { dayKey?: { in?: string[] } } }) => {
+      const keys = args.where?.dayKey?.in ?? [];
+      return Promise.resolve(
+        keys
+          .filter((key) => generatedPlans.has(key))
+          .sort((a, b) => b.localeCompare(a))
+          .map((dayKey) => ({
+            dayKey,
+            version: DAILY_TOUR_VERSION,
+            questionIds: generatedPlans.get(dayKey)!.questionIds,
+            stops: generatedPlans.get(dayKey)!.stops,
+            createdAt: new Date(`${dayKey}T00:00:00.000Z`),
+          }))
+      );
+    });
 
     for (let day = 0; day < 365; day++) {
       const d = new Date(startDate.getTime() + day * 24 * 60 * 60 * 1000);
       const dayKey = d.toISOString().slice(0, 10);
 
-      // Mock previous plans for history
-      const prevPlans = [];
-      for (let back = 1; back <= 7; back++) {
-        const pd = new Date(startDate.getTime() + (day - back) * 24 * 60 * 60 * 1000);
-        const pKey = pd.toISOString().slice(0, 10);
-        // We don't actually need real data, just empty
-        prevPlans.push({ questionIds: [], stops: [] });
-      }
-      mockPreviousPlans(prevPlans);
-
       try {
         const result = await buildDailyTour(dayKey);
         generated++;
+        tierCounts[result.tier] = (tierCounts[result.tier] ?? 0) + 1;
 
         const { plan } = result;
+        assertHardInvariants(plan);
 
-        // Hard invariants
-        if (plan.stops.length !== 10) {
-          invalid++;
-          continue;
+        const last7QuestionIds = new Set<string>();
+        const last3QuestionIds = new Set<string>();
+        const last2Countries = new Set<string>();
+        for (let back = 1; back <= 7; back++) {
+          const previousDate = new Date(startDate.getTime() + (day - back) * 24 * 60 * 60 * 1000);
+          const previousKey = previousDate.toISOString().slice(0, 10);
+          const previousPlan = generatedPlans.get(previousKey);
+          if (!previousPlan) continue;
+          for (const questionId of previousPlan.questionIds) {
+            last7QuestionIds.add(questionId);
+            if (back <= 3) last3QuestionIds.add(questionId);
+          }
+          if (back <= 2) {
+            for (const stop of previousPlan.stops as Array<{ countryCode: string }>) {
+              last2Countries.add(stop.countryCode);
+            }
+          }
         }
 
-        const regionCounts: Record<string, number> = {};
-        const catCounts: Record<string, number> = {};
-        const countries = new Set<string>();
-
-        for (const s of plan.stops) {
-          regionCounts[s.region] = (regionCounts[s.region] ?? 0) + 1;
-          catCounts[s.category] = (catCounts[s.category] ?? 0) + 1;
-          countries.add(s.countryCode);
+        if (result.tier === 1) {
+          for (const questionId of plan.questionIds) {
+            expect(last7QuestionIds.has(questionId)).toBe(false);
+          }
+          for (const stop of plan.stops) {
+            expect(last2Countries.has(stop.countryCode)).toBe(false);
+          }
+        } else if (result.tier === 2) {
+          for (const questionId of plan.questionIds) {
+            expect(last7QuestionIds.has(questionId)).toBe(false);
+          }
+        } else if (result.tier === 3) {
+          for (const questionId of plan.questionIds) {
+            expect(last3QuestionIds.has(questionId)).toBe(false);
+          }
         }
 
-        for (const r of ['AFRICA', 'AMERICAS', 'ASIA', 'EUROPE', 'OCEANIA']) {
-          if (regionCounts[r] !== 2) regionFailures++;
-        }
-        if (countries.size !== 10) countryFailures++;
-        if (Object.keys(catCounts).length < 4) categoryFailures++;
-        for (const c of Object.values(catCounts)) {
-          if (c > 3) categoryFailures++;
-        }
+        generatedPlans.set(dayKey, {
+          questionIds: plan.questionIds,
+          stops: plan.stops,
+        });
       } catch {
         invalid++;
       }
     }
 
+    console.info('Daily Tour rolling-history tiers', tierCounts);
     expect(generated).toBe(365);
     expect(invalid).toBe(0);
-    expect(regionFailures).toBe(0);
-    expect(countryFailures).toBe(0);
-    expect(categoryFailures).toBe(0);
+    expect(Object.values(tierCounts).reduce((sum, count) => sum + count, 0)).toBe(365);
   });
 });
 

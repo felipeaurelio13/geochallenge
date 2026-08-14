@@ -162,6 +162,28 @@ describe('DailyChallengePage abandonment guard', () => {
     expect(abandonCallCount()).toBe(0);
   });
 
+  it('finish failure + unmount: fires exactly 1 game_abandoned', async () => {
+    submitDailyMock.mockRejectedValueOnce(new Error('submit failed'));
+    const { unmount } = render(<DailyChallengePage />);
+
+    const startButton = await screen.findByRole('button', { name: /daily\.startJourney|Comenzar/i });
+    fireEvent.click(startButton);
+
+    await screen.findByRole('button', { name: 'game.exit' });
+
+    fireEvent.click(screen.getByRole('button', { name: 'París' }));
+    fireEvent.click(screen.getByRole('button', { name: 'game.submit' }));
+
+    const finishButton = await screen.findByRole('button', { name: 'daily.finish' });
+    fireEvent.click(finishButton);
+
+    await screen.findByText('daily.finishError');
+
+    unmount();
+
+    expect(abandonCallCount()).toBe(1);
+  });
+
   it('unmount during game: fires exactly 1 game_abandoned', async () => {
     const { unmount } = render(<DailyChallengePage />);
 

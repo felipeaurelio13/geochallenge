@@ -195,11 +195,11 @@ export function DailyChallengePage() {
     if (isLastQuestion) {
       setShowResult(false);
       setFinishSubmitError(false);
-      abandonTrackedRef.current = true;
       try {
         const result = await api.submitDaily({ dayKey: dayKey! });
         setFinalResult(result.result);
         setPageState('finished');
+        abandonTrackedRef.current = true;
       } catch {
         setFinishSubmitError(true);
         // Stay in playing state, don't show fake result
@@ -223,6 +223,7 @@ export function DailyChallengePage() {
       const result = await api.submitDaily({ dayKey: dayKey! });
       setFinalResult(result.result);
       setPageState('finished');
+      abandonTrackedRef.current = true;
     } catch {
       setFinishSubmitError(true);
     }
@@ -441,7 +442,13 @@ export function DailyChallengePage() {
                 timeRemaining={timeRemaining}
                 onTick={setTimeRemaining}
                 onComplete={handleTimeComplete}
-                isActive={!showResult && pageState === 'playing'}
+                isActive={
+                  !showResult
+                  && !lockedAnswer
+                  && !roundSubmitError
+                  && !isSubmittingAnswer
+                  && pageState === 'playing'
+                }
               />
             </div>
           </div>

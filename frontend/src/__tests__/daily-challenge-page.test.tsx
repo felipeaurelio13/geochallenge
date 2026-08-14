@@ -289,6 +289,30 @@ describe('DailyChallengePage — World Tour', () => {
     });
   });
 
+  it('timer is frozen while answer is pending or waiting for retry', async () => {
+    let rejectAnswer!: (reason?: unknown) => void;
+    dailyAnswerMock.mockReturnValueOnce(new Promise((_resolve, reject) => {
+      rejectAnswer = reject;
+    }));
+
+    render(<DailyChallengePage />);
+    const startBtn = await screen.findByRole('button', { name: /daily\.startJourney|Comenzar/i });
+    fireEvent.click(startBtn);
+    await screen.findByText('progress');
+
+    fireEvent.click(screen.getByRole('button', { name: 'A' }));
+    fireEvent.click(screen.getByRole('button', { name: 'game.submit' }));
+    fireEvent.click(screen.getByRole('button', { name: 'timer' }));
+
+    expect(dailyAnswerMock).toHaveBeenCalledTimes(1);
+
+    rejectAnswer(new Error('Network error'));
+    await screen.findByText('daily.answerRetry');
+
+    fireEvent.click(screen.getByRole('button', { name: 'timer' }));
+    expect(dailyAnswerMock).toHaveBeenCalledTimes(1);
+  });
+
   it('countryCode appears only after successful answer', async () => {
     render(<DailyChallengePage />);
     const startBtn = await screen.findByRole('button', { name: /daily\.startJourney|Comenzar/i });

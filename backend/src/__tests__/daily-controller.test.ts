@@ -1,4 +1,5 @@
 import express from 'express';
+import type { RequestHandler } from 'express';
 import { AddressInfo } from 'node:net';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Category } from '@prisma/client';
@@ -117,6 +118,20 @@ vi.mock('../services/mastery.service.js', () => ({
 function startServer() {
   const app = express();
   app.use(express.json());
+  app.use('/api/game', gameRouter);
+  const server = app.listen(0);
+  const baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+  return { server, baseUrl };
+}
+
+function startServerWithOptionalUser() {
+  const app = express();
+  app.use(express.json());
+  const attachUser: RequestHandler = (req, _res, next) => {
+    (req as typeof req & { user?: { userId: string } }).user = { userId: 'user-1' };
+    next();
+  };
+  app.use(attachUser);
   app.use('/api/game', gameRouter);
   const server = app.listen(0);
   const baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
@@ -285,6 +300,36 @@ describe('Daily controller authority contracts', () => {
     }
   });
 
+  it('Redis null still returns alreadyPlayed from DB and does not return questions', async () => {
+    mocks.redisGet.mockResolvedValue(null);
+    mocks.gameResultFindUnique.mockResolvedValueOnce({
+      score: 900,
+      correctCount: 9,
+      totalQuestions: 10,
+      createdAt: new Date('2026-08-13T23:00:00.000Z'),
+      details: { stops: fixedPlan().stops.map((s) => ({ ...s, isCorrect: true, points: 100 })) },
+    });
+    mocks.userFindUnique.mockResolvedValueOnce({ dailyStreak: 6 });
+
+    const { server, baseUrl } = startServerWithOptionalUser();
+    const response = await fetch(`${baseUrl}/api/game/daily?clientDate=${FIXED_DAY_KEY}`);
+    const body = (await response.json()) as {
+      alreadyPlayed: boolean;
+      questions?: unknown[];
+      result: { score: number; dailyStreak?: number; details?: unknown[] };
+    };
+    server.close();
+
+    expect(response.status).toBe(200);
+    expect(body.alreadyPlayed).toBe(true);
+    expect(body.questions).toBeUndefined();
+    expect(body.result.score).toBe(900);
+    expect(body.result.dailyStreak).toBe(6);
+    expect(body.result.details).toHaveLength(10);
+    expect(mocks.dailyPlanFindUnique).not.toHaveBeenCalled();
+    expect(mocks.questionFindMany).not.toHaveBeenCalled();
+  });
+
   it("answer='' is persisted as incorrect and reveals country only after answer", async () => {
     const { server, baseUrl } = startServer();
     const response = await fetch(`${baseUrl}/api/game/daily/answer`, {
@@ -307,6 +352,80 @@ describe('Daily controller authority contracts', () => {
       points: 0,
       countryCode: 'CC01',
     });
+  });
+
+  it('valid explicit dayKey within drift is preserved for answer and submit', async () => {
+    const validNextDay = '2026-08-14';
+    mockPersistedDailyPlan(validNextDay);
+
+    const { server, baseUrl } = startServer();
+    const answer = await fetch(`${baseUrl}/api/game/daily/answer`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ questionId: 'daily-q1', answer: 'A', dayKey: validNextDay }),
+    });
+    const submit = await fetch(`${baseUrl}/api/game/daily/submit`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ dayKey: validNextDay }),
+    });
+    server.close();
+
+    expect(answer.status).toBe(200);
+    expect(submit.status).toBe(200);
+    expect(mocks.redisSet.mock.calls.some((call) => call[0] === `daily:answer:user-1:${validNextDay}:daily-q1`)).toBe(true);
+    expect(mocks.gameResultCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ runId: `daily:user-1:${validNextDay}` }),
+      })
+    );
+  });
+
+  it('spoofed explicit dayKey +5 days falls back to server day for answer and submit', async () => {
+    const spoofedDay = '2026-08-18';
+    mockPersistedDailyPlan(FIXED_DAY_KEY);
+
+    const { server, baseUrl } = startServer();
+    const answer = await fetch(`${baseUrl}/api/game/daily/answer`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ questionId: 'daily-q1', answer: 'A', dayKey: spoofedDay }),
+    });
+    const submit = await fetch(`${baseUrl}/api/game/daily/submit`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ dayKey: spoofedDay }),
+    });
+    server.close();
+
+    expect(answer.status).toBe(200);
+    expect(submit.status).toBe(200);
+    expect(mocks.dailyPlanFindUnique).toHaveBeenCalledWith({ where: { dayKey: FIXED_DAY_KEY } });
+    expect(mocks.dailyPlanFindUnique).not.toHaveBeenCalledWith({ where: { dayKey: spoofedDay } });
+    expect(mocks.redisSet.mock.calls.some((call) => call[0] === `daily:answer:user-1:${FIXED_DAY_KEY}:daily-q1`)).toBe(true);
+    expect(mocks.gameResultCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ runId: `daily:user-1:${FIXED_DAY_KEY}` }),
+      })
+    );
+  });
+
+  it('malformed explicit dayKey does not create a DailyChallengePlan for that malformed key', async () => {
+    const malformedDay = 'not-a-date';
+    mockPersistedDailyPlan(FIXED_DAY_KEY);
+
+    const { server, baseUrl } = startServer();
+    const response = await fetch(`${baseUrl}/api/game/daily/answer`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ questionId: 'daily-q1', answer: 'A', dayKey: malformedDay }),
+    });
+    server.close();
+
+    expect(response.status).toBe(200);
+    expect(mocks.dailyPlanFindUnique).toHaveBeenCalledWith({ where: { dayKey: FIXED_DAY_KEY } });
+    expect(mocks.dailyPlanFindUnique).not.toHaveBeenCalledWith({ where: { dayKey: malformedDay } });
+    expect(mocks.dailyPlanCreate).not.toHaveBeenCalled();
   });
 
   it('first answer wins and retry returns the stored winner', async () => {
@@ -430,17 +549,21 @@ describe('Daily controller authority contracts', () => {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ dayKey: FIXED_DAY_KEY }),
     });
-    const body = (await response.json()) as { result: { score: number } };
+    const body = (await response.json()) as { result: { score: number; dailyStreak?: number } };
     server.close();
 
     expect(response.status).toBe(200);
     expect(body.result.score).toBe(700);
+    expect(body.result.dailyStreak).toBe(4);
     expect(mocks.userUpdate).not.toHaveBeenCalled();
     expect(mocks.gameResultCreate).not.toHaveBeenCalled();
     expect(applyMasteryAttemptsForRun).not.toHaveBeenCalled();
   });
 
   it('concurrent submit P2002 recovers the winning GameResult without a second result write', async () => {
+    mocks.userFindUnique
+      .mockResolvedValueOnce({ highScore: 0, dailyStreak: 5, lastDailyDate: '2026-08-12' })
+      .mockResolvedValueOnce({ dailyStreak: 6 });
     mocks.gameResultCreate.mockRejectedValueOnce({ code: 'P2002' });
     mocks.gameResultFindUnique.mockResolvedValueOnce({
       score: 500,
@@ -456,14 +579,24 @@ describe('Daily controller authority contracts', () => {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ dayKey: FIXED_DAY_KEY }),
     });
-    const body = (await response.json()) as { result: { score: number; correctCount: number; details: unknown[] } };
+    const body = (await response.json()) as { result: { score: number; correctCount: number; dailyStreak: number; details: unknown[] } };
     server.close();
 
     expect(response.status).toBe(200);
     expect(body.result.score).toBe(500);
     expect(body.result.correctCount).toBe(5);
+    expect(body.result.dailyStreak).toBe(6);
     expect(body.result.details).toHaveLength(10);
     expect(mocks.gameResultCreate).toHaveBeenCalledTimes(1);
+    expect(mocks.userUpdate).toHaveBeenCalledTimes(1);
+    expect(mocks.userUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          dailyStreak: 6,
+          gamesPlayed: { increment: 1 },
+        }),
+      })
+    );
     expect(trackServerEvent).not.toHaveBeenCalledWith(expect.objectContaining({ name: 'game_finished' }));
   });
 
