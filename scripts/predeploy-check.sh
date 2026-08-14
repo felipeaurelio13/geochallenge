@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# predeploy-check — verifica que el working tree no rompa el deploy en Render.
+# predeploy-check — verifica que el working tree no rompa el deploy.
 #
 # Funciona como:
 #   1) Hook Stop de Claude Code (.claude/settings.json) — bloquea con exit 2 si hay riesgo.
@@ -82,7 +82,7 @@ UNTRACKED=$(git ls-files --others --exclude-standard -- \
 if [ -n "$UNTRACKED" ]; then
   red "✗ Archivos untracked en directorios que sí se deployean:"
   echo "$UNTRACKED" | sed 's/^/    /' >&2
-  red "  Si commiteas sin estos archivos, el build de Render falla."
+  red "  Si commiteas sin estos archivos, el build de CI/produccion falla."
   red "  Acción: 'git add' los que correspondan, o agrégalos a .gitignore."
   errors=$((errors+1))
 fi
@@ -105,8 +105,8 @@ if [ -n "$FRONTEND_CHANGED$DATA_CHANGED" ]; then
 fi
 
 # ── 3) Build backend ──────────────────────────────────────────────────────────
-# Render corre `npm install` (que dispara `postinstall: prisma generate`) antes de cada
-# build. Espejarlo aquí para que un local con cliente stale no produzca falsos positivos.
+# CI/Docker corren `npm install` (que dispara `postinstall: prisma generate`) antes
+# de cada build. Espejarlo aquí evita falsos positivos con un cliente Prisma stale.
 if [ -n "$BACKEND_CHANGED$DATA_CHANGED$PRISMA_CHANGED" ]; then
   yellow "→ backend: prisma generate && tsc"
   if ! (cd backend && npx prisma generate && npm run build) >"$LOG_DIR/predeploy-backend.log" 2>&1; then

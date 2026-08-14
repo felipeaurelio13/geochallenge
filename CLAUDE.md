@@ -12,15 +12,15 @@
 ## Deploy
 
 **Antes de cualquier push a `master`, correr `npm run build` en `frontend/` y `backend/`.**
-Render builds en cada push y un fail rompe deploy. Ver [DEPLOY.md](DEPLOY.md) para el checklist completo y los anti-patrones recurrentes (cleanups que rompen consumidores, Prisma client stale, etc.).
+Produccion usa GitHub Pages para frontend y PhilServer + Tailscale Funnel para backend. Ver [DEPLOY.md](DEPLOY.md) para el checklist completo y los anti-patrones recurrentes (cleanups que rompen consumidores, Prisma client stale, etc.).
 
 ## Definition of done (obligatorio para agentes)
 
 Cualquier tarea que toque `frontend/`, `backend/`, `data/` o `backend/prisma/` no se considera terminada hasta que `npm run predeploy` pase con `✓ predeploy: builds limpios`.
 
-El script ([scripts/predeploy-check.sh](scripts/predeploy-check.sh)) verifica los tres errores que históricamente rompen Render:
+El script ([scripts/predeploy-check.sh](scripts/predeploy-check.sh)) verifica los tres errores que historicamente rompen deploys:
 
-1. **Untracked source importado por código tracked** — la trampa de PR #179 y del trabajo de monumentos. `tsc` local pasa porque el archivo existe en disco; Render falla porque nunca llegó al remote.
+1. **Untracked source importado por código tracked** — la trampa de PR #179 y del trabajo de monumentos. `tsc` local pasa porque el archivo existe en disco; CI/produccion falla porque nunca llegó al remote.
 2. **Type errors** — `tsc && vite build` en frontend, `tsc` en backend. Sólo corre lo que cambió.
 3. **`schema.prisma` sin migración** — Prisma client se desincroniza del esquema deployado.
 
@@ -74,7 +74,7 @@ geochallenge/
 ├── scripts/           predeploy-check.sh
 ├── .github/workflows/ CI de calidad (lint, test, build)
 ├── docker-compose.yml Stack Docker para VPS (Postgres, Redis, Caddy)
-├── render.yaml        Definición de servicios en Render
+├── docker-compose.backend.yml Backend-only para Pages + PhilServer/Funnel
 └── Caddyfile          Reverse proxy para deploy Docker
 ```
 
@@ -414,19 +414,13 @@ Para e2e tests sin registro real:
 | `backend-quality.yml` | PR / push a master | lint → test → build |
 | `frontend-quality.yml` | PR / push a master | lint → test → build |
 | `deploy-frontend-pages.yml` | Push a master (frontend/) | quality gate → deploy GitHub Pages |
-| `keep-backend-awake.yml` | Cada 5 minutos (cron) | GET /ping → previene sleep en Render free |
+| `keep-backend-awake.yml` | Cada 5 minutos (cron) | GET /health → valida backend publico y toca DB/Redis |
 
-### Deploy en Render (`render.yaml`)
+### Deploy actual
 
-**Backend (geochallenge-api):**
-- Build: `npm install && npm run build`
-- Pre-deploy: `npx prisma migrate deploy`
-- Start: `npm start`
-
-**Frontend (geochallenge):**
-- Build: `npm install && npm run build`
-- Publish: `dist/` (estático)
-- Routes: `/* → /index.html` (SPA fallback)
+**Frontend:** GitHub Pages via `deploy-frontend-pages.yml`.
+**Backend:** PhilServer con `docker-compose.backend.yml`, expuesto por Tailscale Funnel.
+**DB/cache:** Neon Postgres + Redis Docker.
 
 ### Deploy Docker (VPS)
 

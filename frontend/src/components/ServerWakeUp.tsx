@@ -11,9 +11,9 @@ interface ServerWakeUpProps {
 // sentía como app rota. Bajamos a 1s para que el mensaje "despertando el
 // servidor" aparezca antes y le diga al usuario qué está pasando.
 const WAKEUP_HINT_DELAY_MS = 1000;
-// Render free tier tarda ~30s en despertar; reintentamos el health check en
-// vez de soltar al usuario contra un backend dormido. Cada intento ya trae
-// retries internos del api client, así que pocos intentos cubren el cold start.
+// Reintentamos el health check antes de soltar al usuario contra el backend.
+// Cada intento ya trae retries internos del api client, así que pocos intentos
+// cubren latencia o errores transitorios del proxy/backend.
 const WAKEUP_MAX_ATTEMPTS = 3;
 const WAKEUP_RETRY_DELAY_MS = 2000;
 // Part 4.3: mensaje rotativo cada ~8s (mantiene la espera viva en vez de un

@@ -1,6 +1,16 @@
 # Deploy Playbook
 
-Render builds en cada push a `master`. Si el build falla, el sitio se queda con la versión anterior, pero pierdes tiempo y sumas ruido al historial. Este documento existe para que **eso no vuelva a pasar**.
+Produccion corre con esta arquitectura:
+
+```text
+GitHub Pages -> Tailscale Funnel/PhilServer -> backend Docker -> Neon Postgres
+                                                   \-> Redis Docker
+```
+
+El frontend se publica en GitHub Pages. El backend vive en PhilServer con
+`docker-compose.backend.yml`, expuesto por Tailscale Funnel. La base real vive en
+Neon y Redis corre junto al backend. Este documento existe para que los pushes a
+`master` no rompan el build ni vuelvan a asumir Render como destino.
 
 ## Regla de oro
 
@@ -22,7 +32,7 @@ git push origin master
 `npm run predeploy` ejecuta [scripts/predeploy-check.sh](scripts/predeploy-check.sh), que chequea:
 
 1. Archivos untracked importados por código tracked (la trampa de PR #179 / monumentos).
-2. `prisma generate && tsc` en backend si tocaste backend/data/prisma — espeja exactamente lo que hace Render via `postinstall`.
+2. `prisma generate && tsc` en backend si tocaste backend/data/prisma.
 3. `tsc && vite build` en frontend si tocaste frontend/data.
 4. `schema.prisma` modificado sin migración nueva.
 
@@ -54,11 +64,11 @@ No tienes que recordar correr el comando: el repo lo enforza solo.
 
 **Síntoma:** `Property 'duelMatch' does not exist on PrismaClient` o `'isAvailable' does not exist in QuestionWhereInput`.
 
-**Causa real:** Se editó `prisma/schema.prisma` o se agregó migración sin regenerar el cliente local. Render lo regenera automáticamente vía `postinstall`, pero localmente queda stale.
+**Causa real:** Se editó `prisma/schema.prisma` o se agregó migración sin regenerar el cliente local. CI y el build Docker lo regeneran vía `postinstall`, pero localmente queda stale.
 
 **Prevención:**
 - Después de editar `schema.prisma` o de hacer `git pull` con migraciones nuevas: `cd backend && npx prisma generate`.
-- El `postinstall` ya está en `backend/package.json`, así que en CI/Render funciona; el problema sólo aparece localmente.
+- El `postinstall` ya está en `backend/package.json`, así que en CI/Docker funciona; el problema sólo aparece localmente.
 
 ### 3. Trabajar sobre rama desactualizada
 
@@ -80,23 +90,79 @@ No tienes que recordar correr el comando: el repo lo enforza solo.
 - Tratar `npm run build` como la única fuente de verdad pre-push.
 - En VS Code: `Cmd+Shift+P → TypeScript: Restart TS Server` cuando cambies archivos compartidos (types, props de componentes).
 
-## Render buildCommand
+## Produccion actual
 
-Lo que Render corre en cada push (definido en `render.yaml`):
+### Frontend: GitHub Pages
 
-| Servicio | Build | Start |
-|---|---|---|
-| Frontend | `npm install && npm run build` | sirve `dist/` |
-| Backend | `npm install && npm run build` | `npm start` (con `npx prisma migrate deploy` pre-deploy) |
+El workflow [.github/workflows/deploy-frontend-pages.yml](.github/workflows/deploy-frontend-pages.yml)
+corre `npm run ci:quality` y publica `frontend/dist/`.
 
-`npm install` dispara el `postinstall` del backend (`prisma generate`), por eso en CI funciona aunque localmente esté stale.
+Variables requeridas del repo:
+
+```bash
+VITE_API_URL=https://philserver.mulard-caiman.ts.net/api
+VITE_SOCKET_URL=https://philserver.mulard-caiman.ts.net
+```
+
+El workflow falla explicitamente si esas variables estan vacias, para evitar
+publicar un bundle que intente llamar a `github.io/api`.
+
+### Backend: PhilServer + Tailscale Funnel
+
+El backend se levanta desde `docker-compose.backend.yml` en PhilServer:
+
+```bash
+docker compose --env-file .env.backend -f docker-compose.backend.yml up -d --build
+```
+
+Variables requeridas en `.env.backend` del servidor:
+
+```bash
+DATABASE_URL=<Neon production URL>
+JWT_SECRET=<secure random secret>
+FRONTEND_URL=https://felipeaurelio13.github.io
+BACKEND_LOCAL_PORT=3101
+```
+
+Redis es el servicio `redis` del compose y se monta con volumen persistente.
+Tailscale Funnel expone HTTPS hacia `http://127.0.0.1:3101`:
+
+```bash
+tailscale funnel --https=443 http://127.0.0.1:3101
+```
+
+Health checks esperados:
+
+```bash
+curl https://philserver.mulard-caiman.ts.net/ping
+curl https://philserver.mulard-caiman.ts.net/health
+```
+
+Antes de levantar un backend con migraciones nuevas, ejecutar contra la DB real:
+
+```bash
+docker compose --env-file .env.backend -f docker-compose.backend.yml run --rm backend npx prisma migrate deploy
+```
+
+### Keep-awake
+
+El workflow [.github/workflows/keep-backend-awake.yml](.github/workflows/keep-backend-awake.yml)
+pega a `/health` cada 5 minutos. Aunque PhilServer no duerme, ese ping valida el
+backend publico y mantiene actividad en dependencias administradas como Neon.
+
+Secret requerido:
+
+```bash
+BACKEND_HEALTHCHECK_URL=https://philserver.mulard-caiman.ts.net/health
+```
 
 ## Si el deploy falla
 
-1. Lee el log completo en Render — el error real suele estar arriba, no en las últimas líneas.
-2. Reproduce localmente: `cd frontend && npm run build` (o backend).
-3. Arregla, **vuelve a correr `npm run build`** para confirmar, push.
-4. **No pushees "fix" ciegos sin reproducir el error primero.** Caso real: PR #179 fue un "fix" automatizado que rompió el build en lugar de arreglarlo.
+1. Frontend: revisa el run de GitHub Actions y reproduce con `npm --prefix frontend run ci:quality`.
+2. Backend: entra a PhilServer y revisa `docker compose --env-file .env.backend -f docker-compose.backend.yml logs backend`.
+3. DB/migraciones: confirma `prisma migrate deploy` contra Neon real antes de reiniciar backend.
+4. Funnel: valida que `tailscale funnel status` siga apuntando a `http://127.0.0.1:3101`.
+5. **No pushees "fix" ciegos sin reproducir el error primero.** Caso real: PR #179 fue un "fix" automatizado que rompió el build en lugar de arreglarlo.
 
 ## Anti-patrones detectados en este repo
 

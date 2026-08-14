@@ -74,9 +74,8 @@ export class ApiError extends Error {
   }
 }
 
-// Reintentos para GETs idempotentes: el backend en Render free tier tiene
-// cold starts de ~30s, así que un timeout o 502/503/504 transitorio no debe
-// romper la experiencia. Backoff exponencial: 1s, 2s, 4s.
+// Reintentos para GETs idempotentes: GitHub Pages no puede esconder latencia o
+// caidas transitorias del backend detras de SSR. Backoff exponencial: 1s, 2s, 4s.
 const MAX_GET_RETRIES = 3;
 const RETRY_BASE_DELAY_MS = 1000;
 const RETRYABLE_STATUS = new Set([502, 503, 504]);

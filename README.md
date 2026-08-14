@@ -8,7 +8,8 @@ GeoChallenge es un juego full-stack de trivia geografica. Incluye modos single-p
 - Frontend: React 18 + Vite + TypeScript + Tailwind + i18n + PWA
 - Backend: Node.js + Express + TypeScript + Prisma + PostgreSQL + Redis + Socket.IO
 - Frontend de produccion: GitHub Pages / sitio estatico
-- Backend de produccion: Render o VPS Docker, segun despliegue
+- Backend de produccion: PhilServer con Docker, expuesto por Tailscale Funnel
+- Base/cache de produccion: Neon Postgres + Redis Docker en PhilServer
 - Version visible del frontend: definida en `frontend/package.json`
 
 ## Estructura
@@ -22,7 +23,7 @@ geochallenge/
 ├── scripts/               # Automatizaciones del repo
 ├── .github/workflows/     # CI y deploy frontend
 ├── docker-compose.yml     # Stack completo para VPS
-├── render.yaml            # Servicios Render
+├── docker-compose.backend.yml # Backend-only para Pages + PhilServer/Funnel
 ├── DEPLOY.md              # Playbook de deploy/predeploy
 └── DEPLOY-ORACLE.md       # Guia VPS Oracle Cloud Always Free
 ```
@@ -238,11 +239,16 @@ El resultado esperado es:
 
 Lee primero [DEPLOY.md](DEPLOY.md). Ese documento es la fuente operativa para pushes a `master`, hooks, predeploy y errores recurrentes.
 
-Opciones disponibles:
+Produccion actual:
 
 - GitHub Pages para frontend estatico.
-- Render para backend y/o sitio estatico segun `render.yaml`.
-- VPS Docker con Postgres, Redis, backend, frontend estatico y Caddy. Ver [DEPLOY-ORACLE.md](DEPLOY-ORACLE.md).
+- PhilServer con `docker-compose.backend.yml` para backend + Redis.
+- Tailscale Funnel publica el backend HTTPS.
+- Neon Postgres aloja la base real.
+
+Alternativa documentada:
+
+- VPS Docker completo con Postgres, Redis, backend, frontend estatico y Caddy. Ver [DEPLOY-ORACLE.md](DEPLOY-ORACLE.md).
 
 ## Convenciones de desarrollo
 

@@ -2,7 +2,7 @@ name: Keep backend awake
 
 on:
   schedule:
-    - cron: '*/5 * * * *'  # Every 5 minutes (Render free tier sleeps after 15 min)
+    - cron: '*/5 * * * *'  # Public health check and managed dependency keep-alive.
   workflow_dispatch:
 
 jobs:
@@ -18,11 +18,9 @@ jobs:
             exit 0
           fi
 
-          # Antes pegábamos /ping (sólo HTTP, no toca DB/Redis). El problema:
-          # Upstash free tier elimina DBs después de 14 días sin comandos. El
-          # backend se mantenía vivo pero Redis se borraba (incidente 25-mayo).
-          # Ahora pegamos /health que ejecuta `prisma.$queryRaw` Y `redis.ping()`,
-          # manteniendo ambos servicios "activos" desde la perspectiva del proveedor.
+          # /ping sólo valida HTTP. /health ejecuta `prisma.$queryRaw` y
+          # `redis.ping()`, así que confirma el backend público y mantiene
+          # actividad en dependencias administradas como Neon.
           BASE_URL="${BACKEND_URL%/health}"
           BASE_URL="${BASE_URL%/ping}"
           HEALTH_URL="${BASE_URL}/health"

@@ -48,7 +48,7 @@ function startServer() {
 describe('POST /api/auth/forgot-password', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    process.env.FRONTEND_URL = 'https://geochallenge-frontend.onrender.com';
+    process.env.FRONTEND_URL = 'https://felipeaurelio13.github.io/geochallenge';
   });
 
   afterEach(() => {
@@ -78,7 +78,7 @@ describe('POST /api/auth/forgot-password', () => {
     expect(sendPasswordResetEmail).toHaveBeenCalledTimes(1);
     const [to, resetUrl, lang] = vi.mocked(sendPasswordResetEmail).mock.calls[0];
     expect(to).toBe('existing@example.com');
-    expect(resetUrl).toMatch(/^https:\/\/geochallenge-frontend\.onrender\.com\/reset-password\?token=/);
+    expect(resetUrl).toMatch(/^https:\/\/felipeaurelio13\.github\.io\/geochallenge\/reset-password\?token=/);
     expect(lang).toBe('es');
   });
 

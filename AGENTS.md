@@ -43,7 +43,7 @@ Por lo tanto:
 - changelogs o notas de versión
 - metadata/manifests de release
 - lockfiles (`package-lock.json`) salvo que el cambio realmente requiera una dependencia nueva o actualizada
-- archivos de despliegue o infraestructura (`render.yaml`, workflows, Pages config) salvo que la tarea sea de deploy/CI/CD/configuración
+- archivos de despliegue o infraestructura (workflows, Docker, Pages config) salvo que la tarea sea de deploy/CI/CD/configuración
 
 ### Si necesitas tocar dependencias o lockfiles
 
@@ -120,7 +120,7 @@ Antes de terminar:
 
 ### Antes de cualquier push a `master`
 
-**Obligatorio:** `npm run predeploy` debe pasar con `✓ predeploy: builds limpios`. Espeja lo que corre Render (`prisma generate` + `tsc` + `vite build`) y detecta los tres errores que rompen el deploy: untracked-imports, type errors, schema sin migración. Detalle completo en [DEPLOY.md](DEPLOY.md). El push está protegido por un hook `pre-push` que corre el mismo chequeo — no intentes saltarlo con `--no-verify`; si necesitas saltarlo en una emergencia, usa `SKIP_PREDEPLOY_CHECK=1` y documenta por qué en el commit.
+**Obligatorio:** `npm run predeploy` debe pasar con `✓ predeploy: builds limpios`. Espeja lo que corren CI/Docker (`prisma generate` + `tsc` + `vite build`) y detecta los tres errores que rompen el deploy: untracked-imports, type errors, schema sin migración. Detalle completo en [DEPLOY.md](DEPLOY.md). El push está protegido por un hook `pre-push` que corre el mismo chequeo — no intentes saltarlo con `--no-verify`; si necesitas saltarlo en una emergencia, usa `SKIP_PREDEPLOY_CHECK=1` y documenta por qué en el commit.
 
 ### Calidad esperada por tipo de cambio
 
