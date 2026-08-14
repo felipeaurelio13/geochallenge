@@ -348,6 +348,15 @@ export function MenuPage() {
     navigate('/duel?mode=geo-challenge');
   }
 
+  function handleCompetitionHub() {
+    trackUxEvent('mode_selected', {
+      destination: '/competition',
+      gameMode: 'competition',
+      category: 'MIXED',
+    });
+    navigate('/competition');
+  }
+
   const practicePanelOpen = activePanel === 'practice';
   const competePanelOpen = activePanel === 'compete';
 
@@ -531,6 +540,7 @@ export function MenuPage() {
             onPlayDuel={handlePlayDuel}
             onPlayChallenge={handlePlayChallenge}
             onPlaySurvival={handlePlaySurvival}
+            onCompetitionHub={handleCompetitionHub}
             onOpenHelp={(mode) => handleOpenHelp(mode as GameModeId)}
             onGeoChallengesDuel={handleGeoChallengesDuel}
             onClose={() => setActivePanel(null)}

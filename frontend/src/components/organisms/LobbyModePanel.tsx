@@ -26,6 +26,7 @@ interface LobbyModePanelProps {
   onPlayDuel?: () => void;
   onPlayChallenge?: () => void;
   onPlaySurvival?: () => void;
+  onCompetitionHub?: () => void;
   // Special
   onFlagMaster?: () => void;
   onGeoChallenges?: () => void;
@@ -58,6 +59,7 @@ export function LobbyModePanel({
   onPlayDuel,
   onPlayChallenge,
   onPlaySurvival,
+  onCompetitionHub,
   onFlagMaster,
   onGeoChallenges,
   onGeoChallengesDuel,
@@ -186,6 +188,14 @@ export function LobbyModePanel({
           </div>
         ) : (
           <div className="space-y-2">
+            {onCompetitionHub && (
+              <SpecialButton
+                icon="🏆"
+                title={t('menu.compete.competitionHub')}
+                desc={t('menu.compete.competitionHubDesc')}
+                onClick={onCompetitionHub}
+              />
+            )}
             {onPlayDuel && (
               <ModeButtonWithHelp
                 icon="⚔️"

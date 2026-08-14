@@ -5,6 +5,8 @@ import type {
   DuelOpponent,
   DuelResult,
   DuelMode,
+  CompetitiveLadder,
+  DuelRatingEvent,
   AnswerResult,
   MechanicUsage,
   MechanicsConfig,
@@ -22,6 +24,8 @@ type DuelEventHandlers = {
     timePerQuestion: number;
     category: Category;
     mode?: DuelMode;
+    rated?: boolean;
+    ladder?: CompetitiveLadder;
     opponent: DuelOpponent;
     mechanics?: MechanicsConfig;
   }) => void;
@@ -53,7 +57,10 @@ type DuelEventHandlers = {
     results: DuelResult[];
     myScore?: number;
     opponentScore?: number;
+    rated?: boolean;
+    ladder?: CompetitiveLadder;
   }) => void;
+  onRating?: (data: DuelRatingEvent) => void;
   onError?: (data: SocketErrorPayload) => void;
   onOpponentDisconnected?: () => void;
 };
@@ -183,6 +190,10 @@ class SocketService {
       this.handlers.onFinished?.(data);
     });
 
+    this.socket.on('duel:rating', (data) => {
+      this.handlers.onRating?.(data);
+    });
+
     this.socket.on('duel:error', (data) => {
       this.handlers.onError?.(data);
     });
@@ -193,12 +204,12 @@ class SocketService {
   }
 
   // Duel actions
-  joinQueue(category?: Category, filters?: GameFilters, mode: DuelMode = 'classic'): void {
-    this.socket?.emit('duel:queue', { category, filters, mode });
+  joinQueue(category?: Category, filters?: GameFilters, mode: DuelMode = 'classic', rated = false): void {
+    this.socket?.emit('duel:queue', { category, filters, mode, rated });
   }
 
-  joinDuelQueue(category?: Category, filters?: GameFilters, mode: DuelMode = 'classic'): void {
-    this.joinQueue(category, filters, mode);
+  joinDuelQueue(category?: Category, filters?: GameFilters, mode: DuelMode = 'classic', rated = false): void {
+    this.joinQueue(category, filters, mode, rated);
   }
 
   cancelQueue(): void {

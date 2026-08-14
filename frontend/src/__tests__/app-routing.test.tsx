@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import React from 'react';
 import { appRoutes, SinglePlayerGameLayout } from '../App';
 import { RankingsPage } from '../pages/RankingsPage';
+import { CompetitionPage } from '../pages/CompetitionPage';
 
 describe('App single-player routing', () => {
   it('keeps /game/single and /results under the same GameProvider layout', () => {
@@ -37,5 +38,19 @@ describe('Rankings routing', () => {
     expect(rankingsRoute).toBeDefined();
     const rankingsElement = rankingsRoute?.element as React.ReactElement;
     expect(rankingsElement.type).toBe(RankingsPage);
+  });
+});
+
+describe('Competition routing', () => {
+  it('protects /competition and renders CompetitionPage inside the guard', () => {
+    const rootRoute = appRoutes[0];
+    const competitionRoute = rootRoute.children?.find((route) => route.path === '/competition');
+
+    expect(competitionRoute).toBeDefined();
+    const protectedElement = competitionRoute?.element as React.ReactElement;
+    const pageElement = protectedElement.props.children as React.ReactElement;
+
+    expect(pageElement.type).toBe(CompetitionPage);
+    expect(protectedElement.type).not.toBe(CompetitionPage);
   });
 });

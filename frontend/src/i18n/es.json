@@ -174,6 +174,8 @@
       "title": "Competir",
       "subtitle": "Pon a prueba lo que sabes contra otros.",
       "category": "Categoría",
+      "competitionHub": "Competition Hub",
+      "competitionHubDesc": "Ranked, rating y clasificación",
       "duel": "Duelo",
       "duelDesc": "En vivo · 1 vs 1",
       "challenge": "Desafío",
@@ -482,7 +484,53 @@
     "almostWon": "Quedaste a solo {{diff}} puntos 🔥",
     "rematchNudge": "{{opponent}} estuvo fuerte hoy. La revancha es tuya cuando quieras.",
     "rematch": "Revancha",
-    "wonByForfeit": "{{opponent}} abandonó la partida. Victoria para ti — cuenta igual para tu ranking ✓"
+    "wonByForfeit": "{{opponent}} abandonó la partida. Victoria para ti — cuenta igual para tu ranking ✓",
+    "rankedClassicQueue": "Ranked Classic",
+    "rankedGeoQueue": "Ranked GeoRetos",
+    "rankedNoFilters": "Ranked usa MIXED y no aplica filtros.",
+    "rankedPlayer": "Ranked",
+    "ratingUpdating": "Actualizando rating...",
+    "ratingUpdated": "Rating actualizado",
+    "ratingNotRated": "Esta partida no afectó rating.",
+    "ratingUpdateError": "No pudimos actualizar el rating en pantalla. Puedes verlo luego en Competición.",
+    "placementRemaining": "{{count}} partidas de calibración restantes",
+    "openCompetition": "Ver Competición"
+  },
+  "competition": {
+    "title": "Competición",
+    "subtitle": "Pon a prueba tu geografía contra otros jugadores.",
+    "ranked": "Ranked",
+    "leaderboard": "Leaderboard",
+    "recent": "Partidas ranked recientes",
+    "other": "Otra competencia",
+    "findMatch": "Buscar partida",
+    "error": "No pudimos cargar Competición. Intenta de nuevo.",
+    "emptyLeaderboard": "Aún no hay jugadores con 5 partidas en esta ladder.",
+    "emptyRecent": "Tus partidas ranked aparecerán aquí.",
+    "scoreRankings": "Rankings de score",
+    "vs": "vs {{opponent}}",
+    "placementProgress": "{{played}} / {{total}} partidas de calibración",
+    "unranked": "Sin rank público",
+    "ladders": {
+      "CLASSIC": "Classic Ranked",
+      "GEO_CHALLENGE": "GeoRetos Ranked"
+    },
+    "shortLadders": {
+      "CLASSIC": "Classic",
+      "GEO_CHALLENGE": "GeoRetos"
+    },
+    "ladderDesc": {
+      "CLASSIC": "MIXED · sin filtros",
+      "GEO_CHALLENGE": "Duelos GeoRetos"
+    },
+    "tiers": {
+      "CALIBRATING": "Calibrando",
+      "EXPLORER": "Explorador",
+      "PATHFINDER": "Trazarutas",
+      "CARTOGRAPHER": "Cartógrafo",
+      "NAVIGATOR": "Navegante",
+      "ATLAS_MASTER": "Maestro Atlas"
+    }
   },
   "challenges": {
     "title": "Desafíos",

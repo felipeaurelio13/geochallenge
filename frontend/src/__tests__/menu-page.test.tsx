@@ -150,6 +150,8 @@ vi.mock('react-i18next', () => ({
         'menu.compete.title': 'Competir',
         'menu.compete.subtitle': 'Pon a prueba lo que sabes contra otros.',
         'menu.compete.category': 'Categoría',
+        'menu.compete.competitionHub': 'Competition Hub',
+        'menu.compete.competitionHubDesc': 'Ranked, rating y clasificación',
         'menu.compete.duel': 'Duelo',
         'menu.compete.duelDesc': 'En vivo · 1 vs 1',
         'menu.compete.challenge': 'Desafío',
@@ -589,9 +591,28 @@ describe('MenuPage — panels', () => {
     );
 
     fireEvent.click(screen.getByText('Competir'));
+    expect(screen.getByText('Competition Hub')).toBeDefined();
     expect(screen.getByText('Duelo')).toBeDefined();
     expect(screen.getByText('Desafío')).toBeDefined();
     expect(screen.getByText('Supervivencia')).toBeDefined();
+  });
+
+  it('Competition Hub aparece primero en Compete y navega a /competition', () => {
+    render(
+      <MemoryRouter future={routerFutureConfig}>
+        <Screen>
+          <MenuPage />
+        </Screen>
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByText('Competir'));
+    const hub = screen.getByText('Competition Hub');
+    const duel = screen.getByText('Duelo');
+    expect(hub.compareDocumentPosition(duel) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+
+    fireEvent.click(hub);
+    expect(mockNavigate).toHaveBeenCalledWith('/competition');
   });
 
   it('GeoRetos Duel accesible desde Compete', () => {

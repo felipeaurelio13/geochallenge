@@ -20,6 +20,7 @@ import {
   FlagMasterPage,
   GeoChallengesPage,
   PassportPage,
+  CompetitionPage,
 } from './pages';
 import { DailyChallengePage } from './pages/DailyChallengePage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
@@ -162,6 +163,10 @@ export const appRoutes = [
       {
         path: '/duel',
         element: <ProtectedRoute><DuelPage /></ProtectedRoute>,
+      },
+      {
+        path: '/competition',
+        element: <ProtectedRoute><CompetitionPage /></ProtectedRoute>,
       },
       {
         path: '/challenges',

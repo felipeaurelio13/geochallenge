@@ -23,6 +23,14 @@ export type Category = 'MAP' | 'FLAG' | 'CAPITAL' | 'SILHOUETTE' | 'MONUMENT' | 
 export type GameType = 'single' | 'streak' | 'flash' | 'practice';
 export type GameplayMode = GameType | 'duel' | 'challenge';
 export type DuelMode = 'classic' | 'geo-challenge';
+export type CompetitiveLadder = 'CLASSIC' | 'GEO_CHALLENGE';
+export type CompetitiveTier =
+  | 'CALIBRATING'
+  | 'EXPLORER'
+  | 'PATHFINDER'
+  | 'CARTOGRAPHER'
+  | 'NAVIGATOR'
+  | 'ATLAS_MASTER';
 export type GameMechanicKey = 'intel5050' | 'focusTime' | 'streakShield';
 
 export type GameVariant = 'CLASSIC' | 'STREAK' | 'FLASH' | 'FLAG_MASTER' | 'GEO_CHALLENGE' | 'PRACTICE';
@@ -407,6 +415,7 @@ export interface LeaderboardEntry {
 export interface DuelOpponent {
   userId: string;
   username: string;
+  rating?: number;
 }
 
 export interface DuelState {
@@ -425,6 +434,73 @@ export interface DuelResult {
   correctCount: number;
   isWinner: boolean;
 }
+
+export interface CompetitionLadderSummary {
+  rating: number;
+  peakRating: number;
+  gamesPlayed: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  provisional: boolean;
+  placementGamesRemaining: number;
+  rank: number | null;
+  tier: CompetitiveTier;
+}
+
+export interface CompetitionRecentMatch {
+  duelMatchId: string;
+  ladder: CompetitiveLadder;
+  opponent: {
+    id: string;
+    username: string;
+  };
+  result: 'win' | 'draw' | 'loss';
+  ratingBefore: number;
+  ratingDelta: number;
+  ratingAfter: number;
+  createdAt: string;
+}
+
+export interface CompetitionOverview {
+  ladders: Record<CompetitiveLadder, CompetitionLadderSummary>;
+  recentMatches: CompetitionRecentMatch[];
+}
+
+export interface CompetitionLeaderboardEntry {
+  rank: number;
+  userId: string;
+  username: string;
+  rating: number;
+  tier: CompetitiveTier;
+  gamesPlayed: number;
+  wins: number;
+  draws: number;
+  losses: number;
+}
+
+export interface CompetitionLeaderboardResponse {
+  ladder: CompetitiveLadder;
+  leaderboard: CompetitionLeaderboardEntry[];
+  me: CompetitionLadderSummary;
+}
+
+export type DuelRatingEvent =
+  | {
+      status: 'updated';
+      ladder: CompetitiveLadder;
+      ratingBefore: number;
+      ratingDelta: number;
+      ratingAfter: number;
+      peakRating: number;
+      gamesPlayed: number;
+      provisional: boolean;
+      placementGamesRemaining: number;
+      tier: CompetitiveTier;
+    }
+  | {
+      status: 'not-rated';
+    };
 
 // Survival types
 export interface SurvivalPlayerInfo {

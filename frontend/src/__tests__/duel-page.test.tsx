@@ -29,6 +29,7 @@ const mocks = vi.hoisted(() => {
     joinDuelQueueMock: vi.fn(),
     cancelDuelQueueMock: vi.fn(),
     submitDuelAnswerMock: vi.fn(),
+    getCompetitionOverviewMock: vi.fn(),
     onConnectionStateChangeMock: vi.fn(() => () => {}),
     isConnectedMock: vi.fn(() => true),
     searchParams: 'category=FLAG',
@@ -124,11 +125,47 @@ vi.mock('../services/socket', () => ({
   },
 }));
 
+vi.mock('../services/api', () => ({
+  api: {
+    getCompetitionOverview: mocks.getCompetitionOverviewMock,
+  },
+}));
+
 describe('DuelPage socket flow', () => {
   beforeEach(() => {
     mocks.handlers.clear();
     vi.clearAllMocks();
     mocks.searchParams = 'category=FLAG';
+    mocks.getCompetitionOverviewMock.mockResolvedValue({
+      ladders: {
+        CLASSIC: {
+          rating: 1100,
+          peakRating: 1100,
+          gamesPlayed: 6,
+          wins: 4,
+          draws: 1,
+          losses: 1,
+          provisional: false,
+          placementGamesRemaining: 0,
+          rank: 3,
+          tier: 'CARTOGRAPHER',
+        },
+        GEO_CHALLENGE: {
+          rating: 1000,
+          peakRating: 1000,
+          gamesPlayed: 0,
+          wins: 0,
+          draws: 0,
+          losses: 0,
+          provisional: true,
+          placementGamesRemaining: 5,
+          rank: null,
+          tier: 'CALIBRATING',
+        },
+      },
+      recentMatches: [],
+    });
+    vi.useRealTimers();
   });
 
   it('registra listeners antes de entrar a la cola y avanza al recibir oponente', async () => {
@@ -141,7 +178,7 @@ describe('DuelPage socket flow', () => {
     const joinCallOrder = mocks.joinDuelQueueMock.mock.invocationCallOrder[0];
 
     expect(registerCallOrder).toBeLessThan(joinCallOrder);
-    expect(mocks.joinDuelQueueMock).toHaveBeenCalledWith('FLAG', {}, 'classic');
+    expect(mocks.joinDuelQueueMock).toHaveBeenCalledWith('FLAG', {}, 'classic', false);
 
     act(() => {
       mocks.handlers.get('duel:matched')?.forEach((cb) => cb({ duelId: 'd1' }));
@@ -164,7 +201,7 @@ describe('DuelPage socket flow', () => {
     mocks.searchParams = 'mode=geo-challenge';
     render(<DuelPage />);
 
-    expect(mocks.joinDuelQueueMock).toHaveBeenCalledWith('MIXED', {}, 'geo-challenge');
+    expect(mocks.joinDuelQueueMock).toHaveBeenCalledWith('MIXED', {}, 'geo-challenge', false);
 
     act(() => {
       mocks.handlers.get('duel:question')?.forEach((cb) => cb({
@@ -206,6 +243,18 @@ describe('DuelPage socket flow', () => {
       'CA,US,MX,GT',
       25,
     );
+  });
+
+  it('envía rated=true para Ranked Classic y Ranked GeoRetos', () => {
+    mocks.searchParams = 'rated=1&category=MIXED';
+    render(<DuelPage />);
+    expect(mocks.joinDuelQueueMock).toHaveBeenCalledWith('MIXED', {}, 'classic', true);
+
+    vi.clearAllMocks();
+    mocks.handlers.clear();
+    mocks.searchParams = 'rated=1&mode=geo-challenge';
+    render(<DuelPage />);
+    expect(mocks.joinDuelQueueMock).toHaveBeenCalledWith('MIXED', {}, 'geo-challenge', true);
   });
 
   it('reconoce los 4 kinds nuevos en GeoRetos Duel: ORDER_BY_METRIC ordered', async () => {
@@ -438,7 +487,7 @@ describe('DuelPage socket flow', () => {
   it('mantiene una sola suscripción de sockets aunque cambie el score', async () => {
     render(<DuelPage />);
 
-    expect(mocks.socketMock.on).toHaveBeenCalledTimes(9);
+    expect(mocks.socketMock.on).toHaveBeenCalledTimes(10);
 
     act(() => {
       mocks.handlers.get('duel:questionResult')?.forEach((cb) =>
@@ -461,7 +510,128 @@ describe('DuelPage socket flow', () => {
       );
     });
 
-    expect(mocks.socketMock.on).toHaveBeenCalledTimes(9);
+    expect(mocks.socketMock.on).toHaveBeenCalledTimes(10);
+  });
+
+  it('casual finish no muestra rating', async () => {
+    render(<DuelPage />);
+
+    act(() => {
+      mocks.handlers.get('duel:finished')?.forEach((cb) =>
+        cb({
+          reason: 'completed',
+          rated: false,
+          winnerId: 'u1',
+          results: [
+            { userId: 'u1', username: 'player1', score: 200 },
+            { userId: 'u2', username: 'rival', score: 100 },
+          ],
+        })
+      );
+    });
+
+    expect(await screen.findByText('duel.youWin')).toBeInTheDocument();
+    expect(screen.queryByText('duel.ratingUpdating')).not.toBeInTheDocument();
+  });
+
+  it('ranked finish espera duel:rating y muestra before/delta/after con calibración', async () => {
+    mocks.searchParams = 'rated=1&category=MIXED';
+    render(<DuelPage />);
+
+    act(() => {
+      mocks.handlers.get('duel:finished')?.forEach((cb) =>
+        cb({
+          reason: 'completed',
+          rated: true,
+          ladder: 'CLASSIC',
+          winnerId: 'u1',
+          results: [
+            { userId: 'u1', username: 'player1', score: 200 },
+            { userId: 'u2', username: 'rival', score: 100 },
+          ],
+        })
+      );
+    });
+
+    expect(await screen.findByText('duel.ratingUpdating')).toBeInTheDocument();
+
+    act(() => {
+      mocks.handlers.get('duel:rating')?.forEach((cb) =>
+        cb({
+          status: 'updated',
+          ladder: 'CLASSIC',
+          ratingBefore: 1084,
+          ratingDelta: 16,
+          ratingAfter: 1100,
+          peakRating: 1100,
+          gamesPlayed: 3,
+          provisional: true,
+          placementGamesRemaining: 2,
+          tier: 'CALIBRATING',
+        })
+      );
+    });
+
+    expect(await screen.findByText('1084 → 1100')).toBeInTheDocument();
+    expect(screen.getByText('+16')).toBeInTheDocument();
+    expect(screen.getByText(/duel\.placementRemaining/)).toBeInTheDocument();
+  });
+
+  it('fallback de rating consulta overview tras 4s y no inventa delta', async () => {
+    vi.useFakeTimers();
+    mocks.searchParams = 'rated=1&category=MIXED';
+    render(<DuelPage />);
+
+    act(() => {
+      mocks.handlers.get('duel:finished')?.forEach((cb) =>
+        cb({
+          reason: 'completed',
+          rated: true,
+          ladder: 'CLASSIC',
+          winnerId: 'u1',
+          results: [
+            { userId: 'u1', username: 'player1', score: 200 },
+            { userId: 'u2', username: 'rival', score: 100 },
+          ],
+        })
+      );
+    });
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(4000);
+    });
+
+    expect(mocks.getCompetitionOverviewMock).toHaveBeenCalledTimes(1);
+    expect(screen.getByText('duel.ratingUpdated')).toBeInTheDocument();
+    expect(screen.queryByText('+16')).not.toBeInTheDocument();
+  });
+
+  it('fallback de rating muestra estado graceful si overview falla', async () => {
+    vi.useFakeTimers();
+    mocks.getCompetitionOverviewMock.mockRejectedValue(new Error('network'));
+    mocks.searchParams = 'rated=1&category=MIXED';
+    render(<DuelPage />);
+
+    act(() => {
+      mocks.handlers.get('duel:finished')?.forEach((cb) =>
+        cb({
+          reason: 'completed',
+          rated: true,
+          ladder: 'CLASSIC',
+          winnerId: 'u1',
+          results: [
+            { userId: 'u1', username: 'player1', score: 200 },
+            { userId: 'u2', username: 'rival', score: 100 },
+          ],
+        })
+      );
+    });
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(4000);
+    });
+
+    expect(screen.getByText('duel.ratingUpdateError')).toBeInTheDocument();
   });
 
   it('muestra banner no bloqueante cuando llega duel:error y permite reintentar', async () => {

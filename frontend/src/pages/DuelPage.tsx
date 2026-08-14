@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { useUiStore } from '../store/useUiStore';
 import { socketService } from '../services/socket';
+import { api } from '../services/api';
 import {
   Timer,
   LoadingSpinner,
@@ -18,6 +19,8 @@ import { Button } from '../components/atoms/Button';
 import { MonumentAttribution } from '../components/MonumentAttribution';
 import {
   Category,
+  CompetitiveLadder,
+  DuelRatingEvent,
   DuelMode,
   GameFilters,
   GeoChallengeKind,
@@ -44,7 +47,17 @@ interface DuelResult {
   opponentScore: number;
   opponentName: string;
   wonByForfeit?: boolean;
+  rated?: boolean;
+  ladder?: CompetitiveLadder;
 }
+
+type RatingDisplayState =
+  | { status: 'idle' }
+  | { status: 'pending' }
+  | { status: 'updated'; data: Extract<DuelRatingEvent, { status: 'updated' }> }
+  | { status: 'fallback'; rating: number; tier: string; placementGamesRemaining: number }
+  | { status: 'not-rated' }
+  | { status: 'error' };
 
 const { TIME_PER_QUESTION } = GAME_CONSTANTS;
 const SEARCH_TIMEOUT_SECONDS = 120;
@@ -97,7 +110,7 @@ export function DuelPage() {
   const { user } = useAuth();
 
   const [duelState, setDuelState] = useState<DuelState>('searching');
-  const [opponent, setOpponent] = useState<{ id: string; username: string } | null>(null);
+  const [opponent, setOpponent] = useState<{ id?: string; userId?: string; username: string; rating?: number } | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [questionNumber, setQuestionNumber] = useState(0);
   const [totalQuestions, setTotalQuestions] = useState(10);
@@ -136,13 +149,15 @@ export function DuelPage() {
   });
   const [hasSubmittedThisQuestion, setHasSubmittedThisQuestion] = useState(false);
   const [duelImageUrls, setDuelImageUrls] = useState<string[]>([]);
+  const [ratingDisplay, setRatingDisplay] = useState<RatingDisplayState>({ status: 'idle' });
   // Part 1.1: reassurance cuando isSyncingRound se alarga + timeout de conexión inicial.
   const [showSyncingLongHint, setShowSyncingLongHint] = useState(false);
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const connectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const syncingLongTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const ratingFallbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scoreRef = useRef(0);
-  const opponentRef = useRef<{ id: string; username: string } | null>(null);
+  const opponentRef = useRef<{ id?: string; userId?: string; username: string; rating?: number } | null>(null);
   const duelStateRef = useRef<DuelState>('searching');
   const hasSubmittedCurrentQuestionRef = useRef(false);
   const abandonTrackedRef = useRef(false);
@@ -150,6 +165,8 @@ export function DuelPage() {
   const prefersReducedMotion = useUiStore((s) => s.prefersReducedMotion);
   const duelCategory = parseDuelCategory(searchParams.get('category'));
   const duelMode: DuelMode = searchParams.get('mode') === 'geo-challenge' ? 'geo-challenge' : 'classic';
+  const isRated = searchParams.get('rated') === '1';
+  const rankedLadder: CompetitiveLadder = duelMode === 'geo-challenge' ? 'GEO_CHALLENGE' : 'CLASSIC';
   const geoRound = currentQuestion?.geoChallenge;
   const isGeoDuel = duelMode === 'geo-challenge';
   const hasCompleteGeoSelection = geoRound ? (
@@ -194,14 +211,14 @@ export function DuelPage() {
     setShowRetryAction(false);
 
     if (duelStateRef.current === 'searching') {
-      socketService.joinDuelQueue(duelCategory, duelFilters, duelMode);
+      socketService.joinDuelQueue(duelCategory, duelFilters, duelMode, isRated);
       return;
     }
 
     if (duelStateRef.current === 'matched') {
       socketService.ready();
     }
-  }, [duelCategory, duelFilters, duelMode]);
+  }, [duelCategory, duelFilters, duelMode, isRated]);
 
   // Part 1.1: pub-sub de socketService — si el estado pasa a 'error' mientras
   // estamos buscando/emparejados/jugando, mostramos el banner con Reintentar.
@@ -354,13 +371,38 @@ export function DuelPage() {
       const rivalResult = data.results?.find((result: any) => result.userId !== user?.id);
       const myFinalScore = myResult?.score ?? 0;
       const rivalFinalScore = rivalResult?.score ?? 0;
+      const finishedRated = Boolean(data.rated);
+      const finishedLadder = (data.ladder ?? rankedLadder) as CompetitiveLadder;
 
       setDuelResult({
         winner: data.winnerId,
         myScore: myFinalScore,
         opponentScore: rivalFinalScore,
         opponentName: rivalResult?.username || opponent?.username || t('duel.opponent'),
+        rated: finishedRated,
+        ladder: finishedLadder,
       });
+      if (finishedRated) {
+        setRatingDisplay({ status: 'pending' });
+        if (ratingFallbackTimeoutRef.current) {
+          clearTimeout(ratingFallbackTimeoutRef.current);
+        }
+        ratingFallbackTimeoutRef.current = setTimeout(() => {
+          api.getCompetitionOverview()
+            .then((overview) => {
+              const summary = overview.ladders[finishedLadder];
+              setRatingDisplay({
+                status: 'fallback',
+                rating: summary.rating,
+                tier: summary.tier,
+                placementGamesRemaining: summary.placementGamesRemaining,
+              });
+            })
+            .catch(() => setRatingDisplay({ status: 'error' }));
+        }, 4000);
+      } else {
+        setRatingDisplay({ status: 'idle' });
+      }
       setDuelState('finished');
       abandonTrackedRef.current = true;
       if (data.winnerId === user?.id) {
@@ -377,9 +419,26 @@ export function DuelPage() {
         opponentScore: 0,
         opponentName: opponentRef.current?.username || t('duel.opponent'),
         wonByForfeit: true,
+        rated: isRated,
+        ladder: rankedLadder,
       });
+      if (isRated) {
+        setRatingDisplay({ status: 'pending' });
+      }
       setDuelState('finished');
       abandonTrackedRef.current = true;
+    };
+
+    const handleRating = (data: DuelRatingEvent) => {
+      if (ratingFallbackTimeoutRef.current) {
+        clearTimeout(ratingFallbackTimeoutRef.current);
+        ratingFallbackTimeoutRef.current = null;
+      }
+      if (data.status === 'updated') {
+        setRatingDisplay({ status: 'updated', data });
+        return;
+      }
+      setRatingDisplay({ status: 'not-rated' });
     };
 
     const handleDuelError = (data: { message?: string; code?: string; params?: Record<string, unknown> }) => {
@@ -394,7 +453,7 @@ export function DuelPage() {
       const currentState = duelStateRef.current;
 
       if (currentState === 'searching') {
-        socketService.joinDuelQueue(duelCategory, duelFilters, duelMode);
+        socketService.joinDuelQueue(duelCategory, duelFilters, duelMode, isRated);
         showConnectionMessage('info', t('duel.reconnectedSearching'), false);
         return;
       }
@@ -413,17 +472,19 @@ export function DuelPage() {
     socketService.socket?.on('duel:question', handleQuestion);
     socketService.socket?.on('duel:questionResult', handleAnswerResult);
     socketService.socket?.on('duel:finished', handleDuelFinished);
+    socketService.socket?.on('duel:rating', handleRating);
     socketService.socket?.on('duel:opponent-disconnected', handleOpponentDisconnected);
     socketService.socket?.on('duel:error', handleDuelError);
     socketService.socket?.on('disconnect', handleDisconnect);
     socketService.socket?.on('connect', handleConnect);
 
     // Join matchmaking queue after listeners are active
-    socketService.joinDuelQueue(duelCategory, duelFilters, duelMode);
+    socketService.joinDuelQueue(duelCategory, duelFilters, duelMode, isRated);
 
     return () => {
       clearInterval(searchTimer);
       if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+      if (ratingFallbackTimeoutRef.current) clearTimeout(ratingFallbackTimeoutRef.current);
       const stateOnCleanup = duelStateRef.current;
       if (stateOnCleanup === 'matched' || stateOnCleanup === 'playing' || stateOnCleanup === 'waiting') {
         if (!abandonTrackedRef.current) {
@@ -443,12 +504,13 @@ export function DuelPage() {
       socketService.socket?.off('duel:question', handleQuestion);
       socketService.socket?.off('duel:questionResult', handleAnswerResult);
       socketService.socket?.off('duel:finished', handleDuelFinished);
+      socketService.socket?.off('duel:rating', handleRating);
       socketService.socket?.off('duel:opponent-disconnected', handleOpponentDisconnected);
       socketService.socket?.off('duel:error', handleDuelError);
       socketService.socket?.off('disconnect', handleDisconnect);
       socketService.socket?.off('connect', handleConnect);
     };
-  }, [duelCategory, duelMode, showConnectionMessage, user?.id]);
+  }, [duelCategory, duelMode, isRated, rankedLadder, showConnectionMessage, user?.id]);
 
   useEffect(() => {
     if (duelState === 'matched') {
@@ -607,7 +669,9 @@ export function DuelPage() {
 
           <div className="mb-5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-left text-sm">
             <p className="text-primary font-semibold mb-1">
-              {isGeoDuel
+              {isRated
+                ? t(isGeoDuel ? 'duel.rankedGeoQueue' : 'duel.rankedClassicQueue')
+                : isGeoDuel
                 ? t('duel.geoQueue')
                 : t('duel.queueCategory', {
                   category: t(
@@ -629,7 +693,7 @@ export function DuelPage() {
                   ),
                 })}
             </p>
-            {!isGeoDuel && (duelFilters.continent || duelFilters.isInsular || duelFilters.isLandlocked || duelFilters.difficulty) && (
+            {!isRated && !isGeoDuel && (duelFilters.continent || duelFilters.isInsular || duelFilters.isLandlocked || duelFilters.difficulty) && (
               <p className="mt-0.5 text-xs text-[var(--color-text-muted)]">
                 {[
                   duelFilters.continent && t(`filters.continents.${duelFilters.continent.replace(' ', '_')}`),
@@ -639,7 +703,9 @@ export function DuelPage() {
                 ].filter(Boolean).join(' · ')}
               </p>
             )}
-            <p className="text-[var(--color-text-secondary)] mt-1">{t('duel.averageWaitHint')}</p>
+            <p className="text-[var(--color-text-secondary)] mt-1">
+              {isRated ? t('duel.rankedNoFilters') : t('duel.averageWaitHint')}
+            </p>
             <p className="text-primary/80 mt-1 text-xs">{t('duel.expectedWait')}</p>
             <p className="text-[var(--color-text-muted)] mt-1">{t('duel.cancelHint')}</p>
           </div>
@@ -655,7 +721,7 @@ export function DuelPage() {
                   onClick={() => {
                     setSearchTimedOut(false);
                     setSearchTime(0);
-                    socketService.joinDuelQueue(duelCategory, duelFilters, duelMode);
+                    socketService.joinDuelQueue(duelCategory, duelFilters, duelMode, isRated);
                   }}
                   variant="primary"
                   size="sm"
@@ -696,6 +762,9 @@ export function DuelPage() {
                 <UserAvatar username={user?.username ?? ''} size="lg" className="ring-2 ring-primary/60" />
               </div>
               <p className="text-[var(--color-text-primary)] font-semibold text-sm">{user?.username}</p>
+              {isRated && (
+                <p className="mt-1 text-xs font-semibold text-primary">{t('duel.rankedPlayer')}</p>
+              )}
             </div>
 
             <div className="flex flex-col items-center gap-1">
@@ -708,6 +777,9 @@ export function DuelPage() {
                 <UserAvatar username={opponent.username} size="lg" color="bg-red-500" className="ring-2 ring-red-400/60" />
               </div>
               <p className="text-[var(--color-text-primary)] font-semibold text-sm">{opponent.username}</p>
+              {isRated && opponent.rating != null && (
+                <p className="mt-1 text-xs font-semibold text-primary">{opponent.rating}</p>
+              )}
             </div>
           </div>
           <p className={`text-sm text-[var(--color-text-muted)] ${!prefersReducedMotion ? 'animate-pulse' : ''}`}>
@@ -733,7 +805,7 @@ export function DuelPage() {
       setDuelState('searching');
       setSearchTime(0);
       setSearchTimedOut(false);
-      socketService.joinDuelQueue(duelCategory, duelFilters, duelMode);
+      socketService.joinDuelQueue(duelCategory, duelFilters, duelMode, isRated);
     };
 
     return (
@@ -785,6 +857,52 @@ export function DuelPage() {
             </div>
           </div>
 
+          {duelResult.rated && (
+            <div className="mb-5 rounded-xl border border-primary/30 bg-primary/10 px-4 py-3 text-left">
+              {ratingDisplay.status === 'pending' && (
+                <p className="text-sm font-semibold text-primary">{t('duel.ratingUpdating')}</p>
+              )}
+              {ratingDisplay.status === 'updated' && (
+                <div>
+                  <p className="text-xs font-semibold uppercase text-primary/80">
+                    {t(`competition.ladders.${ratingDisplay.data.ladder}`)}
+                  </p>
+                  <div className="mt-1 flex items-baseline justify-between gap-3">
+                    <p className="text-lg font-black text-app-text">
+                      {ratingDisplay.data.ratingBefore} → {ratingDisplay.data.ratingAfter}
+                    </p>
+                    <p className={`text-lg font-black ${ratingDisplay.data.ratingDelta >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {ratingDisplay.data.ratingDelta >= 0 ? '+' : ''}{ratingDisplay.data.ratingDelta}
+                    </p>
+                  </div>
+                  <p className="mt-1 text-sm text-app-secondary">
+                    {t(`competition.tiers.${ratingDisplay.data.tier}`)}
+                    {ratingDisplay.data.provisional
+                      ? ` · ${t('duel.placementRemaining', { count: ratingDisplay.data.placementGamesRemaining })}`
+                      : ''}
+                  </p>
+                </div>
+              )}
+              {ratingDisplay.status === 'fallback' && (
+                <div>
+                  <p className="text-sm font-semibold text-primary">{t('duel.ratingUpdated')}</p>
+                  <p className="mt-1 text-sm text-app-secondary">
+                    {ratingDisplay.rating} · {t(`competition.tiers.${ratingDisplay.tier}`)}
+                    {ratingDisplay.placementGamesRemaining > 0
+                      ? ` · ${t('duel.placementRemaining', { count: ratingDisplay.placementGamesRemaining })}`
+                      : ''}
+                  </p>
+                </div>
+              )}
+              {ratingDisplay.status === 'not-rated' && (
+                <p className="text-sm text-app-secondary">{t('duel.ratingNotRated')}</p>
+              )}
+              {ratingDisplay.status === 'error' && (
+                <p className="text-sm text-app-secondary">{t('duel.ratingUpdateError')}</p>
+              )}
+            </div>
+          )}
+
           <div className="flex flex-col gap-2.5">
             <Button
               onClick={rematch}
@@ -802,6 +920,16 @@ export function DuelPage() {
             >
               {t('common.backToMenu')}
             </Button>
+            {duelResult.rated && (
+              <Button
+                onClick={() => navigate('/competition')}
+                variant="ghost"
+                size="md"
+                fullWidth
+              >
+                {t('duel.openCompetition')}
+              </Button>
+            )}
           </div>
         </div>
       </div>

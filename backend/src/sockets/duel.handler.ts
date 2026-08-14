@@ -1,10 +1,9 @@
 import { Server as SocketIOServer, Socket } from 'socket.io';
-import { Category, GameMode, GameVariant } from '@prisma/client';
+import { Category, CompetitiveLadder, GameMode, GameVariant } from '@prisma/client';
 import { getRedis } from '../config/redis.js';
 import {
   getQuestionsForGame,
   validateAnswer,
-  saveGameResult,
   AnswerResult,
   GameQuestion,
   getMechanicsConfigForMode,
@@ -32,6 +31,8 @@ import {
 } from '../services/geoChallenge.service.js';
 import { calculateTimeBonus } from '../utils/scoring.js';
 import { trackServerEvent } from '../services/telemetry.service.js';
+import { getCompetitiveTier, placementGamesRemaining } from '../services/competitiveRating.service.js';
+import { persistDuelResults } from '../services/duelPersistence.service.js';
 
 export type DuelMode = 'classic' | 'geo-challenge';
 
@@ -47,6 +48,9 @@ interface QueuedPlayer {
   category?: Category;
   filters?: QuestionFilters;
   mode?: DuelMode;
+  rated?: boolean;
+  ladder?: CompetitiveLadder;
+  rating?: number;
 }
 
 const DUEL_CATEGORIES: Category[] = ['MAP', 'FLAG', 'CAPITAL', 'SILHOUETTE', 'MONUMENT', 'CINEMA_GEO', 'MIXED'];
@@ -57,6 +61,10 @@ function isCompatibleCategory(categoryA: Category, categoryB: Category): boolean
 
 function normalizeDuelMode(mode?: DuelMode): DuelMode {
   return mode === 'geo-challenge' ? 'geo-challenge' : 'classic';
+}
+
+function ladderForMode(mode: DuelMode): CompetitiveLadder {
+  return mode === 'geo-challenge' ? CompetitiveLadder.GEO_CHALLENGE : CompetitiveLadder.CLASSIC;
 }
 
 function isCompatibleFilters(a?: QuestionFilters, b?: QuestionFilters): boolean {
@@ -87,6 +95,7 @@ interface ActiveDuel {
     answers: AnswerResult[];
     score: number;
     ready: boolean;
+    rating?: number;
     pendingQuestionIndex?: number;
   }[];
   questions: DuelQuestion[];
@@ -96,6 +105,8 @@ interface ActiveDuel {
   status: 'waiting' | 'countdown' | 'playing' | 'finished';
   category?: Category;
   mode: DuelMode;
+  rated: boolean;
+  ladder?: CompetitiveLadder;
   startedAt?: Date;
   questionStartedAt?: Date;
   resolvingQuestionIndex?: number;
@@ -108,10 +119,15 @@ export class MatchmakingQueue {
   addPlayer(player: QueuedPlayer): void {
     // Remove if already in queue
     this.removePlayer(player.userId);
+    const mode = normalizeDuelMode(player.mode);
+    const rated = Boolean(player.rated);
     this.queue.push({
       ...player,
-      category: normalizeCategory(player.category),
-      mode: normalizeDuelMode(player.mode),
+      category: rated ? Category.MIXED : normalizeCategory(player.category),
+      filters: rated ? undefined : player.filters,
+      mode,
+      rated,
+      ladder: rated ? player.ladder ?? ladderForMode(mode) : undefined,
     });
   }
 
@@ -130,10 +146,20 @@ export class MatchmakingQueue {
       for (let j = i + 1; j < this.queue.length; j++) {
         const player1 = this.queue[i];
         const player2 = this.queue[j];
+        const player1Rated = Boolean(player1.rated);
+        const player2Rated = Boolean(player2.rated);
         const player1Category = normalizeCategory(player1.category);
         const player2Category = normalizeCategory(player2.category);
 
         if (normalizeDuelMode(player1.mode) !== normalizeDuelMode(player2.mode)) {
+          continue;
+        }
+
+        if (player1Rated !== player2Rated) {
+          continue;
+        }
+
+        if (player1Rated && player1.ladder !== player2.ladder) {
           continue;
         }
 
@@ -143,6 +169,36 @@ export class MatchmakingQueue {
 
         if (!isCompatibleFilters(player1.filters, player2.filters)) {
           continue;
+        }
+
+        if (player1Rated) {
+          let bestIndex = j;
+          let bestDistance = Math.abs((player1.rating ?? 1000) - (player2.rating ?? 1000));
+
+          for (let k = j + 1; k < this.queue.length; k++) {
+            const candidate = this.queue[k];
+            if (
+              !candidate.rated ||
+              normalizeDuelMode(candidate.mode) !== normalizeDuelMode(player1.mode) ||
+              candidate.ladder !== player1.ladder ||
+              !isCompatibleCategory(player1Category, normalizeCategory(candidate.category)) ||
+              !isCompatibleFilters(player1.filters, candidate.filters)
+            ) {
+              continue;
+            }
+
+            const distance = Math.abs((player1.rating ?? 1000) - (candidate.rating ?? 1000));
+            const bestJoinedAt = this.queue[bestIndex].joinedAt.getTime();
+            if (distance < bestDistance || (distance === bestDistance && candidate.joinedAt.getTime() < bestJoinedAt)) {
+              bestIndex = k;
+              bestDistance = distance;
+            }
+          }
+
+          const bestPlayer = this.queue[bestIndex];
+          this.queue.splice(bestIndex, 1);
+          this.queue.splice(i, 1);
+          return [player1, bestPlayer];
         }
 
         this.queue.splice(j, 1);
@@ -231,6 +287,7 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
     category?: Category;
     filters?: QuestionFilters;
     mode?: DuelMode;
+    rated?: boolean;
   }) => {
     if (isRateLimited(user.userId, 'duel:queue', 10)) {
       emitSocketError(
@@ -241,8 +298,17 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
       return;
     }
 
-    const selectedCategory = normalizeCategory(data?.category);
+    const rated = data?.rated === true;
     const selectedMode = normalizeDuelMode(data?.mode);
+    const selectedLadder = rated ? ladderForMode(selectedMode) : undefined;
+    const selectedCategory = rated ? Category.MIXED : normalizeCategory(data?.category);
+    const selectedFilters = rated ? undefined : data?.filters;
+    const currentRating = rated
+      ? (await prisma.competitiveRating.findUnique({
+          where: { userId_ladder: { userId: user.userId, ladder: selectedLadder! } },
+          select: { rating: true },
+        }))?.rating ?? 1000
+      : undefined;
 
     // Verificar si ya está en un duelo
     const existingDuelId = playerDuels.get(user.userId);
@@ -267,8 +333,11 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
       socketId: socket.id,
       joinedAt: new Date(),
       category: selectedCategory,
-      filters: data?.filters,
+      filters: selectedFilters,
       mode: selectedMode,
+      rated,
+      ladder: selectedLadder,
+      rating: currentRating,
     });
 
     socket.emit('duel:queued', {
@@ -286,6 +355,8 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
         normalizeCategory(match[0].category),
         match[0].filters,
         normalizeDuelMode(match[0].mode),
+        Boolean(match[0].rated),
+        match[0].ladder,
       );
     }
   });
@@ -493,6 +564,8 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
       totalQuestions: duel.questions.length,
       timeLimit: duelTimeLimit(duel),
       mode: duel.mode,
+      rated: duel.rated,
+      ladder: duel.ladder,
       question: publicQuestion,
       scores: duel.players.map((p) => ({ userId: p.userId, score: p.score })),
     });
@@ -556,6 +629,8 @@ async function createDuel(
   category?: Category,
   filters?: QuestionFilters,
   mode: DuelMode = 'classic',
+  rated = false,
+  ladder?: CompetitiveLadder,
 ) {
   const duelId = generateDuelId();
 
@@ -587,6 +662,7 @@ async function createDuel(
         answers: [],
         score: 0,
         ready: false,
+        rating: player1.rating,
       },
       {
         userId: player2.userId,
@@ -595,6 +671,7 @@ async function createDuel(
         answers: [],
         score: 0,
         ready: false,
+        rating: player2.rating,
       },
     ],
     questions,
@@ -604,6 +681,8 @@ async function createDuel(
     status: 'waiting',
     category: mode === 'geo-challenge' ? undefined : category,
     mode,
+    rated,
+    ladder: rated ? ladder ?? ladderForMode(mode) : undefined,
   };
 
   activeDuels.set(duelId, duel);
@@ -627,6 +706,8 @@ async function createDuel(
     timePerQuestion: duelTimeLimit(duel),
     category: category || 'MIXED',
     mode,
+    rated: duel.rated,
+    ladder: duel.ladder,
     mechanics: mode === 'classic' ? getMechanicsConfigForMode('duel') : { enabled: false, allowed: [], limits: {} },
     imageUrls: questions.map((q) => q.imageUrl).filter((url): url is string => !!url),
   });
@@ -635,11 +716,13 @@ async function createDuel(
   io.to(player1.socketId).emit('duel:opponent', {
     userId: player2.userId,
     username: player2.username,
+    rating: duel.rated ? player2.rating ?? 1000 : undefined,
   });
 
   io.to(player2.socketId).emit('duel:opponent', {
     userId: player1.userId,
     username: player1.username,
+    rating: duel.rated ? player1.rating ?? 1000 : undefined,
   });
 
   const waitingStartedAt = Date.now();
@@ -714,6 +797,10 @@ function startDuel(io: SocketIOServer, duel: ActiveDuel) {
       properties: {
         questionsCount: duel.questions.length,
         mode: duel.mode,
+        rated: duel.rated,
+        ...(duel.rated && duel.ladder
+          ? { ladder: duel.ladder, ratingBefore: player.rating ?? 1000 }
+          : {}),
         ...(isGeoDuel ? { engineVersion: 'v2' as const } : {}),
       },
     });
@@ -924,6 +1011,8 @@ async function endDuel(
     winnerId,
     isDraw: winnerId === null && reason === 'completed',
     results: finalResults,
+    rated: duel.rated,
+    ladder: duel.ladder,
   });
 
   // Liberar el estado in-memory ANTES de la persistencia.
@@ -943,45 +1032,67 @@ async function endDuel(
   try {
     const dueloVariant = duel.mode === 'geo-challenge' ? GameVariant.GEO_CHALLENGE : GameVariant.CLASSIC;
     const isGeoDuel = duel.mode === 'geo-challenge';
-
-    await prisma.$transaction(async (tx) => {
-      for (const player of duel.players) {
-        await saveGameResult(
-          player.userId,
-          player.answers,
-          dueloVariant,
-          GameMode.DUEL,
-          duel.category,
-          tx,
-        );
-
-        // Actualizar wins/losses
-        await tx.user.update({
-          where: { id: player.userId },
-          data: {
-            wins: player.userId === winnerId ? { increment: 1 } : undefined,
-            losses: winnerId && player.userId !== winnerId ? { increment: 1 } : undefined,
-          },
-        });
-      }
-
-      // Registrar el duelo completo para historial head-to-head
-      await tx.duelMatch.create({
-        data: {
-          player1Id: duel.players[0].userId,
-          player2Id: duel.players[1].userId,
-          winnerId: winnerId ?? null,
-          player1Score: duel.players[0].score,
-          player2Score: duel.players[1].score,
-          category: duel.category ?? null,
-          variant: dueloVariant,
-        },
-      });
-    });
+    const persistence = await persistDuelResults(
+      {
+        id: duel.id,
+        players: [duel.players[0], duel.players[1]],
+        category: duel.category,
+        mode: duel.mode,
+        rated: duel.rated,
+        ladder: duel.ladder,
+        startedAt: duel.startedAt,
+      },
+      winnerId,
+      reason,
+    );
 
     // Los duelos no actualizan el ranking global Classic.
+    const ratingChangesByUser = new Map(
+      persistence.ratingChanges.map((change) => [change.userId, change])
+    );
+
+    if (duel.rated) {
+      if (ratingChangesByUser.size > 0) {
+        const currentRatings = await prisma.competitiveRating.findMany({
+          where: {
+            userId: { in: duel.players.map((player) => player.userId) },
+            ladder: duel.ladder,
+          },
+        });
+        const currentRatingByUser = new Map(currentRatings.map((rating) => [rating.userId, rating]));
+
+        for (const player of duel.players) {
+          const change = ratingChangesByUser.get(player.userId);
+          const currentRating = currentRatingByUser.get(player.userId);
+          if (!change) continue;
+          io.to(player.socketId).emit('duel:rating', {
+            status: 'updated',
+            ladder: duel.ladder,
+            ratingBefore: change.ratingBefore,
+            ratingDelta: change.ratingDelta,
+            ratingAfter: change.ratingAfter,
+            peakRating: currentRating?.peakRating ?? change.ratingAfter,
+            gamesPlayed: currentRating?.gamesPlayed ?? change.gamesPlayed,
+            provisional: currentRating ? currentRating.gamesPlayed < 5 : change.provisional,
+            placementGamesRemaining: currentRating
+              ? placementGamesRemaining(currentRating.gamesPlayed)
+              : change.placementGamesRemaining,
+            tier: currentRating
+              ? getCompetitiveTier(currentRating.rating, currentRating.gamesPlayed)
+              : change.tier,
+          });
+        }
+      } else {
+        for (const player of duel.players) {
+          io.to(player.socketId).emit('duel:rating', {
+            status: 'not-rated',
+          });
+        }
+      }
+    }
 
     for (const player of duel.players) {
+      const ratingChange = ratingChangesByUser.get(player.userId);
       trackServerEvent({
         name: 'game_finished',
         userId: player.userId,
@@ -994,7 +1105,16 @@ async function endDuel(
           won: player.userId === winnerId,
           opponentCount: 1,
           finishReason: reason,
+          rated: duel.rated,
+          ...(duel.ladder ? { ladder: duel.ladder } : {}),
           correctCount: player.answers.filter((a) => a.isCorrect).length,
+          ...(ratingChange
+            ? {
+                ratingBefore: ratingChange.ratingBefore,
+                ratingDelta: ratingChange.ratingDelta,
+                ratingAfter: ratingChange.ratingAfter,
+              }
+            : {}),
           ...(isGeoDuel ? { engineVersion: 'v2' as const } : {}),
         },
       });

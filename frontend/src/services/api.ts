@@ -29,6 +29,9 @@ import type {
   MasterySummary,
   PassportResponse,
   AdaptivePracticeStartResponse,
+  CompetitiveLadder,
+  CompetitionOverview,
+  CompetitionLeaderboardResponse,
 } from '../types';
 import { filtersToParams } from '../types';
 import { testAuthBypass } from '../utils/testAuthBypass';
@@ -485,6 +488,18 @@ class ApiService {
 
   async getDuelH2H(opponentId: string) {
     const response = await this.client.get<HeadToHeadData>(`/game/duel-h2h/${opponentId}`);
+    return response.data;
+  }
+
+  async getCompetitionOverview() {
+    const response = await this.client.get<CompetitionOverview>('/competition/overview');
+    return response.data;
+  }
+
+  async getCompetitionLeaderboard(ladder: CompetitiveLadder, limit = 50) {
+    const response = await this.client.get<CompetitionLeaderboardResponse>('/competition/leaderboard', {
+      params: { ladder, limit },
+    });
     return response.data;
   }
 

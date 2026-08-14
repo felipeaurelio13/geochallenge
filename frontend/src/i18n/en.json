@@ -174,6 +174,8 @@
       "title": "Compete",
       "subtitle": "Test your knowledge against others.",
       "category": "Category",
+      "competitionHub": "Competition Hub",
+      "competitionHubDesc": "Ranked, rating and standings",
       "duel": "Duel",
       "duelDesc": "Live · 1 vs 1",
       "challenge": "Challenge",
@@ -482,7 +484,53 @@
     "almostWon": "You were only {{diff}} points away 🔥",
     "rematchNudge": "{{opponent}} brought their A-game today. Rematch whenever you're ready.",
     "rematch": "Rematch",
-    "wonByForfeit": "{{opponent}} left the match. Win goes to you — it still counts for your ranking ✓"
+    "wonByForfeit": "{{opponent}} left the match. Win goes to you — it still counts for your ranking ✓",
+    "rankedClassicQueue": "Ranked Classic",
+    "rankedGeoQueue": "Ranked Geo Challenges",
+    "rankedNoFilters": "Ranked uses MIXED with no filters.",
+    "rankedPlayer": "Ranked",
+    "ratingUpdating": "Updating rating...",
+    "ratingUpdated": "Rating updated",
+    "ratingNotRated": "This match did not affect rating.",
+    "ratingUpdateError": "We couldn't update the rating on screen. You can check it later in Competition.",
+    "placementRemaining": "{{count}} placement games remaining",
+    "openCompetition": "View Competition"
+  },
+  "competition": {
+    "title": "Competition",
+    "subtitle": "Test your geography against other players.",
+    "ranked": "Ranked",
+    "leaderboard": "Leaderboard",
+    "recent": "Recent ranked matches",
+    "other": "Other competition",
+    "findMatch": "Find match",
+    "error": "We couldn't load Competition. Please try again.",
+    "emptyLeaderboard": "No players have 5 matches on this ladder yet.",
+    "emptyRecent": "Your ranked matches will appear here.",
+    "scoreRankings": "Score rankings",
+    "vs": "vs {{opponent}}",
+    "placementProgress": "{{played}} / {{total}} placement games",
+    "unranked": "No public rank",
+    "ladders": {
+      "CLASSIC": "Classic Ranked",
+      "GEO_CHALLENGE": "Geo Challenges Ranked"
+    },
+    "shortLadders": {
+      "CLASSIC": "Classic",
+      "GEO_CHALLENGE": "Geo Challenges"
+    },
+    "ladderDesc": {
+      "CLASSIC": "MIXED · no filters",
+      "GEO_CHALLENGE": "Geo Challenges duels"
+    },
+    "tiers": {
+      "CALIBRATING": "Calibrating",
+      "EXPLORER": "Explorer",
+      "PATHFINDER": "Pathfinder",
+      "CARTOGRAPHER": "Cartographer",
+      "NAVIGATOR": "Navigator",
+      "ATLAS_MASTER": "Atlas Master"
+    }
   },
   "challenges": {
     "title": "Challenges",

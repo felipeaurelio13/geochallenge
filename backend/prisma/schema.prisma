@@ -30,6 +30,8 @@ model User {
   duelMatchesAsP1    DuelMatch[] @relation("DuelMatchAsP1")
   duelMatchesAsP2    DuelMatch[] @relation("DuelMatchAsP2")
   duelMatchesWon     DuelMatch[] @relation("DuelMatchAsWinner")
+  competitiveRatings CompetitiveRating[]
+  competitiveRatingChanges CompetitiveRatingChange[]
   achievements       UserAchievement[]
   survivalParticipations SurvivalParticipant[]
   passwordResetTokens PasswordResetToken[]
@@ -195,8 +197,26 @@ enum GameVariant {
   PRACTICE
 }
 
+enum CompetitiveLadder {
+  CLASSIC
+  GEO_CHALLENGE
+}
+
+enum CompetitiveOutcome {
+  WIN
+  DRAW
+  LOSS
+}
+
+enum DuelFinishReason {
+  COMPLETED
+  OPPONENT_DISCONNECTED
+  CANCELLED
+}
+
 model DuelMatch {
   id           String      @id @default(cuid())
+  runId        String?     @unique
   player1Id    String
   player2Id    String
   winnerId     String?
@@ -204,16 +224,69 @@ model DuelMatch {
   player2Score Int
   category     Category?
   variant      GameVariant @default(CLASSIC)
+  rated        Boolean     @default(false)
+  ladder       CompetitiveLadder?
+  finishReason DuelFinishReason?
+  ratingVersion Int?
   createdAt    DateTime    @default(now())
 
   player1 User  @relation("DuelMatchAsP1", fields: [player1Id], references: [id], onDelete: Cascade)
   player2 User  @relation("DuelMatchAsP2", fields: [player2Id], references: [id], onDelete: Cascade)
   winner  User? @relation("DuelMatchAsWinner", fields: [winnerId], references: [id], onDelete: SetNull)
+  ratingChanges CompetitiveRatingChange[]
 
   @@index([player1Id, createdAt])
   @@index([player2Id, createdAt])
   @@index([player1Id, player2Id])
   @@map("duel_matches")
+}
+
+model CompetitiveRating {
+  userId       String
+  ladder       CompetitiveLadder
+
+  rating       Int      @default(1000)
+  peakRating   Int      @default(1000)
+
+  gamesPlayed  Int      @default(0)
+  wins         Int      @default(0)
+  draws        Int      @default(0)
+  losses       Int      @default(0)
+
+  lastMatchAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, ladder])
+  @@index([ladder, rating(sort: Desc)])
+  @@index([userId, updatedAt])
+  @@map("competitive_ratings")
+}
+
+model CompetitiveRatingChange {
+  id           String @id @default(cuid())
+
+  duelMatchId  String
+  userId       String
+  ladder       CompetitiveLadder
+
+  outcome      CompetitiveOutcome
+
+  ratingBefore Int
+  ratingDelta  Int
+  ratingAfter  Int
+
+  createdAt    DateTime @default(now())
+
+  duelMatch DuelMatch @relation(fields: [duelMatchId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([duelMatchId, userId])
+  @@index([userId, ladder, createdAt])
+  @@index([ladder, createdAt])
+  @@map("competitive_rating_changes")
 }
 
 model SurvivalMatch {
