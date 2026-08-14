@@ -398,7 +398,7 @@ export function MenuPage() {
       {user && (
         <section className="mb-3 rounded-2xl border border-app-border bg-app-surface p-4">
           <div className="flex items-start gap-3">
-            <span aria-hidden="true" className="shrink-0 text-2xl leading-none">📅</span>
+            <span aria-hidden="true" className="shrink-0 text-2xl leading-none">🌍</span>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
                 <h2 className="text-sm font-semibold text-app-text">
@@ -428,7 +428,7 @@ export function MenuPage() {
                   {dailyStatus.dailyStreak > 0 && (
                     <>
                       {' · '}
-                      {t('menu.daily.streak', { days: dailyStatus.dailyStreak })}
+                      🔥 {dailyStatus.dailyStreak}
                     </>
                   )}
                 </p>

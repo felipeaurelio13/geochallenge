@@ -96,8 +96,18 @@ const dailyQuestion = {
 describe('DailyChallengePage abandonment guard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    getDailyMock.mockResolvedValue({ questions: [dailyQuestion] });
-    dailyAnswerMock.mockResolvedValue({ isCorrect: true, correctAnswer: 'París' });
+    getDailyMock.mockResolvedValue({
+      questions: [dailyQuestion],
+      dayKey: '2024-01-01',
+      today: '2024-01-01',
+      alreadyPlayed: false,
+      dailyVersion: 'world-tour-v1',
+      tour: {
+        totalStops: 1,
+        stops: [{ index: 0, region: 'EUROPE', category: 'CAPITAL' }],
+      },
+    });
+    dailyAnswerMock.mockResolvedValue({ isCorrect: true, correctAnswer: 'París', countryCode: 'FR', region: 'EUROPE' });
     submitDailyMock.mockResolvedValue({ result: { score: 100, correctCount: 1, totalQuestions: 1, playedAt: '2024-01-01T00:00:00Z' } });
     confirmMock.mockResolvedValue(true);
   });
@@ -110,6 +120,10 @@ describe('DailyChallengePage abandonment guard', () => {
 
   it('exit click + unmount: fires exactly 1 game_abandoned', async () => {
     const { unmount } = render(<DailyChallengePage />);
+
+    // Click "start journey" to get to playing state
+    const startButton = await screen.findByRole('button', { name: /daily\.startJourney|Comenzar/i });
+    fireEvent.click(startButton);
 
     await screen.findByRole('button', { name: 'game.exit' });
 
@@ -126,6 +140,10 @@ describe('DailyChallengePage abandonment guard', () => {
 
   it('finish + unmount: fires 0 game_abandoned', async () => {
     const { unmount } = render(<DailyChallengePage />);
+
+    // Click "start journey" to get to playing state
+    const startButton = await screen.findByRole('button', { name: /daily\.startJourney|Comenzar/i });
+    fireEvent.click(startButton);
 
     await screen.findByRole('button', { name: 'game.exit' });
 
@@ -146,6 +164,10 @@ describe('DailyChallengePage abandonment guard', () => {
 
   it('unmount during game: fires exactly 1 game_abandoned', async () => {
     const { unmount } = render(<DailyChallengePage />);
+
+    // Click "start journey" to get to playing state
+    const startButton = await screen.findByRole('button', { name: /daily\.startJourney|Comenzar/i });
+    fireEvent.click(startButton);
 
     await screen.findByRole('button', { name: 'game.exit' });
 

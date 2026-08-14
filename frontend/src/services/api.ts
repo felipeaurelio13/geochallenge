@@ -6,6 +6,7 @@ import type {
   LeaderboardEntry,
   LeaderboardScope,
   Category,
+  Difficulty,
   GameType,
   GameConfig,
   MechanicUsage,
@@ -496,8 +497,19 @@ class ApiService {
     const response = await this.client.get<{
       questions: PublicQuestion[];
       today: string;
+      dayKey: string;
       alreadyPlayed: boolean;
       result?: DailyResult;
+      dailyVersion?: string;
+      tour?: {
+        totalStops: number;
+        stops: Array<{
+          index: number;
+          region: string;
+          category: Category;
+          difficulty?: Difficulty;
+        }>;
+      };
     }>('/game/daily', { params: { clientDate: getLocalDateString() } });
     return response.data;
   }
@@ -509,17 +521,19 @@ class ApiService {
     return response.data;
   }
 
-  async dailyAnswer(data: { questionId: string; answer: string }) {
+  async dailyAnswer(data: { questionId: string; answer: string; dayKey?: string }) {
     const response = await this.client.post<{
       questionId: string;
       isCorrect: boolean;
       correctAnswer: string;
       points: number;
+      countryCode?: string;
+      region?: string;
     }>('/game/daily/answer', { ...data, clientDate: getLocalDateString() });
     return response.data;
   }
 
-  async submitDaily(data: { answers: Array<{ questionId: string; answer: string }> }) {
+  async submitDaily(data: { dayKey: string }) {
     const response = await this.client.post<{
       result: DailyResult;
       newAchievements: string[];

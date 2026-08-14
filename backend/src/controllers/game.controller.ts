@@ -48,6 +48,16 @@ import { respondWithError } from '../utils/respondWithError.js';
 import { mapZodIssuesToFields } from '../utils/zodIssueMapper.js';
 import { trackServerEvent } from '../services/telemetry.service.js';
 import { applyMasteryAttemptsForRun } from '../services/mastery.service.js';
+import {
+  getOrCreateDailyTour,
+  DAILY_TOUR_VERSION,
+  type DailyTourPlan,
+  type DailyTourStop,
+  type DailyTourRegion,
+  toPublicDailyTour,
+} from '../services/dailyTour.service.js';
+import { hashString, seededShuffle } from '../utils/hash.js';
+import { Difficulty } from '@prisma/client';
 
 const router = Router();
 const gameTypeSchema = z.enum(['single', 'streak', 'flash']);
@@ -813,15 +823,13 @@ router.get('/category-stats', authenticateJWT, async (req: AuthRequest, res: Res
   }
 });
 
-// ─── Daily Challenge ───────────────────────────────────────────────────────────
+// ─── Daily Challenge (World Tour) ──────────────────────────────────────────
 
-const DAILY_QUESTION_COUNT = 10;
-const DAILY_TTL_SECONDS = 60 * 60 * 50; // 50h — survives past midnight safely
-// El daily usa scoring simple (sin bonus de tiempo); espejo de DailyChallengePage.
+const DAILY_TTL_SECONDS = 60 * 60 * 50; // 50h
 const DAILY_POINTS_PER_CORRECT = 100;
 
 function getTodayKey(): string {
-  return new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+  return new Date().toISOString().slice(0, 10);
 }
 
 function dayKeyToUtcMidnight(dayKey: string): number {
@@ -837,20 +845,6 @@ function addDaysToKey(dayKey: string, days: number): string {
 const CLIENT_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const CLIENT_DATE_MAX_DRIFT_DAYS = 1;
 
-/**
- * Resuelve el "día" a usar para el gate de racha diaria. El servidor corre en
- * UTC; un usuario en UTC-4 jugando a las 23:30 local puede caer ya en
- * "mañana" en UTC y perder su racha aunque haya jugado todos los días reales.
- *
- * `clientDate` (YYYY-MM-DD, fecha calendario LOCAL del dispositivo) permite
- * corregir eso. Se acepta sólo si:
- *  - tiene el formato correcto y parsea a una fecha real, Y
- *  - está a ±1 día calendario de la fecha UTC del servidor (evita spoofing
- *    para gamear la racha).
- * Si es inválido, falta, o está fuera de rango: se ignora silenciosamente y
- * se usa el fallback UTC de siempre (nunca 400 — clientes viejos cacheados
- * de la PWA no mandan este parámetro).
- */
 function resolveDayKey(clientDate: unknown): string {
   const serverToday = getTodayKey();
 
@@ -863,8 +857,6 @@ function resolveDayKey(clientDate: unknown): string {
     return serverToday;
   }
 
-  // Re-serializar y comparar el string: rechaza fechas "reales" pero mal
-  // formateadas por JS Date (p.ej. 2026-02-30 → rueda a marzo).
   if (new Date(parsedMs).toISOString().slice(0, 10) !== clientDate) {
     return serverToday;
   }
@@ -879,46 +871,33 @@ function resolveDayKey(clientDate: unknown): string {
   return clientDate;
 }
 
-function seededShuffle<T>(arr: T[], seed: number): T[] {
-  const a = [...arr];
-  let s = seed;
-  for (let i = a.length - 1; i > 0; i--) {
-    s = ((s * 1664525) + 1013904223) & 0xffffffff;
-    const j = Math.abs(s) % (i + 1);
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-/**
- * Generación determinista de las preguntas del día: misma lista para todos
- * los usuarios y reproducible sin Redis (la caché es solo una optimización).
- * El submit la usa para validar que las respuestas correspondan al reto real.
- */
-async function generateDailyQuestionIds(today: string): Promise<string[]> {
-  const seed = parseInt(today.replace(/-/g, ''), 10);
-  const allIds = await prisma.question.findMany({
-    where: {
-      isAvailable: true,
-      category: { in: ['FLAG', 'CAPITAL', 'SILHOUETTE', 'MONUMENT', 'CINEMA_GEO'] },
-    },
-    select: { id: true },
-  });
-  const shuffled = seededShuffle(allIds.map((q) => q.id), seed);
-  return shuffled.slice(0, DAILY_QUESTION_COUNT);
-}
-
 /**
  * Fallback cuando Redis no responde: reconstruye el resultado del reto diario
- * desde DB. User.lastDailyDate marca si el usuario jugó hoy; el GameResult más
- * reciente del día recupera el detalle de score/aciertos.
+ * desde DB usando runId como fuente primaria.
  */
-async function getDailyResultFromDb(userId: string, today: string) {
+async function getDailyResultFromDb(userId: string, dayKey: string) {
+  const runId = `daily:${userId}:${dayKey}`;
+  const gr = await prisma.gameResult.findUnique({
+    where: { runId },
+    select: { score: true, correctCount: true, totalQuestions: true, createdAt: true, details: true },
+  });
+  if (gr) {
+    const details = (gr.details as { stops?: DailyTourStop[] } | null)?.stops;
+    return {
+      score: gr.score,
+      correctCount: gr.correctCount,
+      totalQuestions: gr.totalQuestions,
+      playedAt: gr.createdAt.toISOString(),
+      details: details ?? null,
+    };
+  }
+
+  // Legacy fallback: before Plan 7, no runId existed
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { lastDailyDate: true, dailyStreak: true },
   });
-  if (user?.lastDailyDate !== today) return null;
+  if (user?.lastDailyDate !== dayKey) return null;
   const last = await prisma.gameResult.findFirst({
     where: { userId, variant: GameVariant.DAILY },
     orderBy: { createdAt: 'desc' },
@@ -927,9 +906,10 @@ async function getDailyResultFromDb(userId: string, today: string) {
   return {
     score: last?.score ?? 0,
     correctCount: last?.correctCount ?? 0,
-    totalQuestions: last?.totalQuestions ?? DAILY_QUESTION_COUNT,
+    totalQuestions: last?.totalQuestions ?? 10,
     dailyStreak: user.dailyStreak ?? undefined,
     playedAt: (last?.createdAt ?? new Date()).toISOString(),
+    details: null,
   };
 }
 
@@ -1011,91 +991,79 @@ router.get('/daily/status', authenticateJWT, async (req: AuthRequest, res: Respo
 
 /**
  * GET /api/game/daily
- * Retorna las preguntas del reto del día (mismas para todos los usuarios).
- * Si el usuario ya jugó hoy, retorna sus resultados previos.
- *
- * Redis es sólo una optimización: seededShuffle es determinista sobre la fecha,
- * así que las preguntas se regeneran sin caché, y el gate "ya jugó hoy" cae a
- * User.lastDailyDate. El reto diario sobrevive una caída de Redis en vez de
- * tirar un 500 que deja al jugador sin poder jugar.
+ * Retorna el plan World Tour del día. Si el usuario ya jugó, retorna resultado.
+ * Nunca envía countryCode ni correctAnswer antes de responder.
  */
 router.get('/daily', optionalAuth, async (req: AuthRequest, res: Response) => {
   try {
-    // `today` (UTC) sigue siendo la clave del set de preguntas: determinista y
-    // compartida por todos los usuarios, no debe moverse con la fecha local
-    // del cliente. `dayKey` es la fecha usada para el gate "¿ya jugó?" del
-    // usuario — ahí sí preferimos su calendario local si es válido.
-    const today = getTodayKey();
     const dayKey = resolveDayKey(req.query.clientDate);
-    const redis = getRedis();
-    const cacheKey = `daily:questions:${today}`;
     const userId = req.user?.userId;
-    let redisDown = false;
 
-    // ¿Ya jugó hoy? Redis es el camino rápido; DB es el fallback.
+    // ¿Ya jugó hoy?
     if (userId) {
       const playedKey = `daily:played:${userId}:${dayKey}`;
       try {
-        const existing = await redis.get(playedKey);
+        const existing = await getRedis().get(playedKey);
         if (existing) {
-          res.json({ alreadyPlayed: true, result: JSON.parse(existing), today: dayKey });
+          const parsed = JSON.parse(existing);
+          res.json({
+            alreadyPlayed: true,
+            result: parsed,
+            today: dayKey,
+            dayKey,
+            dailyVersion: DAILY_TOUR_VERSION,
+          });
           return;
         }
       } catch {
-        redisDown = true;
         const played = await getDailyResultFromDb(userId, dayKey);
         if (played) {
-          res.json({ alreadyPlayed: true, result: played, today: dayKey });
+          res.json({
+            alreadyPlayed: true,
+            result: played,
+            today: dayKey,
+            dayKey,
+            dailyVersion: DAILY_TOUR_VERSION,
+          });
           return;
         }
       }
     }
 
-    // Preguntas del día: caché si Redis responde, generación determinista si no.
-    let questionIds: string[] = [];
-    if (!redisDown) {
-      try {
-        const cached = await redis.get(cacheKey);
-        if (cached) questionIds = JSON.parse(cached);
-      } catch {
-        redisDown = true;
-      }
-    }
+    // Obtener o crear el plan del día
+    const plan = await getOrCreateDailyTour(dayKey);
+    const publicTour = toPublicDailyTour(plan);
 
-    if (questionIds.length === 0) {
-      questionIds = await generateDailyQuestionIds(today);
-      if (!redisDown) {
-        try {
-          await redis.set(cacheKey, JSON.stringify(questionIds), 'EX', DAILY_TTL_SECONDS);
-        } catch {
-          // caché best-effort: la generación determinista cubre el caso
-        }
-      }
-    }
-
+    // Fetch questions from DB using plan questionIds
     const questions = await prisma.question.findMany({
-      where: { id: { in: questionIds } },
+      where: { id: { in: plan.questionIds } },
     });
 
     // Preserve the daily order
-    const ordered = questionIds
+    const ordered = plan.questionIds
       .map((id) => questions.find((q) => q.id === id))
       .filter(Boolean) as typeof questions;
 
-    const formatted = ordered.map((q) => ({
-      id: q.id,
-      category: q.category,
-      questionText: generateQuestionText(q),
-      options: shuffleArray(q.options),
-      imageUrl: q.imageUrl,
-      questionData: q.questionData,
-      continent: q.continent,
-      subregion: q.subregion,
-      isInsular: q.isInsular,
-      isLandlocked: q.isLandlocked,
-      populationTier: q.populationTier,
-      areaTier: q.areaTier,
-    }));
+    // Deterministic options shuffle per day+question
+    const optionSeed = hashString(`${dayKey}:options`);
+    const formatted = ordered.map((q, idx) => {
+      const qSeed = hashString(`${dayKey}:${q.id}:options`);
+      const shuffledOptions = seededShuffle([...q.options], qSeed);
+      return {
+        id: q.id,
+        category: q.category,
+        questionText: generateQuestionText(q),
+        options: shuffledOptions,
+        imageUrl: q.imageUrl,
+        questionData: q.questionData,
+        continent: q.continent,
+        subregion: q.subregion,
+        isInsular: q.isInsular,
+        isLandlocked: q.isLandlocked,
+        populationTier: q.populationTier,
+        areaTier: q.areaTier,
+      };
+    });
 
     if (userId) {
       const runId = `daily:${userId}:${dayKey}`;
@@ -1106,11 +1074,23 @@ router.get('/daily', optionalAuth, async (req: AuthRequest, res: Response) => {
         gameMode: GameMode.SINGLE,
         variant: GameVariant.DAILY,
         category: Category.MIXED,
-        properties: { questionCount: questionIds.length, dayKey },
+        properties: {
+          dailyVersion: DAILY_TOUR_VERSION,
+          dayKey,
+          totalStops: plan.stops.length,
+          regionCount: new Set(plan.stops.map((s) => s.region)).size,
+        },
       });
     }
 
-    res.json({ questions: formatted, today: dayKey, alreadyPlayed: false });
+    res.json({
+      questions: formatted,
+      today: dayKey,
+      dayKey,
+      alreadyPlayed: false,
+      dailyVersion: DAILY_TOUR_VERSION,
+      tour: publicTour,
+    });
   } catch (error) {
     respondWithError(res, error);
   }
@@ -1119,39 +1099,66 @@ router.get('/daily', optionalAuth, async (req: AuthRequest, res: Response) => {
 /**
  * POST /api/game/daily/answer
  * Respuesta individual del Daily. Primera respuesta inmutable, atómica.
+ * Acepta answer='' para timeouts. Retorna countryCode+region sólo después de responder.
  */
 router.post('/daily/answer', authenticateJWT, async (req: AuthRequest, res: Response) => {
   try {
-    const schema = z.object({ questionId: z.string().min(1), answer: z.string(), clientDate: z.string().optional() });
+    const schema = z.object({
+      questionId: z.string().min(1),
+      answer: z.string(),
+      dayKey: z.string().optional(),
+      clientDate: z.string().optional(),
+    });
     const parsed = schema.safeParse(req.body);
     if (!parsed.success) { res.status(400).json({ error: 'Datos inválidos' }); return; }
 
     const { questionId, answer } = parsed.data;
-    const today = getTodayKey();
-    const redis = getRedis();
     const userId = req.user!.userId;
+    const resolvedDayKey = parsed.data.dayKey
+      ? parsed.data.dayKey
+      : resolveDayKey(parsed.data.clientDate);
+    const redis = getRedis();
 
-    let questionIds: string[] = [];
-    try {
-      const cached = await redis.get(`daily:questions:${today}`);
-      if (cached) questionIds = JSON.parse(cached);
-    } catch {}
-    if (questionIds.length === 0) questionIds = await generateDailyQuestionIds(today);
-    if (!questionIds.includes(questionId)) { res.status(400).json({ error: 'Pregunta inválida' }); return; }
+    // Get the plan
+    const plan = await getOrCreateDailyTour(resolvedDayKey);
+    if (!plan.questionIds.includes(questionId)) {
+      res.status(400).json({ error: 'Pregunta inválida' });
+      return;
+    }
 
-    const answerKey = `daily:answer:${userId}:${today}:${questionId}`;
+    const stop = plan.stops.find((s) => s.questionId === questionId);
+    if (!stop) {
+      res.status(400).json({ error: 'Pregunta fuera del plan' });
+      return;
+    }
+
+    const answerKey = `daily:answer:${userId}:${resolvedDayKey}:${questionId}`;
     const existing = await redis.get(answerKey);
-    if (existing) { res.json(JSON.parse(existing) as Record<string, unknown>); return; }
+    if (existing) {
+      const parsed = JSON.parse(existing) as Record<string, unknown>;
+      res.json(parsed);
+      return;
+    }
 
-    const q = await prisma.question.findUnique({ where: { id: questionId }, select: { correctAnswer: true } });
+    const q = await prisma.question.findUnique({
+      where: { id: questionId },
+      select: { correctAnswer: true },
+    });
     if (!q) { res.status(400).json({ error: 'Pregunta no encontrada' }); return; }
 
     const isCorrect = answer.trim().toLowerCase() === q.correctAnswer.toLowerCase().trim();
-    const candidate = { questionId, isCorrect, correctAnswer: q.correctAnswer, points: isCorrect ? 100 : 0 };
+    const candidate = {
+      questionId,
+      isCorrect,
+      correctAnswer: q.correctAnswer,
+      points: isCorrect ? DAILY_POINTS_PER_CORRECT : 0,
+      countryCode: stop.countryCode,
+      region: stop.region,
+    };
 
     const nxResult = await redis.set(answerKey, JSON.stringify(candidate), 'EX', DAILY_TTL_SECONDS, 'NX');
     if (nxResult === 'OK') {
-      const runId = `daily:${userId}:${resolveDayKey(parsed.data.clientDate)}`;
+      const runId = `daily:${userId}:${resolvedDayKey}`;
       trackServerEvent({
         name: 'question_answered',
         userId,
@@ -1159,9 +1166,21 @@ router.post('/daily/answer', authenticateJWT, async (req: AuthRequest, res: Resp
         questionId,
         gameMode: GameMode.SINGLE,
         variant: GameVariant.DAILY,
-        properties: { isCorrect, points: candidate.points },
+        category: stop.category,
+        properties: {
+          dailyVersion: DAILY_TOUR_VERSION,
+          stopIndex: plan.stops.indexOf(stop),
+          category: stop.category,
+          region: stop.region,
+          difficulty: stop.difficulty,
+          isCorrect,
+          points: candidate.points,
+        },
       });
-      res.json(candidate); return;
+      // Return safe response (no correctAnswer in public response, but we include it for the immediate feedback)
+      const { correctAnswer: _ca, ...safeResponse } = candidate;
+      res.json({ ...safeResponse, correctAnswer: q.correctAnswer });
+      return;
     }
 
     const winner = await redis.get(answerKey);
@@ -1173,26 +1192,10 @@ router.post('/daily/answer', authenticateJWT, async (req: AuthRequest, res: Resp
   }
 });
 
-// El cliente manda sus respuestas, NUNCA el puntaje: el servidor las valida
-// contra las preguntas reales del día (deterministas) y calcula el score.
-const dailySubmitSchema = z.object({
-  answers: z
-    .array(
-      z.object({
-        questionId: z.string().min(1).max(64),
-        answer: z.string().max(200),
-      })
-    )
-    .max(DAILY_QUESTION_COUNT),
-  // Fecha calendario LOCAL del dispositivo (YYYY-MM-DD). Opcional y no confiable
-  // por sí sola — resolveDayKey() la descarta si está mal formada o muy alejada
-  // de la fecha UTC del servidor.
-  clientDate: z.string().optional(),
-});
-
 /**
  * POST /api/game/daily/submit
- * Guarda el resultado del reto del día del usuario.
+ * Guarda el resultado del reto del día. Server-authoritative: usa Redis stored answers.
+ * El body answers es ignorado para scoring (compatibilidad legacy).
  */
 router.post('/daily/submit', authenticateJWT, async (req: AuthRequest, res: Response) => {
   try {
@@ -1204,7 +1207,12 @@ router.post('/daily/submit', authenticateJWT, async (req: AuthRequest, res: Resp
       return;
     }
 
-    const parsed = dailySubmitSchema.safeParse(req.body);
+    const parsed = z.object({
+      dayKey: z.string().optional(),
+      clientDate: z.string().optional(),
+      answers: z.array(z.object({ questionId: z.string(), answer: z.string() })).max(10).optional(),
+    }).safeParse(req.body);
+
     if (!parsed.success) {
       res.status(400).json({
         error: 'Datos inválidos',
@@ -1213,18 +1221,16 @@ router.post('/daily/submit', authenticateJWT, async (req: AuthRequest, res: Resp
       });
       return;
     }
-    const { answers, clientDate } = parsed.data;
-    // `today` (UTC) sigue siendo la clave del set de preguntas determinista.
-    // `dayKey` es la fecha usada para el gate de idempotencia y la racha del
-    // usuario — preferimos su calendario local si `clientDate` es válido.
-    const today = getTodayKey();
-    const dayKey = resolveDayKey(clientDate);
+
+    const { dayKey: bodyDayKey, clientDate } = parsed.data;
+    const resolvedDayKey = bodyDayKey
+      ? bodyDayKey
+      : resolveDayKey(clientDate);
     const redis = getRedis();
     const userId = req.user!.userId;
-    const playedKey = `daily:played:${userId}:${dayKey}`;
+    const playedKey = `daily:played:${userId}:${resolvedDayKey}`;
 
-    // Idempotencia: Redis es el camino rápido. Si Redis está caído, la guardia
-    // es User.lastDailyDate === dayKey (verificada justo abajo).
+    // Idempotencia
     try {
       const alreadySaved = await redis.get(playedKey);
       if (alreadySaved) {
@@ -1232,48 +1238,57 @@ router.post('/daily/submit', authenticateJWT, async (req: AuthRequest, res: Resp
         return;
       }
     } catch {
-      // Redis caído: seguimos con la guardia de DB.
+      // Redis caído: seguimos con DB guard
     }
 
-    // Validación server-side: las respuestas deben corresponder a las
-    // preguntas reales del día, sin duplicados, y el score se recalcula acá.
-    let questionIds: string[] = [];
-    try {
-      const cached = await redis.get(`daily:questions:${today}`);
-      if (cached) questionIds = JSON.parse(cached);
-    } catch {
-      // Redis caído: la generación determinista cubre el caso.
-    }
-    if (questionIds.length === 0) {
-      questionIds = await generateDailyQuestionIds(today);
+    // Get the plan
+    const plan = await getOrCreateDailyTour(resolvedDayKey);
+
+    // Consolidar respuestas stored de /daily/answer
+    const details: Array<{
+      questionId: string;
+      countryCode: string;
+      category: Category;
+      region: DailyTourRegion;
+      difficulty: Difficulty | null;
+      isCorrect: boolean;
+      points: number;
+    }> = [];
+
+    for (const stop of plan.stops) {
+      const stored = await redis.get(`daily:answer:${userId}:${resolvedDayKey}:${stop.questionId}`);
+      let isCorrect = false;
+      let points = 0;
+      if (stored !== null) {
+        const a = JSON.parse(stored) as { isCorrect: boolean; points: number };
+        isCorrect = a.isCorrect;
+        points = a.points ?? (isCorrect ? DAILY_POINTS_PER_CORRECT : 0);
+      }
+      // Missing key = unanswered = incorrect
+      details.push({
+        questionId: stop.questionId,
+        countryCode: stop.countryCode,
+        category: stop.category,
+        region: stop.region,
+        difficulty: stop.difficulty,
+        isCorrect,
+        points,
+      });
     }
 
-    // Consolidar respuestas stored de /daily/answer (ignorar body del cliente)
-    let correctCount = 0;
-    let totalAnswered = 0;
-    const dailyAnswers: { questionId: string; isCorrect: boolean }[] = [];
-    for (const qid of questionIds) {
-      const stored = await redis.get(`daily:answer:${userId}:${today}:${qid}`);
-      if (stored === null) continue; // key inexistente = unanswered → incorrecta
-      // key exists or error → parse
-      const a = JSON.parse(stored) as { isCorrect: boolean };
-      if (a.isCorrect) correctCount++;
-      totalAnswered++;
-      dailyAnswers.push({ questionId: qid, isCorrect: a.isCorrect });
-    }
-    const score = correctCount * DAILY_POINTS_PER_CORRECT;
-    const totalQuestions = questionIds.length;
+    const correctCount = details.filter((d) => d.isCorrect).length;
+    const score = details.reduce((sum, d) => sum + d.points, 0);
+    const totalQuestions = plan.stops.length;
 
-    // Update daily streak in DB
+    // User check
     const userRow = await prisma.user.findUnique({
       where: { id: userId },
       select: { highScore: true, dailyStreak: true, lastDailyDate: true },
     });
 
-    // Reenvío del mismo día (p.ej. Redis caído saltó la idempotencia anterior):
-    // no recontar la partida ni resetear la racha.
-    if (userRow?.lastDailyDate === dayKey) {
-      const previous = await getDailyResultFromDb(userId, dayKey);
+    // Reenvío del mismo día
+    if (userRow?.lastDailyDate === resolvedDayKey) {
+      const previous = await getDailyResultFromDb(userId, resolvedDayKey);
       res.json({
         message: 'Ya enviado',
         result: previous ?? {
@@ -1287,53 +1302,88 @@ router.post('/daily/submit', authenticateJWT, async (req: AuthRequest, res: Resp
       return;
     }
 
-    const yesterdayKey = addDaysToKey(dayKey, -1);
+    const yesterdayKey = addDaysToKey(resolvedDayKey, -1);
     const previousStreak = userRow?.dailyStreak ?? 0;
     const isContinuingStreak = userRow?.lastDailyDate === yesterdayKey;
     const newStreak = isContinuingStreak ? previousStreak + 1 : 1;
-    // Sólo marcamos "perdida" una racha que valía la pena flaggear (>=2):
-    // perder una racha de 1 día no es una pérdida notable para el usuario.
     const streakLost = !isContinuingStreak && userRow?.lastDailyDate != null && previousStreak >= 2;
 
-    const updateData: Record<string, unknown> = {
-      dailyStreak: newStreak,
-      lastDailyDate: dayKey,
-      gamesPlayed: { increment: 1 },
-    };
-    // Daily NO actualiza highScore (legacy: exclusivo de Single Classic).
+    const runId = `daily:${userId}:${resolvedDayKey}`;
 
-    // Atómico: o queda el usuario actualizado Y el resultado en el historial, o nada.
-    const runId = `daily:${userId}:${dayKey}`;
+    let concurrentResult: Record<string, unknown> | null = null;
+
     await prisma.$transaction(async (tx) => {
-      await tx.user.update({ where: { id: userId }, data: updateData });
-      await tx.gameResult.create({
-        data: { userId, score, correctCount, totalQuestions, gameMode: 'SINGLE', variant: GameVariant.DAILY, category: 'MIXED' },
+      await tx.user.update({
+        where: { id: userId },
+        data: {
+          dailyStreak: newStreak,
+          lastDailyDate: resolvedDayKey,
+          gamesPlayed: { increment: 1 },
+        },
       });
-      await applyMasteryAttemptsForRun(tx, userId, runId, GameMode.SINGLE, GameVariant.DAILY, dailyAnswers);
+
+      await tx.gameResult.create({
+        data: {
+          userId,
+          runId,
+          score,
+          correctCount,
+          totalQuestions,
+          gameMode: GameMode.SINGLE,
+          variant: GameVariant.DAILY,
+          category: Category.MIXED,
+          details: {
+            dailyVersion: DAILY_TOUR_VERSION,
+            dayKey: resolvedDayKey,
+            stops: details,
+          },
+        },
+      });
+
+      // Always 10 mastery attempts (including timeouts/incorrect)
+      const masteryAnswers = details.map((d) => ({
+        questionId: d.questionId,
+        isCorrect: d.isCorrect,
+      }));
+      await applyMasteryAttemptsForRun(tx, userId, runId, GameMode.SINGLE, GameVariant.DAILY, masteryAnswers);
+    }).catch(async (e: any) => {
+      if (e?.code === 'P2002') {
+        // Concurrent submit: read existing result
+        const existing = await prisma.gameResult.findUnique({
+          where: { runId },
+        });
+        if (existing) {
+          const existingDetails = (existing.details as { stops?: typeof details } | null)?.stops;
+          concurrentResult = {
+            score: existing.score,
+            correctCount: existing.correctCount,
+            totalQuestions: existing.totalQuestions,
+            dailyStreak: userRow?.dailyStreak ?? newStreak,
+            playedAt: existing.createdAt.toISOString(),
+            details: existingDetails ?? null,
+          };
+          try {
+            await redis.set(playedKey, JSON.stringify(concurrentResult), 'EX', DAILY_TTL_SECONDS);
+          } catch { /* best-effort */ }
+          return;
+        }
+      }
+      throw e;
     });
 
-    trackServerEvent({
-      name: 'game_finished',
-      userId,
-      runId,
-      gameMode: GameMode.SINGLE,
-      variant: GameVariant.DAILY,
-      category: Category.MIXED,
-      properties: {
-        score,
-        correctCount,
-        totalQuestions,
-        dailyStreak: newStreak,
-        dayKey,
-      },
-    });
+    if (concurrentResult) {
+      res.json({ message: 'Ya enviado', result: concurrentResult });
+      return;
+    }
 
+    // If we got here, transaction succeeded
     const result: Record<string, unknown> = {
       score,
       correctCount,
       totalQuestions,
       dailyStreak: newStreak,
       playedAt: new Date().toISOString(),
+      details,
     };
     if (streakLost) {
       result.previousStreak = previousStreak;
@@ -1343,12 +1393,27 @@ router.post('/daily/submit', authenticateJWT, async (req: AuthRequest, res: Resp
     try {
       await redis.set(playedKey, JSON.stringify(result), 'EX', DAILY_TTL_SECONDS);
     } catch {
-      // best-effort: User.lastDailyDate ya quedó persistido como fuente de verdad
+      // best-effort: User.lastDailyDate ya quedó persistido
     }
 
-    // Daily NO participa en el ranking global (solo Classic Single).
+    trackServerEvent({
+      name: 'game_finished',
+      userId,
+      runId,
+      gameMode: GameMode.SINGLE,
+      variant: GameVariant.DAILY,
+      category: Category.MIXED,
+      properties: {
+        dailyVersion: DAILY_TOUR_VERSION,
+        score,
+        correctCount,
+        totalQuestions,
+        dailyStreak: newStreak,
+        regionCount: new Set(plan.stops.map((s) => s.region)).size,
+        dayKey: resolvedDayKey,
+      },
+    });
 
-    // Evaluate achievements
     const newAchievements = await evaluateAchievementsAfterDaily(userId, newStreak).catch(() => []);
 
     res.json({ result, newAchievements, message: 'Resultado guardado' });

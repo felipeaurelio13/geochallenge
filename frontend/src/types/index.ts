@@ -242,6 +242,23 @@ export interface FlagMasterAvailability {
   required: number;
 }
 
+export interface DailyTourStop {
+  index: number;
+  region: GeoChallengeRegion;
+  category: Category;
+  difficulty?: Difficulty;
+}
+
+export interface DailyTourDetails {
+  questionId: string;
+  countryCode: string;
+  category: Category;
+  region: GeoChallengeRegion;
+  difficulty: Difficulty | null;
+  isCorrect: boolean;
+  points: number;
+}
+
 export interface DailyResult {
   score: number;
   correctCount: number;
@@ -250,6 +267,7 @@ export interface DailyResult {
   playedAt: string;
   previousStreak?: number;
   streakLost?: boolean;
+  details?: DailyTourDetails[] | null;
 }
 
 export interface DailyStatus {

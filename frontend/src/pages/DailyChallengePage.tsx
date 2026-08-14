@@ -9,6 +9,7 @@ import {
   ProgressBar,
   ScoreDisplay,
   Timer,
+  DailyTourStrip,
 } from '../components';
 import { Button } from '../components/atoms/Button';
 import { MonumentAttribution } from '../components/MonumentAttribution';
@@ -22,7 +23,31 @@ import type { Question, DailyResult } from '../types';
 
 const ANSWER_TIME = 20;
 
-type PageState = 'loading' | 'already-played' | 'playing' | 'finished' | 'error';
+type PageState = 'loading' | 'briefing' | 'already-played' | 'playing' | 'finished' | 'error';
+
+function getCountryName(countryCode: string, language: string): string {
+  try {
+    const names = new Intl.DisplayNames([language], { type: 'region' });
+    return names.of(countryCode) ?? countryCode;
+  } catch {
+    return countryCode;
+  }
+}
+
+const REGION_EMOJI: Record<string, string> = {
+  AFRICA: '🌍',
+  AMERICAS: '🌎',
+  ASIA: '🌏',
+  EUROPE: '🏰',
+  OCEANIA: '🏝️',
+};
+
+function regionLabel(region: string, t: (k: string) => string): string {
+  const key = `geoChallenges.regions.${region}`;
+  const translated = t(key);
+  if (translated.startsWith('geoChallenges')) return region;
+  return translated;
+}
 
 export function DailyChallengePage() {
   const { t, i18n } = useTranslation();
@@ -36,22 +61,26 @@ export function DailyChallengePage() {
   const [selected, setSelected] = useState<string | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [correctCount, setCorrectCount] = useState(0);
-  // QA fix HI-1: results acumulados por ronda — alimentan ProgressBar (los
-  // dots 1..N rojos/verdes) y ScoreDisplay para que Daily tenga el mismo
-  // feedback visual que GamePage (Single Player). Antes solo había
-  // currentIndex y correctCount.
   const [results, setResults] = useState<Array<{ isCorrect: boolean; timedOut: boolean }>>([]);
-  // Respuestas crudas para el backend: el servidor recalcula score/correctCount.
-  const answersRef = useRef<Array<{ questionId: string; answer: string }>>([]);
   const [timedOut, setTimedOut] = useState(false);
   const [previousResult, setPreviousResult] = useState<DailyResult | null>(null);
   const [finalResult, setFinalResult] = useState<DailyResult | null>(null);
   const [shareFeedback, setShareFeedback] = useState('');
   const [lastCorrectAnswer, setLastCorrectAnswer] = useState('');
+  const [lastCountryCode, setLastCountryCode] = useState<string | null>(null);
+  const [lastRegion, setLastRegion] = useState<string | null>(null);
+  const [isSubmittingAnswer, setIsSubmittingAnswer] = useState(false);
+  const [lockedAnswer, setLockedAnswer] = useState(false);
+  const [roundSubmitError, setRoundSubmitError] = useState<string | null>(null);
+  const [finishSubmitError, setFinishSubmitError] = useState(false);
+  const [dayKey, setDayKey] = useState<string | null>(null);
+  const [tourStops, setTourStops] = useState<Array<{ region: string; category: string }>>([]);
+
   const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pageStateRef = useRef<PageState>(pageState);
   pageStateRef.current = pageState;
   const abandonTrackedRef = useRef(false);
+  const pendingAnswerRef = useRef<{ questionId: string; answer: string } | null>(null);
 
   const extendedTimeEnabled = useUiStore((s) => s.extendedTimeEnabled);
 
@@ -69,12 +98,16 @@ export function DailyChallengePage() {
   useEffect(() => {
     api.getDaily()
       .then((data) => {
+        setDayKey(data.dayKey ?? data.today);
+        if (data.tour) {
+          setTourStops(data.tour.stops.map((s) => ({ region: s.region, category: s.category })));
+        }
         if (data.alreadyPlayed && data.result) {
           setPreviousResult(data.result);
           setPageState('already-played');
         } else {
           setQuestions(data.questions as Question[]);
-          setPageState('playing');
+          setPageState('briefing');
         }
       })
       .catch(() => setPageState('error'));
@@ -94,8 +127,6 @@ export function DailyChallengePage() {
     };
   }, []);
 
-  // QA fix HI-1: reset del time-remaining cuando cambia la pregunta.
-  // El <Timer> componente maneja el tick interno, sólo lo re-inicializamos.
   useEffect(() => {
     if (pageState !== 'playing' || showResult) return;
     setTimeRemaining(applyExtendedTime(getQuestionDuration(currentQuestion?.category, ANSWER_TIME), extendedTimeEnabled));
@@ -103,50 +134,97 @@ export function DailyChallengePage() {
   }, [currentIndex, pageState, showResult, extendedTimeEnabled]);
 
   async function handleSubmit(forcedAnswer?: string) {
-    if (showResult) return;
+    if (showResult || isSubmittingAnswer || lockedAnswer) return;
     const answer = forcedAnswer ?? selected ?? '';
     const isTimeout = !answer;
-    let isCorrect = false;
-    let correctAnswer = '';
 
-    if (currentQuestion && answer) {
-      try {
-        const res = await api.dailyAnswer({ questionId: currentQuestion.id, answer });
-        isCorrect = res.isCorrect;
-        correctAnswer = res.correctAnswer;
-        answersRef.current.push({ questionId: currentQuestion.id, answer });
-      } catch { /* offline fallback */ }
+    setLockedAnswer(true);
+    setIsSubmittingAnswer(true);
+    setRoundSubmitError(null);
+    pendingAnswerRef.current = { questionId: currentQuestion?.id ?? '', answer };
+
+    try {
+      const res = await api.dailyAnswer({
+        questionId: currentQuestion!.id,
+        answer,
+        dayKey: dayKey ?? undefined,
+      });
+      if (res.isCorrect) setCorrectCount((c) => c + 1);
+      setResults((prev) => [...prev, { isCorrect: res.isCorrect, timedOut: isTimeout }]);
+      setLastCorrectAnswer(res.correctAnswer);
+      setTimedOut(isTimeout);
+      setLastCountryCode(res.countryCode ?? null);
+      setLastRegion(res.region ?? null);
+      setShowResult(true);
+    } catch {
+      setRoundSubmitError('network');
+      // Keep selection locked, don't advance, don't show fake feedback
+    } finally {
+      setIsSubmittingAnswer(false);
     }
+  }
 
-    if (isCorrect) setCorrectCount((c) => c + 1);
-    setResults((prev) => [...prev, { isCorrect, timedOut: isTimeout }]);
-    setLastCorrectAnswer(correctAnswer);
-    setTimedOut(isTimeout);
-    setShowResult(true);
+  async function handleRetrySubmit() {
+    if (!pendingAnswerRef.current) return;
+    setRoundSubmitError(null);
+    setIsSubmittingAnswer(true);
+    try {
+      const { questionId, answer } = pendingAnswerRef.current;
+      const res = await api.dailyAnswer({ questionId, answer, dayKey: dayKey ?? undefined });
+      if (res.isCorrect) setCorrectCount((c) => c + 1);
+      setResults((prev) => [...prev, { isCorrect: res.isCorrect, timedOut: !answer }]);
+      setLastCorrectAnswer(res.correctAnswer);
+      setTimedOut(!answer);
+      setLastCountryCode(res.countryCode ?? null);
+      setLastRegion(res.region ?? null);
+      setShowResult(true);
+      pendingAnswerRef.current = null;
+    } catch {
+      setRoundSubmitError('network');
+    } finally {
+      setIsSubmittingAnswer(false);
+    }
   }
 
   function handleTimeComplete() {
     if (showResult) return;
-    handleSubmit();
+    handleSubmit('');
   }
 
   async function handleNext() {
     if (isLastQuestion) {
-      const score = correctCount * 100;
       setShowResult(false);
-      setPageState('finished');
+      setFinishSubmitError(false);
       abandonTrackedRef.current = true;
       try {
-        const result = await api.submitDaily({ answers: answersRef.current });
+        const result = await api.submitDaily({ dayKey: dayKey! });
         setFinalResult(result.result);
+        setPageState('finished');
       } catch {
-        setFinalResult({ score, correctCount, totalQuestions: questions.length, playedAt: new Date().toISOString() });
+        setFinishSubmitError(true);
+        // Stay in playing state, don't show fake result
       }
     } else {
       setCurrentIndex((i) => i + 1);
       setSelected(null);
       setShowResult(false);
       setTimedOut(false);
+      setLastCountryCode(null);
+      setLastRegion(null);
+      setLockedAnswer(false);
+      setRoundSubmitError(null);
+      pendingAnswerRef.current = null;
+    }
+  }
+
+  async function handleRetryFinish() {
+    setFinishSubmitError(false);
+    try {
+      const result = await api.submitDaily({ dayKey: dayKey! });
+      setFinalResult(result.result);
+      setPageState('finished');
+    } catch {
+      setFinishSubmitError(true);
     }
   }
 
@@ -181,19 +259,54 @@ export function DailyChallengePage() {
     );
   }
 
+  if (pageState === 'briefing') {
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-6 bg-[var(--color-bg-app)] px-6 py-8 text-center">
+        <div className="text-5xl">🌍</div>
+        <h1 className="text-2xl font-bold text-app-text">{t('daily.worldTourTitle', 'Vuelta al mundo de hoy')}</h1>
+        <p className="text-[var(--color-text-secondary)]">
+          {t('daily.worldTourDesc', '10 paradas · 5 regiones · 1 intento')}
+        </p>
+        <div className="flex gap-2 text-2xl" aria-hidden="true">
+          <span>🌎</span><span>🌍</span><span>🌏</span><span>🏝️</span><span>🧭</span>
+        </div>
+        <p className="text-sm text-[var(--color-text-muted)]">
+          {t('daily.worldTourShared', 'El mismo recorrido para todos')}
+        </p>
+        {previousResult?.dailyStreak !== undefined && previousResult.dailyStreak >= 1 && (
+          <div className="rounded-lg bg-cyan-500/10 border border-cyan-500/30 px-3 py-2 text-sm text-cyan-300">
+            🔥 {previousResult.dailyStreak} {t('daily.streakDays', { count: previousResult.dailyStreak, defaultValue: 'días seguidos' })}
+          </div>
+        )}
+        <Button
+          onClick={() => {
+            setPageState('playing');
+          }}
+          variant="primary"
+          size="lg"
+        >
+          {t('daily.startJourney', 'Comenzar viaje')}
+        </Button>
+        <Button onClick={() => navigate('/menu')} variant="ghost">{t('common.backToMenu')}</Button>
+      </div>
+    );
+  }
+
   if (pageState === 'already-played' && previousResult) {
     const pct = Math.round((previousResult.correctCount / previousResult.totalQuestions) * 100);
     return (
       <div className="flex h-full flex-col items-center justify-center gap-6 bg-[var(--color-bg-app)] px-6 py-8 text-center">
-        {/* 🗓️ (spiral) en vez de 📅 (calendar) — el segundo se renderiza como
-            "JUL 17" hardcoded en muchos OS (QA design audit lo marcó como raro).
-            El spiral es genérico, sin fecha. */}
         <div className="text-6xl">🗓️</div>
         <h1 className="text-2xl font-bold text-app-text">{t('daily.alreadyPlayed', '¡Reto de hoy completado! 🎯')}</h1>
         <p className="text-[var(--color-text-secondary)]">{t('daily.comeBackTomorrow', 'Mañana hay uno nuevo esperándote')}</p>
         <div className="w-full max-w-sm rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
           <div className="text-4xl font-black text-app-text">{previousResult.correctCount}/{previousResult.totalQuestions}</div>
           <div className="mt-1 text-[var(--color-text-secondary)]">{pct}% {t('results.accuracy')}</div>
+          {previousResult.details && previousResult.details.length === 10 && (
+            <div className="mt-3">
+              <DailyTourStrip details={previousResult.details} language={i18n.language} />
+            </div>
+          )}
           {previousResult.dailyStreak !== undefined && previousResult.dailyStreak >= 1 && (
             <div className="mt-3 rounded-lg bg-cyan-500/10 border border-cyan-500/30 px-3 py-2 text-sm text-cyan-300">
               🔥 <span className="font-bold tabular-nums">{previousResult.dailyStreak}</span>{' '}
@@ -208,6 +321,7 @@ export function DailyChallengePage() {
           📸 {t('results.shareStreakButton', 'Compartir resultado')}
         </Button>
         {shareFeedback && <p className="text-xs text-green-300">{shareFeedback}</p>}
+        <Button onClick={() => navigate('/passport')} variant="secondary">{t('results.viewPassport', 'Ver pasaporte')}</Button>
         <Button onClick={() => navigate('/menu')} variant="ghost">{t('common.backToMenu')}</Button>
       </div>
     );
@@ -216,15 +330,11 @@ export function DailyChallengePage() {
   if (pageState === 'finished') {
     const result = finalResult;
     const pct = result ? Math.round((result.correctCount / result.totalQuestions) * 100) : 0;
-    const emoji = pct >= 90 ? '🏆' : pct >= 70 ? '🎉' : pct >= 50 ? '👍' : '💪';
-    // El streak se cortó (Part 2): solo mostramos el aviso cálido cuando la
-    // racha anterior era significativa (>=2) — la misma racha de 0/1 no
-    // amerita un mensaje de "pérdida", sería ruido.
     const showStreakLostNotice = Boolean(result?.streakLost) && (result?.previousStreak ?? 0) >= 2;
     return (
       <div className="flex h-full flex-col items-center justify-center gap-6 bg-[var(--color-bg-app)] px-6 py-8 text-center">
-        <div className="text-6xl">{emoji}</div>
-        <h1 className="text-2xl font-bold text-app-text">{t('daily.complete', '¡Reto del día completado!')}</h1>
+        <div className="text-5xl">🌍</div>
+        <h1 className="text-2xl font-bold text-app-text">{t('daily.tourComplete', '¡Vuelta al mundo completada!')}</h1>
         {showStreakLostNotice && (
           <p className="max-w-sm text-sm text-[var(--color-text-secondary)]">
             {t('daily.streakLostNotice', {
@@ -237,10 +347,14 @@ export function DailyChallengePage() {
           <div className="w-full max-w-sm rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
             <div className="text-5xl font-black text-app-text">{result.correctCount}/{result.totalQuestions}</div>
             <div className="mt-1 text-[var(--color-text-secondary)]">{pct}% {t('results.accuracy')}</div>
-            {/* Racha diaria — motivador de retención clave. Antes solo se mostraba
-              cuando > 1 (silencioso en la primera partida), QA round 3 lo marcó
-              como faltante. Ahora siempre aparece: día 1 invita a volver mañana,
-              días subsiguientes celebran la continuidad. */}
+            {result.details && result.details.length === 10 && (
+              <div className="mt-3">
+                <DailyTourStrip details={result.details} language={i18n.language} />
+                <p className="mt-2 text-xs text-[var(--color-text-muted)] text-center">
+                  10 {t('daily.countriesVisited', 'países visitados')} · 5 {t('daily.regionsVisited', 'regiones')}
+                </p>
+              </div>
+            )}
             {result.dailyStreak !== undefined && result.dailyStreak >= 1 && (
               <div className="mt-4 rounded-xl border border-cyan-500/30 bg-cyan-500/10 p-3">
                 <div className="flex items-center justify-center gap-2 text-cyan-300">
@@ -266,6 +380,18 @@ export function DailyChallengePage() {
           📸 {t('results.shareStreakButton', 'Compartir resultado')}
         </Button>
         {shareFeedback && <p className="text-xs text-green-300">{shareFeedback}</p>}
+        <Button onClick={() => navigate('/passport')} variant="secondary">{t('results.viewPassport', 'Ver pasaporte')}</Button>
+        <Button onClick={() => navigate('/menu')} variant="ghost">{t('common.backToMenu')}</Button>
+      </div>
+    );
+  }
+
+  if (finishSubmitError) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-4 bg-[var(--color-bg-app)] p-6 text-center">
+        <p className="text-app-text">{t('daily.finishError', 'No pudimos guardar tu recorrido')}</p>
+        <p className="text-sm text-[var(--color-text-secondary)]">{t('daily.finishErrorDesc', 'Tu progreso de las rondas sigue disponible.')}</p>
+        <Button onClick={handleRetryFinish} variant="primary">{t('common.retry')}</Button>
         <Button onClick={() => navigate('/menu')} variant="ghost">{t('common.backToMenu')}</Button>
       </div>
     );
@@ -273,11 +399,9 @@ export function DailyChallengePage() {
 
   if (!currentQuestion) return null;
 
-  // QA fix HI-1 + ME-2: ahora Daily comparte scaffold con GamePage. Mismo
-  // header (Exit · Score · Timer), misma ProgressBar 1..N, mismas opciones
-  // verticales en 1 columna, mismo RoundActionTray con feedback "Correcto" /
-  // "Incorrecto" / "Tiempo agotado". El timeout ya no muestra "Incorrect"
-  // genérico — distingue claramente que no fue un error sino tiempo expirado.
+  const currentStop = tourStops[currentIndex];
+  const currentRegion = currentStop?.region ?? '';
+
   return (
     <>
     {confirmDialog}
@@ -305,6 +429,11 @@ export function DailyChallengePage() {
               <p className="mt-0.5 text-[0.65rem] font-medium uppercase tracking-wide text-cyan-400">
                 {t('menu.dailyChallenge', 'Reto del día')}
               </p>
+              {currentRegion && (
+                <p className="text-[0.6rem] font-medium text-[var(--color-text-muted)]">
+                  {t('daily.stopBadge', 'Parada {{current}} / {{total}}', { current: currentIndex + 1, total: questions.length })} · {regionLabel(currentRegion, t)}
+                </p>
+              )}
             </div>
             <div className="justify-self-end pr-[max(env(safe-area-inset-right),0.5rem)] sm:pr-[max(env(safe-area-inset-right),0.75rem)] md:pr-0">
               <Timer
@@ -337,35 +466,42 @@ export function DailyChallengePage() {
       isMapQuestion={false}
       mapContent={null}
       selectedAnswer={selected}
-      onOptionSelect={(opt) => { if (!showResult) setSelected(opt); }}
-      showResult={showResult}
+      onOptionSelect={(opt) => { if (!showResult && !lockedAnswer) setSelected(opt); }}
+      showResult={showResult || !!roundSubmitError}
       actionTray={
         <RoundActionTray
           mode="single"
-          showResult={showResult}
-          canSubmit={!!selected}
+          showResult={showResult || !!roundSubmitError}
+          canSubmit={!!selected && !lockedAnswer}
           submitLabel={t('game.submit')}
-          nextLabel={isLastQuestion ? t('daily.finish', 'Ver resultado') : t('game.next')}
-          // QA fix ME-2: distinguir timeout de respuesta incorrecta.
+          nextLabel={roundSubmitError ? t('common.retry') : isLastQuestion ? t('daily.finish', 'Ver resultado') : t('game.next')}
           resultLabel={
-            timedOut
-              ? t('game.timeUp', 'Tiempo agotado')
-              : lastAnswerCorrect
-                ? t('game.correct')
-                : t('game.incorrect')
+            roundSubmitError
+              ? t('daily.answerError', 'Error al enviar')
+              : timedOut
+                ? t('game.timeUp', 'Tiempo agotado')
+                : lastAnswerCorrect
+                  ? t('game.correct')
+                  : t('game.incorrect')
           }
-          resultHint={funFact ?? undefined}
+          resultHint={
+            roundSubmitError
+              ? t('daily.answerRetry', 'No pudimos registrar tu respuesta.')
+              : showResult && lastCountryCode
+                ? `${REGION_EMOJI[lastRegion ?? ''] ?? ''} ${getCountryName(lastCountryCode, i18n.language)} · ${regionLabel(lastRegion ?? '', t)}`
+                : funFact ?? undefined
+          }
           resultAttribution={
             currentQuestion.category === 'MONUMENT'
               ? <MonumentAttribution question={currentQuestion} />
               : undefined
           }
           selectionAssistiveText={selected && !showResult ? t('game.selectionReadyShortHint') : undefined}
-          showResultBadge
+          showResultBadge={!roundSubmitError}
           isCorrect={lastAnswerCorrect}
-          correctAnswer={showResult && !lastAnswerCorrect ? lastCorrectAnswer : undefined}
+          correctAnswer={showResult && !roundSubmitError && !lastAnswerCorrect ? lastCorrectAnswer : undefined}
           onSubmit={() => handleSubmit()}
-          onNext={handleNext}
+          onNext={roundSubmitError ? handleRetrySubmit : handleNext}
         />
       }
     />

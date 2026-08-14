@@ -9,9 +9,12 @@ import gameRouter from '../controllers/game.controller.js';
 const mocks = vi.hoisted(() => {
   const redisStore = new Map<string, string>();
   const sessionStore = new Map<string, ReturnType<typeof makeSession>>();
-  const TEST_QUESTIONS = Array.from({ length: 10 }, (_, i) => ({
+  const TEST_QUESTIONS = Array.from({ length: 10 }, (_, i) => {
+    const continents = ['Africa', 'Asia', 'Europe', 'Oceania', 'North America', 'South America'];
+    const categories = ['FLAG', 'CAPITAL', 'SILHOUETTE', 'MONUMENT', 'CINEMA_GEO'];
+    return {
     id: `q-${i + 1}`,
-    category: 'CAPITAL',
+    category: categories[i % categories.length],
     questionText: `Question ${i + 1}`,
     questionData: `Country ${i + 1}`,
     options: ['Correct', 'Wrong1', 'Wrong2', 'Wrong3'],
@@ -19,14 +22,17 @@ const mocks = vi.hoisted(() => {
     imageUrl: null,
     latitude: i === 0 ? 10.0 : undefined,
     longitude: i === 0 ? 20.0 : undefined,
-    continent: 'EU',
+    continent: continents[i % continents.length],
+    countryCode: `CC${String(i + 1).padStart(2, '0')}`,
     subregion: 'Western Europe',
     isInsular: false,
     isLandlocked: false,
+    isAvailable: true,
     difficulty: 'MEDIUM',
     populationTier: null,
     areaTier: null,
-  }));
+  };
+  });
 
   function makeSession() {
     const correctAnswers: Record<string, string> = {};
@@ -127,12 +133,28 @@ vi.mock('../config/database.js', () => {
       }),
     },
     user: {
-      findUnique: vi.fn().mockResolvedValue({ highScore: 500, gamesPlayed: 10 }),
+      findUnique: vi.fn().mockResolvedValue({ highScore: 500, gamesPlayed: 10, dailyStreak: 0, lastDailyDate: null }),
       update: vi.fn().mockResolvedValue({}),
     },
     gameResult: {
       create: vi.fn().mockResolvedValue({ id: 'gr-1' }),
       findUnique: vi.fn().mockResolvedValue(null), // runId not found → create
+    },
+    dailyChallengePlan: {
+      findUnique: vi.fn().mockResolvedValue(null),
+      create: vi.fn().mockResolvedValue({
+        dayKey: new Date().toISOString().slice(0, 10),
+        version: 'world-tour-v1',
+        questionIds: mocks.TEST_QUESTIONS.slice(0, 10).map((q: { id: string }) => q.id),
+        stops: mocks.TEST_QUESTIONS.slice(0, 10).map((q: { id: string; continent?: string | null; countryCode?: string | null; category?: string; difficulty?: string | null }, i: number) => ({
+          questionId: q.id,
+          countryCode: q.countryCode ?? 'US',
+          category: q.category ?? 'FLAG',
+          region: ['AFRICA', 'AMERICAS', 'ASIA', 'EUROPE', 'OCEANIA'][i % 5],
+          difficulty: q.difficulty ?? null,
+        })),
+      }),
+      findMany: vi.fn().mockResolvedValue([]),
     },
     $transaction: async (fn: (tx: unknown) => Promise<unknown>) => fn(prismaObj),
   };
@@ -166,6 +188,10 @@ vi.mock('../services/leaderboard.service.js', () => ({
 vi.mock('../services/achievement.service.js', () => ({
   evaluateAchievementsAfterGame: vi.fn().mockResolvedValue([]),
   evaluateAchievementsAfterDaily: vi.fn().mockResolvedValue([]),
+}));
+
+vi.mock('../services/mastery.service.js', () => ({
+  applyMasteryAttemptsForRun: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock('../utils/scoring.js', () => ({

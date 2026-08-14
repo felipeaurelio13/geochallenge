@@ -81,8 +81,8 @@
     "resetRequestNew": "Pedir uno nuevo"
   },
   "menu": {
-    "dailyChallenge": "Reto del día",
-    "dailyChallengeDesc": "10 preguntas · mismas para todos · un intento",
+    "dailyChallenge": "Vuelta al mundo diaria",
+    "dailyChallengeDesc": "10 paradas · 5 regiones · mismo recorrido para todos",
     "dailyChallengeNew": "Nuevo",
     "welcome": "¡Hola, {{name}}!",
     "chooseMode": "Elige un modo de juego",
@@ -139,12 +139,12 @@
       "startDesc": "Cada partida te ayuda a descubrir y dominar nuevos países."
     },
     "daily": {
-      "title": "Reto del día",
+      "title": "Vuelta al mundo diaria",
       "available": "Disponible",
-      "completed": "Completado",
-      "desc": "10 preguntas · mismas para todos · un intento",
-      "play": "Jugar reto de hoy",
-      "viewResult": "Ver resultado",
+      "completed": "Completada",
+      "desc": "10 paradas · 5 regiones · mismo recorrido para todos",
+      "play": "Comenzar viaje",
+      "viewResult": "Ver recorrido",
       "todayScore": "Hoy: {{correct}} / {{total}}",
       "streak": "Racha: {{days}} días",
       "fallbackDesc": "10 preguntas para poner a prueba tu mundo.",
@@ -641,8 +641,8 @@
     "error": "No se pudo compartir"
   },
   "daily": {
-    "alreadyPlayed": "¡Reto de hoy completado! 🎯",
-    "comeBackTomorrow": "Mañana hay uno nuevo esperándote",
+    "alreadyPlayed": "¡Vuelta al mundo de hoy completada! 🎯",
+    "comeBackTomorrow": "Mañana hay un nuevo viaje esperándote",
     "streak": "Racha",
     "days": "días",
     "streakStart": "¡día! Vuelve mañana para seguir la racha",
@@ -650,7 +650,19 @@
     "complete": "¡Reto del día completado!",
     "finish": "Ver resultado",
     "streakLostNotice": "Tu racha de {{count}} días se cortó 💛 — hoy empieza una nueva. Lo importante es volver.",
-    "nextChallengeAt": "El próximo reto abre a medianoche (tu hora)"
+    "nextChallengeAt": "El próximo reto abre a medianoche (tu hora)",
+    "worldTourTitle": "Vuelta al mundo de hoy",
+    "worldTourDesc": "10 paradas · 5 regiones · 1 intento",
+    "worldTourShared": "El mismo recorrido para todos",
+    "startJourney": "Comenzar viaje",
+    "tourComplete": "¡Vuelta al mundo completada!",
+    "countriesVisited": "países visitados",
+    "regionsVisited": "regiones",
+    "stopBadge": "Parada {{current}} / {{total}}",
+    "answerError": "Error al enviar",
+    "answerRetry": "No pudimos registrar tu respuesta.",
+    "finishError": "No pudimos guardar tu recorrido",
+    "finishErrorDesc": "Tu progreso de las rondas sigue disponible."
   },
   "install": {
     "title": "Instala GeoChallenge",

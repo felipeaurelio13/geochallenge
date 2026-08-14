@@ -4,32 +4,45 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Category } from '@prisma/client';
 import gameRouter from '../controllers/game.controller.js';
 import { evaluateAchievementsAfterDaily } from '../services/achievement.service.js';
+import { applyMasteryAttemptsForRun } from '../services/mastery.service.js';
 import { trackServerEvent } from '../services/telemetry.service.js';
 
-const QUESTION_POOL = Array.from({ length: 12 }, (_, i) => ({
-  id: `daily-q${i + 1}`,
-  category: Category.FLAG,
-  questionText: '',
-  questionData: `Pais ${i + 1}`,
-  options: ['A', 'B', 'C', 'D'],
-  correctAnswer: 'A',
-  imageUrl: null,
-  continent: null,
-  subregion: null,
-  isInsular: false,
-  isLandlocked: false,
-  populationTier: null,
-  areaTier: null,
-}));
+const QUESTION_POOL = Array.from({ length: 12 }, (_, i) => {
+  const continents = ['Africa', 'Asia', 'Europe', 'Oceania', 'North America', 'South America'];
+  const categories = [Category.FLAG, Category.CAPITAL, Category.SILHOUETTE, Category.MONUMENT, Category.CINEMA_GEO];
+  const continent = continents[i % continents.length];
+  return {
+    id: `daily-q${i + 1}`,
+    category: categories[i % categories.length],
+    questionText: '',
+    questionData: `Pais ${i + 1}`,
+    options: ['A', 'B', 'C', 'D'],
+    correctAnswer: 'A',
+    imageUrl: null,
+    continent,
+    countryCode: `CC${String(i + 1).padStart(2, '0')}`,
+    subregion: null,
+    isInsular: false,
+    isLandlocked: false,
+    populationTier: null,
+    areaTier: null,
+    difficulty: null,
+  };
+});
 
 const mocks = vi.hoisted(() => ({
   redisGet: vi.fn(),
   redisSet: vi.fn(),
   questionFindMany: vi.fn(),
+  questionFindUnique: vi.fn(),
   userFindUnique: vi.fn(),
   userUpdate: vi.fn(),
   gameResultCreate: vi.fn(),
   gameResultFindFirst: vi.fn(),
+  gameResultFindUnique: vi.fn(),
+  dailyPlanFindUnique: vi.fn(),
+  dailyPlanCreate: vi.fn(),
+  dailyPlanFindMany: vi.fn(),
 }));
 
 vi.mock('../middleware/auth.js', () => ({
@@ -46,9 +59,14 @@ vi.mock('../config/redis.js', () => ({
 
 vi.mock('../config/database.js', () => {
   const prisma = {
-    question: { findMany: mocks.questionFindMany },
+    question: { findMany: mocks.questionFindMany, findUnique: mocks.questionFindUnique },
     user: { findUnique: mocks.userFindUnique, update: mocks.userUpdate },
-    gameResult: { findFirst: mocks.gameResultFindFirst, create: mocks.gameResultCreate },
+    gameResult: { findFirst: mocks.gameResultFindFirst, create: mocks.gameResultCreate, findUnique: mocks.gameResultFindUnique },
+    dailyChallengePlan: {
+      findUnique: mocks.dailyPlanFindUnique,
+      create: mocks.dailyPlanCreate,
+      findMany: mocks.dailyPlanFindMany,
+    },
     $transaction: async (fn: (tx: unknown) => Promise<unknown>) => fn(prisma),
   };
   return { prisma };
@@ -92,6 +110,10 @@ vi.mock('../services/telemetry.service.js', () => ({
   trackServerEvent: vi.fn(),
 }));
 
+vi.mock('../services/mastery.service.js', () => ({
+  applyMasteryAttemptsForRun: vi.fn().mockResolvedValue(undefined),
+}));
+
 function startServer() {
   const app = express();
   app.use(express.json());
@@ -101,12 +123,67 @@ function startServer() {
   return { server, baseUrl };
 }
 
+const FIXED_DAY_KEY = '2026-08-13';
+
+function fixedPlan(dayKey = FIXED_DAY_KEY) {
+  return {
+    dayKey,
+    version: 'world-tour-v1',
+    questionIds: QUESTION_POOL.slice(0, 10).map((q) => q.id),
+    stops: QUESTION_POOL.slice(0, 10).map((q, i) => ({
+      questionId: q.id,
+      countryCode: q.countryCode,
+      category: q.category,
+      region: ['AFRICA', 'AMERICAS', 'ASIA', 'EUROPE', 'OCEANIA'][i % 5],
+      difficulty: q.difficulty,
+    })),
+  };
+}
+
+function mockPersistedDailyPlan(dayKey = FIXED_DAY_KEY) {
+  const plan = fixedPlan(dayKey);
+  mocks.dailyPlanFindUnique.mockResolvedValue(plan);
+  mocks.dailyPlanFindMany.mockResolvedValue([]);
+  mocks.questionFindUnique.mockImplementation((args: { where: { id: string } }) => {
+    const q = QUESTION_POOL.find((item) => item.id === args.where.id);
+    return Promise.resolve(q ? { correctAnswer: q.correctAnswer } : null);
+  });
+  mocks.questionFindMany.mockImplementation((args: any) => {
+    const ids: string[] = args?.where?.id?.in ?? plan.questionIds;
+    return Promise.resolve(QUESTION_POOL.filter((q) => ids.includes(q.id)));
+  });
+  return plan;
+}
+
 describe('GET /api/game/daily — resiliencia ante caída de Redis', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.dailyPlanFindUnique.mockResolvedValue(null);
+    mocks.dailyPlanCreate.mockResolvedValue({
+      dayKey: new Date().toISOString().slice(0, 10),
+      version: 'world-tour-v1',
+      questionIds: QUESTION_POOL.slice(0, 10).map((q) => q.id),
+      stops: QUESTION_POOL.slice(0, 10).map((q, i) => ({
+        questionId: q.id,
+        countryCode: q.countryCode,
+        category: q.category,
+        region: ['AFRICA', 'AMERICAS', 'ASIA', 'EUROPE', 'OCEANIA'][i % 5],
+        difficulty: q.difficulty,
+      })),
+    });
+    mocks.dailyPlanFindMany.mockResolvedValue([]);
     mocks.questionFindMany.mockImplementation((args: any) => {
-      if (args?.select?.id) {
+      if (args?.select?.id && !args?.select?.countryCode) {
         return Promise.resolve(QUESTION_POOL.map((q) => ({ id: q.id })));
+      }
+      if (args?.select?.countryCode) {
+        return Promise.resolve(QUESTION_POOL.map((q) => ({
+          id: q.id,
+          category: q.category,
+          countryCode: q.countryCode,
+          continent: q.continent,
+          difficulty: q.difficulty,
+        })));
       }
       const ids: string[] = args?.where?.id?.in ?? [];
       return Promise.resolve(QUESTION_POOL.filter((q) => ids.includes(q.id)));
@@ -141,6 +218,18 @@ describe('GET /api/game/daily — resiliencia ante caída de Redis', () => {
   it('sigue usando la caché de Redis cuando está disponible', async () => {
     const cachedIds = QUESTION_POOL.slice(0, 10).map((q) => q.id);
     mocks.redisGet.mockResolvedValue(JSON.stringify(cachedIds));
+    mocks.dailyPlanFindUnique.mockResolvedValue({
+      dayKey: new Date().toISOString().slice(0, 10),
+      version: 'world-tour-v1',
+      questionIds: cachedIds,
+      stops: QUESTION_POOL.slice(0, 10).map((q, i) => ({
+        questionId: q.id,
+        countryCode: q.countryCode,
+        category: q.category,
+        region: ['AFRICA', 'AMERICAS', 'ASIA', 'EUROPE', 'OCEANIA'][i % 5],
+        difficulty: q.difficulty,
+      })),
+    });
     const { server, baseUrl } = startServer();
 
     const response = await fetch(`${baseUrl}/api/game/daily`);
@@ -155,12 +244,286 @@ describe('GET /api/game/daily — resiliencia ante caída de Redis', () => {
   });
 });
 
+describe('Daily controller authority contracts', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-08-13T22:30:00.000Z'));
+    mocks.redisGet.mockResolvedValue(null);
+    mocks.redisSet.mockResolvedValue('OK');
+    mockPersistedDailyPlan();
+    mocks.userFindUnique.mockResolvedValue({ highScore: 0, dailyStreak: 0, lastDailyDate: null });
+    mocks.userUpdate.mockResolvedValue({});
+    mocks.gameResultCreate.mockResolvedValue({});
+    mocks.gameResultFindUnique.mockResolvedValue(null);
+    mocks.gameResultFindFirst.mockResolvedValue(null);
+    vi.mocked(evaluateAchievementsAfterDaily).mockResolvedValue([]);
+    vi.mocked(applyMasteryAttemptsForRun).mockResolvedValue(undefined);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  it('GET /daily does not leak countryCode or correctAnswer before answering', async () => {
+    const { server, baseUrl } = startServer();
+    const response = await fetch(`${baseUrl}/api/game/daily?clientDate=${FIXED_DAY_KEY}`);
+    const body = (await response.json()) as {
+      questions: Array<Record<string, unknown>>;
+      tour: { stops: Array<Record<string, unknown>> };
+    };
+    server.close();
+
+    expect(response.status).toBe(200);
+    for (const question of body.questions) {
+      expect(question).not.toHaveProperty('countryCode');
+      expect(question).not.toHaveProperty('correctAnswer');
+    }
+    for (const stop of body.tour.stops) {
+      expect(stop).not.toHaveProperty('countryCode');
+    }
+  });
+
+  it("answer='' is persisted as incorrect and reveals country only after answer", async () => {
+    const { server, baseUrl } = startServer();
+    const response = await fetch(`${baseUrl}/api/game/daily/answer`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ questionId: 'daily-q1', answer: '', dayKey: FIXED_DAY_KEY }),
+    });
+    const body = (await response.json()) as { isCorrect: boolean; points: number; countryCode?: string };
+    server.close();
+
+    expect(response.status).toBe(200);
+    expect(body.isCorrect).toBe(false);
+    expect(body.points).toBe(0);
+    expect(body.countryCode).toBe('CC01');
+
+    const [, persisted] = mocks.redisSet.mock.calls[0];
+    expect(JSON.parse(persisted)).toMatchObject({
+      questionId: 'daily-q1',
+      isCorrect: false,
+      points: 0,
+      countryCode: 'CC01',
+    });
+  });
+
+  it('first answer wins and retry returns the stored winner', async () => {
+    const winner = {
+      questionId: 'daily-q1',
+      isCorrect: false,
+      correctAnswer: 'A',
+      points: 0,
+      countryCode: 'CC01',
+      region: 'AFRICA',
+    };
+    mocks.redisGet.mockResolvedValueOnce(JSON.stringify(winner));
+
+    const { server, baseUrl } = startServer();
+    const response = await fetch(`${baseUrl}/api/game/daily/answer`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ questionId: 'daily-q1', answer: 'A', dayKey: FIXED_DAY_KEY }),
+    });
+    const body = await response.json();
+    server.close();
+
+    expect(response.status).toBe(200);
+    expect(body).toEqual(winner);
+    expect(mocks.redisSet).not.toHaveBeenCalled();
+    expect(mocks.questionFindUnique).not.toHaveBeenCalled();
+  });
+
+  it('/answer Redis failure returns 503', async () => {
+    mocks.redisGet.mockRejectedValueOnce(new Error('redis down'));
+
+    const { server, baseUrl } = startServer();
+    const response = await fetch(`${baseUrl}/api/game/daily/answer`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ questionId: 'daily-q1', answer: 'A', dayKey: FIXED_DAY_KEY }),
+    });
+    const body = (await response.json()) as { code?: string };
+    server.close();
+
+    expect(response.status).toBe(503);
+    expect(body.code).toBe('GAME_STATE_UNAVAILABLE');
+  });
+
+  it('question outside the daily plan is rejected', async () => {
+    const { server, baseUrl } = startServer();
+    const response = await fetch(`${baseUrl}/api/game/daily/answer`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ questionId: 'not-in-plan', answer: 'A', dayKey: FIXED_DAY_KEY }),
+    });
+    server.close();
+
+    expect(response.status).toBe(400);
+    expect(mocks.redisSet).not.toHaveBeenCalled();
+    expect(mocks.questionFindUnique).not.toHaveBeenCalled();
+  });
+
+  it('submit stores exactly 10 details, runId metadata, and 10 mastery attempts', async () => {
+    mocks.redisGet.mockImplementation((key: string) => {
+      if (key === `daily:played:user-1:${FIXED_DAY_KEY}`) return Promise.resolve(null);
+      if (key === `daily:answer:user-1:${FIXED_DAY_KEY}:daily-q1`) {
+        return Promise.resolve(JSON.stringify({ isCorrect: true, points: 100 }));
+      }
+      if (key === `daily:answer:user-1:${FIXED_DAY_KEY}:daily-q2`) {
+        return Promise.resolve(JSON.stringify({ isCorrect: false, points: 0 }));
+      }
+      return Promise.resolve(null);
+    });
+
+    const { server, baseUrl } = startServer();
+    const response = await fetch(`${baseUrl}/api/game/daily/submit`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ dayKey: FIXED_DAY_KEY }),
+    });
+    const body = (await response.json()) as {
+      result: { score: number; correctCount: number; details: Array<{ isCorrect: boolean; points: number }> };
+    };
+    server.close();
+
+    expect(response.status).toBe(200);
+    expect(body.result.score).toBe(100);
+    expect(body.result.correctCount).toBe(1);
+    expect(body.result.details).toHaveLength(10);
+    expect(body.result.details[1]).toMatchObject({ isCorrect: false, points: 0 });
+    expect(body.result.details[9]).toMatchObject({ isCorrect: false, points: 0 });
+
+    expect(mocks.gameResultCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          runId: `daily:user-1:${FIXED_DAY_KEY}`,
+          details: expect.objectContaining({
+            dailyVersion: 'world-tour-v1',
+            dayKey: FIXED_DAY_KEY,
+            stops: expect.any(Array),
+          }),
+        }),
+      })
+    );
+    const masteryCall = vi.mocked(applyMasteryAttemptsForRun).mock.calls[0];
+    expect(masteryCall[2]).toBe(`daily:user-1:${FIXED_DAY_KEY}`);
+    expect(masteryCall[5]).toHaveLength(10);
+    expect(masteryCall[5]).toContainEqual({ questionId: 'daily-q2', isCorrect: false });
+    expect(masteryCall[5]).toContainEqual({ questionId: 'daily-q10', isCorrect: false });
+  });
+
+  it('repeated submit for an already completed day does not duplicate counters or GameResult', async () => {
+    mocks.userFindUnique.mockResolvedValue({ highScore: 0, dailyStreak: 4, lastDailyDate: FIXED_DAY_KEY });
+    mocks.gameResultFindUnique.mockResolvedValue({
+      score: 700,
+      correctCount: 7,
+      totalQuestions: 10,
+      createdAt: new Date('2026-08-13T23:00:00.000Z'),
+      details: { stops: [] },
+    });
+
+    const { server, baseUrl } = startServer();
+    const response = await fetch(`${baseUrl}/api/game/daily/submit`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ dayKey: FIXED_DAY_KEY }),
+    });
+    const body = (await response.json()) as { result: { score: number } };
+    server.close();
+
+    expect(response.status).toBe(200);
+    expect(body.result.score).toBe(700);
+    expect(mocks.userUpdate).not.toHaveBeenCalled();
+    expect(mocks.gameResultCreate).not.toHaveBeenCalled();
+    expect(applyMasteryAttemptsForRun).not.toHaveBeenCalled();
+  });
+
+  it('concurrent submit P2002 recovers the winning GameResult without a second result write', async () => {
+    mocks.gameResultCreate.mockRejectedValueOnce({ code: 'P2002' });
+    mocks.gameResultFindUnique.mockResolvedValueOnce({
+      score: 500,
+      correctCount: 5,
+      totalQuestions: 10,
+      createdAt: new Date('2026-08-13T23:00:00.000Z'),
+      details: { stops: fixedPlan().stops.map((s) => ({ ...s, isCorrect: false, points: 0 })) },
+    });
+
+    const { server, baseUrl } = startServer();
+    const response = await fetch(`${baseUrl}/api/game/daily/submit`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ dayKey: FIXED_DAY_KEY }),
+    });
+    const body = (await response.json()) as { result: { score: number; correctCount: number; details: unknown[] } };
+    server.close();
+
+    expect(response.status).toBe(200);
+    expect(body.result.score).toBe(500);
+    expect(body.result.correctCount).toBe(5);
+    expect(body.result.details).toHaveLength(10);
+    expect(mocks.gameResultCreate).toHaveBeenCalledTimes(1);
+    expect(trackServerEvent).not.toHaveBeenCalledWith(expect.objectContaining({ name: 'game_finished' }));
+  });
+
+  it('answer and submit keep the GET dayKey after server midnight', async () => {
+    vi.setSystemTime(new Date('2026-08-14T03:30:00.000Z'));
+    mockPersistedDailyPlan(FIXED_DAY_KEY);
+
+    const { server, baseUrl } = startServer();
+    const answer = await fetch(`${baseUrl}/api/game/daily/answer`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ questionId: 'daily-q1', answer: 'A', dayKey: FIXED_DAY_KEY }),
+    });
+    const submit = await fetch(`${baseUrl}/api/game/daily/submit`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ dayKey: FIXED_DAY_KEY }),
+    });
+    server.close();
+
+    expect(answer.status).toBe(200);
+    expect(submit.status).toBe(200);
+    expect(mocks.redisSet.mock.calls.some((call) => call[0] === `daily:answer:user-1:${FIXED_DAY_KEY}:daily-q1`)).toBe(true);
+    expect(mocks.gameResultCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ runId: `daily:user-1:${FIXED_DAY_KEY}` }),
+      })
+    );
+  });
+});
+
 describe('POST /api/game/daily/submit — el servidor calcula el puntaje', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.redisGet.mockResolvedValue(null);
     mocks.redisSet.mockResolvedValue('OK');
+    mocks.dailyPlanFindUnique.mockResolvedValue(null);
+    mocks.dailyPlanCreate.mockResolvedValue({
+      dayKey: new Date().toISOString().slice(0, 10),
+      version: 'world-tour-v1',
+      questionIds: QUESTION_POOL.slice(0, 10).map((q) => q.id),
+      stops: QUESTION_POOL.slice(0, 10).map((q, i) => ({
+        questionId: q.id,
+        countryCode: q.countryCode,
+        category: q.category,
+        region: ['AFRICA', 'AMERICAS', 'ASIA', 'EUROPE', 'OCEANIA'][i % 5],
+        difficulty: q.difficulty,
+      })),
+    });
+    mocks.dailyPlanFindMany.mockResolvedValue([]);
     mocks.questionFindMany.mockImplementation((args: any) => {
+      if (args?.select?.countryCode) {
+        return Promise.resolve(QUESTION_POOL.map((q) => ({
+          id: q.id,
+          category: q.category,
+          countryCode: q.countryCode,
+          continent: q.continent,
+          difficulty: q.difficulty,
+        })));
+      }
       if (args?.select?.id && !args?.where?.id) {
         return Promise.resolve(QUESTION_POOL.map((q) => ({ id: q.id })));
       }
@@ -276,7 +639,30 @@ describe('POST /api/game/daily/submit — clientDate y racha en zona horaria loc
     vi.setSystemTime(new Date(SERVER_NOW));
     mocks.redisGet.mockResolvedValue(null);
     mocks.redisSet.mockResolvedValue('OK');
+    mocks.dailyPlanFindUnique.mockResolvedValue(null);
+    mocks.dailyPlanCreate.mockResolvedValue({
+      dayKey: '2026-03-01',
+      version: 'world-tour-v1',
+      questionIds: QUESTION_POOL.slice(0, 10).map((q) => q.id),
+      stops: QUESTION_POOL.slice(0, 10).map((q, i) => ({
+        questionId: q.id,
+        countryCode: q.countryCode,
+        category: q.category,
+        region: ['AFRICA', 'AMERICAS', 'ASIA', 'EUROPE', 'OCEANIA'][i % 5],
+        difficulty: q.difficulty,
+      })),
+    });
+    mocks.dailyPlanFindMany.mockResolvedValue([]);
     mocks.questionFindMany.mockImplementation((args: any) => {
+      if (args?.select?.countryCode) {
+        return Promise.resolve(QUESTION_POOL.map((q) => ({
+          id: q.id,
+          category: q.category,
+          countryCode: q.countryCode,
+          continent: q.continent,
+          difficulty: q.difficulty,
+        })));
+      }
       if (args?.select?.id && !args?.where?.id) {
         return Promise.resolve(QUESTION_POOL.map((q) => ({ id: q.id })));
       }
@@ -287,6 +673,7 @@ describe('POST /api/game/daily/submit — clientDate y racha en zona horaria loc
         )
       );
     });
+    mocks.userFindUnique.mockResolvedValue({ highScore: 0, dailyStreak: 0, lastDailyDate: null });
     mocks.userUpdate.mockResolvedValue({});
     mocks.gameResultCreate.mockResolvedValue({});
     vi.mocked(evaluateAchievementsAfterDaily).mockResolvedValue([]);
@@ -459,6 +846,8 @@ describe('GET /api/game/daily/status — estado ligero para el lobby', () => {
     mocks.redisGet.mockResolvedValue(null);
     mocks.redisSet.mockResolvedValue('OK');
     mocks.questionFindMany.mockResolvedValue([]);
+    mocks.dailyPlanFindUnique.mockResolvedValue(null);
+    mocks.dailyPlanFindMany.mockResolvedValue([]);
   });
 
   afterEach(() => {
@@ -591,6 +980,9 @@ describe('GET /api/game/daily/status — estado ligero para el lobby', () => {
     server.close();
 
     expect(mocks.questionFindMany).not.toHaveBeenCalled();
+    expect(mocks.dailyPlanFindUnique).not.toHaveBeenCalled();
+    expect(mocks.dailyPlanFindMany).not.toHaveBeenCalled();
+    expect(mocks.dailyPlanCreate).not.toHaveBeenCalled();
   });
 
   it('NO emite game_started ni modifica DB', async () => {

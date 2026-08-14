@@ -8,3 +8,4 @@ export { FullScreenError } from './FullScreenError';
 export { GameModeCard } from './GameModeCard';
 export { ListItem } from './ListItem';
 export { PageHeader } from './PageHeader';
+export { DailyTourStrip } from './DailyTourStrip';

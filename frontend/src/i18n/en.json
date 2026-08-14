@@ -81,8 +81,8 @@
     "resetRequestNew": "Request a new one"
   },
   "menu": {
-    "dailyChallenge": "Daily Challenge",
-    "dailyChallengeDesc": "10 questions · same for everyone · one attempt",
+    "dailyChallenge": "Daily World Tour",
+    "dailyChallengeDesc": "10 stops · 5 regions · same route for everyone",
     "dailyChallengeNew": "New",
     "welcome": "Hello, {{name}}!",
     "chooseMode": "Choose a game mode",
@@ -139,12 +139,12 @@
       "startDesc": "Each game helps you discover and master new countries."
     },
     "daily": {
-      "title": "Daily Challenge",
+      "title": "Daily World Tour",
       "available": "Available",
       "completed": "Completed",
-      "desc": "10 questions · same for everyone · one attempt",
-      "play": "Play today's challenge",
-      "viewResult": "View result",
+      "desc": "10 stops · 5 regions · same route for everyone",
+      "play": "Start journey",
+      "viewResult": "View route",
       "todayScore": "Today: {{correct}} / {{total}}",
       "streak": "Streak: {{days}} days",
       "fallbackDesc": "10 questions to test your world knowledge.",
@@ -641,8 +641,8 @@
     "error": "Could not share"
   },
   "daily": {
-    "alreadyPlayed": "Today's challenge is done! 🎯",
-    "comeBackTomorrow": "A new one is waiting for you tomorrow",
+    "alreadyPlayed": "Today's world tour is done! 🎯",
+    "comeBackTomorrow": "A new journey awaits you tomorrow",
     "streak": "Streak",
     "days": "days",
     "streakStart": "day! Come back tomorrow to keep your streak",
@@ -650,7 +650,19 @@
     "complete": "Daily Challenge complete!",
     "finish": "See results",
     "streakLostNotice": "Your {{count}}-day streak ended 💛 — a new one starts today. What matters is coming back.",
-    "nextChallengeAt": "The next challenge opens at midnight (your time)"
+    "nextChallengeAt": "The next challenge opens at midnight (your time)",
+    "worldTourTitle": "Today's World Tour",
+    "worldTourDesc": "10 stops · 5 regions · 1 attempt",
+    "worldTourShared": "The same route for everyone",
+    "startJourney": "Start journey",
+    "tourComplete": "World tour completed!",
+    "countriesVisited": "countries visited",
+    "regionsVisited": "regions",
+    "stopBadge": "Stop {{current}} / {{total}}",
+    "answerError": "Failed to submit",
+    "answerRetry": "We couldn't register your answer.",
+    "finishError": "We couldn't save your route",
+    "finishErrorDesc": "Your round progress is still available."
   },
   "install": {
     "title": "Install GeoChallenge",

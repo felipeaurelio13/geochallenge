@@ -315,6 +315,16 @@ model TelemetryEvent {
   @@map("telemetry_events")
 }
 
+model DailyChallengePlan {
+  dayKey      String   @id
+  version     String
+  questionIds Json
+  stops       Json
+  createdAt   DateTime @default(now())
+
+  @@map("daily_challenge_plans")
+}
+
 enum TelemetrySource {
   SERVER
   CLIENT
