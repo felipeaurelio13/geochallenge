@@ -1,6 +1,7 @@
 import { Category, Difficulty, WorldEventRegion, WorldEventBossAttemptStatus, GameVariant, GameMode } from '@prisma/client';
 import { prisma } from '../config/database.js';
 import { hashString, seededShuffle } from '../utils/hash.js';
+import { AppError } from '../utils/appError.js';
 
 export const WORLD_EVENT_VERSION = 'weekly-world-event-v1' as const;
 export const WORLD_EVENT_BOSS_VERSION = 'regional-boss-v1' as const;
@@ -11,6 +12,20 @@ export const BOSS_HP_REQUIRED = 7;
 export const BOSS_MAX_ATTEMPTS_PER_TIER = 200;
 
 const BOSS_CATEGORIES: Category[] = [
+  Category.FLAG,
+  Category.CAPITAL,
+  Category.SILHOUETTE,
+  Category.MONUMENT,
+  Category.CINEMA_GEO,
+];
+
+/**
+ * Categories that count toward weekly event preparation. Broader than
+ * BOSS_CATEGORIES: MAP counts for progress but is excluded from the boss
+ * pool. MIXED never counts.
+ */
+const EVENT_PROGRESS_CATEGORIES: Category[] = [
+  Category.MAP,
   Category.FLAG,
   Category.CAPITAL,
   Category.SILHOUETTE,
@@ -181,7 +196,7 @@ export async function getWorldEventProgress(
 
   const correctInRegion = attempts.filter((a) => {
     if (!a.countryCode) return false;
-    if (!BOSS_CATEGORIES.includes(a.category)) return false; // MIXED/MAP don't count toward boss prep
+    if (!EVENT_PROGRESS_CATEGORIES.includes(a.category)) return false; // MIXED doesn't count toward prep
     const r = countryCodeToRegion.get(a.countryCode);
     return r === region;
   });
@@ -368,13 +383,26 @@ export function buildBossFromPool(
 
 /**
  * Build a boss plan for the given event (fetches the pool from the DB).
+ * The pure composer stays untouched; the insufficient-pool failure is
+ * translated here to an AppError so HTTP callers get a structured 503.
  */
 export async function buildWorldEventBoss(
   eventId: string,
   region: WorldEventRegion,
 ): Promise<{ plan: WorldEventPlanData; tier: number }> {
   const pool = await fetchBossPool();
-  return buildBossFromPool(pool, eventId, region);
+  try {
+    return buildBossFromPool(pool, eventId, region);
+  } catch (err: unknown) {
+    if (err instanceof Error && err.message === 'EVENT_BOSS_POOL_INSUFFICIENT') {
+      throw new AppError(
+        'EVENT_BOSS_POOL_INSUFFICIENT',
+        503,
+        'No hay suficientes preguntas para generar el Guardián',
+      );
+    }
+    throw err;
+  }
 }
 
 /**

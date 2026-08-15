@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../services/api';
 import { LoadingSpinner, Timer } from '../components';
 import { Button } from '../components/atoms/Button';
-import { trackUxEvent } from '../utils/uxTelemetry';
 import type {
   WorldEventCurrentResponse,
   WorldEventBossStartResponse,
@@ -31,6 +30,14 @@ function formatTimeLeft(endsAt: string, finishedLabel: string): string {
   if (days > 0) return `${days}d ${hours}h`;
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
   return `${hours}h ${minutes}m`;
+}
+
+/**
+ * Convert the server's authoritative timeRemainingMs to whole seconds for the
+ * Timer. Rounds up so a resume at 0.1s still shows 1s instead of 0.
+ */
+function timerSecondsFromMs(ms: number): number {
+  return Math.max(0, Math.ceil(ms / 1000));
 }
 
 export function WorldEventPage() {
@@ -88,14 +95,8 @@ export function WorldEventPage() {
       setCorrectCount(data.correctCount);
       setScore(data.score);
       setBossHp(data.boss.hitsRequired - data.boss.hits);
-      setTimeRemaining(data.timeLimit);
+      setTimeRemaining(timerSecondsFromMs(data.timeRemainingMs));
       setPageState('playing');
-
-      trackUxEvent('game_started', {
-        destination: '/event',
-        gameMode: 'event_boss',
-        category: 'MIXED',
-      });
     } catch (err: any) {
       if (err?.code === 'EVENT_BOSS_LOCKED') {
         setPageState('locked');
@@ -128,15 +129,6 @@ export function WorldEventPage() {
       setScore(result.score);
       setBossHp(bossData.boss.hitsRequired - result.correctCount);
 
-      trackUxEvent('question_answered', {
-        eventId: bossData.eventId,
-        region: bossData.region,
-        roundIndex: bossData.questionIndex,
-        isCorrect: result.isCorrect,
-        points: result.points,
-        timedOut: false,
-      });
-
       // Auto-advance after feedback
       feedbackTimerRef.current = setTimeout(() => {
         if (result.isFinal) {
@@ -144,14 +136,6 @@ export function WorldEventPage() {
           setCorrectCount(result.correctCount);
           setScore(result.score);
           setPageState('finished');
-
-          trackUxEvent('game_finished', {
-            eventId: bossData.eventId,
-            region: bossData.region,
-            score: result.score,
-            correctCount: result.correctCount,
-            cleared: result.cleared ?? false,
-          });
         } else {
           // Next question
           setCurrentQuestion(null);
@@ -165,7 +149,7 @@ export function WorldEventPage() {
             setCorrectCount(data.correctCount);
             setScore(data.score);
             setBossHp(data.boss.hitsRequired - data.boss.hits);
-            setTimeRemaining(data.timeLimit);
+            setTimeRemaining(timerSecondsFromMs(data.timeRemainingMs));
             setIsSubmitting(false);
           }).catch(() => {
             setError(t('worldEvent.errorNext'));

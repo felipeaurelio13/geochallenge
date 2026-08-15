@@ -498,6 +498,32 @@ describe('World Event controller', () => {
       expect(activeCount).toBe(1);
       expect(s.attempts.length).toBe(1);
     });
+
+    it('returns 503 EVENT_BOSS_POOL_INSUFFICIENT when the boss pool cannot compose, creating no attempt', async () => {
+      s.attempts = [];
+      s.plans = [];
+      // Composer pool query (select.id present) returns an empty pool → boss
+      // cannot be built. Progress query still maps region codes.
+      mocks.questionFindMany.mockImplementation(async (args: any) => {
+        if (args?.select?.id) return [];
+        const codes: string[] = args.where.countryCode.in ?? [];
+        return codes.map((cc) => ({
+          countryCode: cc,
+          continent: REGION_CONTINENT[CURRENT_REGION],
+        }));
+      });
+
+      const { server, baseUrl } = startServer();
+      const res = await fetch(`${baseUrl}/api/events/current/boss/start`, { method: 'POST' });
+      const body = (await res.json()) as any;
+      server.close();
+
+      expect(res.status).toBe(503);
+      expect(body.code).toBe('EVENT_BOSS_POOL_INSUFFICIENT');
+      expect(body.error).toBe('No hay suficientes preguntas para generar el Guardián');
+      expect(mocks.attemptCreate).not.toHaveBeenCalled();
+      expect(mocks.planCreate).not.toHaveBeenCalled();
+    });
   });
 
   describe('POST /api/events/boss/:attemptId/answer', () => {
@@ -749,6 +775,157 @@ describe('World Event controller', () => {
         totalQuestions: BOSS_TOTAL_QUESTIONS,
         score: 1000,
       });
+    });
+  });
+
+  describe('Boss telemetry — server-owned', () => {
+    it('emits exactly one game_started for a new boss run', async () => {
+      s.attempts = [];
+      s.plans = [];
+      const { server, baseUrl } = startServer();
+      const res = await fetch(`${baseUrl}/api/events/current/boss/start`, { method: 'POST' });
+      server.close();
+      expect(res.status).toBe(200);
+      const started = vi.mocked(trackServerEvent).mock.calls.filter((c) => c[0].name === 'game_started');
+      expect(started).toHaveLength(1);
+    });
+
+    it('does not emit game_started on resume', async () => {
+      s.attempts = [makeAttempt({ id: 'existing-active', currentQuestionIndex: 4, correctCount: 3, score: 300 })];
+      const { server, baseUrl } = startServer();
+      const res = await fetch(`${baseUrl}/api/events/current/boss/start`, { method: 'POST' });
+      const body = (await res.json()) as any;
+      server.close();
+      expect(res.status).toBe(200);
+      expect(body.resumed).toBe(true);
+      const started = vi.mocked(trackServerEvent).mock.calls.filter((c) => c[0].name === 'game_started');
+      expect(started).toHaveLength(0);
+    });
+
+    it('emits question_answered on answer', async () => {
+      s.attempts = [makeAttempt({ id: 'a1', currentQuestionIndex: 0 })];
+      const { server, baseUrl } = startServer();
+      const res = await fetch(`${baseUrl}/api/events/boss/a1/answer`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ questionId: s.plans[0].questionIds[0], answer: 'A' }),
+      });
+      server.close();
+      expect(res.status).toBe(200);
+      const answered = vi.mocked(trackServerEvent).mock.calls.filter((c) => c[0].name === 'question_answered');
+      expect(answered).toHaveLength(1);
+    });
+
+    it('emits game_finished on the final answer', async () => {
+      s.answers = [];
+      for (let i = 0; i < 9; i++) {
+        s.answers.push({
+          id: `answer-${i}`,
+          attemptId: 'a1',
+          questionId: s.plans[0].questionIds[i],
+          questionIndex: i,
+          userAnswer: 'A',
+          isCorrect: true,
+          points: 100,
+        });
+      }
+      s.attempts = [makeAttempt({ id: 'a1', currentQuestionIndex: 9, correctCount: 9, score: 900 })];
+      const { server, baseUrl } = startServer();
+      const res = await fetch(`${baseUrl}/api/events/boss/a1/answer`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ questionId: s.plans[0].questionIds[9], answer: 'A' }),
+      });
+      server.close();
+      expect(res.status).toBe(200);
+      const finished = vi.mocked(trackServerEvent).mock.calls.filter((c) => c[0].name === 'game_finished');
+      expect(finished).toHaveLength(1);
+    });
+  });
+
+  describe('Boss timer — authoritative handoff', () => {
+    it('first question is served with ~20s remaining', async () => {
+      s.attempts = [];
+      s.plans = [];
+      const { server, baseUrl } = startServer();
+      const res = await fetch(`${baseUrl}/api/events/current/boss/start`, { method: 'POST' });
+      const body = (await res.json()) as any;
+      server.close();
+      expect(res.status).toBe(200);
+      expect(body.timeRemainingMs).toBeGreaterThan(19000);
+      expect(body.timeRemainingMs).toBeLessThanOrEqual(20000);
+    });
+
+    it('resume after ~8s elapsed returns ~12s remaining, never a full reset', async () => {
+      s.attempts = [makeAttempt({
+        id: 'existing-active',
+        currentQuestionIndex: 2,
+        questionStartedAt: new Date(Date.now() - 8000),
+      })];
+      const { server, baseUrl } = startServer();
+      const res = await fetch(`${baseUrl}/api/events/current/boss/start`, { method: 'POST' });
+      const body = (await res.json()) as any;
+      server.close();
+      expect(body.resumed).toBe(true);
+      expect(body.timeRemainingMs).toBeGreaterThan(11000);
+      expect(body.timeRemainingMs).toBeLessThan(13000);
+    });
+
+    it('repeated start/resume does not reset questionStartedAt', async () => {
+      const startedAt = new Date(Date.now() - 8000);
+      s.attempts = [makeAttempt({
+        id: 'existing-active',
+        currentQuestionIndex: 2,
+        questionStartedAt: startedAt,
+      })];
+      const { server, baseUrl } = startServer();
+      const r1 = await fetch(`${baseUrl}/api/events/current/boss/start`, { method: 'POST' });
+      const b1 = (await r1.json()) as any;
+      const r2 = await fetch(`${baseUrl}/api/events/current/boss/start`, { method: 'POST' });
+      const b2 = (await r2.json()) as any;
+      server.close();
+      expect(b1.timeRemainingMs).toBeGreaterThan(11000);
+      expect(b2.timeRemainingMs).toBeGreaterThan(11000);
+      expect(Math.abs(b1.timeRemainingMs - b2.timeRemainingMs)).toBeLessThan(1000);
+      const attempt = s.attempts.find((a) => a.id === 'existing-active')!;
+      expect(attempt.questionStartedAt.getTime()).toBe(startedAt.getTime());
+    });
+
+    it('after a non-final answer the next question is served with a fresh ~20s clock', async () => {
+      s.attempts = [makeAttempt({
+        id: 'a1',
+        currentQuestionIndex: 0,
+        questionStartedAt: new Date(Date.now() - 15000),
+      })];
+      const { server, baseUrl } = startServer();
+      const ansRes = await fetch(`${baseUrl}/api/events/boss/a1/answer`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ questionId: s.plans[0].questionIds[0], answer: 'A' }),
+      });
+      expect(ansRes.status).toBe(200);
+      const attemptAfter = s.attempts.find((a) => a.id === 'a1')!;
+      expect(attemptAfter.questionStartedAt).toBeNull();
+
+      const res = await fetch(`${baseUrl}/api/events/current/boss/start`, { method: 'POST' });
+      const body = (await res.json()) as any;
+      server.close();
+      expect(body.resumed).toBe(true);
+      expect(body.questionIndex).toBe(1);
+      expect(body.timeRemainingMs).toBeGreaterThan(19000);
+    });
+
+    it('expired question returns 0 remaining so the client fires a normal timeout', async () => {
+      s.attempts = [makeAttempt({
+        id: 'existing-active',
+        currentQuestionIndex: 2,
+        questionStartedAt: new Date(Date.now() - 30 * 1000),
+      })];
+      const { server, baseUrl } = startServer();
+      const res = await fetch(`${baseUrl}/api/events/current/boss/start`, { method: 'POST' });
+      const body = (await res.json()) as any;
+      server.close();
+      expect(body.timeRemainingMs).toBe(0);
     });
   });
 

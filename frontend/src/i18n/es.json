@@ -1035,6 +1035,7 @@
     "SURVIVAL_ERROR_GENERIC": "Algo falló en la partida de supervivencia. Intenta nuevamente.",
     "RATE_LIMITED": "Por seguridad pausamos los intentos un momento. Prueba de nuevo en {{minutes}} min",
     "INTERNAL": "Algo falló de nuestro lado 😓 Ya quedó registrado (ref: {{requestId}}). Intenta de nuevo en un momento.",
-    "EVENT_BOSS_LOCKED": "Completa la preparación para desafiar al Guardián"
+    "EVENT_BOSS_LOCKED": "Completa la preparación para desafiar al Guardián",
+    "EVENT_BOSS_POOL_INSUFFICIENT": "No hay suficientes preguntas para generar el Guardián en este momento"
   }
 }

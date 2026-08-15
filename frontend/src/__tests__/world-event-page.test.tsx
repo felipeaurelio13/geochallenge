@@ -258,6 +258,7 @@ describe('WorldEventPage', () => {
       expiresAt: '2026-08-17T00:00:00.000Z',
       question,
       timeLimit: 20,
+      timeRemainingMs: 12000,
       boss: { hitsRequired: 7, hits: 2 },
     });
 
@@ -281,6 +282,58 @@ describe('WorldEventPage', () => {
     expect(hearts).toHaveLength(7);
     hearts.slice(0, 5).forEach((h) => expect(h.className).toContain('opacity-100'));
     hearts.slice(5).forEach((h) => expect(h.className).toContain('opacity-30'));
+  });
+
+  it('initializes the Timer from server timeRemainingMs (resume keeps remaining time)', async () => {
+    vi.mocked(api.getCurrentEvent).mockResolvedValue({
+      ...mockEventData,
+      progress: {
+        correctInRegion: 8,
+        correctRequired: 8,
+        distinctCategories: 3,
+        categoriesRequired: 3,
+        dailyCompleted: true,
+        bossUnlocked: true,
+      },
+      boss: {
+        unlocked: true,
+        cleared: false,
+        attempts: 0,
+        bestCorrect: 0,
+        bestScore: 0,
+        activeAttempt: null,
+      },
+    });
+    vi.mocked(api.startBoss).mockResolvedValue({
+      resumed: true,
+      attemptId: 'a1',
+      eventId: '2026-08-10',
+      region: 'AFRICA',
+      questionIndex: 2,
+      totalQuestions: 10,
+      correctCount: 2,
+      score: 200,
+      expiresAt: '2026-08-17T00:00:00.000Z',
+      question,
+      timeLimit: 20,
+      timeRemainingMs: 12000,
+      boss: { hitsRequired: 7, hits: 2 },
+    });
+
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByText('Enfrentar Guardián')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByText('Enfrentar Guardián'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Pregunta 3 / 10')).toBeInTheDocument();
+    });
+
+    // ~12s remaining, never a full 20s reset on resume
+    expect(screen.queryByText('20s')).not.toBeInTheDocument();
+    expect(screen.getByText(/^1[12]s$/)).toBeInTheDocument();
   });
 
   it('answer syncs correctCount/score/bossHp from server', async () => {
@@ -315,6 +368,7 @@ describe('WorldEventPage', () => {
       expiresAt: '2026-08-17T00:00:00.000Z',
       question,
       timeLimit: 20,
+      timeRemainingMs: 20000,
       boss: { hitsRequired: 7, hits: 0 },
     });
     vi.mocked(api.bossAnswer).mockResolvedValue({

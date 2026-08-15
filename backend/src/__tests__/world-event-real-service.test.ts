@@ -206,6 +206,26 @@ describe('World Event Service — real behavior', () => {
       expect(progress.distinctCategories).toBe(1);
     });
 
+    it('MAP correct attempts count toward preparation and distinct categories', async () => {
+      mocks.masteryAttemptFindMany.mockResolvedValue([
+        { countryCode: 'KE', category: Category.MAP },
+        { countryCode: 'KE', category: Category.FLAG },
+        { countryCode: 'KE', category: Category.MIXED },
+      ]);
+      mocks.questionFindMany.mockImplementation(async (args: any) => {
+        const codes = args.where.countryCode.in as string[];
+        return codes
+          .filter((c) => REGION_COUNTRIES[c])
+          .map((c) => ({ countryCode: c, continent: REGION_COUNTRIES[c] }));
+      });
+      mocks.gameResultFindFirst.mockResolvedValue({ id: 'daily-1' });
+
+      const progress = await getWorldEventProgress('user-1', EVENT_ID, REGION);
+      // MAP counts (+1) and is its own distinct category; MIXED still ignored
+      expect(progress.correctInRegion).toBe(2);
+      expect(progress.distinctCategories).toBe(2);
+    });
+
     it('distinct categories are computed from counted attempts', async () => {
       mocks.masteryAttemptFindMany.mockResolvedValue([
         { countryCode: 'KE', category: Category.FLAG },

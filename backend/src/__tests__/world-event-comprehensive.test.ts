@@ -262,13 +262,21 @@ describe('Components index pruning', () => {
   });
 });
 
-// ─── UX TELEMETRY: BOSS EVENTS ────────────────────────────────────────
+// ─── UX TELEMETRY: BOSS EVENTS ARE SERVER-OWNED ──────────────────────
 describe('UX telemetry boss events', () => {
-  it('game_started, question_answered, game_finished are in ClientEventName', () => {
+  it('game_started, question_answered, game_finished are NOT client events (server-owned)', () => {
     const content = read('frontend/src/utils/uxTelemetry.ts');
-    expect(content).toContain("'game_started'");
-    expect(content).toContain("'question_answered'");
-    expect(content).toContain("'game_finished'");
+    expect(content).not.toContain("'game_started'");
+    expect(content).not.toContain("'question_answered'");
+    expect(content).not.toContain("'game_finished'");
+  });
+
+  it('WorldEventPage no longer tracks game_started/question_answered/game_finished', () => {
+    const content = read('frontend/src/pages/WorldEventPage.tsx');
+    expect(content).not.toContain('trackUxEvent');
+    expect(content).not.toContain("'game_started'");
+    expect(content).not.toContain("'question_answered'");
+    expect(content).not.toContain("'game_finished'");
   });
 });
 

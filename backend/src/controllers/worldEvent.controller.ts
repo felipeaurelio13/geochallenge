@@ -204,6 +204,16 @@ router.post('/current/boss/start', authenticateJWT, async (req: AuthRequest, res
 
       if (existingAttempt) {
         if (existingAttempt.expiresAt > new Date()) {
+          // Authoritative clock handoff: after a non-final answer the server
+          // cleared questionStartedAt, so the next serve (this start) owns the
+          // clock. A real resume (questionStartedAt set) must NOT reset it.
+          if (existingAttempt.questionStartedAt === null) {
+            const clocked = await tx.worldEventBossAttempt.update({
+              where: { id: existingAttempt.id },
+              data: { questionStartedAt: new Date() },
+            });
+            return { attempt: clocked, resumed: true };
+          }
           return { attempt: existingAttempt, resumed: true };
         }
         await tx.worldEventBossAttempt.update({
@@ -253,20 +263,31 @@ router.post('/current/boss/start', authenticateJWT, async (req: AuthRequest, res
 
     const publicQuestion = toPublicBossQuestion(plan, questionIndex, question);
 
-    trackServerEvent({
-      name: 'game_started',
-      userId,
-      runId: `event-boss:${attempt.id}`,
-      gameMode: GameMode.SINGLE,
-      variant: GameVariant.EVENT_BOSS,
-      category: Category.MIXED,
-      properties: {
-        eventId: event.eventId,
-        eventVersion: WORLD_EVENT_VERSION,
-        bossVersion: WORLD_EVENT_BOSS_VERSION,
-        region: event.region,
-      },
-    });
+    // game_started is server-owned and only represents a NEW run, never a
+    // resume. The eventKey already deduplicates resumes, but avoiding the
+    // P2002 write entirely keeps telemetry free of noise.
+    if (!resumed) {
+      trackServerEvent({
+        name: 'game_started',
+        userId,
+        runId: `event-boss:${attempt.id}`,
+        gameMode: GameMode.SINGLE,
+        variant: GameVariant.EVENT_BOSS,
+        category: Category.MIXED,
+        properties: {
+          eventId: event.eventId,
+          eventVersion: WORLD_EVENT_VERSION,
+          bossVersion: WORLD_EVENT_BOSS_VERSION,
+          region: event.region,
+        },
+      });
+    }
+
+    // Authoritative remaining time for the question being served. The frontend
+    // starts its Timer from this value (never a full reset on resume).
+    const serverNow = Date.now();
+    const questionClockStart = attempt.questionStartedAt ?? attempt.startedAt;
+    const timeRemainingMs = Math.max(0, BOSS_QUESTION_SECONDS * 1000 - (serverNow - questionClockStart.getTime()));
 
     res.json({
       resumed,
@@ -280,6 +301,7 @@ router.post('/current/boss/start', authenticateJWT, async (req: AuthRequest, res
       expiresAt: attempt.expiresAt.toISOString(),
       question: publicQuestion,
       timeLimit: BOSS_QUESTION_SECONDS,
+      timeRemainingMs,
       boss: {
         hitsRequired: BOSS_HP_REQUIRED,
         hits: attempt.correctCount,
@@ -430,7 +452,10 @@ router.post('/boss/:attemptId/answer', authenticateJWT, async (req: AuthRequest,
             correctCount: newCorrectCount,
             score: newScore,
             currentQuestionIndex: nextIndex,
-            questionStartedAt: new Date(),
+            // Clear the clock after a non-final answer: the next start/serve
+            // owns a fresh authoritative questionStartedAt when it hands the
+            // next question to the client (feedback is not part of the clock).
+            questionStartedAt: null,
             ...(isFinal ? {
               status: WorldEventBossAttemptStatus.COMPLETED,
               finishedAt: new Date(),

@@ -714,6 +714,7 @@ export interface WorldEventBossStartResponse {
   expiresAt: string;
   question: WorldEventBossQuestion;
   timeLimit: number;
+  timeRemainingMs: number;
   boss: {
     hitsRequired: number;
     hits: number;
