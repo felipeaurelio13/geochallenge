@@ -377,3 +377,31 @@ describe('getTopLeaderboard con filtros', () => {
     });
   });
 });
+
+describe('Leaderboard regression — EVENT_BOSS exclusion', () => {
+  it('Classic leaderboard defaults to variant CLASSIC so EVENT_BOSS never leaks in', async () => {
+    prismaMock.gameResult.groupBy.mockResolvedValueOnce([]);
+    prismaMock.user.findMany.mockResolvedValueOnce([]);
+
+    await getTopLeaderboard(10, { mode: 'SINGLE' });
+
+    expect(prismaMock.gameResult.groupBy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          gameMode: 'SINGLE',
+          variant: 'CLASSIC',
+        }),
+      })
+    );
+  });
+
+  it('season leaderboard filters by CLASSIC variant + season window', async () => {
+    prismaMock.gameResult.groupBy.mockResolvedValueOnce([]);
+    await getSeasonLeaderboard(10, '2025-01');
+    const call = prismaMock.gameResult.groupBy.mock.calls[0][0] as { where: Record<string, unknown> };
+    expect(call.where.variant).toBe('CLASSIC');
+    expect(call.where.gameMode).toBe('SINGLE');
+    expect(call.where.createdAt).toBeDefined();
+    expect((call.where as { variant?: string }).variant).not.toBe('EVENT_BOSS');
+  });
+});

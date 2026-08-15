@@ -72,30 +72,6 @@ describe('World Event Window', () => {
   });
 });
 
-// ─── PROGRESS ─────────────────────────────────────────────────────────
-describe('Progress computation', () => {
-  it('defaults when no plan exists', () => {
-    const result = {
-      correctInRegion: 0,
-      correctRequired: 8,
-      distinctCategories: 0,
-      categoriesRequired: 3,
-      dailyCompleted: false,
-      bossUnlocked: false,
-    };
-    expect(result.correctRequired).toBe(8);
-    expect(result.categoriesRequired).toBe(3);
-    expect(result.bossUnlocked).toBe(false);
-  });
-
-  it('boss requires all three: correctInRegion>=8, distinctCategories>=3, dailyCompleted', () => {
-    expect(7 >= 8 && 3 >= 3 && true).toBe(false);
-    expect(8 >= 8 && 2 >= 3 && true).toBe(false);
-    expect(8 >= 8 && 3 >= 3 && false).toBe(false);
-    expect(8 >= 8 && 3 >= 3 && true).toBe(true);
-  });
-});
-
 // ─── COMPOSER CONSTANTS ───────────────────────────────────────────────
 describe('Boss composer constants', () => {
   it('10 questions, 7 HP to clear', () => {
@@ -112,13 +88,22 @@ describe('Boss composer constants', () => {
     expect(WORLD_EVENT_VERSION).toBe('weekly-world-event-v1');
     expect(WORLD_EVENT_BOSS_VERSION).toBe('regional-boss-v1');
   });
+
+  it('plan stores the WORLD_EVENT_VERSION, boss version stays in GameResult details', async () => {
+    const mod = await import('../services/worldEvent.service.js');
+    const source = fs.readFileSync(path.join(BE, 'src/services/worldEvent.service.ts'), 'utf-8');
+    // plan.version uses the event semantic version, not the boss version
+    expect(source).toMatch(/version: WORLD_EVENT_VERSION/);
+    // boss version still used for per-boss telemetry/GameResult details
+    expect(source).toContain('WORLD_EVENT_BOSS_VERSION');
+  });
 });
 
 // ─── toPublicBossQuestion ──────────────────────────────────────────────
 describe('toPublicBossQuestion', () => {
   const plan: WorldEventPlanData = {
     eventId: '2026-08-10',
-    version: WORLD_EVENT_BOSS_VERSION,
+    version: WORLD_EVENT_VERSION,
     region: 'AFRICA',
     questionIds: ['q1', 'q2'],
     stops: [
@@ -423,77 +408,7 @@ describe('MenuPage event card', () => {
   });
 });
 
-// ─── BOSS START/RESUME BEHAVIOR (unit-level) ──────────────────────────
-describe('Boss start/resume logic', () => {
-  it('locked returns 403 when boss not unlocked', () => {
-    const progress = { bossUnlocked: false };
-    expect(progress.bossUnlocked).toBe(false);
-  });
-
-  it('unlocked allows start', () => {
-    const progress = { bossUnlocked: true };
-    expect(progress.bossUnlocked).toBe(true);
-  });
-});
-
-// ─── ANSWER VALIDATION (unit-level) ───────────────────────────────────
-describe('Answer validation', () => {
-  it('duplicate answer is first-write-wins (idempotent)', () => {
-    const existingAnswer = { isCorrect: true, points: 100 };
-    expect(existingAnswer.isCorrect).toBe(true);
-    expect(existingAnswer.points).toBe(100);
-  });
-
-  it('timed out answer is marked incorrect', () => {
-    const timedOut = true;
-    const answer = '';
-    const correctAnswer = 'Kenya';
-    const isCorrect = !timedOut && answer.trim().toLowerCase() === correctAnswer.toLowerCase().trim();
-    expect(isCorrect).toBe(false);
-  });
-
-  it('correct answer matches case-insensitively', () => {
-    const answer = 'kenya';
-    const correctAnswer = 'Kenya';
-    const isCorrect = answer.trim().toLowerCase() === correctAnswer.toLowerCase().trim();
-    expect(isCorrect).toBe(true);
-  });
-});
-
-// ─── FINISH LOGIC (unit-level) ────────────────────────────────────────
-describe('Finish logic', () => {
-  it('#10 completes the run', () => {
-    const nextIndex = 10;
-    const isFinal = nextIndex >= BOSS_TOTAL_QUESTIONS;
-    expect(isFinal).toBe(true);
-  });
-
-  it('#9 does not complete the run', () => {
-    const nextIndex = 9;
-    const isFinal = nextIndex >= BOSS_TOTAL_QUESTIONS;
-    expect(isFinal).toBe(false);
-  });
-
-  it('7 correct = cleared', () => {
-    expect(7 >= BOSS_HP_REQUIRED).toBe(true);
-  });
-
-  it('6 correct = not cleared', () => {
-    expect(6 >= BOSS_HP_REQUIRED).toBe(false);
-  });
-
-  it('10 correct = perfect', () => {
-    expect(10 === BOSS_TOTAL_QUESTIONS).toBe(true);
-  });
-
-  it('GameResult runId format is event-boss:{attemptId}', () => {
-    const attemptId = 'test-123';
-    const runId = `event-boss:${attemptId}`;
-    expect(runId).toBe('event-boss:test-123');
-  });
-});
-
-// ─── NO MASTERY/CLASSIC/LEADERBOARD LEAK ──────────────────────────────
+// ─── I18N KEYS ────────────────────────────────────────────────────────
 describe('Integrity: no Boss contamination', () => {
   it('Boss controller does not create MasteryAttempt records', async () => {
     const content = read('backend/src/controllers/worldEvent.controller.ts');

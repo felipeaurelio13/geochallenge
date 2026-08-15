@@ -153,6 +153,24 @@ vi.mock('react-i18next', () => ({
         'menu.practice.streak': 'Racha',
         'menu.practice.streakDesc': 'Sigue mientras aciertes',
         'menu.practice.flashDisabledMap': 'El modo Flash no admite mapas — elige otra categoría',
+        'menu.practice.moreTitle': 'Más formas de entrenar',
+        'menu.compete.moreTitle': 'Más formas de competir',
+        'worldEvent.expedition': 'Expedición {{region}}',
+        'worldEvent.region.AFRICA': 'África',
+        'worldEvent.endsIn': 'Termina en {{time}}',
+        'worldEvent.finished': 'Terminado',
+        'worldEvent.preparation': 'Preparación',
+        'worldEvent.correctAnswers': '{{count}} / {{required}} respuestas correctas',
+        'worldEvent.challengeTypes': '{{count}} / {{required}} tipos de desafío',
+        'worldEvent.dailyCompleted': 'Daily completado',
+        'worldEvent.guardianDefeated': 'Guardián derrotado',
+        'worldEvent.guardianAvailable': 'Guardián disponible',
+        'worldEvent.best': 'Mejor: {{correct}} / 10',
+        'worldEvent.attempts': '{{count}} intento',
+        'worldEvent.attemptsPlural': '{{count}} intentos',
+        'worldEvent.playAgain': 'Jugar otra vez',
+        'worldEvent.faceBoss': 'Enfrentar Boss',
+        'worldEvent.viewExpedition': 'Ver expedición',
         'menu.compete.title': 'Competir',
         'menu.compete.subtitle': 'Pon a prueba lo que sabes contra otros.',
         'menu.compete.category': 'Categoría',
@@ -518,7 +536,7 @@ describe('MenuPage — panels', () => {
     expect(screen.getByRole('group', { name: /categorías de preguntas/i })).toBeDefined();
   });
 
-  it('panel Practice → Clásico/Flash/Racha', () => {
+  it('panel Practice → primarios Clásico + GeoRetos visibles; Flash/Racha colapsados', () => {
     render(
       <MemoryRouter future={routerFutureConfig}>
         <Screen>
@@ -529,11 +547,29 @@ describe('MenuPage — panels', () => {
 
     fireEvent.click(screen.getByText('Practicar'));
     expect(screen.getByText('Clásico')).toBeDefined();
-    expect(screen.getByText('Flash')).toBeDefined();
-    expect(screen.getByText('Racha')).toBeDefined();
+    expect(screen.getByText('GeoRetos')).toBeDefined();
+    expect(screen.queryByText('Flash')).not.toBeInTheDocument();
+    expect(screen.queryByText('Racha')).not.toBeInTheDocument();
   });
 
-  it('MAP → Flash disabled', () => {
+  it('Practice → expandir "Más formas de entrenar" muestra Flash/Racha/Maestro de Banderas', () => {
+    render(
+      <MemoryRouter future={routerFutureConfig}>
+        <Screen>
+          <MenuPage />
+        </Screen>
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByText('Practicar'));
+    fireEvent.click(screen.getByRole('button', { name: /más formas de entrenar/i }));
+
+    expect(screen.getByText('Flash')).toBeDefined();
+    expect(screen.getByText('Racha')).toBeDefined();
+    expect(screen.getByText('Maestro de Banderas')).toBeDefined();
+  });
+
+  it('MAP → Flash disabled (tras expandir)', () => {
     render(
       <MemoryRouter future={routerFutureConfig}>
         <Screen>
@@ -544,11 +580,12 @@ describe('MenuPage — panels', () => {
 
     fireEvent.click(screen.getByText('Practicar'));
     fireEvent.click(screen.getByRole('button', { name: /^mapas$/i }));
+    fireEvent.click(screen.getByRole('button', { name: /más formas de entrenar/i }));
 
     expect(screen.getByText(/el modo flash no admite mapas/i)).toBeDefined();
   });
 
-  it('Flag Master accesible desde Practice', () => {
+  it('Flag Master accesible desde Practice (tras expandir)', () => {
     render(
       <MemoryRouter future={routerFutureConfig}>
         <Screen>
@@ -558,10 +595,11 @@ describe('MenuPage — panels', () => {
     );
 
     fireEvent.click(screen.getByText('Practicar'));
+    fireEvent.click(screen.getByRole('button', { name: /más formas de entrenar/i }));
     expect(screen.getByText('Maestro de Banderas')).toBeDefined();
   });
 
-  it('GeoRetos accesible desde Practice', () => {
+  it('GeoRetos accesible desde Practice (primario)', () => {
     render(
       <MemoryRouter future={routerFutureConfig}>
         <Screen>
@@ -587,7 +625,7 @@ describe('MenuPage — panels', () => {
     expect(screen.getByText('Pon a prueba lo que sabes contra otros.')).toBeDefined();
   });
 
-  it('Competition → Duel/Challenge/Survival', () => {
+  it('Competition → primarios Hub + Desafío; Duel/Survival colapsados', () => {
     render(
       <MemoryRouter future={routerFutureConfig}>
         <Screen>
@@ -598,9 +636,26 @@ describe('MenuPage — panels', () => {
 
     fireEvent.click(screen.getByText('Competir'));
     expect(screen.getByText('Competition Hub')).toBeDefined();
-    expect(screen.getByText('Duelo')).toBeDefined();
     expect(screen.getByText('Desafío')).toBeDefined();
+    expect(screen.queryByText('Duelo')).not.toBeInTheDocument();
+    expect(screen.queryByText('Supervivencia')).not.toBeInTheDocument();
+  });
+
+  it('Competition → expandir "Más formas de competir" muestra Duel/Survival/GeoRetos Duel', () => {
+    render(
+      <MemoryRouter future={routerFutureConfig}>
+        <Screen>
+          <MenuPage />
+        </Screen>
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByText('Competir'));
+    fireEvent.click(screen.getByRole('button', { name: /más formas de competir/i }));
+
+    expect(screen.getByText('Duelo')).toBeDefined();
     expect(screen.getByText('Supervivencia')).toBeDefined();
+    expect(screen.getByText('GeoRetos Duel')).toBeDefined();
   });
 
   it('Competition Hub aparece primero en Compete y navega a /competition', () => {
@@ -614,14 +669,14 @@ describe('MenuPage — panels', () => {
 
     fireEvent.click(screen.getByText('Competir'));
     const hub = screen.getByText('Competition Hub');
-    const duel = screen.getByText('Duelo');
-    expect(hub.compareDocumentPosition(duel) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    const challenge = screen.getByText('Desafío');
+    expect(hub.compareDocumentPosition(challenge) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
 
     fireEvent.click(hub);
     expect(mockNavigate).toHaveBeenCalledWith('/competition');
   });
 
-  it('GeoRetos Duel accesible desde Compete', () => {
+  it('GeoRetos Duel accesible desde Compete (tras expandir)', () => {
     render(
       <MemoryRouter future={routerFutureConfig}>
         <Screen>
@@ -631,6 +686,7 @@ describe('MenuPage — panels', () => {
     );
 
     fireEvent.click(screen.getByText('Competir'));
+    fireEvent.click(screen.getByRole('button', { name: /más formas de competir/i }));
     expect(screen.getByText('GeoRetos Duel')).toBeDefined();
   });
 

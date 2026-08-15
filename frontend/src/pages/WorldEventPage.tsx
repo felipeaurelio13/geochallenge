@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { api } from '../services/api';
 import { LoadingSpinner, Timer } from '../components';
 import { Button } from '../components/atoms/Button';
@@ -20,19 +21,11 @@ const REGION_EMOJI: Record<string, string> = {
   OCEANIA: '🏝️',
 };
 
-const REGION_LABELS: Record<string, string> = {
-  AFRICA: 'África',
-  AMERICAS: 'Américas',
-  ASIA: 'Asia',
-  EUROPE: 'Europa',
-  OCEANIA: 'Oceanía',
-};
-
-function formatTimeLeft(endsAt: string): string {
+function formatTimeLeft(endsAt: string, finishedLabel: string): string {
   const now = Date.now();
   const end = new Date(endsAt).getTime();
   const diff = end - now;
-  if (diff <= 0) return 'Terminado';
+  if (diff <= 0) return finishedLabel;
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
   const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
   if (days > 0) return `${days}d ${hours}h`;
@@ -41,6 +34,7 @@ function formatTimeLeft(endsAt: string): string {
 }
 
 export function WorldEventPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const [pageState, setPageState] = useState<PageState>('loading');
@@ -51,9 +45,9 @@ export function WorldEventPage() {
   const [showResult, setShowResult] = useState(false);
   const [correctCount, setCorrectCount] = useState(0);
   const [score, setScore] = useState(0);
-  const [results, setResults] = useState<Array<{ isCorrect: boolean; points: number }>>([]);
   const [lastAnswerCorrect, setLastAnswerCorrect] = useState(false);
   const [lastCorrectAnswer, setLastCorrectAnswer] = useState('');
+  const [lastPoints, setLastPoints] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [bossHp, setBossHp] = useState(7);
@@ -73,10 +67,10 @@ export function WorldEventPage() {
         }
       })
       .catch(() => {
-        setError('Error al cargar el evento');
+        setError(t('worldEvent.errorLoading'));
         setPageState('error');
       });
-  }, []);
+  }, [t]);
 
   // Cleanup feedback timer
   useEffect(() => {
@@ -106,11 +100,11 @@ export function WorldEventPage() {
       if (err?.code === 'EVENT_BOSS_LOCKED') {
         setPageState('locked');
       } else {
-        setError('Error al iniciar el Boss');
+        setError(t('worldEvent.errorStart'));
         setPageState('error');
       }
     }
-  }, []);
+  }, [t]);
 
   const handleAnswer = useCallback(async (answer: string) => {
     if (!bossData || !currentQuestion || isSubmitting) return;
@@ -126,13 +120,13 @@ export function WorldEventPage() {
 
       setLastAnswerCorrect(result.isCorrect);
       setLastCorrectAnswer(result.correctAnswer);
+      setLastPoints(result.points);
       setShowResult(true);
 
-      if (result.isCorrect) {
-        setBossHp((prev) => Math.max(0, prev - 1));
-      }
-
-      setResults((prev) => [...prev, { isCorrect: result.isCorrect, points: result.points }]);
+      // Keep live state in sync with server truth (idempotent on retries)
+      setCorrectCount(result.correctCount);
+      setScore(result.score);
+      setBossHp(bossData.boss.hitsRequired - result.correctCount);
 
       trackUxEvent('question_answered', {
         eventId: bossData.eventId,
@@ -168,20 +162,23 @@ export function WorldEventPage() {
           api.startBoss().then((data) => {
             setBossData(data);
             setCurrentQuestion(data.question);
+            setCorrectCount(data.correctCount);
+            setScore(data.score);
+            setBossHp(data.boss.hitsRequired - data.boss.hits);
             setTimeRemaining(data.timeLimit);
             setIsSubmitting(false);
           }).catch(() => {
-            setError('Error al cargar siguiente pregunta');
+            setError(t('worldEvent.errorNext'));
             setPageState('error');
           });
         }
       }, 2000);
     } catch (err: any) {
-      setError('Error al enviar respuesta');
+      setError(t('worldEvent.errorAnswer'));
       setIsSubmitting(false);
       setSelected(null);
     }
-  }, [bossData, currentQuestion, isSubmitting]);
+  }, [bossData, currentQuestion, isSubmitting, t]);
 
   const handleTimeout = useCallback(() => {
     handleAnswer('');
@@ -200,7 +197,7 @@ export function WorldEventPage() {
       <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4 px-4">
         <p className="text-app-secondary">{error}</p>
         <Button onClick={() => navigate('/menu')} variant="secondary">
-          Volver al menú
+          {t('worldEvent.backToMenu')}
         </Button>
       </div>
     );
@@ -210,22 +207,22 @@ export function WorldEventPage() {
     const { progress, event } = eventData;
     const region = event.region;
     const emoji = REGION_EMOJI[region] || '🌍';
-    const regionName = REGION_LABELS[region] || region;
+    const regionName = t(`worldEvent.region.${region}`);
 
     return (
       <div className="mx-auto max-w-lg px-4 py-6">
         <div className="mb-6 text-center">
           <span className="text-4xl">{emoji}</span>
           <h1 className="mt-2 text-xl font-bold text-app-text">
-            Expedición {regionName}
+            {t('worldEvent.expedition', { region: regionName })}
           </h1>
           <p className="mt-1 text-sm text-app-subtle">
-            Termina en {formatTimeLeft(event.endsAt)}
+            {t('worldEvent.endsIn', { time: formatTimeLeft(event.endsAt, t('worldEvent.finished')) })}
           </p>
         </div>
 
         <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-app-text">Preparación</h2>
+          <h2 className="text-sm font-semibold text-app-text">{t('worldEvent.preparation')}</h2>
 
           <div className="rounded-xl border border-app-border bg-app-surface p-4">
             <div className="flex items-center gap-3">
@@ -234,7 +231,7 @@ export function WorldEventPage() {
               </span>
               <div>
                 <p className="text-sm font-medium text-app-text">
-                  {progress.correctInRegion} / {progress.correctRequired} respuestas correctas
+                  {t('worldEvent.correctAnswers', { count: progress.correctInRegion, required: progress.correctRequired })}
                 </p>
               </div>
             </div>
@@ -247,7 +244,7 @@ export function WorldEventPage() {
               </span>
               <div>
                 <p className="text-sm font-medium text-app-text">
-                  {progress.distinctCategories} / {progress.categoriesRequired} tipos de desafío
+                  {t('worldEvent.challengeTypes', { count: progress.distinctCategories, required: progress.categoriesRequired })}
                 </p>
               </div>
             </div>
@@ -260,7 +257,7 @@ export function WorldEventPage() {
               </span>
               <div>
                 <p className="text-sm font-medium text-app-text">
-                  Daily completado
+                  {t('worldEvent.dailyCompleted')}
                 </p>
               </div>
             </div>
@@ -270,10 +267,10 @@ export function WorldEventPage() {
         <div className="mt-6 rounded-xl border border-app-border bg-app-surface p-4">
           <div className="flex items-center gap-2">
             <span className="text-lg">🔒</span>
-            <p className="text-sm font-medium text-app-text">Guardián bloqueado</p>
+            <p className="text-sm font-medium text-app-text">{t('worldEvent.guardianLocked')}</p>
           </div>
           <p className="mt-1 text-xs text-app-subtle">
-            Completa la preparación para desafiarlo.
+            {t('worldEvent.guardianLockedDesc')}
           </p>
         </div>
 
@@ -282,7 +279,7 @@ export function WorldEventPage() {
           className="mt-4 w-full"
           variant="secondary"
         >
-          Practicar {regionName}
+          {t('worldEvent.practiceRegion', { region: regionName })}
         </Button>
       </div>
     );
@@ -292,18 +289,18 @@ export function WorldEventPage() {
     const { boss, event } = eventData;
     const region = event.region;
     const emoji = REGION_EMOJI[region] || '🌍';
-    const regionName = REGION_LABELS[region] || region;
+    const regionName = t(`worldEvent.region.${region}`);
 
     return (
       <div className="mx-auto max-w-lg px-4 py-6">
         <div className="mb-6 text-center">
           <span className="text-4xl">{emoji}</span>
           <h1 className="mt-2 text-xl font-bold text-app-text">
-            Expedición {regionName}
+            {t('worldEvent.expedition', { region: regionName })}
           </h1>
           {boss.cleared && (
             <p className="mt-1 text-sm text-green-500">
-              Guardián derrotado
+              {t('worldEvent.guardianDefeated')}
             </p>
           )}
         </div>
@@ -311,10 +308,12 @@ export function WorldEventPage() {
         {boss.cleared && (
           <div className="mb-4 rounded-xl border border-green-500/30 bg-green-500/10 p-4 text-center">
             <p className="text-sm font-medium text-green-400">
-              Mejor: {boss.bestCorrect} / 10
+              {t('worldEvent.best', { correct: boss.bestCorrect })}
             </p>
             <p className="text-xs text-app-subtle">
-              {boss.attempts} intento{boss.attempts !== 1 ? 's' : ''}
+              {boss.attempts === 1
+                ? t('worldEvent.attempts', { count: boss.attempts })
+                : t('worldEvent.attemptsPlural', { count: boss.attempts })}
             </p>
           </div>
         )}
@@ -323,11 +322,11 @@ export function WorldEventPage() {
           <div className="flex items-center gap-2">
             <span className="text-lg">🔥</span>
             <p className="text-sm font-medium text-app-text">
-              {boss.cleared ? 'Guardián disponible' : 'Guardián desbloqueado'}
+              {boss.cleared ? t('worldEvent.guardianAvailable') : t('worldEvent.guardianUnlocked')}
             </p>
           </div>
           <p className="mt-1 text-xs text-app-subtle">
-            10 preguntas. Necesitas 7 golpes para derrotarlo.
+            {t('worldEvent.bossDescription')}
           </p>
         </div>
 
@@ -335,7 +334,7 @@ export function WorldEventPage() {
           onClick={handleStartBoss}
           className="mt-4 w-full"
         >
-          {boss.cleared ? 'Jugar otra vez' : 'Enfrentar Guardián'}
+          {boss.cleared ? t('worldEvent.playAgain') : t('worldEvent.faceGuardian')}
         </Button>
 
         {!boss.cleared && (
@@ -344,7 +343,7 @@ export function WorldEventPage() {
             className="mt-2 w-full"
             variant="secondary"
           >
-            Practicar {regionName}
+            {t('worldEvent.practiceRegion', { region: regionName })}
           </Button>
         )}
       </div>
@@ -352,15 +351,16 @@ export function WorldEventPage() {
   }
 
   if (pageState === 'playing' && bossData && currentQuestion) {
-    const progress = results.length;
+    const progress = bossData.questionIndex + 1;
     const total = bossData.totalQuestions;
+    const regionName = t(`worldEvent.region.${bossData.region}`);
 
     return (
       <div className="mx-auto max-w-lg px-4 py-4">
         {/* Boss Header */}
         <div className="mb-4 text-center">
           <h1 className="text-lg font-bold text-app-text">
-            🔥 Guardián de {REGION_LABELS[bossData.region] || bossData.region}
+            {t('worldEvent.bossTitle', { region: regionName })}
           </h1>
           <div className="mt-2 flex justify-center gap-1">
             {Array.from({ length: bossData.boss.hitsRequired }).map((_, i) => (
@@ -373,7 +373,7 @@ export function WorldEventPage() {
             ))}
           </div>
           <p className="mt-1 text-xs text-app-subtle">
-            Pregunta {progress + 1} / {total}
+            {t('worldEvent.question', { current: progress, total })}
           </p>
         </div>
 
@@ -435,11 +435,13 @@ export function WorldEventPage() {
         {showResult && (
           <div className="mt-4 rounded-xl border border-app-border bg-app-surface p-3 text-center">
             <p className={`text-sm font-medium ${lastAnswerCorrect ? 'text-green-400' : 'text-red-400'}`}>
-              {lastAnswerCorrect ? '¡Correcto! +100' : 'Incorrecto'}
+              {lastAnswerCorrect
+                ? t('worldEvent.correctFeedback', { points: lastPoints })
+                : t('worldEvent.incorrectFeedback')}
             </p>
             {!lastAnswerCorrect && (
               <p className="mt-1 text-xs text-app-subtle">
-                Respuesta: {lastCorrectAnswer}
+                {t('worldEvent.answerWas', { answer: lastCorrectAnswer })}
               </p>
             )}
           </div>
@@ -448,7 +450,11 @@ export function WorldEventPage() {
         {/* Score */}
         <div className="mt-4 text-center">
           <p className="text-sm text-app-subtle">
-            Score: {score} | Golpes: {bossData.boss.hitsRequired - bossHp} / {bossData.boss.hitsRequired}
+            {t('worldEvent.scoreLine', {
+              score,
+              hits: bossData.boss.hitsRequired - bossHp,
+              required: bossData.boss.hitsRequired,
+            })}
           </p>
         </div>
       </div>
@@ -463,7 +469,7 @@ export function WorldEventPage() {
         <div className="mb-6 text-center">
           <span className="text-4xl">{cleared ? '🎉' : '💪'}</span>
           <h1 className="mt-2 text-xl font-bold text-app-text">
-            {cleared ? 'Guardián Derrotado' : 'El Guardián Resiste'}
+            {cleared ? t('worldEvent.guardianDefeated') : t('worldEvent.guardianResists')}
           </h1>
           <p className="mt-1 text-2xl font-bold text-app-text">
             {correctCount} / {bossData.totalQuestions}
@@ -476,7 +482,7 @@ export function WorldEventPage() {
         {cleared && (
           <div className="mb-4 rounded-xl border border-green-500/30 bg-green-500/10 p-4 text-center">
             <p className="text-sm font-medium text-green-400">
-              ¡Excelente trabajo!
+              {t('worldEvent.greatWork')}
             </p>
           </div>
         )}
@@ -484,17 +490,17 @@ export function WorldEventPage() {
         {!cleared && (
           <div className="mb-4 rounded-xl border border-app-border bg-app-surface p-4 text-center">
             <p className="text-sm text-app-secondary">
-              Prepárate y vuelve a intentarlo.
+              {t('worldEvent.tryAgain')}
             </p>
           </div>
         )}
 
         <div className="space-y-2">
           <Button onClick={handleStartBoss} className="w-full">
-            Jugar otra vez
+            {t('worldEvent.playAgain')}
           </Button>
           <Button onClick={() => navigate('/menu')} variant="secondary" className="w-full">
-            Volver al viaje
+            {t('worldEvent.backToJourney')}
           </Button>
         </div>
       </div>

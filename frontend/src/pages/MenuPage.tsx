@@ -21,11 +21,11 @@ type LobbyPanel = 'practice' | 'compete' | null;
 
 const HOWTO_SEEN_KEY_PREFIX = 'howto_seen_';
 
-function formatTimeLeft(endsAt: string): string {
+function formatTimeLeft(endsAt: string, finishedLabel: string): string {
   const now = Date.now();
   const end = new Date(endsAt).getTime();
   const diff = end - now;
-  if (diff <= 0) return 'Terminado';
+  if (diff <= 0) return finishedLabel;
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
   const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
   if (days > 0) return `${days}d ${hours}h`;
@@ -503,7 +503,9 @@ export function MenuPage() {
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
                 <h2 className="text-sm font-semibold text-app-text">
-                  Expedición {eventData.event.region}
+                  {t('worldEvent.expedition', {
+                    region: t(`worldEvent.region.${eventData.event.region}`),
+                  })}
                 </h2>
                 <span className={`rounded-full border px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide ${
                   eventData.boss.cleared
@@ -515,31 +517,40 @@ export function MenuPage() {
                   {eventLoading
                     ? '...'
                     : eventData.boss.cleared
-                      ? 'Guardián derrotado'
+                      ? t('worldEvent.guardianDefeated')
                       : eventData.boss.unlocked
-                      ? 'Guardián disponible'
-                      : 'Preparación'}
+                      ? t('worldEvent.guardianAvailable')
+                      : t('worldEvent.preparation')}
                 </span>
               </div>
               <p className="mt-0.5 text-xs text-app-subtle">
-                Termina en {formatTimeLeft(eventData.event.endsAt)}
+                {t('worldEvent.endsIn', { time: formatTimeLeft(eventData.event.endsAt, t('worldEvent.finished')) })}
               </p>
               {!eventData.boss.unlocked && (
                 <div className="mt-2 space-y-1">
                   <p className="text-xs text-app-subtle">
-                    {eventData.progress.correctInRegion} / {eventData.progress.correctRequired} respuestas correctas
+                    {t('worldEvent.correctAnswers', {
+                      count: eventData.progress.correctInRegion,
+                      required: eventData.progress.correctRequired,
+                    })}
                   </p>
                   <p className="text-xs text-app-subtle">
-                    {eventData.progress.distinctCategories} / {eventData.progress.categoriesRequired} tipos de desafío
+                    {t('worldEvent.challengeTypes', {
+                      count: eventData.progress.distinctCategories,
+                      required: eventData.progress.categoriesRequired,
+                    })}
                   </p>
                   <p className="text-xs text-app-subtle">
-                    {eventData.progress.dailyCompleted ? '✓' : '○'} Daily completado
+                    {eventData.progress.dailyCompleted ? '✓' : '○'} {t('worldEvent.dailyCompleted')}
                   </p>
                 </div>
               )}
               {eventData.boss.cleared && (
                 <p className="mt-1 text-xs text-app-secondary">
-                  Mejor: {eventData.boss.bestCorrect} / 10 · {eventData.boss.attempts} intento{eventData.boss.attempts !== 1 ? 's' : ''}
+                  {t('worldEvent.best', { correct: eventData.boss.bestCorrect })} ·{' '}
+                  {eventData.boss.attempts === 1
+                    ? t('worldEvent.attempts', { count: eventData.boss.attempts })
+                    : t('worldEvent.attemptsPlural', { count: eventData.boss.attempts })}
                 </p>
               )}
             </div>
@@ -550,10 +561,10 @@ export function MenuPage() {
             className="mt-3 w-full rounded-lg bg-[var(--color-accent)] py-2 text-sm font-semibold text-white pressable"
           >
             {eventData.boss.cleared
-              ? 'Jugar otra vez'
+              ? t('worldEvent.playAgain')
               : eventData.boss.unlocked
-              ? 'Enfrentar Boss'
-              : 'Ver expedición'}
+              ? t('worldEvent.faceBoss')
+              : t('worldEvent.viewExpedition')}
           </button>
         </section>
       )}

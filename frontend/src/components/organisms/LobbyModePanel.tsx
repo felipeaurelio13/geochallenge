@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CategorySelector } from '../molecules/CategorySelector';
 import { hasActiveFilters, type Category, type GameFilters } from '../../types';
@@ -68,6 +69,7 @@ export function LobbyModePanel({
   const { t } = useTranslation();
   const isPractice = type === 'practice';
   const filtersActive = hasActiveFilters(filters);
+  const [showMore, setShowMore] = useState(false);
 
   const filterButtonLabel = filtersActive
     ? t('filters.openActiveFilters', { summary: filterSummary(filters, t) })
@@ -145,7 +147,7 @@ export function LobbyModePanel({
         </p>
       )}
 
-      {/* Format buttons */}
+      {/* Primary formats */}
       <div className="mt-3">
         <p className="mb-1.5 text-xs font-medium text-app-secondary">
           {isPractice ? t('menu.practice.formats') : ''}
@@ -163,26 +165,12 @@ export function LobbyModePanel({
                 helpAriaLabel={t('menu.howToPlayAria', { mode: t('menu.singlePlayer') })}
               />
             )}
-            {onPlayFlash && (
-              <ModeButtonWithHelp
-                icon="⚡"
-                title={t('menu.practice.flash')}
-                desc={t('menu.practice.flashDesc')}
-                onClick={onPlayFlash}
-                disabled={mapDisabled}
-                disabledHint={mapDisabled ? t('menu.practice.flashDisabledMap') : undefined}
-                onOpenHelp={() => onOpenHelp('flash')}
-                helpAriaLabel={t('menu.howToPlayAria', { mode: t('menu.flash') })}
-              />
-            )}
-            {onPlayStreak && (
-              <ModeButtonWithHelp
-                icon="🔥"
-                title={t('menu.practice.streak')}
-                desc={t('menu.practice.streakDesc')}
-                onClick={onPlayStreak}
-                onOpenHelp={() => onOpenHelp('streak')}
-                helpAriaLabel={t('menu.howToPlayAria', { mode: t('menu.streak') })}
+            {onGeoChallenges && (
+              <SpecialButton
+                icon="🧠"
+                title={t('menu.special.geoChallenges')}
+                desc={t('menu.special.geoChallengesDesc')}
+                onClick={onGeoChallenges}
               />
             )}
           </div>
@@ -196,16 +184,6 @@ export function LobbyModePanel({
                 onClick={onCompetitionHub}
               />
             )}
-            {onPlayDuel && (
-              <ModeButtonWithHelp
-                icon="⚔️"
-                title={t('menu.compete.duel')}
-                desc={t('menu.compete.duelDesc')}
-                onClick={onPlayDuel}
-                onOpenHelp={() => onOpenHelp('duel')}
-                helpAriaLabel={t('menu.howToPlayAria', { mode: t('menu.duel') })}
-              />
-            )}
             {onPlayChallenge && (
               <ModeButtonWithHelp
                 icon="🏁"
@@ -216,52 +194,92 @@ export function LobbyModePanel({
                 helpAriaLabel={t('menu.howToPlayAria', { mode: t('menu.challenge') })}
               />
             )}
-            {onPlaySurvival && (
-              <ModeButtonWithHelp
-                icon="☠️"
-                title={t('menu.compete.survival')}
-                desc={t('menu.compete.survivalDesc')}
-                onClick={onPlaySurvival}
-                onOpenHelp={() => onOpenHelp('survival')}
-                helpAriaLabel={t('menu.howToPlayAria', { mode: t('menu.survival') })}
-              />
-            )}
           </div>
         )}
       </div>
 
-      {/* Special challenges */}
-      <div className="mt-4 space-y-2">
-        {isPractice ? (
-          <>
-            {onFlagMaster && (
-              <SpecialButton
-                icon="🏴"
-                title={t('menu.special.flagMaster')}
-                desc={t('menu.special.flagMasterDesc')}
-                onClick={onFlagMaster}
-              />
+      {/* Collapsed extra formats */}
+      <div className="mt-4">
+        <button
+          type="button"
+          onClick={() => setShowMore((v) => !v)}
+          aria-expanded={showMore}
+          className="flex w-full items-center justify-between rounded-lg border border-app-border/50 bg-app-surface/40 px-3 py-2 text-left text-xs font-semibold text-app-subtle transition-colors hover:border-app-border hover:text-app-secondary pressable"
+        >
+          <span>
+            {isPractice ? t('menu.practice.moreTitle') : t('menu.compete.moreTitle')}
+          </span>
+          <span aria-hidden="true" className="text-app-subtle">{showMore ? '▾' : '▸'}</span>
+        </button>
+
+        {showMore && (
+          <div className="mt-2 space-y-2">
+            {isPractice ? (
+              <>
+                {onPlayFlash && (
+                  <ModeButtonWithHelp
+                    icon="⚡"
+                    title={t('menu.practice.flash')}
+                    desc={t('menu.practice.flashDesc')}
+                    onClick={onPlayFlash}
+                    disabled={mapDisabled}
+                    disabledHint={mapDisabled ? t('menu.practice.flashDisabledMap') : undefined}
+                    onOpenHelp={() => onOpenHelp('flash')}
+                    helpAriaLabel={t('menu.howToPlayAria', { mode: t('menu.flash') })}
+                  />
+                )}
+                {onPlayStreak && (
+                  <ModeButtonWithHelp
+                    icon="🔥"
+                    title={t('menu.practice.streak')}
+                    desc={t('menu.practice.streakDesc')}
+                    onClick={onPlayStreak}
+                    onOpenHelp={() => onOpenHelp('streak')}
+                    helpAriaLabel={t('menu.howToPlayAria', { mode: t('menu.streak') })}
+                  />
+                )}
+                {onFlagMaster && (
+                  <SpecialButton
+                    icon="🏴"
+                    title={t('menu.special.flagMaster')}
+                    desc={t('menu.special.flagMasterDesc')}
+                    onClick={onFlagMaster}
+                  />
+                )}
+              </>
+            ) : (
+              <>
+                {onPlayDuel && (
+                  <ModeButtonWithHelp
+                    icon="⚔️"
+                    title={t('menu.compete.duel')}
+                    desc={t('menu.compete.duelDesc')}
+                    onClick={onPlayDuel}
+                    onOpenHelp={() => onOpenHelp('duel')}
+                    helpAriaLabel={t('menu.howToPlayAria', { mode: t('menu.duel') })}
+                  />
+                )}
+                {onPlaySurvival && (
+                  <ModeButtonWithHelp
+                    icon="☠️"
+                    title={t('menu.compete.survival')}
+                    desc={t('menu.compete.survivalDesc')}
+                    onClick={onPlaySurvival}
+                    onOpenHelp={() => onOpenHelp('survival')}
+                    helpAriaLabel={t('menu.howToPlayAria', { mode: t('menu.survival') })}
+                  />
+                )}
+                {onGeoChallengesDuel && (
+                  <SpecialButton
+                    icon="🧠⚔️"
+                    title={t('menu.special.geoChallengesDuel')}
+                    desc={t('menu.special.geoChallengesDuelDesc')}
+                    onClick={onGeoChallengesDuel}
+                  />
+                )}
+              </>
             )}
-            {onGeoChallenges && (
-              <SpecialButton
-                icon="🧠"
-                title={t('menu.special.geoChallenges')}
-                desc={t('menu.special.geoChallengesDesc')}
-                onClick={onGeoChallenges}
-              />
-            )}
-          </>
-        ) : (
-          <>
-            {onGeoChallengesDuel && (
-              <SpecialButton
-                icon="🧠⚔️"
-                title={t('menu.special.geoChallengesDuel')}
-                desc={t('menu.special.geoChallengesDuelDesc')}
-                onClick={onGeoChallengesDuel}
-              />
-            )}
-          </>
+          </div>
         )}
       </div>
     </section>

@@ -10,7 +10,7 @@ export const BOSS_TOTAL_QUESTIONS = 10;
 export const BOSS_HP_REQUIRED = 7;
 export const BOSS_MAX_ATTEMPTS_PER_TIER = 200;
 
-const BOSS_CATEGORIES = [
+const BOSS_CATEGORIES: Category[] = [
   Category.FLAG,
   Category.CAPITAL,
   Category.SILHOUETTE,
@@ -66,6 +66,14 @@ export interface PublicBossQuestion {
   difficulty: Difficulty | null;
 }
 
+export interface BossPoolQuestion {
+  id: string;
+  category: Category;
+  countryCode: string;
+  continent: string;
+  difficulty: Difficulty | null;
+}
+
 /**
  * Pure function: compute the event window for any given timestamp.
  * Uses deterministic rotation: epoch + weeks mod 5.
@@ -101,6 +109,19 @@ export function getCurrentWorldEvent(): WorldEventWindow {
 }
 
 /**
+ * Derive the event window directly from an eventId (YYYY-MM-DD Monday).
+ * Validates the id actually maps back to itself so callers never get a
+ * window that disagrees with the eventId they were given.
+ */
+export function getWorldEventWindowForId(eventId: string): WorldEventWindow {
+  const window = getWorldEventWindow(new Date(`${eventId}T12:00:00.000Z`));
+  if (window.eventId !== eventId) {
+    throw new Error(`INVALID_EVENT_ID: ${eventId}`);
+  }
+  return window;
+}
+
+/**
  * Map a continent string to a WorldEventRegion.
  * Reuses the same semantics as Daily World Tour.
  */
@@ -120,26 +141,17 @@ export function mapContinentToEventRegion(continent: string): WorldEventRegion |
 
 /**
  * Compute event progress for a user. All derived from persisted sources, no counters.
+ * The event window is derived from the eventId directly — a WorldEventPlan is
+ * NOT required (it may not exist before the first boss start).
  */
 export async function getWorldEventProgress(
   userId: string,
   eventId: string,
   region: WorldEventRegion,
 ): Promise<WorldEventProgress> {
-  const window = await prisma.worldEventPlan.findUnique({ where: { eventId } });
-  if (!window) {
-    return {
-      correctInRegion: 0,
-      correctRequired: 8,
-      distinctCategories: 0,
-      categoriesRequired: 3,
-      dailyCompleted: false,
-      bossUnlocked: false,
-    };
-  }
+  const window = getWorldEventWindowForId(eventId);
 
-  // Get all correct MasteryAttempts for this user during the event window,
-  // in countries belonging to the event region
+  // Get all correct MasteryAttempts for this user during the event window
   const attempts = await prisma.masteryAttempt.findMany({
     where: {
       userId,
@@ -152,15 +164,8 @@ export async function getWorldEventProgress(
     },
   });
 
-  // Filter to attempts in the event region
-  const regionAttempts = attempts.filter((a) => {
-    // We need to resolve countryCode to region via Question.continent
-    // For now, we'll count all correct attempts and filter by region in the query
-    return true; // Will be filtered below
-  });
-
-  // Get questions to resolve continent -> region
-  const countryCodes = [...new Set(regionAttempts.map((a) => a.countryCode))];
+  // Resolve countryCode -> region via Question.continent
+  const countryCodes = [...new Set(attempts.filter((a) => a.countryCode !== null).map((a) => a.countryCode))];
   const questions = await prisma.question.findMany({
     where: { countryCode: { in: countryCodes } },
     select: { countryCode: true, continent: true },
@@ -174,7 +179,9 @@ export async function getWorldEventProgress(
     }
   }
 
-  const correctInRegion = regionAttempts.filter((a) => {
+  const correctInRegion = attempts.filter((a) => {
+    if (!a.countryCode) return false;
+    if (!BOSS_CATEGORIES.includes(a.category)) return false; // MIXED/MAP don't count toward boss prep
     const r = countryCodeToRegion.get(a.countryCode);
     return r === region;
   });
@@ -209,13 +216,7 @@ export async function getWorldEventProgress(
 /**
  * Fetch the question pool for boss generation.
  */
-async function fetchBossPool(): Promise<Array<{
-  id: string;
-  category: Category;
-  countryCode: string;
-  continent: string;
-  difficulty: Difficulty | null;
-}>> {
+async function fetchBossPool(): Promise<BossPoolQuestion[]> {
   const raw = await prisma.question.findMany({
     where: {
       isAvailable: true,
@@ -247,7 +248,7 @@ async function fetchBossPool(): Promise<Array<{
  * Try to build a boss question set for a given tier.
  */
 function tryBuildBoss(
-  pool: Array<{ id: string; category: Category; countryCode: string; continent: string; difficulty: Difficulty | null }>,
+  pool: BossPoolQuestion[],
   region: WorldEventRegion,
   eventId: string,
   tier: number,
@@ -324,31 +325,33 @@ function tryBuildBoss(
   return stops;
 }
 
+function buildPlanFromStops(eventId: string, region: WorldEventRegion, stops: BossStop[]): WorldEventPlanData {
+  return {
+    eventId,
+    version: WORLD_EVENT_VERSION,
+    region,
+    questionIds: stops.map((s) => s.questionId),
+    stops,
+    startsAt: new Date(`${eventId}T00:00:00.000Z`),
+    endsAt: new Date(new Date(`${eventId}T00:00:00.000Z`).getTime() + 7 * 24 * 60 * 60 * 1000),
+  };
+}
+
 /**
- * Build a boss plan for the given event.
+ * Pure boss composer core. Given a question pool it builds a valid 10-question
+ * boss for a region/event, trying Tier 1 (MEDIUM/HARD) then Tier 2 (any).
+ * No Prisma access — fully testable with fixture pools.
  */
-export async function buildWorldEventBoss(
+export function buildBossFromPool(
+  pool: BossPoolQuestion[],
   eventId: string,
   region: WorldEventRegion,
-): Promise<{ plan: WorldEventPlanData; tier: number }> {
-  const pool = await fetchBossPool();
-
+): { plan: WorldEventPlanData; tier: number } {
   // Tier 1: MEDIUM/HARD only
   for (let attempt = 0; attempt < BOSS_MAX_ATTEMPTS_PER_TIER; attempt++) {
     const stops = tryBuildBoss(pool, region, eventId, 1, attempt);
     if (stops) {
-      return {
-        plan: {
-          eventId,
-          version: WORLD_EVENT_BOSS_VERSION,
-          region,
-          questionIds: stops.map((s) => s.questionId),
-          stops,
-          startsAt: new Date(`${eventId}T00:00:00.000Z`),
-          endsAt: new Date(new Date(`${eventId}T00:00:00.000Z`).getTime() + 7 * 24 * 60 * 60 * 1000),
-        },
-        tier: 1,
-      };
+      return { plan: buildPlanFromStops(eventId, region, stops), tier: 1 };
     }
   }
 
@@ -356,22 +359,22 @@ export async function buildWorldEventBoss(
   for (let attempt = 0; attempt < BOSS_MAX_ATTEMPTS_PER_TIER; attempt++) {
     const stops = tryBuildBoss(pool, region, eventId, 2, attempt);
     if (stops) {
-      return {
-        plan: {
-          eventId,
-          version: WORLD_EVENT_BOSS_VERSION,
-          region,
-          questionIds: stops.map((s) => s.questionId),
-          stops,
-          startsAt: new Date(`${eventId}T00:00:00.000Z`),
-          endsAt: new Date(new Date(`${eventId}T00:00:00.000Z`).getTime() + 7 * 24 * 60 * 60 * 1000),
-        },
-        tier: 2,
-      };
+      return { plan: buildPlanFromStops(eventId, region, stops), tier: 2 };
     }
   }
 
   throw new Error('EVENT_BOSS_POOL_INSUFFICIENT');
+}
+
+/**
+ * Build a boss plan for the given event (fetches the pool from the DB).
+ */
+export async function buildWorldEventBoss(
+  eventId: string,
+  region: WorldEventRegion,
+): Promise<{ plan: WorldEventPlanData; tier: number }> {
+  const pool = await fetchBossPool();
+  return buildBossFromPool(pool, eventId, region);
 }
 
 /**
