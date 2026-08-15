@@ -54,6 +54,12 @@ vi.mock('../services/api', () => ({
       skills: [],
     }),
     getDailyStatus: mocks.getDailyStatus,
+    getCurrentEvent: vi.fn().mockResolvedValue({
+      event: { eventId: '2026-08-10', region: 'AFRICA', startsAt: '2026-08-10', endsAt: '2026-08-17', version: 'weekly-world-event-v1' },
+      progress: { correctInRegion: 0, correctRequired: 8, distinctCategories: 0, categoriesRequired: 3, dailyCompleted: false, bossUnlocked: false },
+      boss: { unlocked: false, cleared: false, attempts: 0, bestCorrect: 0, bestScore: 0, activeAttempt: null },
+      serverNow: new Date().toISOString(),
+    }),
   },
 }));
 

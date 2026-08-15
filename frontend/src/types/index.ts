@@ -33,7 +33,7 @@ export type CompetitiveTier =
   | 'ATLAS_MASTER';
 export type GameMechanicKey = 'intel5050' | 'focusTime' | 'streakShield';
 
-export type GameVariant = 'CLASSIC' | 'STREAK' | 'FLASH' | 'FLAG_MASTER' | 'GEO_CHALLENGE' | 'PRACTICE';
+export type GameVariant = 'CLASSIC' | 'STREAK' | 'FLASH' | 'FLAG_MASTER' | 'GEO_CHALLENGE' | 'PRACTICE' | 'EVENT_BOSS';
 
 export type Difficulty = 'EASY' | 'MEDIUM' | 'HARD';
 
@@ -649,4 +649,87 @@ export interface AdaptivePracticeStartResponse {
   sessionId: string;
   questions: PublicQuestion[];
   gameConfig: GameConfig;
+}
+
+// ─── World Event ─────────────────────────────────────────────────────────────
+
+export type WorldEventRegion = 'AFRICA' | 'AMERICAS' | 'ASIA' | 'EUROPE' | 'OCEANIA';
+
+export interface WorldEventInfo {
+  eventId: string;
+  version: string;
+  region: WorldEventRegion;
+  startsAt: string;
+  endsAt: string;
+}
+
+export interface WorldEventProgress {
+  correctInRegion: number;
+  correctRequired: number;
+  distinctCategories: number;
+  categoriesRequired: number;
+  dailyCompleted: boolean;
+  bossUnlocked: boolean;
+}
+
+export interface WorldEventBossStatus {
+  unlocked: boolean;
+  cleared: boolean;
+  attempts: number;
+  bestCorrect: number;
+  bestScore: number;
+  activeAttempt: {
+    id: string;
+    currentQuestionIndex: number;
+    expiresAt: string;
+  } | null;
+}
+
+export interface WorldEventCurrentResponse {
+  event: WorldEventInfo;
+  progress: WorldEventProgress;
+  boss: WorldEventBossStatus;
+  serverNow: string;
+}
+
+export interface WorldEventBossQuestion {
+  questionId: string;
+  category: Category;
+  questionText: string;
+  options: string[];
+  imageUrl: string | null;
+  questionData: string;
+  difficulty: Difficulty | null;
+}
+
+export interface WorldEventBossStartResponse {
+  resumed: boolean;
+  attemptId: string;
+  eventId: string;
+  region: WorldEventRegion;
+  questionIndex: number;
+  totalQuestions: number;
+  correctCount: number;
+  score: number;
+  expiresAt: string;
+  question: WorldEventBossQuestion;
+  timeLimit: number;
+  boss: {
+    hitsRequired: number;
+    hits: number;
+  };
+}
+
+export interface WorldEventBossAnswerResponse {
+  questionId: string;
+  isCorrect: boolean;
+  points: number;
+  correctAnswer: string;
+  questionIndex: number;
+  nextQuestionIndex: number;
+  correctCount: number;
+  score: number;
+  totalQuestions: number;
+  isFinal: boolean;
+  cleared?: boolean;
 }

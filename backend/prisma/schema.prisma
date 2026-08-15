@@ -37,6 +37,7 @@ model User {
   passwordResetTokens PasswordResetToken[]
   telemetryEvents    TelemetryEvent[]
   masteryAttempts    MasteryAttempt[]
+  bossAttempts       WorldEventBossAttempt[]
 
   @@index([highScore(sort: Desc)])
   @@map("users")
@@ -195,6 +196,7 @@ enum GameVariant {
   GEO_CHALLENGE
   DAILY
   PRACTICE
+  EVENT_BOSS
 }
 
 enum CompetitiveLadder {
@@ -401,4 +403,74 @@ model DailyChallengePlan {
 enum TelemetrySource {
   SERVER
   CLIENT
+}
+
+enum WorldEventRegion {
+  AFRICA
+  AMERICAS
+  ASIA
+  EUROPE
+  OCEANIA
+}
+
+enum WorldEventBossAttemptStatus {
+  ACTIVE
+  COMPLETED
+  ABANDONED
+}
+
+model WorldEventPlan {
+  eventId      String           @id
+  version      String
+  region       WorldEventRegion
+  questionIds  Json
+  stops        Json
+  startsAt     DateTime
+  endsAt       DateTime
+  createdAt    DateTime         @default(now())
+
+  attempts WorldEventBossAttempt[]
+
+  @@index([startsAt])
+  @@map("world_event_plans")
+}
+
+model WorldEventBossAttempt {
+  id                   String @id @default(cuid())
+  eventId              String
+  userId               String
+  status               WorldEventBossAttemptStatus @default(ACTIVE)
+  currentQuestionIndex Int @default(0)
+  correctCount         Int @default(0)
+  score                Int @default(0)
+  questionStartedAt    DateTime?
+  startedAt            DateTime @default(now())
+  expiresAt            DateTime
+  finishedAt           DateTime?
+
+  event   WorldEventPlan       @relation(fields: [eventId], references: [eventId])
+  user    User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  answers WorldEventBossAnswer[]
+
+  @@index([userId, eventId, startedAt])
+  @@index([status, expiresAt])
+  @@map("world_event_boss_attempts")
+}
+
+model WorldEventBossAnswer {
+  id            String @id @default(cuid())
+  attemptId     String
+  questionId    String
+  questionIndex Int
+  userAnswer    String
+  isCorrect     Boolean
+  points        Int
+  answeredAt    DateTime @default(now())
+
+  attempt WorldEventBossAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+
+  @@unique([attemptId, questionIndex])
+  @@unique([attemptId, questionId])
+  @@index([attemptId])
+  @@map("world_event_boss_answers")
 }

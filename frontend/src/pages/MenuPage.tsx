@@ -11,7 +11,7 @@ import { FilterDrawer } from '../components/molecules/FilterDrawer';
 import { Modal } from '../components/organisms/Modal';
 import { LobbyJourneyCard } from '../components/organisms/LobbyJourneyCard';
 import { LobbyModePanel } from '../components/organisms/LobbyModePanel';
-import { filtersToParams, type Category, type Difficulty, type GameFilters, type MasterySummary, type DailyStatus } from '../types';
+import { filtersToParams, type Category, type Difficulty, type GameFilters, type MasterySummary, type DailyStatus, type WorldEventCurrentResponse } from '../types';
 import { api } from '../services/api';
 import { trackUxEvent } from '../utils/uxTelemetry';
 import { CONTINENT_IDS, DIFFICULTY_IDS } from '../constants/filters';
@@ -20,6 +20,18 @@ type GameModeId = 'flash' | 'single' | 'duel' | 'challenge' | 'streak' | 'surviv
 type LobbyPanel = 'practice' | 'compete' | null;
 
 const HOWTO_SEEN_KEY_PREFIX = 'howto_seen_';
+
+function formatTimeLeft(endsAt: string): string {
+  const now = Date.now();
+  const end = new Date(endsAt).getTime();
+  const diff = end - now;
+  if (diff <= 0) return 'Terminado';
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  if (days > 0) return `${days}d ${hours}h`;
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  return `${hours}h ${minutes}m`;
+}
 
 function buildUrl(base: string, params: Record<string, string>) {
   const merged = { ...params };
@@ -114,6 +126,8 @@ export function MenuPage() {
   const [masteryLoading, setMasteryLoading] = useState(true);
   const [dailyStatus, setDailyStatus] = useState<DailyStatus | null>(null);
   const [dailyLoading, setDailyLoading] = useState(false);
+  const [eventData, setEventData] = useState<WorldEventCurrentResponse | null>(null);
+  const [eventLoading, setEventLoading] = useState(false);
   const [activePanel, setActivePanel] = useState<LobbyPanel>(null);
 
   const [selectedCategory, setSelectedCategory] = useLocalStorage<Category>(
@@ -261,6 +275,16 @@ export function MenuPage() {
       .finally(() => setDailyLoading(false));
   }, [user]);
 
+  // World Event status
+  useEffect(() => {
+    if (!user) return;
+    setEventLoading(true);
+    api.getCurrentEvent()
+      .then(setEventData)
+      .catch(() => {})
+      .finally(() => setEventLoading(false));
+  }, [user]);
+
   // app_open telemetry
   useEffect(() => {
     const key = 'geochallenge:app-open-fired';
@@ -293,6 +317,15 @@ export function MenuPage() {
       category: 'MIXED',
     });
     navigate('/daily');
+  }
+
+  function handleEventPlay() {
+    trackUxEvent('mode_selected', {
+      destination: '/event',
+      gameMode: 'event_boss',
+      category: 'MIXED',
+    });
+    navigate('/event');
   }
 
   // Practice handlers
@@ -452,6 +485,75 @@ export function MenuPage() {
             {dailyStatus?.completed
               ? t('menu.daily.viewResult')
               : t('menu.daily.play')}
+          </button>
+        </section>
+      )}
+
+      {/* World Event */}
+      {user && eventData && (
+        <section className="mb-3 rounded-2xl border border-app-border bg-app-surface p-4">
+          <div className="flex items-start gap-3">
+            <span aria-hidden="true" className="shrink-0 text-2xl leading-none">
+              {eventData.event.region === 'AFRICA' && '🌍'}
+              {eventData.event.region === 'AMERICAS' && '🌎'}
+              {eventData.event.region === 'ASIA' && '🌏'}
+              {eventData.event.region === 'EUROPE' && '🏰'}
+              {eventData.event.region === 'OCEANIA' && '🏝️'}
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <h2 className="text-sm font-semibold text-app-text">
+                  Expedición {eventData.event.region}
+                </h2>
+                <span className={`rounded-full border px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide ${
+                  eventData.boss.cleared
+                    ? 'border-green-500/40 bg-green-500/15 text-green-400'
+                    : eventData.boss.unlocked
+                    ? 'border-orange-500/40 bg-orange-500/15 text-orange-400'
+                    : 'border-cyan-500/40 bg-cyan-500/15 text-cyan-400'
+                }`}>
+                  {eventLoading
+                    ? '...'
+                    : eventData.boss.cleared
+                      ? 'Guardián derrotado'
+                      : eventData.boss.unlocked
+                      ? 'Guardián disponible'
+                      : 'Preparación'}
+                </span>
+              </div>
+              <p className="mt-0.5 text-xs text-app-subtle">
+                Termina en {formatTimeLeft(eventData.event.endsAt)}
+              </p>
+              {!eventData.boss.unlocked && (
+                <div className="mt-2 space-y-1">
+                  <p className="text-xs text-app-subtle">
+                    {eventData.progress.correctInRegion} / {eventData.progress.correctRequired} respuestas correctas
+                  </p>
+                  <p className="text-xs text-app-subtle">
+                    {eventData.progress.distinctCategories} / {eventData.progress.categoriesRequired} tipos de desafío
+                  </p>
+                  <p className="text-xs text-app-subtle">
+                    {eventData.progress.dailyCompleted ? '✓' : '○'} Daily completado
+                  </p>
+                </div>
+              )}
+              {eventData.boss.cleared && (
+                <p className="mt-1 text-xs text-app-secondary">
+                  Mejor: {eventData.boss.bestCorrect} / 10 · {eventData.boss.attempts} intento{eventData.boss.attempts !== 1 ? 's' : ''}
+                </p>
+              )}
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={handleEventPlay}
+            className="mt-3 w-full rounded-lg bg-[var(--color-accent)] py-2 text-sm font-semibold text-white pressable"
+          >
+            {eventData.boss.cleared
+              ? 'Jugar otra vez'
+              : eventData.boss.unlocked
+              ? 'Enfrentar Boss'
+              : 'Ver expedición'}
           </button>
         </section>
       )}

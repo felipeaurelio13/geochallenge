@@ -32,6 +32,9 @@ import type {
   CompetitiveLadder,
   CompetitionOverview,
   CompetitionLeaderboardResponse,
+  WorldEventCurrentResponse,
+  WorldEventBossStartResponse,
+  WorldEventBossAnswerResponse,
 } from '../types';
 import { filtersToParams } from '../types';
 import { testAuthBypass } from '../utils/testAuthBypass';
@@ -620,6 +623,26 @@ class ApiService {
     const response = await this.client.post<AdaptivePracticeStartResponse>(
       '/mastery/practice/start',
       { count: count ?? 10, ...(countryCode ? { countryCode } : {}) }
+    );
+    return response.data;
+  }
+
+  // ─── World Event ───────────────────────────────────────────────────────────
+
+  async getCurrentEvent() {
+    const response = await this.client.get<WorldEventCurrentResponse>('/events/current');
+    return response.data;
+  }
+
+  async startBoss() {
+    const response = await this.client.post<WorldEventBossStartResponse>('/events/current/boss/start');
+    return response.data;
+  }
+
+  async bossAnswer(attemptId: string, data: { questionId: string; answer: string }) {
+    const response = await this.client.post<WorldEventBossAnswerResponse>(
+      `/events/boss/${attemptId}/answer`,
+      data
     );
     return response.data;
   }

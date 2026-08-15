@@ -23,12 +23,11 @@ import {
   CompetitionPage,
 } from './pages';
 import { DailyChallengePage } from './pages/DailyChallengePage';
+import { WorldEventPage } from './pages/WorldEventPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import {
   ErrorBoundary,
-  ServerWakeUp,
-  BackendKeepAlive,
   AppRoot,
   Screen,
   AuthRouteLoading,
@@ -185,6 +184,10 @@ export const appRoutes = [
         element: <ProtectedRoute><DailyChallengePage /></ProtectedRoute>,
       },
       {
+        path: '/event',
+        element: <ProtectedRoute><WorldEventPage /></ProtectedRoute>,
+      },
+      {
         path: '/survival',
         element: <ProtectedRoute><SurvivalPage /></ProtectedRoute>,
       },
@@ -220,10 +223,7 @@ const router = createBrowserRouter(
 export function App() {
   return (
     <AppRoot>
-      <ServerWakeUp>
-        <BackendKeepAlive />
-        <RouterProvider router={router} />
-      </ServerWakeUp>
+      <RouterProvider router={router} />
     </AppRoot>
   );
 }

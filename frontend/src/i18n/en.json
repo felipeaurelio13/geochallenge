@@ -989,6 +989,7 @@
     "DUEL_ERROR_GENERIC": "We couldn't continue the duel. Please try again.",
     "SURVIVAL_ERROR_GENERIC": "Something went wrong in the survival match. Please try again.",
     "RATE_LIMITED": "For safety we paused attempts for a moment. Try again in {{minutes}} min",
-    "INTERNAL": "Something went wrong on our end 😓 It's already been logged (ref: {{requestId}}). Please try again in a moment."
+    "INTERNAL": "Something went wrong on our end 😓 It's already been logged (ref: {{requestId}}). Please try again in a moment.",
+    "EVENT_BOSS_LOCKED": "Complete the preparation to challenge the Guardian"
   }
 }

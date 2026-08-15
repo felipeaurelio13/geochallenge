@@ -11,7 +11,9 @@ export type AchievementKey =
   | 'FIRST_WIN'
   | 'DAILY_FIRST'
   | 'DAILY_7'
-  | 'DAILY_30';
+  | 'DAILY_30'
+  | 'BOSS_FIRST'
+  | 'BOSS_PERFECT';
 
 export interface EarnedAchievement {
   key: string;
@@ -24,7 +26,7 @@ export interface EarnedAchievement {
   meta?: Record<string, unknown> | null;
 }
 
-// Achievement table has exactly 10 fixed rows seeded in the migration; never changes at runtime.
+// Achievement table has exactly 12 fixed rows seeded in the migration; never changes at runtime.
 // Cache key→id mapping once per process lifetime to avoid re-querying on every game finish.
 const achievementIdCache = new Map<string, string>();
 
@@ -142,4 +144,24 @@ export async function getUserAchievements(userId: string): Promise<EarnedAchieve
     earnedAt: r.earnedAt,
     meta: r.meta as Record<string, unknown> | null,
   }));
+}
+
+export async function evaluateAchievementsAfterBoss(
+  userId: string,
+  correctCount: number,
+): Promise<AchievementKey[]> {
+  await ensureCache();
+
+  const earnedRows = await prisma.userAchievement.findMany({
+    where: { userId },
+    select: { achievementId: true },
+  });
+  const earnedSet = new Set(earnedRows.map((r) => r.achievementId));
+
+  const candidates: { key: AchievementKey; meta?: Record<string, unknown> }[] = [];
+
+  if (correctCount >= 7) candidates.push({ key: 'BOSS_FIRST', meta: { correctCount } });
+  if (correctCount === 10) candidates.push({ key: 'BOSS_PERFECT', meta: { correctCount } });
+
+  return grantNewAchievements(userId, candidates, earnedSet);
 }

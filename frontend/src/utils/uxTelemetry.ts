@@ -7,7 +7,10 @@ type ClientEventName =
   | 'round_timeout'
   | 'option_mis_tap'
   | 'offline_practice_started'
-  | 'ui_error';
+  | 'ui_error'
+  | 'game_started'
+  | 'question_answered'
+  | 'game_finished';
 
 interface ClientEvent {
   eventKey: string;
