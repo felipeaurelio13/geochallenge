@@ -16,7 +16,7 @@ const BOSS_CATEGORIES: Category[] = [
   Category.CAPITAL,
   Category.SILHOUETTE,
   Category.MONUMENT,
-  Category.CINEMA_GEO,
+
 ];
 
 /**
@@ -30,7 +30,7 @@ const EVENT_PROGRESS_CATEGORIES: Category[] = [
   Category.CAPITAL,
   Category.SILHOUETTE,
   Category.MONUMENT,
-  Category.CINEMA_GEO,
+
 ];
 
 const ALL_REGIONS: WorldEventRegion[] = ['AFRICA', 'AMERICAS', 'ASIA', 'EUROPE', 'OCEANIA'];

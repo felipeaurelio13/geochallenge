@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { Question } from '../types';
 import { useImageWithFallback } from '../hooks/useImageWithFallback';
 import { useTranslation } from 'react-i18next';
-import { parseCinemaGeoQuestionData } from '../data/cinemaGeo';
 import { getLocalizedQuestionText } from '../utils/questionText';
 
 interface QuestionCardProps {
@@ -79,16 +78,12 @@ export function QuestionCard({
 
   const { src: normalizedImageUrl, hasError: hasImageError, handleError: handleImageError } = useImageWithFallback(primaryImageUrl, onImageError);
 
-  // CINEMA_GEO v2 never carries an image — the movie card is rendered client-side from
-  // the embedded movie title/year. So showQuestionImage excludes it.
   const showQuestionImage =
     Boolean(normalizedImageUrl) &&
     !hasImageError &&
     (question.category === 'FLAG' || question.category === 'SILHOUETTE' || question.category === 'MONUMENT');
 
   const isCompactMediaMode = compact && showQuestionImage;
-
-  const cinemaPayload = question.category === 'CINEMA_GEO' ? parseCinemaGeoQuestionData(question.questionData) : null;
 
   const getImageContainerClassName = () => {
     if (question.category === 'FLAG') {

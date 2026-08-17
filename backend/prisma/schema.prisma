@@ -8,36 +8,35 @@ datasource db {
 }
 
 model User {
-  id                String      @id @default(cuid())
-  username          String      @unique
-  email             String      @unique
-  passwordHash      String
-  preferredLanguage String      @default("es")
+  id                       String                    @id @default(cuid())
+  username                 String                    @unique
+  email                    String                    @unique
+  passwordHash             String
+  preferredLanguage        String                    @default("es")
   /// Legacy: exclusively the best-ever Classic Single score. Not updated by Streak, Flash, Flag Master, GeoRetos, Duel, Survival, or Challenges.
-  highScore         Int         @default(0)
-  gamesPlayed       Int         @default(0)
-  wins              Int         @default(0)
-  losses            Int         @default(0)
-  dailyStreak       Int         @default(0)
-  lastDailyDate     String?
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
-
+  highScore                Int                       @default(0)
+  gamesPlayed              Int                       @default(0)
+  wins                     Int                       @default(0)
+  losses                   Int                       @default(0)
+  dailyStreak              Int                       @default(0)
+  lastDailyDate            String?
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
   // Relaciones
-  games              GameResult[]
-  challengesCreated  Challenge[]            @relation("ChallengeCreator")
-  challengeParticipations ChallengeParticipant[]
-  duelMatchesAsP1    DuelMatch[] @relation("DuelMatchAsP1")
-  duelMatchesAsP2    DuelMatch[] @relation("DuelMatchAsP2")
-  duelMatchesWon     DuelMatch[] @relation("DuelMatchAsWinner")
-  competitiveRatings CompetitiveRating[]
+  games                    GameResult[]
+  challengesCreated        Challenge[]               @relation("ChallengeCreator")
+  challengeParticipations  ChallengeParticipant[]
+  duelMatchesAsP1          DuelMatch[]               @relation("DuelMatchAsP1")
+  duelMatchesAsP2          DuelMatch[]               @relation("DuelMatchAsP2")
+  duelMatchesWon           DuelMatch[]               @relation("DuelMatchAsWinner")
+  competitiveRatings       CompetitiveRating[]
   competitiveRatingChanges CompetitiveRatingChange[]
-  achievements       UserAchievement[]
-  survivalParticipations SurvivalParticipant[]
-  passwordResetTokens PasswordResetToken[]
-  telemetryEvents    TelemetryEvent[]
-  masteryAttempts    MasteryAttempt[]
-  bossAttempts       WorldEventBossAttempt[]
+  achievements             UserAchievement[]
+  survivalParticipations   SurvivalParticipant[]
+  passwordResetTokens      PasswordResetToken[]
+  telemetryEvents          TelemetryEvent[]
+  masteryAttempts          MasteryAttempt[]
+  bossAttempts             WorldEventBossAttempt[]
 
   @@index([highScore(sort: Desc)])
   @@map("users")
@@ -50,8 +49,7 @@ model PasswordResetToken {
   expiresAt DateTime
   usedAt    DateTime?
   createdAt DateTime  @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([tokenHash])
   @@index([userId])
@@ -59,17 +57,17 @@ model PasswordResetToken {
 }
 
 model Question {
-  id             String   @id @default(cuid())
+  id             String     @id @default(cuid())
   category       Category
-  questionData   String   // Nombre del país/ciudad o prompt
+  questionData   String // Nombre del país/ciudad o prompt
   options        String[] // Opciones para múltiple choice
   correctAnswer  String
-  imageUrl       String?  // URL de bandera o silueta
-  latitude       Float?   // Para preguntas de mapa
-  longitude      Float?   // Para preguntas de mapa
-  continent      String?  // Para generar distractores regionales
+  imageUrl       String? // URL de bandera o silueta
+  latitude       Float? // Para preguntas de mapa
+  longitude      Float? // Para preguntas de mapa
+  continent      String? // Para generar distractores regionales
   difficulty     Difficulty @default(MEDIUM)
-  isAvailable    Boolean  @default(true) // false = imagen no accesible en ningún CDN
+  isAvailable    Boolean    @default(true) // false = imagen no accesible en ningún CDN
   isInsular      Boolean?
   isLandlocked   Boolean?
   subregion      String?
@@ -77,7 +75,7 @@ model Question {
   areaTier       String?
   flagComplexity String?
   countryCode    String?
-  createdAt      DateTime @default(now())
+  createdAt      DateTime   @default(now())
 
   @@index([category])
   @@index([isAvailable])
@@ -97,8 +95,7 @@ model MasteryAttempt {
   gameMode    GameMode
   variant     GameVariant
   occurredAt  DateTime    @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, runId, questionId])
   @@index([userId, countryCode, category, occurredAt])
@@ -107,19 +104,18 @@ model MasteryAttempt {
 }
 
 model GameResult {
-  id            String      @id @default(cuid())
-  userId        String
-  score         Int
-  correctCount  Int
+  id             String      @id @default(cuid())
+  userId         String
+  score          Int
+  correctCount   Int
   totalQuestions Int
-  category      Category?
-  gameMode      GameMode    @default(SINGLE)
-  variant       GameVariant @default(CLASSIC)
-  runId         String?     @unique
-  details       Json?       // Desglose de respuestas
-  createdAt     DateTime    @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category       Category?
+  gameMode       GameMode    @default(SINGLE)
+  variant        GameVariant @default(CLASSIC)
+  runId          String?     @unique
+  details        Json? // Desglose de respuestas
+  createdAt      DateTime    @default(now())
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
   @@index([userId, gameMode, variant, createdAt])
@@ -128,21 +124,20 @@ model GameResult {
 }
 
 model Challenge {
-  id              String          @id @default(cuid())
-  creatorId       String
-  status          ChallengeStatus @default(PENDING)
-  categories      Category[]
-  maxPlayers      Int
-  answerTimeSeconds Int          @default(20)
-  questionIds     String[]        // IDs de preguntas para reproducibilidad
-  filters         Json?           // QuestionFilters snapshot — null means no filters applied
-  winnerId        String?
-  createdAt       DateTime        @default(now())
-  expiresAt       DateTime
-  completedAt     DateTime?
-
-  creator User @relation("ChallengeCreator", fields: [creatorId], references: [id], onDelete: Cascade)
-  participants ChallengeParticipant[]
+  id                String                 @id @default(cuid())
+  creatorId         String
+  status            ChallengeStatus        @default(PENDING)
+  categories        Category[]
+  maxPlayers        Int
+  answerTimeSeconds Int                    @default(20)
+  questionIds       String[] // IDs de preguntas para reproducibilidad
+  filters           Json? // QuestionFilters snapshot — null means no filters applied
+  winnerId          String?
+  createdAt         DateTime               @default(now())
+  expiresAt         DateTime
+  completedAt       DateTime?
+  creator           User                   @relation("ChallengeCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  participants      ChallengeParticipant[]
 
   @@index([status, expiresAt])
   @@index([creatorId])
@@ -150,16 +145,15 @@ model Challenge {
 }
 
 model ChallengeParticipant {
-  id          String   @id @default(cuid())
-  challengeId String
-  userId      String
-  score       Int?
+  id           String    @id @default(cuid())
+  challengeId  String
+  userId       String
+  score        Int?
   correctCount Int?
-  joinedAt    DateTime @default(now())
-  completedAt DateTime?
-
-  challenge Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  joinedAt     DateTime  @default(now())
+  completedAt  DateTime?
+  challenge    Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([challengeId, userId])
   @@map("challenge_participants")
@@ -171,7 +165,6 @@ enum Category {
   CAPITAL
   SILHOUETTE
   MONUMENT
-  CINEMA_GEO
   MIXED
 }
 
@@ -217,24 +210,23 @@ enum DuelFinishReason {
 }
 
 model DuelMatch {
-  id           String      @id @default(cuid())
-  runId        String?     @unique
-  player1Id    String
-  player2Id    String
-  winnerId     String?
-  player1Score Int
-  player2Score Int
-  category     Category?
-  variant      GameVariant @default(CLASSIC)
-  rated        Boolean     @default(false)
-  ladder       CompetitiveLadder?
-  finishReason DuelFinishReason?
+  id            String                    @id @default(cuid())
+  runId         String?                   @unique
+  player1Id     String
+  player2Id     String
+  winnerId      String?
+  player1Score  Int
+  player2Score  Int
+  category      Category?
+  variant       GameVariant               @default(CLASSIC)
+  rated         Boolean                   @default(false)
+  ladder        CompetitiveLadder?
+  finishReason  DuelFinishReason?
   ratingVersion Int?
-  createdAt    DateTime    @default(now())
-
-  player1 User  @relation("DuelMatchAsP1", fields: [player1Id], references: [id], onDelete: Cascade)
-  player2 User  @relation("DuelMatchAsP2", fields: [player2Id], references: [id], onDelete: Cascade)
-  winner  User? @relation("DuelMatchAsWinner", fields: [winnerId], references: [id], onDelete: SetNull)
+  createdAt     DateTime                  @default(now())
+  player1       User                      @relation("DuelMatchAsP1", fields: [player1Id], references: [id], onDelete: Cascade)
+  player2       User                      @relation("DuelMatchAsP2", fields: [player2Id], references: [id], onDelete: Cascade)
+  winner        User?                     @relation("DuelMatchAsWinner", fields: [winnerId], references: [id], onDelete: SetNull)
   ratingChanges CompetitiveRatingChange[]
 
   @@index([player1Id, createdAt])
@@ -244,22 +236,18 @@ model DuelMatch {
 }
 
 model CompetitiveRating {
-  userId       String
-  ladder       CompetitiveLadder
-
-  rating       Int      @default(1000)
-  peakRating   Int      @default(1000)
-
-  gamesPlayed  Int      @default(0)
-  wins         Int      @default(0)
-  draws        Int      @default(0)
-  losses       Int      @default(0)
-
-  lastMatchAt  DateTime?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  ladder      CompetitiveLadder
+  rating      Int               @default(1000)
+  peakRating  Int               @default(1000)
+  gamesPlayed Int               @default(0)
+  wins        Int               @default(0)
+  draws       Int               @default(0)
+  losses      Int               @default(0)
+  lastMatchAt DateTime?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([userId, ladder])
   @@index([ladder, rating(sort: Desc)])
@@ -268,22 +256,17 @@ model CompetitiveRating {
 }
 
 model CompetitiveRatingChange {
-  id           String @id @default(cuid())
-
+  id           String             @id @default(cuid())
   duelMatchId  String
   userId       String
   ladder       CompetitiveLadder
-
   outcome      CompetitiveOutcome
-
   ratingBefore Int
   ratingDelta  Int
   ratingAfter  Int
-
-  createdAt    DateTime @default(now())
-
-  duelMatch DuelMatch @relation(fields: [duelMatchId], references: [id], onDelete: Cascade)
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime           @default(now())
+  duelMatch    DuelMatch          @relation(fields: [duelMatchId], references: [id], onDelete: Cascade)
+  user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([duelMatchId, userId])
   @@index([userId, ladder, createdAt])
@@ -292,12 +275,11 @@ model CompetitiveRatingChange {
 }
 
 model SurvivalMatch {
-  id           String   @id @default(cuid())
+  id           String                @id @default(cuid())
   category     Category?
   totalRounds  Int
   peakPlayers  Int
-  createdAt    DateTime @default(now())
-
+  createdAt    DateTime              @default(now())
   participants SurvivalParticipant[]
 
   @@index([createdAt])
@@ -305,17 +287,16 @@ model SurvivalMatch {
 }
 
 model SurvivalParticipant {
-  id             String        @id @default(cuid())
-  matchId        String
-  userId         String
-  finalRank      Int
+  id              String        @id @default(cuid())
+  matchId         String
+  userId          String
+  finalRank       Int
   eliminatedRound Int?
-  finalScore     Int
-  correctCount   Int
-  livesEarned    Int           @default(0)
-
-  match SurvivalMatch @relation(fields: [matchId], references: [id], onDelete: Cascade)
-  user  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  finalScore      Int
+  correctCount    Int
+  livesEarned     Int           @default(0)
+  match           SurvivalMatch @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([matchId])
@@ -331,15 +312,14 @@ enum ChallengeStatus {
 }
 
 model Achievement {
-  id          String   @id @default(cuid())
-  key         String   @unique
-  nameEs      String
-  nameEn      String
-  descEs      String
-  descEn      String
-  icon        String
-
-  earnedBy    UserAchievement[]
+  id       String            @id @default(cuid())
+  key      String            @unique
+  nameEs   String
+  nameEn   String
+  descEs   String
+  descEn   String
+  icon     String
+  earnedBy UserAchievement[]
 
   @@map("achievements")
 }
@@ -350,9 +330,8 @@ model UserAchievement {
   achievementId String
   earnedAt      DateTime    @default(now())
   meta          Json?
-
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
 
   @@unique([userId, achievementId])
   @@map("user_achievements")
@@ -364,23 +343,18 @@ model TelemetryEvent {
   name            String
   source          TelemetrySource
   schemaVersion   Int             @default(1)
-
   userId          String?
   clientSessionId String?
   runId           String?
   gameResultId    String?
-
   gameMode        GameMode?
   variant         GameVariant?
   category        Category?
   questionId      String?
-
   properties      Json?
-
   occurredAt      DateTime
   receivedAt      DateTime        @default(now())
-
-  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user            User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([name, occurredAt])
   @@index([userId, occurredAt])
@@ -420,37 +394,35 @@ enum WorldEventBossAttemptStatus {
 }
 
 model WorldEventPlan {
-  eventId      String           @id
-  version      String
-  region       WorldEventRegion
-  questionIds  Json
-  stops        Json
-  startsAt     DateTime
-  endsAt       DateTime
-  createdAt    DateTime         @default(now())
-
-  attempts WorldEventBossAttempt[]
+  eventId     String                  @id
+  version     String
+  region      WorldEventRegion
+  questionIds Json
+  stops       Json
+  startsAt    DateTime
+  endsAt      DateTime
+  createdAt   DateTime                @default(now())
+  attempts    WorldEventBossAttempt[]
 
   @@index([startsAt])
   @@map("world_event_plans")
 }
 
 model WorldEventBossAttempt {
-  id                   String @id @default(cuid())
+  id                   String                      @id @default(cuid())
   eventId              String
   userId               String
   status               WorldEventBossAttemptStatus @default(ACTIVE)
-  currentQuestionIndex Int @default(0)
-  correctCount         Int @default(0)
-  score                Int @default(0)
+  currentQuestionIndex Int                         @default(0)
+  correctCount         Int                         @default(0)
+  score                Int                         @default(0)
   questionStartedAt    DateTime?
-  startedAt            DateTime @default(now())
+  startedAt            DateTime                    @default(now())
   expiresAt            DateTime
   finishedAt           DateTime?
-
-  event   WorldEventPlan       @relation(fields: [eventId], references: [eventId])
-  user    User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  answers WorldEventBossAnswer[]
+  event                WorldEventPlan              @relation(fields: [eventId], references: [eventId])
+  user                 User                        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  answers              WorldEventBossAnswer[]
 
   @@index([userId, eventId, startedAt])
   @@index([status, expiresAt])
@@ -458,16 +430,15 @@ model WorldEventBossAttempt {
 }
 
 model WorldEventBossAnswer {
-  id            String @id @default(cuid())
+  id            String                @id @default(cuid())
   attemptId     String
   questionId    String
   questionIndex Int
   userAnswer    String
   isCorrect     Boolean
   points        Int
-  answeredAt    DateTime @default(now())
-
-  attempt WorldEventBossAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  answeredAt    DateTime              @default(now())
+  attempt       WorldEventBossAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
 
   @@unique([attemptId, questionIndex])
   @@unique([attemptId, questionId])

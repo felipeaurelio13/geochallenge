@@ -5,7 +5,6 @@ import { triggerHaptic } from '../hooks/useHaptics';
 import { useImageWithFallback } from '../hooks/useImageWithFallback';
 import { useTranslation } from 'react-i18next';
 import { getOptionDisplayLabel } from '../utils/monumentOptions';
-import { parseCinemaGeoQuestionData } from '../data/cinemaGeo';
 
 interface FlashCardProps {
   question: Question;
@@ -23,7 +22,6 @@ const ALT_KEY: Record<string, { key: string; fallback: string }> = {
   FLAG: { key: 'flash.altFlag', fallback: 'Bandera' },
   SILHOUETTE: { key: 'flash.altSilhouette', fallback: 'Silueta' },
   MONUMENT: { key: 'flash.altMonument', fallback: 'Monumento' },
-  CINEMA_GEO: { key: 'flash.altCinema', fallback: 'Pregunta de Cine & Geografía' },
 };
 
 export function FlashCard({ question, onAnswer, disabled, disabledOptions = [], feedback, onImageError }: FlashCardProps) {

@@ -19,7 +19,7 @@ export interface AuthState {
 }
 
 // Game types
-export type Category = 'MAP' | 'FLAG' | 'CAPITAL' | 'SILHOUETTE' | 'MONUMENT' | 'CINEMA_GEO' | 'MIXED';
+export type Category = 'MAP' | 'FLAG' | 'CAPITAL' | 'SILHOUETTE' | 'MONUMENT' | 'MIXED';
 export type GameType = 'single' | 'streak' | 'flash' | 'practice';
 export type GameplayMode = GameType | 'duel' | 'challenge';
 export type DuelMode = 'classic' | 'geo-challenge';
@@ -390,7 +390,7 @@ export type LeaderboardCategoryFilter =
   | 'CAPITAL'
   | 'SILHOUETTE'
   | 'MONUMENT'
-  | 'CINEMA_GEO'
+
   | 'MIXED';
 
 export type LeaderboardVariantFilter = 'CLASSIC' | 'STREAK' | 'FLASH' | 'FLAG_MASTER' | 'GEO_CHALLENGE';

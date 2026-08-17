@@ -92,7 +92,6 @@ vi.mock('react-i18next', () => ({
         'categories.maps': 'Mapas',
         'categories.silhouettes': 'Siluetas',
         'categories.monuments': 'Monumentos',
-        'categories.cinemaGeo': 'Cine & Geo',
         'categories.mixed': 'Mixto',
         'auth.logout': 'Cerrar sesión',
         'filters.filterBy': 'Filtrar',

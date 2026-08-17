@@ -150,28 +150,4 @@ describe('getQuestionsForStreakGame', () => {
     expect(questionKeys).not.toContain('flag|https://flags.example/ar.svg|argentina|argentina');
     expect(new Set(questionKeys).size).toBe(questions.length);
   });
-
-  it('aplica filtros geográficos a CINEMA_GEO (se siembran desde el país de filmación)', async () => {
-    countMock.mockResolvedValue(7);
-
-    const { getAvailableQuestionsCount } = await import('../services/game.service.js');
-    const available = await getAvailableQuestionsCount(Category.CINEMA_GEO, {
-      continent: 'EUROPE',
-      isInsular: true,
-      isLandlocked: false,
-      difficulty: 'HARD',
-    });
-
-    expect(available).toBe(7);
-    expect(countMock).toHaveBeenCalledWith({
-      where: {
-        category: Category.CINEMA_GEO,
-        continent: 'EUROPE',
-        isInsular: true,
-        isLandlocked: false,
-        difficulty: 'HARD',
-        isAvailable: true,
-      },
-    });
-  });
 });

@@ -34,7 +34,7 @@ const SUPPORTED_CATEGORIES: readonly LeaderboardCategoryFilter[] = [
   'CAPITAL',
   'SILHOUETTE',
   'MONUMENT',
-  'CINEMA_GEO',
+
   'MIXED',
 ];
 const SUPPORTED_VARIANTS: readonly LeaderboardVariantFilter[] = [

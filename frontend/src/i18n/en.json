@@ -380,8 +380,7 @@
     "capitals": "Capitals",
     "maps": "Maps",
     "silhouettes": "Silhouettes",
-    "monuments": "Monuments",
-    "cinemaGeo": "Cinema & Geography"
+    "monuments": "Monuments"
   },
   "game": {
     "loading": "Loading questions...",
@@ -402,7 +401,6 @@
     "monumentUnavailable": "Image unavailable",
     "monumentAttribution": "Photo: {{author}} · {{license}}",
     "monumentAttributionSource": "Wikimedia Commons",
-    "questionCinemaFallback": "Where was this scene filmed?",
     "silhouetteUnavailable": "Silhouette unavailable",
     "flagUnavailable": "Flag unavailable",
     "clickMap": "Click on the map to select the location",
@@ -689,7 +687,6 @@
       "CAPITAL": "Capitals",
       "SILHOUETTE": "Silhouettes",
       "MONUMENT": "Monuments",
-      "CINEMA_GEO": "Cinema geo",
       "MIXED": "Mixed"
     },
     "metric": {
@@ -779,12 +776,8 @@
     "altFlag": "Flag",
     "altSilhouette": "Silhouette",
     "altMonument": "Monument",
-    "altCinema": "Cinema & Geography scene",
     "altImage": "Image",
     "altIdentify": "{{kind}} to identify",
-    "cinemaWhereCountry": "In which country was it filmed?",
-    "cinemaWhereCity": "In which city was it filmed?",
-    "cinemaWhereVenue": "Where was it filmed?",
     "ruleCombo": "Combo x1 → x2 → x3 → x5 → x8 → x10",
     "ruleMiss": "A miss resets the combo, the round continues",
     "start": "Start!",

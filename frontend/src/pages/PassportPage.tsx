@@ -253,7 +253,6 @@ function SkillRow({ skill }: { skill: SkillMastery }) {
     MAP: t('categories.map', 'Mapas'),
     SILHOUETTE: t('categories.silhouette', 'Siluetas'),
     MONUMENT: t('categories.monument', 'Monumentos'),
-    CINEMA_GEO: t('categories.cinema_geo', 'Cine & Geografía'),
   };
 
   return (

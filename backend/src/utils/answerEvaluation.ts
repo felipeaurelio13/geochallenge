@@ -26,7 +26,6 @@ export interface EvaluableQuestion {
 
 const MAP_CORRECT_THRESHOLD_KM = 500;
 const MAP_MAX_DISTANCE_KM = 2000;
-const CINEMA_GEO_EXTRA_READ_SECONDS = 5;
 
 export interface AnswerDetail {
   questionId: string;
@@ -64,8 +63,7 @@ export function evaluateTimedAnswers(
     }
     seen.add(submitted.questionId);
 
-    const extraRead = question.category === 'CINEMA_GEO' ? CINEMA_GEO_EXTRA_READ_SECONDS : 0;
-    const duration = answerTimeSeconds + extraRead;
+    const duration = answerTimeSeconds;
 
     let timeRemaining = Math.max(0, submitted.timeRemaining);
     if (timeRemaining > duration) {
@@ -76,8 +74,7 @@ export function evaluateTimedAnswers(
         timeRemaining = duration;
       }
     }
-    const scoringTime =
-      question.category === 'CINEMA_GEO' ? Math.min(timeRemaining, answerTimeSeconds) : timeRemaining;
+    const scoringTime = timeRemaining;
 
     let questionPoints = 0;
     let isCorrect = false;

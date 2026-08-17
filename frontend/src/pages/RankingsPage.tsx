@@ -44,7 +44,6 @@ const CATEGORY_OPTIONS: LeaderboardCategoryFilter[] = [
   'CAPITAL',
   'SILHOUETTE',
   'MONUMENT',
-  'CINEMA_GEO',
   'MIXED',
 ];
 const MIN_GAMES_OPTIONS = [1, 3, 5, 10] as const;

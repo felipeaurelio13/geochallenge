@@ -1,7 +1,6 @@
 import type { TFunction } from 'i18next';
 import type { Question } from '../types';
 import { parseMonumentQuestionData } from '../data/monuments';
-import { parseCinemaGeoQuestionData } from '../data/cinemaGeo';
 
 /**
  * Genera el texto de la pregunta TRADUCIDO al idioma activo del cliente.
@@ -37,20 +36,6 @@ export function getLocalizedQuestionText(
       return variant === 'country'
         ? t('game.questionMonumentCountry', '¿En qué país está este monumento?')
         : t('game.questionMonumentIdentify', '¿Qué monumento es este?');
-    }
-    case 'CINEMA_GEO': {
-      // questionData embebe el prompt bilingüe. Elegimos el idioma del cliente,
-      // con fallback al opuesto y luego al fallback genérico.
-      const payload = parseCinemaGeoQuestionData(question.questionData);
-      if (payload) {
-        const localized = normalizedLang === 'en' ? payload.prompt.en : payload.prompt.es;
-        if (localized?.trim()) return localized;
-        const other = normalizedLang === 'en' ? payload.prompt.es : payload.prompt.en;
-        if (other?.trim()) return other;
-      }
-      // backend questionText es el último resort (puede estar en español fijo)
-      if (question.questionText?.trim()) return question.questionText;
-      return t('game.questionCinemaFallback', '¿Dónde se filmó esta escena?');
     }
     default:
       if (question.questionText?.trim()) return question.questionText;

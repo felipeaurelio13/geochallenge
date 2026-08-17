@@ -28,7 +28,6 @@ vi.mock('react-i18next', () => ({
         'categories.map': 'Mapas',
         'categories.silhouette': 'Siluetas',
         'categories.monument': 'Monumentos',
-        'categories.cinema_geo': 'Cine & Geografía',
         'common.retry': 'Reintentar',
         'common.all': 'Todos',
         'mastery.level.learning': 'Aprendiendo',

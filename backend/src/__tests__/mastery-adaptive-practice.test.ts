@@ -89,8 +89,8 @@ describe('selectAdaptivePracticeQuestions', () => {
 
   it('respects diversity by country (max 2 per country)', async () => {
     const questions = [
-      ...makeQuestions(['CL', 'CL', 'CL', 'CL', 'CL', 'CL'], [Category.FLAG, Category.CAPITAL, Category.MAP, Category.SILHOUETTE, Category.MONUMENT, Category.CINEMA_GEO]),
-      ...makeQuestions(['AR', 'AR', 'AR', 'AR', 'AR', 'AR'], [Category.FLAG, Category.CAPITAL, Category.MAP, Category.SILHOUETTE, Category.MONUMENT, Category.CINEMA_GEO]),
+      ...makeQuestions(['CL', 'CL', 'CL', 'CL', 'CL', 'CL'], [Category.FLAG, Category.CAPITAL, Category.MAP, Category.SILHOUETTE, Category.MONUMENT]),
+      ...makeQuestions(['AR', 'AR', 'AR', 'AR', 'AR', 'AR'], [Category.FLAG, Category.CAPITAL, Category.MAP, Category.SILHOUETTE, Category.MONUMENT]),
       ...makeQuestions(['BR', 'BR'], [Category.FLAG, Category.CAPITAL]),
     ];
     mocks.masteryAttemptFindMany.mockResolvedValue([]);
@@ -195,8 +195,8 @@ describe('selectAdaptivePracticeQuestions', () => {
 
   it('preserves diversity by category when pool is sufficient', async () => {
     const questions = [
-      ...makeQuestions(['CL', 'CL', 'CL', 'CL', 'CL', 'CL'], [Category.FLAG, Category.CAPITAL, Category.MAP, Category.SILHOUETTE, Category.MONUMENT, Category.CINEMA_GEO]),
-      ...makeQuestions(['AR', 'AR', 'AR', 'AR', 'AR', 'AR'], [Category.FLAG, Category.CAPITAL, Category.MAP, Category.SILHOUETTE, Category.MONUMENT, Category.CINEMA_GEO]),
+      ...makeQuestions(['CL', 'CL', 'CL', 'CL', 'CL', 'CL'], [Category.FLAG, Category.CAPITAL, Category.MAP, Category.SILHOUETTE, Category.MONUMENT]),
+      ...makeQuestions(['AR', 'AR', 'AR', 'AR', 'AR', 'AR'], [Category.FLAG, Category.CAPITAL, Category.MAP, Category.SILHOUETTE, Category.MONUMENT]),
     ];
     mocks.masteryAttemptFindMany.mockResolvedValue([]);
     mocks.questionFindMany.mockResolvedValue(questions);

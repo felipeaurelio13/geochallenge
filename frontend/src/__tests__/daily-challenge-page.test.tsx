@@ -104,7 +104,7 @@ const dailyQuestions = Array.from({ length: 10 }, (_, i) => ({
   questionText: `Question ${i + 1}`,
   options: ['A', 'B', 'C', 'D'],
   correctAnswer: 'A',
-  category: ['FLAG', 'CAPITAL', 'SILHOUETTE', 'MONUMENT', 'CINEMA_GEO'][i % 5],
+  category: ['FLAG', 'CAPITAL', 'SILHOUETTE', 'MONUMENT', 'MAP'][i % 5],
 }));
 
 const tourStops = Array.from({ length: 10 }, (_, i) => ({

@@ -24,7 +24,7 @@ const OTHER_CONTINENT = REGION_CONTINENT[OTHER_REGION];
 const REGION_CODES = Array.from({ length: 10 }, (_, i) => `${CURRENT_REGION.slice(0, 2)}${String(i).padStart(2, '0')}`);
 const OTHER_CODES = Array.from({ length: 5 }, (_, i) => `${OTHER_REGION.slice(0, 2)}${String(i).padStart(2, '0')}`);
 
-const BOSS_CATEGORIES = [Category.FLAG, Category.CAPITAL, Category.SILHOUETTE, Category.MONUMENT, Category.CINEMA_GEO];
+const BOSS_CATEGORIES = [Category.FLAG, Category.CAPITAL, Category.SILHOUETTE, Category.MONUMENT];
 
 // ─── Mocks ────────────────────────────────────────────────────────────
 const mocks = vi.hoisted(() => ({
