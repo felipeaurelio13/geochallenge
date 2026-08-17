@@ -19,7 +19,6 @@
     "lint": "tsc --noEmit",
     "validate:images": "tsx src/scripts/validate-images.ts",
     "rebuild:leaderboards": "tsx src/scripts/rebuild-leaderboards.ts",
-    "validate:cinema-geo": "tsx src/scripts/validate-cinema-geo.ts",
     "telemetry:report": "tsx src/scripts/telemetryReport.ts",
     "mastery:backfill-country-codes": "tsx src/scripts/masteryBackfillCountryCodes.ts",
     "mastery:backfill-attempts": "tsx src/scripts/masteryBackfillAttempts.ts"

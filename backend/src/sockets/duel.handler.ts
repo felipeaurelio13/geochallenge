@@ -56,7 +56,7 @@ interface QueuedPlayer {
   rating?: number;
 }
 
-const DUEL_CATEGORIES: Category[] = ['MAP', 'FLAG', 'CAPITAL', 'SILHOUETTE', 'MONUMENT', 'CINEMA_GEO', 'MIXED'];
+const DUEL_CATEGORIES: Category[] = ['MAP', 'FLAG', 'CAPITAL', 'SILHOUETTE', 'MONUMENT', 'MIXED'];
 
 function isCompatibleCategory(categoryA: Category, categoryB: Category): boolean {
   return categoryA === categoryB;

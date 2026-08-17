@@ -133,7 +133,7 @@ export function MenuPage() {
   const [selectedCategory, setSelectedCategory] = useLocalStorage<Category>(
     'geochallenge:last-category',
     'MIXED',
-    { parse: (v: string) => ['FLAG', 'CAPITAL', 'MAP', 'SILHOUETTE', 'MONUMENT', 'CINEMA_GEO', 'MIXED'].includes(v) ? v as Category : 'MIXED', stringify: (v: Category) => v },
+    { parse: (v: string) => ['FLAG', 'CAPITAL', 'MAP', 'SILHOUETTE', 'MONUMENT', 'MIXED'].includes(v) ? v as Category : 'MIXED', stringify: (v: Category) => v },
   );
 
   const { filters, setFilters, clearFilters } = useGameFilters();

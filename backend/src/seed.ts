@@ -207,9 +207,6 @@ async function main() {
     monumentCount += 2;
   }
 
-  // Cinema & Geography questions are seeded separately by ensureCinemaGeoQuestions() on every
-  // backend startup. We deliberately skip them here so this seed script focuses on the static
-  // geography catalog (countries, capitals, monuments).
 
   // Insertar todas las preguntas
   console.log(`\n📝 Insertando ${questions.length} preguntas en la base de datos...`);
@@ -226,7 +223,6 @@ async function main() {
    - Preguntas de mapa: ${mapCount} (ciudades de ${countries.length} países)
    - Preguntas de siluetas: ${countriesWithSilhouette.length} (${countries.length - countriesWithSilhouette.length} sin silueta en CDN)
    - Preguntas de monumentos: ${monumentCount} (${monuments.length} monumentos × 2 variantes)
-   - Preguntas de cine & geografía: se siembran en startup (ver ensureCinemaGeoQuestions)
    - Total: ${questions.length}
    - Banderas extendidas incluidas: ${countrySelection.extendedCountriesIncluded}
    - Banderas extendidas excluidas (modo estable): ${countrySelection.extendedCountriesExcluded}

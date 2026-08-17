@@ -301,8 +301,6 @@ function buildFilterWhere(filters?: QuestionFilters): object {
 }
 
 function getCompatibleFilters(_category?: Category, filters?: QuestionFilters): QuestionFilters | undefined {
-  // CINEMA_GEO seeds continent/isInsular/isLandlocked from the filming country, so geographic
-  // filters apply uniformly across all categories now.
   return filters;
 }
 
@@ -448,7 +446,7 @@ export async function getQuestionsForGame(
     questions = await prisma.question.findMany({
       where: {
         ...baseWhere,
-        category: { in: [Category.FLAG, Category.CAPITAL, Category.MAP, Category.SILHOUETTE, Category.MONUMENT, Category.CINEMA_GEO] },
+        category: { in: [Category.FLAG, Category.CAPITAL, Category.MAP, Category.SILHOUETTE, Category.MONUMENT] },
       },
     });
   }
@@ -528,7 +526,7 @@ export async function getAvailableQuestionsCount(
     ...buildFilterWhere(compatibleFilters),
     ...(category && category !== Category.MIXED && { category }),
     ...((category === Category.MIXED || !category) && {
-      category: { in: [Category.FLAG, Category.CAPITAL, Category.MAP, Category.SILHOUETTE, Category.MONUMENT, Category.CINEMA_GEO] },
+      category: { in: [Category.FLAG, Category.CAPITAL, Category.MAP, Category.SILHOUETTE, Category.MONUMENT] },
     }),
   };
 
@@ -541,7 +539,7 @@ export async function getAvailableQuestionsCount(
  */
 export async function getQuestionsForFlashGame(category?: Category, filters?: QuestionFilters): Promise<GameQuestion[]> {
   const compatibleFilters = getCompatibleFilters(category, filters);
-  const visualCategories = [Category.FLAG, Category.SILHOUETTE, Category.MONUMENT, Category.CINEMA_GEO];
+  const visualCategories = [Category.FLAG, Category.SILHOUETTE, Category.MONUMENT];
   const flashCategories =
     category && category !== Category.MIXED && category !== Category.MAP
       ? [category]
@@ -678,15 +676,6 @@ export function buildQuestionUniquenessKey(question: Pick<GameQuestion, 'categor
     ].join('|');
   }
 
-  // Para CINEMA_GEO, ancla la unicidad al id del catálogo (cada id es una escena única).
-  if (question.category === Category.CINEMA_GEO) {
-    const catalogId = extractCinemaGeoId(question.questionData);
-    return [
-      normalizeUniquenessPart(question.category),
-      normalizeUniquenessPart(catalogId || question.questionData),
-    ].join('|');
-  }
-
   return [
     normalizeUniquenessPart(question.category),
     normalizeUniquenessPart(question.imageUrl),
@@ -740,15 +729,6 @@ export function generateQuestionText(question: any): string {
         // sigue al default identify
       }
       return '¿Qué monumento es este?';
-    }
-    case Category.CINEMA_GEO: {
-      // Cinema & Geography (v2): every question embeds a bilingual prompt in questionData.
-      try {
-        const parsed = JSON.parse(question.questionData) as { prompt?: { es?: string; en?: string } };
-        return parsed.prompt?.es || parsed.prompt?.en || '¿Dónde se filmó esta escena?';
-      } catch {
-        return '¿Dónde se filmó esta escena?';
-      }
     }
     default:
       return question.questionData;

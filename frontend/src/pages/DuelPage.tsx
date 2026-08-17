@@ -63,7 +63,7 @@ const { TIME_PER_QUESTION } = GAME_CONSTANTS;
 const SEARCH_TIMEOUT_SECONDS = 120;
 const SOCKET_CONNECT_TIMEOUT_MS = 10000;
 const SYNCING_LONG_THRESHOLD_MS = 5000;
-const DUEL_CATEGORIES: Category[] = ['FLAG', 'CAPITAL', 'MAP', 'SILHOUETTE', 'MONUMENT', 'CINEMA_GEO', 'MIXED'];
+const DUEL_CATEGORIES: Category[] = ['FLAG', 'CAPITAL', 'MAP', 'SILHOUETTE', 'MONUMENT', 'MIXED'];
 
 const GEO_KIND_ICONS: Record<GeoChallengeKind, string> = {
   EXTREME: '🧭',
@@ -671,8 +671,6 @@ export function DuelPage() {
                       ? 'silhouettes'
                       : duelCategory === 'MONUMENT'
                       ? 'monuments'
-                      : duelCategory === 'CINEMA_GEO'
-                      ? 'cinemaGeo'
                       : 'mixed'
                   }`
                   ),

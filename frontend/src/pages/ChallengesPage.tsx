@@ -37,7 +37,7 @@ interface Challenge {
 }
 
 type TabType = 'mine' | 'joinable' | 'completed';
-const categories = ['MIXED', 'FLAG', 'CAPITAL', 'MAP', 'SILHOUETTE', 'MONUMENT', 'CINEMA_GEO'];
+const categories = ['MIXED', 'FLAG', 'CAPITAL', 'MAP', 'SILHOUETTE', 'MONUMENT'];
 const playerOptions = [2, 3, 4, 5, 6, 7, 8];
 
 function buildFilterSummary(f: GameFilters, t: (key: string) => string): string {
@@ -56,7 +56,6 @@ const categoryKeyByValue: Record<string, string> = {
   MAP: 'maps',
   SILHOUETTE: 'silhouettes',
   MONUMENT: 'monuments',
-  CINEMA_GEO: 'cinemaGeo',
 };
 
 export function ChallengesPage() {

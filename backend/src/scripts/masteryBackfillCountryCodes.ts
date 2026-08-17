@@ -1,7 +1,6 @@
 import { PrismaClient, Category } from '@prisma/client';
 import { loadCountryCatalog, getActiveCountries, type CountryRecord } from '../utils/countryCatalog.js';
 import { loadMonumentCatalog } from '../utils/monumentCatalog.js';
-import { loadCinemaGeoCatalog } from '../utils/cinemaGeoCatalog.js';
 
 const prisma = new PrismaClient();
 
@@ -36,15 +35,6 @@ async function main() {
     if (c) byMonumentSlug.set(m.slug, c);
   }
 
-  const cinemaCatalog = loadCinemaGeoCatalog();
-  const cinemaById = new Map<string, string>();
-  for (const item of cinemaCatalog) {
-    const country = item.answer.country
-      ? (byName.get(item.answer.country) ?? byName.get(item.answer.country.toLowerCase()))
-      : null;
-    if (country) cinemaById.set(item.id, country.iso2);
-  }
-
   const allQuestions = await prisma.question.findMany({
     where: { category: { not: Category.MIXED } },
     select: { id: true, category: true, questionData: true, correctAnswer: true, countryCode: true },
@@ -72,13 +62,6 @@ async function main() {
         if (parsed.slug) {
           const c = byMonumentSlug.get(parsed.slug);
           if (c) code = c.iso2;
-        }
-      } catch {}
-    } else if (q.category === Category.CINEMA_GEO) {
-      try {
-        const parsed = JSON.parse(q.questionData) as { id?: string };
-        if (parsed.id) {
-          code = cinemaById.get(parsed.id) ?? null;
         }
       } catch {}
     }

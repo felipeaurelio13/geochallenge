@@ -29,7 +29,7 @@ vi.mock('../config/database.js', () => {
 
 const POOL = Array.from({ length: 60 }, (_, i) => {
   const continents = ['Africa', 'Asia', 'Europe', 'Oceania', 'North America', 'South America'];
-  const categories = [Category.FLAG, Category.CAPITAL, Category.SILHOUETTE, Category.MONUMENT, Category.CINEMA_GEO];
+  const categories = [Category.FLAG, Category.CAPITAL, Category.SILHOUETTE, Category.MONUMENT];
   return {
     id: `q-${i + 1}`,
     category: categories[i % categories.length],

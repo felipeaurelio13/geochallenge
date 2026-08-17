@@ -16,7 +16,6 @@ const QUESTIONS: EvaluableQuestion[] = [
   { id: 'q1', category: 'FLAG', correctAnswer: 'Chile' },
   { id: 'q2', category: 'CAPITAL', correctAnswer: 'Lima' },
   { id: 'q3', category: 'MAP', correctAnswer: '', latitude: -33.45, longitude: -70.66 },
-  { id: 'q4', category: 'CINEMA_GEO', correctAnswer: 'Dubai' },
 ];
 
 describe('evaluateTimedAnswers', () => {
@@ -104,16 +103,6 @@ describe('evaluateTimedAnswers', () => {
     );
     expect(far.score).toBe(0);
     expect(far.correctCount).toBe(0);
-  });
-
-  it('CINEMA_GEO: el tiempo extra de lectura no infla el bonus', () => {
-    // Duración real = 10 + 5 = 15, pero el bonus se calcula sobre máx 10.
-    const { score } = evaluateTimedAnswers(
-      QUESTIONS,
-      [{ questionId: 'q4', answer: 'Dubai', timeRemaining: 15 }],
-      10
-    );
-    expect(score).toBe(150);
   });
 
   it('answers=[] produce un detail incorrecto por cada pregunta', () => {

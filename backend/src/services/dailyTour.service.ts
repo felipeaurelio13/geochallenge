@@ -9,7 +9,7 @@ const DAILY_TOUR_CATEGORIES = [
   Category.CAPITAL,
   Category.SILHOUETTE,
   Category.MONUMENT,
-  Category.CINEMA_GEO,
+
 ];
 
 const ALL_REGIONS = ['AFRICA', 'AMERICAS', 'ASIA', 'EUROPE', 'OCEANIA'] as const;

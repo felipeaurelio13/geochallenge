@@ -16,7 +16,7 @@ export type LeaderboardCategoryFilter =
   | 'CAPITAL'
   | 'SILHOUETTE'
   | 'MONUMENT'
-  | 'CINEMA_GEO'
+
   | 'MIXED';
 export type LeaderboardVariantFilter = 'CLASSIC' | 'STREAK' | 'FLASH' | 'FLAG_MASTER' | 'GEO_CHALLENGE';
 

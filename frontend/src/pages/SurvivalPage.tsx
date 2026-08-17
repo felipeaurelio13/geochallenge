@@ -23,7 +23,7 @@ const MapInteractive = lazy(() =>
   import('../components/MapInteractive').then((m) => ({ default: m.MapInteractive }))
 );
 
-const SURVIVAL_CATEGORIES: Category[] = ['FLAG', 'CAPITAL', 'MAP', 'SILHOUETTE', 'MONUMENT', 'CINEMA_GEO', 'MIXED'];
+const SURVIVAL_CATEGORIES: Category[] = ['FLAG', 'CAPITAL', 'MAP', 'SILHOUETTE', 'MONUMENT', 'MIXED'];
 const MAX_LIVES = 4;
 const SEARCH_TIMEOUT_SECONDS = 120;
 const SOCKET_CONNECT_TIMEOUT_MS = 10000;

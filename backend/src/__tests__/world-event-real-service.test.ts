@@ -51,7 +51,7 @@ function makeRegionPool(): BossPoolQuestion[] {
     { region: 'EUROPE', continent: 'Europe' },
     { region: 'OCEANIA', continent: 'Oceania' },
   ];
-  const categories = [Category.FLAG, Category.CAPITAL, Category.SILHOUETTE, Category.MONUMENT, Category.CINEMA_GEO];
+  const categories = [Category.FLAG, Category.CAPITAL, Category.SILHOUETTE, Category.MONUMENT];
   const difficulties = [Difficulty.MEDIUM, Difficulty.HARD, Difficulty.EASY];
 
   for (const { region, continent } of regions) {
@@ -81,7 +81,7 @@ const REGION_COUNTRIES: Record<string, string> = {
 };
 
 function baseAttempts(): Array<{ countryCode: string; category: Category }> {
-  // 8 correct attempts in African countries across 3 categories
+  // 8 correct attempts in African countries across 5 categories
   return [
     { countryCode: 'KE', category: Category.FLAG },
     { countryCode: 'KE', category: Category.CAPITAL },
@@ -90,7 +90,7 @@ function baseAttempts(): Array<{ countryCode: string; category: Category }> {
     { countryCode: 'ZA', category: Category.CAPITAL },
     { countryCode: 'ZA', category: Category.MONUMENT },
     { countryCode: 'EG', category: Category.SILHOUETTE },
-    { countryCode: 'EG', category: Category.CINEMA_GEO },
+    { countryCode: 'EG', category: Category.MAP },
   ];
 }
 
@@ -262,7 +262,7 @@ describe('World Event Service — real behavior', () => {
         { countryCode: 'KE', category: Category.CAPITAL },
         { countryCode: 'KE', category: Category.SILHOUETTE },
         { countryCode: 'KE', category: Category.MONUMENT },
-        { countryCode: 'KE', category: Category.CINEMA_GEO },
+        { countryCode: 'KE', category: Category.MAP },
         { countryCode: 'NG', category: Category.FLAG },
         { countryCode: 'NG', category: Category.CAPITAL },
         { countryCode: 'NG', category: Category.SILHOUETTE },

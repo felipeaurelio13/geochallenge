@@ -41,7 +41,6 @@ const categories: { id: Category; icon: string; labelKey: string; accentClass: s
   { id: 'MAP', icon: '🗺️', labelKey: 'categories.maps', accentClass: 'border-teal-500/50 bg-teal-500/15 text-teal-400' },
   { id: 'SILHOUETTE', icon: '🖼️', labelKey: 'categories.silhouettes', accentClass: 'border-violet-500/50 bg-violet-500/15 text-violet-400' },
   { id: 'MONUMENT', icon: '🗿', labelKey: 'categories.monuments', accentClass: 'border-amber-500/50 bg-amber-500/15 text-amber-400' },
-  { id: 'CINEMA_GEO', icon: '🎬', labelKey: 'categories.cinemaGeo', accentClass: 'border-rose-500/50 bg-rose-500/15 text-rose-400' },
   { id: 'MIXED', icon: '🎲', labelKey: 'categories.mixed', accentClass: 'border-fuchsia-500/50 bg-fuchsia-500/15 text-fuchsia-400' },
 ];
 

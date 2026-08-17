@@ -10,7 +10,7 @@ import { trackServerEvent } from '../services/telemetry.service.js';
 
 const QUESTION_POOL = Array.from({ length: 12 }, (_, i) => {
   const continents = ['Africa', 'Asia', 'Europe', 'Oceania', 'North America', 'South America'];
-  const categories = [Category.FLAG, Category.CAPITAL, Category.SILHOUETTE, Category.MONUMENT, Category.CINEMA_GEO];
+  const categories = [Category.FLAG, Category.CAPITAL, Category.SILHOUETTE, Category.MONUMENT];
   const continent = continents[i % continents.length];
   return {
     id: `daily-q${i + 1}`,

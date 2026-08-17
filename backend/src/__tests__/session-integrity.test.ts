@@ -11,7 +11,7 @@ const mocks = vi.hoisted(() => {
   const sessionStore = new Map<string, ReturnType<typeof makeSession>>();
   const TEST_QUESTIONS = Array.from({ length: 10 }, (_, i) => {
     const continents = ['Africa', 'Asia', 'Europe', 'Oceania', 'North America', 'South America'];
-    const categories = ['FLAG', 'CAPITAL', 'SILHOUETTE', 'MONUMENT', 'CINEMA_GEO'];
+    const categories = ['FLAG', 'CAPITAL', 'SILHOUETTE', 'MONUMENT'];
     return {
     id: `q-${i + 1}`,
     category: categories[i % categories.length],

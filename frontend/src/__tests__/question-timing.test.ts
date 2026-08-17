@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import {
   applyExtendedTime,
   clampTimeRemainingForScoring,
-  CINEMA_GEO_EXTRA_READ_SECONDS,
   EXTENDED_TIME_MULTIPLIER,
   getQuestionDuration,
 } from '../utils/questionTiming';
@@ -22,12 +21,6 @@ describe('applyExtendedTime', () => {
     expect(applyExtendedTime(7, true)).toBe(11);
   });
 
-  it('stacks on top of category-adjusted durations (e.g. CINEMA_GEO)', () => {
-    const baseDuration = 10;
-    const categoryDuration = getQuestionDuration('CINEMA_GEO' as any, baseDuration);
-    expect(categoryDuration).toBe(baseDuration + CINEMA_GEO_EXTRA_READ_SECONDS);
-    expect(applyExtendedTime(categoryDuration, true)).toBe(Math.ceil(categoryDuration * 1.5));
-  });
 });
 
 describe('clampTimeRemainingForScoring', () => {
@@ -37,7 +30,6 @@ describe('clampTimeRemainingForScoring', () => {
     // rejects timeRemaining > config.game.timePerQuestion, so this must clamp.
     expect(clampTimeRemainingForScoring('FLAG' as any, 15, 10)).toBe(10);
     expect(clampTimeRemainingForScoring('CAPITAL' as any, 15, 10)).toBe(10);
-    expect(clampTimeRemainingForScoring('CINEMA_GEO' as any, 15, 10)).toBe(10);
   });
 
   it('passes through values within range unchanged', () => {

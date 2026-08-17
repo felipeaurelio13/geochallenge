@@ -150,22 +150,4 @@ describe('ChallengesPage', () => {
       });
     });
   });
-
-  it('acepta CINEMA_GEO como categoría inicial al crear desafío', async () => {
-    mocks.searchParams = new URLSearchParams('category=CINEMA_GEO&openCreate=1');
-
-    render(<ChallengesPage />);
-
-    expect(await screen.findByText('challenges.createTitle')).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', { name: 'challenges.send' }));
-
-    await waitFor(() => {
-      expect(mocks.apiPost).toHaveBeenCalledWith('/challenges', {
-        categories: ['CINEMA_GEO'],
-        maxPlayers: 2,
-        answerTimeSeconds: 20,
-      });
-    });
-  });
 });

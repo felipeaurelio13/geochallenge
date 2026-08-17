@@ -59,7 +59,6 @@ vi.mock('react-i18next', () => ({
         'categories.maps': 'Mapas',
         'categories.silhouettes': 'Siluetas',
         'categories.monuments': 'Monumentos',
-        'categories.cinemaGeo': 'Cine & Geo',
         'categories.mixed': 'Mixto',
         'menu.journey.title': 'Tu viaje por el mundo',
         'menu.journey.stamped': 'países explorados',

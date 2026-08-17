@@ -60,7 +60,6 @@ const CATEGORY_LABEL_KEY: Record<string, string> = {
   MAP: 'categories.maps',
   SILHOUETTE: 'categories.silhouettes',
   MONUMENT: 'categories.monuments',
-  CINEMA_GEO: 'categories.cinemaGeo',
   MIXED: 'categories.mixed',
 };
 
@@ -360,7 +359,6 @@ export function ProfilePage() {
                       const label = t(labelKey, stat.category);
                       const CATEGORY_ICONS: Record<string, string> = {
                         FLAG: '🚩', CAPITAL: '🏛️', MAP: '🗺️',
-                        SILHOUETTE: '🌑', MONUMENT: '🗿', CINEMA_GEO: '🎬', MIXED: '🎯',
                       };
                       return (
                         <div key={stat.category}>
