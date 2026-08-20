@@ -219,32 +219,10 @@ export function QuestionCard({
           </div>
         )}
 
-        {/* Cinema & Geography: compact context chip above the prompt. Frees ~300px of vertical
-            space for the prompt + options. The answer is always a place, so showing the movie
-            title is intentional context — not a spoiler. */}
-        {question.category === 'CINEMA_GEO' && cinemaPayload && (
-          <div className={`flex flex-wrap items-center justify-center gap-2 ${compact ? 'mb-2' : 'mb-4'}`}>
-            <span className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-rose-400/60 bg-rose-100 px-3 py-1 text-rose-800 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-100">
-              <span aria-hidden>🎬</span>
-              {cinemaPayload.movieTitle && (
-                <span className="truncate text-xs font-semibold sm:text-sm">{cinemaPayload.movieTitle}</span>
-              )}
-              {cinemaPayload.movieYear > 0 && (
-                <span className="text-[0.65rem] text-rose-700/80 dark:text-rose-200/70 sm:text-xs">({cinemaPayload.movieYear})</span>
-              )}
-            </span>
-            {question.difficulty && (
-              <span className={`inline-block rounded-full px-2.5 py-0.5 text-[0.62rem] font-semibold sm:text-[0.68rem] ${getDifficultyClass()}`}>
-                {t(getDifficultyKey())}
-              </span>
-            )}
-          </div>
-        )}
-
         <div className={`flex ${compact ? 'flex-row items-start justify-center gap-1.5 text-left' : 'flex-col items-center'} ${question.category === 'CAPITAL' ? 'w-full justify-center text-center' : ''}`}>
           <h2 className={headingClassName}>{getQuestionText()}</h2>
 
-          {question.difficulty && question.category !== 'FLAG' && question.category !== 'MONUMENT' && question.category !== 'CINEMA_GEO' && (
+          {question.difficulty && question.category !== 'FLAG' && question.category !== 'MONUMENT' && (
             <div className={compact ? 'mt-0.5 shrink-0' : 'mt-5'}>
               <span className={`inline-block rounded-full ${compact ? 'px-2.5 py-0.5 text-[0.65rem] sm:text-xs' : 'px-3.5 py-1 text-xs sm:text-sm'} font-semibold ${getDifficultyClass()}`}>
                 {t(getDifficultyKey())}

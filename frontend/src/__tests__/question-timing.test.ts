@@ -6,6 +6,12 @@ import {
   getQuestionDuration,
 } from '../utils/questionTiming';
 
+describe('getQuestionDuration', () => {
+  it('returns base duration', () => {
+    expect(getQuestionDuration('FLAG' as any, 15)).toBe(15);
+  });
+});
+
 describe('applyExtendedTime', () => {
   it('leaves duration unchanged when the accommodation is off', () => {
     expect(applyExtendedTime(10, false)).toBe(10);

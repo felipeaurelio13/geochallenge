@@ -82,23 +82,7 @@ export function FlashCard({ question, onAnswer, disabled, disabledOptions = [], 
             draggable={false}
             onError={handleImageError}
           />
-        ) : question.category === 'CINEMA_GEO' ? (() => {
-          const cgPayload = parseCinemaGeoQuestionData(question.questionData);
-          const kindHint = cgPayload?.answerKind === 'country'
-            ? t('flash.cinemaWhereCountry', '¿En qué país se filmó?')
-            : cgPayload?.answerKind === 'city'
-              ? t('flash.cinemaWhereCity', '¿En qué ciudad se filmó?')
-              : t('flash.cinemaWhereVenue', '¿Dónde se filmó?');
-          return (
-            <div className="flex h-full flex-col items-center justify-center gap-3 bg-gradient-to-br from-rose-950/60 to-gray-900/80 px-4 text-center">
-              <span className="text-4xl">🎬</span>
-              {cgPayload?.movieTitle && (
-                <p className="text-base font-bold text-rose-200 sm:text-lg">{cgPayload.movieTitle}</p>
-              )}
-              <p className="text-sm font-medium text-rose-100/90">{kindHint}</p>
-            </div>
-          );
-        })() : (
+        ) : (
           <div className="flex h-full items-center justify-center text-6xl">{question.category === 'MONUMENT' ? '🗿' : '🌍'}</div>
         )}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-3 text-center text-xs text-gray-200">
