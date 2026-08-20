@@ -13,7 +13,7 @@ import type { Category } from '../types';
 export const EXTENDED_TIME_MULTIPLIER = 1.5;
 
 /** Total seconds shown to the player for this category (timer starts here, counts down). */
-export function getQuestionDuration(category: Category | undefined, baseDuration: number): number {
+export function getQuestionDuration(_category: Category | undefined, baseDuration: number): number {
   return baseDuration;
 }
 

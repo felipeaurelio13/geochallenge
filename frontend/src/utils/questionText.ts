@@ -17,10 +17,9 @@ import { parseMonumentQuestionData } from '../data/monuments';
 export function getLocalizedQuestionText(
   question: Question,
   t: TFunction,
-  lang: string
+  _lang: string
 ): string {
   const dataValue = getQuestionDataPlainValue(question);
-  const normalizedLang = lang.toLowerCase().startsWith('en') ? 'en' : 'es';
 
   switch (question.category) {
     case 'FLAG':
