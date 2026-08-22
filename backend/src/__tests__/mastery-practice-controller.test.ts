@@ -11,6 +11,7 @@ import gameRouter from '../controllers/game.controller.js';
 
 const mocks = vi.hoisted(() => {
   const redisStore = new Map<string, string>();
+  const hashStore = new Map<string, Map<string, string>>();
   const sessionStore = new Map<string, any>();
 
   const CL_QUESTIONS = [
@@ -30,6 +31,7 @@ const mocks = vi.hoisted(() => {
   return {
     redisStore,
     sessionStore,
+    hashStore,
     CL_QUESTIONS,
     AR_QUESTIONS,
     ALL_QUESTIONS,
@@ -78,6 +80,16 @@ vi.mock('../config/redis.js', () => ({
       return Promise.resolve(prev + 1);
     }),
     expire: vi.fn(() => Promise.resolve(1)),
+    mget: vi.fn((keys: string[]) => Promise.resolve(keys.map((k: string) => mocks.redisStore.get(k) ?? null))),
+    hsetnx: vi.fn((key: string, field: string, value: string) => {
+      if (!mocks.hashStore.has(key)) mocks.hashStore.set(key, new Map());
+      const h = mocks.hashStore.get(key)!;
+      if (h.has(field)) return Promise.resolve(0);
+      h.set(field, value);
+      return Promise.resolve(1);
+    }),
+    hget: vi.fn((key: string, field: string) => Promise.resolve(mocks.hashStore.get(key)?.get(field) ?? null)),
+    hgetall: vi.fn((key: string) => Promise.resolve(Object.fromEntries(mocks.hashStore.get(key) ?? []))),
     pipeline: () => ({ zadd: () => ({ exec: async () => [] }) }),
     zadd: async () => 1, zscore: async () => null, zrevrange: async () => [],
     zcard: async () => 0, del: async () => 1, zrevrank: async () => null, exec: async () => [],
@@ -274,6 +286,11 @@ describe('POST /api/game/finish — PRACTICE', () => {
       createdAt: Date.now(),
       expiresAt: Date.now() + 7200000,
     });
+    // Fuente canónica de respuestas: hash `game:answers:<sessionId>`.
+    mocks.hashStore.set(
+      'game:answers:practice-session',
+      new Map(Object.entries(qResults).map(([qid, r]) => [qid, JSON.stringify(r)])),
+    );
   }
 
   it('accepts gameType=practice and returns variant=PRACTICE', async () => {

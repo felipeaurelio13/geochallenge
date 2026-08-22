@@ -108,7 +108,6 @@ npm run predeploy          # chequeo obligatorio antes de push a master
 npm run lint               # lint/typecheck frontend + backend
 npm run test               # tests frontend + backend
 npm run format:check       # valida formato
-npm run validate:cinema-geo
 ```
 
 Frontend:
@@ -181,7 +180,6 @@ Los catalogos viven en `data/`:
 - `country-catalog.meta.json`: metadata generada del catalogo.
 - `cities.json`: ciudades para preguntas geograficas.
 - `monuments.json`: monumentos con nombre, pais, coordenadas, imagen y atribucion.
-- `cinema/`: dataset de cine con validaciones propias.
 
 Para agregar o ajustar datos:
 
@@ -194,7 +192,6 @@ Comandos utiles:
 
 ```bash
 npm --prefix backend run seed
-npm run validate:cinema-geo
 ```
 
 ## Base de datos
@@ -268,5 +265,4 @@ Alternativa documentada:
 - [DEPLOY-ORACLE.md](DEPLOY-ORACLE.md): deploy completo en VPS.
 - [docs/ui-ux-audit-2026-04-11.md](docs/ui-ux-audit-2026-04-11.md): auditoria UI/UX.
 - [docs/duel-audit-2026-05-01.md](docs/duel-audit-2026-05-01.md): auditoria de duelos.
-- [data/cinema/README.md](data/cinema/README.md): notas del dataset de cine.
 - [scripts/daily-agent/README.md](scripts/daily-agent/README.md): agente diario.

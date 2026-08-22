@@ -4,9 +4,9 @@ import { haversineDistance } from './haversine.js';
 /**
  * Evaluación server-side de respuestas enviadas por el cliente al terminar
  * una partida asíncrona (challenges). El cliente ya no manda `score`: manda
- * sus respuestas y el servidor las valida contra la DB y calcula el puntaje
- * con la MISMA fórmula que muestra la UI (ver ChallengeGamePage.calculatePoints),
- * para que el número que vio el jugador coincida con el persistido.
+ * sus respuestas y el servidor las valida contra la DB y calcula el puntaje.
+ * Los challenges asíncronos no otorgan bonus de tiempo, porque no tienen un
+ * límite autoritativo por pregunta; `timeRemaining` se conserva como telemetría.
  */
 
 export interface SubmittedAnswer {
@@ -46,9 +46,6 @@ export function evaluateTimedAnswers(
 
   const byId = new Map(questions.map((q) => [q.id, q]));
   const seen = new Set<string>();
-  let focusAllowance = 1;
-  const focusBonus = config.game.mechanics.focusTimeBonusSeconds;
-
   let score = 0;
   let correctCount = 0;
   const details: AnswerDetail[] = [];
@@ -63,18 +60,7 @@ export function evaluateTimedAnswers(
     }
     seen.add(submitted.questionId);
 
-    const duration = answerTimeSeconds;
-
-    let timeRemaining = Math.max(0, submitted.timeRemaining);
-    if (timeRemaining > duration) {
-      if (focusAllowance > 0) {
-        focusAllowance -= 1;
-        timeRemaining = Math.min(timeRemaining, duration + focusBonus);
-      } else {
-        timeRemaining = duration;
-      }
-    }
-    const scoringTime = timeRemaining;
+    const timeRemaining = Math.min(Math.max(0, submitted.timeRemaining), answerTimeSeconds);
 
     let questionPoints = 0;
     let isCorrect = false;
@@ -94,11 +80,7 @@ export function evaluateTimedAnswers(
       if (distanceKm < MAP_CORRECT_THRESHOLD_KM) {
         isCorrect = true;
         const accuracyFactor = Math.max(0, 1 - distanceKm / MAP_MAX_DISTANCE_KM);
-        const accuracyPoints = Math.round(config.game.basePoints * accuracyFactor);
-        const timePoints = Math.round(
-          (scoringTime / answerTimeSeconds) * config.game.maxTimeBonus * accuracyFactor
-        );
-        questionPoints = accuracyPoints + timePoints;
+        questionPoints = Math.round(config.game.basePoints * accuracyFactor);
       }
       if (distanceKm < 100) distanceBucket = '<100km';
       else if (distanceKm < 500) distanceBucket = '100-500km';
@@ -107,9 +89,7 @@ export function evaluateTimedAnswers(
       else distanceBucket = '>2000km';
     } else if (submitted.answer && submitted.answer === question.correctAnswer) {
       isCorrect = true;
-      questionPoints =
-        config.game.basePoints +
-        Math.round((scoringTime / answerTimeSeconds) * config.game.maxTimeBonus);
+      questionPoints = config.game.basePoints;
     }
 
     score += questionPoints;

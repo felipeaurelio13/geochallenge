@@ -79,6 +79,26 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     stateRef.current = state;
   }, [state]);
 
+  // Timing server-authoritative: avisa al backend cuando una pregunta pasa a
+  // ser la actual (incluye la primera y las posteriores, y el reemplazo
+  // in-place de replaceCurrentQuestion porque cambia la referencia del array).
+  // Best-effort: si no hay sesión o el request falla, el servidor usa el
+  // primer answer como inicio (ventana completa) — nunca afecta el gameplay.
+  useEffect(() => {
+    if (state.status !== 'playing') return;
+    const question = state.questions[state.currentIndex];
+    if (!question) return;
+    const sessionId = state.sessionId ?? state.config?.sessionId;
+    if (!sessionId) return;
+    void api.notifyQuestionStarted(question.id, sessionId);
+  }, [
+    state.status,
+    state.currentIndex,
+    state.questions,
+    state.sessionId,
+    state.config?.sessionId,
+  ]);
+
   // Cleanup timer on unmount
   useEffect(() => {
     return () => {
@@ -241,8 +261,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       const currentQuestion = questions[currentIndex];
       const baseDuration = config?.timePerQuestion ?? 10;
 
-      // Clamp the reported remaining time so CINEMA_GEO's extra read window doesn't inflate
-      // the time bonus on the backend (the first EXTRA_READ_SECONDS are "free read time").
+      // Clamp the reported remaining time to the backend scoring window.
       const reportedTimeRemaining = clampTimeRemainingForScoring(
         currentQuestion?.category,
         timeRemaining,

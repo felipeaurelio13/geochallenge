@@ -340,6 +340,28 @@ class ApiService {
     return response.data;
   }
 
+  /**
+   * Avisa al servidor que el jugador comenzó a ver una pregunta (best-effort).
+   * El servidor registra first-wins el primer aviso; si este request falla o no
+   * llega, el servidor usa el primer answer como inicio (ventana completa).
+   */
+  async notifyQuestionStarted(questionId: string, sessionId?: string) {
+    if (!sessionId) return;
+    try {
+      await this.client.post('/game/question-started', { sessionId, questionId });
+    } catch {
+      // Best-effort: el fallback server-side cubre la pérdida.
+    }
+  }
+
+  async notifyFlagMasterQuestionStarted(gameId: string, questionId: string) {
+    try {
+      await this.client.post('/game/flag-master/question-started', { gameId, questionId });
+    } catch {
+      // Best-effort: el fallback server-side cubre la pérdida.
+    }
+  }
+
   async submitAnswer(data: {
     sessionId?: string;
     questionId: string;

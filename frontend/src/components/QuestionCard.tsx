@@ -34,10 +34,7 @@ export function QuestionCard({
 }: QuestionCardProps) {
   const { t, i18n } = useTranslation();
 
-  // Texto de la pregunta localizado. Antes esta lógica vivía aquí inline y
-  // ramificaba a `question.questionText` (backend → siempre español) para
-  // CINEMA_GEO, produciendo el bug ROUND2-001. Ahora vive en un util compartido
-  // que tanto QuestionCard como DailyChallengePage usan.
+  // Texto de la pregunta localizado compartido con DailyChallengePage.
   const getQuestionText = () => getLocalizedQuestionText(question, t, i18n.language);
 
   const getDifficultyClass = () => {

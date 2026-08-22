@@ -16,6 +16,8 @@ import { getRedis } from '../config/redis.js';
 import { evaluateAchievementsAfterGame } from '../services/achievement.service.js';
 import { trackServerEvent } from '../services/telemetry.service.js';
 import { applyMasteryAttemptsForRun } from '../services/mastery.service.js';
+import { recordQuestionStarted, getQuestionStartedAt } from '../services/game.service.js';
+import { effectiveTimeRemainingSeconds } from '../utils/serverTiming.js';
 
 const router = Router();
 
@@ -99,7 +101,17 @@ router.post('/start', authenticateJWT, async (req: AuthRequest, res: Response) =
       })),
     };
 
-    await tryCacheSession(gameId, session);
+    // Fail-fast: si no podemos persistir el plan de rondas en Redis, no
+    // arrancamos la partida. Sin el plan cacheado, /answer y /finish no podrían
+    // validar el anti-cheat y degradarían a confiar en el cliente.
+    const cached = await tryCacheSession(gameId, session);
+    if (!cached) {
+      res.status(503).json({
+        error: 'Servicio no disponible. Intenta de nuevo.',
+        code: 'GAME_STATE_UNAVAILABLE',
+      });
+      return;
+    }
 
     trackServerEvent({
       name: 'game_started',
@@ -152,18 +164,17 @@ const answerSchema = z.object({
 });
 
 /**
- * POST /api/game/flag-master/answer
- * Server-authoritative: la respuesta se valida y almacena server-side.
- * Primera respuesta inmutable, re-answer devuelve stored result.
+ * POST /api/game/flag-master/question-started
+ * Marca (first-wins) el instante en que el cliente mostró una ronda. El
+ * servidor usa ese instante como referencia para el scoring de /answer.
  */
-router.post('/answer', authenticateJWT, async (req: AuthRequest, res: Response) => {
+router.post('/question-started', authenticateJWT, async (req: AuthRequest, res: Response) => {
   try {
-    const parsed = answerSchema.safeParse(req.body);
-    if (!parsed.success) {
-      res.status(400).json({ error: 'Datos inválidos' });
-      return;
-    }
-    const { gameId, questionId, answer, timeRemaining } = parsed.data;
+    const schema = z.object({ gameId: z.string().min(1), questionId: z.string().min(1) });
+    const parsed = schema.safeParse(req.body);
+    if (!parsed.success) { res.status(400).json({ error: 'Datos inválidos' }); return; }
+
+    const { gameId, questionId } = parsed.data;
     const session = await loadCachedSession(gameId);
     if (!session) {
       res.status(503).json({ error: 'Servicio no disponible. Intenta de nuevo.', code: 'GAME_STATE_UNAVAILABLE' });
@@ -179,12 +190,57 @@ router.post('/answer', authenticateJWT, async (req: AuthRequest, res: Response) 
       return;
     }
 
+    const startedAt = await recordQuestionStarted(gameId, questionId);
+    res.json({ started: true, startedAt });
+  } catch {
+    res.status(503).json({ error: 'Servicio no disponible. Intenta de nuevo.', code: 'GAME_STATE_UNAVAILABLE' });
+  }
+});
+
+/**
+ * POST /api/game/flag-master/answer
+ * Server-authoritative: la respuesta se valida y almacena server-side.
+ * Primera respuesta inmutable, re-answer devuelve stored result.
+ */
+router.post('/answer', authenticateJWT, async (req: AuthRequest, res: Response) => {
+  try {
+    const parsed = answerSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: 'Datos inválidos' });
+      return;
+    }
+    const { gameId, questionId, answer } = parsed.data;
+    const session = await loadCachedSession(gameId);
+    if (!session) {
+      res.status(503).json({ error: 'Servicio no disponible. Intenta de nuevo.', code: 'GAME_STATE_UNAVAILABLE' });
+      return;
+    }
+    if (session.userId !== req.user!.userId) {
+      res.status(403).json({ error: 'Sesión no pertenece al usuario' });
+      return;
+    }
+    const roundData = session.rounds.find((r) => r.questionId === questionId);
+    if (!roundData) {
+      res.status(400).json({ error: 'Pregunta no pertenece a esta partida' });
+      return;
+    }
+
+    // Timing server-authoritative: el instante de inicio define la ventana de
+    // bonus. El timeRemaining del cliente nunca participa del scoring.
+    const authoritativeStart =
+      (await getQuestionStartedAt(gameId, questionId)) ??
+      (await recordQuestionStarted(gameId, questionId));
+    const scoringTimeRemaining = effectiveTimeRemainingSeconds(
+      authoritativeStart,
+      config.game.timePerQuestion * 1000
+    );
+
     // Atomic first answer: SET NX, fail-closed
     const answerKey = `flagMaster:answer:${gameId}:${questionId}`;
     const redis = getRedis();
 
     const isCorrect = answer.trim().toLowerCase() === roundData.correctAnswer.toLowerCase().trim();
-    const scoring = scoreFlagMasterAnswer(isCorrect, timeRemaining, roundData.multiplier, config.game.basePoints, config.game.maxTimeBonus, config.game.timePerQuestion);
+    const scoring = scoreFlagMasterAnswer(isCorrect, scoringTimeRemaining, roundData.multiplier, config.game.basePoints, config.game.maxTimeBonus, config.game.timePerQuestion);
 
     const candidate = {
       questionId,
@@ -211,7 +267,7 @@ router.post('/answer', authenticateJWT, async (req: AuthRequest, res: Response) 
         properties: {
           isCorrect,
           points: scoring.points,
-          timeRemaining,
+          timeRemaining: scoringTimeRemaining,
           tier: roundData.tier,
           modifier: roundData.modifier,
           multiplier: roundData.multiplier,

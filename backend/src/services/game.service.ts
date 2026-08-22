@@ -137,6 +137,12 @@ export async function getGameSession(sessionId: string): Promise<RedisGameSessio
     if (!raw) return null;
     const session = JSON.parse(raw) as RedisGameSession;
     if (session.expiresAt <= Date.now()) return null;
+    if (
+      String(session.category) === 'CINEMA_GEO' ||
+      Object.values(session.questionMeta ?? {}).some((question) => String(question.category) === 'CINEMA_GEO')
+    ) {
+      return null;
+    }
     return session;
   } catch (err) {
     console.error('[game-session] Failed to read session from Redis:', err);
@@ -144,38 +150,59 @@ export async function getGameSession(sessionId: string): Promise<RedisGameSessio
   }
 }
 
+const STORE_ANSWER_LUA = `
+local sessionKey  = KEYS[1]
+local answersHash = KEYS[2]
+local legacyKey   = KEYS[3]
+local serialized  = ARGV[1]
+local questionId  = ARGV[2]
+
+local legacy = redis.call('GET', legacyKey)
+if (type(legacy) ~= 'nil' and legacy ~= '') then
+  return {0, legacy}
+end
+
+local ttl = redis.call('PTTL', sessionKey)
+local inserted = redis.call('HSETNX', answersHash, questionId, serialized)
+local existing = redis.call('HGET', answersHash, questionId)
+if (not inserted or inserted == 0) then
+  return {0, existing}
+end
+
+if (ttl > 0) then
+  redis.call('PEXPIRE', answersHash, ttl)
+end
+return {1, serialized}
+`;
+
 export async function storeAnswerResult(
   sessionId: string,
   questionId: string,
   result: AnswerResult
 ): Promise<{ stored: AnswerResult; isFirstAnswer: boolean }> {
-  const answerKey = `game:answer:${sessionId}:${questionId}`;
+  const redis = getRedis();
+  const sessionKey = gameSessionKey(sessionId);
+  const answersHash = `game:answers:${sessionId}`;
+  const legacyKey = `game:answer:${sessionId}:${questionId}`;
+  const serialized = JSON.stringify(result);
+
   try {
-    const redis = getRedis();
-    // Atomic SET NX: solo la primera respuesta gana. Re-answer devuelve stored.
-    const serialized = JSON.stringify(result);
-    const nxResult = await redis.set(answerKey, serialized, 'EX', GAME_SESSION_TTL, 'NX');
-    if (nxResult === 'OK') {
-      // Also update session metadata (best-effort, non-atomic with the SET NX)
-      try {
-        const raw = await redis.get(gameSessionKey(sessionId));
-        if (raw) {
-          const session = JSON.parse(raw) as RedisGameSession;
-          session.questionResults[questionId] = result;
-          if (!session.answeredQuestionIds.includes(questionId)) {
-            session.answeredQuestionIds.push(questionId);
-          }
-          await redis.set(gameSessionKey(sessionId), JSON.stringify(session), 'EX', GAME_SESSION_TTL);
-        }
-      } catch { /* metadata best-effort */ }
-      return { stored: result, isFirstAnswer: true };
+    const out = (await redis.eval(
+      STORE_ANSWER_LUA,
+      3,
+      sessionKey,
+      answersHash,
+      legacyKey,
+      serialized,
+      questionId,
+    )) as unknown as Array<string | number | null> | string | null;
+
+    const flag = Array.isArray(out) ? Number(out[0]) : 0;
+    const payload = Array.isArray(out) ? out[1] : (typeof out === 'string' ? out : null);
+    if (payload == null) {
+      throw new Error('GAME_STATE_UNAVAILABLE');
     }
-    // Lost the race: return the stored result
-    const existing = await redis.get(answerKey);
-    if (existing) {
-      return { stored: JSON.parse(existing) as AnswerResult, isFirstAnswer: false };
-    }
-    throw new Error('GAME_STATE_UNAVAILABLE');
+    return { stored: JSON.parse(payload as string) as AnswerResult, isFirstAnswer: flag === 1 };
   } catch (err) {
     console.error('[game-session] Atomic answer storage failed:', err);
     throw new Error('GAME_STATE_UNAVAILABLE');
@@ -207,9 +234,66 @@ export async function getStoredAnswerResult(
   questionId: string
 ): Promise<AnswerResult | null> {
   try {
+    const redis = getRedis();
+    const legacy = await redis.get(`game:answer:${sessionId}:${questionId}`);
+    if (legacy) return JSON.parse(legacy) as AnswerResult;
+    const raw = await redis.hget(`game:answers:${sessionId}`, questionId);
+    if (raw) return JSON.parse(raw) as AnswerResult;
+  } catch {
+    // Fallback to the best-effort session copy below.
+  }
+  try {
     const session = await getGameSession(sessionId);
     if (!session) return null;
     return session.questionResults[questionId] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export async function readCanonicalAnswers(
+  sessionId: string,
+  questionIds: string[]
+): Promise<Record<string, AnswerResult>> {
+  if (questionIds.length === 0) return {};
+  try {
+    const redis = getRedis();
+    const hash = await redis.hgetall(`game:answers:${sessionId}`);
+    const legacyValues = await redis.mget(questionIds.map((qid) => `game:answer:${sessionId}:${qid}`));
+    const answers: Record<string, AnswerResult> = {};
+    for (let index = 0; index < questionIds.length; index += 1) {
+      const questionId = questionIds[index];
+      const raw = legacyValues[index] ?? hash[questionId];
+      if (raw) answers[questionId] = JSON.parse(raw) as AnswerResult;
+    }
+    return answers;
+  } catch {
+    return {};
+  }
+}
+
+const QUESTION_STARTED_PREFIX = 'game:questionStarted';
+
+export async function recordQuestionStarted(sessionId: string, questionId: string): Promise<number> {
+  const key = `${QUESTION_STARTED_PREFIX}:${sessionId}:${questionId}`;
+  const now = Date.now();
+  try {
+    const redis = getRedis();
+    const created = await redis.set(key, String(now), 'EX', GAME_SESSION_TTL, 'NX');
+    if (created === 'OK') return now;
+    const existing = await redis.get(key);
+    const parsed = existing ? parseInt(existing, 10) : NaN;
+    return Number.isFinite(parsed) ? parsed : now;
+  } catch {
+    return now;
+  }
+}
+
+export async function getQuestionStartedAt(sessionId: string, questionId: string): Promise<number | null> {
+  try {
+    const raw = await getRedis().get(`${QUESTION_STARTED_PREFIX}:${sessionId}:${questionId}`);
+    const parsed = raw ? parseInt(raw, 10) : NaN;
+    return Number.isFinite(parsed) ? parsed : null;
   } catch {
     return null;
   }
@@ -418,8 +502,13 @@ const FLASH_OPTIONS_COUNT = 2;
 const STREAK_BATCH_SIZE = 3;
 const STREAK_UNIQUE_FETCH_FACTOR = 4;
 const STREAK_UNIQUE_MAX_ATTEMPTS = 3;
-
-let questionsCache: Map<string, any> = new Map();
+const PLAYABLE_CATEGORIES: Category[] = [
+  Category.FLAG,
+  Category.CAPITAL,
+  Category.MAP,
+  Category.SILHOUETTE,
+  Category.MONUMENT,
+];
 
 /**
  * Obtiene preguntas para una nueva partida
@@ -446,7 +535,7 @@ export async function getQuestionsForGame(
     questions = await prisma.question.findMany({
       where: {
         ...baseWhere,
-        category: { in: [Category.FLAG, Category.CAPITAL, Category.MAP, Category.SILHOUETTE, Category.MONUMENT] },
+        category: { in: PLAYABLE_CATEGORIES },
       },
     });
   }
@@ -504,6 +593,7 @@ export async function getGameQuestionsByIds(questionIds: string[]): Promise<Game
     where: {
       id: { in: questionIds },
       isAvailable: true,
+      category: { in: PLAYABLE_CATEGORIES },
     },
   });
 
@@ -682,16 +772,6 @@ export function buildQuestionUniquenessKey(question: Pick<GameQuestion, 'categor
     normalizeUniquenessPart(question.questionData),
     normalizeUniquenessPart(question.correctAnswer),
   ].join('|');
-}
-
-function extractCinemaGeoId(questionData: string | undefined | null): string | null {
-  if (!questionData) return null;
-  try {
-    const parsed = JSON.parse(questionData) as { id?: string };
-    return parsed.id ?? null;
-  } catch {
-    return null;
-  }
 }
 
 function extractMonumentSlug(questionData: string | undefined | null): string | null {
@@ -883,10 +963,12 @@ export async function saveGameResult(
   gameMode: GameMode = GameMode.SINGLE,
   category?: Category,
   txClient?: Prisma.TransactionClient,
-  runId?: string
+  runId?: string,
+  expectedTotalQuestions?: number
 ): Promise<{ gameId: string; totalScore: number; isHighScore: boolean }> {
   const totalScore = answers.reduce((sum, a) => sum + a.points, 0);
   const correctCount = answers.filter((a) => a.isCorrect).length;
+  const totalQuestions = expectedTotalQuestions ?? answers.length;
 
   const save = async (db: Prisma.TransactionClient) => {
     let gameResult: { id: string; score: number };
@@ -896,7 +978,7 @@ export async function saveGameResult(
           userId,
           score: totalScore,
           correctCount,
-          totalQuestions: answers.length,
+          totalQuestions,
           category,
           gameMode,
           variant,

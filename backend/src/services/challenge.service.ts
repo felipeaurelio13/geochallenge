@@ -173,43 +173,50 @@ export class ChallengeService {
   }
 
   async joinChallenge(challengeId: string, userId: string) {
-    const challenge = await prisma.challenge.findUnique({
-      where: { id: challengeId },
-      include: { participants: true },
-    });
+    return prisma.$transaction(async (tx) => {
+      // Bloqueo de fila (FOR UPDATE) para serializar joins concurrentes:
+      // impide que dos requests crucen el chequeo de cupo a la vez y
+      // excedan maxPlayers.
+      const locked = await tx.$queryRaw<
+        Array<{ id: string; status: string; maxPlayers: number; expiresAt: Date }>
+      >`SELECT id, status, "maxPlayers", "expiresAt" FROM "challenges" WHERE id = ${challengeId} FOR UPDATE`;
 
-    if (!challenge) {
-      throw new AppError('CHALLENGE_NOT_FOUND', 404, 'Desafío no encontrado');
-    }
+      const row = locked[0];
+      if (!row) {
+        throw new AppError('CHALLENGE_NOT_FOUND', 404, 'Desafío no encontrado');
+      }
 
-    if (challenge.status !== 'PENDING') {
-      throw new AppError('CHALLENGE_NOT_JOINABLE', 400, 'Este desafío ya no está disponible para unirse');
-    }
+      if (row.status !== 'PENDING') {
+        throw new AppError('CHALLENGE_NOT_JOINABLE', 400, 'Este desafío ya no está disponible para unirse');
+      }
 
-    if (challenge.expiresAt < new Date()) {
-      await prisma.challenge.update({ where: { id: challengeId }, data: { status: 'EXPIRED' } });
-      throw new AppError('CHALLENGE_EXPIRED', 400, 'Este desafío ha expirado');
-    }
+      if (row.expiresAt < new Date()) {
+        await tx.challenge.update({ where: { id: challengeId }, data: { status: 'EXPIRED' } });
+        throw new AppError('CHALLENGE_EXPIRED', 400, 'Este desafío ha expirado');
+      }
 
-    if (challenge.participants.some((p) => p.userId === userId)) {
-      throw new AppError('CHALLENGE_ALREADY_JOINED', 400, 'Ya estás dentro de este desafío');
-    }
+      const existing = await tx.challengeParticipant.findFirst({ where: { challengeId, userId } });
+      if (existing) {
+        throw new AppError('CHALLENGE_ALREADY_JOINED', 400, 'Ya estás dentro de este desafío');
+      }
 
-    if (challenge.participants.length >= challenge.maxPlayers) {
-      throw new AppError('CHALLENGE_FULL', 400, 'El desafío ya completó el cupo de jugadores');
-    }
+      const count = await tx.challengeParticipant.count({ where: { challengeId } });
+      if (count >= row.maxPlayers) {
+        throw new AppError('CHALLENGE_FULL', 400, 'El desafío ya completó el cupo de jugadores');
+      }
 
-    const joined = await prisma.challenge.update({
-      where: { id: challengeId },
-      data: {
-        participants: {
-          create: { userId },
+      const joined = await tx.challenge.update({
+        where: { id: challengeId },
+        data: {
+          participants: {
+            create: { userId },
+          },
         },
-      },
-      include: this.challengeInclude,
-    });
+        include: this.challengeInclude,
+      });
 
-    return this.toChallengeView(joined, userId);
+      return this.toChallengeView(joined, userId);
+    });
   }
 
   async getChallengeQuestions(challengeId: string, userId: string) {
@@ -235,6 +242,9 @@ export class ChallengeService {
         where: { id: challengeId },
         data: { status: 'ACCEPTED' },
       });
+      // Refleja la transición localmente: la variable `challenge` quedó
+      // con el status viejo (PENDING) y hacía fallar el chequeo siguiente.
+      challenge.status = 'ACCEPTED';
     }
 
     if (challenge.status !== 'ACCEPTED' && challenge.status !== 'COMPLETED') {
@@ -379,34 +389,38 @@ export class ChallengeService {
       const tied = sorted.filter((p) => p.score === topScore);
       const winnerId = tied.length === 1 ? tied[0].userId : null;
 
-      // Cierre atómico: status + stats de todos los participantes, o nada.
-      await prisma.$transaction(async (tx) => {
-        await tx.challenge.update({
-          where: { id: challengeId },
-          data: {
-            status: 'COMPLETED',
-            completedAt: new Date(),
-            winnerId,
-          },
-        });
-
-        for (const p of updatedChallenge.participants) {
-          const isWinner = winnerId === p.userId;
-          const isLoss = winnerId !== null && winnerId !== p.userId;
-
-          // Challenge NO actualiza highScore (legacy: solo Classic Single).
-          await tx.user.update({
-            where: { id: p.userId },
-            data: {
-              gamesPlayed: { increment: 1 },
-              wins: isWinner ? { increment: 1 } : undefined,
-              losses: isLoss ? { increment: 1 } : undefined,
-            },
-          });
-        }
+      // CAS: solo el request que gana la transición ACCEPTED → COMPLETED
+      // actualiza las stats. Los submits concurrentes que lleguen después
+      // ven count=0 y no duplican wins/losses/gamesPlayed.
+      const flipped = await prisma.challenge.updateMany({
+        where: { id: challengeId, status: 'ACCEPTED' },
+        data: {
+          status: 'COMPLETED',
+          completedAt: new Date(),
+          winnerId,
+        },
       });
 
-      // Challenge NO actualiza leaderboard global (solo Classic Single).
+      if (flipped.count === 1) {
+        await prisma.$transaction(async (tx) => {
+          for (const p of updatedChallenge.participants) {
+            const isWinner = winnerId === p.userId;
+            const isLoss = winnerId !== null && winnerId !== p.userId;
+
+            // Challenge NO actualiza highScore (legacy: solo Classic Single).
+            await tx.user.update({
+              where: { id: p.userId },
+              data: {
+                gamesPlayed: { increment: 1 },
+                wins: isWinner ? { increment: 1 } : undefined,
+                losses: isLoss ? { increment: 1 } : undefined,
+              },
+            });
+          }
+        });
+
+        // Challenge NO actualiza leaderboard global (solo Classic Single).
+      }
     }
 
     const finalChallenge = await prisma.challenge.findUnique({

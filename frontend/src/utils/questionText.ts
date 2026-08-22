@@ -5,14 +5,9 @@ import { parseMonumentQuestionData } from '../data/monuments';
 /**
  * Genera el texto de la pregunta TRADUCIDO al idioma activo del cliente.
  *
- * Antes esta lógica vivía duplicada en QuestionCard.tsx y DailyChallengePage.tsx,
- * y ambas caían a `question.questionText` que el backend generaba en español
- * fijo. Resultado: en Daily y Cinema-Geo el texto aparecía en español dentro
- * de UIs en inglés (QA round 2, bug ROUND2-001 / CRITICAL).
- *
- * Ahora la fuente de verdad es i18next + el JSON embebido en questionData
- * (bilingüe para CINEMA_GEO). El `questionText` del backend queda como
- * último fallback para no romper preguntas sin metadata.
+ * La fuente de verdad es i18next + el JSON embebido en questionData.
+ * El `questionText` del backend queda como último fallback para no romper
+ * preguntas sin metadata.
  */
 export function getLocalizedQuestionText(
   question: Question,
@@ -58,4 +53,3 @@ function getQuestionDataPlainValue(question: Question): string {
   }
   return question.questionData.country || question.questionData.capital || '';
 }
-

@@ -24,6 +24,9 @@ import {
   getGameSession,
   storeAnswerResult,
   getStoredAnswerResult,
+  readCanonicalAnswers,
+  recordQuestionStarted,
+  getQuestionStartedAt,
   extendGameSession,
   updateSessionToAuthenticated,
   recordMechanicUsage,
@@ -33,6 +36,7 @@ import {
   type GameQuestion,
   type SoloGameType,
 } from '../services/game.service.js';
+import { effectiveTimeRemainingSeconds } from '../utils/serverTiming.js';
 import { shuffleArray } from '../utils/scoring.js';
 import { getRedis } from '../config/redis.js';
 import { prisma } from '../config/database.js';
@@ -404,9 +408,57 @@ router.post('/extend-session', optionalAuth, async (req: AuthRequest, res: Respo
 });
 
 /**
+ * POST /api/game/question-started
+ * Marca (first-wins) el instante en que el cliente mostró una pregunta.
+ * Idempotente y vinculado a sessionId + questionId. El servidor usa ese
+ * instante como referencia autoritativa para calcular el tiempo restante en
+ * /answer, de modo que ningún score depende del timeRemaining enviado por el
+ * cliente. Clientes antiguos que no lo llaman reciben un fallback seguro
+ * (first-wins en el momento del answer).
+ */
+router.post('/question-started', optionalAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const schema = z.object({
+      sessionId: z.string().min(1),
+      questionId: z.string().min(1),
+    });
+    const validation = schema.safeParse(req.body);
+
+    if (!validation.success) {
+      res.status(400).json({ error: 'Datos inválidos', code: 'VALIDATION_FAILED' });
+      return;
+    }
+
+    const { sessionId, questionId } = validation.data;
+
+    const session = await getGameSession(sessionId);
+    if (!session) {
+      res.status(410).json({ error: 'La sesión expiró.', code: 'GAME_SESSION_EXPIRED' });
+      return;
+    }
+    if (session.userId && (!req.user || session.userId !== req.user!.userId)) {
+      res.status(403).json({ error: 'La sesión pertenece a otro usuario.', code: 'SESSION_MISMATCH' });
+      return;
+    }
+    if (!session.questionIds.includes(questionId)) {
+      res.status(400).json({ error: 'La pregunta no pertenece a esta partida.', code: 'GAME_INVALID_QUESTION' });
+      return;
+    }
+
+    const startedAt = await recordQuestionStarted(sessionId, questionId);
+
+    res.json({ started: true, startedAt });
+  } catch (error) {
+    respondWithError(res, error);
+  }
+});
+
+/**
  * POST /api/game/answer
  * Server-authoritative. sessionId obligatorio. Primera respuesta inmutable.
  * Re-answer devuelve el resultado almacenado (idempotencia).
+ * El scoring usa el instante de inicio de la pregunta (server-side); el
+ * timeRemaining enviado por el cliente solo se conserva como telemetría.
  */
 router.post('/answer', optionalAuth, async (req: AuthRequest, res: Response) => {
   try {
@@ -422,7 +474,7 @@ router.post('/answer', optionalAuth, async (req: AuthRequest, res: Response) => 
       return;
     }
 
-    const { questionId, answer, timeRemaining, coordinates, sessionId } = validation.data;
+    const { questionId, answer, coordinates, sessionId } = validation.data;
 
     if (!sessionId) {
       res.status(400).json({ error: 'sessionId es obligatorio.', code: 'SESSION_REQUIRED' });
@@ -450,23 +502,38 @@ router.post('/answer', optionalAuth, async (req: AuthRequest, res: Response) => 
       : session.variant === 'FLASH' ? 'flash'
       : 'single';
 
-    // Derivar combo Flash desde session.questionResults (historial server-side)
+    // Derivar respuestas canónicas (historial server-side) para combo Flash y
+    // telemetría. Fuente de verdad: hash `game:answers:<sessionId>`.
+    const canonical = await readCanonicalAnswers(sessionId, session.questionIds);
+    const answeredCount = Object.keys(canonical).length;
+
+    // Derivar combo Flash desde las respuestas canónicas
     let flashCombo: number | undefined;
     if (sessionGameType === 'flash') {
       let combo = 0;
       for (const qid of session.questionIds) {
-        const r = session.questionResults[qid];
+        const r = canonical[qid];
         if (!r) break;
         if (r.isCorrect) combo++; else combo = 0;
       }
       flashCombo = combo;
     }
 
+    // Tiempo server-authoritative: el instante de inicio de la pregunta define
+    // la ventana de bonus. El timeRemaining del cliente nunca participa en el scoring.
+    const authoritativeStart =
+      (await getQuestionStartedAt(sessionId, questionId)) ??
+      (await recordQuestionStarted(sessionId, questionId));
+    const scoringTimeRemaining = effectiveTimeRemainingSeconds(
+      authoritativeStart,
+      config.game.timePerQuestion * 1000
+    );
+
     // Validar respuesta contra la sesión
     const result = await validateAnswerByGameType(
       questionId,
       answer,
-      Math.min(Math.max(0, timeRemaining), 30),
+      scoringTimeRemaining,
       coordinates,
       sessionGameType,
       flashCombo !== undefined ? { combo: flashCombo } : undefined
@@ -494,7 +561,7 @@ router.post('/answer', optionalAuth, async (req: AuthRequest, res: Response) => 
           difficulty: session.questionMeta?.[questionId]?.difficulty,
           continent: session.questionMeta?.[questionId]?.continent,
           distanceBucket,
-          roundIndex: session.answeredQuestionIds.length - 1,
+          roundIndex: answeredCount - 1,
         },
       });
     }
@@ -549,7 +616,7 @@ router.post('/mechanic', optionalAuth, async (req: AuthRequest, res: Response) =
     }
 
     // Post-answer check: mechanic not allowed after answering
-    if (session.answeredQuestionIds.includes(questionId)) {
+    if (await getStoredAnswerResult(sessionId, questionId)) {
       res.status(400).json({ error: 'No puedes usar mecánicas después de responder.', code: 'MECHANIC_POST_ANSWER' });
       return;
     }
@@ -639,14 +706,23 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
     // Vincular sesión al usuario si aún no lo estaba (start antes del login)
     await updateSessionToAuthenticated(sessionId, req.user!.userId);
 
-    // Derivar resultados de la sesión, no del body del cliente
+    // Derivar resultados de la sesión, no del body del cliente.
+    // Fuente canónica: hash `game:answers:<sessionId>` (con fallback legacy a
+    // las claves atómicas `game:answer:*`). No se depende de la copia mutable
+    // session.questionResults / answeredQuestionIds.
+    const canonicalAnswers = await readCanonicalAnswers(sessionId, session.questionIds);
     const results: AnswerResult[] = [];
     for (const questionId of session.questionIds) {
-      const stored = session.questionResults[questionId];
+      const stored = canonicalAnswers[questionId];
       if (stored) {
         results.push(stored);
       }
     }
+
+    // El denominador es el total esperado (preguntas servidas), no cuántas se
+    // respondieron: una partida truncada no debe registrarse como perfecta.
+    const expectedTotalQuestions = session.questionIds.length;
+    const answeredQuestions = results.length;
 
     const category = session.category;
     const variant = session.variant;
@@ -660,11 +736,12 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
       category,
       undefined,
       session.sessionId, // runId = sessionId para idempotencia
+      expectedTotalQuestions,
     );
 
     // Calcular estadísticas
     const correctCount = results.filter((r) => r.isCorrect).length;
-    const accuracy = results.length > 0 ? Math.round((correctCount / results.length) * 100) : 0;
+    const accuracy = answeredQuestions > 0 ? Math.round((correctCount / answeredQuestions) * 100) : 0;
 
     trackServerEvent({
       name: 'game_finished',
@@ -676,7 +753,8 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
       properties: {
         score: totalScore,
         correctCount,
-        totalQuestions: results.length,
+        totalQuestions: expectedTotalQuestions,
+        answeredQuestions,
         accuracy,
       },
     });
@@ -694,7 +772,7 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
     const newAchievements = await evaluateAchievementsAfterGame({
       userId: req.user!.userId,
       correctCount,
-      totalQuestions: results.length,
+      totalQuestions: expectedTotalQuestions,
       score: totalScore,
       streakLength,
       isStreakMode: variant === GameVariant.STREAK,
@@ -705,7 +783,8 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
       gameId,
       totalScore,
       correctCount,
-      totalQuestions: results.length,
+      totalQuestions: expectedTotalQuestions,
+      answeredQuestions,
       accuracy,
       isHighScore,
       details: results,

@@ -93,6 +93,21 @@ describe('getQuestionsForStreakGame', () => {
     expect(questions).toHaveLength(2);
   });
 
+  it('limita las partidas mixtas a las categorías activas', async () => {
+    findManyMock.mockResolvedValue([]);
+
+    const { getQuestionsForGame } = await import('../services/game.service.js');
+    await getQuestionsForGame(Category.MIXED, 10);
+
+    expect(findManyMock).toHaveBeenCalledWith({
+      where: {
+        category: { in: [Category.FLAG, Category.CAPITAL, Category.MAP, Category.SILHOUETTE, Category.MONUMENT] },
+        id: { notIn: [] },
+        isAvailable: true,
+      },
+    });
+  });
+
   it('evita preguntas equivalentes por clave de unicidad en racha cuando el flag está activo', async () => {
     findManyMock.mockResolvedValue([
       {

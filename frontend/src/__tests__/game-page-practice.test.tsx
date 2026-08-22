@@ -14,6 +14,7 @@ vi.mock('../services/api', () => ({
     extendSession: vi.fn(),
     useMechanic: vi.fn(),
     healthCheck: vi.fn().mockResolvedValue(true),
+    notifyQuestionStarted: vi.fn(),
   },
 }));
 

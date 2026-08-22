@@ -3,11 +3,12 @@
  */
 import express from 'express';
 import { AddressInfo } from 'node:net';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import gameRouter from '../controllers/game.controller.js';
 
 const mocks = vi.hoisted(() => {
   const redisStore = new Map<string, string>();
+  const hashStore = new Map<string, Map<string, string>>();
   const sessionStore = new Map<string, ReturnType<typeof makeSession>>();
   const TEST_QUESTIONS = Array.from({ length: 10 }, (_, i) => {
     const continents = ['Africa', 'Asia', 'Europe', 'Oceania', 'North America', 'South America'];
@@ -79,7 +80,12 @@ const mocks = vi.hoisted(() => {
     }),
     sessionStore,
     redisStore,
+    hashStore,
     TEST_QUESTIONS,
+    achievementsEval: vi.fn().mockResolvedValue([]),
+    achievementsDaily: vi.fn().mockResolvedValue([]),
+    pexpireMock: vi.fn(),
+    ptttlMock: vi.fn(),
   };
 });
 
@@ -117,6 +123,43 @@ vi.mock('../config/redis.js', () => ({
       return Promise.resolve(prev + 1);
     }),
     expire: vi.fn(() => Promise.resolve(1)),
+    mget: vi.fn((keys: string[]) => Promise.resolve(keys.map((k: string) => mocks.redisStore.get(k) ?? null))),
+    pexpire: mocks.pexpireMock,
+    pttl: mocks.ptttlMock,
+    hsetnx: vi.fn((key: string, field: string, value: string) => {
+      if (!mocks.hashStore.has(key)) mocks.hashStore.set(key, new Map());
+      const h = mocks.hashStore.get(key)!;
+      if (h.has(field)) return Promise.resolve(0);
+      h.set(field, value);
+      return Promise.resolve(1);
+    }),
+    hget: vi.fn((key: string, field: string) => Promise.resolve(mocks.hashStore.get(key)?.get(field) ?? null)),
+    hgetall: vi.fn((key: string) => Promise.resolve(Object.fromEntries(mocks.hashStore.get(key) ?? []))),
+    eval: vi.fn((_script: string, numkeys: number, ...rest: unknown[]) => {
+      const keys = rest.slice(0, numkeys) as string[];
+      const args = rest.slice(numkeys) as string[];
+      const sessionKey = keys[0];
+      const answersHash = keys[1];
+      const legacyKey = keys[2];
+      const serialized = args[0];
+      const questionId = args[1];
+      // Lua: legacy first-wins
+      const legacy = mocks.redisStore.get(legacyKey);
+      if (legacy !== undefined && legacy !== null) {
+        return Promise.resolve([0, legacy]);
+      }
+      // PTTL real de la sesión
+      const ttl = mocks.sessionStore.has(sessionKey.replace('game:session:', '')) ? 7200000 : -2;
+      if (ttl > 0) mocks.pexpireMock(answersHash, ttl);
+      // HSETNX sobre el hash
+      if (!mocks.hashStore.has(answersHash)) mocks.hashStore.set(answersHash, new Map());
+      const h = mocks.hashStore.get(answersHash)!;
+      if (h.has(questionId)) {
+        return Promise.resolve([0, h.get(questionId)]);
+      }
+      h.set(questionId, serialized);
+      return Promise.resolve([1, serialized]);
+    }),
     pipeline: () => ({ zadd: () => ({ exec: async () => [] }) }),
     zadd: async () => 1, zscore: async () => null, zrevrange: async () => [],
     zcard: async () => 0, del: async () => 1, zrevrank: async () => null, exec: async () => [],
@@ -186,8 +229,8 @@ vi.mock('../services/leaderboard.service.js', () => ({
 }));
 
 vi.mock('../services/achievement.service.js', () => ({
-  evaluateAchievementsAfterGame: vi.fn().mockResolvedValue([]),
-  evaluateAchievementsAfterDaily: vi.fn().mockResolvedValue([]),
+  evaluateAchievementsAfterGame: mocks.achievementsEval,
+  evaluateAchievementsAfterDaily: mocks.achievementsDaily,
 }));
 
 vi.mock('../services/mastery.service.js', () => ({
@@ -215,16 +258,26 @@ function startServer() {
   return { server, baseUrl };
 }
 
+beforeEach(() => {
+  mocks.achievementsEval.mockClear();
+  mocks.achievementsDaily.mockClear();
+});
+
 function primeSession() {
   // Re-create test-session-1 with a clean state for each caller.
-  // Also clear any stale SET-NX answer keys from prior tests.
+  // Also clear stale SET-NX answer keys and the answers hash from prior tests.
   const prefix = 'game:answer:test-session-1:';
   for (const key of mocks.redisStore.keys()) {
     if (key.startsWith(prefix)) mocks.redisStore.delete(key);
   }
+  mocks.hashStore.delete('game:answers:test-session-1');
   const mechanicPrefix = 'game:mechanic:test-session-1:';
   for (const key of mocks.redisStore.keys()) {
     if (key.startsWith(mechanicPrefix)) mocks.redisStore.delete(key);
+  }
+  const startedPrefix = 'game:questionStarted:test-session-1:';
+  for (const key of mocks.redisStore.keys()) {
+    if (key.startsWith(startedPrefix)) mocks.redisStore.delete(key);
   }
   const correctAnswers: Record<string, string> = {};
   const optionsPerQuestion: Record<string, string[]> = {};
@@ -347,9 +400,173 @@ describe('POST /game/finish — session integrity', () => {
         }),
       });
       expect(res.status).toBe(200);
-      const result = await res.json() as { correctCount: number; totalQuestions: number };
+      const result = await res.json() as { correctCount: number; totalQuestions: number; answeredQuestions: number };
       expect(result.correctCount).toBe(3);
-      expect(result.totalQuestions).toBe(5);
+      // El denominador es el total esperado (10 preguntas servidas), no las
+      // 5 respondidas: una partida truncada no se registra como perfecta.
+      expect(result.totalQuestions).toBe(10);
+      expect(result.answeredQuestions).toBe(5);
+
+      // No se puede explotar 3 aciertos en 10 como si fuera perfect: la
+      // evaluación de achievements recibe el total esperado, no el respondido.
+      const evalCall = mocks.achievementsEval.mock.calls[0]?.[0] as { correctCount: number; totalQuestions: number } | undefined;
+      expect(evalCall).toEqual(expect.objectContaining({ correctCount: 3, totalQuestions: 10 }));
+      expect(mocks.achievementsEval.mock.results[0]?.value).toEqual([]);
+    } finally { server.close(); }
+  });
+
+  it('finish siempre ve la primera respuesta aceptada (fuente canónica)', async () => {
+    const { server, baseUrl } = startServer();
+    primeSession();
+    try {
+      // Primera respuesta aceptada: Correct (isCorrect true).
+      const r1 = await fetch(`${baseUrl}/api/game/answer`, {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ sessionId: 'test-session-1', questionId: 'q-1', answer: 'Correct', timeRemaining: 5, gameType: 'single' }),
+      });
+      expect((await r1.json() as { isCorrect: boolean }).isCorrect).toBe(true);
+
+      // Re-answer con respuesta incorrecta: se conserva la original.
+      const r2 = await fetch(`${baseUrl}/api/game/answer`, {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ sessionId: 'test-session-1', questionId: 'q-1', answer: 'Wrong1', timeRemaining: 5, gameType: 'single' }),
+      });
+      expect((await r2.json() as { isCorrect: boolean }).isCorrect).toBe(true);
+
+      const res = await fetch(`${baseUrl}/api/game/finish`, {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ sessionId: 'test-session-1', gameType: 'single' }),
+      });
+      expect(res.status).toBe(200);
+      const body = await res.json() as { correctCount: number; details: Array<{ questionId: string; isCorrect: boolean }> };
+      expect(body.correctCount).toBe(1);
+      const detail = body.details.find((d) => d.questionId === 'q-1');
+      expect(detail).toBeDefined();
+      expect(detail!.isCorrect).toBe(true);
+    } finally { server.close(); }
+  });
+
+  it('partida completa 10/10 sí puede otorgar PERFECT_GAME', async () => {
+    const { server, baseUrl } = startServer();
+    primeSession();
+    try {
+      for (let i = 1; i <= 10; i++) {
+        await fetch(`${baseUrl}/api/game/answer`, {
+          method: 'POST', headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ sessionId: 'test-session-1', questionId: `q-${i}`, answer: 'Correct', timeRemaining: 5, gameType: 'single' }),
+        });
+      }
+      // El servicio de achievements autoriza PERFECT_GAME solo cuando la
+      // evaluación recibe 10/10.
+      mocks.achievementsEval.mockResolvedValueOnce(['PERFECT_GAME']);
+
+      const res = await fetch(`${baseUrl}/api/game/finish`, {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ sessionId: 'test-session-1', gameType: 'single' }),
+      });
+      expect(res.status).toBe(200);
+      const body = await res.json() as { correctCount: number; totalQuestions: number; newAchievements: string[] };
+      expect(body.correctCount).toBe(10);
+      expect(body.totalQuestions).toBe(10);
+      expect(body.newAchievements).toContain('PERFECT_GAME');
+
+      const evalCall = mocks.achievementsEval.mock.calls[0]?.[0] as { correctCount: number; totalQuestions: number } | undefined;
+      expect(evalCall).toEqual(expect.objectContaining({ correctCount: 10, totalQuestions: 10 }));
+    } finally { server.close(); }
+  });
+});
+
+describe('POST /game/question-started — server-authoritative timing', () => {
+  it('rejects unknown session → GAME_SESSION_EXPIRED', async () => {
+    const { server, baseUrl } = startServer();
+    try {
+      const res = await fetch(`${baseUrl}/api/game/question-started`, {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ sessionId: 'no-such', questionId: 'q-1' }),
+      });
+      expect(res.status).toBe(410);
+    } finally { server.close(); }
+  });
+
+  it('rejects question not in session → GAME_INVALID_QUESTION', async () => {
+    const { server, baseUrl } = startServer();
+    primeSession();
+    try {
+      const res = await fetch(`${baseUrl}/api/game/question-started`, {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ sessionId: 'test-session-1', questionId: 'not-here' }),
+      });
+      expect(res.status).toBe(400);
+      expect(((await res.json()) as { code: string }).code).toBe('GAME_INVALID_QUESTION');
+    } finally { server.close(); }
+  });
+
+  it('is idempotent: first call wins, repeats return the same startedAt', async () => {
+    const { server, baseUrl } = startServer();
+    primeSession();
+    try {
+      const r1 = await fetch(`${baseUrl}/api/game/question-started`, {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ sessionId: 'test-session-1', questionId: 'q-1' }),
+      });
+      expect(r1.status).toBe(200);
+      const b1 = await r1.json() as { started: boolean; startedAt: number };
+      expect(b1.started).toBe(true);
+
+      const r2 = await fetch(`${baseUrl}/api/game/question-started`, {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ sessionId: 'test-session-1', questionId: 'q-1' }),
+      });
+      const b2 = await r2.json() as { startedAt: number };
+      expect(b2.startedAt).toBe(b1.startedAt);
+    } finally { server.close(); }
+  });
+});
+
+describe('POST /game/answer — server-authoritative timing', () => {
+  it('scores from the authoritative question start, ignoring client timeRemaining', async () => {
+    const { server, baseUrl } = startServer();
+    primeSession();
+    try {
+      // El cliente marca el inicio de la pregunta…
+      const started = await fetch(`${baseUrl}/api/game/question-started`, {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ sessionId: 'test-session-1', questionId: 'q-1' }),
+      });
+      expect(started.status).toBe(200);
+
+      // …espera 60ms (tiempo real transcurrido)…
+      await new Promise((resolve) => setTimeout(resolve, 60));
+
+      // …y responde afirmando que quedan 0 segundos (cliente deshonesto).
+      const res = await fetch(`${baseUrl}/api/game/answer`, {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ sessionId: 'test-session-1', questionId: 'q-1', answer: 'Correct', timeRemaining: 0, gameType: 'single' }),
+      });
+      expect(res.status).toBe(200);
+      const body = await res.json() as { isCorrect: boolean; timeRemaining: number };
+      expect(body.isCorrect).toBe(true);
+      // El tiempo almacenado refleja la ventana server-side (≈ duración base 10s),
+      // NO el timeRemaining=0 del cliente.
+      expect(body.timeRemaining).toBeGreaterThan(9);
+      expect(body.timeRemaining).toBeLessThanOrEqual(10);
+    } finally { server.close(); }
+  });
+
+  it('without question-started: first answer records start first-wins (full-window fallback)', async () => {
+    const { server, baseUrl } = startServer();
+    primeSession();
+    try {
+      // Cliente antiguo/offline que no llama a question-started: el servidor
+      // registra el inicio en el primer answer y usa esa ventana completa.
+      const res = await fetch(`${baseUrl}/api/game/answer`, {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ sessionId: 'test-session-1', questionId: 'q-2', answer: 'Correct', timeRemaining: 0, gameType: 'single' }),
+      });
+      expect(res.status).toBe(200);
+      const body = await res.json() as { timeRemaining: number };
+      expect(body.timeRemaining).toBeGreaterThan(9);
+      expect(body.timeRemaining).toBeLessThanOrEqual(10);
     } finally { server.close(); }
   });
 });

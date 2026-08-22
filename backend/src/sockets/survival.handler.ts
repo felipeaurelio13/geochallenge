@@ -77,10 +77,26 @@ interface ActiveSurvivalMatch {
   usedQuestionIds: string[];
   currentRound: number;
   resolvingRound?: number;
+  questionStartedAt?: Date;
   fillTimerId?: ReturnType<typeof setTimeout>;
   fillStartedAt: number;
   countdownIntervalId?: ReturnType<typeof setInterval>;
   disconnectTimers: Map<string, ReturnType<typeof setTimeout>>;
+}
+
+/**
+ * Tiempo restante server-authoritative para Survival: derivado del instante en
+ * que la pregunta fue emitida y del límite de la dificultad vigente. El
+ * timeRemaining que envíe el cliente nunca participa del scoring.
+ */
+function getAuthoritativeSurvivalTimeRemaining(
+  match: Pick<ActiveSurvivalMatch, 'questionStartedAt'>,
+  round: number,
+  nowMs: number = Date.now()
+): number {
+  if (!match.questionStartedAt) return 0;
+  const elapsedSeconds = Math.max(0, (nowMs - match.questionStartedAt.getTime()) / 1000);
+  return Math.max(0, TIME_PER_DIFFICULTY[getDifficultyForRound(round)] - elapsedSeconds);
 }
 
 // ─── Global state ────────────────────────────────────────────────────────────
@@ -254,6 +270,7 @@ function sendQuestion(io: SocketIOServer, match: ActiveSurvivalMatch): void {
 
   const difficulty = getDifficultyForRound(round);
   const timeLimit = TIME_PER_DIFFICULTY[difficulty];
+  match.questionStartedAt = new Date();
 
   // Strip correctAnswer and MAP coordinates from emitted question
   const publicQuestion = toPublicSocketPayload(question as unknown as Record<string, unknown>);
@@ -711,7 +728,12 @@ export function setupSurvivalHandlers(io: SocketIOServer, socket: Socket): void 
 
         let result: AnswerResult;
         try {
-          result = await validateAnswer(data.questionId, data.answer, data.timeRemaining, data.coordinates);
+          result = await validateAnswer(
+            data.questionId,
+            data.answer,
+            getAuthoritativeSurvivalTimeRemaining(match, round),
+            data.coordinates
+          );
         } catch {
           player.pendingRound = undefined;
           return;

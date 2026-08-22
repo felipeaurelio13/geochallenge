@@ -19,14 +19,14 @@ const QUESTIONS: EvaluableQuestion[] = [
 ];
 
 describe('evaluateTimedAnswers', () => {
-  it('calcula el puntaje con la misma fórmula que el cliente (base + bonus de tiempo)', () => {
+  it('puntúa base por acierto sin bonus de tiempo (asíncrono)', () => {
     const { score, correctCount } = evaluateTimedAnswers(
       QUESTIONS,
       [{ questionId: 'q1', answer: 'Chile', timeRemaining: 5 }],
       10
     );
-    // 100 base + round((5/10) * 50) = 125
-    expect(score).toBe(125);
+    // 100 base, sin bonus de tiempo (el score no depende del timeRemaining)
+    expect(score).toBe(100);
     expect(correctCount).toBe(1);
   });
 
@@ -71,28 +71,31 @@ describe('evaluateTimedAnswers', () => {
     expect(() => evaluateTimedAnswers(QUESTIONS, answers, 10)).toThrow(/más respuestas/);
   });
 
-  it('recorta timeRemaining inflado: solo un Focus Time (+3s) por partida', () => {
-    const { score } = evaluateTimedAnswers(
+  it('el score NO depende del timeRemaining del cliente (solo se recorta para telemetría)', () => {
+    const { score, details } = evaluateTimedAnswers(
       QUESTIONS,
       [
-        // Primer exceso: permitido hasta duration + 3 → bonus round((13/10)*50) = 65
         { questionId: 'q1', answer: 'Chile', timeRemaining: 999 },
-        // Segundo exceso: recortado a duration → bonus 50
         { questionId: 'q2', answer: 'Lima', timeRemaining: 999 },
       ],
       10
     );
-    expect(score).toBe(100 + 65 + 100 + 50);
+    // Sin bonus de tiempo: cada acierto vale exactamente basePoints.
+    expect(score).toBe(200);
+    // El valor para telemetría queda recortado a la duración.
+    for (const d of details) {
+      if (d.isCorrect) expect(d.timeRemaining).toBeLessThanOrEqual(10);
+    }
   });
 
-  it('MAP: puntúa por precisión con haversine y umbral de 500km', () => {
-    // Respuesta exacta: accuracy 1 → 100 + bonus completo
+  it('MAP: puntúa por precisión con haversine y umbral de 500km (sin bonus de tiempo)', () => {
+    // Respuesta exacta: accuracy 1 → 100 (solo precisión)
     const exact = evaluateTimedAnswers(
       QUESTIONS,
       [{ questionId: 'q3', mapAnswer: { lat: -33.45, lng: -70.66 }, timeRemaining: 10 }],
       10
     );
-    expect(exact.score).toBe(150);
+    expect(exact.score).toBe(100);
     expect(exact.correctCount).toBe(1);
 
     // Muy lejos (> 500km): incorrecta, 0 puntos

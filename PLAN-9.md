@@ -147,7 +147,7 @@ export const BOSS_SERVER_GRACE_MS = 1500;
    - **No counters persisted** — all computed
 
 4. **`buildWorldEventBoss(eventId: string, region: WorldEventRegion)`**
-   - Pool: questions with `category IN (FLAG, CAPITAL, SILHOUETTE, MONUMENT, CINEMA_GEO)`
+   - Pool: questions with `category IN (FLAG, CAPITAL, SILHOUETTE, MONUMENT)`
    - Filter to region countries
    - Tier 1: MEDIUM/HARD only
    - Tier 2: any difficulty (fallback)

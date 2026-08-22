@@ -35,7 +35,15 @@ import {
 import { calculateTimeBonus } from '../utils/scoring.js';
 import { trackServerEvent } from '../services/telemetry.service.js';
 import { getCompetitiveTier, placementGamesRemaining } from '../services/competitiveRating.service.js';
-import { persistDuelResults } from '../services/duelPersistence.service.js';
+import {
+  persistDuelFinalization,
+  type DuelFinalizationPayload,
+} from '../services/duelPersistence.service.js';
+import {
+  upsertPendingFinalization,
+  markFinalizationCompleted,
+  failFinalization,
+} from '../services/pendingFinalization.service.js';
 
 export type DuelMode = 'classic' | 'geo-challenge';
 
@@ -465,9 +473,9 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
           }
           const selectedOptionIds = data.answer ? data.answer.split(',').filter(Boolean) : [];
           const isCorrect = isGeoChallengeAnswerCorrect(round.correctOptionIds, selectedOptionIds);
-          const safeTimeRemaining = duel.rated
-            ? getAuthoritativeDuelTimeRemaining(duel)
-            : Math.max(0, Math.min(duelTimeLimit(duel), data.timeRemaining));
+          // Timing server-authoritative en ambos casos (rated y no-rated): el
+          // timeRemaining del cliente nunca participa del scoring del duelo.
+          const safeTimeRemaining = getAuthoritativeDuelTimeRemaining(duel);
           const basePoints = isCorrect ? getGeoChallengeBasePoints(round.difficulty) : 0;
           const timeBonus = isCorrect ? calculateTimeBonus(safeTimeRemaining, duelTimeLimit(duel)) : 0;
           result = {
@@ -481,9 +489,7 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
             timeRemaining: safeTimeRemaining,
           };
         } else {
-          const scoringTimeRemaining = duel.rated
-            ? getAuthoritativeDuelTimeRemaining(duel)
-            : data.timeRemaining;
+          const scoringTimeRemaining = getAuthoritativeDuelTimeRemaining(duel);
           result = await validateAnswer(
             data.questionId,
             data.answer,
@@ -1012,6 +1018,33 @@ async function endDuel(
     isWinner: p.userId === winnerId,
   }));
 
+  // Paso A: construir snapshot inmutable antes de limpiar estado.
+  // Después de este snapshot, la persistencia no depende de activeDuels,
+  // sockets, timers ni otros Maps en memoria.
+  const finalizationPayload: DuelFinalizationPayload = {
+    duel: {
+      id: duel.id,
+      players: [duel.players[0], duel.players[1]],
+      category: duel.category,
+      mode: duel.mode,
+      rated: duel.rated,
+      ladder: duel.ladder,
+      startedAt: duel.startedAt,
+    },
+    winnerId,
+    reason,
+  };
+
+  // Paso B: guardar intent durable ANTES de limpiar estado in-memory.
+  // runId UNIQUE garantiza idempotencia: si ya existe, se reutiliza.
+  try {
+    await upsertPendingFinalization(duel.id, 'DUEL', finalizationPayload);
+  } catch (err) {
+    // No es fatal: aún tenemos el snapshot en memoria para un intento inmediato.
+    console.error(`[duel] failed to upsert pending finalization for ${duel.id}:`, err);
+  }
+
+  // Paso C: notificar al usuario (el intent durable ya existe).
   io.to(duel.id).emit('duel:finished', {
     reason,
     winnerId,
@@ -1021,8 +1054,7 @@ async function endDuel(
     ladder: duel.ladder,
   });
 
-  // Liberar el estado in-memory ANTES de la persistencia.
-  // Los clientes ya recibieron duel:finished; el duelo ya no es "activo".
+  // Paso D: limpiar estado in-memory (los clientes ya recibieron duel:finished).
   // Si esperamos a que termine Prisma + Redis, el guard de duel:queue rechaza
   // intentos legítimos de re-encolarse con "Ya estás en un duelo activo".
   readyTimeouts.delete(duel.id);
@@ -1034,23 +1066,9 @@ async function endDuel(
   }
   activeDuels.delete(duel.id);
 
-  // Guardar resultados en la base de datos usando una transacción
+  // Paso E: persistir dominio (idempotente vía persistDuelResults / P2002 en runId).
   try {
-    const dueloVariant = duel.mode === 'geo-challenge' ? GameVariant.GEO_CHALLENGE : GameVariant.CLASSIC;
-    const isGeoDuel = duel.mode === 'geo-challenge';
-    const persistence = await persistDuelResults(
-      {
-        id: duel.id,
-        players: [duel.players[0], duel.players[1]],
-        category: duel.category,
-        mode: duel.mode,
-        rated: duel.rated,
-        ladder: duel.ladder,
-        startedAt: duel.startedAt,
-      },
-      winnerId,
-      reason,
-    );
+    const persistence = await persistDuelFinalization(finalizationPayload);
 
     // Los duelos no actualizan el ranking global Classic.
     const ratingChangesByUser = new Map(
@@ -1104,7 +1122,7 @@ async function endDuel(
         userId: player.userId,
         runId: duel.id,
         gameMode: GameMode.DUEL,
-        variant: dueloVariant,
+        variant: duel.mode === 'geo-challenge' ? GameVariant.GEO_CHALLENGE : GameVariant.CLASSIC,
         category: duel.category,
         properties: {
           score: player.score,
@@ -1121,11 +1139,20 @@ async function endDuel(
                 ratingAfter: ratingChange.ratingAfter,
               }
             : {}),
-          ...(isGeoDuel ? { engineVersion: 'v2' as const } : {}),
+          ...(duel.mode === 'geo-challenge' ? { engineVersion: 'v2' as const } : {}),
         },
       });
     }
+
+    // Paso E-completed: marcar el intent durable como completado.
+    await markFinalizationCompleted(duel.id);
   } catch (error) {
     console.error(`Error guardando resultados del duelo ${duel.id}:`, error);
+    // El intent durable queda PENDING para recovery en próximo restart.
+    try {
+      await failFinalization(duel.id, error);
+    } catch (failErr) {
+      console.error(`[duel] failed to mark finalization as failed for ${duel.id}:`, failErr);
+    }
   }
 }

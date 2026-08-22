@@ -275,6 +275,16 @@ export function FlashGamePage() {
     }
   }, [currentIndex, finish, questions.length, status, t]);
 
+  // Timing server-authoritative (best-effort): avisa cuando cada pregunta
+  // flash pasa a ser la actual. Si falla, el servidor usa el primer answer
+  // como inicio — nunca afecta el gameplay.
+  useEffect(() => {
+    if (status !== 'playing') return;
+    const currentQuestion = questions[currentIndex];
+    if (!currentQuestion || !flashSessionId) return;
+    void api.notifyQuestionStarted(currentQuestion.id, flashSessionId);
+  }, [status, currentIndex, questions, flashSessionId]);
+
   // Abandonment tracking
   const currentIndexRef = useRef(currentIndex);
   currentIndexRef.current = currentIndex;

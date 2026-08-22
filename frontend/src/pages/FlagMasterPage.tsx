@@ -164,6 +164,16 @@ export function FlagMasterPage() {
     setTimeRemaining(timePerQuestion);
   }, [roundIndex, timePerQuestion]);
 
+  // Timing server-authoritative (best-effort): avisa cuando cada round pasa a
+  // ser el actual. Si falla, el servidor usa el primer answer como inicio —
+  // nunca afecta el gameplay.
+  useEffect(() => {
+    if (status !== 'playing') return;
+    const round = rounds[roundIndex];
+    if (!round || !gameId) return;
+    void api.notifyFlagMasterQuestionStarted(gameId, round.id);
+  }, [status, roundIndex, rounds, gameId]);
+
   // ─── Cleanup ─────────────────────────────────────────────────────────────
   useEffect(() => {
     return () => {
