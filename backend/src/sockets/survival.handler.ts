@@ -3,16 +3,15 @@ import { Category, Difficulty, GameMode, GameVariant } from '@prisma/client';
 import {
   getQuestionsForGame,
   validateAnswer,
-  saveGameResult,
   AnswerResult,
   GameQuestion,
   QuestionFilters,
   toPublicSocketPayload,
 } from '../services/game.service.js';
-import { prisma } from '../config/database.js';
 import { AppError } from '../utils/appError.js';
 import { emitSocketError } from '../utils/respondWithError.js';
 import { trackServerEvent } from '../services/telemetry.service.js';
+import { persistSurvivalFinalization } from '../services/survivalPersistence.service.js';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -70,7 +69,7 @@ interface SurvivalPlayer {
 
 interface ActiveSurvivalMatch {
   id: string;
-  status: 'filling' | 'countdown' | 'playing' | 'finished';
+  status: 'filling' | 'countdown' | 'playing' | 'finalizing' | 'finished';
   players: SurvivalPlayer[];
   category: Category;
   questions: GameQuestion[];
@@ -434,8 +433,8 @@ async function endGame(
   match: ActiveSurvivalMatch,
   reason: string
 ): Promise<void> {
-  if (match.status === 'finished') return;
-  match.status = 'finished';
+  if (match.status === 'finalizing' || match.status === 'finished') return;
+  match.status = 'finalizing';
 
   // Rank remaining active players by score: highest score gets rank 1
   const remaining = getActivePlayers(match);
@@ -454,15 +453,8 @@ async function endGame(
       eliminatedRound: p.eliminatedRound,
     }));
 
-  io.to(match.id).emit('survival:finished', {
-    reason,
-    rankings,
-    totalRounds: match.currentRound,
-  });
-
-  // Capture data before cleanup
   const matchSnapshot = {
-    id: match.id,
+    matchId: match.id,
     category: match.category,
     totalRounds: match.currentRound,
     peakPlayers: match.players.length,
@@ -477,44 +469,21 @@ async function endGame(
     })),
   };
 
-  cleanupMatch(match.id);
-
   try {
-    // Atómico: el match, sus participantes y los GameResult de cada jugador
-    // se persisten juntos o no se persiste nada (evita historiales a medias).
-    await prisma.$transaction(async (tx) => {
-      await tx.survivalMatch.create({
-        data: {
-          id: matchSnapshot.id,
-          category: matchSnapshot.category || null,
-          totalRounds: matchSnapshot.totalRounds,
-          peakPlayers: matchSnapshot.peakPlayers,
-          participants: {
-            create: matchSnapshot.players.map((p) => ({
-              userId: p.userId,
-              finalRank: p.finalRank,
-              eliminatedRound: p.eliminatedRound,
-              finalScore: p.finalScore,
-              correctCount: p.correctCount,
-              livesEarned: p.livesEarned,
-            })),
-          },
-        },
-      });
+    await persistSurvivalFinalization(matchSnapshot);
 
-      for (const p of matchSnapshot.players) {
-        await saveGameResult(p.userId, p.answers, GameVariant.CLASSIC, GameMode.SURVIVAL, matchSnapshot.category, tx);
-      }
+    io.to(match.id).emit('survival:finished', {
+      reason,
+      rankings,
+      totalRounds: match.currentRound,
     });
-
-    // Survival no actualiza el ranking global Classic.
 
     // Emit game_finished per player
     for (const p of matchSnapshot.players) {
       trackServerEvent({
         name: 'game_finished',
         userId: p.userId,
-        runId: matchSnapshot.id,
+        runId: matchSnapshot.matchId,
         gameMode: GameMode.SURVIVAL,
         variant: GameVariant.CLASSIC,
         category: matchSnapshot.category,
@@ -528,8 +497,15 @@ async function endGame(
         },
       });
     }
+    match.status = 'finished';
+    cleanupMatch(match.id);
   } catch (err) {
-    console.error(`[survival] Error saving results for ${matchSnapshot.id}:`, err);
+    console.error(`[survival] Error saving results for ${matchSnapshot.matchId}:`, err);
+    setTimeout(() => {
+      if (activeMatches.get(match.id) !== match) return;
+      match.status = 'playing';
+      void endGame(io, match, reason);
+    }, 5_000).unref();
   }
 }
 

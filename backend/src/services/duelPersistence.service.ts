@@ -169,16 +169,3 @@ export async function persistDuelResults(
     };
   });
 }
-
-export interface DuelFinalizationPayload {
-  duel: PersistableDuel;
-  winnerId: string | null;
-  reason: PersistDuelFinishReason;
-}
-
-export async function persistDuelFinalization(
-  payload: DuelFinalizationPayload,
-  db: Pick<PrismaClient, '$transaction'> = prisma
-): Promise<PersistDuelResult> {
-  return persistDuelResults(payload.duel, payload.winnerId, payload.reason, db);
-}

@@ -36,14 +36,9 @@ import { calculateTimeBonus } from '../utils/scoring.js';
 import { trackServerEvent } from '../services/telemetry.service.js';
 import { getCompetitiveTier, placementGamesRemaining } from '../services/competitiveRating.service.js';
 import {
-  persistDuelFinalization,
-  type DuelFinalizationPayload,
+  persistDuelResults,
+  type PersistableDuel,
 } from '../services/duelPersistence.service.js';
-import {
-  upsertPendingFinalization,
-  markFinalizationCompleted,
-  failFinalization,
-} from '../services/pendingFinalization.service.js';
 
 export type DuelMode = 'classic' | 'geo-challenge';
 
@@ -113,7 +108,7 @@ interface ActiveDuel {
   questionsData: any[]; // Full questions with answers for validation
   geoChallengeRounds?: GeoChallengeRoundWithAnswer[];
   currentQuestionIndex: number;
-  status: 'waiting' | 'countdown' | 'playing' | 'finished';
+  status: 'waiting' | 'countdown' | 'playing' | 'finalizing' | 'finished';
   category?: Category;
   mode: DuelMode;
   rated: boolean;
@@ -1005,7 +1000,8 @@ async function endDuel(
   winnerId: string | null,
   reason: 'completed' | 'opponent_disconnected' | 'cancelled'
 ) {
-  duel.status = 'finished';
+  if (duel.status === 'finalizing' || duel.status === 'finished') return;
+  duel.status = 'finalizing';
   for (const player of duel.players) {
     player.pendingQuestionIndex = undefined;
   }
@@ -1018,57 +1014,29 @@ async function endDuel(
     isWinner: p.userId === winnerId,
   }));
 
-  // Paso A: construir snapshot inmutable antes de limpiar estado.
-  // Después de este snapshot, la persistencia no depende de activeDuels,
-  // sockets, timers ni otros Maps en memoria.
-  const finalizationPayload: DuelFinalizationPayload = {
-    duel: {
-      id: duel.id,
-      players: [duel.players[0], duel.players[1]],
-      category: duel.category,
-      mode: duel.mode,
-      rated: duel.rated,
-      ladder: duel.ladder,
-      startedAt: duel.startedAt,
-    },
-    winnerId,
-    reason,
-  };
-
-  // Paso B: guardar intent durable ANTES de limpiar estado in-memory.
-  // runId UNIQUE garantiza idempotencia: si ya existe, se reutiliza.
-  try {
-    await upsertPendingFinalization(duel.id, 'DUEL', finalizationPayload);
-  } catch (err) {
-    // No es fatal: aún tenemos el snapshot en memoria para un intento inmediato.
-    console.error(`[duel] failed to upsert pending finalization for ${duel.id}:`, err);
-  }
-
-  // Paso C: notificar al usuario (el intent durable ya existe).
-  io.to(duel.id).emit('duel:finished', {
-    reason,
-    winnerId,
-    isDraw: winnerId === null && reason === 'completed',
-    results: finalResults,
+  const duelSnapshot: PersistableDuel = {
+    id: duel.id,
+    players: [duel.players[0], duel.players[1]],
+    category: duel.category,
+    mode: duel.mode,
     rated: duel.rated,
     ladder: duel.ladder,
-  });
+    startedAt: duel.startedAt,
+  };
 
-  // Paso D: limpiar estado in-memory (los clientes ya recibieron duel:finished).
-  // Si esperamos a que termine Prisma + Redis, el guard de duel:queue rechaza
-  // intentos legítimos de re-encolarse con "Ya estás en un duelo activo".
-  readyTimeouts.delete(duel.id);
-  for (const p of duel.players) {
-    disconnectTimers.get(p.userId) && clearTimeout(disconnectTimers.get(p.userId)!);
-    disconnectTimers.delete(p.userId);
-    playerDuels.delete(p.userId);
-    persistPlayerDuel(p.userId, null);
-  }
-  activeDuels.delete(duel.id);
-
-  // Paso E: persistir dominio (idempotente vía persistDuelResults / P2002 en runId).
+  // La escritura completa es transaccional e idempotente por runId. Si falla,
+  // el duelo queda en memoria para que una nueva llamada del proceso lo reintente.
   try {
-    const persistence = await persistDuelFinalization(finalizationPayload);
+    const persistence = await persistDuelResults(duelSnapshot, winnerId, reason);
+
+    io.to(duel.id).emit('duel:finished', {
+      reason,
+      winnerId,
+      isDraw: winnerId === null && reason === 'completed',
+      results: finalResults,
+      rated: duel.rated,
+      ladder: duel.ladder,
+    });
 
     // Los duelos no actualizan el ranking global Classic.
     const ratingChangesByUser = new Map(
@@ -1144,15 +1112,22 @@ async function endDuel(
       });
     }
 
-    // Paso E-completed: marcar el intent durable como completado.
-    await markFinalizationCompleted(duel.id);
+    readyTimeouts.delete(duel.id);
+    for (const p of duel.players) {
+      disconnectTimers.get(p.userId) && clearTimeout(disconnectTimers.get(p.userId)!);
+      disconnectTimers.delete(p.userId);
+      playerDuels.delete(p.userId);
+      persistPlayerDuel(p.userId, null);
+    }
+    duel.status = 'finished';
+    activeDuels.delete(duel.id);
   } catch (error) {
     console.error(`Error guardando resultados del duelo ${duel.id}:`, error);
-    // El intent durable queda PENDING para recovery en próximo restart.
-    try {
-      await failFinalization(duel.id, error);
-    } catch (failErr) {
-      console.error(`[duel] failed to mark finalization as failed for ${duel.id}:`, failErr);
-    }
+    const retryTimer = setTimeout(() => {
+      if (activeDuels.get(duel.id) !== duel) return;
+      duel.status = 'waiting';
+      void endDuel(io, duel, winnerId, reason);
+    }, 5_000);
+    retryTimer.unref();
   }
 }

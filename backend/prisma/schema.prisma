@@ -299,7 +299,7 @@ model SurvivalParticipant {
   user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
-  @@index([matchId])
+  @@unique([matchId, userId])
   @@map("survival_participants")
 }
 
@@ -444,20 +444,4 @@ model WorldEventBossAnswer {
   @@unique([attemptId, questionId])
   @@index([attemptId])
   @@map("world_event_boss_answers")
-}
-
-model PendingGameFinalization {
-  id          String   @id @default(cuid())
-  runId       String   @unique
-  gameType    String
-  payload     Json
-  status      String   @default("PENDING")
-  attempts    Int      @default(0)
-  lastError   String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  completedAt DateTime?
-
-  @@index([status, createdAt])
-  @@map("pending_game_finalizations")
 }

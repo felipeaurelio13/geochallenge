@@ -58,7 +58,7 @@ export function shouldRejectRankedRepeatAnswer(
 }
 
 export function shouldAutoCloseQuestion(
-  duelStatus: 'waiting' | 'countdown' | 'playing' | 'finished',
+  duelStatus: 'waiting' | 'countdown' | 'playing' | 'finalizing' | 'finished',
   scheduledQuestionIndex: number,
   currentQuestionIndex: number,
   resolvingQuestionIndex?: number
@@ -71,7 +71,7 @@ export function shouldAutoCloseQuestion(
 }
 
 export function shouldResolveQuestion(
-  duelStatus: 'waiting' | 'countdown' | 'playing' | 'finished',
+  duelStatus: 'waiting' | 'countdown' | 'playing' | 'finalizing' | 'finished',
   questionIndex: number,
   currentQuestionIndex: number,
   resolvingQuestionIndex?: number
@@ -84,7 +84,7 @@ export function shouldResolveQuestion(
 }
 
 export function shouldForceStartDuel(
-  duelStatus: 'waiting' | 'countdown' | 'playing' | 'finished',
+  duelStatus: 'waiting' | 'countdown' | 'playing' | 'finalizing' | 'finished',
   readyPlayersCount: number,
   totalPlayers: number,
   elapsedMs: number,

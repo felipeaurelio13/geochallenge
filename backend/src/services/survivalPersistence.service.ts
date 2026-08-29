@@ -41,22 +41,19 @@ export async function persistSurvivalFinalization(
     });
 
     for (const p of payload.players) {
-      const existing = await tx.survivalParticipant.findFirst({
-        where: { matchId: payload.matchId, userId: p.userId },
+      await tx.survivalParticipant.upsert({
+        where: { matchId_userId: { matchId: payload.matchId, userId: p.userId } },
+        create: {
+          matchId: payload.matchId,
+          userId: p.userId,
+          finalRank: p.finalRank,
+          eliminatedRound: p.eliminatedRound,
+          finalScore: p.finalScore,
+          correctCount: p.correctCount,
+          livesEarned: p.livesEarned,
+        },
+        update: {},
       });
-      if (!existing) {
-        await tx.survivalParticipant.create({
-          data: {
-            matchId: payload.matchId,
-            userId: p.userId,
-            finalRank: p.finalRank,
-            eliminatedRound: p.eliminatedRound,
-            finalScore: p.finalScore,
-            correctCount: p.correctCount,
-            livesEarned: p.livesEarned,
-          },
-        });
-      }
 
       await saveGameResult(
         p.userId,
