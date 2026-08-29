@@ -1,6 +1,7 @@
 import React from 'react';
 import i18n from 'i18next';
 import { FullScreenError } from './molecules/FullScreenError';
+import { trackUxEvent } from '../utils/uxTelemetry';
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -21,7 +22,24 @@ export class ErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    try {
+      console.error('ErrorBoundary caught an error:', error, errorInfo);
+    } catch {
+      // Logging must not interfere with the fallback UI.
+    }
+
+    try {
+      trackUxEvent('ui_error', {
+        errorName: error.name,
+        errorMessage: error.message,
+        errorStack: error.stack,
+        componentStack: errorInfo.componentStack,
+        buildSha: __BUILD_SHA__,
+        pathname: typeof window === 'undefined' ? undefined : window.location.pathname,
+      });
+    } catch {
+      // Telemetry is best-effort and must never cause a second error.
+    }
   }
 
   render() {

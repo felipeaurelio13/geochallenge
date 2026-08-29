@@ -22,7 +22,7 @@ export default defineConfig({
   projects: [
     {
       name: 'iPhone SE',
-      use: { ...devices['iPhone SE'] },
+      use: { ...devices['iPhone SE'], browserName: 'webkit' },
     },
     {
       name: 'iPhone 15 Pro',

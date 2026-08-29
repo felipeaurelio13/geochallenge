@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState, lazy, Suspense, useMemo, useRef } from 'react';
+import { useEffect, useCallback, useState, useMemo, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
@@ -24,10 +24,7 @@ import { trackUxEvent } from '../utils/uxTelemetry';
 import { generateFunFact } from '../utils/funFacts';
 import { applyExtendedTime, getQuestionDuration } from '../utils/questionTiming';
 import { useUiStore } from '../store/useUiStore';
-
-const MapInteractive = lazy(() =>
-  import('../components/MapInteractive').then((m) => ({ default: m.MapInteractive }))
-);
+import { MapInteractive } from '../components/MapInteractive';
 
 const { TIME_PER_QUESTION } = GAME_CONSTANTS;
 const FOCUS_TIME_BONUS_SECONDS = 3;
@@ -404,7 +401,6 @@ export function GamePage() {
                 gameFilters
               );
           appendQuestions(refillResponse.questions);
-          appendQuestions(refillResponse.questions);
           bufferedQuestionCount += refillResponse.questions.length;
         } catch (err) {
           console.error('Error preloading streak questions:', err);
@@ -645,20 +641,18 @@ export function GamePage() {
       compactQuestionCard={shouldUseCompactQuestionCard}
       isMapQuestion={Boolean(isMapQuestion)}
       mapContent={
-        <Suspense fallback={<LoadingSpinner size="lg" text={t('game.loading')} />}>
-          <MapInteractive
-            questionId={currentQuestion.id}
-            onLocationSelect={handleMapSelect}
-            selectedLocation={mapLocation}
-            correctLocation={
-              showResult && isMapQuestion && results.length > 0
-                ? results[results.length - 1].correctLocation ?? null
-                : null
-            }
-            showResult={showResult}
-            disabled={showResult}
-          />
-        </Suspense>
+        <MapInteractive
+          questionId={currentQuestion.id}
+          onLocationSelect={handleMapSelect}
+          selectedLocation={mapLocation}
+          correctLocation={
+            showResult && isMapQuestion && results.length > 0
+              ? results[results.length - 1].correctLocation ?? null
+              : null
+          }
+          showResult={showResult}
+          disabled={showResult}
+        />
       }
       selectedAnswer={selectedAnswer}
       onOptionSelect={handleOptionSelect}

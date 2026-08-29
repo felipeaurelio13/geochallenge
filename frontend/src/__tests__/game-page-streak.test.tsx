@@ -188,6 +188,7 @@ describe('GamePage streak mode', () => {
         {}
       );
       expect(mocks.appendQuestionsMock).toHaveBeenCalled();
+      expect(mocks.appendQuestionsMock).toHaveBeenCalledTimes(1);
     });
   });
 
