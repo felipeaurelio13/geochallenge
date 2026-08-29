@@ -502,7 +502,7 @@ router.post('/answer', optionalAuth, async (req: AuthRequest, res: Response) => 
       : 'single';
 
     // Derivar respuestas canónicas (historial server-side) para combo Flash y
-    // telemetría. Fuente de verdad: hash `game:answers:<sessionId>`.
+    // telemetría. Fuente de verdad: campos `answer:<questionId>` de la sesión.
     const canonical = await readCanonicalAnswers(sessionId, session.questionIds);
     const answeredCount = Object.keys(canonical).length;
 
