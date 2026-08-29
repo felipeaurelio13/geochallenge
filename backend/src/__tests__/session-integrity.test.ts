@@ -60,32 +60,12 @@ const mocks = vi.hoisted(() => {
   }
 
   return {
-    redisGet: vi.fn((key: string) => {
-      if (key.startsWith('game:session:')) {
-        const sid = key.replace('game:session:', '');
-        const s = sessionStore.get(sid);
-        if (!s) return Promise.resolve(null); // unknown session
-        return Promise.resolve(JSON.stringify(s));
-      }
-      return Promise.resolve(redisStore.get(key) ?? null);
-    }),
-    redisSet: vi.fn((key: string, value: string) => {
-      if (key.startsWith('game:session:')) {
-        const sid = key.replace('game:session:', '');
-        sessionStore.set(sid, JSON.parse(value));
-      } else {
-        redisStore.set(key, value);
-      }
-      return Promise.resolve('OK');
-    }),
     sessionStore,
     redisStore,
     hashStore,
     TEST_QUESTIONS,
     achievementsEval: vi.fn().mockResolvedValue([]),
     achievementsDaily: vi.fn().mockResolvedValue([]),
-    pexpireMock: vi.fn(),
-    ptttlMock: vi.fn(),
   };
 });
 
@@ -102,62 +82,47 @@ vi.mock('../middleware/auth.js', () => ({
 
 vi.mock('../config/redis.js', () => ({
   getRedis: () => ({
-    get: mocks.redisGet,
-    set: vi.fn((key: string, value: string, ...args: string[]) => {
-      if (args.includes('NX')) {
-        if (mocks.redisStore.has(key)) return Promise.resolve(null);
-        mocks.redisStore.set(key, value);
-        return Promise.resolve('OK');
+    hset: vi.fn((key: string, field: string, value: string) => {
+      if (field === 'metadata') {
+        mocks.sessionStore.set(key.replace('game:session:', ''), JSON.parse(value));
+      } else {
+        if (!mocks.hashStore.has(key)) mocks.hashStore.set(key, new Map());
+        mocks.hashStore.get(key)!.set(field, value);
       }
-      mocks.redisStore.set(key, value);
-      // Sync session keys to sessionStore for GET access
-      if (key.startsWith('game:session:')) {
-        const sid = key.replace('game:session:', '');
-        mocks.sessionStore.set(sid, JSON.parse(value));
-      }
-      return Promise.resolve('OK');
-    }),
-    incr: vi.fn((key: string) => {
-      const prev = parseInt(mocks.redisStore.get(key) ?? '0', 10);
-      mocks.redisStore.set(key, String(prev + 1));
-      return Promise.resolve(prev + 1);
-    }),
-    expire: vi.fn(() => Promise.resolve(1)),
-    mget: vi.fn((keys: string[]) => Promise.resolve(keys.map((k: string) => mocks.redisStore.get(k) ?? null))),
-    pexpire: mocks.pexpireMock,
-    pttl: mocks.ptttlMock,
-    hsetnx: vi.fn((key: string, field: string, value: string) => {
-      if (!mocks.hashStore.has(key)) mocks.hashStore.set(key, new Map());
-      const h = mocks.hashStore.get(key)!;
-      if (h.has(field)) return Promise.resolve(0);
-      h.set(field, value);
       return Promise.resolve(1);
     }),
-    hget: vi.fn((key: string, field: string) => Promise.resolve(mocks.hashStore.get(key)?.get(field) ?? null)),
-    hgetall: vi.fn((key: string) => Promise.resolve(Object.fromEntries(mocks.hashStore.get(key) ?? []))),
+    expire: vi.fn(() => Promise.resolve(1)),
+    hget: vi.fn((key: string, field: string) => {
+      if (field === 'metadata' && key.startsWith('game:session:')) {
+        const session = mocks.sessionStore.get(key.replace('game:session:', ''));
+        return Promise.resolve(session ? JSON.stringify(session) : null);
+      }
+      return Promise.resolve(mocks.hashStore.get(key)?.get(field) ?? null);
+    }),
+    hmget: vi.fn((key: string, ...fields: string[]) => Promise.resolve(fields.map((field) => mocks.hashStore.get(key)?.get(field) ?? null))),
     eval: vi.fn((_script: string, numkeys: number, ...rest: unknown[]) => {
       const keys = rest.slice(0, numkeys) as string[];
       const args = rest.slice(numkeys) as string[];
       const sessionKey = keys[0];
-      const answersHash = keys[1];
-      const legacyKey = keys[2];
-      const serialized = args[0];
-      const questionId = args[1];
-      // Lua: legacy first-wins
-      const legacy = mocks.redisStore.get(legacyKey);
-      if (legacy !== undefined && legacy !== null) {
-        return Promise.resolve([0, legacy]);
+      if (!mocks.sessionStore.has(sessionKey.replace('game:session:', ''))) return Promise.resolve([-1, null]);
+      if (!mocks.hashStore.has(sessionKey)) mocks.hashStore.set(sessionKey, new Map());
+      const hash = mocks.hashStore.get(sessionKey)!;
+      const field = args[0];
+      if (_script.includes('HINCRBY')) {
+        const max = Number(args[1]);
+        const used = Number(hash.get(field) ?? '0');
+        if (used >= max) return Promise.resolve([0, 0]);
+        hash.set(field, String(used + 1));
+        return Promise.resolve([1, max - used - 1]);
       }
-      // PTTL real de la sesión
-      const ttl = mocks.sessionStore.has(sessionKey.replace('game:session:', '')) ? 7200000 : -2;
-      if (ttl > 0) mocks.pexpireMock(answersHash, ttl);
-      // HSETNX sobre el hash
-      if (!mocks.hashStore.has(answersHash)) mocks.hashStore.set(answersHash, new Map());
-      const h = mocks.hashStore.get(answersHash)!;
-      if (h.has(questionId)) {
-        return Promise.resolve([0, h.get(questionId)]);
+      if (_script.includes('local now = ARGV[2]')) {
+        const now = args[1];
+        if (!hash.has(field)) hash.set(field, now);
+        return Promise.resolve(hash.get(field));
       }
-      h.set(questionId, serialized);
+      const serialized = args[1];
+      if (hash.has(field)) return Promise.resolve([0, hash.get(field)]);
+      hash.set(field, serialized);
       return Promise.resolve([1, serialized]);
     }),
     pipeline: () => ({ zadd: () => ({ exec: async () => [] }) }),
@@ -265,20 +230,7 @@ beforeEach(() => {
 
 function primeSession() {
   // Re-create test-session-1 with a clean state for each caller.
-  // Also clear stale SET-NX answer keys and the answers hash from prior tests.
-  const prefix = 'game:answer:test-session-1:';
-  for (const key of mocks.redisStore.keys()) {
-    if (key.startsWith(prefix)) mocks.redisStore.delete(key);
-  }
-  mocks.hashStore.delete('game:answers:test-session-1');
-  const mechanicPrefix = 'game:mechanic:test-session-1:';
-  for (const key of mocks.redisStore.keys()) {
-    if (key.startsWith(mechanicPrefix)) mocks.redisStore.delete(key);
-  }
-  const startedPrefix = 'game:questionStarted:test-session-1:';
-  for (const key of mocks.redisStore.keys()) {
-    if (key.startsWith(startedPrefix)) mocks.redisStore.delete(key);
-  }
+  mocks.hashStore.delete('game:session:test-session-1');
   const correctAnswers: Record<string, string> = {};
   const optionsPerQuestion: Record<string, string[]> = {};
   for (const q of mocks.TEST_QUESTIONS) {

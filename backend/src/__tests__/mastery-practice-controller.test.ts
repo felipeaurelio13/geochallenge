@@ -37,15 +37,6 @@ const mocks = vi.hoisted(() => {
     ALL_QUESTIONS,
     mockSelectAdaptive,
 
-    redisGet: vi.fn((key: string) => {
-      if (key.startsWith('game:session:')) {
-        const sid = key.replace('game:session:', '');
-        const s = sessionStore.get(sid);
-        return Promise.resolve(s ? JSON.stringify(s) : null);
-      }
-      return Promise.resolve(redisStore.get(key) ?? null);
-    }),
-
     leaderboardUpdate: vi.fn(),
     leaderboardUpdateSeason: vi.fn(),
   };
@@ -64,32 +55,24 @@ vi.mock('../middleware/auth.js', () => ({
 
 vi.mock('../config/redis.js', () => ({
   getRedis: () => ({
-    get: mocks.redisGet,
-    set: vi.fn((key: string, value: string) => {
-      if (key.startsWith('game:session:')) {
-        const sid = key.replace('game:session:', '');
-        mocks.sessionStore.set(sid, JSON.parse(value));
+    hset: vi.fn((key: string, field: string, value: string) => {
+      if (field === 'metadata') {
+        mocks.sessionStore.set(key.replace('game:session:', ''), JSON.parse(value));
       } else {
-        mocks.redisStore.set(key, value);
+        if (!mocks.hashStore.has(key)) mocks.hashStore.set(key, new Map());
+        mocks.hashStore.get(key)!.set(field, value);
       }
-      return Promise.resolve('OK');
-    }),
-    incr: vi.fn((key: string) => {
-      const prev = parseInt(mocks.redisStore.get(key) ?? '0', 10);
-      mocks.redisStore.set(key, String(prev + 1));
-      return Promise.resolve(prev + 1);
-    }),
-    expire: vi.fn(() => Promise.resolve(1)),
-    mget: vi.fn((keys: string[]) => Promise.resolve(keys.map((k: string) => mocks.redisStore.get(k) ?? null))),
-    hsetnx: vi.fn((key: string, field: string, value: string) => {
-      if (!mocks.hashStore.has(key)) mocks.hashStore.set(key, new Map());
-      const h = mocks.hashStore.get(key)!;
-      if (h.has(field)) return Promise.resolve(0);
-      h.set(field, value);
       return Promise.resolve(1);
     }),
-    hget: vi.fn((key: string, field: string) => Promise.resolve(mocks.hashStore.get(key)?.get(field) ?? null)),
-    hgetall: vi.fn((key: string) => Promise.resolve(Object.fromEntries(mocks.hashStore.get(key) ?? []))),
+    expire: vi.fn(() => Promise.resolve(1)),
+    hget: vi.fn((key: string, field: string) => {
+      if (field === 'metadata') {
+        const session = mocks.sessionStore.get(key.replace('game:session:', ''));
+        return Promise.resolve(session ? JSON.stringify(session) : null);
+      }
+      return Promise.resolve(mocks.hashStore.get(key)?.get(field) ?? null);
+    }),
+    hmget: vi.fn((key: string, ...fields: string[]) => Promise.resolve(fields.map((field) => mocks.hashStore.get(key)?.get(field) ?? null))),
     pipeline: () => ({ zadd: () => ({ exec: async () => [] }) }),
     zadd: async () => 1, zscore: async () => null, zrevrange: async () => [],
     zcard: async () => 0, del: async () => 1, zrevrank: async () => null, exec: async () => [],
@@ -279,17 +262,12 @@ describe('POST /api/game/finish — PRACTICE', () => {
       questionIds,
       correctAnswers,
       optionsPerQuestion,
-      answeredQuestionIds: questionIds,
-      questionResults: qResults,
-      mechanicsUsage: {},
       questionMeta: {},
-      createdAt: Date.now(),
-      expiresAt: Date.now() + 7200000,
     });
-    // Fuente canónica de respuestas: hash `game:answers:<sessionId>`.
+    // Fuente canónica de respuestas: campos answer en el hash de sesión.
     mocks.hashStore.set(
-      'game:answers:practice-session',
-      new Map(Object.entries(qResults).map(([qid, r]) => [qid, JSON.stringify(r)])),
+      'game:session:practice-session',
+      new Map(Object.entries(qResults).map(([qid, r]) => [`answer:${qid}`, JSON.stringify(r)])),
     );
   }
 

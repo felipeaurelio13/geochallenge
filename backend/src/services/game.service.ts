@@ -55,22 +55,22 @@ export interface RedisGameSession {
   questionIds: string[];
   correctAnswers: Record<string, string>;
   optionsPerQuestion: Record<string, string[]>;
-  answeredQuestionIds: string[];
-  questionResults: Record<string, AnswerResult>;
-  mechanicsUsage: Record<string, number>;
   questionMeta?: Record<string, {
     category: Category;
     difficulty?: string;
     continent?: string;
     countryCode?: string;
   }>;
-  createdAt: number;
-  expiresAt: number;
 }
 
 function gameSessionKey(sessionId: string): string {
   return `game:session:${sessionId}`;
 }
+
+const SESSION_METADATA_FIELD = 'metadata';
+const answerField = (questionId: string) => `answer:${questionId}`;
+const questionStartedField = (questionId: string) => `started:${questionId}`;
+const mechanicField = (mechanicKey: string) => `mechanic:${mechanicKey}`;
 
 export async function createGameSession(data: {
   userId: string | null;
@@ -81,14 +81,8 @@ export async function createGameSession(data: {
   questions: GameQuestion[];
 }): Promise<string> {
   const sessionId = randomUUID();
-  const now = Date.now();
   const correctAnswers: Record<string, string> = {};
   const optionsPerQuestion: Record<string, string[]> = {};
-  for (const q of data.questions) {
-    correctAnswers[q.id] = q.correctAnswer;
-    optionsPerQuestion[q.id] = q.options;
-  }
-
   const questionMeta: Record<string, { category: Category; difficulty?: string; continent?: string; countryCode?: string }> = {};
   for (const q of data.questions) {
     correctAnswers[q.id] = q.correctAnswer;
@@ -111,17 +105,13 @@ export async function createGameSession(data: {
     questionIds: data.questions.map((q) => q.id),
     correctAnswers,
     optionsPerQuestion,
-    answeredQuestionIds: [],
-    questionResults: {},
-    mechanicsUsage: {},
     questionMeta,
-    createdAt: now,
-    expiresAt: now + GAME_SESSION_TTL * 1000,
   };
 
   try {
     const redis = getRedis();
-    await redis.set(gameSessionKey(sessionId), JSON.stringify(session), 'EX', GAME_SESSION_TTL);
+    await redis.hset(gameSessionKey(sessionId), SESSION_METADATA_FIELD, JSON.stringify(session));
+    await redis.expire(gameSessionKey(sessionId), GAME_SESSION_TTL);
   } catch (err) {
     console.error('[game-session] Failed to create session in Redis:', err);
     throw new Error('GAME_STATE_UNAVAILABLE');
@@ -133,17 +123,9 @@ export async function createGameSession(data: {
 export async function getGameSession(sessionId: string): Promise<RedisGameSession | null> {
   try {
     const redis = getRedis();
-    const raw = await redis.get(gameSessionKey(sessionId));
+    const raw = await redis.hget(gameSessionKey(sessionId), SESSION_METADATA_FIELD);
     if (!raw) return null;
-    const session = JSON.parse(raw) as RedisGameSession;
-    if (session.expiresAt <= Date.now()) return null;
-    if (
-      String(session.category) === 'CINEMA_GEO' ||
-      Object.values(session.questionMeta ?? {}).some((question) => String(question.category) === 'CINEMA_GEO')
-    ) {
-      return null;
-    }
-    return session;
+    return JSON.parse(raw) as RedisGameSession;
   } catch (err) {
     console.error('[game-session] Failed to read session from Redis:', err);
     return null;
@@ -151,26 +133,18 @@ export async function getGameSession(sessionId: string): Promise<RedisGameSessio
 }
 
 const STORE_ANSWER_LUA = `
-local sessionKey  = KEYS[1]
-local answersHash = KEYS[2]
-local legacyKey   = KEYS[3]
-local serialized  = ARGV[1]
-local questionId  = ARGV[2]
+local sessionKey = KEYS[1]
+local field = ARGV[1]
+local serialized = ARGV[2]
 
-local legacy = redis.call('GET', legacyKey)
-if (type(legacy) ~= 'nil' and legacy ~= '') then
-  return {0, legacy}
+if redis.call('EXISTS', sessionKey) == 0 then
+  return { -1, false }
 end
 
-local ttl = redis.call('PTTL', sessionKey)
-local inserted = redis.call('HSETNX', answersHash, questionId, serialized)
-local existing = redis.call('HGET', answersHash, questionId)
+local inserted = redis.call('HSETNX', sessionKey, field, serialized)
+local existing = redis.call('HGET', sessionKey, field)
 if (not inserted or inserted == 0) then
   return {0, existing}
-end
-
-if (ttl > 0) then
-  redis.call('PEXPIRE', answersHash, ttl)
 end
 return {1, serialized}
 `;
@@ -182,23 +156,22 @@ export async function storeAnswerResult(
 ): Promise<{ stored: AnswerResult; isFirstAnswer: boolean }> {
   const redis = getRedis();
   const sessionKey = gameSessionKey(sessionId);
-  const answersHash = `game:answers:${sessionId}`;
-  const legacyKey = `game:answer:${sessionId}:${questionId}`;
   const serialized = JSON.stringify(result);
 
   try {
     const out = (await redis.eval(
       STORE_ANSWER_LUA,
-      3,
+      1,
       sessionKey,
-      answersHash,
-      legacyKey,
+      answerField(questionId),
       serialized,
-      questionId,
     )) as unknown as Array<string | number | null> | string | null;
 
     const flag = Array.isArray(out) ? Number(out[0]) : 0;
     const payload = Array.isArray(out) ? out[1] : (typeof out === 'string' ? out : null);
+    if (flag === -1) {
+      throw new Error('GAME_SESSION_EXPIRED');
+    }
     if (payload == null) {
       throw new Error('GAME_STATE_UNAVAILABLE');
     }
@@ -214,16 +187,30 @@ export async function recordMechanicUsageAtomic(
   mechanicKey: string,
   questionId: string,
 ): Promise<{ allowed: boolean; remaining: number }> {
-  const counterKey = `game:mechanic:${sessionId}:${mechanicKey}`;
+  const max = config.game.mechanics.limits[mechanicKey as keyof typeof config.game.mechanics.limits] ?? 1;
+  const script = `
+local sessionKey = KEYS[1]
+local field = ARGV[1]
+local max = tonumber(ARGV[2])
+
+if redis.call('EXISTS', sessionKey) == 0 then
+  return {-1, 0}
+end
+
+local used = tonumber(redis.call('HGET', sessionKey, field) or '0')
+if used >= max then
+  return {0, 0}
+end
+
+local current = redis.call('HINCRBY', sessionKey, field, 1)
+return {1, max - current}
+`;
   try {
     const redis = getRedis();
-    const prev = parseInt(await redis.get(counterKey) as string ?? '0', 10);
-    const max = config.game.mechanics.limits[mechanicKey as keyof typeof config.game.mechanics.limits] ?? 1;
-    if (prev >= max) return { allowed: false, remaining: 0 };
-    const newVal = await redis.incr(counterKey);
-    await redis.expire(counterKey, GAME_SESSION_TTL);
-    const remaining = Math.max(0, max - newVal);
-    return { allowed: newVal <= max, remaining };
+    const out = await redis.eval(script, 1, gameSessionKey(sessionId), mechanicField(mechanicKey), String(max)) as Array<number | string>;
+    const status = Number(out[0]);
+    if (status === -1) throw new Error('GAME_SESSION_EXPIRED');
+    return { allowed: status === 1, remaining: Math.max(0, Number(out[1])) };
   } catch {
     throw new Error('GAME_STATE_UNAVAILABLE');
   }
@@ -235,20 +222,12 @@ export async function getStoredAnswerResult(
 ): Promise<AnswerResult | null> {
   try {
     const redis = getRedis();
-    const legacy = await redis.get(`game:answer:${sessionId}:${questionId}`);
-    if (legacy) return JSON.parse(legacy) as AnswerResult;
-    const raw = await redis.hget(`game:answers:${sessionId}`, questionId);
+    const raw = await redis.hget(gameSessionKey(sessionId), answerField(questionId));
     if (raw) return JSON.parse(raw) as AnswerResult;
-  } catch {
-    // Fallback to the best-effort session copy below.
-  }
-  try {
-    const session = await getGameSession(sessionId);
-    if (!session) return null;
-    return session.questionResults[questionId] ?? null;
   } catch {
     return null;
   }
+  return null;
 }
 
 export async function readCanonicalAnswers(
@@ -258,12 +237,11 @@ export async function readCanonicalAnswers(
   if (questionIds.length === 0) return {};
   try {
     const redis = getRedis();
-    const hash = await redis.hgetall(`game:answers:${sessionId}`);
-    const legacyValues = await redis.mget(questionIds.map((qid) => `game:answer:${sessionId}:${qid}`));
+    const values = await redis.hmget(gameSessionKey(sessionId), ...questionIds.map(answerField));
     const answers: Record<string, AnswerResult> = {};
     for (let index = 0; index < questionIds.length; index += 1) {
       const questionId = questionIds[index];
-      const raw = legacyValues[index] ?? hash[questionId];
+      const raw = values[index];
       if (raw) answers[questionId] = JSON.parse(raw) as AnswerResult;
     }
     return answers;
@@ -272,16 +250,30 @@ export async function readCanonicalAnswers(
   }
 }
 
-const QUESTION_STARTED_PREFIX = 'game:questionStarted';
+const RECORD_QUESTION_STARTED_LUA = `
+local sessionKey = KEYS[1]
+local field = ARGV[1]
+local now = ARGV[2]
+
+if redis.call('EXISTS', sessionKey) == 0 then
+  return false
+end
+
+redis.call('HSETNX', sessionKey, field, now)
+return redis.call('HGET', sessionKey, field)
+`;
 
 export async function recordQuestionStarted(sessionId: string, questionId: string): Promise<number> {
-  const key = `${QUESTION_STARTED_PREFIX}:${sessionId}:${questionId}`;
   const now = Date.now();
   try {
     const redis = getRedis();
-    const created = await redis.set(key, String(now), 'EX', GAME_SESSION_TTL, 'NX');
-    if (created === 'OK') return now;
-    const existing = await redis.get(key);
+    const existing = await redis.eval(
+      RECORD_QUESTION_STARTED_LUA,
+      1,
+      gameSessionKey(sessionId),
+      questionStartedField(questionId),
+      String(now),
+    ) as string | null;
     const parsed = existing ? parseInt(existing, 10) : NaN;
     return Number.isFinite(parsed) ? parsed : now;
   } catch {
@@ -291,7 +283,7 @@ export async function recordQuestionStarted(sessionId: string, questionId: strin
 
 export async function getQuestionStartedAt(sessionId: string, questionId: string): Promise<number | null> {
   try {
-    const raw = await getRedis().get(`${QUESTION_STARTED_PREFIX}:${sessionId}:${questionId}`);
+    const raw = await getRedis().hget(gameSessionKey(sessionId), questionStartedField(questionId));
     const parsed = raw ? parseInt(raw, 10) : NaN;
     return Number.isFinite(parsed) ? parsed : null;
   } catch {
@@ -308,10 +300,9 @@ export async function extendGameSession(
 ): Promise<RedisGameSession | null> {
   try {
     const redis = getRedis();
-    const raw = await redis.get(gameSessionKey(sessionId));
+    const raw = await redis.hget(gameSessionKey(sessionId), SESSION_METADATA_FIELD);
     if (!raw) return null;
     const session = JSON.parse(raw) as RedisGameSession;
-    if (session.expiresAt <= Date.now()) return null;
     for (const q of questions) {
       if (!session.questionIds.includes(q.id)) {
         session.questionIds.push(q.id);
@@ -319,7 +310,7 @@ export async function extendGameSession(
         session.optionsPerQuestion[q.id] = q.options;
       }
     }
-    await redis.set(gameSessionKey(sessionId), JSON.stringify(session), 'EX', GAME_SESSION_TTL);
+    await redis.hset(gameSessionKey(sessionId), SESSION_METADATA_FIELD, JSON.stringify(session));
     return session;
   } catch (err) {
     console.error('[game-session] Failed to extend session:', err);
@@ -330,40 +321,14 @@ export async function extendGameSession(
 export async function updateSessionToAuthenticated(sessionId: string, userId: string): Promise<void> {
   try {
     const redis = getRedis();
-    const raw = await redis.get(gameSessionKey(sessionId));
+    const raw = await redis.hget(gameSessionKey(sessionId), SESSION_METADATA_FIELD);
     if (!raw) return;
     const session = JSON.parse(raw) as RedisGameSession;
     if (session.userId) return; // already bound
     session.userId = userId;
-    await redis.set(gameSessionKey(sessionId), JSON.stringify(session), 'EX', GAME_SESSION_TTL);
+    await redis.hset(gameSessionKey(sessionId), SESSION_METADATA_FIELD, JSON.stringify(session));
   } catch {
     // best-effort
-  }
-}
-
-export async function recordMechanicUsage(
-  sessionId: string,
-  mechanicKey: string,
-): Promise<{ allowed: boolean; remaining: number } | null> {
-  try {
-    const redis = getRedis();
-    const raw = await redis.get(gameSessionKey(sessionId));
-    if (!raw) return null;
-    const session = JSON.parse(raw) as RedisGameSession;
-    if (session.expiresAt <= Date.now()) return null;
-
-    const max = config.game.mechanics.limits[mechanicKey as keyof typeof config.game.mechanics.limits] ?? 1;
-    const used = session.mechanicsUsage[mechanicKey] ?? 0;
-    if (used >= max) {
-      return { allowed: false, remaining: 0 };
-    }
-
-    session.mechanicsUsage[mechanicKey] = used + 1;
-    await redis.set(gameSessionKey(sessionId), JSON.stringify(session), 'EX', GAME_SESSION_TTL);
-    return { allowed: true, remaining: max - (used + 1) };
-  } catch (err) {
-    console.error('[game-session] Failed to record mechanic usage:', err);
-    return null;
   }
 }
 

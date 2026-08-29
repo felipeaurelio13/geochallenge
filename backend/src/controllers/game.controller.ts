@@ -29,7 +29,6 @@ import {
   getQuestionStartedAt,
   extendGameSession,
   updateSessionToAuthenticated,
-  recordMechanicUsage,
   recordMechanicUsageAtomic,
   AnswerResult,
   QuestionFilters,
@@ -707,9 +706,7 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
     await updateSessionToAuthenticated(sessionId, req.user!.userId);
 
     // Derivar resultados de la sesión, no del body del cliente.
-    // Fuente canónica: hash `game:answers:<sessionId>` (con fallback legacy a
-    // las claves atómicas `game:answer:*`). No se depende de la copia mutable
-    // session.questionResults / answeredQuestionIds.
+    // Fuente canónica: campos `answer:<questionId>` dentro de la sesión Redis.
     const canonicalAnswers = await readCanonicalAnswers(sessionId, session.questionIds);
     const results: AnswerResult[] = [];
     for (const questionId of session.questionIds) {
