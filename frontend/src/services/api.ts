@@ -319,27 +319,6 @@ class ApiService {
     return response.data;
   }
 
-  async submitFlashAnswer(data: {
-    sessionId?: string;
-    questionId: string;
-    answer: string;
-    combo: number;
-    mechanicUsage?: MechanicUsage;
-  }) {
-    const response = await this.client.post<{
-      isCorrect: boolean;
-      correctAnswer: string;
-      points: number;
-      basePoints?: number;
-      comboBonus?: number;
-    }>('/game/answer', {
-      ...data,
-      timeRemaining: 0,
-      gameType: 'flash',
-    });
-    return response.data;
-  }
-
   /**
    * Avisa al servidor que el jugador comenzó a ver una pregunta (best-effort).
    * El servidor registra first-wins el primer aviso; si este request falla o no
@@ -476,16 +455,6 @@ class ApiService {
       },
     });
     return response.data;
-  }
-
-  // Health check for cold start detection
-  async healthCheck(): Promise<boolean> {
-    try {
-      await this.client.get('/health', { baseURL: API_URL.replace('/api', ''), timeout: 30000 });
-      return true;
-    } catch {
-      return false;
-    }
   }
 
   // Duel history endpoints

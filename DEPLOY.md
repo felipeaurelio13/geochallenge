@@ -131,10 +131,9 @@ Tailscale Funnel expone HTTPS hacia `http://127.0.0.1:3101`:
 tailscale funnel --https=443 http://127.0.0.1:3101
 ```
 
-Health checks esperados:
+Health check esperado:
 
 ```bash
-curl https://philserver.mulard-caiman.ts.net/ping
 curl https://philserver.mulard-caiman.ts.net/health
 ```
 
@@ -144,17 +143,31 @@ Antes de levantar un backend con migraciones nuevas, ejecutar contra la DB real:
 docker compose --env-file .env.backend -f docker-compose.backend.yml run --rm backend npx prisma migrate deploy
 ```
 
-### Keep-awake
+### Backend por SHA
 
-El workflow [.github/workflows/keep-backend-awake.yml](.github/workflows/keep-backend-awake.yml)
-pega a `/health` cada 5 minutos. Aunque PhilServer no duerme, ese ping valida el
-backend publico y mantiene actividad en dependencias administradas como Neon.
-
-Secret requerido:
+En PhilServer, despliega un commit explícito; no uses `git pull` como paso de deploy:
 
 ```bash
-BACKEND_HEALTHCHECK_URL=https://philserver.mulard-caiman.ts.net/health
+DEPLOY_SHA=<sha-validado>
+git fetch origin "$DEPLOY_SHA"
+git checkout --detach "$DEPLOY_SHA"
+printf 'GIT_SHA=%s\n' "$DEPLOY_SHA" >> .env.backend
+docker compose --env-file .env.backend -f docker-compose.backend.yml run --rm backend npx prisma migrate deploy
+docker compose --env-file .env.backend -f docker-compose.backend.yml up -d --build
+curl --fail https://philserver.mulard-caiman.ts.net/health
 ```
+
+La respuesta de `/health` debe incluir `sha` igual a `DEPLOY_SHA`.
+
+Antes de aplicar la migración `20261012000000_simplify_game_finalization`, revisa Neon:
+
+```sql
+SELECT "runId", "gameType", "status", "attempts", "lastError"
+FROM "pending_game_finalizations"
+WHERE "status" <> 'COMPLETED';
+```
+
+Si devuelve filas, no despliegues esa migración: resuelve esos runs con la versión anterior. Si no devuelve filas, la migración elimina la tabla de recovery de forma segura.
 
 ## Si el deploy falla
 

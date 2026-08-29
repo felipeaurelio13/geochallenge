@@ -7,7 +7,6 @@ import { Server as SocketIOServer } from 'socket.io';
 import { config } from './config/env.js';
 import { connectDatabase, disconnectDatabase, prisma } from './config/database.js';
 import { getRedis, disconnectRedis } from './config/redis.js';
-import { rebuildAllLeaderboards } from './services/leaderboard.service.js';
 
 
 // Controllers
@@ -27,6 +26,7 @@ import { globalLimiter } from './middleware/rateLimit.js';
 import { setupSocketHandlers } from './sockets/index.js';
 
 const app = express();
+const buildSha = process.env.GIT_SHA || process.env.BUILD_SHA || 'unknown';
 app.set('trust proxy', 1);
 const httpServer = createServer(app);
 
@@ -49,17 +49,7 @@ app.use(
 );
 app.use(express.json({ limit: '1mb' }));
 
-// Lightweight ping for keep-alive (no DB/Redis round-trip).
-// NO rate-limit: BackendKeepAlive en el cliente lo invoca periódicamente
-// y consumiría cupo del jugador.
-app.get('/ping', (_req, res) => {
-  res.json({ status: 'ok' });
-});
-
-// Health check (with dependency verification). Sin rate-limit por la misma razón.
-// El ping a Redis se acota a 1.5s: el keep-alive del cliente invoca /health a
-// menudo, y un /health lento satura el pool de 6 conexiones del navegador y
-// bloquea requests reales (p.ej. el ranking deja de cargar).
+// Health check with dependency verification.
 app.get('/health', async (_req, res) => {
   let pingTimer: ReturnType<typeof setTimeout> | undefined;
   try {
@@ -73,16 +63,15 @@ app.get('/health', async (_req, res) => {
         pingTimer = setTimeout(() => reject(new Error('redis ping timeout')), 1500);
       }),
     ]);
-    res.json({ status: 'ok', db: 'ok', redis: 'ok', timestamp: new Date().toISOString() });
+    res.json({ status: 'ok', db: 'ok', redis: 'ok', sha: buildSha, timestamp: new Date().toISOString() });
   } catch (error: any) {
-    res.status(503).json({ status: 'degraded', error: error.message, timestamp: new Date().toISOString() });
+    res.status(503).json({ status: 'degraded', error: error.message, sha: buildSha, timestamp: new Date().toISOString() });
   } finally {
     clearTimeout(pingTimer);
   }
 });
 
-// Rate limit aplica sólo a las rutas /api (no a /ping ni /health, para que
-// keep-alives no consuman el cupo y dejen al usuario sin poder jugar).
+// Rate limit applies only to application routes.
 app.use('/api', globalLimiter);
 
 // API Routes
@@ -117,8 +106,6 @@ async function start() {
     // Connect to database
     await connectDatabase();
 
-    // Auto-seed Cinema & Geography questions (idempotent, prunes stale rows)
-
     // Initialize Redis
     getRedis();
 
@@ -132,44 +119,6 @@ async function start() {
 🔗 Frontend URL: ${config.frontend.url}
       `);
 
-      // Rebuild retroactivo en cada arranque:
-      //   1. Recomputa User.highScore desde GameResult (corrige desincronizaciones históricas).
-      //   2. Repuebla Redis global desde DB.
-      //   3. Repuebla Redis para CADA temporada con actividad.
-      // Es idempotente y rápido (groupBy + updateMany solo cuando hay diff). Para deshabilitarlo
-      // (e.g. debugging), setear DISABLE_LEADERBOARD_AUTOREBUILD=true.
-      if (process.env.DISABLE_LEADERBOARD_AUTOREBUILD === 'true') {
-        console.log('ℹ️  Leaderboard auto-rebuild disabled by env flag');
-      } else {
-        void rebuildAllLeaderboards()
-          .then((r) => {
-            console.log(
-              `✅ Leaderboards rebuilt: highScores+${r.highScoresUpdated}, global=${r.globalLoaded}, seasons=[${r.seasonsLoaded
-                .map((s) => `${s.seasonId}:${s.loaded}`)
-                .join(', ')}]`
-            );
-          })
-          .catch((err) => console.error('⚠️  Leaderboard rebuild failed (non-fatal):', err));
-      }
-
-      // Redis keepalive: Upstash free tier elimina databases tras 14 días sin
-      // comandos (incidente 25-mayo: Redis borrado, app cayó a path degradado
-      // hasta que se restauró). Defensa redundante con el cron de GH Actions
-      // (.github/workflows/keep-backend-awake.yml) que ya pegamos /health
-      // cada 5min: si el cron falla por X razón, este interval garantiza
-      // actividad cada 6h directamente desde el backend.
-      const REDIS_KEEPALIVE_MS = 6 * 60 * 60 * 1000; // 6h
-      const keepaliveTimer = setInterval(() => {
-        const redis = getRedis();
-        redis
-          .ping()
-          .then(() => console.log(`[redis-keepalive] PING ok @ ${new Date().toISOString()}`))
-          .catch((err) =>
-            console.error(`[redis-keepalive] PING failed @ ${new Date().toISOString()}: ${err?.message ?? err}`)
-          );
-      }, REDIS_KEEPALIVE_MS);
-      // No bloquear el event loop si el proceso quiere terminar.
-      keepaliveTimer.unref();
     });
   } catch (error) {
     console.error('Failed to start server:', error);

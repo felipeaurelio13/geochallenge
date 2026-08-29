@@ -4,6 +4,8 @@ Estas reglas aplican a todo el repositorio.
 
 Objetivo: hacer cambios pequeños, correctos, reversibles y fáciles de integrar, respetando el comportamiento actual del producto y minimizando riesgo técnico y de merge.
 
+Antes de agregar estado, fallback, servicio, tabla, workflow o abstracción nueva, demostrar por qué no puede resolverse eliminando o reutilizando un mecanismo existente.
+
 ## Contexto del repo
 
 - Monorepo con:

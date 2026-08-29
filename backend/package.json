@@ -21,7 +21,8 @@
     "rebuild:leaderboards": "tsx src/scripts/rebuild-leaderboards.ts",
     "telemetry:report": "tsx src/scripts/telemetryReport.ts",
     "mastery:backfill-country-codes": "tsx src/scripts/masteryBackfillCountryCodes.ts",
-    "mastery:backfill-attempts": "tsx src/scripts/masteryBackfillAttempts.ts"
+    "mastery:backfill-attempts": "tsx src/scripts/masteryBackfillAttempts.ts",
+    "db:smoke": "tsx src/scripts/prismaSmoke.ts"
   },
   "keywords": [
     "geochallenge",

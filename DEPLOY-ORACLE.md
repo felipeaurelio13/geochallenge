@@ -141,8 +141,10 @@ regístrate y comparte el link con tus amigos.
 Cuando hagas cambios y los subas a git:
 ```bash
 cd geochallenge
-git pull
-docker compose up -d --build
+DEPLOY_SHA=<sha-validado>
+git fetch origin "$DEPLOY_SHA"
+git checkout --detach "$DEPLOY_SHA"
+GIT_SHA="$DEPLOY_SHA" docker compose up -d --build
 ```
 
 Las migraciones de Prisma se aplican solas al rearrancar el backend.

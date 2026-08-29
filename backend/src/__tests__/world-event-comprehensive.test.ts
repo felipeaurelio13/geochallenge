@@ -205,8 +205,9 @@ describe('Legacy routes retained', () => {
     expect(read('backend/src/index.ts')).toContain('/health');
   });
 
-  it('GET /ping endpoint exists in backend index', () => {
-    expect(read('backend/src/index.ts')).toContain('/ping');
+  it('only retains /health as the operational endpoint', () => {
+    expect(read('backend/src/index.ts')).toContain("'/health'");
+    expect(read('backend/src/index.ts')).not.toContain("'/ping'");
   });
 });
 

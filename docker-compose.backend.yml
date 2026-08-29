@@ -24,6 +24,7 @@ services:
       JWT_SECRET: ${JWT_SECRET:?define JWT_SECRET en .env.backend}
       JWT_EXPIRES_IN: "7d"
       FRONTEND_URL: ${FRONTEND_URL:?define FRONTEND_URL en .env.backend}
+      GIT_SHA: ${GIT_SHA:?define GIT_SHA en .env.backend}
     ports:
       - "127.0.0.1:${BACKEND_LOCAL_PORT:-3101}:3001"
 

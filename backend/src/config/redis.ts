@@ -8,10 +8,7 @@ export function getRedis(): Redis {
     redis = new Redis(config.redis.url, {
       maxRetriesPerRequest: 3,
       connectTimeout: 5000,
-      // Sin commandTimeout, un comando contra un Redis caído queda colgado ~8s
-      // mientras ioredis reintenta. Eso vuelve lentísimo /health (lo invoca el
-      // keep-alive del cliente) y satura el pool de 6 conexiones del navegador,
-      // dejando sin slot a requests reales (ranking, etc.). Lo acotamos a 3s.
+      // A failed Redis command must fail quickly so requests can return a clear error.
       commandTimeout: 3000,
       retryStrategy(times) {
         const delay = Math.min(times * 50, 2000);

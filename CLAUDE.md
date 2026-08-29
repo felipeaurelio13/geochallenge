@@ -1,6 +1,6 @@
 # GeoChallenge
 
-**GeoChallenge** es un juego de trivia geográfica full-stack con modos de juego múltiples (single-player, duelos, survival, challenges, daily), multijugador en tiempo real via WebSockets, leaderboards, achievements y soporte offline (PWA).
+**GeoChallenge** es un juego de trivia geográfica full-stack con modos single-player, duelos, survival, challenges y daily; es PWA instalable, pero jugar requiere conexión al servidor.
 
 - Frontend: React 18 + TypeScript + Vite (`frontend/`) — v1.2.87
 - Backend: Node.js + Express + Socket.IO + Prisma + PostgreSQL + Redis (`backend/`) — v1.1.0
@@ -166,14 +166,13 @@ Componentes de juego independientes: `QuestionCard`, `OptionButton`, `Timer`, `P
 ### Estado y contextos
 
 - **`AuthContext`** — login/logout, token JWT en localStorage, datos del usuario autenticado.
-- **`GameContext`** — estado de partida, respuestas, scoring, caché offline (IndexedDB via `useOfflineQuestions`).
+- **`GameContext`** — estado temporal de la partida y coordinación con el backend.
 - **`useUiStore`** — estado UI global (Zustand-like, sin dependencia externa).
 
 ### Hooks personalizados (`src/hooks/`)
 
 - `useApi` — wrapper genérico sobre Axios
 - `useFormValidation` — validación con Zod
-- `useOfflineQuestions` — caché IndexedDB con mínimo 10 preguntas de fallback
 - `useGesture` / `useHaptics` — soporte móvil
 - `useInstallPrompt` — prompt de instalación PWA
 - `useStreakShareImage` / `useWebShare` — compartir resultados nativamente

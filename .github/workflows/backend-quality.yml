@@ -11,6 +11,25 @@ jobs:
     defaults:
       run:
         working-directory: backend
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: geochallenge
+          POSTGRES_PASSWORD: geochallenge
+          POSTGRES_DB: geochallenge
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U geochallenge -d geochallenge"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://geochallenge:geochallenge@localhost:5432/geochallenge?schema=public
+      REDIS_URL: redis://localhost:6379
+      JWT_SECRET: ci-test-secret
+      FRONTEND_URL: http://localhost:5173
 
     steps:
       - name: Checkout
@@ -29,8 +48,17 @@ jobs:
       - name: Run lint
         run: npm run lint
 
+      - name: Apply migrations from zero
+        run: npx prisma migrate deploy
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
       - name: Run unit tests
         run: npm run test
 
       - name: Build TypeScript
         run: npm run build
+
+      - name: Prisma read/write smoke test
+        run: npm run db:smoke
