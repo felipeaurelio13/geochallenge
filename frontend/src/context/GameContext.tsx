@@ -11,14 +11,8 @@ import type {
   MechanicUsage,
   Question,
 } from '../types';
-import { hasActiveFilters } from '../types';
-import { cacheQuestions, drainPendingSessions, enqueuePendingSession, getCachedQuestions } from '../hooks/useOfflineQuestions';
 import { useImagePreloader } from '../hooks/useImagePreloader';
 import { clampTimeRemainingForScoring, getQuestionDuration } from '../utils/questionTiming';
-import { uiStoreActions } from '../store/useUiStore';
-// OJO: `i18next` (paquete, singleton) y NO `../i18n` (bootstrap de la app) —
-// mismo motivo que utils/apiError.ts: evita reventar tests que mockean
-// `react-i18next` sin `initReactI18next`.
 import i18n from 'i18next';
 
 interface GameContextType {
@@ -57,10 +51,7 @@ const initialState: GameState = {
   score: 0,
   timeRemaining: 10,
   config: null,
-  isOffline: false,
 };
-
-const OFFLINE_FALLBACK_MIN_QUESTIONS = 10;
 
 function isOnline(): boolean {
   return typeof navigator === 'undefined' ? true : navigator.onLine !== false;
@@ -108,72 +99,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  // Cuando el navegador recupera conectividad, drenamos las sesiones que
-  // quedaron encoladas (offline real o los 2 reintentos de finishGame
-  // agotados) y las reenviamos al backend. Antes nada llamaba a
-  // drainPendingSessions — quedaban en localStorage para siempre.
-  useEffect(() => {
-    const handleOnline = () => {
-      const pending = drainPendingSessions();
-      if (!pending.length) return;
-
-      (async () => {
-        let syncedCount = 0;
-        for (const session of pending) {
-          if (!session.sessionId) continue; // legacy: discard, not re-enqueue
-          try {
-            await api.finishGame({ sessionId: session.sessionId, answers: session.answers, category: session.category });
-            syncedCount += 1;
-          } catch {
-            // Si el reenvío falla de nuevo, la re-encolamos para el próximo online.
-            enqueuePendingSession(session);
-          }
-        }
-        if (syncedCount > 0) {
-          uiStoreActions.pushToast({ type: 'success', message: i18n.t('sync.done') });
-        }
-      })();
-    };
-
-    window.addEventListener('online', handleOnline);
-    return () => window.removeEventListener('online', handleOnline);
-  }, []);
-
   const startGame = useCallback(async (category?: Category, questionCount?: number, gameType?: GameType, filters?: GameFilters, acceptShortGame?: boolean) => {
     setState((prev) => ({ ...prev, status: 'loading' }));
-    const resolvedCategory = (category ?? 'MIXED') as Category;
-    const desiredCount = questionCount ?? 10;
-    const modeOfflineEligible = gameType !== 'flash'; // flash requires server-side 60s feed
-
-    const fallbackToOfflineCache = async (): Promise<boolean> => {
-      if (!modeOfflineEligible) return false;
-      const cached = await getCachedQuestions(resolvedCategory, desiredCount);
-      if (cached.length < OFFLINE_FALLBACK_MIN_QUESTIONS) return false;
-      setState({
-        status: 'playing',
-        questions: cached,
-        currentIndex: 0,
-        answers: [],
-        results: [],
-        score: 0,
-        timeRemaining: getQuestionDuration(cached[0]?.category, 10),
-        config: {
-          questionsCount: cached.length,
-          timePerQuestion: 10,
-          category: resolvedCategory,
-          gameType: (gameType ?? 'single') as GameType,
-        },
-        isOffline: true,
-      });
-      setStreakAlive(true);
-      return true;
-    };
-
-    const filtersActive = hasActiveFilters(filters);
-
-    if (!isOnline() && modeOfflineEligible && !filtersActive) {
-      const served = await fallbackToOfflineCache();
-      if (served) return;
+    if (!isOnline()) {
+      setState((prev) => ({ ...prev, status: 'idle' }));
+      throw new Error(i18n.t('game.connectionRequired'));
     }
 
     try {
@@ -192,21 +122,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           ...response.gameConfig,
           sessionId: response.sessionId,
         },
-        isOffline: false,
       });
       setStreakAlive(true);
-
-      // cache for future offline use (fire-and-forget, only when no filters to avoid polluting cache)
-      if (modeOfflineEligible && !filtersActive && response.questions?.length) {
-        cacheQuestions(resolvedCategory, response.questions).catch(() => {
-          // noop: cache failures must not affect gameplay
-        });
-      }
     } catch (error) {
-      if (modeOfflineEligible && !filtersActive) {
-        const served = await fallbackToOfflineCache();
-        if (served) return;
-      }
       setState((prev) => ({ ...prev, status: 'idle' }));
       throw error;
     }
@@ -232,7 +150,6 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           sessionId: response.sessionId,
           gameType: 'practice',
         },
-        isOffline: false,
       });
       setStreakAlive(true);
     } catch (error) {
@@ -257,7 +174,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       coordinates?: { lat: number; lng: number },
       mechanicUsage?: MechanicUsage
     ): Promise<AnswerResult> => {
-      const { questions, currentIndex, timeRemaining, isOffline, config } = stateRef.current;
+      const { questions, currentIndex, timeRemaining, config } = stateRef.current;
       const currentQuestion = questions[currentIndex];
       const baseDuration = config?.timePerQuestion ?? 10;
 
@@ -277,44 +194,29 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         coordinates,
       };
 
-      let answerResult: AnswerResult;
-
-      if (isOffline || !isOnline()) {
-        // Offline: ya no podemos leer correctAnswer del frontend (Plan 2).
-        // Devolvemos un resultado placeholder; la partida se encola para sync.
-        answerResult = {
-          questionId: currentQuestion.id,
-          isCorrect: false,
-          correctAnswer: '',
-          userAnswer: answer,
-          points: 0,
-          basePoints: 0,
-          timeBonus: 0,
-        };
-      } else {
-        const sessionId = stateRef.current.sessionId ?? stateRef.current.config?.sessionId;
-        const result = await api.submitAnswer({
-          sessionId,
-          questionId: currentQuestion.id,
-          answer,
-          timeRemaining: reportedTimeRemaining,
-          mechanicUsage,
-          coordinates,
-        });
-        answerResult = {
-          questionId: currentQuestion.id,
-          isCorrect: result.isCorrect,
-          correctAnswer: result.correctAnswer,
-          userAnswer: answer,
-          points: result.points,
-          basePoints: result.basePoints,
-          timeBonus: result.timeBonus,
-          comboBonus: result.comboBonus,
-          accuracyBonus: result.accuracyBonus,
-          distance: result.distance,
-          correctLocation: (result as { correctLocation?: { lat: number; lng: number } }).correctLocation,
-        };
-      }
+      if (!isOnline()) throw new Error(i18n.t('game.connectionRequired'));
+      const sessionId = stateRef.current.sessionId ?? stateRef.current.config?.sessionId;
+      const result = await api.submitAnswer({
+        sessionId,
+        questionId: currentQuestion.id,
+        answer,
+        timeRemaining: reportedTimeRemaining,
+        mechanicUsage,
+        coordinates,
+      });
+      const answerResult: AnswerResult = {
+        questionId: currentQuestion.id,
+        isCorrect: result.isCorrect,
+        correctAnswer: result.correctAnswer,
+        userAnswer: answer,
+        points: result.points,
+        basePoints: result.basePoints,
+        timeBonus: result.timeBonus,
+        comboBonus: result.comboBonus,
+        accuracyBonus: result.accuracyBonus,
+        distance: result.distance,
+        correctLocation: (result as { correctLocation?: { lat: number; lng: number } }).correctLocation,
+      };
 
       setState((prev) => ({
         ...prev,
@@ -348,9 +250,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const replaceCurrentQuestion = useCallback(async (filters?: GameFilters): Promise<boolean> => {
-    const { questions, currentIndex, config, isOffline } = stateRef.current;
+    const { questions, currentIndex, config } = stateRef.current;
     const currentQuestion = questions[currentIndex];
-    if (!currentQuestion || isOffline || !isOnline()) return false;
+    if (!currentQuestion || !isOnline()) return false;
 
     try {
       const response = await api.startGame(
@@ -382,56 +284,12 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const finishGame = useCallback(async (): Promise<GameResult> => {
-    const { answers, config, isOffline, results, score } = stateRef.current;
-
-    if (isOffline || !isOnline()) {
-      // Offline-started: practice-only, no ranked queue
-      const correctCount = results.filter((r) => r.isCorrect).length;
-      const totalQuestions = results.length || answers.length || 1;
-      setLastNewAchievements([]);
-      return {
-        gameId: `practice-${Date.now()}`,
-        totalScore: score,
-        correctCount,
-        totalQuestions,
-        accuracy: Math.round((correctCount / totalQuestions) * 100),
-        isHighScore: false,
-        details: results,
-        newAchievements: [],
-      };
-    }
-
-    // Online-started: retry with sessionId
+    const { answers, config } = stateRef.current;
+    if (!isOnline()) throw new Error(i18n.t('game.connectionRequired'));
     const sessionId = stateRef.current.sessionId ?? stateRef.current.config?.sessionId;
-    try {
-      const result = await api.finishGame({ sessionId, answers, category: config?.category, gameType: config?.gameType });
-      setLastNewAchievements(result.newAchievements ?? []);
-      return result;
-    } catch {
-      try {
-        const result = await api.finishGame({ sessionId, answers, category: config?.category, gameType: config?.gameType });
-        setLastNewAchievements(result.newAchievements ?? []);
-        return result;
-      } catch {
-        if (config?.category && sessionId) {
-          enqueuePendingSession({ category: config.category, answers, sessionId, finishedAt: Date.now() });
-        }
-        const correctCount = results.filter((r) => r.isCorrect).length;
-        const totalQuestions = results.length || answers.length || 1;
-        setLastNewAchievements([]);
-        return {
-          gameId: `pending-${Date.now()}`,
-          totalScore: score,
-          correctCount,
-          totalQuestions,
-          accuracy: Math.round((correctCount / totalQuestions) * 100),
-          isHighScore: false,
-          details: results,
-          newAchievements: [],
-          pendingSync: true,
-        };
-      }
-    }
+    const result = await api.finishGame({ sessionId, answers, category: config?.category, gameType: config?.gameType });
+    setLastNewAchievements(result.newAchievements ?? []);
+    return result;
   }, []);
 
   const resetGame = useCallback(() => {

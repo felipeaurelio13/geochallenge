@@ -444,7 +444,7 @@
     "shortGameConfirm": "Solo hay {{available}} preguntas disponibles (de {{requested}} solicitadas). ¿Quieres jugar igualmente?",
     "shortGameCancelled": "Partida cancelada. Prueba con otra categoría o configuración para obtener más preguntas.",
     "startError": "Error al iniciar el juego",
-    "offlineBadge": "📴 Sin conexión — puedes seguir jugando",
+    "connectionRequired": "Necesitas conexión para jugar.",
     "imageErrorTitle": "No pudimos cargar esta imagen 🖼️",
     "imageErrorRetry": "Reintentar",
     "imageErrorSkip": "Saltar pregunta"
@@ -479,7 +479,6 @@
     "accuracyBonus": "Precisión mapa",
     "achievementUnlocked": "🏅 ¡Logro desbloqueado!",
     "moreAchievements": "+{{count}} logros más",
-    "pendingSync": "📡 Resultado guardado en este dispositivo — se sincronizará automáticamente",
     "streakHeadline": "Racha de {{count}} 🔥",
     "streakShort": "Todos empiezan así. Una más y le agarras el ritmo.",
     "streakMid": "¡Sólida racha! Tu récord está a la vista.",
@@ -763,8 +762,7 @@
     "dismiss": "Ahora no"
   },
   "offline": {
-    "banner": "Sin conexión — jugando modo offline",
-    "queued": "Resultado guardado. Se enviará cuando vuelvas online."
+    "connectionRequired": "📴 Sin conexión · necesitas conexión para jugar"
   },
   "flash": {
     "title": "Flash",

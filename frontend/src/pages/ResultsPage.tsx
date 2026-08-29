@@ -17,9 +17,6 @@ export function ResultsPage() {
   const isStreakMode = searchParams.get('gameType') === 'streak';
   const isPracticeMode = searchParams.get('gameType') === 'practice';
   const category = searchParams.get('category') ?? 'MIXED';
-  // Part 1.2: bandera de navegación cuando finishGame no llegó al servidor
-  // (dos intentos agotados) y el resultado se guardó localmente para reintentar.
-  const isPendingSync = searchParams.get('pendingSync') === '1';
   const { state, resetGame, lastNewAchievements } = useGame();
   const { share: shareStreakImage, status: streakShareStatus } = useStreakShareImage();
   const [streakShareFeedback, setStreakShareFeedback] = useState<string>('');
@@ -200,12 +197,6 @@ export function ResultsPage() {
             {isStreakMode ? t('results.streakHeadline', { count: streakCount }) : isPracticeMode ? t('results.practiceTitle', 'Práctica adaptativa') : t('results.gameOver')}
           </h1>
           <p className="mt-2 text-lg text-[var(--color-text-secondary)] sm:text-xl">{isPracticeMode ? t('results.practiceSubtitle', 'Tu progreso se ha guardado') : getPerformanceMessage()}</p>
-
-          {isPendingSync && (
-            <p className="mt-3 text-sm text-sky-300" role="status">
-              {t('results.pendingSync')}
-            </p>
-          )}
 
           {unlockedAchievements.length > 0 && (
             <div

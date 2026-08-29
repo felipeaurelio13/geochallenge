@@ -7,7 +7,6 @@ export * from './useHaptics';
 export * from './useInstallPrompt';
 export * from './useLocalStorage';
 export * from './useMediaQuery';
-export * from './useOfflineQuestions';
 export * from './useWebShare';
 export * from './useWindowSize';
 export * from './useImageWithFallback';

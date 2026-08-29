@@ -444,7 +444,7 @@
     "shortGameConfirm": "Only {{available}} questions are available (out of {{requested}} requested). Do you want to play anyway?",
     "shortGameCancelled": "Game cancelled. Try another category or setup to get more questions.",
     "startError": "Failed to start the game",
-    "offlineBadge": "📴 Offline — you can keep playing",
+    "connectionRequired": "You need a connection to play.",
     "imageErrorTitle": "We couldn't load this image 🖼️",
     "imageErrorRetry": "Retry",
     "imageErrorSkip": "Skip question"
@@ -479,7 +479,6 @@
     "accuracyBonus": "Map accuracy",
     "achievementUnlocked": "🏅 Achievement unlocked!",
     "moreAchievements": "+{{count}} more achievements",
-    "pendingSync": "📡 Result saved on this device — it'll sync automatically",
     "streakHeadline": "Streak of {{count}} 🔥",
     "streakShort": "Everyone starts here. One more and you'll find your rhythm.",
     "streakMid": "Solid streak! Your record is within reach.",
@@ -763,8 +762,7 @@
     "dismiss": "Not now"
   },
   "offline": {
-    "banner": "Offline — playing in offline mode",
-    "queued": "Result saved. It will sync when you're back online."
+    "connectionRequired": "📴 Offline · you need a connection to play"
   },
   "flash": {
     "title": "Flash",

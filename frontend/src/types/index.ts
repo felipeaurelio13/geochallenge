@@ -364,7 +364,6 @@ export interface GameState {
   score: number;
   timeRemaining: number;
   config: GameConfig | null;
-  isOffline?: boolean;
 }
 
 export interface GameResult {
@@ -376,8 +375,6 @@ export interface GameResult {
   isHighScore: boolean;
   details: AnswerResult[];
   newAchievements?: string[];
-  /** true cuando finishGame no pudo llegar al servidor y el resultado se guardó localmente para reintentar más tarde. */
-  pendingSync?: boolean;
 }
 
 // Leaderboard types

@@ -26,13 +26,6 @@ vi.mock('../hooks/useImagePreloader', () => ({
   useImagePreloader: () => {},
 }));
 
-vi.mock('../hooks/useOfflineQuestions', () => ({
-  cacheQuestions: vi.fn(),
-  getCachedQuestions: vi.fn().mockResolvedValue([]),
-  drainPendingSessions: vi.fn().mockReturnValue([]),
-  enqueuePendingSession: vi.fn(),
-}));
-
 vi.mock('../utils/uxTelemetry', () => ({
   trackUxEvent: vi.fn(),
 }));

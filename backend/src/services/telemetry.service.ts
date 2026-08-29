@@ -7,7 +7,6 @@ const CLIENT_EVENT_NAMES = [
   'game_abandoned',
   'round_timeout',
   'option_mis_tap',
-  'offline_practice_started',
   'ui_error',
 ] as const;
 

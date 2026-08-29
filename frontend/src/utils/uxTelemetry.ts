@@ -6,7 +6,6 @@ type ClientEventName =
   | 'game_abandoned'
   | 'round_timeout'
   | 'option_mis_tap'
-  | 'offline_practice_started'
   | 'ui_error';
 
 interface ClientEvent {

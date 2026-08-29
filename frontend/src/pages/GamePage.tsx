@@ -25,10 +25,6 @@ import { generateFunFact } from '../utils/funFacts';
 import { applyExtendedTime, getQuestionDuration } from '../utils/questionTiming';
 import { useUiStore } from '../store/useUiStore';
 
-function isOnlineNow(): boolean {
-  return typeof navigator === 'undefined' ? true : navigator.onLine !== false;
-}
-
 const MapInteractive = lazy(() =>
   import('../components/MapInteractive').then((m) => ({ default: m.MapInteractive }))
 );
@@ -109,7 +105,6 @@ export function GamePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imageReplacementFailed, setImageReplacementFailed] = useState(false);
   const [isRetryingImage, setIsRetryingImage] = useState(false);
-  const [isBrowserOffline, setIsBrowserOffline] = useState(!isOnlineNow());
   const prefersReducedMotion = useUiStore((s) => s.prefersReducedMotion);
   const extendedTimeEnabled = useUiStore((s) => s.extendedTimeEnabled);
   const abandonTrackedRef = useRef(false);
@@ -156,20 +151,6 @@ export function GamePage() {
     setDisabledOptionIndexes([]);
     setPendingMechanicUsage(undefined);
   }, [mechanicsConfig, mechanicsRuntimeEnabled]);
-
-  // Chip persistente "sin conexión" durante la partida (Part 1.2). El drenado
-  // real de partidas pendientes vive en GameContext (listener global); acá
-  // solo reflejamos el estado de red para la UI de esta pantalla.
-  useEffect(() => {
-    const handleOnline = () => setIsBrowserOffline(false);
-    const handleOffline = () => setIsBrowserOffline(true);
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
 
   // Prevent accidental navigation during game
   useEffect(() => {
@@ -321,13 +302,10 @@ export function GamePage() {
         haptics.tap();
         return;
       } catch {
-        // fallback: comportamiento local defectivo (menos seguro, pero permite
-        // que la mecánica funcione aunque Redis esté caído)
+        return;
       }
     }
 
-    // Fallback sin sesión (offline o Redis caído): no sabe la respuesta correcta.
-    // No puede ocultar opciones sin exponer información.
   };
 
   const handleUseFocusTime = () => {
@@ -384,10 +362,8 @@ export function GamePage() {
         setShowResult(true);
         abandonTrackedRef.current = true;
         finishGame()
-          .then((gameResult) => {
-            navigate(gameResult.pendingSync ? '/results?gameType=streak&pendingSync=1' : '/results?gameType=streak');
-          })
-          .catch(() => navigate('/results?gameType=streak'));
+          .then(() => navigate('/results?gameType=streak'))
+          .catch((err: Error) => setError(err.message || t('game.error')));
         return;
       }
 
@@ -438,19 +414,16 @@ export function GamePage() {
 
     if (currentIndex >= bufferedQuestionCount - 1) {
       abandonTrackedRef.current = true;
-      // Game finished. finishGame() ya retries una vez internamente y encola
-      // localmente si ambos intentos fallan (Part 1.2) — pendingSync=1 le dice
-      // a ResultsPage que muestre el badge "guardado en este dispositivo".
       const base = shouldUseStreakFlow
         ? '/results?gameType=streak'
         : gameType === 'practice'
           ? '/results?gameType=practice'
           : '/results';
       try {
-        const gameResult = await finishGame();
-        navigate(gameResult.pendingSync ? `${base}${base.includes('?') ? '&' : '?'}pendingSync=1` : base);
-      } catch (err) {
+        await finishGame();
         navigate(base);
+      } catch (err: any) {
+        setError(err.message || t('game.error'));
       }
     } else {
       nextQuestion();
@@ -636,11 +609,6 @@ export function GamePage() {
               />
             </div>
           </div>
-          {isBrowserOffline && (
-            <div className="max-w-4xl mx-auto mt-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-center text-xs font-medium text-amber-600">
-              {t('game.offlineBadge', '📴 Sin conexión — puedes seguir jugando')}
-            </div>
-          )}
         </header>
       }
       progress={
