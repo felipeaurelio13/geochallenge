@@ -162,12 +162,20 @@ La respuesta de `/health` debe incluir `sha` igual a `DEPLOY_SHA`.
 Antes de aplicar la migración `20261012000000_simplify_game_finalization`, revisa Neon:
 
 ```sql
+SELECT
+  to_regclass('"PendingGameFinalization"') AS camelcase_table,
+  to_regclass('pending_game_finalizations') AS snakecase_table;
+```
+
+Consulta la tabla que exista:
+
+```sql
 SELECT "runId", "gameType", "status", "attempts", "lastError"
-FROM "pending_game_finalizations"
+FROM "PendingGameFinalization"
 WHERE "status" <> 'COMPLETED';
 ```
 
-Si devuelve filas, no despliegues esa migración: resuelve esos runs con la versión anterior. Si no devuelve filas, la migración elimina la tabla de recovery de forma segura.
+Si el primer query devuelve solo `snakecase_table`, reemplaza el `FROM` por `pending_game_finalizations`. Si no existe ninguna tabla, no hay estado de recovery que converger. Si la consulta correspondiente devuelve filas, no despliegues esa migración: resuelve esos runs con la versión anterior. La migración detecta ambos nombres y solo elimina tablas sin finalizaciones pendientes.
 
 ## Si el deploy falla
 
