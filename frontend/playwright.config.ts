@@ -32,5 +32,10 @@ export default defineConfig({
       name: 'Android Medium',
       use: { ...devices['Pixel 5'] },
     },
+    {
+      name: 'Desktop',
+      use: { browserName: 'chromium', viewport: { width: 1440, height: 960 } },
+      grep: /Perfect Round screenshots/,
+    },
   ],
 });

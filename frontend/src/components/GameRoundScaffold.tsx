@@ -30,6 +30,8 @@ type GameRoundScaffoldProps = {
   imageReplacementFailed?: boolean;
   onRetryImage?: () => void;
   onSkipQuestion?: () => void;
+  minimalQuestionCard?: boolean;
+  feedback?: ReactNode;
 };
 
 export function GameRoundScaffold({
@@ -54,13 +56,15 @@ export function GameRoundScaffold({
   imageReplacementFailed = false,
   onRetryImage,
   onSkipQuestion,
+  minimalQuestionCard = false,
+  feedback,
 }: GameRoundScaffoldProps) {
   const { i18n } = useTranslation();
   const isCapitalQuestion = !isMapQuestion && question.category === 'CAPITAL';
   const hasMediaQuestion = !isMapQuestion && (question.category === 'FLAG' || question.category === 'SILHOUETTE' || question.category === 'MONUMENT');
 
   const content = (
-    <div className="game-round-content mx-auto flex h-full w-full max-w-4xl min-h-0 flex-col">
+    <div className={`game-round-content mx-auto flex h-full w-full max-w-4xl min-h-0 flex-col ${minimalQuestionCard ? 'perfect-round-content' : ''}`}>
       <div
         className={[
           'game-question-wrap min-h-0',
@@ -83,6 +87,7 @@ export function GameRoundScaffold({
           replacementFailed={imageReplacementFailed}
           onRetryImage={onRetryImage}
           onSkipQuestion={onSkipQuestion}
+          minimal={minimalQuestionCard}
         />
       </div>
 
@@ -108,6 +113,7 @@ export function GameRoundScaffold({
           </div>
         </div>
       )}
+      {feedback ? <div className="perfect-round-feedback" aria-live="polite">{feedback}</div> : null}
     </div>
   );
 

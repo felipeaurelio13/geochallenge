@@ -109,4 +109,40 @@ describe('RoundActionTray', () => {
       expect(child.tagName === 'BUTTON' || child.classList.contains('sr-only')).toBe(true);
     }
   });
+
+  it('mantiene la misma acción y geometría al validar, avanzar y terminar una ronda estable', () => {
+    const { rerender } = render(
+      <RoundActionTray
+        mode="single"
+        stableAction
+        showResult={false}
+        canSubmit={false}
+        submitLabel="Confirmar"
+        validatingLabel="Validando…"
+        nextLabel="Siguiente"
+        onSubmit={vi.fn()}
+      />
+    );
+
+    const button = screen.getByRole('button', { name: 'Confirmar' });
+    const className = button.className;
+    expect(button).toBeDisabled();
+    expect(className).toContain('min-h-12');
+
+    rerender(
+      <RoundActionTray mode="single" stableAction showResult={false} canSubmit submitLabel="Confirmar" validatingLabel="Validando…" nextLabel="Siguiente" onSubmit={vi.fn()} />
+    );
+    expect(screen.getByRole('button', { name: 'Confirmar' })).toHaveClass('min-h-12');
+
+    rerender(
+      <RoundActionTray mode="single" stableAction showResult={false} canSubmit isSubmitting submitLabel="Confirmar" validatingLabel="Validando…" nextLabel="Siguiente" onSubmit={vi.fn()} />
+    );
+    expect(screen.getByRole('button', { name: 'Validando…' })).toHaveClass('min-h-12');
+
+    rerender(
+      <RoundActionTray mode="single" stableAction showResult canSubmit submitLabel="Confirmar" nextLabel="Ver resultados" onSubmit={vi.fn()} onNext={vi.fn()} />
+    );
+    const resultButton = screen.getByRole('button', { name: 'Ver resultados' });
+    expect(resultButton.className).toBe(className);
+  });
 });
