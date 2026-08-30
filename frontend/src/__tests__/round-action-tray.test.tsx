@@ -45,6 +45,8 @@ describe('RoundActionTray', () => {
 
     const tray = screen.getByTestId('mobile-action-tray');
     expect(tray).toHaveClass('w-full');
+    expect(tray).toHaveClass('max-h-[45dvh]');
+    expect(screen.getByRole('button', { name: 'Siguiente' })).toHaveClass('sticky');
     expect(screen.getByText('resumen')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Siguiente' }));

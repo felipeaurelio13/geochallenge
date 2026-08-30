@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { calculateMasteryScore } from '../services/mastery.service.js';
+import { calculateMasteryScore, calculateWorldProgressPercent } from '../services/mastery.service.js';
 
 describe('calculateMasteryScore', () => {
   it('1/1 → masteryScore 13, level LEARNING', () => {
@@ -60,5 +60,15 @@ describe('calculateMasteryScore', () => {
     const result2 = calculateMasteryScore(5, 3);
     expect(result2.masteryScore).toBe(38);
     expect(result2.level).toBe('LEARNING');
+  });
+});
+
+describe('calculateWorldProgressPercent', () => {
+  it('uses stamped countries and preserves one decimal place', () => {
+    expect(calculateWorldProgressPercent(32, 197)).toBe(16.2);
+  });
+
+  it('returns 0 when no country has been stamped', () => {
+    expect(calculateWorldProgressPercent(0, 197)).toBe(0);
   });
 });

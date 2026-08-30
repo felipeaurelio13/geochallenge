@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../services/api';
 import type { PassportResponse, CountryMastery, SkillMastery, MasteryLevel } from '../types';
 import { LoadingSpinner } from '../components';
+import { getLocalizedCountryName } from '../utils/countryNames';
 
 const LEVEL_LABELS: Record<MasteryLevel, string> = {
   UNSEEN: 'No jugado',
@@ -190,7 +191,8 @@ function CountryCard({
   onToggle: () => void;
   onPractice: () => void;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const countryName = getLocalizedCountryName(country.countryCode, i18n.language, country.name);
 
   return (
     <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
@@ -198,13 +200,13 @@ function CountryCard({
         onClick={onToggle}
         className="flex w-full items-center gap-3 px-4 py-3 text-left"
       >
-        <span className="text-xl" role="img" aria-label={country.name}>
+        <span className="text-xl" role="img" aria-label={countryName}>
           {getCountryEmoji(country.countryCode)}
         </span>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <span className="text-sm font-semibold text-[var(--color-text-primary)] truncate">
-              {country.name}
+              {countryName}
             </span>
             {country.stamped && (
               <span className="shrink-0 text-xs" title={t('passport.stamped', 'Sellado')}>
@@ -237,7 +239,7 @@ function CountryCard({
             onClick={onPractice}
             className="w-full rounded-lg bg-[var(--color-accent)] py-2 text-sm font-semibold text-white transition-colors hover:opacity-90"
           >
-            {t('passport.practiceCountry', 'Practicar {{country}}', { country: country.name })}
+            {t('passport.practiceCountry', 'Practicar {{country}}', { country: countryName })}
           </button>
         </div>
       )}

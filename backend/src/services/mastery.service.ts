@@ -51,6 +51,12 @@ export interface MasterySummary {
   }[];
 }
 
+export function calculateWorldProgressPercent(stampedCountries: number, totalCountries: number): number {
+  return totalCountries > 0
+    ? parseFloat(((stampedCountries / totalCountries) * 100).toFixed(1))
+    : 0;
+}
+
 interface AttemptsForCountry {
   [countryCode: string]: { [category: string]: { attempts: number; correct: number; lastIncorrect?: boolean; lastSeenAt?: number } };
 }
@@ -228,9 +234,7 @@ export async function getMasterySummary(userId: string): Promise<MasterySummary>
   }
 
   const totalCountries = playableCountryCodes.size;
-  const worldProgressPercent = totalCountries > 0
-    ? parseFloat(((masteredCountries / totalCountries) * 100).toFixed(1))
-    : 0;
+  const worldProgressPercent = calculateWorldProgressPercent(stampedCountries, totalCountries);
 
   const skills = Object.entries(skillAgg).map(([category, stats]) => {
     const score = calculateMasteryScore(stats.attempts, stats.correct);

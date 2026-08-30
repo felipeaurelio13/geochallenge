@@ -102,7 +102,7 @@ export function LobbyJourneyCard({
       </div>
 
       <p className="mt-1.5 text-xs text-app-subtle">
-        {t('menu.journey.globalDominance')}: {summary.worldProgressPercent.toFixed(1)}%
+        {t('menu.journey.worldExplored')}: {summary.worldProgressPercent.toFixed(1)}%
       </p>
 
       <div className="mt-3 flex gap-2">

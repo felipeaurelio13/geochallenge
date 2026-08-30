@@ -940,6 +940,7 @@ export function DuelPage() {
     return (
       <UniversalGameLayout
         className="bg-[var(--color-bg-app)]"
+        footerOverlay={showResult}
         header={
           <header className="border-b border-app-border bg-app-surface/95 px-3 py-2 pt-[calc(env(safe-area-inset-top)+0.5rem)] backdrop-blur sm:px-4">
             <div className="mx-auto flex max-w-4xl items-center justify-between gap-3">

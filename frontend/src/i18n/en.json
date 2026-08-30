@@ -130,7 +130,7 @@
       "stamped": "explored countries",
       "ofWorld": "of the world",
       "mastered": "mastered",
-      "globalDominance": "Global dominance",
+      "worldExplored": "World explored",
       "continue": "Keep exploring",
       "passport": "Passport",
       "start": "Start your world journey",
@@ -823,6 +823,7 @@
     "backToMenu": "Back to Menu",
     "save": "Save",
     "processing": "Processing...",
+    "all": "All",
     "skipToMainAction": "Skip to main actions",
     "skipToAnswerOptions": "Skip to answer options",
     "search": "Search"
@@ -907,7 +908,7 @@
     },
   "passport": {
     "title": "My Journey",
-    "worldProgress": "of the world",
+    "worldProgress": "of the world explored",
     "stamped": "stamped countries",
     "totalCountries": "countries",
     "mastered": "mastered",

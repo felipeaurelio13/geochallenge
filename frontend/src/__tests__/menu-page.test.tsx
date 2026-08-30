@@ -121,7 +121,7 @@ vi.mock('react-i18next', () => ({
         'menu.journey.title': 'Tu viaje por el mundo',
         'menu.journey.stamped': 'países explorados',
         'menu.journey.mastered': 'dominados',
-        'menu.journey.globalDominance': 'Dominio global',
+        'menu.journey.worldExplored': 'Mundo explorado',
         'menu.journey.continue': 'Seguir explorando',
         'menu.journey.passport': 'Pasaporte',
         'menu.journey.startTitle': 'Empieza tu viaje por el mundo',

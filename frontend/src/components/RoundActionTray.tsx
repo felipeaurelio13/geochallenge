@@ -90,7 +90,7 @@ export function RoundActionTray({
   }
 
   return (
-    <div className={CONTAINER_CLASS} data-testid="mobile-action-tray">
+    <div className={`${CONTAINER_CLASS} ${showResult ? 'max-h-[45dvh] overflow-y-auto' : ''}`} data-testid="mobile-action-tray">
       <div className={wrapperClassName}>
         {summarySlot}
 
@@ -152,7 +152,7 @@ export function RoundActionTray({
                 type="button"
                 onClick={onNext}
                 disabled={isSubmitting}
-                className="w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-6 py-2 text-sm sm:text-base font-semibold text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] active:scale-[0.99] transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:cursor-wait disabled:opacity-70"
+                className="sticky bottom-0 w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-6 py-2 text-sm sm:text-base font-semibold text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] active:scale-[0.99] transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:cursor-wait disabled:opacity-70"
               >
                 {nextLabel}
               </button>

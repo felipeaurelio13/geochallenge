@@ -124,6 +124,7 @@ export function GameRoundScaffold({
       progress={progress}
       content={content}
       footer={actionTray}
+      footerOverlay={showResult}
     />
   );
 }

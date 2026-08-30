@@ -511,6 +511,7 @@ export function GeoChallengesPage() {
       <a href="#geo-challenge-options" className="skip-link">{t('common.skipToAnswerOptions')}</a>
       <UniversalGameLayout
         className="geo-challenges-layout"
+        footerOverlay={Boolean(feedback)}
         header={
           <header className="border-b border-app-border bg-app-surface/90 px-3 pb-2 pt-[calc(env(safe-area-inset-top)+0.6rem)] backdrop-blur sm:px-4">
             <div className="mx-auto grid max-w-4xl grid-cols-[auto_1fr_auto] items-center gap-2">

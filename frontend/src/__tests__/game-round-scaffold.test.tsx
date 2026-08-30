@@ -42,7 +42,7 @@ describe('GameRoundScaffold', () => {
     difficulty: 'MEDIUM',
   } as Question;
 
-  it('usa estructura header/main/footer en flujo para evitar overlays', () => {
+  it('usa estructura header/main/footer en flujo antes de mostrar el resultado', () => {
     render(
       <GameRoundScaffold
         header={<div>header</div>}
@@ -102,7 +102,7 @@ describe('GameRoundScaffold', () => {
     expect(optionsWrapper).toHaveClass('flex-1');
     expect(screen.getAllByRole('button')).toHaveLength(4);
   });
-  it('ancla capitales cerca del top y mantiene opciones en flujo sin overlay absoluto', () => {
+  it('ancla capitales cerca del top y superpone sólo el feedback de resultado', () => {
     const capitalQuestion = {
       ...question,
       category: 'CAPITAL',
@@ -128,6 +128,7 @@ describe('GameRoundScaffold', () => {
     // El wrapper se ancla arriba (items-start pt-2) para que las opciones
     // queden a tiro de pulgar en mobile sin ~150px de dead space.
     expect(screen.getByTestId('question-card').parentElement).toHaveClass('items-start');
+    expect(screen.getByText('header').closest('.universal-layout')).toHaveClass('universal-layout--footer-overlay');
     for (const button of screen.getAllByRole('button')) {
       expect(button.className).not.toContain('absolute');
       expect(button.className).not.toContain('fixed');

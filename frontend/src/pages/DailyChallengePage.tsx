@@ -18,21 +18,13 @@ import { applyExtendedTime, getQuestionDuration } from '../utils/questionTiming'
 import { useStreakShareImage } from '../hooks/useStreakShareImage';
 import { useConfirmDialog } from '../hooks/useConfirmDialog';
 import { useUiStore } from '../store/useUiStore';
+import { getLocalizedCountryName } from '../utils/countryNames';
 import { trackUxEvent } from '../utils/uxTelemetry';
 import type { Question, DailyResult } from '../types';
 
 const ANSWER_TIME = 20;
 
 type PageState = 'loading' | 'briefing' | 'already-played' | 'playing' | 'finished' | 'error';
-
-function getCountryName(countryCode: string, language: string): string {
-  try {
-    const names = new Intl.DisplayNames([language], { type: 'region' });
-    return names.of(countryCode) ?? countryCode;
-  } catch {
-    return countryCode;
-  }
-}
 
 const REGION_EMOJI: Record<string, string> = {
   AFRICA: '🌍',
@@ -402,6 +394,10 @@ export function DailyChallengePage() {
 
   const currentStop = tourStops[currentIndex];
   const currentRegion = currentStop?.region ?? '';
+  const correctAnswerForFeedback =
+    ['FLAG', 'SILHOUETTE', 'MAP'].includes(currentQuestion.category)
+      ? getLocalizedCountryName(lastCountryCode, i18n.language, lastCorrectAnswer)
+      : lastCorrectAnswer;
 
   return (
     <>
@@ -496,7 +492,7 @@ export function DailyChallengePage() {
             roundSubmitError
               ? t('daily.answerRetry', 'No pudimos registrar tu respuesta.')
               : showResult && lastCountryCode
-                ? `${REGION_EMOJI[lastRegion ?? ''] ?? ''} ${getCountryName(lastCountryCode, i18n.language)} · ${regionLabel(lastRegion ?? '', t)}`
+                ? `${REGION_EMOJI[lastRegion ?? ''] ?? ''} ${getLocalizedCountryName(lastCountryCode, i18n.language, lastCountryCode)} · ${regionLabel(lastRegion ?? '', t)}`
                 : funFact ?? undefined
           }
           resultAttribution={
@@ -507,7 +503,7 @@ export function DailyChallengePage() {
           selectionAssistiveText={selected && !showResult ? t('game.selectionReadyShortHint') : undefined}
           showResultBadge={!roundSubmitError}
           isCorrect={lastAnswerCorrect}
-          correctAnswer={showResult && !roundSubmitError && !lastAnswerCorrect ? lastCorrectAnswer : undefined}
+          correctAnswer={showResult && !roundSubmitError && !lastAnswerCorrect ? correctAnswerForFeedback : undefined}
           onSubmit={() => handleSubmit()}
           onNext={roundSubmitError ? handleRetrySubmit : handleNext}
         />

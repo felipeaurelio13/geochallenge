@@ -1,18 +1,10 @@
 import type { DailyTourDetails } from '../../types';
+import { getLocalizedCountryName } from '../../utils/countryNames';
 
 interface DailyTourStripProps {
   details: DailyTourDetails[];
   language: string;
   compact?: boolean;
-}
-
-function getCountryName(countryCode: string, language: string): string {
-  try {
-    const names = new Intl.DisplayNames([language], { type: 'region' });
-    return names.of(countryCode) ?? countryCode;
-  } catch {
-    return countryCode;
-  }
 }
 
 export function DailyTourStrip({ details, language, compact }: DailyTourStripProps) {
@@ -22,7 +14,7 @@ export function DailyTourStrip({ details, language, compact }: DailyTourStripPro
     <div className={`w-full ${compact ? '' : 'max-w-sm'}`}>
       <div className="flex flex-wrap gap-1.5 justify-center">
         {details.map((d) => {
-          const countryName = getCountryName(d.countryCode, language);
+          const countryName = getLocalizedCountryName(d.countryCode, language, d.countryCode);
           return (
             <span
               key={d.questionId}

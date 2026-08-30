@@ -24,4 +24,21 @@ describe('UniversalGameLayout', () => {
     expect(footer).toContainElement(screen.getByRole('button', { name: 'Confirmar' }));
     expect(content.compareDocumentPosition(footer) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
+
+  it('superpone el footer de resultado sin cambiar la fila de contenido', () => {
+    render(
+      <UniversalGameLayout
+        header={<div>Header</div>}
+        content={<div>Content</div>}
+        footer={<button type="button">Siguiente</button>}
+        footerOverlay
+      />
+    );
+
+    expect(screen.getByText('Header').closest('.universal-layout')).toHaveClass('universal-layout--footer-overlay');
+    expect(screen.getByTestId('universal-layout-main')).toContainElement(screen.getByText('Content'));
+    expect(screen.getByTestId('universal-layout-footer')).toContainElement(
+      screen.getByRole('button', { name: 'Siguiente' })
+    );
+  });
 });

@@ -225,6 +225,35 @@
     min-width: 0;
   }
 
+  /* El feedback de resultado no participa de la altura de la ronda en móvil.
+     El pseudo-elemento deja recorrido de scroll para que las alternativas que
+     queden bajo el tray se puedan alcanzar sin reducir sus targets táctiles. */
+  @media (max-width: 639px) {
+    .universal-layout--footer-overlay {
+      grid-template-rows: auto minmax(0, 1fr);
+    }
+
+    .universal-layout--footer-overlay .content-area,
+    .universal-layout--footer-overlay .layout-footer {
+      grid-column: 1;
+      grid-row: 2;
+    }
+
+    .universal-layout--footer-overlay .layout-footer {
+      align-self: end;
+    }
+
+    .universal-layout--footer-overlay .content-area::after {
+      content: '';
+      display: block;
+      flex: 0 0 clamp(9rem, 31dvh, 13rem);
+    }
+
+    .universal-layout--footer-overlay .content-area > :first-child {
+      flex-shrink: 0;
+    }
+  }
+
   .game-round-content {
     gap: clamp(var(--space-1_5), 1.4dvh, var(--space-2_5));
     padding-top: clamp(var(--space-1), 0.8dvh, var(--space-1_5));

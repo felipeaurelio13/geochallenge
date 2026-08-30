@@ -130,7 +130,7 @@
       "stamped": "países explorados",
       "ofWorld": "del mundo",
       "mastered": "dominados",
-      "globalDominance": "Dominio global",
+      "worldExplored": "Mundo explorado",
       "continue": "Seguir explorando",
       "passport": "Pasaporte",
       "start": "Comienza tu viaje por el mundo",
@@ -823,6 +823,7 @@
     "backToMenu": "Volver al menú",
     "save": "Guardar",
     "processing": "Procesando...",
+    "all": "Todos",
     "skipToMainAction": "Ir a las acciones principales",
     "skipToAnswerOptions": "Saltar a las opciones de respuesta",
     "search": "Buscar"
@@ -907,7 +908,7 @@
     },
   "passport": {
     "title": "Mi viaje",
-    "worldProgress": "del mundo",
+    "worldProgress": "del mundo explorado",
     "stamped": "países sellados",
     "totalCountries": "países",
     "mastered": "dominados",
