@@ -473,6 +473,7 @@ export function DailyChallengePage() {
       isMapQuestion={false}
       mapContent={null}
       selectedAnswer={selected}
+      correctAnswer={showResult && !roundSubmitError ? lastCorrectAnswer : undefined}
       onOptionSelect={(opt) => { if (!showResult && !lockedAnswer) setSelected(opt); }}
       showResult={showResult || !!roundSubmitError}
       actionTray={

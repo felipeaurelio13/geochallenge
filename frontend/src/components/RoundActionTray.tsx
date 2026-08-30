@@ -73,7 +73,7 @@ export function RoundActionTray({
             </button>
 
             {selectionAssistiveText && canSubmit && (
-              <p className="w-full text-center text-xs text-cyan-100/85 sm:text-right">{selectionAssistiveText}</p>
+              <p className="sr-only" aria-live="polite">{selectionAssistiveText}</p>
             )}
           </div>
         )}

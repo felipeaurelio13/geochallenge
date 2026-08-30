@@ -16,6 +16,8 @@ type GameRoundScaffoldProps = {
   isMapQuestion: boolean;
   mapContent: ReactNode;
   selectedAnswer: string | null;
+  /** Respuesta correcta devuelta por el backend para la ronda ya confirmada. */
+  correctAnswer?: string;
   onOptionSelect: (option: string) => void;
   showResult: boolean;
   disableOptions?: boolean;
@@ -40,6 +42,7 @@ export function GameRoundScaffold({
   isMapQuestion,
   mapContent,
   selectedAnswer,
+  correctAnswer,
   onOptionSelect,
   showResult,
   disableOptions = false,
@@ -98,7 +101,7 @@ export function GameRoundScaffold({
               disabled={showResult || disableOptions || imageReplacementFailed || hiddenOptionIndexes.includes(index)}
               eliminated={hiddenOptionIndexes.includes(index)}
               selected={selectedAnswer === option}
-              isCorrect={false}
+              isCorrect={showResult && correctAnswer === option}
               showResult={showResult}
             />
             ))}

@@ -900,6 +900,7 @@ export function SurvivalPage() {
         </Suspense>
       }
       selectedAnswer={selectedAnswer}
+      correctAnswer={showResult ? resultCorrectAnswer : undefined}
       onOptionSelect={handleOptionSelect}
       showResult={showResult}
       disableOptions={isSpectating || showResult}

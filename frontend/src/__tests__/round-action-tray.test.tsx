@@ -69,8 +69,24 @@ describe('RoundActionTray', () => {
     expect(submitButton.className).toContain('py-1.5');
   });
 
-  it('muestra ayuda breve al tener selección lista para confirmar', () => {
-    render(
+  it('al seleccionar sólo habilita Confirmar y mantiene la ayuda fuera del layout visible', () => {
+    const { rerender } = render(
+      <RoundActionTray
+        mode="single"
+        showResult={false}
+        canSubmit={false}
+        submitLabel="Confirmar"
+        onSubmit={vi.fn()}
+      />
+    );
+
+    const buttonBeforeSelection = screen.getByRole('button', { name: 'Confirmar' });
+    const buttonClassName = buttonBeforeSelection.className;
+    const actionContainer = buttonBeforeSelection.parentElement;
+    expect(buttonBeforeSelection).toBeDisabled();
+    expect(actionContainer?.children).toHaveLength(1);
+
+    rerender(
       <RoundActionTray
         mode="single"
         showResult={false}
@@ -81,6 +97,16 @@ describe('RoundActionTray', () => {
       />
     );
 
-    expect(screen.getByText('Selección lista para confirmar.')).toBeInTheDocument();
+    const submitButton = screen.getByRole('button', { name: 'Confirmar' });
+    const assistiveText = screen.getByText('Selección lista para confirmar.');
+    expect(submitButton).toBeEnabled();
+    expect(submitButton.className).toBe(buttonClassName);
+    expect(assistiveText).toHaveClass('sr-only');
+    expect(assistiveText).toHaveAttribute('aria-live', 'polite');
+    expect(submitButton.parentElement).toBe(actionContainer);
+    expect(actionContainer?.children).toHaveLength(2);
+    for (const child of Array.from(actionContainer?.children ?? [])) {
+      expect(child.tagName === 'BUTTON' || child.classList.contains('sr-only')).toBe(true);
+    }
   });
 });

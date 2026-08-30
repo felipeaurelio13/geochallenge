@@ -655,6 +655,7 @@ export function GamePage() {
         />
       }
       selectedAnswer={selectedAnswer}
+      correctAnswer={showResult ? results[results.length - 1]?.correctAnswer : undefined}
       onOptionSelect={handleOptionSelect}
       showResult={showResult}
       disableOptions={isSubmitting || imageReplacementFailed}

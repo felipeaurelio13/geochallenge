@@ -7,8 +7,28 @@ vi.mock('../components/QuestionCard', () => ({
   QuestionCard: () => <div data-testid="question-card">Question card</div>,
 }));
 
+vi.mock('../utils/monumentOptions', () => ({
+  getOptionDisplayLabel: (_question: Question, option: string) => `localized-${option}`,
+}));
+
 vi.mock('../components/OptionButton', () => ({
-  OptionButton: ({ option }: { option: string }) => <button type="button" className="option-row">{option}</button>,
+  OptionButton: ({ option, displayLabel, isCorrect, selected, showResult }: {
+    option: string;
+    displayLabel?: string;
+    isCorrect?: boolean;
+    selected: boolean;
+    showResult: boolean;
+  }) => (
+    <button
+      type="button"
+      className="option-row"
+      data-correct={isCorrect ? 'true' : 'false'}
+      data-selected={selected ? 'true' : 'false'}
+      data-show-result={showResult ? 'true' : 'false'}
+    >
+      {displayLabel ?? option}
+    </button>
+  ),
 }));
 
 describe('GameRoundScaffold', () => {
@@ -78,7 +98,7 @@ describe('GameRoundScaffold', () => {
     const questionWrap = screen.getByTestId('question-card').parentElement;
     expect(questionWrap).toHaveClass('game-question-wrap--media');
 
-    const optionsWrapper = screen.getByRole('button', { name: 'Argentina' }).closest('.game-options-wrap');
+    const optionsWrapper = screen.getByRole('button', { name: 'localized-Argentina' }).closest('.game-options-wrap');
     expect(optionsWrapper).toHaveClass('flex-1');
     expect(screen.getAllByRole('button')).toHaveLength(4);
   });
@@ -113,7 +133,68 @@ describe('GameRoundScaffold', () => {
       expect(button.className).not.toContain('fixed');
     }
 
-    const optionsWrapper = screen.getByRole('button', { name: 'Santiago' }).closest('.game-options-wrap');
+    const optionsWrapper = screen.getByRole('button', { name: 'localized-Santiago' }).closest('.game-options-wrap');
     expect(optionsWrapper?.className).toContain('overflow-hidden');
+  });
+
+  it('marca en verde y con resultado correcto la alternativa seleccionada cuando coincide con el valor raw', () => {
+    const localizedQuestion = {
+      ...question,
+      category: 'CAPITAL',
+      options: ['raw-santiago', 'raw-lima', 'raw-bogota', 'raw-quito'],
+    } as Question;
+
+    render(
+      <GameRoundScaffold
+        header={<div>header</div>}
+        question={localizedQuestion}
+        questionNumber={1}
+        totalQuestions={10}
+        isMapQuestion={false}
+        mapContent={null}
+        selectedAnswer="raw-santiago"
+        correctAnswer="raw-santiago"
+        onOptionSelect={() => {}}
+        showResult
+        actionTray={<div>tray</div>}
+      />
+    );
+
+    const selected = screen.getByRole('button', { name: 'localized-raw-santiago' });
+    expect(selected).toHaveAttribute('data-selected', 'true');
+    expect(selected).toHaveAttribute('data-correct', 'true');
+    for (const button of screen.getAllByRole('button').filter((button) => button !== selected)) {
+      expect(button).toHaveAttribute('data-correct', 'false');
+    }
+  });
+
+  it('marca la alternativa correcta aunque no sea la seleccionada y mantiene el error como incorrecto', () => {
+    const localizedQuestion = {
+      ...question,
+      category: 'CAPITAL',
+      options: ['raw-santiago', 'raw-lima', 'raw-bogota', 'raw-quito'],
+    } as Question;
+
+    render(
+      <GameRoundScaffold
+        header={<div>header</div>}
+        question={localizedQuestion}
+        questionNumber={1}
+        totalQuestions={10}
+        isMapQuestion={false}
+        mapContent={null}
+        selectedAnswer="raw-lima"
+        correctAnswer="raw-santiago"
+        onOptionSelect={() => {}}
+        showResult
+        actionTray={<div>tray</div>}
+      />
+    );
+
+    expect(screen.getByRole('button', { name: 'localized-raw-lima' })).toHaveAttribute('data-selected', 'true');
+    expect(screen.getByRole('button', { name: 'localized-raw-lima' })).toHaveAttribute('data-correct', 'false');
+    expect(screen.getByRole('button', { name: 'localized-raw-santiago' })).toHaveAttribute('data-correct', 'true');
+    expect(screen.getByRole('button', { name: 'localized-raw-bogota' })).toHaveAttribute('data-correct', 'false');
+    expect(screen.getByRole('button', { name: 'localized-raw-quito' })).toHaveAttribute('data-correct', 'false');
   });
 });

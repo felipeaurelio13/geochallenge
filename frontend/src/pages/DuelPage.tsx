@@ -1124,6 +1124,7 @@ export function DuelPage() {
         </Suspense>
       }
       selectedAnswer={selectedAnswer}
+      correctAnswer={showResult ? resultCorrectAnswer : undefined}
       onOptionSelect={handleOptionSelectDuel}
       showResult={showResult}
       hiddenOptionIndexes={disabledOptionIndexes}

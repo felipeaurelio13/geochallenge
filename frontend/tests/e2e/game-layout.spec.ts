@@ -38,4 +38,21 @@ test.describe('layout de ronda mobile', () => {
     expect(isContained.fit).toBe('contain');
     expect(isContained.insideParent).toBeTruthy();
   });
+
+  test('al seleccionar sólo habilita Confirmar sin desplazar ni redimensionar el CTA', async ({ page }) => {
+    await page.goto('/game/single?category=FLAG');
+
+    const confirmButton = page.getByTestId('mobile-action-tray').getByRole('button', { name: /^(Confirmar|Submit)$/ });
+    await expect(confirmButton).toBeDisabled();
+    const beforeSelection = await confirmButton.boundingBox();
+
+    await page.getByRole('button', { name: 'Argentina' }).click();
+
+    await expect(confirmButton).toBeEnabled();
+    await expect(page.getByText(/^(Selección lista para confirmar\.|Selection ready to confirm\.)$/)).toHaveClass(/sr-only/);
+    const afterSelection = await confirmButton.boundingBox();
+
+    expect(beforeSelection).not.toBeNull();
+    expect(afterSelection).toEqual(beforeSelection);
+  });
 });
