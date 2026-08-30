@@ -3,6 +3,7 @@ import { Question } from '../types';
 import { useImageWithFallback } from '../hooks/useImageWithFallback';
 import { useTranslation } from 'react-i18next';
 import { getLocalizedQuestionText } from '../utils/questionText';
+import { GeoMark } from './atoms/GeoMark';
 
 interface QuestionCardProps {
   question: Question;
@@ -125,12 +126,12 @@ export function QuestionCard({
   return (
     <div
       aria-label={t('game.questionOf', { current: questionNumber, total: totalQuestions })}
-      className={`question-card ${minimal ? 'question-card--minimal px-1 py-1 sm:px-2 sm:py-2' : `rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface-muted)]/95 shadow-xl shadow-black/25 ${compact ? 'px-4 py-2 sm:px-5 sm:py-3' : 'px-4 py-4 sm:px-6 sm:py-6'}`} ${isCompactMediaMode ? 'question-card--with-media' : ''}`}
+      className={`question-card ${(minimal || showQuestionImage) ? 'question-card--minimal px-1 py-1 sm:px-2 sm:py-2' : `rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-muted)] ${compact ? 'px-4 py-2 sm:px-5 sm:py-3' : 'px-4 py-4 sm:px-6 sm:py-6'}`} ${isCompactMediaMode ? 'question-card--with-media' : ''}`}
     >
       <div className="text-center">
         {showQuestionImage && (
           <div className={compact ? 'mb-1' : 'mb-6'}>
-            <div className={`mx-auto flex items-center justify-center rounded-xl ${
+            <div className={`mx-auto flex items-center justify-center rounded-lg ${
               question.category === 'SILHOUETTE'
                 ? 'border border-[var(--color-border)]/60 bg-[var(--color-bg-shell)]/90 p-3'
                 : question.category === 'MONUMENT'
@@ -164,8 +165,8 @@ export function QuestionCard({
         {hasImageError && onImageError && replacementFailed && (
           <div className={compact ? 'mb-1' : 'mb-6'}>
             <div className="media-box media-box--compact mx-auto flex flex-col items-center justify-center gap-3 rounded-xl border border-app-border/70 bg-app-muted/50 px-3 py-3">
-              <span className="text-4xl opacity-40">🖼️</span>
-              <p className="text-xs text-app-subtle">{t('game.imageErrorTitle', 'No pudimos cargar esta imagen 🖼️')}</p>
+              <GeoMark className="h-9 w-9 opacity-40 text-app-subtle" />
+              <p className="text-xs text-app-subtle">{t('game.imageErrorTitle', 'No pudimos cargar esta imagen')}</p>
               <div className="flex flex-wrap items-center justify-center gap-2">
                 {onRetryImage && (
                   <button
@@ -194,7 +195,7 @@ export function QuestionCard({
         {hasImageError && !onImageError && question.category === 'FLAG' && (
           <div className={compact ? 'mb-1' : 'mb-6'}>
             <div className="media-box media-box--compact mx-auto flex flex-col items-center justify-center gap-2 rounded-xl border border-app-border/70 bg-app-muted/50 px-2">
-              <span className="text-4xl opacity-30">🏳️</span>
+              <GeoMark className="h-9 w-9 opacity-30 text-app-subtle" />
               <p className="text-xs text-app-subtle">{t('game.flagUnavailable', 'Bandera no disponible')}</p>
             </div>
           </div>
@@ -203,7 +204,7 @@ export function QuestionCard({
         {hasImageError && !onImageError && question.category === 'SILHOUETTE' && (
           <div className={compact ? 'mb-1' : 'mb-6'}>
             <div className="media-box media-box--silhouette mx-auto flex flex-col items-center justify-center gap-2 rounded-xl border border-app-border/60 bg-app-surface/90 p-3">
-              <span className="text-4xl opacity-30">🌐</span>
+              <GeoMark className="h-9 w-9 opacity-30 text-app-subtle" />
               <p className="text-xs text-slate-500">{t('game.silhouetteUnavailable', 'Silueta no disponible')}</p>
             </div>
           </div>
@@ -212,7 +213,7 @@ export function QuestionCard({
         {hasImageError && !onImageError && question.category === 'MONUMENT' && (
           <div className={compact ? 'mb-1' : 'mb-6'}>
             <div className="mx-auto flex aspect-[16/9] w-full max-w-xl flex-col items-center justify-center gap-2 rounded-xl border border-app-border/70 bg-black/40 p-4">
-              <span className="text-5xl opacity-40">🗿</span>
+              <GeoMark className="h-10 w-10 opacity-40 text-app-subtle" />
               <p className="text-xs text-app-subtle">{t('game.monumentUnavailable', 'Imagen no disponible')}</p>
             </div>
           </div>

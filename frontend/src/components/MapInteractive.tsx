@@ -234,7 +234,7 @@ export function MapInteractive({
       */}
       {/* eslint-disable jsx-a11y/no-noninteractive-tabindex, jsx-a11y/no-noninteractive-element-interactions */}
       <div
-        className="map-surface relative flex-1 min-h-[12.5rem] overflow-hidden rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/70"
+        className="map-surface relative flex-1 min-h-[12.5rem] overflow-hidden rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/70"
         tabIndex={0}
         role="application"
         aria-label={t('map.keyboardInstructions')}

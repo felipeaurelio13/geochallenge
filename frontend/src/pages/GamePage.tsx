@@ -546,7 +546,7 @@ export function GamePage() {
     </a>
     <GameRoundScaffold
       header={
-        <header className={`${isPerfectRoundPilot ? 'sticky top-0 z-30 border-b border-[var(--color-border)] bg-[var(--color-bg-app)]/95 px-3 py-1.5 backdrop-blur sm:px-4 sm:py-2' : 'sticky top-0 z-30 border-b border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 pb-2 pt-3 backdrop-blur sm:px-4 sm:pb-3 sm:pt-4'}`}>
+        <header className={`${isPerfectRoundPilot ? 'sticky top-0 z-30 border-b border-[var(--color-border)] bg-[var(--color-bg-app)] px-3 py-1.5 sm:px-4 sm:py-2' : 'sticky top-0 z-30 border-b border-[var(--color-border)] bg-[var(--color-surface)] px-3 pb-2 pt-3 sm:px-4 sm:pb-3 sm:pt-4'}`}>
           <div className="max-w-4xl mx-auto grid grid-cols-[auto_1fr_auto] items-center gap-2.5 sm:gap-4">
             <button
               onClick={async () => {
@@ -562,7 +562,7 @@ export function GamePage() {
                   navigate('/menu');
                 }
               }}
-              className={`${isPerfectRoundPilot ? 'pressable grid h-11 w-11 place-items-center rounded-xl text-lg text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text-primary)]' : 'pressable min-h-10 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 py-2 text-xs sm:text-sm text-[var(--color-text-secondary)] hover:border-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors'}`}
+              className={`${isPerfectRoundPilot ? 'pressable grid h-11 w-11 place-items-center rounded-md text-lg text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text-primary)]' : 'pressable min-h-10 rounded-md border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 py-2 text-xs sm:text-sm text-[var(--color-text-secondary)] hover:border-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors'}`}
               aria-label={t('game.exit')}
             >
               ✕{isPerfectRoundPilot ? null : ` ${t('game.exit')}`}
@@ -615,7 +615,7 @@ export function GamePage() {
         // 3 dots hacía creer al usuario que el modo era de 3 rondas (QA round 2
         // ROUND2-003). Reemplazamos por un contador de racha grande y semántico.
         shouldUseStreakFlow ? (
-          <div className="bg-[var(--color-surface-muted)] px-3 py-2 sm:px-4">
+          <div className="bg-[var(--color-surface)] px-3 py-2 sm:px-4">
             <div className="max-w-4xl mx-auto flex items-center justify-center">
               <StreakCombo
                 combo={results.filter((r) => r.isCorrect).length}
@@ -625,7 +625,7 @@ export function GamePage() {
             </div>
           </div>
         ) : (
-          <div className="bg-[var(--color-surface-muted)] px-3 py-1 sm:px-4 sm:py-1.5">
+          <div className="bg-[var(--color-surface)] px-3 py-1 sm:px-4 sm:py-1.5">
             <div className="max-w-4xl mx-auto overflow-x-hidden">
               <ProgressBar
                 current={currentIndex + 1}
@@ -675,7 +675,7 @@ export function GamePage() {
       feedback={
         isPerfectRoundPilot ? (
           showResult ? (
-            <div className="w-full rounded-xl border border-[var(--color-border)]/70 bg-[var(--color-surface-muted)]/60 px-3 py-2 text-left transition-opacity duration-200">
+            <div className="w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 py-2 text-left transition-opacity duration-200">
               <>
                 <div className="flex items-center justify-between gap-3 text-sm font-semibold">
                   {lastAnswerCorrect ? (

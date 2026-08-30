@@ -4,6 +4,7 @@ export { Button } from './Button';
 export { Card as CardAtom } from './Card';
 export { FormLabel } from './FormLabel';
 export { Icon } from './Icon';
+export { GeoMark } from './GeoMark';
 export { Input } from './Input';
 export { LanguageSwitcher } from './LanguageSwitcher';
 export { SectionTitle } from './SectionTitle';

@@ -39,12 +39,12 @@ export const OptionButton = React.memo(function OptionButton({
   // o navegación — los QA rounds 1-3 lo reportaron como "parece pre-seleccionado".
   // Conservamos a11y para teclado (Tab) pero quitamos el ruido visual del click.
   const baseClasses =
-    'option-button-shell pressable w-full min-h-12 rounded-2xl text-left transition-[border-color,background-color,opacity,box-shadow] duration-150 flex items-center gap-2.5 overflow-hidden border px-3 py-2 option-button-base sm:px-3.5 sm:py-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-1 focus-visible:ring-offset-[var(--color-bg-app)]';
+    'option-button-shell pressable w-full min-h-12 rounded-md text-left transition-[border-color,background-color,opacity,transform] duration-150 flex items-center gap-2.5 overflow-hidden border px-3 py-2 option-button-base sm:px-3.5 sm:py-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-1 focus-visible:ring-offset-[var(--color-bg-app)]';
 
   const defaultStateClasses =
-    'bg-[var(--color-surface-muted)] border-[var(--color-border)] text-[var(--color-text-primary)] hover:border-[var(--color-primary-400)] hover:bg-[var(--color-surface)] cursor-pointer';
+    'bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-primary)] hover:border-[var(--color-primary-400)] hover:bg-[var(--color-surface-muted)] cursor-pointer';
   const selectedStateClasses =
-    'bg-primary/10 border-primary text-[var(--color-text-primary)] ring-1 ring-primary/30 shadow-sm shadow-primary/10';
+    'bg-primary/10 border-primary text-[var(--color-text-primary)] ring-1 ring-primary/25';
   const disabledStateClasses =
     'bg-[var(--color-surface-muted)] border-[var(--color-border)] text-[var(--color-text-muted)] cursor-not-allowed';
   const lockedStateClasses =
@@ -52,9 +52,9 @@ export const OptionButton = React.memo(function OptionButton({
   const eliminatedStateClasses =
     'bg-[var(--color-surface-muted)] border-[var(--color-border)] text-[var(--color-text-muted)] cursor-not-allowed opacity-50';
   const correctStateClasses =
-    'bg-green-500/10 border-green-500/80 text-[var(--color-text-primary)] cursor-not-allowed';
+    'bg-success-500/10 border-success-500 text-[var(--color-text-primary)] cursor-not-allowed';
   const wrongStateClasses =
-    'bg-red-500/10 border-red-500/80 text-[var(--color-text-primary)] cursor-not-allowed';
+    'bg-error-500/10 border-error-500 text-[var(--color-text-primary)] cursor-not-allowed';
 
   const getButtonClasses = () => {
     if (showResult) {
@@ -97,9 +97,9 @@ export const OptionButton = React.memo(function OptionButton({
       <span
         className={`option-button-index flex h-7 w-7 shrink-0 rounded-full items-center justify-center self-center font-bold text-xs transition-colors sm:text-sm ${
           showResult && isCorrect
-            ? 'bg-green-500/15 text-green-700 dark:text-green-200'
+            ? 'bg-success-500/15 text-success-600 dark:text-success-500'
             : showResult && selected && !isCorrect
-              ? 'bg-red-500/15 text-red-700 dark:text-red-200'
+              ? 'bg-error-500/15 text-error-600 dark:text-error-500'
             : eliminated
               ? 'bg-[var(--color-border)] text-[var(--color-text-muted)]'
             : selected
@@ -121,9 +121,9 @@ export const OptionButton = React.memo(function OptionButton({
 
       <span className="flex w-[4.75rem] shrink-0 items-center justify-end text-right text-[0.68rem] font-semibold leading-tight" aria-live="polite">
         {showResult && isCorrect ? (
-          <span className="text-green-600 dark:text-green-300">{t('game.correctLabel')}</span>
+          <span className="text-success-600 dark:text-success-500">{t('game.correctLabel')}</span>
         ) : showResult && selected ? (
-          <span className="text-red-600 dark:text-red-300">{t('game.yourAnswer')}</span>
+          <span className="text-error-600 dark:text-error-500">{t('game.yourAnswer')}</span>
         ) : null}
       </span>
     </button>

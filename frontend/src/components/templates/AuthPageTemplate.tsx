@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card } from '../molecules/Card';
-import { Icon } from '../atoms/Icon';
+import { GeoMark } from '../atoms/GeoMark';
 
 type AuthPageTemplateProps = {
   title: string;
@@ -14,7 +14,7 @@ export function AuthPageTemplate({ title, children, footer }: AuthPageTemplatePr
     <div className="mx-auto my-auto w-full max-w-md px-4 py-4 sm:py-6">
       <div className="mb-5 text-center">
         <Link to="/" className="inline-flex flex-col items-center gap-2">
-          <Icon symbol="🌍" className="text-4xl" />
+          <GeoMark className="h-11 w-11 text-primary" />
           <h1 className="text-2xl font-bold text-app-text">
             <span className="text-primary">Geo</span>Challenge
           </h1>

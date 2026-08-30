@@ -18,7 +18,7 @@ export function LobbyJourneyCard({
 
   if (loading) {
     return (
-      <section className="rounded-2xl border border-app-border bg-app-surface p-4">
+      <section className="border-b border-app-border pb-5">
         <div className="h-16 animate-pulse rounded-lg bg-app-border/30" />
       </section>
     );
@@ -26,7 +26,7 @@ export function LobbyJourneyCard({
 
   if (!summary) {
     return (
-      <section className="rounded-2xl border border-app-border bg-app-surface p-4">
+      <section className="border-b border-app-border pb-5">
         <h2 className="text-sm font-semibold text-app-text">
           {t('menu.journey.title')}
         </h2>
@@ -35,7 +35,7 @@ export function LobbyJourneyCard({
         </p>
         <button
           onClick={onContinue}
-          className="mt-3 w-full rounded-lg bg-[var(--color-accent)] py-2 text-sm font-semibold text-white pressable"
+          className="mt-3 w-full rounded-md bg-primary py-3 text-sm font-semibold text-white pressable"
         >
           {t('menu.journey.continue')}
         </button>
@@ -53,7 +53,7 @@ export function LobbyJourneyCard({
 
   if (!hasProgress) {
     return (
-      <section className="rounded-2xl border border-app-border bg-app-surface p-4 text-center">
+      <section className="border-b border-app-border pb-5">
         <h2 className="text-sm font-semibold text-app-text">
           {t('menu.journey.startTitle')}
         </h2>
@@ -65,13 +65,13 @@ export function LobbyJourneyCard({
         </p>
         <button
           onClick={onContinue}
-          className="mt-3 rounded-lg bg-[var(--color-accent)] px-4 py-2 text-sm font-semibold text-white pressable"
+          className="mt-3 rounded-md bg-primary px-4 py-3 text-sm font-semibold text-white pressable"
         >
           {t('menu.journey.startFirst')}
         </button>
         <button
           onClick={onPassport}
-          className="mt-2 ml-3 rounded-lg border border-app-border px-4 py-2 text-xs font-semibold text-app-subtle pressable"
+          className="mt-2 ml-3 rounded-md border border-app-border px-4 py-3 text-xs font-semibold text-app-subtle pressable"
         >
           {t('menu.journey.passport')}
         </button>
@@ -80,7 +80,7 @@ export function LobbyJourneyCard({
   }
 
   return (
-    <section className="rounded-2xl border border-app-border bg-app-surface p-4">
+    <section className="border-b border-app-border pb-5">
       <h2 className="text-sm font-semibold text-app-text">
         {t('menu.journey.title')}
       </h2>
@@ -96,7 +96,7 @@ export function LobbyJourneyCard({
 
       <div className="mt-2 h-2 overflow-hidden rounded-full bg-app-border/40">
         <div
-          className="h-full rounded-full bg-[var(--color-accent)] transition-all"
+          className="h-full rounded-full bg-primary transition-all"
           style={{ width: `${Math.min(coveragePercent, 100)}%` }}
         />
       </div>
@@ -108,13 +108,13 @@ export function LobbyJourneyCard({
       <div className="mt-3 flex gap-2">
         <button
           onClick={onContinue}
-          className="flex-1 rounded-lg bg-[var(--color-accent)] py-2 text-sm font-semibold text-white pressable"
+          className="flex-1 rounded-md bg-primary py-3 text-sm font-semibold text-white pressable"
         >
           {t('menu.journey.continue')}
         </button>
         <button
           onClick={onPassport}
-          className="rounded-lg border border-app-border px-3 py-2 text-xs font-semibold text-app-subtle pressable"
+          className="rounded-md border border-app-border px-3 py-3 text-xs font-semibold text-app-subtle pressable"
         >
           {t('menu.journey.passport')}
         </button>

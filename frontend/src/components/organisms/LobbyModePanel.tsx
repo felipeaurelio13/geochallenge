@@ -35,13 +35,13 @@ interface LobbyModePanelProps {
   onClose: () => void;
 }
 
-const categories: { id: Category; icon: string; labelKey: string; accentClass: string }[] = [
-  { id: 'FLAG', icon: '🏳️', labelKey: 'categories.flags', accentClass: 'border-blue-500/50 bg-blue-500/15 text-blue-400' },
-  { id: 'CAPITAL', icon: '🏛️', labelKey: 'categories.capitals', accentClass: 'border-green-500/50 bg-green-500/15 text-green-400' },
-  { id: 'MAP', icon: '🗺️', labelKey: 'categories.maps', accentClass: 'border-teal-500/50 bg-teal-500/15 text-teal-400' },
-  { id: 'SILHOUETTE', icon: '🖼️', labelKey: 'categories.silhouettes', accentClass: 'border-violet-500/50 bg-violet-500/15 text-violet-400' },
-  { id: 'MONUMENT', icon: '🗿', labelKey: 'categories.monuments', accentClass: 'border-amber-500/50 bg-amber-500/15 text-amber-400' },
-  { id: 'MIXED', icon: '🎲', labelKey: 'categories.mixed', accentClass: 'border-fuchsia-500/50 bg-fuchsia-500/15 text-fuchsia-400' },
+const categories: { id: Category; labelKey: string }[] = [
+  { id: 'FLAG', labelKey: 'categories.flags' },
+  { id: 'CAPITAL', labelKey: 'categories.capitals' },
+  { id: 'MAP', labelKey: 'categories.maps' },
+  { id: 'SILHOUETTE', labelKey: 'categories.silhouettes' },
+  { id: 'MONUMENT', labelKey: 'categories.monuments' },
+  { id: 'MIXED', labelKey: 'categories.mixed' },
 ];
 
 export function LobbyModePanel({
@@ -78,7 +78,7 @@ export function LobbyModePanel({
 
   return (
     <section
-      className="rounded-2xl border border-app-border bg-app-surface p-4"
+      className="border-t border-app-border bg-app-surface px-0 py-4"
       aria-label={isPractice ? t('menu.practice.title') : t('menu.compete.title')}
     >
       <div className="flex items-center justify-between">
@@ -88,7 +88,7 @@ export function LobbyModePanel({
         <button
           type="button"
           onClick={onClose}
-          className="rounded-full p-1 text-app-subtle hover:text-app-text pressable"
+          className="rounded-md p-2 text-app-subtle hover:bg-app-muted hover:text-app-text pressable"
           aria-label={t('common.close')}
         >
           ✕
@@ -107,9 +107,7 @@ export function LobbyModePanel({
         <CategorySelector
           categories={categories.map((cat) => ({
             id: cat.id,
-            icon: cat.icon,
             label: t(cat.labelKey),
-            accentClass: cat.accentClass,
           }))}
           selected={selectedCategory}
           onSelect={(id) => onSelectCategory(id as Category)}
@@ -128,7 +126,7 @@ export function LobbyModePanel({
           <button
             type="button"
             onClick={onClearFilters}
-            className="rounded-full border border-app-border bg-app-surface/80 px-2 py-1.5 text-xs text-app-subtle hover:text-red-400"
+            className="rounded-md border border-app-border bg-app-surface px-2 py-1.5 text-xs text-app-subtle hover:text-error-500"
             title={t('filters.clearActive')}
             aria-label={t('filters.clearActive')}
           >
@@ -138,7 +136,7 @@ export function LobbyModePanel({
       </div>
 
       {!availability?.canPlay && availability?.available != null && (
-        <p className="mt-2 text-xs text-amber-300">
+        <p className="mt-2 text-xs text-warning-500">
           {t('filters.unavailableCombination', {
             required: availability.required,
             available: availability.available,
@@ -156,7 +154,6 @@ export function LobbyModePanel({
           <div className="space-y-2">
             {onPlayClassic && (
               <ModeButtonWithHelp
-                icon="🎯"
                 title={t('menu.practice.classic')}
                 desc={t('menu.practice.classicDesc')}
                 onClick={onPlayClassic}
@@ -166,7 +163,6 @@ export function LobbyModePanel({
             )}
             {onGeoChallenges && (
               <SpecialButton
-                icon="🧠"
                 title={t('menu.special.geoChallenges')}
                 desc={t('menu.special.geoChallengesDesc')}
                 onClick={onGeoChallenges}
@@ -177,7 +173,6 @@ export function LobbyModePanel({
           <div className="space-y-2">
             {onCompetitionHub && (
               <SpecialButton
-                icon="🏆"
                 title={t('menu.compete.competitionHub')}
                 desc={t('menu.compete.competitionHubDesc')}
                 onClick={onCompetitionHub}
@@ -185,7 +180,6 @@ export function LobbyModePanel({
             )}
             {onPlayChallenge && (
               <ModeButtonWithHelp
-                icon="🏁"
                 title={t('menu.compete.challenge')}
                 desc={t('menu.compete.challengeDesc')}
                 onClick={onPlayChallenge}
@@ -217,7 +211,6 @@ export function LobbyModePanel({
               <>
                 {onPlayFlash && (
                   <ModeButtonWithHelp
-                    icon="⚡"
                     title={t('menu.practice.flash')}
                     desc={t('menu.practice.flashDesc')}
                     onClick={onPlayFlash}
@@ -229,7 +222,6 @@ export function LobbyModePanel({
                 )}
                 {onPlayStreak && (
                   <ModeButtonWithHelp
-                    icon="🔥"
                     title={t('menu.practice.streak')}
                     desc={t('menu.practice.streakDesc')}
                     onClick={onPlayStreak}
@@ -239,7 +231,6 @@ export function LobbyModePanel({
                 )}
                 {onFlagMaster && (
                   <SpecialButton
-                    icon="🏴"
                     title={t('menu.special.flagMaster')}
                     desc={t('menu.special.flagMasterDesc')}
                     onClick={onFlagMaster}
@@ -250,7 +241,6 @@ export function LobbyModePanel({
               <>
                 {onPlayDuel && (
                   <ModeButtonWithHelp
-                    icon="⚔️"
                     title={t('menu.compete.duel')}
                     desc={t('menu.compete.duelDesc')}
                     onClick={onPlayDuel}
@@ -260,7 +250,6 @@ export function LobbyModePanel({
                 )}
                 {onPlaySurvival && (
                   <ModeButtonWithHelp
-                    icon="☠️"
                     title={t('menu.compete.survival')}
                     desc={t('menu.compete.survivalDesc')}
                     onClick={onPlaySurvival}
@@ -270,7 +259,6 @@ export function LobbyModePanel({
                 )}
                 {onGeoChallengesDuel && (
                   <SpecialButton
-                    icon="🧠⚔️"
                     title={t('menu.special.geoChallengesDuel')}
                     desc={t('menu.special.geoChallengesDuelDesc')}
                     onClick={onGeoChallengesDuel}
@@ -309,13 +297,12 @@ function FilterButton({
       onClick={onClick}
       aria-label={label}
       aria-haspopup="dialog"
-      className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+        className={`flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium transition-colors ${
         active
           ? 'border-primary/60 bg-primary/15 text-primary'
           : 'border-app-border bg-app-surface/80 text-app-subtle hover:border-app-border hover:text-app-secondary'
       }`}
     >
-      <span aria-hidden="true">🎚️</span>
       <span>{label}</span>
       {!active && <span aria-hidden="true" className="opacity-50">▾</span>}
     </button>
@@ -323,7 +310,6 @@ function FilterButton({
 }
 
 function ModeButtonWithHelp({
-  icon,
   title,
   desc,
   onClick,
@@ -332,7 +318,6 @@ function ModeButtonWithHelp({
   onOpenHelp,
   helpAriaLabel,
 }: {
-  icon: string;
   title: string;
   desc: string;
   onClick: () => void;
@@ -343,9 +328,8 @@ function ModeButtonWithHelp({
 }) {
   if (disabled) {
     return (
-      <div className="relative rounded-xl border border-app-border/50 bg-app-surface/40 px-4 py-3 opacity-60">
+      <div className="relative rounded-md border border-app-border bg-app-muted px-4 py-3 opacity-60">
         <div className="flex items-center gap-3">
-          <span aria-hidden="true" className="text-xl leading-none">{icon}</span>
           <div className="min-w-0 flex-1">
             <div className="text-sm font-semibold text-app-text">{title}</div>
             <div className="text-xs text-app-subtle">{desc}</div>
@@ -363,10 +347,9 @@ function ModeButtonWithHelp({
       <button
         type="button"
         onClick={onClick}
-        className="w-full rounded-xl border border-app-border bg-app-surface/80 px-4 py-3 text-left transition-colors hover:border-primary/60 hover:bg-primary/10 pressable"
+        className="w-full rounded-md border border-app-border bg-app-surface px-4 py-3 text-left transition-colors hover:border-primary/60 hover:bg-primary/10 pressable"
       >
         <div className="flex items-center gap-3">
-          <span aria-hidden="true" className="text-xl leading-none">{icon}</span>
           <div className="min-w-0 flex-1">
             <div className="text-sm font-semibold text-app-text">{title}</div>
             <div className="text-xs text-app-subtle">{desc}</div>
@@ -381,7 +364,7 @@ function ModeButtonWithHelp({
           onOpenHelp();
         }}
         aria-label={helpAriaLabel}
-        className="pressable absolute right-1 top-1 flex min-h-7 min-w-7 items-center justify-center rounded-full border border-app-border bg-app-surface/90 text-xs font-bold text-app-subtle shadow-sm transition-colors hover:border-primary/60 hover:text-primary"
+        className="pressable absolute right-1 top-1 flex min-h-8 min-w-8 items-center justify-center rounded-md border border-app-border bg-app-surface text-xs font-bold text-app-subtle transition-colors hover:border-primary/60 hover:text-primary"
       >
         ?
       </button>
@@ -390,12 +373,10 @@ function ModeButtonWithHelp({
 }
 
 function SpecialButton({
-  icon,
   title,
   desc,
   onClick,
 }: {
-  icon: string;
   title: string;
   desc: string;
   onClick: () => void;
@@ -404,15 +385,14 @@ function SpecialButton({
     <button
       type="button"
       onClick={onClick}
-      className="w-full rounded-xl border border-fuchsia-500/40 bg-fuchsia-500/10 px-4 py-3 text-left transition-colors hover:bg-fuchsia-500/20 pressable"
+      className="w-full rounded-md border border-app-border bg-app-surface px-4 py-3 text-left transition-colors hover:border-primary/60 hover:bg-primary/10 pressable"
     >
       <div className="flex items-center gap-3">
-        <span aria-hidden="true" className="text-xl leading-none">{icon}</span>
         <div className="min-w-0 flex-1">
-          <div className="text-sm font-semibold text-fuchsia-200">{title}</div>
-          <div className="text-xs text-fuchsia-300/80">{desc}</div>
+          <div className="text-sm font-semibold text-app-text">{title}</div>
+          <div className="text-xs text-app-subtle">{desc}</div>
         </div>
-        <span aria-hidden="true" className="text-fuchsia-300/80">→</span>
+        <span aria-hidden="true" className="text-app-subtle">→</span>
       </div>
     </button>
   );

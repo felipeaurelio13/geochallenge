@@ -87,7 +87,7 @@ export function GameRoundScaffold({
           replacementFailed={imageReplacementFailed}
           onRetryImage={onRetryImage}
           onSkipQuestion={onSkipQuestion}
-          minimal={minimalQuestionCard}
+          minimal={minimalQuestionCard || isMapQuestion || hasMediaQuestion}
         />
       </div>
 

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { useLocalStorage } from '../hooks';
 import { useGameFilters } from '../hooks/useGameFilters';
-import { Button, Header, Icon, PageTemplate } from '../components';
+import { Button, Header, PageTemplate } from '../components';
 import { LanguageSwitcher } from '../components/atoms/LanguageSwitcher';
 import { UserAvatar } from '../components/atoms/UserAvatar';
 import { FilterDrawer } from '../components/molecules/FilterDrawer';
@@ -81,15 +81,15 @@ function HowToPlayModal({
             </div>
             <ul className="mt-4 space-y-3 text-sm text-app-secondary">
               <li>
-                <span className="font-semibold text-app-text">🎯 {t('howto.objectiveLabel', 'Objetivo')}: </span>
+                <span className="font-semibold text-app-text">{t('howto.objectiveLabel', 'Objetivo')}: </span>
                 {t(`howto.${mode}.objective`)}
               </li>
               <li>
-                <span className="font-semibold text-app-text">📏 {t('howto.ruleLabel', 'Regla')}: </span>
+                <span className="font-semibold text-app-text">{t('howto.ruleLabel', 'Regla')}: </span>
                 {t(`howto.${mode}.rule`)}
               </li>
               <li>
-                <span className="font-semibold text-app-text">💡 {t('howto.tipLabel', 'Tip')}: </span>
+                <span className="font-semibold text-app-text">{t('howto.tipLabel', 'Tip')}: </span>
                 {t(`howto.${mode}.tip`)}
               </li>
             </ul>
@@ -415,9 +415,7 @@ export function MenuPage() {
                 size="sm"
                 title={t('auth.logout')}
                 aria-label={t('auth.logout')}
-              >
-                <Icon symbol="🚪" />
-              </Button>
+              >{t('auth.logout')}</Button>
             </>
           }
         />
@@ -438,10 +436,8 @@ export function MenuPage() {
 
       {/* Daily Challenge */}
       {user && (
-        <section className="mb-3 rounded-2xl border border-app-border bg-app-surface p-4">
-          <div className="flex items-start gap-3">
-            <span aria-hidden="true" className="shrink-0 text-2xl leading-none">🌍</span>
-            <div className="min-w-0 flex-1">
+        <section className="mb-5 border-y border-app-border py-4">
+          <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <h2 className="text-sm font-semibold text-app-text">
                   {t('menu.daily.title')}
@@ -469,18 +465,16 @@ export function MenuPage() {
                   })}
                   {dailyStatus.dailyStreak > 0 && (
                     <>
-                      {' · '}
-                      🔥 {dailyStatus.dailyStreak}
+                      {' · '}{dailyStatus.dailyStreak}
                     </>
                   )}
                 </p>
               )}
             </div>
-          </div>
           <button
             type="button"
             onClick={handleDailyPlay}
-            className="mt-3 w-full rounded-lg bg-[var(--color-accent)] py-2 text-sm font-semibold text-white pressable"
+            className="mt-3 w-full rounded-md bg-primary py-3 text-sm font-semibold text-white pressable"
           >
             {dailyStatus?.completed
               ? t('menu.daily.viewResult')
@@ -491,16 +485,8 @@ export function MenuPage() {
 
       {/* World Event */}
       {user && eventData && (
-        <section className="mb-3 rounded-2xl border border-app-border bg-app-surface p-4">
-          <div className="flex items-start gap-3">
-            <span aria-hidden="true" className="shrink-0 text-2xl leading-none">
-              {eventData.event.region === 'AFRICA' && '🌍'}
-              {eventData.event.region === 'AMERICAS' && '🌎'}
-              {eventData.event.region === 'ASIA' && '🌏'}
-              {eventData.event.region === 'EUROPE' && '🏰'}
-              {eventData.event.region === 'OCEANIA' && '🏝️'}
-            </span>
-            <div className="min-w-0 flex-1">
+        <section className="mb-5 border-y border-app-border py-4">
+          <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <h2 className="text-sm font-semibold text-app-text">
                   {t('worldEvent.expedition', {
@@ -554,11 +540,10 @@ export function MenuPage() {
                 </p>
               )}
             </div>
-          </div>
           <button
             type="button"
             onClick={handleEventPlay}
-            className="mt-3 w-full rounded-lg bg-[var(--color-accent)] py-2 text-sm font-semibold text-white pressable"
+            className="mt-3 w-full rounded-md bg-primary py-3 text-sm font-semibold text-white pressable"
           >
             {eventData.boss.cleared
               ? t('worldEvent.playAgain')
@@ -580,14 +565,13 @@ export function MenuPage() {
             onClick={() => togglePanel('practice')}
             aria-expanded={practicePanelOpen}
             aria-controls="panel-practice"
-            className={`rounded-xl border p-4 text-left transition-colors pressable ${
+            className={`rounded-md border p-4 text-left transition-colors pressable ${
               practicePanelOpen
                 ? 'border-primary/60 bg-primary/10'
                 : 'border-app-border bg-app-surface hover:border-primary/40 hover:bg-primary/5'
             }`}
           >
-            <span aria-hidden="true" className="text-2xl leading-none">🎯</span>
-            <div className="mt-2 text-sm font-semibold text-app-text">
+            <div className="text-sm font-semibold text-app-text">
               {t('menu.choose.practice')}
             </div>
             <div className="text-xs text-app-subtle">
@@ -600,14 +584,13 @@ export function MenuPage() {
             onClick={() => togglePanel('compete')}
             aria-expanded={competePanelOpen}
             aria-controls="panel-compete"
-            className={`rounded-xl border p-4 text-left transition-colors pressable ${
+            className={`rounded-md border p-4 text-left transition-colors pressable ${
               competePanelOpen
                 ? 'border-primary/60 bg-primary/10'
                 : 'border-app-border bg-app-surface hover:border-primary/40 hover:bg-primary/5'
             }`}
           >
-            <span aria-hidden="true" className="text-2xl leading-none">⚔️</span>
-            <div className="mt-2 text-sm font-semibold text-app-text">
+            <div className="text-sm font-semibold text-app-text">
               {t('menu.choose.compete')}
             </div>
             <div className="text-xs text-app-subtle">
@@ -669,9 +652,8 @@ export function MenuPage() {
         <div className="mt-2 grid grid-cols-2 gap-2">
           <Link
             to="/rankings"
-            className="pressable flex items-center gap-3 rounded-xl border border-app-border bg-app-surface/80 px-4 py-3 text-app-secondary transition-colors hover:border-primary/60 hover:bg-primary/10"
+            className="pressable flex items-center gap-3 rounded-md border border-app-border bg-app-surface px-4 py-3 text-app-secondary transition-colors hover:border-primary/60 hover:bg-primary/10"
           >
-            <span aria-hidden="true" className="text-2xl leading-none">🏆</span>
             <div className="min-w-0 flex-1">
               <div className="text-sm font-semibold text-app-text">{t('menu.more.rankings')}</div>
               <div className="truncate text-xs text-app-subtle">{t('menu.more.rankingsDesc')}</div>
@@ -679,9 +661,8 @@ export function MenuPage() {
           </Link>
           <Link
             to="/profile"
-            className="pressable flex items-center gap-3 rounded-xl border border-app-border bg-app-surface/80 px-4 py-3 text-app-secondary transition-colors hover:border-primary/60 hover:bg-primary/10"
+            className="pressable flex items-center gap-3 rounded-md border border-app-border bg-app-surface px-4 py-3 text-app-secondary transition-colors hover:border-primary/60 hover:bg-primary/10"
           >
-            <span aria-hidden="true" className="text-2xl leading-none">📊</span>
             <div className="min-w-0 flex-1">
               <div className="text-sm font-semibold text-app-text">{t('menu.more.stats')}</div>
               <div className="truncate text-xs text-app-subtle">{t('menu.more.statsDesc')}</div>

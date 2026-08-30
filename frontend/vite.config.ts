@@ -13,13 +13,13 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'prompt',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+      includeAssets: ['geochallenge-mark.svg', 'apple-touch-icon.png'],
       manifest: {
         name: 'GeoChallenge',
         short_name: 'GeoChallenge',
-        description: 'Test your geography knowledge with flags, capitals, maps, and more!',
-        theme_color: '#3B82F6',
-        background_color: '#1F2937',
+        description: 'Juego de geografía con banderas, capitales y mapas.',
+        theme_color: '#0D5144',
+        background_color: '#F4F6F1',
         display: 'standalone',
         orientation: 'portrait-primary',
         categories: ['games', 'education'],

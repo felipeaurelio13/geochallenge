@@ -115,19 +115,6 @@ export function ResultsPage() {
   // así que bypasseamos el cálculo por porcentaje enteramente.
   const streakCount = correctAnswers;
 
-  const getPerformanceEmoji = () => {
-    if (isStreakMode) {
-      if (streakCount >= 10) return '👏';
-      if (streakCount >= 3) return '🔥';
-      return '🌱';
-    }
-    if (percentage >= 90) return '🏆';
-    if (percentage >= 70) return '🎉';
-    if (percentage >= 50) return '👍';
-    if (percentage >= 30) return '🤔';
-    return '💪';
-  };
-
   const getPerformanceMessage = () => {
     if (isStreakMode) {
       if (streakCount >= 10) return t('results.streakLong');
@@ -188,8 +175,10 @@ export function ResultsPage() {
   return (
     <div className="h-full min-h-0 overflow-y-auto bg-[var(--color-bg-app)] px-4 py-5 pt-[calc(env(safe-area-inset-top)+1.25rem)] pb-[calc(env(safe-area-inset-bottom)+1.25rem)] sm:px-6 sm:py-8">
       <main className="mx-auto w-full max-w-xl animate-fade-in" aria-label="results-summary">
-        <section className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 text-center shadow-2xl shadow-black/30 sm:p-8">
-          <div className="text-6xl sm:text-7xl mb-3 animate-scale-in" aria-hidden="true">{getPerformanceEmoji()}</div>
+        <section className="border-b border-[var(--color-border)] pb-6 text-center sm:pb-8">
+          <div className="mb-3 text-5xl font-bold tabular-nums text-primary sm:text-6xl" aria-label={t('results.accuracy')}>
+            {isStreakMode ? streakCount : `${percentage}%`}
+          </div>
 
           {/* Part 5.2: en streak, el titular es la racha misma — no el genérico
               "Partida terminada" + un % que no representa nada útil en este modo. */}
@@ -200,19 +189,19 @@ export function ResultsPage() {
 
           {unlockedAchievements.length > 0 && (
             <div
-              className={`mt-6 rounded-2xl border border-amber-400/40 bg-gradient-to-br from-amber-500/15 to-orange-500/10 p-4 text-left ${
+              className={`mt-6 rounded-lg border border-warning-500/40 bg-warning-500/10 p-4 text-left ${
                 prefersReducedMotion ? '' : 'animate-scale-in'
               }`}
               data-testid="results-achievements"
             >
-              <p className="text-center text-sm font-bold text-amber-300 sm:text-base">
+              <p className="text-center text-sm font-bold text-warning-500 sm:text-base">
                 {t('results.achievementUnlocked')}
               </p>
               <ul className="mt-3 space-y-2">
                 {unlockedAchievements.map((achievement) => (
                   <li
                     key={achievement.key}
-                    className="flex items-center gap-3 rounded-xl border border-amber-400/20 bg-[var(--color-surface)]/70 px-3 py-2"
+                    className="flex items-center gap-3 rounded-md border border-warning-500/30 bg-[var(--color-surface)] px-3 py-2"
                   >
                     <span className="text-2xl" aria-hidden="true">{achievement.icon}</span>
                     <div className="min-w-0">
@@ -227,20 +216,20 @@ export function ResultsPage() {
             </div>
           )}
 
-          <div className="mt-6 rounded-2xl border border-primary/35 bg-[var(--color-surface-muted)] p-5">
+          <div className="mt-6 border-y border-[var(--color-border)] py-5">
             <p className="text-sm font-medium uppercase tracking-wide text-primary/80">{t('game.score')}</p>
             <div className="mt-1 text-5xl font-black text-app-text sm:text-6xl">{score.toLocaleString()}</div>
             <div className="mt-1 text-[var(--color-text-muted)]">{t('results.points')}</div>
           </div>
 
-          <div className="mt-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] p-4 text-left">
+          <div className="mt-6 text-left">
             <div className="mb-2 flex items-center justify-between text-sm text-[var(--color-text-secondary)]">
               <span>{t('results.accuracy')}</span>
               <span className="font-semibold text-app-text">{percentage}%</span>
             </div>
-            <div className="h-2.5 rounded-full bg-[var(--color-surface)] p-0.5" data-testid="results-accuracy-bar">
+            <div className="h-2 rounded-full bg-[var(--color-border)]" data-testid="results-accuracy-bar">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-green-400 via-emerald-400 to-primary transition-all duration-500"
+                className="h-full rounded-full bg-primary transition-all duration-500"
                 style={{ width: `${percentage}%` }}
               />
             </div>
@@ -248,8 +237,8 @@ export function ResultsPage() {
 
           {isStreakMode ? (
             <div className="mt-6 flex justify-center">
-              <article className="min-w-0 w-36 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 text-center sm:p-4">
-                <div className="text-2xl font-bold text-green-400">{correctAnswers}</div>
+              <article className="min-w-0 w-36 border-r border-[var(--color-border)] p-3 text-center sm:p-4">
+                <div className="text-2xl font-bold text-success-500">{correctAnswers}</div>
                 <div className="mt-2 flex justify-center min-w-0">
                   <AnswerStatusBadge
                     status="correct"
@@ -261,8 +250,8 @@ export function ResultsPage() {
             </div>
           ) : (
             <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4">
-              <article className="min-w-0 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 sm:p-4">
-                <div className="text-2xl font-bold text-green-400">{correctAnswers}</div>
+              <article className="min-w-0 border-r border-[var(--color-border)] p-3 sm:p-4">
+                <div className="text-2xl font-bold text-success-500">{correctAnswers}</div>
                 <div className="mt-2 flex justify-center min-w-0">
                   <AnswerStatusBadge
                     status="correct"
@@ -271,8 +260,8 @@ export function ResultsPage() {
                   />
                 </div>
               </article>
-              <article className="min-w-0 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 sm:p-4">
-                <div className="text-2xl font-bold text-red-400">{incorrectAnswers}</div>
+              <article className="min-w-0 p-3 sm:p-4">
+                <div className="text-2xl font-bold text-error-500">{incorrectAnswers}</div>
                 <div className="mt-2 flex justify-center min-w-0">
                   <AnswerStatusBadge
                     status="incorrect"
@@ -285,7 +274,7 @@ export function ResultsPage() {
           )}
 
           {pointsBreakdown.length > 0 && (
-            <div className="mt-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] p-4 text-left">
+            <div className="mt-6 border-t border-[var(--color-border)] pt-4 text-left">
               <div className="mb-2 flex items-center justify-between text-sm text-[var(--color-text-secondary)]">
                 <span>{t('results.pointsBreakdownTitle')}</span>
                 {topPointsSource && <span className="font-semibold text-app-text">{topPointsSource.label}</span>}
@@ -294,7 +283,7 @@ export function ResultsPage() {
                 {pointsBreakdown.map((item) => (
                   <div
                     key={item.key}
-                    className={`flex items-center justify-between rounded-lg border px-3 py-2 text-sm ${
+                    className={`flex items-center justify-between rounded-md border px-3 py-2 text-sm ${
                       topPointsSource?.key === item.key
                         ? 'border-primary/50 bg-primary/10 text-primary'
                         : 'border-[var(--color-border)] bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)]'
@@ -313,18 +302,18 @@ export function ResultsPage() {
               <LoadingSpinner size="sm" />
             </div>
           ) : userRank ? (
-            <div className="mt-6 rounded-xl border border-yellow-700 bg-gradient-to-r from-yellow-900/50 to-orange-900/50 p-4">
-              <div className="text-sm text-yellow-300">{t('results.yourRank')}</div>
-              <div className="text-3xl font-bold text-yellow-400">#{userRank}</div>
+            <div className="mt-6 border-l-2 border-primary pl-4 text-left">
+              <div className="text-sm text-app-secondary">{t('results.yourRank')}</div>
+              <div className="text-3xl font-bold text-app-text">#{userRank}</div>
             </div>
           ) : (
-            <div className="mt-6 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] p-4 text-sm text-[var(--color-text-secondary)]">
+            <div className="mt-6 border-l-2 border-[var(--color-border)] pl-4 text-left text-sm text-[var(--color-text-secondary)]">
               {t('rankings.empty')}
             </div>
           )}
         </section>
 
-        <section className="mt-5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 sm:p-5">
+        <section className="mt-5 border-b border-[var(--color-border)] pb-5 sm:pb-6">
           <p className="text-sm text-[var(--color-text-secondary)]">{t('results.shareScore')}</p>
           <div className="mt-3">
             {isStreakMode ? (
@@ -336,7 +325,7 @@ export function ResultsPage() {
                   size="lg"
                   fullWidth
                 >
-                  📸 {streakShareStatus === 'sharing' ? `${t('common.loading')}...` : t('results.shareStreakButton', 'Compartir mi racha')}
+                  {streakShareStatus === 'sharing' ? `${t('common.loading')}...` : t('results.shareStreakButton', 'Compartir mi racha')}
                 </Button>
                 <p className="mt-2 min-h-5 text-xs text-green-300" aria-live="polite">
                   {streakShareFeedback}
@@ -359,7 +348,7 @@ export function ResultsPage() {
             (breakdown, rank). Ahora va en flujo natural al final de la página,
             la cual ya es scrolleable verticalmente. Mucho más limpio. */}
         <section
-          className="mt-5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+          className="mt-5 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
           data-testid="results-action-tray"
         >
           <div className="flex flex-col gap-2.5">

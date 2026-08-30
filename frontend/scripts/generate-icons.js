@@ -7,7 +7,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const PUBLIC_DIR = path.resolve(__dirname, '..', 'public');
-const SVG_PATH = path.join(PUBLIC_DIR, 'globe.svg');
+const SVG_PATH = path.join(PUBLIC_DIR, 'geochallenge-mark.svg');
 
 const icons = [
   { name: 'pwa-192x192.png', size: 192 },
