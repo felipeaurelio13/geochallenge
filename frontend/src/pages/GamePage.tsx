@@ -16,7 +16,7 @@ import {
 } from '../components';
 import { FullScreenError } from '../components/molecules/FullScreenError';
 import { MonumentAttribution } from '../components/MonumentAttribution';
-import { Category, GameFilters, MechanicUsage, Question, hasActiveFilters } from '../types';
+import { Category, GameFilters, MechanicUsage, Question } from '../types';
 import { GAME_CONSTANTS } from '../constants/game';
 import { useConfirmDialog, useHaptics } from '../hooks';
 import { areMechanicsV2Enabled } from '../config/featureFlags';
@@ -97,11 +97,11 @@ export function GamePage() {
     focusTime: 1,
     streakShield: 0,
   });
-  const [previousScore, setPreviousScore] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imageReplacementFailed, setImageReplacementFailed] = useState(false);
   const [isRetryingImage, setIsRetryingImage] = useState(false);
+  const [previousScore, setPreviousScore] = useState(0);
   const prefersReducedMotion = useUiStore((s) => s.prefersReducedMotion);
   const extendedTimeEnabled = useUiStore((s) => s.extendedTimeEnabled);
   const abandonTrackedRef = useRef(false);
@@ -113,6 +113,9 @@ export function GamePage() {
   const hasSelection = Boolean(selectedAnswer || mapLocation);
   const shouldUseCompactQuestionCard = true;
   const shouldUseStreakFlow = gameType === 'streak';
+  // El piloto se limita deliberadamente a la ruta Single/Mixed. Las demás
+  // composiciones siguen usando el flujo visual que ya tienen en producción.
+  const isPerfectRoundPilot = gameType === 'single' && category === 'MIXED';
   const baseDuration = state.config?.timePerQuestion ?? TIME_PER_QUESTION;
   const roundDuration = applyExtendedTime(
     getQuestionDuration(currentQuestion?.category, baseDuration),
@@ -543,7 +546,7 @@ export function GamePage() {
     </a>
     <GameRoundScaffold
       header={
-        <header className="sticky top-0 z-30 border-b border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 pb-2 pt-3 backdrop-blur sm:px-4 sm:pb-3 sm:pt-4">
+        <header className={`${isPerfectRoundPilot ? 'sticky top-0 z-30 border-b border-[var(--color-border)] bg-[var(--color-bg-app)]/95 px-3 py-1.5 backdrop-blur sm:px-4 sm:py-2' : 'sticky top-0 z-30 border-b border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 pb-2 pt-3 backdrop-blur sm:px-4 sm:pb-3 sm:pt-4'}`}>
           <div className="max-w-4xl mx-auto grid grid-cols-[auto_1fr_auto] items-center gap-2.5 sm:gap-4">
             <button
               onClick={async () => {
@@ -559,36 +562,34 @@ export function GamePage() {
                   navigate('/menu');
                 }
               }}
-              className="pressable min-h-10 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 py-2 text-xs sm:text-sm text-[var(--color-text-secondary)] hover:border-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors"
+              className={`${isPerfectRoundPilot ? 'pressable grid h-11 w-11 place-items-center rounded-xl text-lg text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text-primary)]' : 'pressable min-h-10 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 py-2 text-xs sm:text-sm text-[var(--color-text-secondary)] hover:border-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors'}`}
               aria-label={t('game.exit')}
             >
-              ✕ {t('game.exit')}
+              ✕{isPerfectRoundPilot ? null : ` ${t('game.exit')}`}
             </button>
 
             <div className="text-center">
-              <ScoreDisplay
-                score={score}
-                previousScore={previousScore}
-                showAnimation={showResult}
-                lastResult={results[results.length - 1] ?? null}
-              />
-              {isSubmitting && (
+              {isPerfectRoundPilot ? (
+                <p className="text-sm font-semibold tabular-nums text-[var(--color-text-primary)] sm:text-base">
+                  {currentIndex + 1} / {questions.length}
+                </p>
+              ) : (
+                <>
+                  <ScoreDisplay
+                    score={score}
+                    previousScore={previousScore}
+                    showAnimation={showResult}
+                    lastResult={results[results.length - 1] ?? null}
+                  />
+                  {isSubmitting && (
                 <p
                   className={`mt-0.5 text-xs text-[var(--color-text-muted)] ${prefersReducedMotion ? '' : 'animate-pulse'}`}
                   aria-live="polite"
                 >
                   {t('game.validating')}
                 </p>
-              )}
-              {hasActiveFilters(gameFilters) && (
-                <p className="mt-0.5 text-xs text-[var(--color-text-muted)]">
-                  {[
-                    gameFilters.continent && t(`filters.continents.${gameFilters.continent.replace(' ', '_')}`),
-                    gameFilters.isInsular && t('filters.insular'),
-                    gameFilters.isLandlocked && t('filters.landlocked'),
-                    gameFilters.difficulty && t(`filters.difficulties.${gameFilters.difficulty}`),
-                  ].filter(Boolean).join(' · ')}
-                </p>
+                  )}
+                </>
               )}
             </div>
 
@@ -602,12 +603,13 @@ export function GamePage() {
                 }}
                 onComplete={handleTimeComplete}
                 isActive={!showResult && !imageReplacementFailed && status === 'playing'}
+                compact={isPerfectRoundPilot}
               />
             </div>
           </div>
         </header>
       }
-      progress={
+      progress={isPerfectRoundPilot ? undefined : (
         // En modo streak, la cantidad de preguntas que llegan del backend es un
         // batch corto (3) que se rellena al ir respondiendo. La ProgressBar de
         // 3 dots hacía creer al usuario que el modo era de 3 rondas (QA round 2
@@ -634,11 +636,12 @@ export function GamePage() {
             </div>
           </div>
         )
-      }
+      )}
       question={currentQuestion}
       questionNumber={currentIndex + 1}
       totalQuestions={questions.length}
       compactQuestionCard={shouldUseCompactQuestionCard}
+      minimalQuestionCard={isPerfectRoundPilot}
       isMapQuestion={Boolean(isMapQuestion)}
       mapContent={
         <MapInteractive
@@ -669,33 +672,56 @@ export function GamePage() {
       imageReplacementFailed={imageReplacementFailed}
       onRetryImage={handleRetryImage}
       onSkipQuestion={handleSkipQuestion}
+      feedback={
+        isPerfectRoundPilot ? (
+          showResult ? (
+            <div className="w-full rounded-xl border border-[var(--color-border)]/70 bg-[var(--color-surface-muted)]/60 px-3 py-2 text-left transition-opacity duration-200">
+              <>
+                <div className="flex items-center justify-between gap-3 text-sm font-semibold">
+                  {lastAnswerCorrect ? (
+                    <span className="text-green-600 dark:text-green-300">✓ {t('game.correctLabel')}</span>
+                  ) : (
+                    <span className="text-red-600 dark:text-red-300">✕ {t('game.itWas', { answer: results[results.length - 1]?.correctAnswer })}</span>
+                  )}
+                  {lastAnswerCorrect && results[results.length - 1]?.points ? (
+                    <span className="shrink-0 tabular-nums text-[var(--color-text-primary)]">+{results[results.length - 1]?.points}</span>
+                  ) : null}
+                </div>
+                {funFact ? <p className="mt-1 text-xs leading-snug text-[var(--color-text-secondary)]">{funFact}</p> : null}
+              </>
+            </div>
+          ) : null
+        ) : undefined
+      }
       actionTray={
         <RoundActionTray
           mode="single"
           showResult={showResult}
           canSubmit={hasSelection}
           isSubmitting={isSubmitting}
+          stableAction={isPerfectRoundPilot}
+          validatingLabel={t('game.validating')}
           submitLabel={t('game.submit')}
           nextLabel={streakGameOver ? t('game.seeResults') : shouldUseStreakFlow ? t('game.next') : isLastQuestion ? t('game.seeResults') : t('game.next')}
           resultLabel={lastAnswerCorrect ? t('game.correct') : t('game.incorrect')}
-          resultHint={
+          resultHint={isPerfectRoundPilot ? undefined : (
             streakGameOver
               ? (t('game.streakBroken', { count: results.filter((r) => r.isCorrect).length }) as string)
               : (funFact ?? undefined)
-          }
-          resultAttribution={
+          )}
+          resultAttribution={isPerfectRoundPilot ? undefined : (
             currentQuestion && currentQuestion.category === 'MONUMENT'
               ? <MonumentAttribution question={currentQuestion} />
               : undefined
-          }
+          )}
           selectionAssistiveText={hasSelection && !showResult ? t('game.selectionReadyShortHint') : undefined}
-          showResultBadge
+          showResultBadge={!isPerfectRoundPilot}
           isCorrect={lastAnswerCorrect}
           correctAnswer={showResult && !lastAnswerCorrect ? results[results.length - 1]?.correctAnswer : undefined}
           onSubmit={handleSubmitAnswer}
           onNext={handleNextQuestion}
           summarySlot={
-            mechanicsRuntimeEnabled && !showResult ? (
+            !isPerfectRoundPilot && mechanicsRuntimeEnabled && !showResult ? (
               <MechanicsHud
                 available={mechanicsAvailable}
                 disabled={false}

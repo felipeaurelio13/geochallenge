@@ -24,6 +24,9 @@ type RoundActionTrayProps = {
   /** Atribución opcional (e.g. crédito de imagen) mostrada solo en showResult. */
   resultAttribution?: ReactNode;
   summarySlot?: ReactNode;
+  /** Single/Mixed piloto: una única acción con geometría constante. */
+  stableAction?: boolean;
+  validatingLabel?: string;
 };
 
 const CONTAINER_CLASS =
@@ -49,12 +52,42 @@ export function RoundActionTray({
   resultHint,
   resultAttribution,
   summarySlot,
+  stableAction = false,
+  validatingLabel,
 }: RoundActionTrayProps) {
   const { t } = useTranslation();
   const wrapperClassName =
     mode === 'challenge'
       ? 'mx-auto flex w-full max-w-4xl flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between'
       : 'mx-auto flex w-full max-w-4xl flex-col gap-1 rounded-2xl border border-[var(--color-border)]/50 bg-[var(--color-surface-muted)]/85 p-[clamp(0.35rem,1.1dvh,0.5rem)] shadow-lg sm:flex-row sm:items-center sm:justify-between';
+
+  if (stableAction) {
+    const actionLabel = isSubmitting
+      ? validatingLabel ?? waitingLabel ?? submitLabel
+      : showResult
+        ? nextLabel ?? submitLabel
+        : submitLabel;
+    const handleAction = showResult ? onNext : onSubmit;
+
+    return (
+      <div className={CONTAINER_CLASS} data-testid="mobile-action-tray">
+        <div className="mx-auto w-full max-w-4xl rounded-2xl border border-[var(--color-border)]/50 bg-[var(--color-surface-muted)]/85 p-[clamp(0.35rem,1.1dvh,0.5rem)] shadow-sm">
+          <button
+            type="button"
+            onClick={handleAction}
+            disabled={isSubmitting || (!showResult && !canSubmit)}
+            className="w-full min-h-12 rounded-xl border border-primary/50 bg-primary px-6 py-2 text-sm font-bold text-white shadow-sm shadow-primary/20 transition-colors duration-150 hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:cursor-not-allowed disabled:border-[var(--color-border)] disabled:bg-[var(--color-surface-muted)] disabled:text-[var(--color-text-muted)] disabled:shadow-none disabled:opacity-70 sm:text-base"
+            aria-live="polite"
+          >
+            {actionLabel}
+          </button>
+          {selectionAssistiveText && canSubmit && !showResult && !isSubmitting && (
+            <p className="sr-only" aria-live="polite">{selectionAssistiveText}</p>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={CONTAINER_CLASS} data-testid="mobile-action-tray">

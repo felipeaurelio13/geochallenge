@@ -77,7 +77,7 @@ describe('OptionButton', () => {
     expect(optionText.className).not.toContain('truncate');
   });
 
-  it('mantiene fondo sólido en locked/correct/wrong sin opacity ni transparency', () => {
+  it('atenúa alternativas no elegidas y conserva feedback textual además del color', () => {
     const { rerender } = render(
       <OptionButton
         option="Perú"
@@ -93,8 +93,7 @@ describe('OptionButton', () => {
     const button = screen.getByRole('button');
     expect(button).toHaveAttribute('data-state', 'locked');
     expect(button.className).toContain('bg-[var(--color-surface-muted)]');
-    expect(button.className).not.toContain('opacity');
-    expect(button.className).not.toContain('transparent');
+    expect(button.className).toContain('opacity-60');
 
     rerender(
       <OptionButton
@@ -108,6 +107,7 @@ describe('OptionButton', () => {
       />
     );
     expect(screen.getByRole('button')).toHaveAttribute('data-state', 'wrong');
+    expect(screen.getByText('game.yourAnswer')).toBeInTheDocument();
 
     rerender(
       <OptionButton
@@ -121,6 +121,7 @@ describe('OptionButton', () => {
       />
     );
     expect(screen.getByRole('button')).toHaveAttribute('data-state', 'correct');
+    expect(screen.getByText('game.correctLabel')).toBeInTheDocument();
   });
 
   it('mantiene clases estructurales y padding/altura base en default, selected y showResult', () => {

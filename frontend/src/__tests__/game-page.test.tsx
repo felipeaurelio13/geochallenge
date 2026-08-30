@@ -184,11 +184,12 @@ describe('GamePage ending flow', () => {
     expect(optionsGrid).not.toHaveClass('sm:grid-cols-2');
   });
 
-  it('elimina la barra textual de pregunta para ganar espacio vertical', () => {
+  it('usa el contador compacto en header y elimina progreso redundante en Single/Mixed', () => {
     render(<GamePage />);
 
     expect(screen.queryByText('game.questionOf')).not.toBeInTheDocument();
-    expect(screen.getByText('progress')).toBeInTheDocument();
+    expect(screen.queryByText('progress')).not.toBeInTheDocument();
+    expect(screen.getByText('1 / 1')).toBeInTheDocument();
   });
 
   it('mantiene bandeja de acciones fija en mobile con espacio inferior seguro', () => {
@@ -209,7 +210,7 @@ describe('GamePage ending flow', () => {
     const header = container.querySelector('header');
     const timerWrapper = screen.getByText('timer').parentElement;
 
-    expect(header).toHaveClass('pt-3');
+    expect(header).toHaveClass('py-1.5');
     expect(timerWrapper).toHaveClass('pr-[max(env(safe-area-inset-right),0.5rem)]');
   });
 

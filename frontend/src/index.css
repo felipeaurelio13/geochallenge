@@ -253,6 +253,22 @@
     width: 100%;
   }
 
+  .question-card--minimal {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+  }
+
+  .perfect-round-content {
+    gap: clamp(var(--space-1), 1dvh, var(--space-2));
+  }
+
+  .perfect-round-feedback {
+    min-height: clamp(3.75rem, 9dvh, 5.25rem);
+    display: flex;
+    align-items: center;
+  }
+
   .media-box {
     width: 100%;
     aspect-ratio: 16 / 9;

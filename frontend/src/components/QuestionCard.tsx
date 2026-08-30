@@ -20,6 +20,7 @@ interface QuestionCardProps {
   replacementFailed?: boolean;
   onRetryImage?: () => void;
   onSkipQuestion?: () => void;
+  minimal?: boolean;
 }
 
 export function QuestionCard({
@@ -31,6 +32,7 @@ export function QuestionCard({
   replacementFailed = false,
   onRetryImage,
   onSkipQuestion,
+  minimal = false,
 }: QuestionCardProps) {
   const { t, i18n } = useTranslation();
 
@@ -123,7 +125,7 @@ export function QuestionCard({
   return (
     <div
       aria-label={t('game.questionOf', { current: questionNumber, total: totalQuestions })}
-      className={`question-card rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface-muted)]/95 shadow-xl shadow-black/25 ${compact ? 'px-4 py-2 sm:px-5 sm:py-3' : 'px-4 py-4 sm:px-6 sm:py-6'} ${isCompactMediaMode ? 'question-card--with-media' : ''}`}
+      className={`question-card ${minimal ? 'question-card--minimal px-1 py-1 sm:px-2 sm:py-2' : `rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface-muted)]/95 shadow-xl shadow-black/25 ${compact ? 'px-4 py-2 sm:px-5 sm:py-3' : 'px-4 py-4 sm:px-6 sm:py-6'}`} ${isCompactMediaMode ? 'question-card--with-media' : ''}`}
     >
       <div className="text-center">
         {showQuestionImage && (
@@ -145,7 +147,7 @@ export function QuestionCard({
                 onError={handleImageError}
               />
 
-              {(question.category === 'FLAG' || question.category === 'MONUMENT') && question.difficulty && (
+              {!minimal && (question.category === 'FLAG' || question.category === 'MONUMENT') && question.difficulty && (
                 <span
                   className={`absolute right-2 top-2 inline-block rounded-full px-2 py-0.5 text-[0.62rem] font-semibold sm:text-[0.68rem] ${getDifficultyClass()}`}
                 >
@@ -219,7 +221,7 @@ export function QuestionCard({
         <div className={`flex ${compact ? 'flex-row items-start justify-center gap-1.5 text-left' : 'flex-col items-center'} ${question.category === 'CAPITAL' ? 'w-full justify-center text-center' : ''}`}>
           <h2 className={headingClassName}>{getQuestionText()}</h2>
 
-          {question.difficulty && question.category !== 'FLAG' && question.category !== 'MONUMENT' && (
+          {!minimal && question.difficulty && question.category !== 'FLAG' && question.category !== 'MONUMENT' && (
             <div className={compact ? 'mt-0.5 shrink-0' : 'mt-5'}>
               <span className={`inline-block rounded-full ${compact ? 'px-2.5 py-0.5 text-[0.65rem] sm:text-xs' : 'px-3.5 py-1 text-xs sm:text-sm'} font-semibold ${getDifficultyClass()}`}>
                 {t(getDifficultyKey())}

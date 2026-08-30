@@ -12,15 +12,16 @@ interface TimerProps {
   onTick: (time: number) => void;
   onComplete: () => void;
   isActive: boolean;
+  compact?: boolean;
 }
 
 export function getTimerColorToken(percentage: number): string {
-  if (percentage > 50) return 'var(--color-success-500)';
-  if (percentage > 25) return 'var(--color-warning-500)';
+  if (percentage > 30) return 'var(--color-primary-500)';
+  if (percentage > 10) return 'var(--color-warning-500)';
   return 'var(--color-error-500)';
 }
 
-export function Timer({ duration, timeRemaining, onTick, onComplete, isActive }: TimerProps) {
+export function Timer({ duration, timeRemaining, onTick, onComplete, isActive, compact = false }: TimerProps) {
   const { t } = useTranslation();
   const prefersReducedMotion = useUiStore((state) => state.prefersReducedMotion);
   const intervalRef = useRef<number | null>(null);
@@ -28,6 +29,7 @@ export function Timer({ duration, timeRemaining, onTick, onComplete, isActive }:
   const onTickRef = useRef(onTick);
   const onCompleteRef = useRef(onComplete);
   const hasAnnouncedHurryRef = useRef(false);
+  const hasTriggeredWarningHapticRef = useRef(false);
   const prevTimeRemainingRef = useRef(timeRemaining);
   const [hurryAnnouncement, setHurryAnnouncement] = useState('');
 
@@ -67,8 +69,9 @@ export function Timer({ duration, timeRemaining, onTick, onComplete, isActive }:
 
   useEffect(() => {
     if (!isActive) return;
-    if (prefersReducedMotion) return;
-    if (timeRemaining > 0 && timeRemaining <= URGENCY_THRESHOLD_SECONDS) {
+    if (prefersReducedMotion || hasTriggeredWarningHapticRef.current) return;
+    if (timeRemaining > 0 && timeRemaining <= HURRY_ANNOUNCE_THRESHOLD_SECONDS) {
+      hasTriggeredWarningHapticRef.current = true;
       triggerHaptic('urgency');
     }
   }, [timeRemaining, isActive, prefersReducedMotion]);
@@ -79,6 +82,7 @@ export function Timer({ duration, timeRemaining, onTick, onComplete, isActive }:
   useEffect(() => {
     if (timeRemaining > prevTimeRemainingRef.current) {
       hasAnnouncedHurryRef.current = false;
+      hasTriggeredWarningHapticRef.current = false;
     }
     prevTimeRemainingRef.current = timeRemaining;
 
@@ -101,12 +105,12 @@ export function Timer({ duration, timeRemaining, onTick, onComplete, isActive }:
 
   return (
     <div
-      className={`relative h-14 w-14 sm:h-16 sm:w-16 md:h-20 md:w-20 ${isUrgent && !prefersReducedMotion ? 'timer-urgent' : ''}`}
+      className={`relative ${compact ? 'h-11 w-11 sm:h-12 sm:w-12' : 'h-14 w-14 sm:h-16 sm:w-16 md:h-20 md:w-20'} ${isUrgent && !prefersReducedMotion ? 'timer-urgent' : ''}`}
       role="timer"
       aria-live="off"
       aria-label={t('game.timeRemaining', { seconds: Math.max(0, timeRemaining) })}
     >
-      <svg className="h-14 w-14 -rotate-90 transform sm:h-16 sm:w-16 md:h-20 md:w-20" viewBox="0 0 100 100">
+      <svg className={`${compact ? 'h-11 w-11 sm:h-12 sm:w-12' : 'h-14 w-14 sm:h-16 sm:w-16 md:h-20 md:w-20'} -rotate-90 transform`} viewBox="0 0 100 100">
         <circle cx="50" cy="50" r="45" fill="none" className="timer-ring-bg" strokeWidth="8" />
         <circle
           cx="50"
@@ -123,10 +127,10 @@ export function Timer({ duration, timeRemaining, onTick, onComplete, isActive }:
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">
         <span
-          className={`text-lg font-bold sm:text-xl md:text-2xl ${prefersReducedMotion ? '' : 'transition-colors duration-300'}`}
+          className={`${compact ? 'text-sm sm:text-base' : 'text-lg sm:text-xl md:text-2xl'} font-bold ${prefersReducedMotion ? '' : 'transition-colors duration-300'}`}
           style={{ color: timerColor }}
         >
-          {Math.max(0, timeRemaining)}s
+          {Math.max(0, timeRemaining)}{compact ? '' : 's'}
         </span>
       </div>
       <span className="sr-only" aria-live="polite">
