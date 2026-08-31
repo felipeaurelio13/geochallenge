@@ -277,11 +277,11 @@ describe('WorldEventPage', () => {
     // Score and hits come from the server state
     expect(screen.getByText('Score: 200 | Golpes: 2 / 7')).toBeInTheDocument();
 
-    // Boss hearts reflect hits from server (2 hits landed → 5 remaining)
-    const hearts = screen.getAllByText('❤️');
-    expect(hearts).toHaveLength(7);
-    hearts.slice(0, 5).forEach((h) => expect(h.className).toContain('opacity-100'));
-    hearts.slice(5).forEach((h) => expect(h.className).toContain('opacity-30'));
+    // Server state is represented by seven accessible progress segments.
+    const lives = screen.getAllByTestId('boss-hp');
+    expect(lives).toHaveLength(7);
+    expect(lives.slice(0, 5).every((segment) => segment.getAttribute('aria-label') === 'Vida disponible')).toBe(true);
+    expect(lives.slice(5).every((segment) => segment.getAttribute('aria-label') === 'Vida perdida')).toBe(true);
   });
 
   it('initializes the Timer from server timeRemainingMs (resume keeps remaining time)', async () => {

@@ -24,7 +24,7 @@ export function InstallPromptBanner() {
       aria-label={t('install.title', 'Instala la app')}
       className="fixed inset-x-0 bottom-0 z-40 px-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pointer-events-none"
     >
-      <div className="pointer-events-auto mx-auto max-w-md rounded-2xl border border-app-border bg-app-surface/95 p-3 shadow-2xl shadow-black/50 backdrop-blur">
+      <div className="pointer-events-auto mx-auto max-w-md rounded-lg border border-app-border bg-app-surface p-3 shadow-sm">
         <div className="flex items-start gap-3">
           <div className="text-2xl" aria-hidden="true">📲</div>
           <div className="flex-1 min-w-0">

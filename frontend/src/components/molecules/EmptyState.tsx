@@ -1,4 +1,5 @@
 import React from 'react';
+import { GeoMark } from '../atoms/GeoMark';
 
 interface EmptyStateProps {
   emoji?: string;
@@ -13,7 +14,7 @@ interface EmptyStateProps {
 export function EmptyState({ emoji = '📭', message, action, className = '' }: EmptyStateProps) {
   return (
     <div className={`flex flex-1 min-h-[40vh] flex-col items-center justify-center text-center py-10 px-4 ${className}`}>
-      {emoji && <div className="text-5xl mb-4 opacity-90">{emoji}</div>}
+      {emoji && <GeoMark className="mb-4 h-12 w-12 text-primary opacity-70" />}
       <p className="text-app-subtle mb-5 max-w-sm">{message}</p>
       {action}
     </div>

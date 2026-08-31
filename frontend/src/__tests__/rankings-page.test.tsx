@@ -93,16 +93,16 @@ describe('RankingsPage', () => {
 
     const { container } = render(<RankingsPage />);
 
-    expect(await screen.findByText('🥇')).toBeInTheDocument();
+    expect(await screen.findByText('#1')).toBeInTheDocument();
     await waitFor(() => {
       expect(mocks.getLeaderboardMock).toHaveBeenCalledTimes(1);
     });
     expect(mocks.getLeaderboardMock).toHaveBeenCalledWith(50, 'global');
-    expect(screen.getByText('🥈')).toBeInTheDocument();
+    expect(screen.queryByText('🥈')).not.toBeInTheDocument();
     expect(screen.getByText('(Tú)')).toBeInTheDocument();
 
     expect(container.firstChild).toHaveClass('h-full', 'min-h-0', 'bg-[var(--color-bg-app)]');
-    expect(container.querySelector('header')).toHaveClass('bg-[var(--color-surface-muted)]', 'border-b', 'border-[var(--color-border)]');
+    expect(container.querySelector('header')).toHaveClass('bg-[var(--color-surface)]', 'border-b', 'border-[var(--color-border)]');
 
     const search = screen.getByLabelText('Buscar');
     expect(search).toHaveClass('bg-[var(--color-surface-muted)]', 'text-[var(--color-text-primary)]', 'placeholder-[var(--color-text-muted)]');
@@ -161,7 +161,7 @@ describe('RankingsPage', () => {
 
     render(<RankingsPage />);
 
-    expect(await screen.findByText('🥇')).toBeInTheDocument();
+    expect(await screen.findByText('#1')).toBeInTheDocument();
     expect(mocks.getLeaderboardMock).toHaveBeenCalledWith(50, 'global');
 
     const seasonTab = screen.getByRole('tab', { name: /Mes/ });
@@ -282,7 +282,7 @@ describe('RankingsPage', () => {
     await waitFor(() => {
       expect(mocks.getLeaderboardMock.mock.calls.length).toBeGreaterThan(callsBeforeRetry);
     });
-    expect(await screen.findByText('🥇')).toBeInTheDocument();
+    expect(await screen.findByText('#1')).toBeInTheDocument();
   });
 
 });

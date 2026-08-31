@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Button, Header, PageTemplate } from '../components';
+import { Button, GeoIcon, Header, PageTemplate } from '../components';
 import { api } from '../services/api';
 import type {
   CompetitiveLadder,
@@ -65,7 +65,7 @@ export function CompetitionPage() {
             <button
               type="button"
               onClick={() => navigate('/menu')}
-              className="rounded-lg border border-app-border bg-app-surface px-3 py-2 text-sm font-semibold text-app-secondary hover:text-app-text"
+              className="rounded-md border border-app-border bg-app-surface px-3 py-2 text-sm font-semibold text-app-secondary hover:text-app-text"
             >
               {t('common.back')}
             </button>
@@ -215,7 +215,7 @@ function LadderCard({
           <h3 className="text-sm font-black text-app-text">{t(`competition.ladders.${ladder}`)}</h3>
           <p className="mt-1 text-xs text-app-subtle">{t(`competition.ladderDesc.${ladder}`)}</p>
         </div>
-        <span className="text-2xl" aria-hidden="true">🏆</span>
+        <GeoIcon name="rank" className="h-7 w-7 text-primary" />
       </div>
       <div className="mt-4">
         <p className="text-3xl font-black text-app-text">{loading ? '...' : formatRating(data.rating)}</p>

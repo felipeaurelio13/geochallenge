@@ -10,6 +10,8 @@ import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ShareButton } from '../components/ShareButton';
 import { FullScreenError } from '../components/molecules/FullScreenError';
 import { PageTemplate } from '../components/templates/PageTemplate';
+import { GeoIcon } from '../components/atoms/GeoIcon';
+import { GeoMark } from '../components/atoms/GeoMark';
 import { useConfirmDialog } from '../hooks/useConfirmDialog';
 import { api } from '../services/api';
 import { trackUxEvent } from '../utils/uxTelemetry';
@@ -42,30 +44,28 @@ interface RecordedAnswer {
   multiplier: number;
 }
 
-// Cada tier necesita texto VISIBLE tanto en light como dark mode. Los tiers
-// 2-5 ya usaban colores saturados (sky/amber/orange/red) que funcionan; tier 1
-// usaba slate-300 que en light mode desaparece. Subimos contraste de todos a
-// tonos 700/100 que pasan AA en ambos temas.
+// Los tiers comunican dificultad mediante texto y multiplicador: no requieren
+// una paleta competidora. Usan la misma escala semántica en ambos temas.
 const TIER_ACCENTS: Record<number, { defaultLabel: string; chip: string }> = {
   1: {
     defaultLabel: 'Calentamiento',
-    chip: 'bg-slate-200 text-slate-700 border-slate-400 dark:bg-slate-700/40 dark:text-slate-100 dark:border-slate-500/60',
+    chip: 'bg-app-muted text-app-secondary border-app-border',
   },
   2: {
     defaultLabel: 'Sin color',
-    chip: 'bg-sky-100 text-sky-800 border-sky-400 dark:bg-sky-500/20 dark:text-sky-100 dark:border-sky-500/60',
+    chip: 'bg-app-muted text-app-secondary border-app-border',
   },
   3: {
     defaultLabel: 'Zoom',
-    chip: 'bg-amber-100 text-amber-800 border-amber-400 dark:bg-amber-500/20 dark:text-amber-100 dark:border-amber-500/60',
+    chip: 'bg-primary/10 text-primary border-primary/30',
   },
   4: {
     defaultLabel: 'Trampa',
-    chip: 'bg-orange-100 text-orange-800 border-orange-400 dark:bg-orange-500/20 dark:text-orange-100 dark:border-orange-500/60',
+    chip: 'bg-primary/10 text-primary border-primary/30',
   },
   5: {
     defaultLabel: 'Final',
-    chip: 'bg-red-100 text-red-800 border-red-400 dark:bg-red-500/20 dark:text-red-100 dark:border-red-500/60',
+    chip: 'bg-warning-500/10 text-warning-500 border-warning-500/30',
   },
 };
 
@@ -283,7 +283,6 @@ export function FlagMasterPage() {
   if (status === 'error') {
     return (
       <FullScreenError
-        emoji="🏳️"
         title={t('flagMaster.errorTitle', 'No se pudo iniciar Flag Master')}
         message={errorMessage ?? ''}
         onRetry={() => window.location.reload()}
@@ -327,17 +326,17 @@ export function FlagMasterPage() {
                 navigate('/menu');
               }
             }}
-            className="rounded-full border border-app-border bg-app-surface/80 px-3 py-1.5 text-xs text-app-subtle hover:text-red-400"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md border border-app-border bg-app-surface text-app-subtle hover:text-error-500"
             aria-label={t('flagMaster.exit', 'Salir')}
           >
-            ✕
+            <GeoIcon name="close" size={18} />
           </button>
           <div className="flex flex-1 items-center justify-center gap-2 text-xs text-app-subtle">
             <span className="font-mono">
               {roundIndex + 1} / {rounds.length}
             </span>
           </div>
-          <div className="rounded-full border border-app-border bg-app-surface/80 px-3 py-1.5 text-xs font-bold text-app-text tabular-nums">
+          <div className="rounded-md border border-app-border bg-app-surface px-3 py-1.5 text-xs font-bold text-app-text tabular-nums">
             ≈ {accumulatedScore}
           </div>
         </div>
@@ -441,16 +440,6 @@ function FlagMasterResults({ result, onPlayAgain }: ResultsProps) {
   const { t } = useTranslation();
   const byTier = useMemo(() => groupByTier(result.rounds), [result.rounds]);
 
-  // Emoji y mensaje según rendimiento — alineado con ResultsPage (Single/Streak)
-  // para que las pantallas de fin se sientan parte de la misma app.
-  const performanceEmoji = (() => {
-    if (result.accuracy >= 90) return '🏆';
-    if (result.accuracy >= 70) return '🎉';
-    if (result.accuracy >= 50) return '🏴';
-    if (result.accuracy >= 30) return '🤔';
-    return '💪';
-  })();
-
   const shareText = t('flagMaster.shareText', {
     score: result.totalScore,
     correct: result.correctCount,
@@ -462,10 +451,8 @@ function FlagMasterResults({ result, onPlayAgain }: ResultsProps) {
   return (
     <PageTemplate contentClassName="pb-6">
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-3 py-4 sm:px-4">
-        {/* Header: emoji + h1 + perf message + score card (alineado con
-            ResultsPage para coherencia entre modos). */}
-        <section className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 text-center shadow-2xl shadow-black/30 sm:p-6">
-          <div className="text-6xl mb-3 animate-scale-in" aria-hidden="true">{performanceEmoji}</div>
+        <section className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-5 text-center sm:p-6">
+          <div className="mb-3 flex justify-center" aria-hidden="true"><GeoMark className="h-12 w-12 text-primary" /></div>
           <h1 className="text-3xl font-bold text-[var(--color-text-primary)] sm:text-4xl">
             {t('flagMaster.summaryTitle', 'Flag Master')}
           </h1>
@@ -473,7 +460,7 @@ function FlagMasterResults({ result, onPlayAgain }: ResultsProps) {
             {result.correctCount} / {result.totalQuestions} {t('flagMaster.correctSuffix', 'correctas')} · {result.accuracy}%
           </p>
 
-          <div className="mt-5 rounded-2xl border border-primary/35 bg-[var(--color-surface-muted)] p-5">
+          <div className="mt-5 rounded-lg border border-primary/35 bg-[var(--color-surface-muted)] p-5">
             <p className="text-sm font-medium uppercase tracking-wide text-primary/80">{t('game.score', 'Puntuación')}</p>
             <div className="mt-1 text-5xl font-black text-app-text sm:text-6xl tabular-nums">
               {result.totalScore.toLocaleString()}
@@ -482,18 +469,18 @@ function FlagMasterResults({ result, onPlayAgain }: ResultsProps) {
           </div>
 
           {result.isHighScore && (
-            <p className="mt-4 inline-block rounded-full bg-amber-500/15 border border-amber-500/40 px-3 py-1 text-xs font-semibold text-amber-300">
-              🏆 {t('flagMaster.newHighScore', '¡Nuevo récord personal!')}
+            <p className="mt-4 inline-flex items-center gap-1.5 rounded-md border border-warning-500/40 bg-warning-500/10 px-3 py-2 text-xs font-semibold text-warning-500">
+              <GeoIcon name="rank" size={14} /> {t('flagMaster.newHighScore', '¡Nuevo récord personal!')}
             </p>
           )}
           {result.degraded && (
-            <p className="mt-2 text-xs text-amber-300/80">
-              ⚠️ {result.message || t('flagMaster.degraded', 'Score verificado parcialmente (caché caída).')}
+            <p className="mt-2 text-xs text-warning-500">
+              {result.message || t('flagMaster.degraded', 'Score verificado parcialmente (caché caída).')}
             </p>
           )}
         </section>
 
-        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-muted)]/80 p-3 sm:p-4">
+        <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-muted)] p-3 sm:p-4">
           <h2 className="mb-2 text-sm font-bold text-app-text">
             {t('flagMaster.breakdownTitle', 'Desglose por tier')}
           </h2>
@@ -506,10 +493,10 @@ function FlagMasterResults({ result, onPlayAgain }: ResultsProps) {
               return (
                 <div
                   key={tier}
-                  className="flex items-center gap-3 rounded-xl border border-app-border bg-app-surface/60 p-2.5"
+                  className="flex items-center gap-3 rounded-md border border-app-border bg-app-surface p-2.5"
                 >
                   <span
-                    className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-0.5 text-[0.65rem] font-semibold sm:text-xs ${accent.chip}`}
+                    className={`inline-flex shrink-0 items-center gap-1 rounded-md border px-2.5 py-1 text-[0.65rem] font-semibold sm:text-xs ${accent.chip}`}
                   >
                     {t(`flagMaster.tier.${tier}`, accent.defaultLabel)}
                   </span>
@@ -525,7 +512,7 @@ function FlagMasterResults({ result, onPlayAgain }: ResultsProps) {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-muted)]/60 p-3 sm:p-4">
+        <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-muted)] p-3 sm:p-4">
           <h2 className="mb-2 text-sm font-bold text-app-text">
             {t('flagMaster.roundsTitle', 'Ronda por ronda')}
           </h2>
@@ -533,7 +520,7 @@ function FlagMasterResults({ result, onPlayAgain }: ResultsProps) {
             {result.rounds.map((r, idx) => (
               <div key={`${r.questionId}-${idx}`} className="flex items-center gap-2 py-2 text-xs">
                 <span className="w-5 text-app-subtle tabular-nums">{idx + 1}</span>
-                <span className={r.isCorrect ? 'text-green-400' : 'text-red-400'}>
+                <span className={r.isCorrect ? 'text-success-500' : 'text-error-500'}>
                   {r.isCorrect ? '✓' : '✕'}
                 </span>
                 <span className="flex-1 truncate text-app-text">{r.correctAnswer}</span>
@@ -547,7 +534,7 @@ function FlagMasterResults({ result, onPlayAgain }: ResultsProps) {
         </div>
 
         {/* Share + actions (paridad con ResultsPage de Single/Streak). */}
-        <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 sm:p-5">
+        <section className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-4 sm:p-5">
           <p className="text-sm text-[var(--color-text-secondary)]">
             {t('results.shareScore', 'Comparte tu puntaje')}
           </p>
@@ -556,14 +543,14 @@ function FlagMasterResults({ result, onPlayAgain }: ResultsProps) {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+        <section className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
           <div className="flex flex-col gap-2.5">
             <Button onClick={onPlayAgain} variant="primary" size="lg" fullWidth>
               {t('flagMaster.playAgain', 'Jugar de nuevo')}
             </Button>
             <Link
               to="/menu"
-              className="inline-flex h-12 items-center justify-center rounded-xl border border-app-border bg-app-surface px-6 text-sm font-semibold text-app-secondary transition-colors hover:bg-app-surface/60"
+              className="inline-flex h-12 items-center justify-center rounded-md border border-app-border bg-app-surface px-6 text-sm font-semibold text-app-secondary transition-colors hover:bg-app-surface/60"
             >
               {t('flagMaster.backToMenu', 'Volver al menú')}
             </Link>

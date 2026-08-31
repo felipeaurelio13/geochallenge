@@ -46,7 +46,6 @@ export class ErrorBoundary extends React.Component<
     if (this.state.hasError) {
       return (
         <FullScreenError
-          emoji="😢"
           title={i18n.t('error.title')}
           message={i18n.t('error.unexpected')}
           onRetry={() => this.setState({ hasError: false, error: null })}

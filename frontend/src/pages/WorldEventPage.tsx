@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../services/api';
 import { LoadingSpinner, Timer } from '../components';
 import { Button } from '../components/atoms/Button';
+import { GeoIcon } from '../components/atoms/GeoIcon';
+import { GeoMark } from '../components/atoms/GeoMark';
 import type {
   WorldEventCurrentResponse,
   WorldEventBossStartResponse,
@@ -11,14 +13,6 @@ import type {
 } from '../types';
 
 type PageState = 'loading' | 'locked' | 'unlocked' | 'playing' | 'finished' | 'error';
-
-const REGION_EMOJI: Record<string, string> = {
-  AFRICA: '🌍',
-  AMERICAS: '🌎',
-  ASIA: '🌏',
-  EUROPE: '🏰',
-  OCEANIA: '🏝️',
-};
 
 function formatTimeLeft(endsAt: string, finishedLabel: string): string {
   const now = Date.now();
@@ -190,13 +184,12 @@ export function WorldEventPage() {
   if (pageState === 'locked' && eventData) {
     const { progress, event } = eventData;
     const region = event.region;
-    const emoji = REGION_EMOJI[region] || '🌍';
     const regionName = t(`worldEvent.region.${region}`);
 
     return (
       <div className="mx-auto max-w-lg px-4 py-6">
         <div className="mb-6 text-center">
-          <span className="text-4xl">{emoji}</span>
+          <GeoMark className="mx-auto h-10 w-10 text-primary" />
           <h1 className="mt-2 text-xl font-bold text-app-text">
             {t('worldEvent.expedition', { region: regionName })}
           </h1>
@@ -208,10 +201,10 @@ export function WorldEventPage() {
         <div className="space-y-3">
           <h2 className="text-sm font-semibold text-app-text">{t('worldEvent.preparation')}</h2>
 
-          <div className="rounded-xl border border-app-border bg-app-surface p-4">
+          <div className="rounded-md border border-app-border bg-app-surface p-4">
             <div className="flex items-center gap-3">
-              <span className={`text-lg ${progress.correctInRegion >= progress.correctRequired ? 'text-green-500' : 'text-app-subtle'}`}>
-                {progress.correctInRegion >= progress.correctRequired ? '✓' : '○'}
+              <span className={progress.correctInRegion >= progress.correctRequired ? 'text-success-500' : 'text-app-subtle'}>
+                <GeoIcon name="challenge" size={18} />
               </span>
               <div>
                 <p className="text-sm font-medium text-app-text">
@@ -221,10 +214,10 @@ export function WorldEventPage() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-app-border bg-app-surface p-4">
+          <div className="rounded-md border border-app-border bg-app-surface p-4">
             <div className="flex items-center gap-3">
-              <span className={`text-lg ${progress.distinctCategories >= progress.categoriesRequired ? 'text-green-500' : 'text-app-subtle'}`}>
-                {progress.distinctCategories >= progress.categoriesRequired ? '✓' : '○'}
+              <span className={progress.distinctCategories >= progress.categoriesRequired ? 'text-success-500' : 'text-app-subtle'}>
+                <GeoIcon name="challenge" size={18} />
               </span>
               <div>
                 <p className="text-sm font-medium text-app-text">
@@ -234,10 +227,10 @@ export function WorldEventPage() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-app-border bg-app-surface p-4">
+          <div className="rounded-md border border-app-border bg-app-surface p-4">
             <div className="flex items-center gap-3">
-              <span className={`text-lg ${progress.dailyCompleted ? 'text-green-500' : 'text-app-subtle'}`}>
-                {progress.dailyCompleted ? '✓' : '○'}
+              <span className={progress.dailyCompleted ? 'text-success-500' : 'text-app-subtle'}>
+                <GeoIcon name="challenge" size={18} />
               </span>
               <div>
                 <p className="text-sm font-medium text-app-text">
@@ -248,9 +241,9 @@ export function WorldEventPage() {
           </div>
         </div>
 
-        <div className="mt-6 rounded-xl border border-app-border bg-app-surface p-4">
+        <div className="mt-6 rounded-md border border-app-border bg-app-surface p-4">
           <div className="flex items-center gap-2">
-            <span className="text-lg">🔒</span>
+            <GeoIcon name="close" size={17} className="text-app-subtle" />
             <p className="text-sm font-medium text-app-text">{t('worldEvent.guardianLocked')}</p>
           </div>
           <p className="mt-1 text-xs text-app-subtle">
@@ -272,26 +265,25 @@ export function WorldEventPage() {
   if (pageState === 'unlocked' && eventData) {
     const { boss, event } = eventData;
     const region = event.region;
-    const emoji = REGION_EMOJI[region] || '🌍';
     const regionName = t(`worldEvent.region.${region}`);
 
     return (
       <div className="mx-auto max-w-lg px-4 py-6">
         <div className="mb-6 text-center">
-          <span className="text-4xl">{emoji}</span>
+          <GeoMark className="mx-auto h-10 w-10 text-primary" />
           <h1 className="mt-2 text-xl font-bold text-app-text">
             {t('worldEvent.expedition', { region: regionName })}
           </h1>
           {boss.cleared && (
-            <p className="mt-1 text-sm text-green-500">
+            <p className="mt-1 text-sm text-success-500">
               {t('worldEvent.guardianDefeated')}
             </p>
           )}
         </div>
 
         {boss.cleared && (
-          <div className="mb-4 rounded-xl border border-green-500/30 bg-green-500/10 p-4 text-center">
-            <p className="text-sm font-medium text-green-400">
+          <div className="mb-4 rounded-md border border-success-500/30 bg-success-500/10 p-4 text-center">
+            <p className="text-sm font-medium text-success-500">
               {t('worldEvent.best', { correct: boss.bestCorrect })}
             </p>
             <p className="text-xs text-app-subtle">
@@ -302,9 +294,9 @@ export function WorldEventPage() {
           </div>
         )}
 
-        <div className="rounded-xl border border-orange-500/30 bg-orange-500/10 p-4">
+        <div className="rounded-md border border-primary/30 bg-primary/10 p-4">
           <div className="flex items-center gap-2">
-            <span className="text-lg">🔥</span>
+            <GeoIcon name="challenge" size={18} className="text-primary" />
             <p className="text-sm font-medium text-app-text">
               {boss.cleared ? t('worldEvent.guardianAvailable') : t('worldEvent.guardianUnlocked')}
             </p>
@@ -350,9 +342,10 @@ export function WorldEventPage() {
             {Array.from({ length: bossData.boss.hitsRequired }).map((_, i) => (
               <span
                 key={i}
-                className={`text-lg ${i < bossHp ? 'opacity-100' : 'opacity-30'}`}
+                data-testid="boss-hp"
+                aria-label={i < bossHp ? 'Vida disponible' : 'Vida perdida'}
+                className={`h-2 w-5 rounded-sm ${i < bossHp ? 'bg-primary' : 'bg-app-muted'}`}
               >
-                ❤️
               </span>
             ))}
           </div>
@@ -373,7 +366,7 @@ export function WorldEventPage() {
         </div>
 
         {/* Question */}
-        <div className="mb-4 rounded-xl border border-app-border bg-app-surface p-4">
+        <div className="mb-4 rounded-md border border-app-border bg-app-surface p-4">
           <p className="text-sm font-medium text-app-text">
             {currentQuestion.questionText}
           </p>
@@ -399,11 +392,11 @@ export function WorldEventPage() {
                 type="button"
                 onClick={() => !showResult && handleAnswer(option)}
                 disabled={showResult || isSubmitting}
-                className={`w-full rounded-xl border p-3 text-left text-sm font-medium transition-all ${
+                className={`w-full rounded-md border p-3 text-left text-sm font-medium transition-all ${
                   isCorrectOption
-                    ? 'border-green-500 bg-green-500/20 text-green-400'
-                    : isWrongSelected
-                    ? 'border-red-500 bg-red-500/20 text-red-400'
+                    ? 'border-success-500 bg-success-500/10 text-success-500'
+                  : isWrongSelected
+                    ? 'border-error-500 bg-error-500/10 text-error-500'
                     : isSelected
                     ? 'border-primary bg-primary/20 text-app-text'
                     : 'border-app-border bg-app-surface text-app-text hover:border-primary/50'
@@ -417,8 +410,8 @@ export function WorldEventPage() {
 
         {/* Feedback */}
         {showResult && (
-          <div className="mt-4 rounded-xl border border-app-border bg-app-surface p-3 text-center">
-            <p className={`text-sm font-medium ${lastAnswerCorrect ? 'text-green-400' : 'text-red-400'}`}>
+          <div className="mt-4 rounded-md border border-app-border bg-app-surface p-3 text-center">
+            <p className={`text-sm font-medium ${lastAnswerCorrect ? 'text-success-500' : 'text-error-500'}`}>
               {lastAnswerCorrect
                 ? t('worldEvent.correctFeedback', { points: lastPoints })
                 : t('worldEvent.incorrectFeedback')}
@@ -451,7 +444,7 @@ export function WorldEventPage() {
     return (
       <div className="mx-auto max-w-lg px-4 py-6">
         <div className="mb-6 text-center">
-          <span className="text-4xl">{cleared ? '🎉' : '💪'}</span>
+          <GeoMark className="mx-auto h-10 w-10 text-primary" />
           <h1 className="mt-2 text-xl font-bold text-app-text">
             {cleared ? t('worldEvent.guardianDefeated') : t('worldEvent.guardianResists')}
           </h1>
@@ -464,15 +457,15 @@ export function WorldEventPage() {
         </div>
 
         {cleared && (
-          <div className="mb-4 rounded-xl border border-green-500/30 bg-green-500/10 p-4 text-center">
-            <p className="text-sm font-medium text-green-400">
+          <div className="mb-4 rounded-md border border-success-500/30 bg-success-500/10 p-4 text-center">
+            <p className="text-sm font-medium text-success-500">
               {t('worldEvent.greatWork')}
             </p>
           </div>
         )}
 
         {!cleared && (
-          <div className="mb-4 rounded-xl border border-app-border bg-app-surface p-4 text-center">
+          <div className="mb-4 rounded-md border border-app-border bg-app-surface p-4 text-center">
             <p className="text-sm text-app-secondary">
               {t('worldEvent.tryAgain')}
             </p>

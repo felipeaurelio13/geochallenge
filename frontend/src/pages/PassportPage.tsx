@@ -3,7 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../services/api';
 import type { PassportResponse, CountryMastery, SkillMastery, MasteryLevel } from '../types';
-import { LoadingSpinner } from '../components';
+import { Button, GeoIcon, LoadingSpinner } from '../components';
+import { FullScreenError } from '../components/molecules/FullScreenError';
+import { EmptyState } from '../components/molecules/EmptyState';
+import { GeoMark } from '../components/atoms/GeoMark';
 import { getLocalizedCountryName } from '../utils/countryNames';
 
 const LEVEL_LABELS: Record<MasteryLevel, string> = {
@@ -16,10 +19,10 @@ const LEVEL_LABELS: Record<MasteryLevel, string> = {
 
 const LEVEL_COLORS: Record<MasteryLevel, string> = {
   UNSEEN: 'text-[var(--color-text-muted)]',
-  LEARNING: 'text-amber-400',
-  FAMILIAR: 'text-yellow-400',
-  STRONG: 'text-lime-400',
-  MASTERED: 'text-emerald-400',
+  LEARNING: 'text-[var(--color-text-secondary)]',
+  FAMILIAR: 'text-primary',
+  STRONG: 'text-primary',
+  MASTERED: 'text-success-500',
 };
 
 export function PassportPage() {
@@ -58,15 +61,14 @@ export function PassportPage() {
 
   if (error) {
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-4 px-4">
-        <p className="text-[var(--color-text-secondary)]">{error}</p>
-        <button
-          onClick={fetchData}
-          className="rounded-lg bg-[var(--color-accent)] px-4 py-2 text-sm font-semibold text-white"
-        >
-          {t('common.retry')}
-        </button>
-      </div>
+      <FullScreenError
+        title={t('common.error')}
+        message={error}
+        onRetry={fetchData}
+        retryLabel={t('common.retry')}
+        backTo="/menu"
+        backLabel={t('common.back')}
+      />
     );
   }
 
@@ -85,7 +87,7 @@ export function PassportPage() {
           {t('passport.title', 'Mi viaje')}
         </h1>
 
-        <section className="mb-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
+        <section className="mb-6 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
           <div className="grid grid-cols-2 gap-4 text-center">
             <div>
               <div className="text-2xl font-bold text-[var(--color-accent)]">
@@ -112,7 +114,7 @@ export function PassportPage() {
               </div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-emerald-400">
+              <div className="text-2xl font-bold text-success-500">
                 {summary.masteredCountries}
               </div>
               <div className="text-xs text-[var(--color-text-muted)]">
@@ -123,19 +125,17 @@ export function PassportPage() {
         </section>
 
         {summary.stampedCountries === 0 ? (
-          <p className="py-8 text-center text-[var(--color-text-muted)]">
-            {t('passport.empty', 'Juega partidas para empezar a llenar tu pasaporte')}
-          </p>
+          <EmptyState message={t('passport.empty', 'Juega partidas para empezar a llenar tu pasaporte')} />
         ) : (
           <>
             {continents.length > 1 && (
               <div className="mb-4 flex flex-wrap gap-2">
                 <button
                   onClick={() => setContinentFilter(null)}
-                  className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                  className={`rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
                     !continentFilter
-                      ? 'bg-[var(--color-accent)] text-white'
-                      : 'bg-[var(--color-surface)] text-[var(--color-text-secondary)]'
+                      ? 'border-primary bg-primary text-white'
+                      : 'border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-secondary)]'
                   }`}
                 >
                   {t('common.all')}
@@ -144,10 +144,10 @@ export function PassportPage() {
                   <button
                     key={cont}
                     onClick={() => setContinentFilter(cont)}
-                    className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                    className={`rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
                       continentFilter === cont
-                        ? 'bg-[var(--color-accent)] text-white'
-                        : 'bg-[var(--color-surface)] text-[var(--color-text-secondary)]'
+                        ? 'border-primary bg-primary text-white'
+                        : 'border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-secondary)]'
                     }`}
                   >
                     {cont}
@@ -192,30 +192,35 @@ function CountryCard({
   onPractice: () => void;
 }) {
   const { t, i18n } = useTranslation();
+  const flag = getCountryEmoji(country.countryCode);
   const countryName = getLocalizedCountryName(country.countryCode, i18n.language, country.name);
 
   return (
-    <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
+    <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]">
       <button
         onClick={onToggle}
         className="flex w-full items-center gap-3 px-4 py-3 text-left"
       >
-        <span className="text-xl" role="img" aria-label={countryName}>
-          {getCountryEmoji(country.countryCode)}
-        </span>
+        {flag ? (
+          <span className="text-xl" role="img" aria-label={countryName}>{flag}</span>
+        ) : (
+          <GeoMark className="h-5 w-5 shrink-0 text-primary" title={countryName} />
+        )}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <span className="text-sm font-semibold text-[var(--color-text-primary)] truncate">
               {countryName}
             </span>
             {country.stamped && (
-              <span className="shrink-0 text-xs" title={t('passport.stamped', 'Sellado')}>
-                ✅
+              <span className="shrink-0 text-success-500" title={t('passport.stamped', 'Sellado')}>
+                <span className="sr-only">{t('passport.stamped', 'Sellado')}</span>
+                <GeoIcon name="challenge" size={14} />
               </span>
             )}
             {country.mastered && (
-              <span className="shrink-0 text-xs" title={t('passport.masteredLabel', 'Dominado')}>
-                ⭐
+              <span className="shrink-0 text-primary" title={t('passport.masteredLabel', 'Dominado')}>
+                <span className="sr-only">{t('passport.masteredLabel', 'Dominado')}</span>
+                <GeoIcon name="rank" size={14} />
               </span>
             )}
           </div>
@@ -223,8 +228,8 @@ function CountryCard({
             {country.score}%
           </span>
         </div>
-        <span className="text-xs text-[var(--color-text-muted)] shrink-0">
-          {expanded ? '▲' : '▼'}
+        <span className="text-xs text-[var(--color-text-muted)] shrink-0" aria-hidden="true">
+          {expanded ? '−' : '+'}
         </span>
       </button>
 
@@ -235,12 +240,12 @@ function CountryCard({
               <SkillRow key={skill.category} skill={skill} />
             ))}
           </div>
-          <button
+          <Button
             onClick={onPractice}
-            className="w-full rounded-lg bg-[var(--color-accent)] py-2 text-sm font-semibold text-white transition-colors hover:opacity-90"
+            fullWidth
           >
             {t('passport.practiceCountry', 'Practicar {{country}}', { country: countryName })}
-          </button>
+          </Button>
         </div>
       )}
     </div>
@@ -289,5 +294,5 @@ function getCountryEmoji(countryCode: string): string {
     const b = 0x1F1E6 + upper.charCodeAt(1) - 65;
     return String.fromCodePoint(a, b);
   }
-  return '🌍';
+  return '';
 }

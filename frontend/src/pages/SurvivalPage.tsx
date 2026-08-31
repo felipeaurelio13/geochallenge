@@ -5,6 +5,8 @@ import { useAuth } from '../context/AuthContext';
 import { socketService } from '../services/socket';
 import { LoadingSpinner, GameRoundScaffold, RoundActionTray, Timer } from '../components';
 import { Button } from '../components';
+import { GeoIcon } from '../components/atoms/GeoIcon';
+import { GeoMark } from '../components/atoms/GeoMark';
 import { MonumentAttribution } from '../components/MonumentAttribution';
 import {
   Category,
@@ -43,9 +45,8 @@ function parseSurvivalCategory(value: string | null): Category {
 }
 
 function getDifficultyColor(diff: Difficulty | null): string {
-  if (diff === 'EASY') return 'text-green-400 border-green-700 bg-green-950';
-  if (diff === 'MEDIUM') return 'text-yellow-400 border-yellow-700 bg-yellow-950';
-  if (diff === 'HARD') return 'text-red-400 border-red-700 bg-red-950';
+  if (diff === 'HARD') return 'text-warning-500 border-warning-500/40 bg-warning-500/10';
+  if (diff === 'EASY' || diff === 'MEDIUM') return 'text-primary border-primary/40 bg-primary/10';
   return 'text-app-subtle border-app-border bg-app-surface';
 }
 
@@ -53,9 +54,7 @@ function LivesDisplay({ lives, max = MAX_LIVES }: { lives: number; max?: number 
   return (
     <span className="inline-flex gap-0.5 text-sm">
       {Array.from({ length: max }).map((_, i) => (
-        <span key={i} className={i < lives ? 'text-red-500' : 'text-gray-700'}>
-          ♥
-        </span>
+        <span key={i} className={`h-2 w-2 rounded-sm ${i < lives ? 'bg-primary' : 'bg-app-muted'}`} />
       ))}
     </span>
   );
@@ -76,7 +75,7 @@ function PlayerCard({
         player.eliminated
           ? 'border-app-border bg-app-surface/30 opacity-40'
           : answered
-          ? 'border-green-700/50 bg-green-950/20'
+          ? 'border-success-500/50 bg-success-500/10'
           : isMe
           ? 'border-primary/60 bg-primary/10'
           : 'border-app-border bg-app-surface/60'
@@ -84,7 +83,7 @@ function PlayerCard({
     >
       <span className="max-w-[5rem] truncate text-xs font-semibold text-app-text">
         {player.username}
-        {isMe && <span className="text-primary"> ★</span>}
+        {isMe && <span className="text-primary"> ·</span>}
       </span>
       <LivesDisplay lives={player.eliminated ? 0 : player.lives} />
       <span className="text-xs text-app-subtle">{player.score}</span>
@@ -518,9 +517,7 @@ export function SurvivalPage() {
   // ── Render helpers ─────────────────────────────────────────────────────────
 
   function renderRankBadge(rank: number) {
-    if (rank === 1) return <span className="text-2xl">🏆</span>;
-    if (rank === 2) return <span className="text-2xl">🥈</span>;
-    if (rank === 3) return <span className="text-2xl">🥉</span>;
+    if (rank <= 3) return <span className="text-lg font-bold text-primary">#{rank}</span>;
     return <span className="text-lg text-app-subtle">#{rank}</span>;
   }
 
@@ -560,21 +557,21 @@ export function SurvivalPage() {
     return (
       <div className="h-full min-h-0 bg-[var(--color-bg-app)] flex flex-col items-center justify-center px-4">
         <div className="w-full max-w-sm flex flex-col items-center gap-5 text-center">
-          <div className="text-6xl">☠️</div>
+          <GeoMark className="h-12 w-12 text-primary" />
           <div>
             <h1 className="text-2xl font-bold text-app-text">{t('survival.title')}</h1>
             <p className="mt-1 text-sm text-app-secondary">{t('survival.subtitle')}</p>
           </div>
 
-          <div className="w-full rounded-2xl border border-app-border bg-app-surface p-4 text-left text-sm text-app-text space-y-2">
+          <div className="w-full rounded-lg border border-app-border bg-app-surface p-4 text-left text-sm text-app-text space-y-2">
             {[
-              ['❤️', t('survival.ruleOneLive')],
-              ['📈', t('survival.ruleDifficulty')],
-              ['🔥', t('survival.ruleStreak')],
-              ['👑', t('survival.ruleWin')],
-            ].map(([icon, text]) => (
-              <div key={icon} className="flex items-start gap-2">
-                <span>{icon}</span>
+              [<GeoIcon name="life" size={16} />, t('survival.ruleOneLive')],
+              [<GeoIcon name="challenge" size={16} />, t('survival.ruleDifficulty')],
+              [<GeoIcon name="map" size={16} />, t('survival.ruleStreak')],
+              [<GeoIcon name="rank" size={16} />, t('survival.ruleWin')],
+            ].map(([icon, text], index) => (
+              <div key={index} className="flex items-start gap-2">
+                <span className="mt-0.5 text-primary">{icon}</span>
                 <span>{text}</span>
               </div>
             ))}
@@ -583,15 +580,15 @@ export function SurvivalPage() {
           {notice && <p className="text-sm text-amber-400">{notice}</p>}
 
           <div className="flex items-center gap-2 text-xs text-app-subtle">
-            <span className="rounded border border-green-800 bg-green-950 px-2 py-0.5 text-green-400">
+            <span className="rounded-md border border-primary/30 bg-primary/10 px-2 py-1 text-primary">
               {t('survival.difficulty.easy')} 15s
             </span>
             <span className="text-app-subtle">→</span>
-            <span className="rounded border border-yellow-800 bg-yellow-950 px-2 py-0.5 text-yellow-400">
+            <span className="rounded-md border border-primary/30 bg-primary/10 px-2 py-1 text-primary">
               {t('survival.difficulty.medium')} 12s
             </span>
             <span className="text-app-subtle">→</span>
-            <span className="rounded border border-red-800 bg-red-950 px-2 py-0.5 text-red-400">
+            <span className="rounded-md border border-warning-500/30 bg-warning-500/10 px-2 py-1 text-warning-500">
               {t('survival.difficulty.hard')} 9s
             </span>
           </div>
@@ -622,7 +619,7 @@ export function SurvivalPage() {
           {!searchTimedOut && (
             <span className="absolute inline-flex h-20 w-20 rounded-full bg-primary/10 animate-ping" />
           )}
-          <span className="text-5xl relative">{searchTimedOut ? '😴' : '☠️'}</span>
+          {searchTimedOut ? <GeoIcon name="duel" size={42} className="relative text-app-subtle" /> : <GeoMark className="relative h-11 w-11 text-primary" />}
         </div>
         {searchTimedOut ? (
           <>
@@ -737,7 +734,7 @@ export function SurvivalPage() {
     return (
       <div className="h-full min-h-0 bg-[var(--color-bg-app)] flex flex-col items-center justify-center px-4">
         <div className="w-full max-w-sm flex flex-col items-center gap-5 text-center">
-          <div className="text-5xl">{isWinner ? '🏆' : showEliminatedWarm ? '💪' : '💀'}</div>
+          <div className="flex justify-center"><GeoIcon name={isWinner ? 'rank' : 'life'} size={44} className="text-primary" /></div>
           <div>
             <h2 className="text-2xl font-bold text-app-text">
               {isWinner
@@ -760,7 +757,7 @@ export function SurvivalPage() {
             {rankings.map((r) => (
               <div
                 key={r.userId}
-                className={`flex items-center gap-3 rounded-xl border px-4 py-3 ${
+                className={`flex items-center gap-3 rounded-md border px-4 py-3 ${
                   r.userId === user?.id
                     ? 'border-primary/50 bg-primary/10'
                     : 'border-app-border bg-app-surface'
@@ -817,7 +814,7 @@ export function SurvivalPage() {
     <GameRoundScaffold
       rootClassName="bg-[var(--color-bg-app)]"
       header={
-        <header className="sticky top-0 z-30 border-b border-app-border/80 bg-app-surface/95 px-3 py-2 backdrop-blur">
+        <header className="sticky top-0 z-30 border-b border-app-border/80 bg-app-surface px-3 py-2">
           <div className="mx-auto flex max-w-4xl items-center justify-between gap-3">
             {/* Left: round + difficulty */}
             <div className="flex items-center gap-2">
@@ -854,15 +851,15 @@ export function SurvivalPage() {
               <div className="mb-1.5">{connectionBanner}</div>
             )}
             {isSpectating && (
-              <div className="mb-1.5 rounded-lg border border-red-800/50 bg-red-950/30 px-3 py-1 text-center text-xs font-semibold text-red-400">
+              <div className="mb-1.5 rounded-md border border-error-500/50 bg-error-500/10 px-3 py-1 text-center text-xs font-semibold text-error-500">
                 {eliminatedAtRound != null
                   ? t('survival.spectatingHeader', { round: eliminatedAtRound })
-                  : `💀 ${t('survival.youEliminated')}`}
+                  : t('survival.youEliminated')}
               </div>
             )}
             {lifeGainedNotice && showResult && (
-              <div className="mb-1.5 rounded-lg border border-green-700/50 bg-green-950/30 px-3 py-1 text-center text-xs font-semibold text-green-400">
-                ✨ {lifeGainedNotice}
+              <div className="mb-1.5 rounded-md border border-success-500/50 bg-success-500/10 px-3 py-1 text-center text-xs font-semibold text-success-500">
+                {lifeGainedNotice}
               </div>
             )}
             {notice && (

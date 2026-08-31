@@ -102,7 +102,7 @@ function Title({ children }: { children: React.ReactNode }) {
 }
 
 function Panel({ children }: { children: React.ReactNode }) {
-  return <div className="w-full max-w-md rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-xl">{children}</div>;
+  return <div className="w-full max-w-md rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm">{children}</div>;
 }
 
 function CloseButton({ children }: { children?: React.ReactNode }) {

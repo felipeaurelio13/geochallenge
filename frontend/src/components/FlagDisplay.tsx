@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useImageWithFallback } from '../hooks/useImageWithFallback';
+import { GeoMark } from './atoms/GeoMark';
 import type { FlagModifier } from '../types';
 
 interface FlagDisplayProps {
@@ -73,7 +74,7 @@ export function FlagDisplay({ imageUrl, modifier, questionId, compact = false }:
         role="img"
         aria-label={t('flagMaster.imageUnavailable', 'Bandera no disponible')}
       >
-        <span className="text-4xl opacity-30">🏳️</span>
+        <GeoMark className="h-10 w-10 text-app-subtle opacity-30" />
         <p className="text-xs text-app-subtle">
           {t('flagMaster.imageUnavailable', 'Bandera no disponible')}
         </p>

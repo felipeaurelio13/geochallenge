@@ -58,12 +58,12 @@ export function FilterDrawer({ filters, onChange, onClose, disabledOptions }: Fi
         ref={backdropRef}
         type="button"
         aria-label={t('common.close')}
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/60"
         onClick={onClose}
       />
 
       {/* Panel */}
-      <div className="relative z-10 rounded-t-2xl border border-app-border bg-app-surface px-4 pb-8 pt-4 shadow-2xl">
+      <div className="relative z-10 rounded-t-lg border border-app-border bg-app-surface px-4 pb-8 pt-4 shadow-sm">
         {/* Handle */}
         <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-app-muted" />
 

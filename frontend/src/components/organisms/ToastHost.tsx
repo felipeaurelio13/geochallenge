@@ -11,7 +11,7 @@ const DEFAULT_DURATION_MS: Record<Toast['type'], number> = {
 const TONE_CLASSES: Record<Toast['type'], string> = {
   success: 'border-green-500/40 bg-green-500/15 text-green-100',
   info: 'border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)]',
-  achievement: 'border-amber-400/50 bg-gradient-to-br from-amber-500/20 to-orange-500/15 text-amber-100',
+  achievement: 'border-warning-500/50 bg-warning-500/10 text-app-text',
 };
 
 function ToastItem({ toast, prefersReducedMotion }: { toast: Toast; prefersReducedMotion: boolean }) {
@@ -55,7 +55,7 @@ function ToastItem({ toast, prefersReducedMotion }: { toast: Toast; prefersReduc
 
   return (
     <div
-      className={`pointer-events-auto w-full max-w-sm rounded-2xl border px-4 py-3 shadow-lg backdrop-blur ${TONE_CLASSES[toast.type]} ${
+      className={`pointer-events-auto w-full max-w-sm rounded-lg border px-4 py-3 shadow-sm ${TONE_CLASSES[toast.type]} ${
         prefersReducedMotion ? '' : 'animate-slide-up'
       }`}
       onMouseEnter={pause}

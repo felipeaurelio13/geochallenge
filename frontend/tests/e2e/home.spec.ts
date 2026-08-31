@@ -21,4 +21,10 @@ test('home renderiza CTA principales en mobile', async ({ page }) => {
   await expect(loginLink).toBeVisible();
   await expect(registerLink).toBeVisible();
   await expect(page.locator('.app-footer__version')).toBeHidden();
+  await expect(page).toHaveScreenshot('home-entry.png', {
+    animations: 'disabled',
+    caret: 'hide',
+    fullPage: false,
+    maxDiffPixelRatio: 0.01,
+  });
 });

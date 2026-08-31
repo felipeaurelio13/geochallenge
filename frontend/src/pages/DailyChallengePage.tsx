@@ -12,6 +12,8 @@ import {
   DailyTourStrip,
 } from '../components';
 import { Button } from '../components/atoms/Button';
+import { GeoIcon } from '../components/atoms/GeoIcon';
+import { GeoMark } from '../components/atoms/GeoMark';
 import { MonumentAttribution } from '../components/MonumentAttribution';
 import { generateFunFact } from '../utils/funFacts';
 import { applyExtendedTime, getQuestionDuration } from '../utils/questionTiming';
@@ -255,20 +257,18 @@ export function DailyChallengePage() {
   if (pageState === 'briefing') {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-6 bg-[var(--color-bg-app)] px-6 py-8 text-center">
-        <div className="text-5xl">🌍</div>
+        <GeoMark className="h-12 w-12 text-primary" />
         <h1 className="text-2xl font-bold text-app-text">{t('daily.worldTourTitle', 'Vuelta al mundo de hoy')}</h1>
         <p className="text-[var(--color-text-secondary)]">
           {t('daily.worldTourDesc', '10 paradas · 5 regiones · 1 intento')}
         </p>
-        <div className="flex gap-2 text-2xl" aria-hidden="true">
-          <span>🌎</span><span>🌍</span><span>🌏</span><span>🏝️</span><span>🧭</span>
-        </div>
+        <div className="h-px w-16 bg-primary/40" aria-hidden="true" />
         <p className="text-sm text-[var(--color-text-muted)]">
           {t('daily.worldTourShared', 'El mismo recorrido para todos')}
         </p>
         {previousResult?.dailyStreak !== undefined && previousResult.dailyStreak >= 1 && (
-          <div className="rounded-lg bg-cyan-500/10 border border-cyan-500/30 px-3 py-2 text-sm text-cyan-300">
-            🔥 {previousResult.dailyStreak} {t('daily.streakDays', { count: previousResult.dailyStreak, defaultValue: 'días seguidos' })}
+          <div className="inline-flex items-center gap-1.5 rounded-md border border-primary/30 bg-primary/10 px-3 py-2 text-sm text-primary">
+            <GeoIcon name="life" size={15} /> {previousResult.dailyStreak} {t('daily.streakDays', { count: previousResult.dailyStreak, defaultValue: 'días seguidos' })}
           </div>
         )}
         <Button
@@ -289,10 +289,10 @@ export function DailyChallengePage() {
     const pct = Math.round((previousResult.correctCount / previousResult.totalQuestions) * 100);
     return (
       <div className="flex h-full flex-col items-center justify-center gap-6 bg-[var(--color-bg-app)] px-6 py-8 text-center">
-        <div className="text-6xl">🗓️</div>
-        <h1 className="text-2xl font-bold text-app-text">{t('daily.alreadyPlayed', '¡Reto de hoy completado! 🎯')}</h1>
+        <GeoMark className="h-12 w-12 text-primary" />
+        <h1 className="text-2xl font-bold text-app-text">{t('daily.alreadyPlayed', 'Reto de hoy completado')}</h1>
         <p className="text-[var(--color-text-secondary)]">{t('daily.comeBackTomorrow', 'Mañana hay uno nuevo esperándote')}</p>
-        <div className="w-full max-w-sm rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
+        <div className="w-full max-w-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
           <div className="text-4xl font-black text-app-text">{previousResult.correctCount}/{previousResult.totalQuestions}</div>
           <div className="mt-1 text-[var(--color-text-secondary)]">{pct}% {t('results.accuracy')}</div>
           {previousResult.details && previousResult.details.length === 10 && (
@@ -301,8 +301,8 @@ export function DailyChallengePage() {
             </div>
           )}
           {previousResult.dailyStreak !== undefined && previousResult.dailyStreak >= 1 && (
-            <div className="mt-3 rounded-lg bg-cyan-500/10 border border-cyan-500/30 px-3 py-2 text-sm text-cyan-300">
-              🔥 <span className="font-bold tabular-nums">{previousResult.dailyStreak}</span>{' '}
+            <div className="mt-3 flex items-center justify-center gap-1.5 rounded-md border border-primary/30 bg-primary/10 px-3 py-2 text-sm text-primary">
+              <GeoIcon name="life" size={15} /> <span className="font-bold tabular-nums">{previousResult.dailyStreak}</span>{' '}
               {previousResult.dailyStreak === 1
                 ? t('daily.streakStart', '¡día! Vuelve mañana para seguir la racha')
                 : t('daily.streakDays', { count: previousResult.dailyStreak, defaultValue: 'días seguidos' })}
@@ -311,9 +311,9 @@ export function DailyChallengePage() {
         </div>
         <p className="text-xs text-[var(--color-text-muted)]">{t('daily.nextChallengeAt', 'El próximo reto abre a medianoche (tu hora)')}</p>
         <Button onClick={() => handleShare(previousResult.correctCount)} disabled={shareStatus === 'sharing'} variant="primary" size="lg">
-          📸 {t('results.shareStreakButton', 'Compartir resultado')}
+          {t('results.shareStreakButton', 'Compartir resultado')}
         </Button>
-        {shareFeedback && <p className="text-xs text-green-300">{shareFeedback}</p>}
+        {shareFeedback && <p className="text-xs text-success-500">{shareFeedback}</p>}
         <Button onClick={() => navigate('/passport')} variant="secondary">{t('results.viewPassport', 'Ver pasaporte')}</Button>
         <Button onClick={() => navigate('/menu')} variant="ghost">{t('common.backToMenu')}</Button>
       </div>
@@ -326,7 +326,7 @@ export function DailyChallengePage() {
     const showStreakLostNotice = Boolean(result?.streakLost) && (result?.previousStreak ?? 0) >= 2;
     return (
       <div className="flex h-full flex-col items-center justify-center gap-6 bg-[var(--color-bg-app)] px-6 py-8 text-center">
-        <div className="text-5xl">🌍</div>
+        <GeoMark className="h-12 w-12 text-primary" />
         <h1 className="text-2xl font-bold text-app-text">{t('daily.tourComplete', '¡Vuelta al mundo completada!')}</h1>
         {showStreakLostNotice && (
           <p className="max-w-sm text-sm text-[var(--color-text-secondary)]">
@@ -337,7 +337,7 @@ export function DailyChallengePage() {
           </p>
         )}
         {result && (
-          <div className="w-full max-w-sm rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
+          <div className="w-full max-w-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
             <div className="text-5xl font-black text-app-text">{result.correctCount}/{result.totalQuestions}</div>
             <div className="mt-1 text-[var(--color-text-secondary)]">{pct}% {t('results.accuracy')}</div>
             {result.details && result.details.length === 10 && (
@@ -349,9 +349,9 @@ export function DailyChallengePage() {
               </div>
             )}
             {result.dailyStreak !== undefined && result.dailyStreak >= 1 && (
-              <div className="mt-4 rounded-xl border border-cyan-500/30 bg-cyan-500/10 p-3">
-                <div className="flex items-center justify-center gap-2 text-cyan-300">
-                  <span className="text-xl">🔥</span>
+              <div className="mt-4 rounded-md border border-primary/30 bg-primary/10 p-3">
+                <div className="flex items-center justify-center gap-2 text-primary">
+                  <GeoIcon name="life" size={18} />
                   <span className="text-2xl font-black tabular-nums">{result.dailyStreak}</span>
                   <span className="text-sm">
                     {result.dailyStreak === 1
@@ -370,9 +370,9 @@ export function DailyChallengePage() {
           variant="primary"
           size="lg"
         >
-          📸 {t('results.shareStreakButton', 'Compartir resultado')}
+          {t('results.shareStreakButton', 'Compartir resultado')}
         </Button>
-        {shareFeedback && <p className="text-xs text-green-300">{shareFeedback}</p>}
+        {shareFeedback && <p className="text-xs text-success-500">{shareFeedback}</p>}
         <Button onClick={() => navigate('/passport')} variant="secondary">{t('results.viewPassport', 'Ver pasaporte')}</Button>
         <Button onClick={() => navigate('/menu')} variant="ghost">{t('common.backToMenu')}</Button>
       </div>
@@ -407,14 +407,14 @@ export function DailyChallengePage() {
     </a>
     <GameRoundScaffold
       header={
-        <header className="sticky top-0 z-30 border-b border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 pb-2 pt-3 backdrop-blur sm:px-4 sm:pb-3 sm:pt-4">
+        <header className="sticky top-0 z-30 border-b border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 pb-2 pt-3 sm:px-4 sm:pb-3 sm:pt-4">
           <div className="max-w-4xl mx-auto grid grid-cols-[auto_1fr_auto] items-center gap-2.5 sm:gap-4">
             <button
               onClick={async () => { if (await confirm(t('game.confirmExit'))) { abandonTrackedRef.current = true; trackUxEvent('game_abandoned', { mode: 'single', variant: 'DAILY', roundIndex: currentIndex, reason: 'navigation' }); navigate('/menu'); } }}
               className="pressable min-h-10 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 py-2 text-xs sm:text-sm text-[var(--color-text-secondary)] hover:border-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors"
               aria-label={t('game.exit')}
             >
-              ✕ {t('game.exit')}
+              <GeoIcon name="close" size={16} /> <span>{t('game.exit')}</span>
             </button>
             <div className="text-center">
               <ScoreDisplay
@@ -423,7 +423,7 @@ export function DailyChallengePage() {
                 showAnimation={showResult}
                 lastResult={null}
               />
-              <p className="mt-0.5 text-[0.65rem] font-medium uppercase tracking-wide text-cyan-400">
+              <p className="mt-0.5 text-[0.65rem] font-medium uppercase tracking-wide text-primary">
                 {t('menu.dailyChallenge', 'Reto del día')}
               </p>
               {currentRegion && (

@@ -227,7 +227,6 @@ export function ChallengesPage() {
           </div>
         ) : filteredChallenges.length === 0 ? (
           <EmptyState
-            emoji="🏁"
             message={t('challenges.emptyWithAction')}
             action={
               <Button

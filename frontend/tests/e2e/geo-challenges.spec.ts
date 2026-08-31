@@ -130,7 +130,7 @@ test.describe('GeoRetos mobile', () => {
     await expect(page).toHaveURL(/\/duel\?mode=geo-challenge$/);
   });
 
-  test('has no accidental horizontal overflow in dark mode', async ({ page }, testInfo) => {
+  test('has no accidental horizontal overflow in dark mode', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'dark' });
     await page.goto('/geo-challenges');
     await page.getByRole('button', { name: /Comenzar la vuelta al mundo|Start the world tour/ }).click();
@@ -141,10 +141,12 @@ test.describe('GeoRetos mobile', () => {
     );
     expect(hasHorizontalOverflow).toBeFalsy();
 
-    const screenshot = await page.screenshot({ fullPage: true });
-    await testInfo.attach(`geo-challenges-dark-${testInfo.project.name}.png`, {
-      body: screenshot,
-      contentType: 'image/png',
+    await expect(page).toHaveScreenshot('geo-challenge-round-dark.png', {
+      animations: 'disabled',
+      caret: 'hide',
+      fullPage: false,
+      mask: [page.getByRole('timer')],
+      maxDiffPixelRatio: 0.01,
     });
   });
 });

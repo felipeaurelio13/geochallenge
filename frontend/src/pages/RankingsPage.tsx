@@ -56,31 +56,22 @@ const NEIGHBORS_AUTO_SHOW_RANK_THRESHOLD = 100;
 
 const PODIUM_COLORS = {
   1: {
-    bg: 'bg-gradient-to-b from-yellow-400 to-yellow-600',
-    border: 'border-yellow-400',
-    text: 'text-yellow-400',
-    glow: 'shadow-yellow-500/40',
+    bg: 'bg-primary',
+    border: 'border-primary',
+    text: 'text-primary',
     height: 'h-24',
-    crown: '🥇',
   },
   2: {
-    // QA fix LO-5: antes from-slate-300 to-slate-500 daba un gris plano que
-    // no leía como "plata". Gradient más brillante con shine arriba lo hace
-    // sentir metálico junto al oro y el bronce.
-    bg: 'bg-gradient-to-b from-zinc-200 via-slate-300 to-slate-500',
-    border: 'border-slate-300',
-    text: 'text-slate-300',
-    glow: 'shadow-slate-400/40',
+    bg: 'bg-app-muted',
+    border: 'border-app-border',
+    text: 'text-app-secondary',
     height: 'h-16',
-    crown: '🥈',
   },
   3: {
-    bg: 'bg-gradient-to-b from-amber-600 to-amber-800',
-    border: 'border-amber-600',
-    text: 'text-amber-500',
-    glow: 'shadow-amber-600/40',
+    bg: 'bg-app-muted',
+    border: 'border-app-border',
+    text: 'text-app-secondary',
     height: 'h-12',
-    crown: '🥉',
   },
 } as const;
 
@@ -92,14 +83,13 @@ function PodiumBlock({ entry, topScore, youLabel }: { entry: LeaderboardEntry; t
 
   return (
     <div className="flex flex-col items-center gap-2 flex-1 min-w-0">
-      <span className={`text-2xl ${entry.rank === 1 ? 'animate-bounce' : ''}`}>{config.crown}</span>
       <div
-        className={`w-14 h-14 rounded-full border-2 ${config.border} flex items-center justify-center bg-[var(--color-surface)] shadow-lg ${config.glow} shadow-lg`}
+        className={`w-14 h-14 rounded-full border ${config.border} flex items-center justify-center bg-[var(--color-surface)]`}
         title={entry.username}
       >
         <span className="text-xl font-black">{entry.username.charAt(0).toUpperCase()}</span>
       </div>
-      <span className={`text-xs font-bold truncate max-w-full px-1 ${entry.rank === 1 ? 'text-yellow-300' : 'text-[var(--color-text-secondary)]'}`}>
+      <span className="text-xs font-bold truncate max-w-full px-1 text-[var(--color-text-secondary)]">
         {entry.username}
         {entry.isCurrentUser && (
           <span className="ml-1 text-xs font-normal text-primary">({youLabel})</span>
@@ -129,16 +119,11 @@ function ScoreBar({ entry, topScore }: { entry: LeaderboardEntry; topScore: numb
 
 function getRankBadgeStyle(rank: number, isCurrentUser?: boolean) {
   if (isCurrentUser) return 'bg-primary/30 border-primary';
-  if (rank === 1) return 'bg-gradient-to-r from-yellow-500/20 to-yellow-700/20 border-yellow-500/60';
-  if (rank === 2) return 'bg-gradient-to-r from-slate-400/20 to-slate-600/20 border-slate-400/60';
-  if (rank === 3) return 'bg-gradient-to-r from-amber-600/20 to-amber-800/20 border-amber-600/60';
+  if (rank <= 3) return 'bg-[var(--color-surface-muted)] border-[var(--color-border)]';
   return 'bg-[var(--color-surface)] border-[var(--color-border)]';
 }
 
 function getRankLabel(rank: number) {
-  if (rank === 1) return '🥇';
-  if (rank === 2) return '🥈';
-  if (rank === 3) return '🥉';
   return `#${rank}`;
 }
 
@@ -372,7 +357,7 @@ export function RankingsPage() {
 
   return (
     <div className="h-full min-h-0 overflow-y-auto bg-[var(--color-bg-app)]">
-      <PageHeader title={`🏆 ${t('rankings.title')}`} backTo="/menu" backLabel={`← ${t('common.back')}`} />
+      <PageHeader title={t('rankings.title')} backTo="/menu" backLabel={`← ${t('common.back')}`} />
 
       <main className="max-w-2xl mx-auto px-4 py-6 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] sm:px-6">
         {/* Scope toggle Global / Mes */}
@@ -497,7 +482,7 @@ export function RankingsPage() {
 
         {!hasActiveFilters && (
           <p className="mb-4 rounded-lg border border-dashed border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 py-2 text-xs text-[var(--color-text-muted)]">
-            💡 {t('rankings.fairnessNote')}
+            {t('rankings.fairnessNote')}
           </p>
         )}
 
@@ -592,7 +577,6 @@ export function RankingsPage() {
         {/* Error */}
         {error && (
           <EmptyState
-            emoji="😢"
             message={error || ''}
             action={
               <Button
@@ -612,7 +596,7 @@ export function RankingsPage() {
         {!isLoading && !error && (
           <>
             {filteredLeaderboard.length === 0 ? (
-              <EmptyState emoji="📊" message={t(hasNoSearchResults ? 'rankings.noSearchResults' : 'rankings.empty')} />
+              <EmptyState message={t(hasNoSearchResults ? 'rankings.noSearchResults' : 'rankings.empty')} />
             ) : (
               <>
                 {/* Podium top 3 — only when not searching */}

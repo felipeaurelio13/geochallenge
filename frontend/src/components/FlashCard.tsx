@@ -5,6 +5,7 @@ import { triggerHaptic } from '../hooks/useHaptics';
 import { useImageWithFallback } from '../hooks/useImageWithFallback';
 import { useTranslation } from 'react-i18next';
 import { getOptionDisplayLabel } from '../utils/monumentOptions';
+import { GeoMark } from './atoms/GeoMark';
 
 interface FlashCardProps {
   question: Question;
@@ -56,16 +57,16 @@ export function FlashCard({ question, onAnswer, disabled, disabledOptions = [], 
 
   const feedbackClass =
     feedback === 'correct'
-      ? 'border-green-400 ring-4 ring-green-400/40 bg-green-950/30'
+      ? 'border-success-500 bg-success-500/10'
       : feedback === 'incorrect'
-        ? 'border-red-400 ring-4 ring-red-400/40 bg-red-950/30'
+        ? 'border-error-500 bg-error-500/10'
         : 'border-[var(--color-border)]';
 
   return (
     <div className="flex h-full w-full flex-col gap-4">
       <div
         {...swipeHandlers}
-        className={`relative flex-1 min-h-0 overflow-hidden rounded-3xl border-2 bg-[var(--color-surface)] shadow-xl transition-all duration-150 ${feedbackClass}`}
+        className={`relative flex-1 min-h-0 overflow-hidden rounded-lg border bg-[var(--color-surface)] transition-[border-color,background-color] duration-150 ${feedbackClass}`}
         role="img"
         aria-label={t(
           'flash.altIdentify',
@@ -83,9 +84,9 @@ export function FlashCard({ question, onAnswer, disabled, disabledOptions = [], 
             onError={handleImageError}
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-6xl">{question.category === 'MONUMENT' ? '🗿' : '🌍'}</div>
+          <div className="flex h-full items-center justify-center"><GeoMark className="h-16 w-16 text-app-subtle opacity-40" /></div>
         )}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-3 text-center text-xs text-gray-200">
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-black/55 p-3 text-center text-xs text-white">
           {t('flash.swipeHint')}
         </div>
       </div>
@@ -95,7 +96,7 @@ export function FlashCard({ question, onAnswer, disabled, disabledOptions = [], 
           type="button"
           onClick={() => handleAnswer(optionA)}
           disabled={disabled || disabledOptions.includes(optionA)}
-          className="pressable min-h-16 rounded-2xl border-2 border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 py-4 text-base font-semibold text-[var(--color-text-primary)] shadow-md transition-colors hover:border-primary/50 hover:bg-[var(--color-surface)] active:bg-[var(--color-surface)] disabled:cursor-not-allowed disabled:opacity-60"
+          className="pressable min-h-16 rounded-md border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 py-4 text-base font-semibold text-[var(--color-text-primary)] transition-colors hover:border-primary/50 hover:bg-[var(--color-surface)] active:bg-[var(--color-surface)] disabled:cursor-not-allowed disabled:opacity-60"
           aria-label={`Opción A: ${displayA}`}
         >
           <span className="mr-2 text-xs text-[var(--color-text-muted)]">←</span>
@@ -105,7 +106,7 @@ export function FlashCard({ question, onAnswer, disabled, disabledOptions = [], 
           type="button"
           onClick={() => handleAnswer(optionB)}
           disabled={disabled || disabledOptions.includes(optionB)}
-          className="pressable min-h-16 rounded-2xl border-2 border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 py-4 text-base font-semibold text-[var(--color-text-primary)] shadow-md transition-colors hover:border-primary/50 hover:bg-[var(--color-surface)] active:bg-[var(--color-surface)] disabled:cursor-not-allowed disabled:opacity-60"
+          className="pressable min-h-16 rounded-md border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 py-4 text-base font-semibold text-[var(--color-text-primary)] transition-colors hover:border-primary/50 hover:bg-[var(--color-surface)] active:bg-[var(--color-surface)] disabled:cursor-not-allowed disabled:opacity-60"
           aria-label={`Opción B: ${displayB}`}
         >
           {displayB}

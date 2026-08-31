@@ -16,7 +16,7 @@ export function LoadingSpinner({ size = 'md', text }: LoadingSpinnerProps) {
         <div className="absolute inset-0 rounded-full border-4 border-[var(--color-border)]" />
         <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-primary animate-spin" />
       </div>
-      {text && <p className="text-gray-400 text-sm animate-pulse">{text}</p>}
+      {text && <p className="text-app-subtle text-sm animate-pulse">{text}</p>}
     </div>
   );
 }

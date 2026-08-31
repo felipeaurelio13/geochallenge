@@ -16,6 +16,8 @@ import {
 import { UserAvatar } from '../components/atoms/UserAvatar';
 import { Alert } from '../components/atoms/Alert';
 import { Button } from '../components/atoms/Button';
+import { GeoIcon } from '../components/atoms/GeoIcon';
+import { GeoMark } from '../components/atoms/GeoMark';
 import { MonumentAttribution } from '../components/MonumentAttribution';
 import {
   Category,
@@ -24,7 +26,6 @@ import {
   DuelMode,
   GameFilters,
   GeoChallengeKind,
-  GeoChallengeRegion,
   LocalizedText,
   MechanicUsage,
   Question,
@@ -65,24 +66,10 @@ const SOCKET_CONNECT_TIMEOUT_MS = 10000;
 const SYNCING_LONG_THRESHOLD_MS = 5000;
 const DUEL_CATEGORIES: Category[] = ['FLAG', 'CAPITAL', 'MAP', 'SILHOUETTE', 'MONUMENT', 'MIXED'];
 
-const GEO_KIND_ICONS: Record<GeoChallengeKind, string> = {
-  EXTREME: '🧭',
-  HIGHER_LOWER: '⚖️',
-  COMMON_NEIGHBOR: '🔗',
-  ODD_ONE_OUT: '🕵️',
-  NORTH_TO_SOUTH: '↕️',
-  CAPITAL_PROXIMITY: '📍',
-  ORDER_BY_METRIC: '📊',
-  NEIGHBOR_COUNT: '🧩',
-  BORDER_CHAIN: '⛓️',
-};
-
-const GEO_REGION_ICONS: Record<GeoChallengeRegion, string> = {
-  AFRICA: '🌍',
-  AMERICAS: '🌎',
-  ASIA: '🌏',
-  EUROPE: '🧭',
-  OCEANIA: '🏝️',
+const GEO_KIND_ICONS: Record<GeoChallengeKind, 'map' | 'challenge'> = {
+  EXTREME: 'map', HIGHER_LOWER: 'challenge', COMMON_NEIGHBOR: 'map',
+  ODD_ONE_OUT: 'challenge', NORTH_TO_SOUTH: 'map', CAPITAL_PROXIMITY: 'map',
+  ORDER_BY_METRIC: 'challenge', NEIGHBOR_COUNT: 'map', BORDER_CHAIN: 'challenge',
 };
 
 function localizeGeoText(text: LocalizedText, language: string): string {
@@ -637,7 +624,7 @@ export function DuelPage() {
                 <span className="absolute inline-flex h-16 w-16 rounded-full bg-primary/15 animate-ping [animation-delay:0.3s]" />
               </>
             )}
-            <span className="relative text-6xl">⚔️</span>
+            <GeoIcon name="duel" size={56} className="relative text-primary" />
           </div>
 
           <h1 className="text-2xl font-bold text-[var(--color-text-primary)] mb-5">
@@ -652,7 +639,7 @@ export function DuelPage() {
             {formatSearchTime(searchTime)}
           </div>
 
-          <div className="mb-5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-left text-sm">
+          <div className="mb-5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-left text-sm">
             <p className="text-primary font-semibold mb-1">
               {isRated
                 ? t(isGeoDuel ? 'duel.rankedGeoQueue' : 'duel.rankedClassicQueue')
@@ -694,8 +681,8 @@ export function DuelPage() {
           </div>
 
           {searchTimedOut && (
-            <div className="mb-4 w-full rounded-2xl border border-amber-500/40 bg-amber-500/10 p-4 text-left">
-              <p className="font-medium text-amber-700 dark:text-amber-300">{t('duel.searchTimeoutWarm')}</p>
+          <div className="mb-4 w-full rounded-lg border border-warning-500/40 bg-warning-500/10 p-4 text-left">
+              <p className="font-medium text-warning-500">{t('duel.searchTimeoutWarm')}</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <Button onClick={() => navigate('/menu')} variant="secondary" size="sm">
                   {t('duel.changeCategory')}
@@ -757,7 +744,7 @@ export function DuelPage() {
 
             <div className="text-center">
               <div className="relative inline-block mb-2">
-                <UserAvatar username={opponent.username} size="lg" color="bg-red-500" className="ring-2 ring-red-400/60" />
+                <UserAvatar username={opponent.username} size="lg" />
               </div>
               <p className="text-[var(--color-text-primary)] font-semibold text-sm">{opponent.username}</p>
               {isRated && opponent.rating != null && (
@@ -793,20 +780,16 @@ export function DuelPage() {
 
     return (
       <div className="h-full min-h-0 bg-[var(--color-bg-app)] flex items-center justify-center px-4">
-        <div className={`max-w-md w-full rounded-2xl border p-6 sm:p-8 text-center animate-scale-in ${
-          isWinner
-            ? 'border-yellow-500/40 bg-gradient-to-b from-yellow-950/40 to-[var(--color-surface)]'
-            : isTie
-              ? 'border-[var(--color-border)] bg-[var(--color-surface)]'
-              : 'border-[var(--color-border)] bg-[var(--color-surface)]'
+        <div className={`max-w-md w-full rounded-lg border p-6 sm:p-8 text-center animate-scale-in ${
+          isWinner ? 'border-primary/40 bg-primary/5' : 'border-[var(--color-border)] bg-[var(--color-surface)]'
         }`}>
           {connectionBanner}
 
-          <div className={`text-6xl mb-3 ${isWinner && !prefersReducedMotion ? 'animate-bounce' : ''}`}>
-            {isTie ? '🤝' : isWinner ? '🏆' : isCloseLoss ? '🔥' : '💪'}
+          <div className={`mb-3 flex justify-center ${isWinner && !prefersReducedMotion ? 'animate-bounce' : ''}`}>
+            {isWinner ? <GeoIcon name="rank" size={52} className="text-primary" /> : <GeoMark className="h-12 w-12 text-primary" />}
           </div>
 
-          <h1 className={`text-3xl font-black mb-1 ${isWinner ? 'text-yellow-400' : isTie ? 'text-[var(--color-text-primary)]' : 'text-[var(--color-text-primary)]'}`}>
+          <h1 className={`text-3xl font-black mb-1 ${isWinner ? 'text-primary' : 'text-[var(--color-text-primary)]'}`}>
             {isTie
               ? t('duel.tie')
               : isWinner
@@ -826,14 +809,14 @@ export function DuelPage() {
 
           <div className="my-6 grid grid-cols-[1fr_auto_1fr] items-center gap-4">
             <div className="text-center">
-              <div className={`text-3xl font-black ${isWinner ? 'text-yellow-400' : 'text-primary'}`}>
+              <div className="text-3xl font-black text-primary">
                 {duelResult.myScore.toLocaleString()}
               </div>
               <div className="mt-1 text-xs text-[var(--color-text-muted)] truncate max-w-full">{user?.username}</div>
             </div>
             <div className="text-sm font-bold text-[var(--color-text-muted)]">vs</div>
             <div className="text-center">
-              <div className={`text-3xl font-black ${!isWinner && !isTie ? 'text-yellow-400' : 'text-red-400'}`}>
+              <div className="text-3xl font-black text-app-text">
                 {duelResult.opponentScore.toLocaleString()}
               </div>
               <div className="mt-1 text-xs text-[var(--color-text-muted)] truncate max-w-full">{duelResult.opponentName}</div>
@@ -854,7 +837,7 @@ export function DuelPage() {
                     <p className="text-lg font-black text-app-text">
                       {ratingDisplay.data.ratingBefore} → {ratingDisplay.data.ratingAfter}
                     </p>
-                    <p className={`text-lg font-black ${ratingDisplay.data.ratingDelta >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    <p className={`text-lg font-black ${ratingDisplay.data.ratingDelta >= 0 ? 'text-success-500' : 'text-error-500'}`}>
                       {ratingDisplay.data.ratingDelta >= 0 ? '+' : ''}{ratingDisplay.data.ratingDelta}
                     </p>
                   </div>
@@ -942,7 +925,7 @@ export function DuelPage() {
         className="bg-[var(--color-bg-app)]"
         footerOverlay={showResult}
         header={
-          <header className="border-b border-app-border bg-app-surface/95 px-3 py-2 pt-[calc(env(safe-area-inset-top)+0.5rem)] backdrop-blur sm:px-4">
+          <header className="border-b border-app-border bg-app-surface px-3 py-2 pt-[calc(env(safe-area-inset-top)+0.5rem)] sm:px-4">
             <div className="mx-auto flex max-w-4xl items-center justify-between gap-3">
               <div className="flex min-w-0 items-center gap-2">
                 <UserAvatar username={user?.username ?? ''} size="sm" />
@@ -957,8 +940,8 @@ export function DuelPage() {
                 isActive={duelState === 'playing' && !showResult}
               />
               <div className="flex min-w-0 items-center gap-2">
-                <span className="text-xl font-black text-red-400">{opponentScore}</span>
-                <UserAvatar username={opponent?.username ?? ''} size="sm" color="bg-red-500" />
+                <span className="text-xl font-black text-app-text">{opponentScore}</span>
+                <UserAvatar username={opponent?.username ?? ''} size="sm" />
               </div>
             </div>
           </header>
@@ -968,8 +951,8 @@ export function DuelPage() {
             <span className="text-sm text-app-secondary">
               {t('game.questionOf', { current: questionNumber, total: totalQuestions })}
             </span>
-            <span className="ml-2 text-xs font-bold text-fuchsia-300">
-              {GEO_REGION_ICONS[geoRound.region]} {t(`geoChallenges.regions.${geoRound.region}`)}
+            <span className="ml-2 text-xs font-bold text-primary">
+              {t(`geoChallenges.regions.${geoRound.region}`)}
             </span>
             {connectionNotice && connectionNotice.type !== 'info' && (
               <div className="mt-2">{connectionBanner}</div>
@@ -978,8 +961,8 @@ export function DuelPage() {
         }
         content={
           <main className="mx-auto flex h-full min-h-0 w-full max-w-4xl flex-col px-3 py-3 sm:px-4">
-            <section className="shrink-0 rounded-2xl border border-fuchsia-500/25 bg-gradient-to-br from-fuchsia-500/10 to-indigo-500/5 p-3 text-center sm:p-4">
-              <div className="text-2xl" aria-hidden="true">{GEO_KIND_ICONS[geoRound.kind]}</div>
+            <section className="shrink-0 rounded-lg border border-app-border bg-app-surface p-3 text-center sm:p-4">
+              <div className="flex justify-center" aria-hidden="true"><GeoIcon name={GEO_KIND_ICONS[geoRound.kind]} size={22} className="text-primary" /></div>
               <h1 className="mt-1 text-base font-black leading-snug text-app-text sm:text-xl">
                 {localizeGeoText(geoRound.prompt, i18n.language)}
               </h1>
@@ -997,13 +980,13 @@ export function DuelPage() {
                   const isWrongSelection = showResult && isSelected && !isCorrectOption;
                   const stateClass = showResult
                     ? isCorrectOption
-                      ? 'border-green-500 bg-green-500/15 text-green-100'
+                      ? 'border-success-500 bg-success-500/10 text-success-500'
                       : isWrongSelection
-                        ? 'border-red-500 bg-red-500/15 text-red-100'
+                        ? 'border-error-500 bg-error-500/10 text-error-500'
                         : 'border-app-border bg-app-surface/60 text-app-subtle opacity-65'
                     : isSelected
-                      ? 'border-fuchsia-400 bg-fuchsia-500/20 text-app-text ring-1 ring-fuchsia-400/60'
-                      : 'border-app-border bg-app-surface text-app-text hover:border-fuchsia-500/60';
+                      ? 'border-primary bg-primary/10 text-app-text'
+                      : 'border-app-border bg-app-surface text-app-text hover:border-primary/60';
 
                   return (
                     <button
@@ -1015,14 +998,14 @@ export function DuelPage() {
                       className={`pressable flex min-h-14 items-center gap-3 rounded-2xl border px-4 py-3 text-left text-sm font-bold transition-all ${stateClass}`}
                     >
                       {geoRound.selectionMode === 'ordered' && isSelected && (
-                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-fuchsia-500 text-sm font-black text-white">
+                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-black text-white">
                           {position}
                         </span>
                       )}
                       <span className="text-2xl" aria-hidden="true">{flagFromIso2(option.id)}</span>
                       <span className="min-w-0 flex-1">{localizeGeoText(option.label, i18n.language)}</span>
-                      {showResult && isCorrectOption && <span className="text-green-400" aria-hidden="true">✓</span>}
-                      {isWrongSelection && <span className="text-red-400" aria-hidden="true">✕</span>}
+                      {showResult && isCorrectOption && <span className="text-success-500" aria-hidden="true">✓</span>}
+                      {isWrongSelection && <span className="text-error-500" aria-hidden="true">✕</span>}
                     </button>
                   );
                 })}
@@ -1052,7 +1035,7 @@ export function DuelPage() {
                   <button
                     type="button"
                     onClick={() => setGeoSelectionIds((current) => current.slice(0, -1))}
-                    className="rounded-lg px-2 py-1 font-semibold text-fuchsia-300 hover:bg-fuchsia-500/10"
+                    className="rounded-md px-2 py-1 font-semibold text-primary hover:bg-primary/10"
                   >
                     ↶ {t('geoChallenges.undo')}
                   </button>
@@ -1069,7 +1052,7 @@ export function DuelPage() {
     <GameRoundScaffold
       rootClassName="bg-[var(--color-bg-app)]"
       header={
-        <header className="sticky top-0 z-30 border-b border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 py-2 pt-2 backdrop-blur sm:px-4">
+        <header className="sticky top-0 z-30 border-b border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 py-2 pt-2 sm:px-4">
           <div className="max-w-4xl mx-auto flex items-center justify-between">
             <div className="flex items-center gap-2">
               <UserAvatar username={user?.username ?? ''} size="sm" />
@@ -1085,8 +1068,8 @@ export function DuelPage() {
             />
 
             <div className="flex items-center gap-2">
-              <span className="text-xl font-bold text-red-400">{opponentScore}</span>
-              <UserAvatar username={opponent?.username ?? ''} size="sm" color="bg-red-500" />
+              <span className="text-xl font-bold text-app-text">{opponentScore}</span>
+              <UserAvatar username={opponent?.username ?? ''} size="sm" />
             </div>
           </div>
         </header>

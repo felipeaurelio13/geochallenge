@@ -13,6 +13,7 @@ import { StatCard } from '../components/atoms/StatCard';
 import { Input } from '../components/atoms/Input';
 import { FormLabel } from '../components/atoms/FormLabel';
 import { Button } from '../components/atoms/Button';
+import { GeoIcon } from '../components/atoms/GeoIcon';
 import { SkeletonRow } from '../components/atoms/Skeleton';
 import { uiStoreActions, useUiStore } from '../store/useUiStore';
 import type {
@@ -38,12 +39,8 @@ interface GameHistoryEntry {
   createdAt: string;
 }
 
-const VARIANT_ICONS: Record<string, string> = {
-  CLASSIC: '🎯',
-  STREAK: '🔥',
-  FLASH: '⚡',
-  FLAG_MASTER: '🏴',
-  GEO_CHALLENGE: '🧠',
+const VARIANT_ICONS: Record<string, 'challenge' | 'life' | 'flag' | 'map'> = {
+  CLASSIC: 'challenge', STREAK: 'life', FLASH: 'challenge', FLAG_MASTER: 'flag', GEO_CHALLENGE: 'map',
 };
 
 const VARIANT_LABEL_KEYS: Record<string, string> = {
@@ -357,21 +354,21 @@ export function ProfilePage() {
                     .map((stat) => {
                       const labelKey = `categories.${stat.category.toLowerCase()}s`;
                       const label = t(labelKey, stat.category);
-                      const CATEGORY_ICONS: Record<string, string> = {
-                        FLAG: '🚩', CAPITAL: '🏛️', MAP: '🗺️',
+                      const CATEGORY_ICONS: Record<string, 'flag' | 'landmark' | 'map'> = {
+                        FLAG: 'flag', CAPITAL: 'landmark', MAP: 'map',
                       };
                       return (
                         <div key={stat.category}>
                           <div className="mb-1 flex items-center justify-between text-sm">
                             <span className="flex items-center gap-1.5 text-[var(--color-text-secondary)]">
-                              <span>{CATEGORY_ICONS[stat.category] ?? '🎯'}</span>
+                              <GeoIcon name={CATEGORY_ICONS[stat.category] ?? 'challenge'} size={15} className="text-primary" />
                               {label}
                             </span>
                             <span className="font-semibold text-app-text">{stat.accuracy}%</span>
                           </div>
                           <div className="h-2 rounded-full bg-[var(--color-surface-muted)]">
                             <div
-                              className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-emerald-500 transition-all duration-500"
+                              className="h-full rounded-full bg-primary transition-all duration-500"
                               style={{ width: `${stat.accuracy}%` }}
                             />
                           </div>
@@ -569,7 +566,7 @@ export function ProfilePage() {
             {activePeriodStats ? (
               <div className="grid grid-cols-3 gap-3">
                 <div className="bg-[var(--color-surface)] rounded-xl p-4 text-center">
-                  <div className="text-2xl font-bold text-green-400">{activePeriodStats.wins}</div>
+                  <div className="text-2xl font-bold text-success-500">{activePeriodStats.wins}</div>
                   <div className="text-xs text-[var(--color-text-muted)] mt-1">{t('duelHistory.stats.wins')}</div>
                 </div>
                 <div className="bg-[var(--color-surface)] rounded-xl p-4 text-center">
@@ -577,7 +574,7 @@ export function ProfilePage() {
                   <div className="text-xs text-[var(--color-text-muted)] mt-1">{t('duelHistory.stats.draws')}</div>
                 </div>
                 <div className="bg-[var(--color-surface)] rounded-xl p-4 text-center">
-                  <div className="text-2xl font-bold text-red-400">{activePeriodStats.losses}</div>
+                  <div className="text-2xl font-bold text-error-500">{activePeriodStats.losses}</div>
                   <div className="text-xs text-[var(--color-text-muted)] mt-1">{t('duelHistory.stats.losses')}</div>
                 </div>
               </div>
@@ -620,7 +617,6 @@ export function ProfilePage() {
                 </div>
               ) : duelMatches.length === 0 ? (
                 <EmptyState
-                  emoji="⚔️"
                   message={t('profile.emptyDuels')}
                   action={
                     <Button variant="primary" size="md" onClick={() => navigate('/duel')}>
@@ -648,9 +644,9 @@ export function ProfilePage() {
                         <span
                           className={`inline-block text-xs font-bold px-2 py-0.5 rounded-full mb-1 ${
                             m.result === 'win'
-                              ? 'bg-green-500/20 text-green-400'
+                              ? 'bg-success-500/10 text-success-500'
                               : m.result === 'loss'
-                              ? 'bg-red-500/20 text-red-400'
+                              ? 'bg-error-500/10 text-error-500'
                               : 'bg-[var(--color-surface-muted)] text-[var(--color-text-muted)]'
                           }`}
                         >
@@ -692,7 +688,6 @@ export function ProfilePage() {
                 </div>
               ) : !historyEntries || historyEntries.length === 0 ? (
                 <EmptyState
-                  emoji="🚀"
                   message={t('profile.emptyHistory')}
                   action={
                     <Button variant="primary" size="md" onClick={() => navigate('/menu')}>
@@ -708,25 +703,23 @@ export function ProfilePage() {
                       : 0;
                     const accuracyColor =
                       accuracy >= 80
-                        ? 'text-green-400'
+                        ? 'text-success-500'
                         : accuracy >= 50
-                        ? 'text-yellow-400'
-                        : 'text-red-400';
+                        ? 'text-primary'
+                        : 'text-error-500';
                     const categoryLabel = entry.category
                       ? t(CATEGORY_LABEL_KEY[entry.category] || 'categories.mixed')
                       : null;
                     // Usar variant para el ícono y label si está disponible; si no, mantener compatibilidad con el gameMode legacy.
                     const variantKey = entry.variant ?? entry.gameMode;
-                    const variantIcon = VARIANT_ICONS[variantKey] ?? '🎮';
+                    const variantIcon = VARIANT_ICONS[variantKey] ?? 'challenge';
                     const hasLegacyMode = !entry.variant;
                     const labelKey = entry.variant
                       ? (VARIANT_LABEL_KEYS[variantKey] ?? `gameHistory.modes.${entry.gameMode}`)
                       : `gameHistory.modes.${entry.gameMode}`;
                     return (
                       <li key={entry.id} className="flex items-center gap-3 px-4 py-3">
-                        <span className="text-2xl leading-none" aria-hidden="true">
-                          {variantIcon}
-                        </span>
+                        <GeoIcon name={variantIcon} size={22} className="shrink-0 text-primary" />
                         <div className="flex-1 min-w-0">
                           <div className="text-sm font-medium text-app-text truncate">
                             {t(labelKey, entry.gameMode)}
@@ -794,7 +787,7 @@ export function ProfilePage() {
                     onClick={() => navigate(`/duel?category=${challengeCategory}`)}
                     className="pressable mb-4 flex items-center justify-center gap-2"
                   >
-                    <span aria-hidden="true">⚔️</span>
+                    <GeoIcon name="duel" size={17} />
                     <span>{t('duelHistory.challengeAgain')}</span>
                   </Button>
                   <p className="-mt-3 mb-4 text-center text-[11px] text-[var(--color-text-muted)]">
@@ -811,13 +804,13 @@ export function ProfilePage() {
                         <div key={p.key} className="flex items-center gap-3">
                           <span className="text-xs text-[var(--color-text-muted)] w-14 shrink-0">{p.label}</span>
                           <div className="flex gap-1 flex-1">
-                            <span className="flex-1 text-center py-1 rounded text-xs font-bold bg-green-500/15 text-green-400">
+                            <span className="flex-1 text-center py-1 rounded-md text-xs font-bold bg-success-500/10 text-success-500">
                               {s.wins}V
                             </span>
-                            <span className="flex-1 text-center py-1 rounded text-xs font-bold bg-[var(--color-surface-muted)] text-[var(--color-text-muted)]">
+                            <span className="flex-1 text-center py-1 rounded-md text-xs font-bold bg-[var(--color-surface-muted)] text-[var(--color-text-muted)]">
                               {s.draws}E
                             </span>
-                            <span className="flex-1 text-center py-1 rounded text-xs font-bold bg-red-500/15 text-red-400">
+                            <span className="flex-1 text-center py-1 rounded-md text-xs font-bold bg-error-500/10 text-error-500">
                               {s.losses}D
                             </span>
                           </div>
@@ -848,9 +841,9 @@ export function ProfilePage() {
                             <span
                               className={`inline-block text-xs font-bold px-2 py-0.5 rounded-full mb-1 ${
                                 m.result === 'win'
-                                  ? 'bg-green-500/20 text-green-400'
+                                  ? 'bg-success-500/10 text-success-500'
                                   : m.result === 'loss'
-                                  ? 'bg-red-500/20 text-red-400'
+                                  ? 'bg-error-500/10 text-error-500'
                                   : 'bg-[var(--color-surface-muted)] text-[var(--color-text-muted)]'
                               }`}
                             >

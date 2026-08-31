@@ -34,14 +34,14 @@ export function StreakCombo({
 
   const isActive = combo > 0;
   const tone = milestone
-    ? 'from-amber-400 to-orange-500 border-amber-300 text-amber-950'
+    ? 'border-warning-500 bg-warning-500/10 text-warning-500'
     : isActive
-      ? 'from-primary to-blue-500 border-primary/50 text-white'
-      : 'from-app-muted to-app-surface border-app-border text-app-subtle';
+      ? 'border-primary bg-primary/10 text-primary'
+      : 'border-app-border bg-app-muted text-app-subtle';
 
   return (
     <div
-      className={`inline-flex items-center gap-2 rounded-2xl border bg-gradient-to-br px-3 py-1.5 shadow-lg ${tone} ${
+      className={`inline-flex items-center gap-2 rounded-md border px-3 py-1.5 shadow-sm ${tone} ${
         milestone && !prefersReducedMotion ? 'combo-flash' : ''
       } ${className ?? ''}`}
       aria-label={ariaLabel ?? `${label} ${combo}`}
