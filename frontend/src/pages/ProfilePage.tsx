@@ -510,7 +510,7 @@ export function ProfilePage() {
               </h3>
 
               <div className="space-y-3">
-                <label className="pressable flex cursor-pointer items-center justify-between rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-4 py-3 hover:border-gray-500">
+                <label className="pressable flex cursor-pointer items-center justify-between rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-4 py-3 hover:border-primary/50">
                   <div className="pr-4">
                     <div className="text-sm font-medium text-app-text">
                       {t('profile.hapticsLabel', 'Vibración háptica')}
@@ -532,7 +532,7 @@ export function ProfilePage() {
                   </div>
                 </label>
 
-                <label className="pressable flex cursor-pointer items-center justify-between rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-4 py-3 hover:border-gray-500">
+                <label className="pressable flex cursor-pointer items-center justify-between rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-4 py-3 hover:border-primary/50">
                   <div className="pr-4">
                     <div className="text-sm font-medium text-app-text">
                       {t('profile.extendedTime')}

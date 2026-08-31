@@ -86,7 +86,6 @@
   /* Shadows */
   --shadow-sm: 0 1px 2px rgb(23 33 29 / 0.08);
   --shadow-md: 0 4px 10px rgb(23 33 29 / 0.1);
-  --shadow-lg: var(--shadow-md);
   --shadow-glow-primary: 0 0 0 0.1875rem rgb(24 123 104 / 0.18);
 
   /* Breakpoints */

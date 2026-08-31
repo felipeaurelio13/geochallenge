@@ -72,7 +72,7 @@ function MechanicButton({
       <p
         id={tooltipId}
         role="tooltip"
-        className={`pointer-events-none absolute left-0 right-0 top-full z-10 mt-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1.5 text-[0.68rem] leading-snug text-[var(--color-text-secondary)] shadow-lg transition-opacity duration-150 ${
+        className={`pointer-events-none absolute left-0 right-0 top-full z-10 mt-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1.5 text-[0.68rem] leading-snug text-[var(--color-text-secondary)] shadow-sm transition-opacity duration-150 ${
           tooltipVisible ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
         }`}
       >

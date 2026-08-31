@@ -49,7 +49,7 @@ export function CategorySelector({ categories, selected, onSelect, ariaLabel }: 
           en sm+ desaparece junto con el scroll. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-[var(--color-bg-app)] to-transparent sm:hidden"
+        className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-app-bg sm:hidden"
       />
     </div>
   );
