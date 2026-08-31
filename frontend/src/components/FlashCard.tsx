@@ -86,7 +86,7 @@ export function FlashCard({ question, onAnswer, disabled, disabledOptions = [], 
         ) : (
           <div className="flex h-full items-center justify-center"><GeoMark className="h-16 w-16 text-app-subtle opacity-40" /></div>
         )}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-black/55 p-3 text-center text-xs text-white">
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-[color-mix(in_srgb,var(--color-bg-shell)_82%,transparent)] p-3 text-center text-xs text-app-text">
           {t('flash.swipeHint')}
         </div>
       </div>

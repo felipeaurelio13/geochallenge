@@ -70,7 +70,7 @@ export function ShareButton({
       >
         🔗 {isSharing ? `${t('common.loading')}...` : buttonLabel}
       </Button>
-      <p className="mt-2 min-h-5 text-xs text-green-300" aria-live="polite">
+      <p className="mt-2 min-h-5 text-xs text-success" aria-live="polite">
         {feedbackMessage}
       </p>
     </div>

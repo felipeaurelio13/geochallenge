@@ -301,93 +301,13 @@ export function MenuPage() {
     setActivePanel((prev) => (prev === panel ? null : panel));
   }
 
-  function handleJourneyContinue() {
+  function goTracked(destination: string, gameMode: string, category: Category | 'MIXED' = 'MIXED') {
     trackUxEvent('mode_selected', {
-      destination: '/game/single?gameType=practice',
-      gameMode: 'practice',
-      category: 'MIXED',
+      destination,
+      gameMode,
+      category,
     });
-    navigate('/game/single?gameType=practice');
-  }
-
-  function handleDailyPlay() {
-    trackUxEvent('mode_selected', {
-      destination: '/daily',
-      gameMode: 'daily',
-      category: 'MIXED',
-    });
-    navigate('/daily');
-  }
-
-  function handleEventPlay() {
-    trackUxEvent('mode_selected', {
-      destination: '/event',
-      gameMode: 'event_boss',
-      category: 'MIXED',
-    });
-    navigate('/event');
-  }
-
-  // Practice handlers
-  function handlePlayClassic() {
-    goMode('single', '/game/single', { category: selectedCategory });
-  }
-
-  function handlePlayFlash() {
-    goMode('flash', '/game/flash', { category: selectedCategory });
-  }
-
-  function handlePlayStreak() {
-    goMode('streak', '/game/single', { category: selectedCategory, mode: 'streak' });
-  }
-
-  // Compete handlers
-  function handlePlayDuel() {
-    goMode('duel', '/duel', { category: selectedCategory });
-  }
-
-  function handlePlayChallenge() {
-    goMode('challenge', '/challenges', { category: selectedCategory, openCreate: '1' });
-  }
-
-  function handlePlaySurvival() {
-    goMode('survival', '/survival', { category: selectedCategory });
-  }
-
-  function handleFlagMaster() {
-    trackUxEvent('mode_selected', {
-      destination: '/flag-master',
-      gameMode: 'flag_master',
-      category: 'MIXED',
-    });
-    navigate('/flag-master');
-  }
-
-  function handleGeoChallenges() {
-    trackUxEvent('mode_selected', {
-      destination: '/geo-challenges',
-      gameMode: 'geo_challenges',
-      category: 'MIXED',
-    });
-    navigate('/geo-challenges');
-  }
-
-  function handleGeoChallengesDuel() {
-    trackUxEvent('mode_selected', {
-      destination: '/duel?mode=geo-challenge',
-      gameMode: 'geo_challenges_duel',
-      category: 'MIXED',
-    });
-    navigate('/duel?mode=geo-challenge');
-  }
-
-  function handleCompetitionHub() {
-    trackUxEvent('mode_selected', {
-      destination: '/competition',
-      gameMode: 'competition',
-      category: 'MIXED',
-    });
-    navigate('/competition');
+    navigate(destination);
   }
 
   const practicePanelOpen = activePanel === 'practice';
@@ -428,7 +348,7 @@ export function MenuPage() {
           <LobbyJourneyCard
             summary={masterySummary}
             loading={masteryLoading && !masterySummary}
-            onContinue={handleJourneyContinue}
+            onContinue={() => goTracked('/game/single?gameType=practice', 'practice')}
             onPassport={() => navigate('/passport')}
           />
         </div>
@@ -472,7 +392,7 @@ export function MenuPage() {
               )}
             </div>
           <Button
-            onClick={handleDailyPlay}
+            onClick={() => goTracked('/daily', 'daily')}
             className="mt-4"
             size="lg"
             fullWidth
@@ -542,7 +462,7 @@ export function MenuPage() {
               )}
             </div>
           <Button
-            onClick={handleEventPlay}
+            onClick={() => goTracked('/event', 'event_boss')}
             className="mt-4"
             size="lg"
             fullWidth
@@ -613,12 +533,12 @@ export function MenuPage() {
             onClearFilters={clearFilters}
             onOpenFilters={() => setDrawerOpen(true)}
             availability={canPlaySelection ? null : { canPlay: false, required: requiredQuestions, available: availableQuestions }}
-            onPlayClassic={handlePlayClassic}
-            onPlayFlash={handlePlayFlash}
-            onPlayStreak={handlePlayStreak}
+            onPlayClassic={() => goMode('single', '/game/single', { category: selectedCategory })}
+            onPlayFlash={() => goMode('flash', '/game/flash', { category: selectedCategory })}
+            onPlayStreak={() => goMode('streak', '/game/single', { category: selectedCategory, mode: 'streak' })}
             onOpenHelp={(mode) => handleOpenHelp(mode as GameModeId)}
-            onFlagMaster={handleFlagMaster}
-            onGeoChallenges={handleGeoChallenges}
+            onFlagMaster={() => goTracked('/flag-master', 'flag_master')}
+            onGeoChallenges={() => goTracked('/geo-challenges', 'geo_challenges')}
             onClose={() => setActivePanel(null)}
           />
         </div>
@@ -635,12 +555,12 @@ export function MenuPage() {
             onClearFilters={clearFilters}
             onOpenFilters={() => setDrawerOpen(true)}
             availability={canPlaySelection ? null : { canPlay: false, required: requiredQuestions, available: availableQuestions }}
-            onPlayDuel={handlePlayDuel}
-            onPlayChallenge={handlePlayChallenge}
-            onPlaySurvival={handlePlaySurvival}
-            onCompetitionHub={handleCompetitionHub}
+            onPlayDuel={() => goMode('duel', '/duel', { category: selectedCategory })}
+            onPlayChallenge={() => goMode('challenge', '/challenges', { category: selectedCategory, openCreate: '1' })}
+            onPlaySurvival={() => goMode('survival', '/survival', { category: selectedCategory })}
+            onCompetitionHub={() => goTracked('/competition', 'competition')}
             onOpenHelp={(mode) => handleOpenHelp(mode as GameModeId)}
-            onGeoChallengesDuel={handleGeoChallengesDuel}
+            onGeoChallengesDuel={() => goTracked('/duel?mode=geo-challenge', 'geo_challenges_duel')}
             onClose={() => setActivePanel(null)}
           />
         </div>

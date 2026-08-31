@@ -99,7 +99,7 @@ function PodiumBlock({ entry, topScore, youLabel }: { entry: LeaderboardEntry; t
         {entry.score.toLocaleString()}
       </span>
       <div className={`w-full rounded-t-lg border ${config.border} border-b-0 ${config.bg} ${config.height} flex items-end justify-center pb-1`}>
-        <span className={`text-xs font-bold text-white/80`}>{pct}%</span>
+        <span className={`text-xs font-bold text-app-on-accent/80`}>{pct}%</span>
       </div>
     </div>
   );
@@ -203,7 +203,7 @@ function FilterChip({
       aria-pressed={active}
       className={`whitespace-nowrap rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
         active
-          ? 'border-primary bg-primary text-white shadow-sm'
+          ? 'border-primary bg-primary text-app-on-accent shadow-sm'
           : 'border-[var(--color-border)] bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] hover:text-app-text'
       }`}
     >
@@ -375,12 +375,12 @@ export function RankingsPage() {
                 aria-selected={isActive}
                 onClick={() => setScope(s)}
                 className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
-                  isActive ? 'bg-primary text-white shadow' : 'text-[var(--color-text-secondary)] hover:text-app-text'
+                  isActive ? 'bg-primary text-app-on-accent shadow' : 'text-[var(--color-text-secondary)] hover:text-app-text'
                 }`}
               >
                 {t(`rankings.${s}`)}
                 {s === 'season' && data?.season && isActive && (
-                  <span className="ml-2 text-xs font-normal text-white/80">{data.season}</span>
+                  <span className="ml-2 text-xs font-normal text-app-on-accent/80">{data.season}</span>
                 )}
               </button>
             );
@@ -398,7 +398,7 @@ export function RankingsPage() {
         </div>
 
         {/* Filters */}
-        <div className="mb-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3">
+        <div className="mb-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-3">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
               {t('rankings.filters.title')}
@@ -491,7 +491,7 @@ export function RankingsPage() {
             para saber dónde está. Sin humillación: si no tiene partidas,
             mostramos una invitación a jugar en vez de un bloque vacío. */}
         {!isLoading && !error && user && (
-          <div className="mb-6 p-4 bg-primary/10 border border-primary/50 rounded-2xl">
+          <div className="mb-6 rounded-lg border border-primary/50 bg-primary/10 p-4">
             {resolvedUserRank ? (
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
@@ -523,7 +523,7 @@ export function RankingsPage() {
         {/* Nearby context — visible por defecto cuando el usuario está lejos
             del top (rank > 100) para que no tenga que hacer click extra. */}
         {!isLoading && !error && shouldShowNeighborsPanel && (
-          <section className="mb-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4" aria-live="polite">
+          <section className="mb-6 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-4" aria-live="polite">
             <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">{t('rankings.nearbyContext')}</h2>
             {neighborsLoading ? (
               <p className="text-sm text-[var(--color-text-muted)]">{t('rankings.loadingNeighbors')}</p>
@@ -683,7 +683,7 @@ export function RankingsPage() {
 
             {/* Stats panel */}
             {filteredLeaderboard.length > 0 && (
-              <div className="mt-8 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden">
+              <div className="mt-8 overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]">
                 <div className="px-5 py-4 border-b border-[var(--color-border)]">
                   <h3 className="text-sm font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">{statsTitle}</h3>
                 </div>

@@ -93,7 +93,7 @@ export function ForgotPasswordPage() {
         </>
       )}
 
-      <p className="mt-5 text-center text-sm text-gray-400">
+      <p className="mt-5 text-center text-sm text-app-subtle">
         <Link to="/login" className="text-primary hover:underline">
           {t('auth.loginHere')}
         </Link>

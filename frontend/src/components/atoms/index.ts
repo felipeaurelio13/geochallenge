@@ -8,7 +8,6 @@ export { GeoMark } from './GeoMark';
 export { GeoIcon } from './GeoIcon';
 export { Input } from './Input';
 export { LanguageSwitcher } from './LanguageSwitcher';
-export { SectionTitle } from './SectionTitle';
 export { SkeletonLine, SkeletonCard, SkeletonRow } from './Skeleton';
 export { StatCard } from './StatCard';
 export { UserAvatar } from './UserAvatar';

@@ -15,7 +15,7 @@ interface UserAvatarProps {
 
 export function UserAvatar({ username, size = 'md', color = 'bg-primary', className = '' }: UserAvatarProps) {
   return (
-    <div className={`${sizeClasses[size]} ${color} rounded-full flex items-center justify-center font-bold text-white ${className}`}>
+    <div className={`${sizeClasses[size]} ${color} rounded-full flex items-center justify-center font-bold text-app-on-accent ${className}`}>
       {username?.charAt(0).toUpperCase() || '?'}
     </div>
   );

@@ -331,7 +331,7 @@ export function FlashGamePage() {
     return (
       <div className="h-full min-h-0 bg-[var(--color-bg-app)] px-4 py-6 pt-[calc(env(safe-area-inset-top)+1.5rem)]">
         <div className="mx-auto max-w-md animate-fade-in">
-          <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 text-center shadow-2xl">
+          <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-6 text-center shadow-sm">
             <div className="text-7xl" aria-hidden="true">⚡</div>
             <h1 className="mt-3 text-3xl font-black text-[var(--color-text-primary)]">{t('flash.title')}</h1>
             <p className="mt-2 text-[var(--color-text-secondary)]">{t('flash.intro')}</p>
@@ -378,10 +378,10 @@ export function FlashGamePage() {
     return (
       <div className="h-full min-h-0 overflow-y-auto bg-[var(--color-bg-app)] px-4 py-6 pt-[calc(env(safe-area-inset-top)+1.5rem)]">
         <div className="mx-auto max-w-md animate-scale-in">
-          <div className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 text-center shadow-2xl">
+          <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-6 text-center shadow-sm">
             <div className="text-6xl" aria-hidden="true">⚡</div>
             <h1 className="mt-2 text-2xl font-black text-[var(--color-text-primary)]">{t('flash.finished')}</h1>
-            <div className="mt-5 rounded-2xl border border-primary/40 bg-[var(--color-surface-muted)] p-5">
+            <div className="mt-5 rounded-lg border border-primary/40 bg-[var(--color-surface-muted)] p-5">
               <p className="text-xs font-semibold uppercase tracking-wide text-primary/80">
                 {t('flash.score')}
               </p>

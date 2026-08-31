@@ -141,7 +141,7 @@ export function LoginPage() {
             <button
               type="button"
               onClick={() => setShowPassword((prev) => !prev)}
-              className="absolute inset-y-1 right-1 flex min-h-11 min-w-11 items-center justify-center rounded-lg px-3 text-xs font-semibold text-primary hover:bg-gray-700/60 focus:outline-none focus:ring-2 focus:ring-primary/70"
+              className="absolute inset-y-1 right-1 flex min-h-11 min-w-11 items-center justify-center rounded-lg px-3 text-xs font-semibold text-primary hover:bg-app-muted focus:outline-none focus:ring-2 focus:ring-primary/70"
               aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
               aria-pressed={showPassword}
             >
@@ -156,7 +156,7 @@ export function LoginPage() {
           </Link>
         </div>
 
-        {helperKey && !isBusy ? <p className="text-xs text-gray-500">{t(helperKey)}</p> : null}
+        {helperKey && !isBusy ? <p className="text-xs text-app-subtle">{t(helperKey)}</p> : null}
 
         <Button type="submit" disabled={isBusy || !isValid} fullWidth size="lg">
           {isBusy ? (
@@ -170,7 +170,7 @@ export function LoginPage() {
         </Button>
       </form>
 
-      <p className="mt-5 text-center text-sm text-gray-400">
+      <p className="mt-5 text-center text-sm text-app-subtle">
         {t('auth.noAccount')}{' '}
         <Link to="/register" className="text-primary hover:underline">
           {t('auth.registerHere')}

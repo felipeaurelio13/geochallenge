@@ -318,7 +318,7 @@ export function ProfilePage() {
               onClick={() => setActiveTab(tab.key)}
               className={`flex-1 rounded-lg py-2 text-sm font-medium transition-colors ${
                 activeTab === tab.key
-                  ? 'bg-primary text-white'
+                  ? 'bg-primary text-app-on-accent'
                   : 'text-[var(--color-text-muted)] hover:text-app-text'
               }`}
             >
@@ -597,7 +597,7 @@ export function ProfilePage() {
                   onClick={() => handlePeriodChange(p.key)}
                   className={`flex-1 rounded-lg py-2 text-xs font-medium transition-colors ${
                     duelPeriod === p.key
-                      ? 'bg-primary text-white'
+                      ? 'bg-primary text-app-on-accent'
                       : 'bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:text-app-text'
                   }`}
                 >
@@ -870,7 +870,7 @@ export function ProfilePage() {
                 />
 
                 <div className="bg-[var(--color-surface)] rounded-xl overflow-hidden">
-                  <h4 className="px-4 pt-4 pb-2 text-sm font-semibold text-white">
+                  <h4 className="px-4 pt-4 pb-2 text-sm font-semibold text-app-on-accent">
                     {t('duelHistory.recentOpponents')}
                   </h4>
 

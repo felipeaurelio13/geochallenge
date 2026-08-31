@@ -32,7 +32,7 @@ export function MonumentAttribution({ question }: MonumentAttributionProps) {
             href={sourceUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="underline hover:text-gray-200"
+            className="underline hover:text-app-text"
           >
             {t('game.monumentAttributionSource', 'Wikimedia Commons')}
           </a>

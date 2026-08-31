@@ -81,7 +81,7 @@ function Hint({ children }: { children: React.ReactNode }) {
   const context = useContext(FormFieldContext);
 
   return (
-    <p id={context?.hintId} className="text-xs text-gray-500">
+    <p id={context?.hintId} className="text-xs text-app-subtle">
       {children}
     </p>
   );

@@ -139,7 +139,7 @@ export function ResetPasswordPage() {
             <button
               type="button"
               onClick={() => setShowNewPassword((prev) => !prev)}
-              className="absolute inset-y-1 right-1 flex min-h-11 min-w-11 items-center justify-center rounded-lg px-3 text-xs font-semibold text-primary hover:bg-gray-700/60 focus:outline-none focus:ring-2 focus:ring-primary/70"
+              className="absolute inset-y-1 right-1 flex min-h-11 min-w-11 items-center justify-center rounded-lg px-3 text-xs font-semibold text-primary hover:bg-app-muted focus:outline-none focus:ring-2 focus:ring-primary/70"
               aria-label={showNewPassword ? t('auth.hidePassword') : t('auth.showPassword')}
               aria-pressed={showNewPassword}
             >
@@ -169,7 +169,7 @@ export function ResetPasswordPage() {
             <button
               type="button"
               onClick={() => setShowConfirmPassword((prev) => !prev)}
-              className="absolute inset-y-1 right-1 flex min-h-11 min-w-11 items-center justify-center rounded-lg px-3 text-xs font-semibold text-primary hover:bg-gray-700/60 focus:outline-none focus:ring-2 focus:ring-primary/70"
+              className="absolute inset-y-1 right-1 flex min-h-11 min-w-11 items-center justify-center rounded-lg px-3 text-xs font-semibold text-primary hover:bg-app-muted focus:outline-none focus:ring-2 focus:ring-primary/70"
               aria-label={showConfirmPassword ? t('auth.hidePassword') : t('auth.showPassword')}
               aria-pressed={showConfirmPassword}
             >

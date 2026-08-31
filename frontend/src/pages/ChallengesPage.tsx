@@ -204,7 +204,7 @@ export function ChallengesPage() {
       <div className="bg-[var(--color-surface)] border-b border-[var(--color-border)] px-4">
         <div className="max-w-4xl mx-auto grid grid-cols-3 gap-2 py-2 text-sm">
           {(['mine', 'joinable', 'completed'] as TabType[]).map((tab) => (
-            <button key={tab} onClick={() => setActiveTab(tab)} className={`py-2 rounded-lg ${activeTab === tab ? 'bg-primary text-white' : 'text-[var(--color-text-muted)] bg-[var(--color-surface-muted)]'}`}>
+            <button key={tab} onClick={() => setActiveTab(tab)} className={`py-2 rounded-lg ${activeTab === tab ? 'bg-primary text-app-on-accent' : 'text-[var(--color-text-muted)] bg-[var(--color-surface-muted)]'}`}>
               {t(`challenges.tabs.${tab}`)}
             </button>
           ))}
@@ -326,7 +326,7 @@ export function ChallengesPage() {
                     key={playerCount}
                     type="button"
                     onClick={() => setCreateMaxPlayers(playerCount)}
-                    className={`py-2 rounded-lg text-sm ${createMaxPlayers === playerCount ? 'bg-primary text-white' : 'bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)]'}`}
+                    className={`py-2 rounded-lg text-sm ${createMaxPlayers === playerCount ? 'bg-primary text-app-on-accent' : 'bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)]'}`}
                   >
                     {playerCount}
                   </button>
@@ -339,7 +339,7 @@ export function ChallengesPage() {
               <p className="text-xs text-[var(--color-text-muted)] mb-2">{t('challenges.answerTimeHint')}</p>
               <div className="grid grid-cols-3 gap-2">
                 {[10, 20, 30].map((time) => (
-                  <button key={time} type="button" onClick={() => setCreateTime(time as 10 | 20 | 30)} className={`py-2 rounded-lg ${createTime === time ? 'bg-primary text-white' : 'bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)]'}`}>
+                  <button key={time} type="button" onClick={() => setCreateTime(time as 10 | 20 | 30)} className={`py-2 rounded-lg ${createTime === time ? 'bg-primary text-app-on-accent' : 'bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)]'}`}>
                     {time}s
                   </button>
                 ))}

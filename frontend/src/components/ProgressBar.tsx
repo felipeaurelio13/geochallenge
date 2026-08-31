@@ -49,9 +49,9 @@ export function ProgressBar({ current, total, results, showCurrentResult = false
               style={{ width: indicatorWidth }}
               className={`h-7 min-w-0 shrink-0 rounded-full border text-[0.66rem] font-semibold transition-all duration-300 flex items-center justify-center sm:h-8 sm:text-xs ${
                 status === 'correct'
-                  ? 'border-green-400 bg-green-500 text-white'
+                  ? 'border-success bg-success text-app-on-accent'
                   : status === 'incorrect'
-                    ? 'border-red-400 bg-red-500 text-white'
+                    ? 'border-error bg-error text-app-on-accent'
                     : status === 'current'
                       ? 'border-primary/70 bg-primary/25 text-primary ring-1 ring-primary/50'
                       : 'border-[var(--color-border)] bg-[var(--color-surface-muted)] text-[var(--color-text-muted)]'

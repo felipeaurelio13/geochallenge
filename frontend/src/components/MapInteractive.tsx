@@ -303,7 +303,7 @@ export function MapInteractive({
 
       <div className="mt-2 text-center" aria-live="polite">
         {!selectedLocation && !showResult && (
-          <p className="text-sm text-gray-400">{t('game.clickMap')}</p>
+          <p className="text-sm text-app-secondary">{t('game.clickMap')}</p>
         )}
         {selectedLocation && !showResult && (
           <p className="text-sm font-medium text-primary">{t('game.locationSelected')}</p>

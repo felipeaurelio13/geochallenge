@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { useGame } from '../context/GameContext';
 import { api } from '../services/api';
 import { LoadingSpinner, ShareButton } from '../components';
-import { AnswerStatusBadge } from '../components/AnswerStatusBadge';
 import { Button } from '../components/atoms/Button';
 import { useStreakShareImage } from '../hooks/useStreakShareImage';
 import { uiStoreActions, useUiStore } from '../store/useUiStore';
@@ -175,17 +174,17 @@ export function ResultsPage() {
   return (
     <div className="h-full min-h-0 overflow-y-auto bg-[var(--color-bg-app)] px-4 py-5 pt-[calc(env(safe-area-inset-top)+1.25rem)] pb-[calc(env(safe-area-inset-bottom)+1.25rem)] sm:px-6 sm:py-8">
       <main className="mx-auto w-full max-w-xl animate-fade-in" aria-label="results-summary">
-        <section className="border-b border-[var(--color-border)] pb-6 text-center sm:pb-8">
-          <div className="mb-3 text-5xl font-bold tabular-nums text-primary sm:text-6xl" aria-label={t('results.accuracy')}>
-            {isStreakMode ? streakCount : `${percentage}%`}
+        <section className="border-b border-app-border pb-7 text-center sm:pb-9">
+          <div className="text-6xl font-bold tracking-tight tabular-nums text-primary sm:text-7xl" aria-label={t('results.accuracy')}>
+            {isStreakMode ? streakCount : `${correctAnswers} / ${totalQuestions}`}
           </div>
 
           {/* Part 5.2: en streak, el titular es la racha misma — no el genérico
               "Partida terminada" + un % que no representa nada útil en este modo. */}
-          <h1 className="text-3xl font-bold text-[var(--color-text-primary)] sm:text-4xl">
+          <h1 className="mt-3 text-2xl font-semibold text-app-text sm:text-3xl">
             {isStreakMode ? t('results.streakHeadline', { count: streakCount }) : isPracticeMode ? t('results.practiceTitle', 'Práctica adaptativa') : t('results.gameOver')}
           </h1>
-          <p className="mt-2 text-lg text-[var(--color-text-secondary)] sm:text-xl">{isPracticeMode ? t('results.practiceSubtitle', 'Tu progreso se ha guardado') : getPerformanceMessage()}</p>
+          <p className="mt-1.5 text-base text-app-secondary sm:text-lg">{isPracticeMode ? t('results.practiceSubtitle', 'Tu progreso se ha guardado') : getPerformanceMessage()}</p>
 
           {unlockedAchievements.length > 0 && (
             <div
@@ -216,77 +215,32 @@ export function ResultsPage() {
             </div>
           )}
 
-          <div className="mt-6 border-y border-[var(--color-border)] py-5">
-            <p className="text-sm font-medium uppercase tracking-wide text-primary/80">{t('game.score')}</p>
-            <div className="mt-1 text-5xl font-black text-app-text sm:text-6xl">{score.toLocaleString()}</div>
-            <div className="mt-1 text-[var(--color-text-muted)]">{t('results.points')}</div>
-          </div>
-
-          <div className="mt-6 text-left">
-            <div className="mb-2 flex items-center justify-between text-sm text-[var(--color-text-secondary)]">
-              <span>{t('results.accuracy')}</span>
-              <span className="font-semibold text-app-text">{percentage}%</span>
-            </div>
-            <div className="h-2 rounded-full bg-[var(--color-border)]" data-testid="results-accuracy-bar">
-              <div
-                className="h-full rounded-full bg-primary transition-all duration-500"
-                style={{ width: `${percentage}%` }}
-              />
-            </div>
+          <div className="mt-7 grid grid-cols-3 divide-x divide-app-border border-y border-app-border py-4 text-center">
+            <div className="px-2"><p className="text-lg font-semibold tabular-nums text-app-text">{percentage}%</p><p className="mt-0.5 text-xs text-app-subtle">{t('results.accuracy')}</p></div>
+            <div className="px-2"><p className="text-lg font-semibold tabular-nums text-app-text">{score.toLocaleString()}</p><p className="mt-0.5 text-xs text-app-subtle">{t('results.points')}</p></div>
+            <div className="px-2"><p className="text-lg font-semibold tabular-nums text-app-text">{correctAnswers}</p><p className="mt-0.5 text-xs text-app-subtle">{t('results.correct')}</p></div>
           </div>
 
           {isStreakMode ? (
-            <div className="mt-6 flex justify-center">
-              <article className="min-w-0 w-36 border-r border-[var(--color-border)] p-3 text-center sm:p-4">
-                <div className="text-2xl font-bold text-success-500">{correctAnswers}</div>
-                <div className="mt-2 flex justify-center min-w-0">
-                  <AnswerStatusBadge
-                    status="correct"
-                    label={t('results.correct')}
-                    className="justify-center text-2xs-token sm:text-xs"
-                  />
-                </div>
-              </article>
-            </div>
+            <p className="mt-5 text-sm text-app-secondary">{t('results.streakHeadline', { count: streakCount })}</p>
           ) : (
-            <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4">
-              <article className="min-w-0 border-r border-[var(--color-border)] p-3 sm:p-4">
-                <div className="text-2xl font-bold text-success-500">{correctAnswers}</div>
-                <div className="mt-2 flex justify-center min-w-0">
-                  <AnswerStatusBadge
-                    status="correct"
-                    label={t('results.correct')}
-                    className="w-full justify-center text-2xs-token sm:text-xs"
-                  />
-                </div>
-              </article>
-              <article className="min-w-0 p-3 sm:p-4">
-                <div className="text-2xl font-bold text-error-500">{incorrectAnswers}</div>
-                <div className="mt-2 flex justify-center min-w-0">
-                  <AnswerStatusBadge
-                    status="incorrect"
-                    label={t('results.incorrect')}
-                    className="w-full justify-center text-2xs-token sm:text-xs"
-                  />
-                </div>
-              </article>
-            </div>
+            <p className="mt-5 text-sm text-app-secondary"><span className="font-semibold text-success">{correctAnswers} {t('results.correct')}</span> · <span className="font-semibold text-error">{incorrectAnswers} {t('results.incorrect')}</span></p>
           )}
 
           {pointsBreakdown.length > 0 && (
-            <div className="mt-6 border-t border-[var(--color-border)] pt-4 text-left">
+            <div className="mt-6 border-t border-app-border pt-4 text-left">
               <div className="mb-2 flex items-center justify-between text-sm text-[var(--color-text-secondary)]">
                 <span>{t('results.pointsBreakdownTitle')}</span>
                 {topPointsSource && <span className="font-semibold text-app-text">{topPointsSource.label}</span>}
               </div>
-              <div className="space-y-2">
+              <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
                 {pointsBreakdown.map((item) => (
                   <div
                     key={item.key}
-                    className={`flex items-center justify-between rounded-md border px-3 py-2 text-sm ${
+                    className={`inline-flex items-center gap-1 ${
                       topPointsSource?.key === item.key
                         ? 'border-primary/50 bg-primary/10 text-primary'
-                        : 'border-[var(--color-border)] bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)]'
+                        : 'text-app-secondary'
                     }`}
                   >
                     <span>{item.label}</span>
@@ -307,13 +261,13 @@ export function ResultsPage() {
               <div className="text-3xl font-bold text-app-text">#{userRank}</div>
             </div>
           ) : (
-            <div className="mt-6 border-l-2 border-[var(--color-border)] pl-4 text-left text-sm text-[var(--color-text-secondary)]">
+            <div className="mt-6 border-l-2 border-app-border pl-4 text-left text-sm text-app-secondary">
               {t('rankings.empty')}
             </div>
           )}
         </section>
 
-        <section className="mt-5 border-b border-[var(--color-border)] pb-5 sm:pb-6">
+        <section className="mt-5 border-b border-app-border pb-5 sm:pb-6">
           <p className="text-sm text-[var(--color-text-secondary)]">{t('results.shareScore')}</p>
           <div className="mt-3">
             {isStreakMode ? (
@@ -327,7 +281,7 @@ export function ResultsPage() {
                 >
                   {streakShareStatus === 'sharing' ? `${t('common.loading')}...` : t('results.shareStreakButton', 'Compartir mi racha')}
                 </Button>
-                <p className="mt-2 min-h-5 text-xs text-green-300" aria-live="polite">
+                <p className="mt-2 min-h-5 text-xs text-success" aria-live="polite">
                   {streakShareFeedback}
                 </p>
               </div>

@@ -79,6 +79,11 @@ export function PassportPage() {
   const filtered = continentFilter
     ? countries.filter((c) => c.continent === continentFilter)
     : countries;
+  const continentProgress = continents.map((continent) => {
+    const countriesInContinent = countries.filter((country) => country.continent === continent);
+    const stamped = countriesInContinent.filter((country) => country.stamped).length;
+    return { continent, stamped, total: countriesInContinent.length };
+  });
 
   return (
     <div className="h-full overflow-y-auto bg-[var(--color-bg-app)] px-4 py-5 pt-[calc(env(safe-area-inset-top)+1.25rem)] pb-[calc(env(safe-area-inset-bottom)+1.25rem)] sm:px-6 sm:py-8">
@@ -110,6 +115,18 @@ export function PassportPage() {
             {continents.length > 1 && (
               <section className="mb-6">
                 <h2 className="mb-2 text-sm font-semibold text-app-text">{t('passport.continents', 'Continentes')}</h2>
+                <div className="mb-4 space-y-2">
+                  {continentProgress.map(({ continent, stamped, total }) => {
+                    const percent = total ? (stamped / total) * 100 : 0;
+                    return (
+                      <div key={continent}>
+                        <div className="mb-1 flex justify-between text-xs text-app-secondary"><span>{continent}</span><span>{stamped} / {total}</span></div>
+                        <div className="h-1.5 overflow-hidden rounded-full bg-app-border/70"><div className="h-full rounded-full bg-primary" style={{ width: `${percent}%` }} /></div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <p className="mb-2 text-xs font-medium text-app-secondary">{t('passport.countries', 'Países')}</p>
                 <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => setContinentFilter(null)}

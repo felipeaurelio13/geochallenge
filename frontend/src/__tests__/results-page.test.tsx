@@ -93,19 +93,17 @@ describe('ResultsPage', () => {
     vi.spyOn(navigator.clipboard, 'writeText').mockImplementation(mocks.writeTextMock);
   });
 
-  it('mantiene badges contenidos y agrega barra de precisión visible', async () => {
+  it('prioriza el resultado y mantiene métricas secundarias en una sola composición', async () => {
     const { container } = render(<ResultsPage />);
 
     await waitFor(() => {
       expect(mocks.getMyRankMock).toHaveBeenCalledTimes(1);
     });
 
-    expect(screen.getByText('Correctas').parentElement).toHaveClass('w-full', 'justify-center');
-    expect(screen.getByText('Incorrectas').parentElement).toHaveClass('w-full', 'justify-center');
-    expect(container.querySelectorAll('article.min-w-0').length).toBeGreaterThanOrEqual(2);
-
-    const accuracyBar = screen.getByTestId('results-accuracy-bar').firstElementChild as HTMLElement;
-    expect(accuracyBar.style.width).toBe('80%');
+    expect(screen.getByText('8 / 10')).toBeInTheDocument();
+    expect(screen.getByText('80%')).toBeInTheDocument();
+    expect(screen.getByText('1,100')).toBeInTheDocument();
+    expect(container.querySelectorAll('article.min-w-0').length).toBe(0);
   });
 
   it('copia mensaje y muestra confirmación inline; action tray en flujo natural (no sticky)', async () => {

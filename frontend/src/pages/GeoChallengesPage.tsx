@@ -584,7 +584,7 @@ export function GeoChallengesPage() {
                       className={`pressable relative flex min-h-14 items-center gap-3 rounded-md border px-4 py-3 text-left text-sm font-bold transition-all sm:min-h-16 sm:text-base ${resultClass}`}
                     >
                       {isOrderedRound && isSelected && (
-                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-black text-white">
+                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-black text-app-on-accent">
                           {position}
                         </span>
                       )}

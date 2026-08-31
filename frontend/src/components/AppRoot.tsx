@@ -47,7 +47,7 @@ export function AppRoot({ children }: { children: React.ReactNode }) {
         <div
           role="status"
           aria-live="polite"
-          className="fixed inset-x-0 top-0 z-40 bg-warning-500 px-3 py-1 text-center text-xs font-semibold text-white"
+          className="fixed inset-x-0 top-0 z-40 bg-warning-500 px-3 py-1 text-center text-xs font-semibold text-app-on-accent"
           style={{ paddingTop: 'calc(env(safe-area-inset-top) + 0.25rem)' }}
         >
           {t('offline.connectionRequired')}

@@ -141,7 +141,7 @@ export function RegisterPage() {
             <button
               type="button"
               onClick={() => setShowPassword((prev) => !prev)}
-              className="absolute inset-y-1 right-1 flex min-h-11 min-w-11 items-center justify-center rounded-lg px-3 text-xs font-semibold text-primary hover:bg-gray-700/60 focus:outline-none focus:ring-2 focus:ring-primary/70"
+              className="absolute inset-y-1 right-1 flex min-h-11 min-w-11 items-center justify-center rounded-lg px-3 text-xs font-semibold text-primary hover:bg-app-muted focus:outline-none focus:ring-2 focus:ring-primary/70"
               aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
               aria-pressed={showPassword}
             >
@@ -175,7 +175,7 @@ export function RegisterPage() {
             <button
               type="button"
               onClick={() => setShowConfirmPassword((prev) => !prev)}
-              className="absolute inset-y-1 right-1 flex min-h-11 min-w-11 items-center justify-center rounded-lg px-3 text-xs font-semibold text-primary hover:bg-gray-700/60 focus:outline-none focus:ring-2 focus:ring-primary/70"
+              className="absolute inset-y-1 right-1 flex min-h-11 min-w-11 items-center justify-center rounded-lg px-3 text-xs font-semibold text-primary hover:bg-app-muted focus:outline-none focus:ring-2 focus:ring-primary/70"
               aria-label={showConfirmPassword ? t('auth.hidePassword') : t('auth.showPassword')}
               aria-pressed={showConfirmPassword}
             >
@@ -197,7 +197,7 @@ export function RegisterPage() {
       </form>
 
       <div className="mt-5 text-center">
-        <p className="text-sm text-gray-400">
+        <p className="text-sm text-app-subtle">
           {t('auth.hasAccount')}{' '}
           <Link to="/login" className="text-primary hover:underline">
             {t('auth.loginHere')}

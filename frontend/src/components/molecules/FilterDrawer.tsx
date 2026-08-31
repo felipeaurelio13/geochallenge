@@ -162,7 +162,7 @@ export function FilterDrawer({ filters, onChange, onClose, disabledOptions }: Fi
 
         <button
           onClick={onClose}
-          className="w-full rounded-xl bg-primary py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90 active:opacity-75"
+          className="w-full rounded-xl bg-primary py-3 text-sm font-semibold text-app-on-accent transition-opacity hover:opacity-90 active:opacity-75"
         >
           {t('filters.apply')}
         </button>

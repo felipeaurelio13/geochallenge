@@ -17,7 +17,7 @@ export function AnswerStatusBadge({ status, label, className = '' }: AnswerStatu
     >
       <span
         className={`inline-flex h-5 w-5 items-center justify-center rounded-full text-xs font-bold ${
-          isCorrect ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+          isCorrect ? 'bg-success text-app-on-accent' : 'bg-error text-app-on-accent'
         }`}
         aria-hidden
       >

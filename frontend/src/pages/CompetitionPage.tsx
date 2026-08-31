@@ -112,7 +112,7 @@ export function CompetitionPage() {
                   onClick={() => setActiveLadder(ladder)}
                   className={`rounded-md px-3 py-1.5 text-xs font-semibold ${
                     activeLadder === ladder
-                      ? 'bg-primary text-white'
+                      ? 'bg-primary text-app-on-accent'
                       : 'text-app-secondary hover:text-app-text'
                   }`}
                 >

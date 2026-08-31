@@ -679,9 +679,9 @@ export function GamePage() {
               <>
                 <div className="flex items-center justify-between gap-3 text-sm font-semibold">
                   {lastAnswerCorrect ? (
-                    <span className="text-green-600 dark:text-green-300">✓ {t('game.correctLabel')}</span>
+                    <span className="text-success">✓ {t('game.correctLabel')}</span>
                   ) : (
-                    <span className="text-red-600 dark:text-red-300">✕ {t('game.itWas', { answer: results[results.length - 1]?.correctAnswer })}</span>
+                    <span className="text-error">✕ {t('game.itWas', { answer: results[results.length - 1]?.correctAnswer })}</span>
                   )}
                   {lastAnswerCorrect && results[results.length - 1]?.points ? (
                     <span className="shrink-0 tabular-nums text-[var(--color-text-primary)]">+{results[results.length - 1]?.points}</span>

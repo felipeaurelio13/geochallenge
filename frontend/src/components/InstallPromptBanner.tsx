@@ -40,7 +40,7 @@ export function InstallPromptBanner() {
                   type="button"
                   onClick={handleInstall}
                   disabled={busy}
-                  className="pressable min-h-10 flex-1 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-white disabled:opacity-60"
+                  className="pressable min-h-10 flex-1 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-app-on-accent disabled:opacity-60"
                 >
                   {busy ? '…' : t('install.cta', 'Instalar')}
                 </button>
