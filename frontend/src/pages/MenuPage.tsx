@@ -420,7 +420,7 @@ export function MenuPage() {
           }
         />
       }
-      contentClassName="py-2.5 pb-4 sm:py-3 sm:pb-6"
+      contentClassName="py-5 pb-6 sm:py-8 sm:pb-10"
     >
       {/* Journey Hero */}
       {user && (
@@ -436,7 +436,7 @@ export function MenuPage() {
 
       {/* Daily Challenge */}
       {user && (
-        <section className="mb-5 border-y border-app-border py-4">
+        <section className="mb-7 border-y border-app-border py-5">
           <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <h2 className="text-sm font-semibold text-app-text">
@@ -471,21 +471,22 @@ export function MenuPage() {
                 </p>
               )}
             </div>
-          <button
-            type="button"
+          <Button
             onClick={handleDailyPlay}
-            className="mt-3 w-full rounded-md bg-primary py-3 text-sm font-semibold text-white pressable"
+            className="mt-4"
+            size="lg"
+            fullWidth
           >
             {dailyStatus?.completed
               ? t('menu.daily.viewResult')
               : t('menu.daily.play')}
-          </button>
+          </Button>
         </section>
       )}
 
       {/* World Event */}
       {user && eventData && (
-        <section className="mb-5 border-y border-app-border py-4">
+        <section className="mb-7 border-y border-app-border py-5">
           <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <h2 className="text-sm font-semibold text-app-text">
@@ -540,32 +541,33 @@ export function MenuPage() {
                 </p>
               )}
             </div>
-          <button
-            type="button"
+          <Button
             onClick={handleEventPlay}
-            className="mt-3 w-full rounded-md bg-primary py-3 text-sm font-semibold text-white pressable"
+            className="mt-4"
+            size="lg"
+            fullWidth
           >
             {eventData.boss.cleared
               ? t('worldEvent.playAgain')
               : eventData.boss.unlocked
               ? t('worldEvent.faceBoss')
               : t('worldEvent.viewExpedition')}
-          </button>
+          </Button>
         </section>
       )}
 
       {/* Choose: Practice / Compete */}
-      <div className="mb-3">
-        <h2 className="px-1 text-sm font-semibold text-app-text sm:px-0">
+      <section className="mb-5">
+        <h2 className="text-base font-semibold text-app-text">
           {t('menu.choose.title')}
         </h2>
-        <div className="mt-2 grid grid-cols-2 gap-2">
+        <div className="mt-3 grid grid-cols-2 gap-3">
           <button
             type="button"
             onClick={() => togglePanel('practice')}
             aria-expanded={practicePanelOpen}
             aria-controls="panel-practice"
-            className={`rounded-md border p-4 text-left transition-colors pressable ${
+            className={`min-h-24 rounded-md border px-4 py-3 text-left transition-colors pressable ${
               practicePanelOpen
                 ? 'border-primary/60 bg-primary/10'
                 : 'border-app-border bg-app-surface hover:border-primary/40 hover:bg-primary/5'
@@ -584,7 +586,7 @@ export function MenuPage() {
             onClick={() => togglePanel('compete')}
             aria-expanded={competePanelOpen}
             aria-controls="panel-compete"
-            className={`rounded-md border p-4 text-left transition-colors pressable ${
+            className={`min-h-24 rounded-md border px-4 py-3 text-left transition-colors pressable ${
               competePanelOpen
                 ? 'border-primary/60 bg-primary/10'
                 : 'border-app-border bg-app-surface hover:border-primary/40 hover:bg-primary/5'
@@ -598,7 +600,7 @@ export function MenuPage() {
             </div>
           </button>
         </div>
-      </div>
+      </section>
 
       {/* Practice Panel */}
       {practicePanelOpen && (
@@ -645,8 +647,8 @@ export function MenuPage() {
       )}
 
       {/* More section */}
-      <section className="mt-2">
-        <h2 className="px-1 text-xs font-semibold text-app-subtle sm:px-0">
+      <section className="mt-6 border-t border-app-border pt-5">
+        <h2 className="text-xs font-semibold uppercase tracking-[0.12em] text-app-subtle">
           {t('menu.more.title')}
         </h2>
         <div className="mt-2 grid grid-cols-2 gap-2">

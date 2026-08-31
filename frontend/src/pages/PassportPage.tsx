@@ -87,40 +87,19 @@ export function PassportPage() {
           {t('passport.title', 'Mi viaje')}
         </h1>
 
-        <section className="mb-6 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
-          <div className="grid grid-cols-2 gap-4 text-center">
-            <div>
-              <div className="text-2xl font-bold text-[var(--color-accent)]">
+        <section className="mb-7 border-b border-app-border pb-6">
+          <div className="mt-2 flex items-end gap-3">
+            <div className="text-5xl font-bold tracking-tight text-primary sm:text-6xl">
                 {summary.worldProgressPercent}%
-              </div>
-              <div className="text-xs text-[var(--color-text-muted)]">
-                {t('passport.worldProgress', 'del mundo')}
-              </div>
             </div>
-            <div>
-              <div className="text-2xl font-bold text-[var(--color-text-primary)]">
-                {summary.stampedCountries}
-              </div>
-              <div className="text-xs text-[var(--color-text-muted)]">
-                {t('passport.stamped', 'países sellados')}
-              </div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-[var(--color-text-primary)]">
-                {summary.totalCountries}
-              </div>
-              <div className="text-xs text-[var(--color-text-muted)]">
-                {t('passport.totalCountries', 'países')}
-              </div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-success-500">
-                {summary.masteredCountries}
-              </div>
-              <div className="text-xs text-[var(--color-text-muted)]">
-                {t('passport.mastered', 'dominados')}
-              </div>
-            </div>
+            <p className="pb-1 text-base leading-tight text-app-secondary">{t('passport.worldProgress', 'del mundo explorado')}</p>
+          </div>
+          <p className="mt-3 text-sm text-app-secondary">
+            <span className="font-semibold text-app-text">{summary.stampedCountries}</span> {t('passport.stamped', 'países sellados')} · {summary.totalCountries} {t('passport.totalCountries', 'países')}
+            {summary.masteredCountries > 0 && <> · <span className="font-semibold text-success">{summary.masteredCountries}</span> {t('passport.mastered', 'dominados')}</>}
+          </p>
+          <div className="mt-3 h-2 overflow-hidden rounded-full bg-app-border/70">
+            <div className="h-full rounded-full bg-primary" style={{ width: `${Math.min(summary.worldProgressPercent, 100)}%` }} />
           </div>
         </section>
 
@@ -129,12 +108,14 @@ export function PassportPage() {
         ) : (
           <>
             {continents.length > 1 && (
-              <div className="mb-4 flex flex-wrap gap-2">
+              <section className="mb-6">
+                <h2 className="mb-2 text-sm font-semibold text-app-text">{t('passport.continents', 'Continentes')}</h2>
+                <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => setContinentFilter(null)}
                   className={`rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
                     !continentFilter
-                      ? 'border-primary bg-primary text-white'
+                      ? 'border-primary bg-primary text-app-on-accent'
                       : 'border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-secondary)]'
                   }`}
                 >
@@ -146,16 +127,17 @@ export function PassportPage() {
                     onClick={() => setContinentFilter(cont)}
                     className={`rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
                       continentFilter === cont
-                        ? 'border-primary bg-primary text-white'
+                        ? 'border-primary bg-primary text-app-on-accent'
                         : 'border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-secondary)]'
                     }`}
                   >
                     {cont}
                   </button>
                 ))}
-              </div>
+                </div>
+              </section>
             )}
-
+            <h2 className="mb-3 text-sm font-semibold text-app-text">{t('passport.countries', 'Países')}</h2>
             <div className="flex flex-col gap-3">
               {filtered.map((country) => (
                 <CountryCard

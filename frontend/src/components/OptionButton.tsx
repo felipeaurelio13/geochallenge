@@ -97,13 +97,13 @@ export const OptionButton = React.memo(function OptionButton({
       <span
         className={`option-button-index flex h-7 w-7 shrink-0 rounded-full items-center justify-center self-center font-bold text-xs transition-colors sm:text-sm ${
           showResult && isCorrect
-            ? 'bg-success-500/15 text-success-600 dark:text-success-500'
+            ? 'bg-success-soft text-success'
             : showResult && selected && !isCorrect
-              ? 'bg-error-500/15 text-error-600 dark:text-error-500'
+              ? 'bg-error-soft text-error'
             : eliminated
               ? 'bg-[var(--color-border)] text-[var(--color-text-muted)]'
             : selected
-                ? 'bg-primary/80 text-white'
+                ? 'bg-primary/80 text-app-on-accent'
                 : 'bg-[var(--color-border)] text-[var(--color-text-secondary)]'
         }`}
       >
@@ -121,9 +121,9 @@ export const OptionButton = React.memo(function OptionButton({
 
       <span className="flex w-[4.75rem] shrink-0 items-center justify-end text-right text-[0.68rem] font-semibold leading-tight" aria-live="polite">
         {showResult && isCorrect ? (
-          <span className="text-success-600 dark:text-success-500">{t('game.correctLabel')}</span>
+          <span className="text-success">{t('game.correctLabel')}</span>
         ) : showResult && selected ? (
-          <span className="text-error-600 dark:text-error-500">{t('game.yourAnswer')}</span>
+          <span className="text-error">{t('game.yourAnswer')}</span>
         ) : null}
       </span>
     </button>

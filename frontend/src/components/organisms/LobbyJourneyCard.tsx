@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { MasterySummary } from '../../types';
+import { Button } from '../atoms/Button';
 
 interface LobbyJourneyCardProps {
   summary: MasterySummary | null;
@@ -33,12 +34,13 @@ export function LobbyJourneyCard({
         <p className="mt-1 text-xs text-app-subtle">
           {t('menu.journey.startDesc')}
         </p>
-        <button
+        <Button
           onClick={onContinue}
-          className="mt-3 w-full rounded-md bg-primary py-3 text-sm font-semibold text-white pressable"
+          className="mt-3"
+          fullWidth
         >
           {t('menu.journey.continue')}
-        </button>
+        </Button>
       </section>
     );
   }
@@ -63,18 +65,20 @@ export function LobbyJourneyCard({
         <p className="mt-1 text-xs text-app-subtle">
           {t('menu.journey.startDesc')}
         </p>
-        <button
+        <Button
           onClick={onContinue}
-          className="mt-3 rounded-md bg-primary px-4 py-3 text-sm font-semibold text-white pressable"
+          className="mt-3"
         >
           {t('menu.journey.startFirst')}
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={onPassport}
-          className="mt-2 ml-3 rounded-md border border-app-border px-4 py-3 text-xs font-semibold text-app-subtle pressable"
+          className="mt-2 ml-3"
+          variant="secondary"
+          size="sm"
         >
           {t('menu.journey.passport')}
-        </button>
+        </Button>
       </section>
     );
   }
@@ -106,18 +110,19 @@ export function LobbyJourneyCard({
       </p>
 
       <div className="mt-3 flex gap-2">
-        <button
+        <Button
           onClick={onContinue}
-          className="flex-1 rounded-md bg-primary py-3 text-sm font-semibold text-white pressable"
+          className="flex-1"
         >
           {t('menu.journey.continue')}
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={onPassport}
-          className="rounded-md border border-app-border px-3 py-3 text-xs font-semibold text-app-subtle pressable"
+          variant="secondary"
+          size="sm"
         >
           {t('menu.journey.passport')}
-        </button>
+        </Button>
       </div>
     </section>
   );

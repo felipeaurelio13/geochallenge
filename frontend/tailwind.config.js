@@ -13,6 +13,7 @@ export default {
           text: 'var(--color-text-primary)',
           secondary: 'var(--color-text-secondary)',
           subtle: 'var(--color-text-muted)',
+          'on-accent': 'var(--color-on-accent)',
         },
         primary: {
           50: 'var(--color-primary-50)',
@@ -31,6 +32,7 @@ export default {
           500: 'var(--color-success-500)',
           600: 'var(--color-success-600)',
         },
+        'success-soft': 'var(--color-success-soft)',
         warning: {
           500: 'var(--color-warning-500)',
         },
@@ -38,6 +40,7 @@ export default {
           500: 'var(--color-error-500)',
           600: 'var(--color-error-600)',
         },
+        'error-soft': 'var(--color-error-soft)',
       },
       spacing: {
         0.5: 'var(--space-0_5)',

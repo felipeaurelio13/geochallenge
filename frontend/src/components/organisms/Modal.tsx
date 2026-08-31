@@ -95,7 +95,7 @@ function Root({ isOpen, onClose, children }: ModalRootProps) {
 
 function Title({ children }: { children: React.ReactNode }) {
   return (
-    <h2 id="modal-title" className="text-lg font-semibold text-white">
+    <h2 id="modal-title" className="text-lg font-semibold text-app-text">
       {children}
     </h2>
   );
