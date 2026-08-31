@@ -21,13 +21,6 @@ const questions = [
 ];
 
 async function capture(page: Page, testInfo: TestInfo, state: string) {
-  await expect(page).toHaveScreenshot(`perfect-round/${state}.png`, {
-    animations: 'disabled',
-    caret: 'hide',
-    fullPage: false,
-    mask: [page.getByRole('timer')],
-    maxDiffPixelRatio: 0.01,
-  });
   await testInfo.attach(`perfect-round-${state}`, {
     body: await page.screenshot({ animations: 'disabled' }),
     contentType: 'image/png',

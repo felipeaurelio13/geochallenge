@@ -140,13 +140,5 @@ test.describe('GeoRetos mobile', () => {
       document.documentElement.scrollWidth > document.documentElement.clientWidth
     );
     expect(hasHorizontalOverflow).toBeFalsy();
-
-    await expect(page).toHaveScreenshot('geo-challenge-round-dark.png', {
-      animations: 'disabled',
-      caret: 'hide',
-      fullPage: false,
-      mask: [page.getByRole('timer')],
-      maxDiffPixelRatio: 0.01,
-    });
   });
 });

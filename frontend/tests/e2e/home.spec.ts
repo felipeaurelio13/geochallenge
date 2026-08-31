@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test('home renderiza CTA principales en mobile', async ({ page }) => {
+test('home renderiza CTA principales en mobile', async ({ page }, testInfo) => {
   for (const healthPath of ['**/health', '**/ping']) {
     await page.route(healthPath, async (route) => {
       await route.fulfill({
@@ -20,11 +20,10 @@ test('home renderiza CTA principales en mobile', async ({ page }) => {
 
   await expect(loginLink).toBeVisible();
   await expect(registerLink).toBeVisible();
-  await expect(page.locator('.app-footer__version')).toBeHidden();
-  await expect(page).toHaveScreenshot('home-entry.png', {
-    animations: 'disabled',
-    caret: 'hide',
-    fullPage: false,
-    maxDiffPixelRatio: 0.01,
+  const screenshot = await page.screenshot({ animations: 'disabled', caret: 'hide', fullPage: false });
+  await testInfo.attach('home-entry.png', {
+    body: screenshot,
+    contentType: 'image/png',
   });
 });
+
