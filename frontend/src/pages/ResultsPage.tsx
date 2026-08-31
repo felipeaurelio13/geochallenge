@@ -275,8 +275,8 @@ export function ResultsPage() {
                 <Button
                   onClick={handleShareStreak}
                   disabled={streakShareStatus === 'sharing'}
-                  variant="primary"
-                  size="lg"
+                  variant="secondary"
+                  size="md"
                   fullWidth
                 >
                   {streakShareStatus === 'sharing' ? `${t('common.loading')}...` : t('results.shareStreakButton', 'Compartir mi racha')}
@@ -287,6 +287,8 @@ export function ResultsPage() {
               </div>
             ) : (
               <ShareButton
+                variant="secondary"
+                size="md"
                 payload={{
                   title: t('app.name'),
                   text: shareText,
