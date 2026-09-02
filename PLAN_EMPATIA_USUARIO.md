@@ -1,5 +1,7 @@
 # Plan de Empatía con el Usuario — GeoChallenge
 
+> **Estado (2026-09-02):** plan mayormente implementado. Ya en el repo: recuperación de contraseña, toasts globales (`ToastHost`), email transaccional con Resend, mensaje de escudo para rachas, próximo daily en hora local (`nextChallengeAt`), `eslint-plugin-jsx-a11y`. **Obsoleto:** la sección de cola offline de partidas — `useOfflineQuestions` fue eliminado por decisión de producto (commit `7885fa7`) y no debe reimplementarse. Leer como referencia de criterios (P1–P7), no como backlog vigente.
+
 > **Propósito de este documento:** plan de implementación detallado para que un agente de IA (u otro desarrollador) ejecute las mejoras de empatía detectadas en la auditoría de julio 2026. Cada tarea incluye: archivos exactos, comportamiento actual verificado (con `archivo:línea`), cambio requerido y criterios de aceptación.
 >
 > **Origen:** auditoría de 5 dimensiones sobre el código real — (1) manejo de errores y resiliencia, (2) copy/tono/i18n, (3) accesibilidad, (4) diseño emocional de journeys, (5) estados de carga y feedback. Todos los hallazgos críticos fueron verificados contra el código fuente.

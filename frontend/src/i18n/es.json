@@ -1005,9 +1005,6 @@
     "retry": "Reintentar",
     "backToMenu": "Volver al menú"
   },
-  "sync": {
-    "done": "Tus partidas pendientes se sincronizaron ✓"
-  },
   "pwa": {
     "updateAvailable": "GeoChallenge se actualizó ✨ Los cambios se aplicarán al recargar"
   },
