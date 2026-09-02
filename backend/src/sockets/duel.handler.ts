@@ -92,7 +92,7 @@ function normalizeCategory(category?: Category): Category {
   return DUEL_CATEGORIES.includes(category) ? category : 'MIXED';
 }
 
-interface ActiveDuel {
+export interface ActiveDuel {
   id: string;
   players: {
     userId: string;

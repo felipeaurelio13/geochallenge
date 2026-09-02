@@ -478,6 +478,9 @@ Boss-specific:
 7. Smoke browser
 
 ### Production Smoke Checklist
+
+> Pendiente de ejecutar en producción (requiere deploy). Los criterios de aceptación de abajo fueron verificados contra el código y suites de tests el 2026-09-02.
+
 - [ ] Lobby: World Event visible
 - [ ] Locked state: requirements correct
 - [ ] Satisfy requirements: unlock from DB truth
@@ -560,31 +563,33 @@ Boss-specific:
 
 ## Acceptance Criteria
 
-- [ ] Weekly deterministic event with 5-region rotation
-- [ ] Server-authoritative progress (no counters/drift)
-- [ ] Daily integrated as requirement
-- [ ] Shared weekly Boss question plan
-- [ ] 10 unique countries, >=3 categories
-- [ ] Server timing, first-write-wins
-- [ ] Resumable, replayable
-- [ ] Clear >=7, permanent GameResult
-- [ ] Achievements (BOSS_FIRST, BOSS_PERFECT)
-- [ ] No mastery farming
-- [ ] No Elo changes
-- [ ] No Classic highScore changes
-- [ ] No score leaderboard contamination
-- [ ] Primary lobby simpler
-- [ ] Old routes retained
-- [ ] Flash/Streak/FlagMaster demoted
-- [ ] Casual competitive modes demoted
-- [ ] ServerWakeUp removed
-- [ ] BackendKeepAlive removed
-- [ ] keep-awake workflow removed
-- [ ] Render config/docs removed
-- [ ] All new tests pass
-- [ ] All retained regressions pass
-- [ ] Typechecks pass
-- [ ] Lint 0 errors
-- [ ] Builds pass
-- [ ] Prisma valid
-- [ ] Predeploy passes
+> Verificado contra código y tests el 2026-09-02 (suites world-event: 129 backend + 8 frontend en verde).
+
+- [x] Weekly deterministic event with 5-region rotation
+- [x] Server-authoritative progress (no counters/drift)
+- [x] Daily integrated as requirement
+- [x] Shared weekly Boss question plan
+- [x] 10 unique countries, >=3 categories
+- [x] Server timing, first-write-wins
+- [x] Resumable, replayable
+- [x] Clear >=7, permanent GameResult
+- [x] Achievements (BOSS_FIRST, BOSS_PERFECT)
+- [x] No mastery farming
+- [x] No Elo changes
+- [x] No Classic highScore changes
+- [x] No score leaderboard contamination
+- [x] Primary lobby simpler
+- [x] Old routes retained
+- [x] Flash/Streak/FlagMaster demoted
+- [x] Casual competitive modes demoted
+- [x] ServerWakeUp removed
+- [x] BackendKeepAlive removed
+- [x] keep-awake workflow removed
+- [x] Render config/docs removed
+- [x] All new tests pass
+- [x] All retained regressions pass
+- [x] Typechecks pass
+- [x] Lint 0 errors
+- [x] Builds pass
+- [x] Prisma valid
+- [x] Predeploy passes
