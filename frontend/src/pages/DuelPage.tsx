@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { useUiStore } from '../store/useUiStore';
-import { socketService } from '../services/socket';
+import { socketService, type DuelStatePayload } from '../services/socket';
 import { api } from '../services/api';
 import {
   Timer,
@@ -412,7 +412,37 @@ export function DuelPage() {
     };
 
     const handleDuelError = (data: { message?: string; code?: string; params?: Record<string, unknown> }) => {
+      setIsSyncingRound(false);
       showConnectionMessage('error', getSocketErrorMessage(data, t('duel.errorGeneric')), true);
+    };
+
+    // Resync tras reconexión: el backend responde duel:resume con el estado
+    // vigente. Con pregunta en curso restauramos la ronda; en pre-juego
+    // volvemos a la pantalla de ready; sin pregunta quedamos en syncing hasta
+    // que la sala emita el siguiente evento de ronda.
+    const handleDuelState = (data: DuelStatePayload) => {
+      if (duelStateRef.current !== 'playing' && duelStateRef.current !== 'waiting' && duelStateRef.current !== 'matched') {
+        return;
+      }
+      const myScore = data.scores?.find((score) => score.userId === user?.id)?.score;
+      const rivalScore = data.scores?.find((score) => score.userId !== user?.id)?.score;
+      if (typeof myScore === 'number') setMyScore(myScore);
+      if (typeof rivalScore === 'number') setOpponentScore(rivalScore);
+
+      if (data.status === 'playing' && data.question) {
+        handleQuestion({
+          question: data.question,
+          questionIndex: data.currentQuestionIndex,
+          totalQuestions: data.totalQuestions,
+          timeLimit: data.timeLimit,
+        });
+        return;
+      }
+      if (data.status === 'waiting' || data.status === 'countdown') {
+        setIsSyncingRound(false);
+        setDuelState('matched');
+        socketService.ready();
+      }
     };
 
     const handleDisconnect = () => {
@@ -431,6 +461,7 @@ export function DuelPage() {
       if (currentState === 'playing' || currentState === 'waiting') {
         setIsSyncingRound(true);
         showConnectionMessage('info', t('duel.reconnectedSyncing'), false);
+        socketService.resumeDuel();
       } else {
         showConnectionMessage('info', t('duel.reconnected'), false);
       }
@@ -446,6 +477,7 @@ export function DuelPage() {
     socketService.socket?.on('duel:opponent-disconnected', handleOpponentDisconnected);
     socketService.socket?.on('duel:opponent-reconnected', handleOpponentReconnected);
     socketService.socket?.on('duel:error', handleDuelError);
+    socketService.socket?.on('duel:state', handleDuelState);
     socketService.socket?.on('disconnect', handleDisconnect);
     socketService.socket?.on('connect', handleConnect);
 
@@ -479,6 +511,7 @@ export function DuelPage() {
       socketService.socket?.off('duel:opponent-disconnected', handleOpponentDisconnected);
       socketService.socket?.off('duel:opponent-reconnected', handleOpponentReconnected);
       socketService.socket?.off('duel:error', handleDuelError);
+      socketService.socket?.off('duel:state', handleDuelState);
       socketService.socket?.off('disconnect', handleDisconnect);
       socketService.socket?.off('connect', handleConnect);
     };

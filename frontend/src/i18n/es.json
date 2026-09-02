@@ -1024,6 +1024,7 @@
     "GAME_INSUFFICIENT_QUESTIONS_SHORT": "No hay suficientes preguntas para esta configuración — prueba otra categoría",
     "DUEL_RATE_LIMITED": "Vas muy rápido — espera un momento antes de volver a intentarlo",
     "DUEL_ERROR_GENERIC": "No pudimos continuar el duelo. Intenta nuevamente.",
+    "DUEL_NOT_FOUND": "El duelo ya no está disponible — puedes buscar un nuevo oponente",
     "SURVIVAL_ERROR_GENERIC": "Algo falló en la partida de supervivencia. Intenta nuevamente.",
     "RATE_LIMITED": "Por seguridad pausamos los intentos un momento. Prueba de nuevo en {{minutes}} min",
     "INTERNAL": "Algo falló de nuestro lado 😓 Ya quedó registrado (ref: {{requestId}}). Intenta de nuevo en un momento.",

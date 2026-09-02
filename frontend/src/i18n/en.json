@@ -1024,6 +1024,7 @@
     "GAME_INSUFFICIENT_QUESTIONS_SHORT": "Not enough questions for this setup — try another category",
     "DUEL_RATE_LIMITED": "You're going too fast — wait a moment before trying again",
     "DUEL_ERROR_GENERIC": "We couldn't continue the duel. Please try again.",
+    "DUEL_NOT_FOUND": "This duel is no longer available — you can look for a new opponent",
     "SURVIVAL_ERROR_GENERIC": "Something went wrong in the survival match. Please try again.",
     "RATE_LIMITED": "For safety we paused attempts for a moment. Try again in {{minutes}} min",
     "INTERNAL": "Something went wrong on our end 😓 It's already been logged (ref: {{requestId}}). Please try again in a moment.",

@@ -1,5 +1,27 @@
 # Auditoría técnica de Duelos (2026-05-01)
 
+> **Estado de remediación (2026-09-02):**
+> - **Fase 0 completa.** Guard de socket vigente, `duel:resume`/`duel:state`, grace period de 20s con timers por jugador, rate limit por usuario.
+> - **Fase 1 completa (2026-09-02).** Snapshot Redis de duelos activos (`duel:active:{id}`, TTL 1h) para diagnóstico y detección de punteros huérfanos tras reinicio; watchdog periódico (60s) que termina duelos zombies (`isDuelZombie`) y poda entradas viejas de la cola (5 min); `duel:resume` responde `duel:error DUEL_NOT_FOUND` cuando el duelo ya no existe para que el cliente no quede en "syncing". El estado vivo de juego sigue en memoria del proceso — la réplica completa multi-instancia (adapter de Socket.IO) queda como follow-up si se despliega más de una instancia.
+> - **Fase 2 parcial (2026-09-02).** Telemetría de ciclo de vida: `duel_queue_joined`, `duel_matched`, `duel_resumed`, `duel_grace_started` (se suman a `game_started`/`game_finished` con `finishReason`). El cliente ahora emite `duel:resume` al reconectar y restaura estado desde `duel:state`. Pendiente: dashboard SLO (consultas abajo) y tests E2E multi-tab.
+>
+> Consultas SLO sobre `telemetry_events` (name + occurredAt indexados):
+>
+> ```sql
+> -- Recuperación tras reconexión: resumed / grace_started
+> SELECT
+>   count(*) FILTER (WHERE name = 'duel_resumed')::float
+>   / NULLIF(count(*) FILTER (WHERE name = 'duel_grace_started'), 0) AS recovery_rate
+> FROM telemetry_events
+> WHERE "occurredAt" > now() - interval '7 days';
+>
+> -- Falsos "duelo activo": resume sin duelo (DUEL_NOT_FOUND no se telemetriza aún;
+> -- proxy: queue joins después de grace sin resumed intermedio)
+> SELECT name, count(*) FROM telemetry_events
+> WHERE name LIKE 'duel_%' AND "occurredAt" > now() - interval '7 days'
+> GROUP BY name ORDER BY 2 DESC;
+> ```
+
 ## Alcance
 
 - Backend Socket.IO de duelos.

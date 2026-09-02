@@ -2,7 +2,7 @@ import { Server as SocketIOServer, Socket } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import { config } from '../config/env.js';
 import { JwtPayload } from '../middleware/auth.js';
-import { setupDuelHandlers, MatchmakingQueue } from './duel.handler.js';
+import { setupDuelHandlers, MatchmakingQueue, startDuelWatchdog } from './duel.handler.js';
 import { setupSurvivalHandlers } from './survival.handler.js';
 
 // Extend Socket type to include user info
@@ -43,6 +43,9 @@ function authenticateSocket(socket: Socket, next: (err?: Error) => void) {
 export function setupSocketHandlers(io: SocketIOServer) {
   // Middleware de autenticación
   io.use(authenticateSocket);
+
+  // Watchdog de duelos zombies y limpieza de cola (barrido periódico)
+  startDuelWatchdog(io, matchmakingQueue);
 
   io.on('connection', (socket: Socket) => {
     const user = socket.user!;

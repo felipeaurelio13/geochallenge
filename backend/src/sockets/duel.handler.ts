@@ -116,6 +116,7 @@ interface ActiveDuel {
   startedAt?: Date;
   questionStartedAt?: Date;
   resolvingQuestionIndex?: number;
+  createdAt: Date;
 }
 
 // Matchmaking queue
@@ -223,6 +224,19 @@ export class MatchmakingQueue {
   isInQueue(userId: string): boolean {
     return this.queue.some((p) => p.userId === userId);
   }
+
+  // Elimina entradas cuyo socket probablemente ya no existe (cierre sin
+  // duel:cancel). Evita matches con sockets muertos tras caídas de red.
+  pruneStale(maxAgeMs: number): number {
+    const now = Date.now();
+    let removed = 0;
+    this.queue = this.queue.filter((player) => {
+      const stale = now - player.joinedAt.getTime() > maxAgeMs;
+      if (stale) removed++;
+      return !stale;
+    });
+    return removed;
+  }
 }
 
 // Active duels storage
@@ -255,6 +269,36 @@ async function persistPlayerDuel(userId: string, duelId: string | null): Promise
   }
 }
 
+// Snapshot compacto del duelo activo en Redis. No sustituye el estado en
+// memoria: sirve para diagnóstico/SLO y para detectar punteros huérfanos tras
+// un reinicio del proceso (el estado vivo no sobrevive al restart).
+async function persistActiveDuelSnapshot(duel: ActiveDuel): Promise<void> {
+  try {
+    const redis = getRedis();
+    const snapshot = {
+      id: duel.id,
+      status: duel.status,
+      mode: duel.mode,
+      rated: duel.rated,
+      currentQuestionIndex: duel.currentQuestionIndex,
+      startedAt: duel.startedAt?.toISOString() ?? null,
+      players: duel.players.map((p) => ({ userId: p.userId, username: p.username })),
+      updatedAt: new Date().toISOString(),
+    };
+    await redis.set(`duel:active:${duel.id}`, JSON.stringify(snapshot), 'EX', 3600);
+  } catch (err) {
+    console.error(`[duel] failed to persist snapshot for ${duel.id}:`, err);
+  }
+}
+
+async function clearActiveDuelSnapshot(duelId: string): Promise<void> {
+  try {
+    await getRedis().del(`duel:active:${duelId}`);
+  } catch {
+    // No-fatal: el TTL de 1h limpia el snapshot si Redis falla aquí.
+  }
+}
+
 // Per-user event rate limiter (keyed by userId so reconnections don't reset the counter)
 const eventCounts = new Map<string, { count: number; resetAt: number }>();
 function isRateLimited(userId: string, event: string, maxPerMinute: number = 30): boolean {
@@ -270,6 +314,59 @@ function isRateLimited(userId: string, event: string, maxPerMinute: number = 30)
 }
 
 const READY_TIMEOUT_MS = 7000;
+
+// Watchdog: barrido periódico que termina duelos zombies y limpia la cola.
+// Un duelo zombie es aquel cuyo tiempo en su estado actual excede lo que un
+// juego sano puede durar (p. ej. timers perdidos por un error no manejado).
+const DUEL_WATCHDOG_INTERVAL_MS = 60_000;
+const DUEL_QUEUE_MAX_AGE_MS = 5 * 60_000;
+const DUEL_PRE_GAME_MAX_AGE_MS = 2 * 60_000;
+
+export function isDuelZombie(duel: ActiveDuel, now: number = Date.now()): boolean {
+  if (duel.status === 'waiting' || duel.status === 'countdown') {
+    // El ready-check fuerza inicio a los 7s; esperar más de 2min es anómalo.
+    return now - duel.createdAt.getTime() > DUEL_PRE_GAME_MAX_AGE_MS;
+  }
+  if (duel.status === 'finalizing') {
+    return false; // endDuel tiene su propio retry loop
+  }
+  const perQuestionMs = (duelTimeLimit(duel) + 2 + 3) * 1000;
+  const maxLifetimeMs = duel.questions.length * perQuestionMs + 2 * 60_000;
+  const anchor = (duel.questionStartedAt ?? duel.startedAt ?? duel.createdAt).getTime();
+  return now - anchor > maxLifetimeMs;
+}
+
+let duelWatchdogTimer: ReturnType<typeof setInterval> | null = null;
+
+export function startDuelWatchdog(io: SocketIOServer, queue: MatchmakingQueue): void {
+  if (duelWatchdogTimer) return;
+
+  duelWatchdogTimer = setInterval(() => {
+    const now = Date.now();
+
+    for (const duel of activeDuels.values()) {
+      if (isDuelZombie(duel, now)) {
+        console.warn(`[duel] watchdog: terminating zombie duel ${duel.id} (status ${duel.status})`);
+        void endDuel(io, duel, null, 'cancelled');
+      }
+    }
+
+    const pruned = queue.pruneStale(DUEL_QUEUE_MAX_AGE_MS);
+    if (pruned > 0) {
+      console.warn(`[duel] watchdog: pruned ${pruned} stale matchmaking entries`);
+    }
+
+    // Limpieza defensiva de timers de desconexión cuyos duelos ya no existen.
+    for (const [userId, timer] of disconnectTimers) {
+      const duelId = playerDuels.get(userId);
+      if (!duelId || !activeDuels.has(duelId)) {
+        clearTimeout(timer);
+        disconnectTimers.delete(userId);
+      }
+    }
+  }, DUEL_WATCHDOG_INTERVAL_MS);
+  duelWatchdogTimer.unref();
+}
 
 /**
  * Genera un ID único para el duelo
@@ -345,6 +442,18 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
     socket.emit('duel:queued', {
       message: 'Buscando oponente...',
       queueSize: queue.getQueueSize(),
+    });
+
+    trackServerEvent({
+      name: 'duel_queue_joined',
+      userId: user.userId,
+      gameMode: GameMode.DUEL,
+      variant: selectedMode === 'geo-challenge' ? GameVariant.GEO_CHALLENGE : GameVariant.CLASSIC,
+      category: selectedCategory,
+      properties: {
+        queueSize: queue.getQueueSize(),
+        rated,
+      },
     });
 
     // Intentar encontrar match
@@ -537,9 +646,28 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
 
   // Desconexión durante duelo
   // Resume a duel after reconnection: emit current state to the reconnecting player
-  socket.on('duel:resume', () => {
+  socket.on('duel:resume', async () => {
     const duelId = playerDuels.get(user.userId);
-    if (!duelId) return;
+
+    if (!duelId) {
+      // Sin estado en memoria: el duelo terminó con el socket caído o el
+      // backend se reinició. Limpiar el puntero Redis huérfano (si existe) y
+      // dar feedback al cliente para que no quede en "syncing" indefinido.
+      try {
+        const stale = await getRedis().getdel(`duel:player:${user.userId}`);
+        if (stale) {
+          console.warn(`[duel] resume miss for ${user.userId}: stale pointer to ${stale}`);
+        }
+      } catch {
+        // Redis caído: seguir con el error hacia el cliente igualmente.
+      }
+      emitSocketError(
+        socket,
+        'duel:error',
+        new AppError('DUEL_NOT_FOUND', 404, 'El duelo ya no está disponible')
+      );
+      return;
+    }
 
     // Cancel any pending disconnect timer for this player
     const pendingTimer = disconnectTimers.get(user.userId);
@@ -556,6 +684,19 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
     if (playerRecord) playerRecord.socketId = socket.id;
 
     socket.join(duelId);
+
+    trackServerEvent({
+      name: 'duel_resumed',
+      userId: user.userId,
+      runId: duelId,
+      gameMode: GameMode.DUEL,
+      variant: duel.mode === 'geo-challenge' ? GameVariant.GEO_CHALLENGE : GameVariant.CLASSIC,
+      category: duel.category,
+      properties: {
+        status: duel.status,
+        questionIndex: duel.currentQuestionIndex,
+      },
+    });
 
     // Notify opponent of reconnect
     const opponent = duel.players.find((p) => p.userId !== user.userId);
@@ -608,6 +749,19 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
           }, DISCONNECT_GRACE_MS);
 
           disconnectTimers.set(user.userId, timer);
+
+          trackServerEvent({
+            name: 'duel_grace_started',
+            userId: user.userId,
+            runId: duelId,
+            gameMode: GameMode.DUEL,
+            variant: duel.mode === 'geo-challenge' ? GameVariant.GEO_CHALLENGE : GameVariant.CLASSIC,
+            category: duel.category,
+            properties: {
+              graceMs: DISCONNECT_GRACE_MS,
+              status: duel.status,
+            },
+          });
 
           // Clean up ready-check timeout
           const readyTimeout = readyTimeouts.get(duelId);
@@ -692,6 +846,7 @@ async function createDuel(
     mode,
     rated,
     ladder: rated ? ladder ?? ladderForMode(mode) : undefined,
+    createdAt: new Date(),
   };
 
   activeDuels.set(duelId, duel);
@@ -699,6 +854,7 @@ async function createDuel(
   playerDuels.set(player2.userId, duelId);
   persistPlayerDuel(player1.userId, duelId);
   persistPlayerDuel(player2.userId, duelId);
+  void persistActiveDuelSnapshot(duel);
 
   // Unir sockets a la sala del duelo
   const socket1 = io.sockets.sockets.get(player1.socketId);
@@ -720,6 +876,21 @@ async function createDuel(
     mechanics: duelMechanics(duel),
     imageUrls: questions.map((q) => q.imageUrl).filter((url): url is string => !!url),
   });
+
+  for (const player of duel.players) {
+    trackServerEvent({
+      name: 'duel_matched',
+      userId: player.userId,
+      runId: duelId,
+      gameMode: GameMode.DUEL,
+      variant: mode === 'geo-challenge' ? GameVariant.GEO_CHALLENGE : GameVariant.CLASSIC,
+      category: duel.category,
+      properties: {
+        matchedAtMs: Date.now() - duel.createdAt.getTime(),
+        rated: duel.rated,
+      },
+    });
+  }
 
   // Enviar info del oponente a cada jugador
   io.to(player1.socketId).emit('duel:opponent', {
@@ -791,6 +962,7 @@ function startDuelCountdown(io: SocketIOServer, duel: ActiveDuel) {
 function startDuel(io: SocketIOServer, duel: ActiveDuel) {
   duel.status = 'playing';
   duel.startedAt = new Date();
+  void persistActiveDuelSnapshot(duel);
 
   const dueloVariant = duel.mode === 'geo-challenge' ? GameVariant.GEO_CHALLENGE : GameVariant.CLASSIC;
   const isGeoDuel = duel.mode === 'geo-challenge';
@@ -831,6 +1003,7 @@ function sendQuestion(io: SocketIOServer, duel: ActiveDuel) {
     const questionIndex = duel.currentQuestionIndex;
     const question = duel.questions[questionIndex];
     duel.questionStartedAt = new Date();
+    void persistActiveDuelSnapshot(duel);
 
     // Strip correctAnswer from emitted question
     const publicQuestion = toPublicSocketPayload(question as unknown as Record<string, unknown>);
@@ -1121,6 +1294,7 @@ async function endDuel(
     }
     duel.status = 'finished';
     activeDuels.delete(duel.id);
+    await clearActiveDuelSnapshot(duel.id);
   } catch (error) {
     console.error(`Error guardando resultados del duelo ${duel.id}:`, error);
     const retryTimer = setTimeout(() => {

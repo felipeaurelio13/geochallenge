@@ -64,7 +64,22 @@ type DuelEventHandlers = {
   onError?: (data: SocketErrorPayload) => void;
   onOpponentDisconnected?: () => void;
   onOpponentReconnected?: () => void;
+  onState?: (data: DuelStatePayload) => void;
 };
+
+/** Payload de `duel:state` — resync tras reconexión (contrato aditivo Fase 0). */
+export interface DuelStatePayload {
+  duelId: string;
+  status: 'waiting' | 'countdown' | 'playing';
+  currentQuestionIndex: number;
+  totalQuestions: number;
+  timeLimit: number;
+  mode?: DuelMode;
+  rated?: boolean;
+  ladder?: CompetitiveLadder;
+  question: Question | null;
+  scores: { userId: string; score: number }[];
+}
 
 /**
  * Forma que traen `duel:error` / `survival:error` — `message` sigue siendo el
@@ -206,6 +221,10 @@ class SocketService {
     this.socket.on('duel:opponent-reconnected', () => {
       this.handlers.onOpponentReconnected?.();
     });
+
+    this.socket.on('duel:state', (data) => {
+      this.handlers.onState?.(data);
+    });
   }
 
   // Duel actions
@@ -227,6 +246,12 @@ class SocketService {
 
   ready(): void {
     this.socket?.emit('duel:ready');
+  }
+
+  // Pide el estado actual del duelo tras reconectar (backend re-une el socket
+  // a la sala y responde con `duel:state`, o `duel:error DUEL_NOT_FOUND`).
+  resumeDuel(): void {
+    this.socket?.emit('duel:resume');
   }
 
   sendAnswer(data: {

@@ -25,6 +25,7 @@ const mocks = vi.hoisted(() => {
     socketMock,
     navigateMock: vi.fn(),
     readyMock: vi.fn(),
+    resumeDuelMock: vi.fn(),
     connectMock: vi.fn(),
     joinDuelQueueMock: vi.fn(),
     cancelDuelQueueMock: vi.fn(),
@@ -119,6 +120,7 @@ vi.mock('../services/socket', () => ({
     joinDuelQueue: mocks.joinDuelQueueMock,
     cancelDuelQueue: mocks.cancelDuelQueueMock,
     ready: mocks.readyMock,
+    resumeDuel: mocks.resumeDuelMock,
     submitDuelAnswer: mocks.submitDuelAnswerMock,
     onConnectionStateChange: mocks.onConnectionStateChangeMock,
     isConnected: mocks.isConnectedMock,
@@ -487,7 +489,7 @@ describe('DuelPage socket flow', () => {
   it('mantiene una sola suscripción de sockets aunque cambie el score', async () => {
     render(<DuelPage />);
 
-    expect(mocks.socketMock.on).toHaveBeenCalledTimes(11);
+    expect(mocks.socketMock.on).toHaveBeenCalledTimes(12);
 
     act(() => {
       mocks.handlers.get('duel:questionResult')?.forEach((cb) =>
@@ -510,7 +512,7 @@ describe('DuelPage socket flow', () => {
       );
     });
 
-    expect(mocks.socketMock.on).toHaveBeenCalledTimes(11);
+    expect(mocks.socketMock.on).toHaveBeenCalledTimes(12);
   });
 
   it('casual finish no muestra rating', async () => {

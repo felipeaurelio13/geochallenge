@@ -17,6 +17,11 @@ const SERVER_EVENT_NAMES = [
   'question_answered',
   'mechanic_used',
   'game_finished',
+  // Ciclo de vida de duelos (auditoría 2026-05-01, fase 2)
+  'duel_queue_joined',
+  'duel_matched',
+  'duel_resumed',
+  'duel_grace_started',
 ] as const;
 
 type ServerEventName = (typeof SERVER_EVENT_NAMES)[number];
