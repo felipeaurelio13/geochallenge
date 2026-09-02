@@ -532,7 +532,7 @@ export function SurvivalPage() {
 
   // Part 1.1: mismo patrón que DuelPage — banner no bloqueante con Reintentar/Menú.
   const connectionBanner = connectionError ? (
-    <div className="mb-4 w-full max-w-sm rounded-lg border border-red-500/50 bg-red-500/10 px-4 py-3 text-left text-sm text-[var(--color-error-500)]">
+    <div className="mb-4 w-full max-w-sm rounded-lg border border-error/50 bg-error/10 px-4 py-3 text-left text-sm text-[var(--color-error-500)]">
       <p className="font-medium">{t('socket.connectionError')}</p>
       <div className="mt-3 flex flex-wrap gap-2">
         <button
@@ -577,7 +577,7 @@ export function SurvivalPage() {
             ))}
           </div>
 
-          {notice && <p className="text-sm text-amber-400">{notice}</p>}
+          {notice && <p className="text-sm text-warning">{notice}</p>}
 
           <div className="flex items-center gap-2 text-xs text-app-subtle">
             <span className="rounded-md border border-primary/30 bg-primary/10 px-2 py-1 text-primary">
@@ -863,7 +863,7 @@ export function SurvivalPage() {
               </div>
             )}
             {notice && (
-              <div className="mb-1.5 rounded-lg border border-amber-800/50 bg-amber-950/30 px-3 py-1 text-center text-xs text-amber-400">
+              <div className="mb-1.5 rounded-lg border border-warning/40 bg-warning/10 px-3 py-1 text-center text-xs text-warning">
                 {notice}
               </div>
             )}

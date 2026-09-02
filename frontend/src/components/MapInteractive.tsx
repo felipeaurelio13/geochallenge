@@ -314,16 +314,16 @@ export function MapInteractive({
               {t('game.distance')}: <span className="font-bold text-app-text">{distance} km</span>
             </p>
             {distance < 50 && (
-              <p className="mt-2 text-xl font-medium text-green-400">{t('game.excellent')}</p>
+              <p className="mt-2 text-xl font-medium text-success">{t('game.excellent')}</p>
             )}
             {distance >= 50 && distance < 200 && (
-              <p className="mt-2 text-xl font-medium text-yellow-400">{t('game.good')}</p>
+              <p className="mt-2 text-xl font-medium text-warning">{t('game.good')}</p>
             )}
             {distance >= 200 && distance < 500 && (
-              <p className="mt-2 text-xl font-medium text-orange-400">{t('game.notBad')}</p>
+              <p className="mt-2 text-xl font-medium text-warning">{t('game.notBad')}</p>
             )}
             {distance >= 500 && (
-              <p className="mt-2 text-xl font-medium text-red-400">{t('game.farAway')}</p>
+              <p className="mt-2 text-xl font-medium text-error">{t('game.farAway')}</p>
             )}
           </div>
         )}

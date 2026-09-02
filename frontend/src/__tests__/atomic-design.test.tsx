@@ -35,7 +35,7 @@ describe('Atomic design components', () => {
 
     const input = screen.getByLabelText('Email');
     expect(input).toHaveAttribute('id', 'email');
-    expect(input).toHaveClass('border-red-500/70');
+    expect(input).toHaveClass('border-error/70');
     expect(screen.getByText('Campo inválido')).toBeInTheDocument();
   });
 

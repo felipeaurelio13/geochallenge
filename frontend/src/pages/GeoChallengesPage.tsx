@@ -604,7 +604,7 @@ export function GeoChallengesPage() {
             <div className="mx-auto w-full max-w-4xl">
               {!feedback ? (
                 <>
-                  {roundError && <p className="mb-2 text-center text-xs text-red-300" role="alert">{roundError}</p>}
+                  {roundError && <p className="mb-2 text-center text-xs text-error" role="alert">{roundError}</p>}
                   {isOrderedRound && selectedOptionIds.length > 0 && (
                     <div className="mb-2 flex items-center justify-between gap-2 text-xs text-app-subtle">
                       <span>{t('geoChallenges.orderProgress', { current: selectedOptionIds.length, total: currentRound.options.length })}</span>
@@ -629,11 +629,11 @@ export function GeoChallengesPage() {
               ) : (
                 <div className="rounded-2xl border border-app-border bg-app-muted/90 p-2.5">
                   <div className="flex items-center justify-center gap-2 text-sm font-black">
-                    <span className={feedback.isCorrect ? 'text-green-300' : 'text-red-300'}>
+                    <span className={feedback.isCorrect ? 'text-success' : 'text-error'}>
                       {feedback.isCorrect ? `✓ ${t('game.correct')}` : `✕ ${t('game.incorrect')}`}
                     </span>
                     {feedback.isCorrect && (
-                      <span className="rounded-full bg-green-500/15 px-2 py-0.5 text-xs font-black text-green-300">
+                      <span className="rounded-full bg-success/15 px-2 py-0.5 text-xs font-black text-success">
                         +{feedback.points}
                       </span>
                     )}
@@ -643,7 +643,7 @@ export function GeoChallengesPage() {
                       {isOrderedRound
                         ? `${t('geoChallenges.correctOrder')}: `
                         : `${t('geoChallenges.correctAnswer')}: `}
-                      <span className="font-bold text-green-300">{correctAnswerLabel}</span>
+                      <span className="font-bold text-success">{correctAnswerLabel}</span>
                     </p>
                   )}
                   <p className="mt-1 text-center text-xs leading-snug text-app-subtle">

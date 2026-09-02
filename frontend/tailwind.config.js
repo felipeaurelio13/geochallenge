@@ -31,14 +31,17 @@ export default {
         success: {
           500: 'var(--color-success-500)',
           600: 'var(--color-success-600)',
+          DEFAULT: 'var(--color-success-500)',
         },
         'success-soft': 'var(--color-success-soft)',
         warning: {
           500: 'var(--color-warning-500)',
+          DEFAULT: 'var(--color-warning-500)',
         },
         error: {
           500: 'var(--color-error-500)',
           600: 'var(--color-error-600)',
+          DEFAULT: 'var(--color-error-500)',
         },
         'error-soft': 'var(--color-error-soft)',
       },

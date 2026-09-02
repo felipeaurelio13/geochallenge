@@ -336,7 +336,7 @@ function ModeButtonWithHelp({
           </div>
         </div>
         {disabledHint && (
-          <p className="mt-1 text-[0.65rem] text-amber-300/80">{disabledHint}</p>
+          <p className="mt-1 text-[0.65rem] text-warning/80">{disabledHint}</p>
         )}
       </div>
     );

@@ -72,7 +72,7 @@ export function FilterDrawer({ filters, onChange, onClose, disabledOptions }: Fi
           {hasAny && (
             <button
               onClick={clearAll}
-              className="text-xs font-medium text-red-400 hover:text-red-300"
+              className="text-xs font-medium text-error hover:text-error"
             >
               {t('filters.clearAll')}
             </button>

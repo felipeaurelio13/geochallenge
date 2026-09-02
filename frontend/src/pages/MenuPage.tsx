@@ -364,8 +364,8 @@ export function MenuPage() {
                 </h2>
                 <span className={`rounded-full border px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide ${
                   dailyStatus?.completed
-                    ? 'border-green-500/40 bg-green-500/15 text-green-400'
-                    : 'border-cyan-500/40 bg-cyan-500/15 text-cyan-400'
+                    ? 'border-success/40 bg-success/15 text-success'
+                    : 'border-primary/40 bg-primary/10 text-primary'
                 }`}>
                   {dailyLoading
                     ? '...'
@@ -416,10 +416,10 @@ export function MenuPage() {
                 </h2>
                 <span className={`rounded-full border px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide ${
                   eventData.boss.cleared
-                    ? 'border-green-500/40 bg-green-500/15 text-green-400'
+                    ? 'border-success/40 bg-success/15 text-success'
                     : eventData.boss.unlocked
-                    ? 'border-orange-500/40 bg-orange-500/15 text-orange-400'
-                    : 'border-cyan-500/40 bg-cyan-500/15 text-cyan-400'
+                    ? 'border-warning/40 bg-warning/15 text-warning'
+                    : 'border-primary/40 bg-primary/10 text-primary'
                 }`}>
                   {eventLoading
                     ? '...'

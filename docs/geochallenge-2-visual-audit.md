@@ -2,6 +2,8 @@
 
 Fecha: 2026-08-30
 
+> **Estado (2026-09-02):** segunda pasada completada. Las pantallas de meta game usan las primitives centrales y los colores hardcodeados del palette Tailwind fueron migrados a tokens (`success`/`error`/`warning`/`primary`/`app-*`), con overrides de dark mode para los tokens de estado. El favicon usa la marca propia (`geochallenge-mark.svg`). Pendiente de verificación visual en producción.
+
 ## Base revisada
 
 Se revisaron las rutas de `App.tsx`, las páginas de `frontend/src/pages`, los primitives y layouts de `frontend/src/components`, `index.css`, Tailwind, PWA y las suites Vitest/Playwright.

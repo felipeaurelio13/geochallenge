@@ -81,7 +81,7 @@ export function CompetitionPage() {
         </section>
 
         {error && (
-          <div className="rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-300">
+          <div className="rounded-xl border border-error/40 bg-error/10 p-4 text-sm text-error">
             {t('competition.error')}
           </div>
         )}
@@ -153,13 +153,13 @@ export function CompetitionPage() {
               <div className="divide-y divide-app-border">
                 {overview!.recentMatches.map((match) => (
                   <div key={match.duelMatchId} className="grid grid-cols-[1.5rem_1fr_auto] items-center gap-3 px-4 py-3 text-sm">
-                    <span className={match.result === 'win' ? 'text-green-400' : match.result === 'loss' ? 'text-red-400' : 'text-app-subtle'}>
+                    <span className={match.result === 'win' ? 'text-success' : match.result === 'loss' ? 'text-error' : 'text-app-subtle'}>
                       {match.result === 'win' ? '✓' : match.result === 'loss' ? '✕' : '—'}
                     </span>
                     <span className="min-w-0 truncate text-app-text">
                       {t('competition.vs', { opponent: match.opponent.username })}
                     </span>
-                    <span className={match.ratingDelta >= 0 ? 'font-bold text-green-400' : 'font-bold text-red-400'}>
+                    <span className={match.ratingDelta >= 0 ? 'font-bold text-success' : 'font-bold text-error'}>
                       {match.ratingDelta >= 0 ? '+' : ''}{match.ratingDelta} · {formatRating(match.ratingAfter)}
                     </span>
                   </div>

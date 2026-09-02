@@ -20,8 +20,8 @@ export function DailyTourStrip({ details, language, compact }: DailyTourStripPro
               key={d.questionId}
               className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-medium ${
                 d.isCorrect
-                  ? 'bg-green-500/15 text-green-400 border border-green-500/30'
-                  : 'bg-red-500/15 text-red-400 border border-red-500/30'
+                  ? 'bg-success/15 text-success border border-success/30'
+                  : 'bg-error/15 text-error border border-error/30'
               }`}
               title={`${countryName} — ${d.isCorrect ? 'correcto' : 'incorrecto'}`}
             >

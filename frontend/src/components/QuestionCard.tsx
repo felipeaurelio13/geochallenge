@@ -44,11 +44,11 @@ export function QuestionCard({
     const difficulty = question.difficulty?.toUpperCase() || 'MEDIUM';
     switch (difficulty) {
       case 'EASY':
-        return 'border border-green-500/30 bg-green-500/15 text-[var(--color-success-600)]';
+        return 'border border-success/30 bg-success/15 text-[var(--color-success-600)]';
       case 'HARD':
-        return 'border border-red-500/30 bg-red-500/15 text-[var(--color-error-500)]';
+        return 'border border-error/30 bg-error/15 text-[var(--color-error-500)]';
       default:
-        return 'border border-amber-500/30 bg-amber-500/15 text-amber-600';
+        return 'border border-warning/30 bg-warning/15 text-warning';
     }
   };
 
@@ -205,7 +205,7 @@ export function QuestionCard({
           <div className={compact ? 'mb-1' : 'mb-6'}>
             <div className="media-box media-box--silhouette mx-auto flex flex-col items-center justify-center gap-2 rounded-xl border border-app-border/60 bg-app-surface/90 p-3">
               <GeoMark className="h-9 w-9 opacity-30 text-app-subtle" />
-              <p className="text-xs text-slate-500">{t('game.silhouetteUnavailable', 'Silueta no disponible')}</p>
+              <p className="text-xs text-app-subtle">{t('game.silhouetteUnavailable', 'Silueta no disponible')}</p>
             </div>
           </div>
         )}

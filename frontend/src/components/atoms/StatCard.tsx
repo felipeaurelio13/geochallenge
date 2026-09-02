@@ -1,8 +1,8 @@
 const colorClasses = {
   primary: 'text-primary',
-  green: 'text-green-400',
-  red: 'text-red-400',
-  yellow: 'text-yellow-400',
+  green: 'text-success',
+  red: 'text-error',
+  yellow: 'text-warning',
   white: 'text-app-text',
 } as const;
 

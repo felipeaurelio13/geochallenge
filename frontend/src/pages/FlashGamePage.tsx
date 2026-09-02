@@ -389,11 +389,11 @@ export function FlashGamePage() {
             </div>
             <div className="mt-4 grid grid-cols-3 gap-3 text-sm">
               <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] p-3">
-                <div className="text-2xl font-bold text-amber-400">{maxCombo}</div>
+                <div className="text-2xl font-bold text-warning">{maxCombo}</div>
                 <div className="text-xs text-[var(--color-text-muted)]">{t('flash.maxCombo')}</div>
               </div>
               <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] p-3">
-                <div className="text-2xl font-bold text-green-400">{correct}</div>
+                <div className="text-2xl font-bold text-success">{correct}</div>
                 <div className="text-xs text-[var(--color-text-muted)]">{t('flash.correct')}</div>
               </div>
               <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-muted)] p-3">
@@ -476,7 +476,7 @@ export function FlashGamePage() {
                 ? 'border-[var(--color-border)] bg-[var(--color-surface-muted)] text-app-text'
                 : progressPercent > 25
                   ? 'border-yellow-600/60 bg-yellow-950/30 text-yellow-300'
-                  : `border-red-600/60 bg-red-950/30 text-red-300 ${!prefersReducedMotion ? 'animate-pulse' : ''}`
+                  : `border-error/60 bg-error/10 text-error ${!prefersReducedMotion ? 'animate-pulse' : ''}`
             }`}
             aria-live="off"
           >
@@ -497,10 +497,10 @@ export function FlashGamePage() {
           <div
             className={`h-full transition-[width] duration-1000 ease-linear ${
               progressPercent > 50
-                ? 'bg-green-500'
+                ? 'bg-success'
                 : progressPercent > 25
-                  ? 'bg-amber-500'
-                  : 'bg-red-500'
+                  ? 'bg-warning'
+                  : 'bg-error'
             }`}
             style={{ width: `${progressPercent}%` }}
           />

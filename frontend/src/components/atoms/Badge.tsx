@@ -9,8 +9,8 @@ type BadgeProps = {
 const toneClasses = {
   neutral: 'border-[var(--color-border)] bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)]',
   primary: 'border-primary/40 bg-primary/10 text-primary',
-  success: 'border-green-500/40 bg-green-500/10 text-green-300',
-  danger: 'border-red-500/50 bg-red-500/10 text-red-200',
+  success: 'border-success/40 bg-success/10 text-success',
+  danger: 'border-error/50 bg-error/10 text-error',
 };
 
 export function Badge({ children, tone = 'neutral', className = '' }: BadgeProps) {

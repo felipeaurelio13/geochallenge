@@ -1,8 +1,8 @@
 import React from 'react';
 
 const typeStyles = {
-  error: 'border-red-500/50 bg-red-500/10 text-[var(--color-error-500)]',
-  success: 'border-green-500/50 bg-green-500/10 text-[var(--color-success-600)]',
+  error: 'border-error/50 bg-error/10 text-[var(--color-error-500)]',
+  success: 'border-success/50 bg-success/10 text-[var(--color-success-600)]',
   warning: 'border-yellow-500/50 bg-yellow-500/10 text-yellow-600',
   info: 'border-sky-500/50 bg-sky-500/10 text-sky-600',
 } as const;

@@ -108,6 +108,11 @@
     --color-on-accent: #0d211a;
     --color-success-soft: #143a22;
     --color-error-soft: #421e1b;
+    --color-success-500: #58b98a;
+    --color-success-600: #7fd3a8;
+    --color-warning-500: #d9a15c;
+    --color-error-500: #e07b70;
+    --color-error-600: #eb9c93;
     --color-primary-50: #123a31;
     --color-primary-100: #174b3f;
     --color-primary-200: #236957;

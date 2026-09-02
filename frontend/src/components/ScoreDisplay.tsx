@@ -67,7 +67,7 @@ export function ScoreDisplay({ score, previousScore = 0, showAnimation = true, l
         {displayScore.toLocaleString()}
       </div>
       {showAnimation && !prefersReducedMotion && pointsGained > 0 && isAnimating && (
-        <div className="text-green-400 text-xs sm:text-sm font-semibold animate-slide-up">
+        <div className="text-success text-xs sm:text-sm font-semibold animate-slide-up">
           {scoreBreakdownText
             ? t('game.scoreBreakdownSummary', { points: pointsGained, breakdown: scoreBreakdownText })
             : `+${pointsGained}`}

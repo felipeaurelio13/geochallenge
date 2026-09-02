@@ -28,14 +28,6 @@ const ANSWER_TIME = 20;
 
 type PageState = 'loading' | 'briefing' | 'already-played' | 'playing' | 'finished' | 'error';
 
-const REGION_EMOJI: Record<string, string> = {
-  AFRICA: '🌍',
-  AMERICAS: '🌎',
-  ASIA: '🌏',
-  EUROPE: '🏰',
-  OCEANIA: '🏝️',
-};
-
 function regionLabel(region: string, t: (k: string) => string): string {
   const key = `geoChallenges.regions.${region}`;
   const translated = t(key);
@@ -492,7 +484,7 @@ export function DailyChallengePage() {
             roundSubmitError
               ? t('daily.answerRetry', 'No pudimos registrar tu respuesta.')
               : showResult && lastCountryCode
-                ? `${REGION_EMOJI[lastRegion ?? ''] ?? ''} ${getLocalizedCountryName(lastCountryCode, i18n.language, lastCountryCode)} · ${regionLabel(lastRegion ?? '', t)}`
+                ? `${getLocalizedCountryName(lastCountryCode, i18n.language, lastCountryCode)} · ${regionLabel(lastRegion ?? '', t)}`
                 : funFact ?? undefined
           }
           resultAttribution={

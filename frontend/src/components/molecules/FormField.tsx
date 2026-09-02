@@ -36,7 +36,7 @@ function Root({ children, id, error, className = '' }: FormFieldRootProps) {
       <div className={`space-y-2 ${className}`.trim()}>
         {children}
         {error ? (
-          <p id={errorId} className="text-xs text-red-300">
+          <p id={errorId} className="text-xs text-error">
             {error}
           </p>
         ) : null}

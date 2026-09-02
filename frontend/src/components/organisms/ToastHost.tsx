@@ -9,7 +9,7 @@ const DEFAULT_DURATION_MS: Record<Toast['type'], number> = {
 };
 
 const TONE_CLASSES: Record<Toast['type'], string> = {
-  success: 'border-green-500/40 bg-green-500/15 text-green-100',
+  success: 'border-success/40 bg-success/15 text-success',
   info: 'border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)]',
   achievement: 'border-warning-500/50 bg-warning-500/10 text-app-text',
 };

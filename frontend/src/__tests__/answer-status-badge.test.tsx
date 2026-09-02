@@ -7,11 +7,11 @@ describe('AnswerStatusBadge', () => {
     const { rerender } = render(<AnswerStatusBadge status="correct" label="Correcta" />);
 
     expect(screen.getByText('Correcta')).toBeInTheDocument();
-    expect(screen.getByText('Correcta').parentElement).toHaveClass('text-green-300');
+    expect(screen.getByText('Correcta').parentElement).toHaveClass('text-success');
 
     rerender(<AnswerStatusBadge status="incorrect" label="Incorrecta" />);
 
     expect(screen.getByText('Incorrecta')).toBeInTheDocument();
-    expect(screen.getByText('Incorrecta').parentElement).toHaveClass('text-red-300');
+    expect(screen.getByText('Incorrecta').parentElement).toHaveClass('text-error');
   });
 });

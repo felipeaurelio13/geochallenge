@@ -11,8 +11,8 @@ export function AnswerStatusBadge({ status, label, className = '' }: AnswerStatu
     <span
       className={`inline-flex max-w-full min-w-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-sm font-semibold ${
         isCorrect
-          ? 'border-green-400/60 bg-green-500/15 text-green-300'
-          : 'border-red-400/60 bg-red-500/15 text-red-300'
+          ? 'border-success/60 bg-success/15 text-success'
+          : 'border-error/60 bg-error/15 text-error'
       } ${className}`}
     >
       <span
