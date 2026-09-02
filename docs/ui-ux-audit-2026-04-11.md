@@ -41,8 +41,8 @@ Se agregó una suite de guardrails automatizada para blindar:
 
 ## Follow-ups recomendados
 
-1. Incorporar snapshot visual e2e en dark mode por viewport (iPhone SE, iPhone 15 Pro, Android medium).
-2. Añadir test e2e explícito de alineación horizontal (sin overflow accidental).
+1. Incorporar snapshot visual e2e en dark mode por viewport (iPhone SE, iPhone 15 Pro, Android medium). — Hecho: `tests/e2e/game-layout-darkmode.spec.ts`.
+2. Añadir test e2e explícito de alineación horizontal (sin overflow accidental). — Hecho (2026-09-02): `tests/e2e/no-horizontal-overflow.spec.ts` (lobby, menu, rankings, profile y ronda de juego, en los 3 viewports mobile).
 3. Consolidar checklist de release visual en PR template.
 
 ## Rollback
