@@ -35,6 +35,7 @@ vi.mock('../components', () => ({
   ScoreDisplay: () => <div>score</div>,
   ProgressBar: () => <div>progress</div>,
   LoadingSpinner: ({ text }: { text?: string }) => <div>{text || 'loading'}</div>,
+  MechanicsHud: () => <div>mechanics-hud</div>,
 
   RoundActionTray: ({ showResult, canSubmit, isWaiting, submitLabel, clearLabel, nextLabel, waitingLabel, onSubmit, onNext, onClear, showClearButton, resultLabel }: any) => (
     <div data-testid="mobile-action-tray" className='fixed bottom-0'>

@@ -88,8 +88,8 @@ export const config = {
     mechanics: {
       single: process.env.ENABLE_MECHANICS_SINGLE !== 'false',
       flash: process.env.ENABLE_MECHANICS_FLASH !== 'false',
-      duel: process.env.ENABLE_MECHANICS_DUEL === 'true',
-      challenge: process.env.ENABLE_MECHANICS_CHALLENGE === 'true',
+      duel: process.env.ENABLE_MECHANICS_DUEL !== 'false',
+      challenge: process.env.ENABLE_MECHANICS_CHALLENGE !== 'false',
       limits: {
         intel5050: parseNumberEnv(process.env.MECHANIC_LIMIT_INTEL5050, 1),
         focusTime: parseNumberEnv(process.env.MECHANIC_LIMIT_FOCUS_TIME, 1),
