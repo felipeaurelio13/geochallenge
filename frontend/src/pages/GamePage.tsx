@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState, useMemo, useRef } from 'react';
+import { useEffect, useCallback, useState, useMemo, useRef, lazy, Suspense } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
@@ -24,7 +24,10 @@ import { trackUxEvent } from '../utils/uxTelemetry';
 import { generateFunFact } from '../utils/funFacts';
 import { applyExtendedTime, getQuestionDuration } from '../utils/questionTiming';
 import { useUiStore } from '../store/useUiStore';
-import { MapInteractive } from '../components/MapInteractive';
+
+const MapInteractive = lazy(() =>
+  import('../components/MapInteractive').then((m) => ({ default: m.MapInteractive }))
+);
 
 const { TIME_PER_QUESTION } = GAME_CONSTANTS;
 const FOCUS_TIME_BONUS_SECONDS = 3;
@@ -644,18 +647,20 @@ export function GamePage() {
       minimalQuestionCard={isPerfectRoundPilot}
       isMapQuestion={Boolean(isMapQuestion)}
       mapContent={
-        <MapInteractive
-          questionId={currentQuestion.id}
-          onLocationSelect={handleMapSelect}
-          selectedLocation={mapLocation}
-          correctLocation={
-            showResult && isMapQuestion && results.length > 0
-              ? results[results.length - 1].correctLocation ?? null
-              : null
-          }
-          showResult={showResult}
-          disabled={showResult}
-        />
+        <Suspense fallback={<LoadingSpinner size="lg" />}>
+          <MapInteractive
+            questionId={currentQuestion.id}
+            onLocationSelect={handleMapSelect}
+            selectedLocation={mapLocation}
+            correctLocation={
+              showResult && isMapQuestion && results.length > 0
+                ? results[results.length - 1].correctLocation ?? null
+                : null
+            }
+            showResult={showResult}
+            disabled={showResult}
+          />
+        </Suspense>
       }
       selectedAnswer={selectedAnswer}
       correctAnswer={showResult ? results[results.length - 1]?.correctAnswer : undefined}

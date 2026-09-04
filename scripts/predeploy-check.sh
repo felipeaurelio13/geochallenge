@@ -19,9 +19,12 @@ set -euo pipefail
 
 # Re-entry guard: si Stop hook ya disparó este turno, no entres en loop.
 if [ ! -t 0 ]; then
-  HOOK_INPUT=$(cat || true)
-  if echo "$HOOK_INPUT" | grep -q '"stop_hook_active"[[:space:]]*:[[:space:]]*true'; then
-    exit 0
+  if read -t 0.1 -r FIRST_LINE 2>/dev/null; then
+    REST_LINES=$(cat 2>/dev/null || true)
+    HOOK_INPUT="${FIRST_LINE}${REST_LINES}"
+    if echo "$HOOK_INPUT" | grep -q '"stop_hook_active"[[:space:]]*:[[:space:]]*true'; then
+      exit 0
+    fi
   fi
 fi
 

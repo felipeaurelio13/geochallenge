@@ -1,31 +1,12 @@
+import { lazy, Suspense } from 'react';
 import { createBrowserRouter, RouterProvider, Navigate, Outlet } from 'react-router-dom';
 import { buttonVariants } from './components/atoms/Button';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { GameProvider } from './context/GameContext';
-import {
-  HomePage,
-  LoginPage,
-  RegisterPage,
-  MenuPage,
-  GamePage,
-  FlashGamePage,
-  ResultsPage,
-  RankingsPage,
-  ProfilePage,
-  DuelPage,
-  ChallengesPage,
-  ChallengeGamePage,
-  ChallengeResultsPage,
-  SurvivalPage,
-  FlagMasterPage,
-  GeoChallengesPage,
-  PassportPage,
-  CompetitionPage,
-} from './pages';
-import { DailyChallengePage } from './pages/DailyChallengePage';
-import { WorldEventPage } from './pages/WorldEventPage';
-import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
-import { ResetPasswordPage } from './pages/ResetPasswordPage';
+import { HomePage } from './pages/HomePage';
+import { LoginPage } from './pages/LoginPage';
+import { RegisterPage } from './pages/RegisterPage';
+import { MenuPage } from './pages/MenuPage';
 import {
   ErrorBoundary,
   AppRoot,
@@ -33,6 +14,25 @@ import {
   AuthRouteLoading,
 } from './components';
 import { getRouterBasename, toAppPath } from './utils/routing';
+
+export const GamePage = lazy(() => import('./pages/GamePage').then((m) => ({ default: m.GamePage })));
+export const ResultsPage = lazy(() => import('./pages/ResultsPage').then((m) => ({ default: m.ResultsPage })));
+export const FlashGamePage = lazy(() => import('./pages/FlashGamePage').then((m) => ({ default: m.FlashGamePage })));
+export const RankingsPage = lazy(() => import('./pages/RankingsPage').then((m) => ({ default: m.RankingsPage })));
+export const ProfilePage = lazy(() => import('./pages/ProfilePage').then((m) => ({ default: m.ProfilePage })));
+export const PassportPage = lazy(() => import('./pages/PassportPage').then((m) => ({ default: m.PassportPage })));
+export const DuelPage = lazy(() => import('./pages/DuelPage').then((m) => ({ default: m.DuelPage })));
+export const CompetitionPage = lazy(() => import('./pages/CompetitionPage').then((m) => ({ default: m.CompetitionPage })));
+export const ChallengesPage = lazy(() => import('./pages/ChallengesPage').then((m) => ({ default: m.ChallengesPage })));
+export const ChallengeGamePage = lazy(() => import('./pages/ChallengeGamePage').then((m) => ({ default: m.ChallengeGamePage })));
+export const ChallengeResultsPage = lazy(() => import('./pages/ChallengeResultsPage').then((m) => ({ default: m.ChallengeResultsPage })));
+export const DailyChallengePage = lazy(() => import('./pages/DailyChallengePage').then((m) => ({ default: m.DailyChallengePage })));
+export const WorldEventPage = lazy(() => import('./pages/WorldEventPage').then((m) => ({ default: m.WorldEventPage })));
+export const SurvivalPage = lazy(() => import('./pages/SurvivalPage').then((m) => ({ default: m.SurvivalPage })));
+export const FlagMasterPage = lazy(() => import('./pages/FlagMasterPage').then((m) => ({ default: m.FlagMasterPage })));
+export const GeoChallengesPage = lazy(() => import('./pages/GeoChallengesPage').then((m) => ({ default: m.GeoChallengesPage })));
+export const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage').then((m) => ({ default: m.ForgotPasswordPage })));
+export const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage').then((m) => ({ default: m.ResetPasswordPage })));
 
 // Protected route wrapper
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -85,7 +85,9 @@ function RootProviders() {
     <ErrorBoundary>
       <AuthProvider>
         <Screen>
-          <Outlet />
+          <Suspense fallback={<AuthRouteLoading />}>
+            <Outlet />
+          </Suspense>
         </Screen>
       </AuthProvider>
     </ErrorBoundary>
@@ -95,7 +97,9 @@ function RootProviders() {
 export function SinglePlayerGameLayout() {
   return (
     <GameProvider>
-      <Outlet />
+      <Suspense fallback={<AuthRouteLoading />}>
+        <Outlet />
+      </Suspense>
     </GameProvider>
   );
 }

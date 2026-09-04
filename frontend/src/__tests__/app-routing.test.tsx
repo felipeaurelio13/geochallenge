@@ -1,8 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import React from 'react';
-import { appRoutes, SinglePlayerGameLayout } from '../App';
-import { RankingsPage } from '../pages/RankingsPage';
-import { CompetitionPage } from '../pages/CompetitionPage';
+import { appRoutes, SinglePlayerGameLayout, RankingsPage, CompetitionPage } from '../App';
 
 describe('App single-player routing', () => {
   it('keeps /game/single and /results under the same GameProvider layout', () => {
