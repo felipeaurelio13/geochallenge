@@ -211,6 +211,7 @@ export function MenuPage() {
         setRequiredQuestions(base.required);
         setAvailableQuestions(base.available);
 
+        if (!drawerOpen) return;
         const probeFilters: GameFilters[] = [
           { ...filters, isInsular: true },
           { ...filters, isLandlocked: true },
@@ -253,7 +254,7 @@ export function MenuPage() {
     return () => {
       mounted = false;
     };
-  }, [filters, selectedCategory, activePanel]);
+  }, [filters, selectedCategory, activePanel, drawerOpen]);
 
   // Mastery summary
   useEffect(() => {
@@ -322,6 +323,7 @@ export function MenuPage() {
               <LanguageSwitcher />
               <Link
                 to="/profile"
+                aria-label={t('nav.profile')}
                 className="flex min-h-11 items-center gap-2 rounded-lg border border-app-border bg-app-surface px-2.5 py-1.5 text-app-secondary transition-colors hover:border-app-border hover:text-app-text"
               >
                 <UserAvatar username={user?.username || ''} size="xs" />

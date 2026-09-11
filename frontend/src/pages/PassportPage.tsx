@@ -88,6 +88,9 @@ export function PassportPage() {
   return (
     <div className="h-full overflow-y-auto bg-[var(--color-bg-app)] px-4 py-5 pt-[calc(env(safe-area-inset-top)+1.25rem)] pb-[calc(env(safe-area-inset-bottom)+1.25rem)] sm:px-6 sm:py-8">
       <div className="mx-auto max-w-xl">
+        <Button variant="ghost" size="sm" className="mb-3" onClick={() => navigate('/menu')}>
+          {t('common.backToMenu')}
+        </Button>
         <h1 className="mb-6 text-2xl font-bold text-[var(--color-text-primary)]">
           {t('passport.title', 'Mi viaje')}
         </h1>
@@ -109,7 +112,10 @@ export function PassportPage() {
         </section>
 
         {summary.stampedCountries === 0 ? (
-          <EmptyState message={t('passport.empty', 'Juega partidas para empezar a llenar tu pasaporte')} />
+          <EmptyState
+            message={t('passport.empty', 'Juega partidas para empezar a llenar tu pasaporte')}
+            action={<Button size="lg" onClick={() => navigate('/game/single?gameType=practice')}>{t('menu.journey.startFirst')}</Button>}
+          />
         ) : (
           <>
             {continents.length > 1 && (

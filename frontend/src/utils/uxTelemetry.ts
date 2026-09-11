@@ -21,7 +21,7 @@ const SESSION_KEY = 'geochallenge:ux-telemetry-session';
 const MAX_BUFFER = 200;
 const FLUSH_THRESHOLD = 20;
 const FLUSH_INTERVAL_MS = 10_000;
-const TELEMETRY_ENDPOINT = '/api/telemetry/events';
+const TELEMETRY_ENDPOINT = `${(import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '')}/telemetry/events`;
 
 let flushTimer: ReturnType<typeof setTimeout> | null = null;
 let isFlushing = false;

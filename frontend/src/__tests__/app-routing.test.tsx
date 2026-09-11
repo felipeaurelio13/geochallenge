@@ -3,6 +3,14 @@ import React from 'react';
 import { appRoutes, SinglePlayerGameLayout, RankingsPage, CompetitionPage } from '../App';
 
 describe('App single-player routing', () => {
+  it('keeps trial and its results in a separate public game provider', () => {
+    const trialParent = appRoutes[0].children.find((route) => route.children?.some((child) => child.path === '/play'));
+    const publicGuard = trialParent?.element as React.ReactElement;
+    expect(publicGuard.props.children.type).toBe(SinglePlayerGameLayout);
+    expect(trialParent?.children?.map((route) => route.path)).toEqual(['/play', '/play/results']);
+    expect(trialParent?.children?.every((route) => route.element.props.isTrial)).toBe(true);
+  });
+
   it('keeps /game/single and /results under the same GameProvider layout', () => {
     const rootRoute = appRoutes[0];
     const singlePlayerParent = rootRoute.children?.find(

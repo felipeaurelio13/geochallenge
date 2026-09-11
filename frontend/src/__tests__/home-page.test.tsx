@@ -65,6 +65,7 @@ describe('HomePage', () => {
       'href',
       '#home-main-actions'
     );
+    expect(screen.getByRole('link', { name: 'home.tryGame' })).toHaveAttribute('href', '/play');
     expect(screen.getByRole('link', { name: 'Iniciar sesión' })).toHaveAttribute('href', '/login');
     expect(screen.getByRole('link', { name: 'Crear cuenta' })).toHaveAttribute('href', '/register');
     expect(screen.queryByRole('link', { name: 'Rankings' })).not.toBeInTheDocument();

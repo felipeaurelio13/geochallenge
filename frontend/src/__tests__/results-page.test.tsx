@@ -1,26 +1,30 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { GameConfig } from '../types';
 import { ResultsPage } from '../pages/ResultsPage';
 
 const mocks = vi.hoisted(() => ({
   navigateMock: vi.fn(),
+  search: '',
   resetGameMock: vi.fn(),
   getMyRankMock: vi.fn().mockResolvedValue({ userRank: { rank: 1 } }),
   writeTextMock: vi.fn().mockResolvedValue(undefined),
   gameState: {
+    config: null as GameConfig | null,
     score: 1100,
-    questions: new Array(10).fill(null).map((_, index) => ({ id: `q${index}` })),
+    questions: new Array(10).fill(null).map((_, index) => ({ id: `q${index}`, category: 'CAPITAL', questionData: 'Chile', questionText: 'Capital', options: [] })),
     results: [
-      ...new Array(8).fill(null).map(() => ({ isCorrect: true })),
-      ...new Array(2).fill(null).map(() => ({ isCorrect: false })),
+      ...new Array(8).fill(null).map((_, index) => ({ questionId: `q${index}`, isCorrect: true, correctAnswer: 'Santiago', userAnswer: 'Santiago' })),
+      ...new Array(2).fill(null).map((_, index) => ({ questionId: `q${index + 8}`, isCorrect: false, correctAnswer: 'Santiago', userAnswer: 'Lima' })),
     ],
   },
 }));
 
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigateMock,
-  useSearchParams: () => [new URLSearchParams()],
+  useSearchParams: () => [new URLSearchParams(mocks.search)],
+  Navigate: ({ to }: { to: string }) => <div data-testid="redirect">{to}</div>,
   Link: ({ children, to, className }: { children: ReactNode; to: string; className?: string }) => (
     <a href={to} className={className}>{children}</a>
   ),
@@ -90,6 +94,8 @@ vi.mock('../components', async () => {
 describe('ResultsPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.search = '';
+    mocks.gameState.config = null;
     vi.spyOn(navigator.clipboard, 'writeText').mockImplementation(mocks.writeTextMock);
   });
 
@@ -104,6 +110,39 @@ describe('ResultsPage', () => {
     expect(screen.getByText('80%')).toBeInTheDocument();
     expect(screen.getByText('1,100')).toBeInTheDocument();
     expect(container.querySelectorAll('article.min-w-0').length).toBe(0);
+  });
+
+  it.each(['single', 'streak', 'practice'] as const)('replays %s with the same configuration', async (gameType) => {
+    mocks.search = `gameType=${gameType}&category=FLAG&continent=Europe&difficulty=HARD&isLandlocked=true&countryCode=CL`;
+    mocks.gameState.config = { gameType, category: 'FLAG', questionsCount: 10, timePerQuestion: 10 };
+    render(<ResultsPage />);
+    const tray = screen.getByTestId('results-action-tray');
+    const primary = tray.querySelector('button')!;
+    fireEvent.click(primary);
+    expect(mocks.resetGameMock).toHaveBeenCalledOnce();
+    expect(mocks.navigateMock).toHaveBeenCalledWith(`/game/single?category=FLAG&gameType=${gameType}&continent=Europe&difficulty=HARD&isLandlocked=true&countryCode=CL`);
+    if (gameType === 'practice') {
+      expect(mocks.getMyRankMock).not.toHaveBeenCalled();
+      expect(screen.queryByText('Jugar de nuevo')).not.toBeInTheDocument();
+    }
+  });
+
+  it('places replay before review and sharing, and shows actual missed answers', () => {
+    render(<ResultsPage />);
+    const tray = screen.getByTestId('results-action-tray');
+    const review = screen.getByRole('heading', { name: 'results.reviewTitle' });
+    expect(tray.compareDocumentPosition(review) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(document.querySelectorAll('details')).toHaveLength(2);
+    expect(screen.getAllByText('Lima')).toHaveLength(2);
+    expect(screen.getAllByText('Santiago')).toHaveLength(4);
+  });
+
+  it('keeps trial replay public and does not request a private ranking', () => {
+    render(<ResultsPage isTrial />);
+    fireEvent.click(screen.getByRole('button', { name: 'Jugar de nuevo' }));
+    expect(mocks.navigateMock).toHaveBeenCalledWith('/play');
+    expect(mocks.getMyRankMock).not.toHaveBeenCalled();
+    expect(screen.getByText('results.trialNotice')).toBeInTheDocument();
   });
 
   it('copia mensaje y muestra confirmación inline; action tray en flujo natural (no sticky)', async () => {

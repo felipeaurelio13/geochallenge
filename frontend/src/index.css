@@ -296,7 +296,8 @@
     display: grid;
     grid-template-rows: repeat(4, minmax(0, 1fr));
     gap: clamp(var(--space-1), 1.2dvh, var(--space-2));
-    height: 100%;
+    /* Leave room for fractional row rounding inside the clipped viewport. */
+    height: calc(100% - 1px);
   }
 
   .question-card {

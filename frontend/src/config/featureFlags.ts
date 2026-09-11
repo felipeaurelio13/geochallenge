@@ -18,6 +18,7 @@ type ModeFlagSet = {
 };
 
 export const featureFlags = {
+  guestTrial: parseBoolFlag(import.meta.env.VITE_GUEST_TRIAL_ENABLED, true),
   uxV2: {
     single: parseBoolFlag(import.meta.env.VITE_UX_V2_SINGLE, true),
     streak: parseBoolFlag(import.meta.env.VITE_UX_V2_STREAK, true),

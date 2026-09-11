@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { createBrowserRouter, RouterProvider, Navigate, Outlet } from 'react-router-dom';
 import { buttonVariants } from './components/atoms/Button';
+import { featureFlags } from './config/featureFlags';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { GameProvider } from './context/GameContext';
 import { HomePage } from './pages/HomePage';
@@ -133,6 +134,15 @@ export const appRoutes = [
       {
         path: '/menu',
         element: <ProtectedRoute><MenuPage /></ProtectedRoute>,
+      },
+      {
+        element: featureFlags.guestTrial
+          ? <PublicRoute><SinglePlayerGameLayout /></PublicRoute>
+          : <Navigate to="/" replace />,
+        children: [
+          { path: '/play', element: <GamePage isTrial /> },
+          { path: '/play/results', element: <ResultsPage isTrial /> },
+        ],
       },
       {
         element: <ProtectedRoute><SinglePlayerGameLayout /></ProtectedRoute>,

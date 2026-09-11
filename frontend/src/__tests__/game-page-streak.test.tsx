@@ -159,7 +159,7 @@ describe('GamePage streak mode', () => {
     await waitFor(() => {
       expect(mocks.setStreakAliveMock).toHaveBeenCalledWith(false);
       expect(mocks.finishGameMock).toHaveBeenCalledTimes(1);
-      expect(mocks.navigateMock).toHaveBeenCalledWith('/results?gameType=streak');
+      expect(mocks.navigateMock).toHaveBeenCalledWith('/results?category=MIXED&gameType=streak');
     });
   });
 
@@ -218,7 +218,7 @@ describe('GamePage streak mode', () => {
       );
       expect(mocks.appendQuestionsMock).toHaveBeenCalled();
       expect(mocks.nextQuestionMock).toHaveBeenCalledTimes(1);
-      expect(mocks.navigateMock).not.toHaveBeenCalledWith('/results?gameType=streak');
+      expect(mocks.navigateMock).not.toHaveBeenCalledWith('/results?category=MIXED&gameType=streak');
     });
   });
 
@@ -239,7 +239,7 @@ describe('GamePage streak mode', () => {
     await waitFor(() => {
       expect(mocks.setStreakAliveMock).toHaveBeenCalledWith(false);
       expect(mocks.finishGameMock).toHaveBeenCalledTimes(1);
-      expect(mocks.navigateMock).toHaveBeenCalledWith('/results?gameType=streak');
+      expect(mocks.navigateMock).toHaveBeenCalledWith('/results?category=MIXED&gameType=streak');
     });
   });
 });

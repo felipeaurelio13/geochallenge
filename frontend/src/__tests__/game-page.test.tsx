@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import axios from 'axios';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { GamePage } from '../pages/GamePage';
 
@@ -237,8 +238,43 @@ describe('GamePage ending flow', () => {
 
     await waitFor(() => {
       expect(mocks.finishGameMock).toHaveBeenCalledTimes(1);
-      expect(mocks.navigateMock).toHaveBeenCalledWith('/results');
+      expect(mocks.navigateMock).toHaveBeenCalledWith('/results?category=MIXED&gameType=single');
     });
+  });
+
+  it('plays a five-question trial using the real start flow without saving a ranked result', async () => {
+    mockedSearchParams = 'category=MAP&gameType=practice&difficulty=HARD';
+    render(<GamePage isTrial />);
+    await waitFor(() => expect(mocks.startGameMock).toHaveBeenCalledWith('FLAG', 5, 'single', { difficulty: 'EASY' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Santiago' }));
+    fireEvent.click(screen.getByRole('button', { name: 'game.submit' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'game.seeResults' }));
+    await waitFor(() => expect(mocks.navigateMock).toHaveBeenCalledWith('/play/results'));
+    expect(mocks.finishGameMock).not.toHaveBeenCalled();
+  });
+
+  it('does not downgrade a trial when fewer than five questions are available', async () => {
+    const isAxiosErrorSpy = vi.spyOn(axios, 'isAxiosError').mockReturnValue(true);
+    mocks.startGameMock.mockRejectedValueOnce({
+      response: { data: { available: 3, requested: 5, canStartShortGame: true } },
+    });
+    mockedSearchParams = 'category=FLAG';
+
+    render(<GamePage isTrial />);
+
+    await waitFor(() => expect(screen.getByText('game.startError')).toBeInTheDocument());
+    expect(confirmDialogStable.confirm).not.toHaveBeenCalled();
+    expect(mocks.startGameMock.mock.calls.some((call) => call[1] === 3 || call[4] === true)).toBe(false);
+    isAxiosErrorSpy.mockRestore();
+  });
+
+  it('carries category and every active filter into results', async () => {
+    mockedSearchParams = 'category=CAPITAL&continent=Europe&difficulty=HARD&isInsular=true';
+    render(<GamePage />);
+    fireEvent.click(screen.getByRole('button', { name: 'Santiago' }));
+    fireEvent.click(screen.getByRole('button', { name: 'game.submit' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'game.seeResults' }));
+    await waitFor(() => expect(mocks.navigateMock).toHaveBeenCalledWith('/results?category=CAPITAL&gameType=single&continent=Europe&isInsular=true&difficulty=HARD'));
   });
 
   it('en modo streak con acierto sigue a la siguiente ronda', async () => {
@@ -273,7 +309,7 @@ describe('GamePage ending flow', () => {
       expect(mocks.nextQuestionMock).toHaveBeenCalledTimes(1);
     });
     expect(mocks.finishGameMock).not.toHaveBeenCalled();
-    expect(mocks.navigateMock).not.toHaveBeenCalledWith('/results?gameType=streak');
+    expect(mocks.navigateMock).not.toHaveBeenCalledWith('/results?category=CAPITAL&gameType=streak');
   });
 
   it('en modo streak con fallo termina la partida y navega a resultados', async () => {
@@ -287,7 +323,7 @@ describe('GamePage ending flow', () => {
 
     await waitFor(() => {
       expect(mocks.finishGameMock).toHaveBeenCalledTimes(1);
-      expect(mocks.navigateMock).toHaveBeenCalledWith('/results?gameType=streak');
+      expect(mocks.navigateMock).toHaveBeenCalledWith('/results?category=CAPITAL&gameType=streak');
     });
     expect(mocks.nextQuestionMock).not.toHaveBeenCalled();
   });

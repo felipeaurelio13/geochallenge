@@ -140,8 +140,8 @@ describe('CompetitionPage', () => {
 
     expect(await screen.findByText('Classic Ranked')).toBeInTheDocument();
     expect(screen.getByText('GeoRetos Ranked')).toBeInTheDocument();
+    expect(await screen.findByText('#12')).toBeInTheDocument();
     expect(screen.getByText('0 / 5 partidas de calibración')).toBeInTheDocument();
-    expect(screen.getByText('#12')).toBeInTheDocument();
     expect(screen.getByText('vs Laura')).toBeInTheDocument();
 
     const buttons = screen.getAllByRole('button', { name: 'Buscar partida' });

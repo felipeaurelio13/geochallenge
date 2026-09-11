@@ -16,7 +16,7 @@ import {
 } from '../components';
 import { FullScreenError } from '../components/molecules/FullScreenError';
 import { MonumentAttribution } from '../components/MonumentAttribution';
-import { Category, GameFilters, MechanicUsage, Question } from '../types';
+import { Category, GameFilters, MechanicUsage, Question, filtersToParams } from '../types';
 import { GAME_CONSTANTS } from '../constants/game';
 import { useConfirmDialog, useHaptics } from '../hooks';
 import { areMechanicsV2Enabled } from '../config/featureFlags';
@@ -48,16 +48,17 @@ function buildQuestionUniquenessKey(question: Question): string {
   ].join('|');
 }
 
-export function GamePage() {
+export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const category = searchParams.get('category') || 'MIXED';
-  const gameTypeParam = searchParams.get('gameType') ?? searchParams.get('mode');
+  const category = isTrial ? 'FLAG' : searchParams.get('category') || 'MIXED';
+  const gameTypeParam = isTrial ? 'single' : searchParams.get('gameType') ?? searchParams.get('mode');
   const gameType = gameTypeParam === 'streak' ? 'streak' : gameTypeParam === 'practice' ? 'practice' : 'single';
   const practiceCountryCode = searchParams.get('countryCode') || undefined;
 
   const gameFilters = useMemo<GameFilters>(() => {
+    if (isTrial) return { difficulty: 'EASY' };
     const f: GameFilters = {};
     const continent = searchParams.get('continent');
     const difficulty = searchParams.get('difficulty');
@@ -66,7 +67,12 @@ export function GamePage() {
     if (searchParams.get('isLandlocked') === 'true') f.isLandlocked = true;
     if (difficulty === 'EASY' || difficulty === 'MEDIUM' || difficulty === 'HARD') f.difficulty = difficulty;
     return f;
-  }, [searchParams]);
+  }, [searchParams, isTrial]);
+
+  const resultParams = new URLSearchParams({ category, gameType, ...filtersToParams(gameFilters) });
+  if (gameType === 'practice' && practiceCountryCode) resultParams.set('countryCode', practiceCountryCode);
+  const resultsPath = isTrial ? '/play/results' : `/results?${resultParams}`;
+  const exitPath = isTrial ? '/' : '/menu';
 
   const {
     state,
@@ -173,7 +179,7 @@ export function GamePage() {
         if (gameType === 'practice') {
           await startPractice(practiceCountryCode);
         } else {
-          await startGame(category as Category, undefined, gameType, gameFilters);
+          await startGame(category as Category, isTrial ? 5 : undefined, gameType, gameFilters);
         }
       } catch (err: any) {
         if (gameType === 'practice') {
@@ -191,6 +197,11 @@ export function GamePage() {
           typeof shortGameData.requested === 'number' &&
           shortGameData.available < shortGameData.requested
         ) {
+          if (isTrial) {
+            setError(t('game.startError'));
+            return;
+          }
+
           const confirmed = await confirm(
             t('game.shortGameConfirm', {
               available: shortGameData.available,
@@ -216,7 +227,7 @@ export function GamePage() {
       }
     };
     initGame();
-  }, [category, gameType, gameFilters, practiceCountryCode, startGame, startPractice, confirm]);
+  }, [category, gameType, gameFilters, practiceCountryCode, startGame, startPractice, confirm, isTrial]);
 
   // Keyboard shortcuts: A/B/C/D to select, Enter to submit/next
   const handleKeyDown = useCallback(
@@ -365,7 +376,7 @@ export function GamePage() {
         setShowResult(true);
         abandonTrackedRef.current = true;
         finishGame()
-          .then(() => navigate('/results?gameType=streak'))
+          .then(() => navigate(resultsPath))
           .catch((err: Error) => setError(err.message || t('game.error')));
         return;
       }
@@ -383,7 +394,7 @@ export function GamePage() {
   // Move to next question
   const handleNextQuestion = async () => {
     if (streakGameOver) {
-      navigate('/results?gameType=streak');
+      navigate(resultsPath);
       return;
     }
 
@@ -416,14 +427,9 @@ export function GamePage() {
 
     if (currentIndex >= bufferedQuestionCount - 1) {
       abandonTrackedRef.current = true;
-      const base = shouldUseStreakFlow
-        ? '/results?gameType=streak'
-        : gameType === 'practice'
-          ? '/results?gameType=practice'
-          : '/results';
       try {
-        await finishGame();
-        navigate(base);
+        if (!isTrial) await finishGame();
+        navigate(resultsPath);
       } catch (err: any) {
         setError(err.message || t('game.error'));
       }
@@ -526,8 +532,8 @@ export function GamePage() {
       <FullScreenError
         title={t('game.error')}
         message={error || undefined}
-        backTo="/menu"
-        backLabel={t('common.backToMenu')}
+        backTo={exitPath}
+        backLabel={t(isTrial ? 'common.back' : 'common.backToMenu')}
       />
     );
   }
@@ -562,7 +568,7 @@ export function GamePage() {
                     reason: 'navigation',
                   });
                   resetGame();
-                  navigate('/menu');
+                  navigate(exitPath);
                 }
               }}
               className={`${isPerfectRoundPilot ? 'pressable grid h-11 w-11 place-items-center rounded-md text-lg text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text-primary)]' : 'pressable min-h-10 rounded-md border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 py-2 text-xs sm:text-sm text-[var(--color-text-secondary)] hover:border-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors'}`}

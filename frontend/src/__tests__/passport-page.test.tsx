@@ -131,6 +131,8 @@ describe('PassportPage', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Juega partidas')).toBeDefined();
+      expect(screen.getByRole('button', { name: 'menu.journey.startFirst' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'common.backToMenu' })).toBeInTheDocument();
     });
   });
 

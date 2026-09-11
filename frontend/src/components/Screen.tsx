@@ -20,6 +20,8 @@ export function Screen({ header, footer, children }: ScreenProps) {
   // pista de "hay más abajo". Ocultarlo en esas rutas resuelve la
   // confusión visual sin cambiar el layout interno.
   const isFullViewportRoute = pathname.startsWith('/game/')
+    || pathname === '/play'
+    || pathname.startsWith('/play/')
     || pathname === '/duel'
     || pathname === '/daily'
     || pathname === '/flag-master'
