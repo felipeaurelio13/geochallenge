@@ -51,20 +51,22 @@ export const OptionButton = React.memo(function OptionButton({
 
   const defaultStateClasses =
     'bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-primary)] hover:border-[var(--color-primary-400)] hover:bg-[var(--color-surface-muted)] cursor-pointer';
+  // Tailwind no genera modificadores de opacidad (`/10`) para colores definidos
+  // como var(--token): se usan color-mix arbitrarios para el tinte y el ring.
   const selectedStateClasses =
-    'bg-primary/10 border-primary text-[var(--color-text-primary)] ring-1 ring-primary/25';
+    'bg-[color-mix(in_srgb,var(--color-primary-500)_10%,transparent)] border-primary text-[var(--color-text-primary)] ring-1 ring-[color:color-mix(in_srgb,var(--color-primary-500)_25%,transparent)]';
   const disabledStateClasses =
     'bg-[var(--color-surface-muted)] border-[var(--color-border)] text-[var(--color-text-muted)] cursor-not-allowed';
   const lockedStateClasses =
     'bg-[var(--color-surface-muted)] border-[var(--color-border)] text-[var(--color-text-secondary)] cursor-not-allowed opacity-60';
   const submittedStateClasses =
-    'bg-primary/10 border-primary text-[var(--color-text-primary)] ring-1 ring-primary/25 cursor-not-allowed';
+    'bg-[color-mix(in_srgb,var(--color-primary-500)_10%,transparent)] border-primary text-[var(--color-text-primary)] ring-1 ring-[color:color-mix(in_srgb,var(--color-primary-500)_25%,transparent)] cursor-not-allowed';
   const eliminatedStateClasses =
     'bg-[var(--color-surface-muted)] border-[var(--color-border)] text-[var(--color-text-muted)] cursor-not-allowed opacity-50';
   const correctStateClasses =
-    'bg-success-500/10 border-success-500 text-[var(--color-text-primary)] cursor-not-allowed';
+    'bg-[color-mix(in_srgb,var(--color-success-500)_10%,transparent)] border-success-500 text-[var(--color-text-primary)] cursor-not-allowed';
   const wrongStateClasses =
-    'bg-error-500/10 border-error-500 text-[var(--color-text-primary)] cursor-not-allowed';
+    'bg-[color-mix(in_srgb,var(--color-error-500)_10%,transparent)] border-error-500 text-[var(--color-text-primary)] cursor-not-allowed';
 
   const getButtonClasses = () => {
     if (showResult) {
@@ -110,13 +112,13 @@ export const OptionButton = React.memo(function OptionButton({
           showResult && isCorrect
             ? 'bg-success-soft text-success'
             : isSubmittedUnrevealed
-              ? 'bg-primary/80 text-app-on-accent'
+              ? 'bg-primary text-app-on-accent'
             : showResult && selected && !isCorrect
               ? 'bg-error-soft text-error'
             : eliminated
               ? 'bg-[var(--color-border)] text-[var(--color-text-muted)]'
             : selected
-                ? 'bg-primary/80 text-app-on-accent'
+                ? 'bg-primary text-app-on-accent'
                 : 'bg-[var(--color-border)] text-[var(--color-text-secondary)]'
         }`}
       >

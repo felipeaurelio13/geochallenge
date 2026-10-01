@@ -393,7 +393,7 @@ export function RankingsPage() {
             {scope === 'season' ? t('rankings.metric.monthHint') : t('rankings.metric.bestHint')}
           </span>
           <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-2 py-0.5 font-semibold uppercase tracking-wide">
-            {t('rankings.metric.best')}
+            {scope === 'season' ? t('rankings.metric.month') : t('rankings.metric.best')}
           </span>
         </div>
 

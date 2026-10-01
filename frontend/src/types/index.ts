@@ -367,7 +367,8 @@ export interface GameState {
 }
 
 export interface GameResult {
-  gameId: string;
+  /** `null` when the session finished with no answered questions (nothing persisted). */
+  gameId: string | null;
   totalScore: number;
   correctCount: number;
   totalQuestions: number;

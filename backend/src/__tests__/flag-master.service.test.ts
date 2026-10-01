@@ -14,6 +14,7 @@ vi.mock('../config/database.js', () => ({
 }));
 
 vi.mock('../utils/scoring.js', () => ({
+  distanceBucket: vi.fn(() => undefined),
   // Deterministas para que los tests sean predecibles.
   selectRandom: <T>(arr: T[], count: number) => arr.slice(0, count),
   shuffleArray: <T>(arr: T[]) => [...arr],

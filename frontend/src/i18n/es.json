@@ -732,6 +732,7 @@
     "metric": {
       "sum": "Suma del mes",
       "best": "Mejor de siempre",
+      "month": "Mejor del mes",
       "sumHint": "Ranking por puntaje total acumulado en el mes",
       "bestHint": "Ranking por la mejor partida individual",
       "monthHint": "Ranking por la mejor partida individual del mes"

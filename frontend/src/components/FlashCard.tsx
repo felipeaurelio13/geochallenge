@@ -56,10 +56,13 @@ export function FlashCard({ question, onAnswer, disabled, disabledOptions = [], 
     threshold: 40,
   });
 
+  // `disabled:opacity-60` vive solo en la rama normal: junto a `disabled:opacity-100`
+  // ganaba el 60% (orden del CSS generado) y atenuaba la respuesta correcta revelada.
+  // El tinte usa color-mix porque `bg-success-500/20` no se genera con var(--token).
   const optionClass = (option: string) =>
     feedback === 'incorrect' && correctAnswer && option === correctAnswer
-      ? 'border-success-500 bg-success-500/20 ring-2 ring-success-500 disabled:opacity-100'
-      : 'border-[var(--color-border)] bg-[var(--color-surface-muted)]';
+      ? 'border-success-500 bg-[color-mix(in_srgb,var(--color-success-500)_20%,transparent)] ring-2 ring-success-500'
+      : 'border-[var(--color-border)] bg-[var(--color-surface-muted)] disabled:opacity-60';
 
   const feedbackClass =
     feedback === 'correct'
@@ -103,7 +106,7 @@ export function FlashCard({ question, onAnswer, disabled, disabledOptions = [], 
           onClick={() => handleAnswer(optionA)}
           disabled={disabled || disabledOptions.includes(optionA)}
           data-correct={feedback === 'incorrect' && !!correctAnswer && optionA === correctAnswer ? 'true' : undefined}
-          className={`pressable min-h-16 rounded-md border ${optionClass(optionA)} px-3 py-4 text-base font-semibold text-[var(--color-text-primary)] transition-colors hover:border-primary/50 hover:bg-[var(--color-surface)] active:bg-[var(--color-surface)] disabled:cursor-not-allowed disabled:opacity-60`}
+          className={`pressable min-h-16 rounded-md border ${optionClass(optionA)} px-3 py-4 text-base font-semibold text-[var(--color-text-primary)] transition-colors hover:border-primary/50 hover:bg-[var(--color-surface)] active:bg-[var(--color-surface)] disabled:cursor-not-allowed`}
           aria-label={t('flash.optionA', { label: displayA })}
         >
           <span className="mr-2 text-xs text-[var(--color-text-muted)]">←</span>
@@ -114,7 +117,7 @@ export function FlashCard({ question, onAnswer, disabled, disabledOptions = [], 
           onClick={() => handleAnswer(optionB)}
           disabled={disabled || disabledOptions.includes(optionB)}
           data-correct={feedback === 'incorrect' && !!correctAnswer && optionB === correctAnswer ? 'true' : undefined}
-          className={`pressable min-h-16 rounded-md border ${optionClass(optionB)} px-3 py-4 text-base font-semibold text-[var(--color-text-primary)] transition-colors hover:border-primary/50 hover:bg-[var(--color-surface)] active:bg-[var(--color-surface)] disabled:cursor-not-allowed disabled:opacity-60`}
+          className={`pressable min-h-16 rounded-md border ${optionClass(optionB)} px-3 py-4 text-base font-semibold text-[var(--color-text-primary)] transition-colors hover:border-primary/50 hover:bg-[var(--color-surface)] active:bg-[var(--color-surface)] disabled:cursor-not-allowed`}
           aria-label={t('flash.optionB', { label: displayB })}
         >
           {displayB}

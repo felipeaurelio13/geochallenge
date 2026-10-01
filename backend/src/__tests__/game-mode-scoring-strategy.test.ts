@@ -19,6 +19,7 @@ const calculateMapScoreMock = vi.fn();
 const calculateTimeBonusMock = vi.fn();
 
 vi.mock('../utils/scoring.js', () => ({
+  distanceBucket: vi.fn(() => undefined),
   calculateScore: calculateScoreMock,
   calculateMapScore: calculateMapScoreMock,
   calculateTimeBonus: calculateTimeBonusMock,
