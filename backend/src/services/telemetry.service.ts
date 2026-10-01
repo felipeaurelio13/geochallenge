@@ -1,5 +1,6 @@
 import { prisma } from '../config/database.js';
 import { TelemetrySource, GameMode, GameVariant, Category, Prisma } from '@prisma/client';
+import { distanceBucket } from '../utils/scoring.js';
 
 const CLIENT_EVENT_NAMES = [
   'app_open',
@@ -66,14 +67,7 @@ interface InsertClientEventsOptions {
   userId: string | null;
 }
 
-export function distanceBucket(distanceKm?: number): string | undefined {
-  if (distanceKm === undefined || distanceKm === null) return undefined;
-  if (distanceKm < 100) return '<100km';
-  if (distanceKm < 500) return '100-500km';
-  if (distanceKm < 1000) return '500-1000km';
-  if (distanceKm < 2000) return '1000-2000km';
-  return '>2000km';
-}
+export { distanceBucket };
 
 function sanitizeProperties(props?: Record<string, unknown>): Record<string, unknown> | undefined {
   if (!props) return undefined;

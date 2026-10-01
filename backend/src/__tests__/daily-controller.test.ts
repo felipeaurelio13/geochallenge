@@ -155,6 +155,16 @@ function fixedPlan(dayKey = FIXED_DAY_KEY) {
   };
 }
 
+/** Simula respuestas ya guardadas por /daily/answer (submit exige al menos una). */
+function mockStoredDailyAnswers(correct = true) {
+  mocks.redisGet.mockImplementation((key: string) => {
+    if (key.startsWith('daily:answer:user-1:')) {
+      return Promise.resolve(JSON.stringify({ isCorrect: correct, points: correct ? 100 : 0 }));
+    }
+    return Promise.resolve(null);
+  });
+}
+
 function mockPersistedDailyPlan(dayKey = FIXED_DAY_KEY) {
   const plan = fixedPlan(dayKey);
   mocks.dailyPlanFindUnique.mockResolvedValue(plan);
@@ -364,6 +374,7 @@ describe('Daily controller authority contracts', () => {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ questionId: 'daily-q1', answer: 'A', dayKey: validNextDay }),
     });
+    mockStoredDailyAnswers(); // lo que /answer dejó guardado en Redis
     const submit = await fetch(`${baseUrl}/api/game/daily/submit`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -391,6 +402,7 @@ describe('Daily controller authority contracts', () => {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ questionId: 'daily-q1', answer: 'A', dayKey: spoofedDay }),
     });
+    mockStoredDailyAnswers(); // lo que /answer dejó guardado en Redis
     const submit = await fetch(`${baseUrl}/api/game/daily/submit`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -561,6 +573,7 @@ describe('Daily controller authority contracts', () => {
   });
 
   it('concurrent submit P2002 recovers the winning GameResult without a second result write', async () => {
+    mockStoredDailyAnswers();
     mocks.userFindUnique
       .mockResolvedValueOnce({ highScore: 0, dailyStreak: 5, lastDailyDate: '2026-08-12' })
       .mockResolvedValueOnce({ dailyStreak: 6 });
@@ -610,6 +623,7 @@ describe('Daily controller authority contracts', () => {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ questionId: 'daily-q1', answer: 'A', dayKey: FIXED_DAY_KEY }),
     });
+    mockStoredDailyAnswers(); // lo que /answer dejó guardado en Redis
     const submit = await fetch(`${baseUrl}/api/game/daily/submit`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -625,6 +639,74 @@ describe('Daily controller authority contracts', () => {
         data: expect.objectContaining({ runId: `daily:user-1:${FIXED_DAY_KEY}` }),
       })
     );
+  });
+
+  it('submit sin ninguna respuesta almacenada responde 400 DAILY_NO_ANSWERS y no avanza la racha', async () => {
+    // redisGet devuelve null para todo: nunca se llamó a /daily/answer.
+    const { server, baseUrl } = startServer();
+    const response = await fetch(`${baseUrl}/api/game/daily/submit`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ dayKey: FIXED_DAY_KEY }),
+    });
+    const body = (await response.json()) as { code?: string };
+    server.close();
+
+    expect(response.status).toBe(400);
+    expect(body.code).toBe('DAILY_NO_ANSWERS');
+    expect(mocks.userUpdate).not.toHaveBeenCalled();
+    expect(mocks.gameResultCreate).not.toHaveBeenCalled();
+    expect(applyMasteryAttemptsForRun).not.toHaveBeenCalled();
+    expect(evaluateAchievementsAfterDaily).not.toHaveBeenCalled();
+  });
+
+  it('doble submit del mismo día no cuenta dos veces (200 Ya enviado, sin escrituras)', async () => {
+    mockStoredDailyAnswers();
+    mocks.userFindUnique.mockResolvedValue({ highScore: 0, dailyStreak: 1, lastDailyDate: FIXED_DAY_KEY });
+    mocks.gameResultFindUnique.mockResolvedValue({
+      score: 100,
+      correctCount: 1,
+      totalQuestions: 10,
+      createdAt: new Date('2026-08-13T23:00:00.000Z'),
+      details: { stops: [] },
+    });
+
+    const { server, baseUrl } = startServer();
+    const response = await fetch(`${baseUrl}/api/game/daily/submit`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ dayKey: FIXED_DAY_KEY }),
+    });
+    const body = (await response.json()) as { message: string };
+    server.close();
+
+    expect(response.status).toBe(200);
+    expect(body.message).toBe('Ya enviado');
+    expect(mocks.userUpdate).not.toHaveBeenCalled();
+    expect(mocks.gameResultCreate).not.toHaveBeenCalled();
+    expect(evaluateAchievementsAfterDaily).not.toHaveBeenCalled();
+  });
+
+  it('submit de un día anterior al último enviado responde 409 DAILY_ALREADY_SUBMITTED y no retrocede la racha', async () => {
+    mockStoredDailyAnswers();
+    // Ya envió el 13; reenviar con la clave del 12 (dentro del drift) movería lastDailyDate hacia atrás.
+    mockPersistedDailyPlan('2026-08-12');
+    mocks.userFindUnique.mockResolvedValue({ highScore: 0, dailyStreak: 7, lastDailyDate: FIXED_DAY_KEY });
+
+    const { server, baseUrl } = startServer();
+    const response = await fetch(`${baseUrl}/api/game/daily/submit`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ dayKey: '2026-08-12' }),
+    });
+    const body = (await response.json()) as { code?: string };
+    server.close();
+
+    expect(response.status).toBe(409);
+    expect(body.code).toBe('DAILY_ALREADY_SUBMITTED');
+    expect(mocks.userUpdate).not.toHaveBeenCalled();
+    expect(mocks.gameResultCreate).not.toHaveBeenCalled();
+    expect(evaluateAchievementsAfterDaily).not.toHaveBeenCalled();
   });
 });
 
@@ -737,10 +819,13 @@ describe('POST /api/game/daily/submit — el servidor calcula el puntaje', () =>
   it('ignora preguntas que no son del reto del día (scoring desde stored)', async () => {
     const { server, baseUrl } = startServer();
 
-    // Mock Redis: no stored answers → correctCount = 0
+    // Mock Redis: una sola respuesta stored (incorrecta) → correctCount = 0
     const today = new Date().toISOString().slice(0, 10);
     const ids = await getDailyQuestionIds(baseUrl);
     mocks.redisGet.mockImplementation((key: string) => {
+      if (key === `daily:answer:user-1:${today}:${ids[0]}`) {
+        return Promise.resolve(JSON.stringify({ isCorrect: false, points: 0 }));
+      }
       if (key === `daily:questions:${today}`) return Promise.resolve(JSON.stringify(ids));
       if (key === `daily:played:user-1:${today}`) return Promise.resolve(null);
       return Promise.resolve(null);
@@ -756,7 +841,7 @@ describe('POST /api/game/daily/submit — el servidor calcula el puntaje', () =>
 
     expect(response.status).toBe(200);
     const body = (await response.json()) as { result?: { correctCount: number } };
-    expect(body.result?.correctCount).toBe(0); // no stored answers = 0 score
+    expect(body.result?.correctCount).toBe(0); // la respuesta stored es incorrecta = 0 score
   });
 });
 
@@ -824,6 +909,7 @@ describe('POST /api/game/daily/submit — clientDate y racha en zona horaria loc
   }
 
   it('(a) clientDate un día detrás de la fecha UTC del servidor mantiene la racha si jugó "ayer" localmente', async () => {
+    mockStoredDailyAnswers();
     // El usuario jugó ayer local (2026-02-28) y hoy es 2026-03-01 local
     // (aunque el servidor ya esté en 2026-03-02 UTC).
     mocks.userFindUnique.mockResolvedValue({
@@ -855,6 +941,7 @@ describe('POST /api/game/daily/submit — clientDate y racha en zona horaria loc
   });
 
   it('(b) clientDate spoofeado 3+ días de diferencia se ignora y cae al fallback UTC', async () => {
+    mockStoredDailyAnswers();
     mocks.userFindUnique.mockResolvedValue({
       highScore: 0,
       dailyStreak: 5,
@@ -887,6 +974,7 @@ describe('POST /api/game/daily/submit — clientDate y racha en zona horaria loc
   });
 
   it('(c) una racha genuinamente rota reporta previousStreak y streakLost', async () => {
+    mockStoredDailyAnswers();
     mocks.userFindUnique.mockResolvedValue({
       highScore: 0,
       dailyStreak: 4,
@@ -915,6 +1003,7 @@ describe('POST /api/game/daily/submit — clientDate y racha en zona horaria loc
   });
 
   it('perder una racha de 1 día no marca streakLost (no vale la pena flaggear)', async () => {
+    mockStoredDailyAnswers();
     mocks.userFindUnique.mockResolvedValue({
       highScore: 0,
       dailyStreak: 1,
@@ -939,6 +1028,7 @@ describe('POST /api/game/daily/submit — clientDate y racha en zona horaria loc
   });
 
   it('(d) sin clientDate sigue funcionando exactamente como antes (compatibilidad con PWA cacheada)', async () => {
+    mockStoredDailyAnswers();
     mocks.userFindUnique.mockResolvedValue({
       highScore: 0,
       dailyStreak: 5,

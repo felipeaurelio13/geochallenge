@@ -303,7 +303,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const setTimeRemaining = useCallback((time: number) => {
-    setState((prev) => ({ ...prev, timeRemaining: Math.max(0, time) }));
+    const next = Math.max(0, time);
+    setState((prev) => (prev.timeRemaining === next ? prev : { ...prev, timeRemaining: next }));
   }, []);
 
   const allImageUrls = useMemo(
@@ -312,27 +313,39 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   );
   useImagePreloader(allImageUrls); // skip=1 default: Q1 ya carga via eager img tag
 
-  return (
-    <GameContext.Provider
-      value={{
-        state,
-        streakAlive,
-        startGame,
-        startPractice,
-        appendQuestions,
-        setStreakAlive,
-        submitAnswer,
-        nextQuestion,
-        finishGame,
-        resetGame,
-        setTimeRemaining,
-        replaceCurrentQuestion,
-        lastNewAchievements,
-      }}
-    >
-      {children}
-    </GameContext.Provider>
+  const value = useMemo<GameContextType>(
+    () => ({
+      state,
+      streakAlive,
+      startGame,
+      startPractice,
+      appendQuestions,
+      setStreakAlive,
+      submitAnswer,
+      nextQuestion,
+      finishGame,
+      resetGame,
+      setTimeRemaining,
+      replaceCurrentQuestion,
+      lastNewAchievements,
+    }),
+    [
+      state,
+      streakAlive,
+      startGame,
+      startPractice,
+      appendQuestions,
+      submitAnswer,
+      nextQuestion,
+      finishGame,
+      resetGame,
+      setTimeRemaining,
+      replaceCurrentQuestion,
+      lastNewAchievements,
+    ]
   );
+
+  return <GameContext.Provider value={value}>{children}</GameContext.Provider>;
 }
 
 export function useGame() {

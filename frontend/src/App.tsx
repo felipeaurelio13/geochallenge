@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { createBrowserRouter, RouterProvider, Navigate, Outlet } from 'react-router-dom';
-import { buttonVariants } from './components/atoms/Button';
+import { useTranslation } from 'react-i18next';
+import { FullScreenError } from './components/molecules/FullScreenError';
 import { featureFlags } from './config/featureFlags';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { GameProvider } from './context/GameContext';
@@ -14,7 +15,7 @@ import {
   Screen,
   AuthRouteLoading,
 } from './components';
-import { getRouterBasename, toAppPath } from './utils/routing';
+import { getRouterBasename } from './utils/routing';
 
 export const GamePage = lazy(() => import('./pages/GamePage').then((m) => ({ default: m.GamePage })));
 export const ResultsPage = lazy(() => import('./pages/ResultsPage').then((m) => ({ default: m.ResultsPage })));
@@ -30,6 +31,7 @@ export const ChallengeResultsPage = lazy(() => import('./pages/ChallengeResultsP
 export const DailyChallengePage = lazy(() => import('./pages/DailyChallengePage').then((m) => ({ default: m.DailyChallengePage })));
 export const WorldEventPage = lazy(() => import('./pages/WorldEventPage').then((m) => ({ default: m.WorldEventPage })));
 export const SurvivalPage = lazy(() => import('./pages/SurvivalPage').then((m) => ({ default: m.SurvivalPage })));
+export const NotFoundPage = lazy(() => import('./pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })));
 export const FlagMasterPage = lazy(() => import('./pages/FlagMasterPage').then((m) => ({ default: m.FlagMasterPage })));
 export const GeoChallengesPage = lazy(() => import('./pages/GeoChallengesPage').then((m) => ({ default: m.GeoChallengesPage })));
 export const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage').then((m) => ({ default: m.ForgotPasswordPage })));
@@ -67,18 +69,8 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 
 // Router error fallback
 function RouteErrorFallback() {
-  return (
-    <div className="h-full min-h-0 bg-[var(--color-bg-app)] flex items-center justify-center px-4">
-      <div className="text-center">
-        <div className="text-6xl mb-4">:(</div>
-        <h2 className="text-2xl font-bold text-app-text mb-2">Algo salio mal</h2>
-        <p className="text-[var(--color-text-muted)] mb-6">Ha ocurrido un error inesperado</p>
-        <a href={toAppPath('/menu')} className={buttonVariants({ variant: 'primary', size: 'lg' })}>
-          Volver al menu
-        </a>
-      </div>
-    </div>
-  );
+  const { t } = useTranslation();
+  return <FullScreenError title={t('error.title')} message={t('error.unexpected')} />;
 }
 
 function RootProviders() {
@@ -215,7 +207,7 @@ export const appRoutes = [
       },
       {
         path: '*',
-        element: <Navigate to="/" replace />,
+        element: <NotFoundPage />,
       },
     ],
   },

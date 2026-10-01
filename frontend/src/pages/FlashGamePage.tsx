@@ -13,6 +13,9 @@ import { trackUxEvent } from '../utils/uxTelemetry';
 
 const FALLBACK_DURATION_SECONDS = 60;
 const FEEDBACK_MS = 320;
+const FEEDBACK_MISS_MS = 700;
+const TICK_INTERVAL_MS = 250;
+const URGENCY_THRESHOLD_SECONDS = 5;
 const FOCUS_TIME_BONUS_SECONDS = 5;
 const FLASH_COMBO_TIERS = [1, 1, 2, 2, 3, 3, 5, 5, 8, 8, 10];
 
@@ -66,6 +69,9 @@ export function FlashGamePage() {
   const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null);
   const [results, setResults] = useState<FlashRoundResult[]>([]);
   const [disabledOption, setDisabledOption] = useState<string | null>(null);
+  const [correctAnswer, setCorrectAnswer] = useState<string | null>(null);
+  const [finishError, setFinishError] = useState(false);
+  const [finishRetrying, setFinishRetrying] = useState(false);
   const [mechanicsRuntimeEnabled, setMechanicsRuntimeEnabled] = useState(false);
   const [mechanicsAvailable, setMechanicsAvailable] = useState({
     intel5050: 1,
@@ -75,6 +81,11 @@ export function FlashGamePage() {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const statusRef = useRef<Status>(status);
+  const submittingRef = useRef(false);
+  const finishingRef = useRef(false);
+  const endAtRef = useRef<number | null>(null);
+  const timeRemainingRef = useRef(timeRemaining);
+  const hapticsRef = useRef(haptics);
   const questionsRef = useRef(questions);
   const abandonTrackedRef = useRef(false);
   const mechanicsFeatureEnabled = areMechanicsV2Enabled('flash');
@@ -86,6 +97,14 @@ export function FlashGamePage() {
   useEffect(() => {
     questionsRef.current = questions;
   }, [questions]);
+
+  useEffect(() => {
+    timeRemainingRef.current = timeRemaining;
+  }, [timeRemaining]);
+
+  useEffect(() => {
+    hapticsRef.current = haptics;
+  }, [haptics]);
 
   // Load flash session
   useEffect(() => {
@@ -119,40 +138,83 @@ export function FlashGamePage() {
   }, [category, gameFilters]);
 
   const finish = useCallback(async () => {
-    if (statusRef.current === 'finished') return;
+    if (statusRef.current === 'finished' || finishingRef.current) return;
+    finishingRef.current = true;
     if (intervalRef.current) clearInterval(intervalRef.current);
     intervalRef.current = null;
     if (flashSessionId) {
       try {
         const result = await api.finishGame({ sessionId: flashSessionId, answers: [], gameType: 'flash' });
         setScore(result.totalScore);
-      } catch { return; } // retryable, don't show as success
+      } catch {
+        // Retryable: surface the failure so the player is not stuck at 0s.
+        finishingRef.current = false;
+        setFinishError(true);
+        return;
+      }
     }
+    setFinishError(false);
     setStatus('finished');
     abandonTrackedRef.current = true;
     haptics.celebrate();
   }, [haptics, flashSessionId]);
 
-  // Timer
+  const handleRetryFinish = useCallback(async () => {
+    setFinishRetrying(true);
+    try {
+      await finish();
+    } finally {
+      setFinishRetrying(false);
+    }
+  }, [finish]);
+
+  // Wall-clock timer: remaining time is derived from a deadline instead of
+  // counting ticks, so a throttled/backgrounded tab does not drift.
   useEffect(() => {
-    if (status !== 'playing') return;
-    intervalRef.current = setInterval(() => {
-      setTimeRemaining((prev) => {
-        const next = prev - 1;
-        if (next <= 0) {
-          finish();
-          return 0;
-        }
-        if (next <= 5) {
-          haptics.urgency();
-        }
-        return next;
-      });
-    }, 1000);
+    if (status !== 'playing') {
+      endAtRef.current = null;
+      return;
+    }
+    endAtRef.current = Date.now() + timeRemainingRef.current * 1000;
+    const sync = () => {
+      if (endAtRef.current === null) return;
+      const remaining = Math.max(0, Math.ceil((endAtRef.current - Date.now()) / 1000));
+      setTimeRemaining((prev) => (prev === remaining ? prev : remaining));
+    };
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') sync();
+    };
+    intervalRef.current = setInterval(sync, TICK_INTERVAL_MS);
+    document.addEventListener('visibilitychange', handleVisibility);
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
+      intervalRef.current = null;
+      document.removeEventListener('visibilitychange', handleVisibility);
     };
-  }, [status, finish, haptics]);
+  }, [status]);
+
+  // Side effects driven by the countdown live here, not in the state updater.
+  useEffect(() => {
+    if (status !== 'playing') return;
+    if (timeRemaining > 0 && timeRemaining <= URGENCY_THRESHOLD_SECONDS) {
+      hapticsRef.current.urgency();
+    }
+  }, [status, timeRemaining]);
+
+  useEffect(() => {
+    if (status !== 'playing' || timeRemaining > 0) return;
+    void finish();
+  }, [status, timeRemaining, finish]);
+
+  // Prevent accidental navigation while a round is running
+  useEffect(() => {
+    if (status !== 'playing') return;
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [status]);
 
   useEffect(() => {
     return () => {
@@ -181,6 +243,7 @@ export function FlashGamePage() {
   const handleAnswer = useCallback(
     async (option: string) => {
       if (!currentQuestion || status !== 'playing') return;
+      if (submittingRef.current || finishingRef.current || feedback !== null) return;
       if (disabledOption && option === disabledOption) {
         trackUxEvent('option_mis_tap', {
           mode: 'flash',
@@ -191,13 +254,21 @@ export function FlashGamePage() {
       }
       let isCorrect = false;
       let points = 0;
+      let serverCorrectAnswer: string | null = null;
 
+      // Held until the feedback window ends so a double tap/swipe cannot submit twice.
+      submittingRef.current = true;
       if (flashSessionId) {
         try {
           const server = await api.submitAnswer({ sessionId: flashSessionId, questionId: currentQuestion.id, answer: option, timeRemaining: 0 });
           isCorrect = server.isCorrect;
           points = server.points ?? 0;
-        } catch { return; } // server failure: don't advance or score
+          serverCorrectAnswer = server.correctAnswer ?? null;
+        } catch {
+          // server failure: don't advance or score
+          submittingRef.current = false;
+          return;
+        }
       }
 
       const prevCombo = combo;
@@ -211,6 +282,7 @@ export function FlashGamePage() {
         ...prev,
         { questionId: currentQuestion.id, isCorrect, points, combo: effectiveCombo },
       ]);
+      setCorrectAnswer(isCorrect ? null : serverCorrectAnswer);
       setFeedback(isCorrect ? 'correct' : 'incorrect');
 
       if (isCorrect) {
@@ -225,7 +297,9 @@ export function FlashGamePage() {
       if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
       feedbackTimerRef.current = setTimeout(() => {
         setFeedback(null);
+        setCorrectAnswer(null);
         setDisabledOption(null);
+        submittingRef.current = false;
         setCurrentIndex((idx) => {
           const next = idx + 1;
           if (next >= questions.length) {
@@ -234,9 +308,9 @@ export function FlashGamePage() {
           }
           return next;
         });
-      }, FEEDBACK_MS);
+      }, isCorrect ? FEEDBACK_MS : FEEDBACK_MISS_MS);
     },
-    [combo, currentQuestion, disabledOption, finish, flashSessionId, haptics, questions.length, status]
+    [combo, currentQuestion, disabledOption, feedback, finish, flashSessionId, haptics, questions.length, status]
   );
 
   const handleUseIntel5050 = useCallback(async () => {
@@ -255,13 +329,15 @@ export function FlashGamePage() {
 
   const handleUseFocusTime = useCallback(() => {
     if (mechanicsAvailable.focusTime <= 0 || !canUseMechanics || feedback) return;
-    setTimeRemaining((prev) => Math.min(durationSeconds + FOCUS_TIME_BONUS_SECONDS, prev + FOCUS_TIME_BONUS_SECONDS));
+    const next = Math.min(durationSeconds + FOCUS_TIME_BONUS_SECONDS, timeRemaining + FOCUS_TIME_BONUS_SECONDS);
+    if (endAtRef.current !== null) endAtRef.current += (next - timeRemaining) * 1000;
+    setTimeRemaining(next);
     setMechanicsAvailable((prev) => ({
       ...prev,
       focusTime: Math.max(0, prev.focusTime - 1),
     }));
     haptics.tap();
-  }, [canUseMechanics, currentQuestion?.id, durationSeconds, feedback, haptics, mechanicsAvailable.focusTime]);
+  }, [canUseMechanics, durationSeconds, feedback, haptics, mechanicsAvailable.focusTime, timeRemaining]);
 
 
   useEffect(() => {
@@ -415,7 +491,6 @@ export function FlashGamePage() {
                     correct,
                     accuracy: `${accuracy}%`,
                     maxCombo,
-                    defaultValue: '⚡ Flash: {{score}} pts · combo máx {{maxCombo}} · {{correct}} correctas ({{accuracy}})',
                   }),
                 }}
               />
@@ -430,6 +505,11 @@ export function FlashGamePage() {
                 setAnswered(0);
                 setCurrentIndex(0);
                 setTimeRemaining(durationSeconds);
+                setFeedback(null);
+                setCorrectAnswer(null);
+                setFinishError(false);
+                submittingRef.current = false;
+                finishingRef.current = false;
                 setStatus('intro');
               }}
               variant="primary"
@@ -454,6 +534,33 @@ export function FlashGamePage() {
     );
   }
 
+  if (finishError) {
+    return (
+      <div className="h-full min-h-0 bg-[var(--color-bg-app)] px-4 py-6 pt-[calc(env(safe-area-inset-top)+1.5rem)]">
+        <div className="mx-auto max-w-md animate-fade-in">
+          <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-6 text-center shadow-sm">
+            <div className="text-6xl" aria-hidden="true">⚡</div>
+            <h1 className="mt-2 text-2xl font-black text-[var(--color-text-primary)]">{t('flash.finished')}</h1>
+            <p role="alert" className="mt-3 text-sm text-error">{t('flash.finishError')}</p>
+            <Button
+              onClick={handleRetryFinish}
+              variant="primary"
+              size="lg"
+              fullWidth
+              className="mt-5"
+              disabled={finishRetrying}
+            >
+              {t('flash.finishRetry')}
+            </Button>
+            <Button onClick={() => navigate('/menu')} variant="secondary" size="md" fullWidth className="mt-2">
+              {t('common.backToMenu')}
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // playing
   return (
     <div className="flex h-full min-h-0 flex-col bg-[var(--color-bg-app)] px-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-[calc(env(safe-area-inset-top)+0.5rem)] sm:px-4">
@@ -469,7 +576,7 @@ export function FlashGamePage() {
           >
             ✕
           </button>
-          <StreakCombo combo={combo} multiplier={multiplier} label="Combo" />
+          <StreakCombo combo={combo} multiplier={multiplier} label={t('flash.combo')} />
           <div
             className={`tabular-nums rounded-lg border px-3 py-2 text-sm font-bold transition-colors duration-300 ${
               progressPercent > 50
@@ -522,6 +629,7 @@ export function FlashGamePage() {
             onAnswer={handleAnswer}
             disabled={feedback !== null}
             feedback={feedback}
+            correctAnswer={correctAnswer}
             disabledOptions={disabledOption ? [disabledOption] : []}
             onImageError={
               currentQuestion?.category === 'FLAG' || currentQuestion?.category === 'SILHOUETTE'

@@ -92,6 +92,7 @@ import {
   getTopLeaderboard,
   getSeasonLeaderboard,
   getUserRank,
+  getUserLeaderboardContext,
   getCurrentSeasonId,
   syncLeaderboardFromDatabase,
   syncSeasonLeaderboardFromDatabase,
@@ -163,17 +164,14 @@ describe('getTopLeaderboard', () => {
   it('devuelve resultados de Redis con usernames y rank empezando en 1', async () => {
     await updateLeaderboardScore('u1', 1000);
     await updateLeaderboardScore('u2', 1500);
-    prismaMock.user.findMany
-      .mockResolvedValueOnce([
-        { id: 'u1', username: 'alice' },
-        { id: 'u2', username: 'bob' },
-      ])
-      .mockResolvedValueOnce([
-        { id: 'u1', gamesPlayed: 5 },
-        { id: 'u2', gamesPlayed: 12 },
-      ]);
+    prismaMock.user.findMany.mockResolvedValueOnce([
+      { id: 'u1', username: 'alice', gamesPlayed: 5 },
+      { id: 'u2', username: 'bob', gamesPlayed: 12 },
+    ]);
 
     const top = await getTopLeaderboard(10);
+    // Una sola query a User (username + gamesPlayed), no dos.
+    expect(prismaMock.user.findMany).toHaveBeenCalledTimes(1);
     expect(top).toEqual([
       { rank: 1, userId: 'u2', username: 'bob', score: 1500, bestScore: 1500, gamesPlayed: 12 },
       { rank: 2, userId: 'u1', username: 'alice', score: 1000, bestScore: 1000, gamesPlayed: 5 },
@@ -206,6 +204,29 @@ describe('getUserRank', () => {
     prismaMock.user.count.mockResolvedValueOnce(5);
     const rank = await getUserRank('cold-user');
     expect(rank).toEqual({ rank: 6, score: 1234 });
+  });
+});
+
+describe('getUserLeaderboardContext (Redis path)', () => {
+  it('rellena gamesPlayed de los vecinos con una sola query a User', async () => {
+    await updateLeaderboardScore('u1', 500);
+    await updateLeaderboardScore('u2', 1500);
+    await updateLeaderboardScore('u3', 1000);
+    prismaMock.user.findMany.mockResolvedValueOnce([
+      { id: 'u1', username: 'alice', gamesPlayed: 4 },
+      { id: 'u2', username: 'bob', gamesPlayed: 9 },
+      { id: 'u3', username: 'carol', gamesPlayed: 6 },
+    ]);
+
+    const ctx = await getUserLeaderboardContext('u3', 3);
+
+    expect(prismaMock.user.findMany).toHaveBeenCalledTimes(1);
+    expect(ctx.userRank).toMatchObject({ userId: 'u3', rank: 2, gamesPlayed: 6 });
+    expect(ctx.neighbors.map((n) => [n.userId, n.gamesPlayed])).toEqual([
+      ['u2', 9],
+      ['u3', 6],
+      ['u1', 4],
+    ]);
   });
 });
 
@@ -361,9 +382,7 @@ describe('getTopLeaderboard con filtros', () => {
 
   it('sin filtros usa Redis ZSET global', async () => {
     await updateLeaderboardScore('u1', 1500);
-    prismaMock.user.findMany
-      .mockResolvedValueOnce([{ id: 'u1', username: 'alice' }])
-      .mockResolvedValueOnce([{ id: 'u1', gamesPlayed: 7 }]);
+    prismaMock.user.findMany.mockResolvedValueOnce([{ id: 'u1', username: 'alice', gamesPlayed: 7 }]);
 
     const top = await getTopLeaderboard(10);
     expect(redisMock.zrevrange).toHaveBeenCalled();

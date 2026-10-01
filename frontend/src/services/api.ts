@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
+import i18n from '../i18n';
 import type {
   User,
   PublicQuestion,
@@ -140,10 +141,10 @@ class ApiService {
         }
 
         if (error.code === 'ECONNABORTED') {
-          return Promise.reject(new Error('La solicitud tardó demasiado. Verifica tu conexión.'));
+          return Promise.reject(new Error(i18n.t('error.timeout')));
         }
         if (!error.response) {
-          return Promise.reject(new Error('Sin conexión a internet. Verifica tu red.'));
+          return Promise.reject(new Error(i18n.t('error.offline')));
         }
 
         const responseData = error.response.data as

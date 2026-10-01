@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 interface ProgressBarProps {
   current: number;
   total: number;
@@ -30,14 +32,22 @@ export function getQuestionIndicatorStatus(
   return 'pending';
 }
 
+const STATUS_FALLBACK = {
+  current: 'actual',
+  correct: 'correcta',
+  incorrect: 'incorrecta',
+  pending: 'pendiente',
+} as const;
+
 export function ProgressBar({ current, total, results, showCurrentResult = false }: ProgressBarProps) {
+  const { t } = useTranslation();
   const safeTotal = Math.max(1, total);
   const indicatorGapPx = 4;
   const indicatorWidth = `calc((100% - ${(safeTotal - 1) * indicatorGapPx}px) / ${safeTotal})`;
 
   return (
     <div className="w-full">
-      <div className="flex w-full flex-nowrap gap-1 overflow-hidden" role="list" aria-label="Progreso de preguntas">
+      <div className="flex w-full flex-nowrap gap-1 overflow-hidden" role="list" aria-label={t('game.progressLabel', 'Progreso de preguntas')}>
         {Array.from({ length: total }, (_, i) => {
           const status = getQuestionIndicatorStatus(i, current, results, showCurrentResult);
 
@@ -45,7 +55,11 @@ export function ProgressBar({ current, total, results, showCurrentResult = false
             <div
               key={i}
               role="listitem"
-              aria-label={`Pregunta ${i + 1} ${status}`}
+              aria-label={t('game.questionStatus', {
+                number: i + 1,
+                status: t(`game.indicatorStatus.${status}`, STATUS_FALLBACK[status]),
+                defaultValue: `Pregunta ${i + 1}: ${STATUS_FALLBACK[status]}`,
+              })}
               style={{ width: indicatorWidth }}
               className={`h-7 min-w-0 shrink-0 rounded-full border text-[0.66rem] font-semibold transition-all duration-300 flex items-center justify-center sm:h-8 sm:text-xs ${
                 status === 'correct'

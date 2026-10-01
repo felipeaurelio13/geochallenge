@@ -12,6 +12,13 @@ import { AppError } from '../utils/appError.js';
 import { emitSocketError } from '../utils/respondWithError.js';
 import { trackServerEvent } from '../services/telemetry.service.js';
 import { persistSurvivalFinalization } from '../services/survivalPersistence.service.js';
+import {
+  parseSocketPayload,
+  safeHandler,
+  survivalAnswerSchema,
+  survivalQueueSchema,
+  toSocketAppError,
+} from './socketSchemas.js';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -24,6 +31,13 @@ const FILL_WINDOW_MS = 15_000;
 const COUNTDOWN_SECONDS = 3;
 const QUESTION_RESULT_DELAY_MS = 3_000;
 const DISCONNECT_GRACE_MS = 20_000;
+const MAX_PERSIST_ATTEMPTS = 5;
+const PERSIST_RETRY_DELAY_MS = 5_000;
+
+const SURVIVAL_SAFE_OPTIONS = {
+  genericCode: 'SURVIVAL_ERROR_GENERIC',
+  genericMessage: 'Error procesando la solicitud de supervivencia',
+} as const;
 
 const TIME_PER_DIFFICULTY: Record<Difficulty, number> = {
   EASY: 15,
@@ -118,6 +132,19 @@ function isRateLimited(socketId: string, event: string, max = 30): boolean {
   return entry.count > max;
 }
 
+// Un jugador con un reemplazo de respuesta en vuelo (pendingRound) aún no tiene
+// respuesta definitiva: la anterior se conserva hasta validar la nueva.
+function hasSettledAnswer(player: SurvivalPlayer, round: number): boolean {
+  return player.answers.length >= round && player.pendingRound !== round;
+}
+
+function clearRateLimitEntries(socketId: string): void {
+  const prefix = `${socketId}:`;
+  for (const key of eventCounts.keys()) {
+    if (key.startsWith(prefix)) eventCounts.delete(key);
+  }
+}
+
 function generateMatchId(): string {
   return `survival_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
@@ -132,13 +159,56 @@ function getActivePlayers(match: ActiveSurvivalMatch): SurvivalPlayer[] {
 
 // ─── Match lifecycle ──────────────────────────────────────────────────────────
 
+/**
+ * Crea la partida para el grupo. Si falla (preguntas insuficientes, error de
+ * DB), todos los jugadores reciben `survival:error` y se limpia el estado para
+ * que puedan volver a encolarse sin SURVIVAL_ALREADY_IN_PROGRESS.
+ */
 async function createMatch(
   io: SocketIOServer,
   players: QueuedPlayer[],
   category: Category
 ): Promise<void> {
   const matchId = generateMatchId();
+  try {
+    await createMatchUnsafe(io, matchId, players, category);
+  } catch (error) {
+    console.error(`[survival] error creando partida ${matchId}:`, error);
+    abortMatchCreation(io, matchId, players, error);
+  }
+}
 
+function abortMatchCreation(
+  io: SocketIOServer,
+  matchId: string,
+  players: QueuedPlayer[],
+  error: unknown
+): void {
+  cleanupMatch(matchId);
+
+  const appError = toSocketAppError(
+    error,
+    'SURVIVAL_ERROR_GENERIC',
+    'No se pudo crear la partida de supervivencia'
+  );
+
+  for (const player of players) {
+    if (playerMatches.get(player.userId) === matchId) playerMatches.delete(player.userId);
+    try {
+      io.sockets?.sockets?.get(player.socketId)?.leave(matchId);
+      emitSocketError(io.to(player.socketId), 'survival:error', appError);
+    } catch (emitErr) {
+      console.error(`[survival] no se pudo notificar fallo de creación a ${player.userId}:`, emitErr);
+    }
+  }
+}
+
+async function createMatchUnsafe(
+  io: SocketIOServer,
+  matchId: string,
+  players: QueuedPlayer[],
+  category: Category
+): Promise<void> {
   const easyQs = await getQuestionsForGame(category, PHASE_FETCH_COUNTS.EASY, [], {
     difficulty: 'EASY',
   } as QuestionFilters);
@@ -202,10 +272,14 @@ async function createMatch(
   });
 
   match.fillTimerId = setTimeout(async () => {
-    const m = activeMatches.get(matchId);
-    if (!m || m.status !== 'filling') return;
-    m.fillTimerId = undefined;
-    await startCountdown(io, m);
+    try {
+      const m = activeMatches.get(matchId);
+      if (!m || m.status !== 'filling') return;
+      m.fillTimerId = undefined;
+      await startCountdown(io, m);
+    } catch (err) {
+      console.error(`[survival] error iniciando countdown de ${matchId}:`, err);
+    }
   }, FILL_WINDOW_MS);
 }
 
@@ -431,7 +505,8 @@ function resolveRound(io: SocketIOServer, match: ActiveSurvivalMatch, round: num
 async function endGame(
   io: SocketIOServer,
   match: ActiveSurvivalMatch,
-  reason: string
+  reason: string,
+  attempt = 1
 ): Promise<void> {
   if (match.status === 'finalizing' || match.status === 'finished') return;
   match.status = 'finalizing';
@@ -500,12 +575,33 @@ async function endGame(
     match.status = 'finished';
     cleanupMatch(match.id);
   } catch (err) {
-    console.error(`[survival] Error saving results for ${matchSnapshot.matchId}:`, err);
+    console.error(
+      `[survival] Error saving results for ${matchSnapshot.matchId} (intento ${attempt}/${MAX_PERSIST_ATTEMPTS}):`,
+      err
+    );
+    if (attempt >= MAX_PERSIST_ATTEMPTS) {
+      console.error(
+        `[survival] abandonando partida ${matchSnapshot.matchId}: persistencia agotó ${MAX_PERSIST_ATTEMPTS} intentos`
+      );
+      match.status = 'finished';
+      try {
+        emitSocketError(
+          io.to(match.id),
+          'survival:error',
+          new AppError('SURVIVAL_ERROR_GENERIC', 500, 'No se pudieron guardar los resultados de la partida')
+        );
+      } catch (emitErr) {
+        console.error(`[survival] no se pudo notificar el abandono de ${matchSnapshot.matchId}:`, emitErr);
+      }
+      cleanupMatch(match.id);
+      return;
+    }
+
     setTimeout(() => {
       if (activeMatches.get(match.id) !== match) return;
       match.status = 'playing';
-      void endGame(io, match, reason);
-    }, 5_000).unref();
+      void endGame(io, match, reason, attempt + 1);
+    }, PERSIST_RETRY_DELAY_MS).unref();
   }
 }
 
@@ -526,7 +622,7 @@ function cleanupMatch(matchId: string): void {
 export function setupSurvivalHandlers(io: SocketIOServer, socket: Socket): void {
   const user = socket.user!;
 
-  socket.on('survival:queue', async (data?: { category?: Category }) => {
+  socket.on('survival:queue', safeHandler(socket, 'survival:error', async (rawData?: unknown) => {
     if (isRateLimited(socket.id, 'survival:queue', 10)) {
       emitSocketError(
         socket,
@@ -535,6 +631,10 @@ export function setupSurvivalHandlers(io: SocketIOServer, socket: Socket): void 
       );
       return;
     }
+
+    const parsed = parseSocketPayload(socket, 'survival:error', survivalQueueSchema, rawData);
+    if (parsed === null) return;
+    const data = parsed as { category?: Category } | undefined;
 
     const existingMatchId = playerMatches.get(user.userId);
     if (existingMatchId) {
@@ -552,6 +652,11 @@ export function setupSurvivalHandlers(io: SocketIOServer, socket: Socket): void 
     }
 
     const category = normalizeCategory(data?.category);
+
+    // Un usuario nunca debe quedar a la vez en la cola pendiente y en una
+    // partida: sacarlo antes de unirse a una sala (o de re-encolarse).
+    const staleQueueIdx = pendingQueue.findIndex((p) => p.userId === user.userId);
+    if (staleQueueIdx >= 0) pendingQueue.splice(staleQueueIdx, 1);
 
     // Try to join an existing filling room
     for (const match of activeMatches.values()) {
@@ -612,9 +717,6 @@ export function setupSurvivalHandlers(io: SocketIOServer, socket: Socket): void 
     }
 
     // Add to pending queue
-    const existingIdx = pendingQueue.findIndex((p) => p.userId === user.userId);
-    if (existingIdx >= 0) pendingQueue.splice(existingIdx, 1);
-
     pendingQueue.push({ userId: user.userId, username: user.username, socketId: socket.id, category });
     socket.emit('survival:queued', { category });
 
@@ -627,7 +729,7 @@ export function setupSurvivalHandlers(io: SocketIOServer, socket: Socket): void 
       }
       await createMatch(io, group, category);
     }
-  });
+  }, { ...SURVIVAL_SAFE_OPTIONS, label: 'survival:queue' }));
 
   socket.on('survival:dequeue', () => {
     const queueIdx = pendingQueue.findIndex((p) => p.userId === user.userId);
@@ -665,13 +767,11 @@ export function setupSurvivalHandlers(io: SocketIOServer, socket: Socket): void 
 
   socket.on(
     'survival:answer',
-    async (data: {
-      questionId: string;
-      answer: string;
-      timeRemaining: number;
-      coordinates?: { lat: number; lng: number };
-    }) => {
+    safeHandler(socket, 'survival:error', async (rawData?: unknown) => {
       if (isRateLimited(socket.id, 'survival:answer', 120)) return;
+
+      const data = parseSocketPayload(socket, 'survival:error', survivalAnswerSchema, rawData);
+      if (data === null) return;
 
       const matchId = playerMatches.get(user.userId);
       if (!matchId) return;
@@ -688,11 +788,10 @@ export function setupSurvivalHandlers(io: SocketIOServer, socket: Socket): void 
       if (player.pendingRound === round) return;
 
       // Si ya respondió, permitir cambio solo si la ronda aún no se resuelve
-      if (player.answers.length >= round) {
+      const isReanswer = player.answers.length >= round;
+      if (isReanswer) {
         if (match.resolvingRound === round) return;
-        if (getActivePlayers(match).every((p) => p.answers.length >= round)) return;
-        // Score en survival se computa en resolveRound, no incrementalmente — solo sacar la respuesta anterior
-        player.answers.splice(round - 1, 1);
+        if (getActivePlayers(match).every((p) => hasSettledAnswer(p, round))) return;
       }
 
       const lockKey = `${matchId}-${user.userId}-${round}`;
@@ -710,27 +809,43 @@ export function setupSurvivalHandlers(io: SocketIOServer, socket: Socket): void 
             getAuthoritativeSurvivalTimeRemaining(match, round),
             data.coordinates
           );
-        } catch {
+        } catch (error) {
+          player.pendingRound = undefined;
+          console.error('[survival] error validando respuesta:', error);
+          return;
+        }
+
+        if (match.status !== 'playing' || match.currentRound !== round) {
           player.pendingRound = undefined;
           return;
         }
 
-        if (match.status !== 'playing' || match.currentRound !== round || player.answers.length >= round) {
-          player.pendingRound = undefined;
-          return;
+        // Score en survival se computa en resolveRound, no incrementalmente: el
+        // reemplazo es solo de la entrada, en un único paso síncrono tras validar
+        // (si validateAnswer lanza, la respuesta previa se conserva).
+        if (isReanswer) {
+          if (player.answers.length < round || match.resolvingRound === round) {
+            player.pendingRound = undefined;
+            return;
+          }
+          player.answers[round - 1] = result;
+        } else {
+          if (player.answers.length >= round) {
+            player.pendingRound = undefined;
+            return;
+          }
+          player.answers.push(result);
         }
-
-        player.answers.push(result);
         player.pendingRound = undefined;
 
         io.to(matchId).emit('survival:player-answered', { userId: user.userId, round });
 
-        const allAnswered = getActivePlayers(match).every((p) => p.answers.length >= round);
+        const allAnswered = getActivePlayers(match).every((p) => hasSettledAnswer(p, round));
         if (allAnswered) resolveRound(io, match, round);
       } finally {
         processingAnswers.delete(lockKey);
       }
-    }
+    }, { ...SURVIVAL_SAFE_OPTIONS, label: 'survival:answer' })
   );
 
   socket.on('survival:resume', () => {
@@ -776,7 +891,14 @@ export function setupSurvivalHandlers(io: SocketIOServer, socket: Socket): void 
   });
 
   socket.on('disconnect', () => {
-    const queueIdx = pendingQueue.findIndex((p) => p.userId === user.userId);
+    // El rate limiter está indexado por socket.id: sin esto crece sin límite.
+    clearRateLimitEntries(socket.id);
+
+    // Solo la entrada de ESTE socket: un disconnect tardío de un socket viejo no
+    // debe borrar la entrada que el socket nuevo del mismo usuario ya encoló.
+    const queueIdx = pendingQueue.findIndex(
+      (p) => p.userId === user.userId && p.socketId === socket.id
+    );
     if (queueIdx >= 0) pendingQueue.splice(queueIdx, 1);
 
     const matchId = playerMatches.get(user.userId);

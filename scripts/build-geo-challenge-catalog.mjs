@@ -17,6 +17,26 @@ const baseCatalog = JSON.parse(
   readFileSync(resolve(root, 'data/country-catalog.v1.json'), 'utf8'),
 );
 const upstream = JSON.parse(readFileSync(upstreamPath, 'utf8'));
+const canonicalByName = new Map(
+  JSON.parse(readFileSync(resolve(root, 'data/countries.json'), 'utf8')).countries.map((country) => [
+    country.name,
+    country,
+  ]),
+);
+
+// REST Countries trae coordenadas de capital erróneas para estos países
+// (Granada apunta a Bermudas, Guinea Ecuatorial a otra ubicación). Para ellos se
+// usan las coordenadas canónicas de data/countries.json.
+const CAPITAL_COORD_FROM_CANONICAL = new Set(['GD', 'GQ']);
+const MAX_CAPITAL_DRIFT_KM = 50;
+
+function haversineKm(lat1, lng1, lat2, lng2) {
+  const toRad = (deg) => (deg * Math.PI) / 180;
+  const a =
+    Math.sin(toRad(lat2 - lat1) / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(toRad(lng2 - lng1) / 2) ** 2;
+  return 2 * 6371 * Math.asin(Math.sqrt(a));
+}
 
 const upstreamByIso2 = new Map(upstream.map((country) => [country.cca2, country]));
 const iso3ToIso2 = new Map(upstream.map((country) => [country.cca3, country.cca2]));
@@ -39,9 +59,25 @@ if (missing.length > 0) {
 
 const countries = baseCatalog.countries.map((base) => {
   const source = upstreamByIso2.get(base.iso2);
-  const capitalLatLng = source.capitalInfo?.latlng;
+  const canonical = canonicalByName.get(base.name);
+  let capitalLatLng = source.capitalInfo?.latlng;
+  if (CAPITAL_COORD_FROM_CANONICAL.has(base.iso2)) {
+    if (!canonical) {
+      throw new Error(`Falta ${base.name} en data/countries.json para ${base.iso2}`);
+    }
+    capitalLatLng = [canonical.lat, canonical.lng];
+  }
   if (!Array.isArray(capitalLatLng) || capitalLatLng.length !== 2) {
     throw new Error(`Faltan coordenadas de capital para ${base.iso2} (${base.name})`);
+  }
+  if (canonical) {
+    const drift = haversineKm(capitalLatLng[0], capitalLatLng[1], canonical.lat, canonical.lng);
+    if (drift > MAX_CAPITAL_DRIFT_KM) {
+      throw new Error(
+        `Capital de ${base.iso2} (${base.name}) a ${Math.round(drift)} km de data/countries.json; ` +
+          'agregarla a CAPITAL_COORD_FROM_CANONICAL',
+      );
+    }
   }
 
   return {

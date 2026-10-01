@@ -373,7 +373,7 @@ export function WorldEventPage() {
           {currentQuestion.imageUrl && (
             <img
               src={currentQuestion.imageUrl}
-              alt="Question"
+              alt={t('game.questionImage', 'Imagen de la pregunta')}
               className="mt-2 max-h-40 rounded-lg object-contain"
             />
           )}

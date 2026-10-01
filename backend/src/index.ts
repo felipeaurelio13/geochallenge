@@ -64,8 +64,10 @@ app.get('/health', async (_req, res) => {
       }),
     ]);
     res.json({ status: 'ok', db: 'ok', redis: 'ok', sha: buildSha, timestamp: new Date().toISOString() });
-  } catch (error: any) {
-    res.status(503).json({ status: 'degraded', error: error.message, sha: buildSha, timestamp: new Date().toISOString() });
+  } catch (error) {
+    // El detalle (host/puerto de DB, etc.) solo va al log, nunca a la respuesta.
+    console.error('[health] dependency check failed:', error);
+    res.status(503).json({ status: 'degraded', error: 'Dependency check failed', sha: buildSha, timestamp: new Date().toISOString() });
   } finally {
     clearTimeout(pingTimer);
   }
@@ -92,7 +94,25 @@ app.use((_req, res) => {
 });
 
 // Error handler
-app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+app.use((err: Error & { status?: number; statusCode?: number; type?: string }, _req: express.Request, res: express.Response, next: express.NextFunction) => {
+  if (res.headersSent) {
+    next(err);
+    return;
+  }
+
+  // Errores de cliente (JSON malformado, body demasiado grande, etc.): 4xx sin stack en logs.
+  const candidate = err.status ?? err.statusCode;
+  if (typeof candidate === 'number' && candidate >= 400 && candidate < 500) {
+    if (err.type === 'entity.parse.failed') {
+      res.status(candidate).json({ error: 'JSON inválido', code: 'INVALID_JSON' });
+    } else if (err.type === 'entity.too.large') {
+      res.status(candidate).json({ error: 'Payload demasiado grande', code: 'PAYLOAD_TOO_LARGE' });
+    } else {
+      res.status(candidate).json({ error: 'Solicitud inválida', code: 'BAD_REQUEST' });
+    }
+    return;
+  }
+
   console.error('Error:', err);
   res.status(500).json({ error: 'Error interno del servidor' });
 });
@@ -127,15 +147,49 @@ async function start() {
 }
 
 // Graceful shutdown
+const SHUTDOWN_TIMEOUT_MS = 10_000;
+let shuttingDown = false;
+
 async function shutdown() {
+  if (shuttingDown) return;
+  shuttingDown = true;
   console.log('\nShutting down...');
-  await disconnectDatabase();
-  await disconnectRedis();
-  process.exit(0);
+
+  // Si algo se cuelga (conexiones abiertas, DB), forzamos la salida.
+  const forceExitTimer = setTimeout(() => {
+    console.error(`Shutdown did not finish within ${SHUTDOWN_TIMEOUT_MS}ms, forcing exit`);
+    process.exit(1);
+  }, SHUTDOWN_TIMEOUT_MS);
+  forceExitTimer.unref();
+
+  let exitCode = 0;
+  try {
+    // Dejar de aceptar conexiones y cerrar sockets antes de soltar DB/Redis.
+    httpServer.close();
+    await new Promise<void>((resolve) => {
+      // io.close() desconecta los clientes y resuelve cuando el http server cerró
+      // (el callback puede recibir un error si ya estaba cerrándose; da igual).
+      io.close(() => resolve());
+      httpServer.closeIdleConnections?.();
+    });
+    await disconnectDatabase();
+    await disconnectRedis();
+  } catch (error) {
+    console.error('Error during shutdown:', error);
+    exitCode = 1;
+  }
+  clearTimeout(forceExitTimer);
+  process.exit(exitCode);
 }
 
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);
+
+// Red de seguridad: en Node >= 15 un rechazo sin manejar mata el proceso.
+// Loggear con contexto en vez de morir en silencio.
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[unhandledRejection]', reason, promise);
+});
 
 start();
 

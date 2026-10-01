@@ -4,9 +4,16 @@
     "tagline": "Test your geography knowledge"
   },
   "error": {
+    "timeout": "The request took too long. Check your connection.",
+    "offline": "No internet connection. Check your network.",
     "title": "Something went wrong",
     "unexpected": "An unexpected error occurred",
     "retry": "Try again",
+    "backToMenu": "Back to menu"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "message": "The page you're looking for doesn't exist or has moved.",
     "backToMenu": "Back to menu"
   },
   "home": {
@@ -249,6 +256,9 @@
     "errorAnswer": "Error submitting answer"
   },
   "howto": {
+    "objectiveLabel": "Objective",
+    "ruleLabel": "Rule",
+    "tipLabel": "Tip",
     "flash": {
       "objective": "Answer as many questions as you can in 60 seconds.",
       "rule": "The clock runs for the whole game, not per question.",
@@ -281,6 +291,7 @@
     }
   },
   "flagMaster": {
+    "shareText": "🏴 Flag Master: {{score}} pts · {{correct}}/{{total}} ({{accuracy}})",
     "question": "Which country does this flag belong to?",
     "preparing": "Loading 10 hard flags...",
     "errorTitle": "Could not start Flag Master",
@@ -338,6 +349,7 @@
     "tooLong": "This is taking longer than usual — you can keep waiting or try offline mode"
   },
   "survival": {
+    "errorGeneric": "Something went wrong in the survival match. Please try again.",
     "title": "Survival",
     "subtitle": "Are you the last one standing?",
     "ruleOneLive": "You start with 2 lives. One wrong answer takes 1 away.",
@@ -441,6 +453,15 @@
     "lowTimeHint": "{{seconds}} seconds left. Take a breath and confirm your answer.",
     "clearSelection": "Change selection",
     "questionImageAlt": "Question image for {{category}} category",
+    "questionImage": "Question image",
+    "progressLabel": "Question progress",
+    "questionStatus": "Question {{number}}: {{status}}",
+    "indicatorStatus": {
+      "current": "current",
+      "correct": "correct",
+      "incorrect": "incorrect",
+      "pending": "pending"
+    },
     "scoreBreakdownSummary": "+{{points}} ({{breakdown}})",
     "scoreBreakdownBase": "base",
     "scoreBreakdownTime": "fast",
@@ -712,7 +733,8 @@
       "sum": "Monthly total",
       "best": "All-time best",
       "sumHint": "Ranked by total accumulated points this month",
-      "bestHint": "Ranked by best single game ever"
+      "bestHint": "Ranked by best single game ever",
+      "monthHint": "Ranked by best single game this month"
     },
     "columns": {
       "games": "Games",
@@ -806,7 +828,13 @@
     "accuracy": "Accuracy",
     "answered": "{{count}} questions answered",
     "playAgain": "Play again",
-    "error": "Flash could not start"
+    "error": "Flash could not start",
+    "combo": "Combo",
+    "optionA": "Option A: {{label}}",
+    "optionB": "Option B: {{label}}",
+    "finishError": "We couldn't save your result. Check your connection and try again.",
+    "finishRetry": "Retry",
+    "shareText": "⚡ Flash: {{score}} pts · max combo {{maxCombo}} · {{correct}} correct ({{accuracy}})"
   },
   "mechanics": {
     "intel5050": "Intel 50/50",
@@ -819,7 +847,8 @@
     "intel5050Tooltip": "Removes 2 wrong options — 1 per game",
     "focusTimeTooltip": "Adds 3 extra seconds to the clock — 1 per game",
     "streakShieldTooltip": "Protects your streak from one mistake — 1 per game",
-    "coachmarkTitle": "Your power-ups 👇 tap them when you need them"
+    "coachmarkTitle": "Your power-ups 👇 tap them when you need them",
+    "useFailed": "Couldn't use the power-up. Please try again."
   },
   "stats": {
     "highScore": "High Score",
@@ -841,6 +870,7 @@
     "save": "Save",
     "processing": "Processing...",
     "all": "All",
+    "clear": "Clear search",
     "skipToMainAction": "Skip to main actions",
     "skipToAnswerOptions": "Skip to answer options",
     "search": "Search"
@@ -909,6 +939,28 @@
     "finishRetryDesc": "Your progress is safe. You can retry saving your result.",
     "errorFinishing": "We couldn't save your result."
   },
+  "passport": {
+    "title": "My Journey",
+    "worldProgress": "of the world explored",
+    "stamped": "stamped countries",
+    "totalCountries": "countries",
+    "mastered": "mastered",
+    "stampedLabel": "Stamped",
+    "masteredLabel": "Mastered",
+    "empty": "Play games to start filling your passport",
+    "continents": "Continents",
+    "countries": "Countries",
+    "practiceCountry": "Practice {{country}}"
+  },
+  "mastery": {
+    "level": {
+      "unseen": "Unplayed",
+      "learning": "Learning",
+      "familiar": "Familiar",
+      "strong": "Strong",
+      "mastered": "Mastered"
+    }
+  },
   "duelHistory": {
     "title": "Duel History",
     "tabs": {
@@ -923,26 +975,7 @@
       "year": "Year",
       "all": "All Time"
     },
-  "passport": {
-    "title": "My Journey",
-    "worldProgress": "of the world explored",
-    "stamped": "stamped countries",
-    "totalCountries": "countries",
-    "mastered": "mastered",
-    "masteredLabel": "Mastered",
-    "empty": "Play games to start filling your passport",
-    "practiceCountry": "Practice {{country}}"
-  },
-  "mastery": {
-    "level": {
-      "unseen": "Unplayed",
-      "learning": "Learning",
-      "familiar": "Familiar",
-      "strong": "Strong",
-      "mastered": "Mastered"
-    }
-  },
-  "stats": {
+    "stats": {
       "wins": "Wins",
       "draws": "Draws",
       "losses": "Losses"
@@ -1013,6 +1046,7 @@
     "dismissToast": "Dismiss notification",
     "correctAnswer": "Correct",
     "incorrectAnswer": "Incorrect",
+    "answerLocked": "Answer locked",
     "eliminatedOption": "Eliminated",
     "hurryUp": "{{seconds}} seconds left"
   },

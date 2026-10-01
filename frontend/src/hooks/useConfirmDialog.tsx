@@ -40,5 +40,5 @@ export function useConfirmDialog() {
     />
   );
 
-  return { confirm, confirmDialog };
+  return { confirm, confirmDialog, isOpen: pending !== null };
 }

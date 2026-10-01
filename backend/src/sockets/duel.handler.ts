@@ -39,6 +39,14 @@ import {
   persistDuelResults,
   type PersistableDuel,
 } from '../services/duelPersistence.service.js';
+import { evaluateAchievementsAfterGame } from '../services/achievement.service.js';
+import {
+  duelAnswerSchema,
+  duelQueueSchema,
+  parseSocketPayload,
+  safeHandler,
+  toSocketAppError,
+} from './socketSchemas.js';
 
 export type DuelMode = 'classic' | 'geo-challenge';
 
@@ -146,6 +154,16 @@ export class MatchmakingQueue {
     return null;
   }
 
+  // Remueve la entrada solo si pertenece a ese socket. Un disconnect tardío de
+  // un socket viejo no debe borrar la entrada que el socket nuevo ya encoló.
+  removePlayerIfSocket(userId: string, socketId: string): QueuedPlayer | null {
+    const index = this.queue.findIndex((p) => p.userId === userId && p.socketId === socketId);
+    if (index !== -1) {
+      return this.queue.splice(index, 1)[0];
+    }
+    return null;
+  }
+
   findMatch(): [QueuedPlayer, QueuedPlayer] | null {
     if (this.queue.length < 2) return null;
 
@@ -245,6 +263,15 @@ const activeDuels = new Map<string, ActiveDuel>();
 // Player to duel mapping
 const playerDuels = new Map<string, string>();
 
+// Un jugador con un reemplazo de respuesta en vuelo (pendingQuestionIndex) aún
+// no tiene respuesta definitiva: la anterior se conserva hasta validar la nueva.
+function hasSettledAnswer(
+  player: { answers: unknown[]; pendingQuestionIndex?: number },
+  questionIndex: number
+): boolean {
+  return player.answers.length > questionIndex && player.pendingQuestionIndex !== questionIndex;
+}
+
 // Mutex for answer processing to prevent race conditions
 const processingAnswers = new Set<string>();
 
@@ -254,6 +281,15 @@ const readyTimeouts = new Map<string, ReturnType<typeof setTimeout>>();
 // Grace period timers: userId -> timer that fires endDuel if player doesn't reconnect
 const disconnectTimers = new Map<string, ReturnType<typeof setTimeout>>();
 const DISCONNECT_GRACE_MS = 20_000;
+
+// Máximo de intentos de persistencia al terminar un duelo antes de abandonar.
+const MAX_PERSIST_ATTEMPTS = 5;
+const PERSIST_RETRY_DELAY_MS = 5_000;
+
+const DUEL_SAFE_OPTIONS = {
+  genericCode: 'DUEL_ERROR_GENERIC',
+  genericMessage: 'Error procesando la solicitud del duelo',
+} as const;
 
 async function persistPlayerDuel(userId: string, duelId: string | null): Promise<void> {
   try {
@@ -382,12 +418,7 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
   const user = socket.user!;
 
   // Unirse a la cola de matchmaking
-  socket.on('duel:queue', async (data?: {
-    category?: Category;
-    filters?: QuestionFilters;
-    mode?: DuelMode;
-    rated?: boolean;
-  }) => {
+  socket.on('duel:queue', safeHandler(socket, 'duel:error', async (rawData?: unknown) => {
     if (isRateLimited(user.userId, 'duel:queue', 10)) {
       emitSocketError(
         socket,
@@ -396,6 +427,15 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
       );
       return;
     }
+
+    const parsed = parseSocketPayload(socket, 'duel:error', duelQueueSchema, rawData);
+    if (parsed === null) return;
+    const data = parsed as {
+      category?: Category;
+      filters?: QuestionFilters;
+      mode?: DuelMode;
+      rated?: boolean;
+    } | undefined;
 
     const rated = data?.rated === true;
     const selectedMode = normalizeDuelMode(data?.mode);
@@ -470,7 +510,7 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
         match[0].ladder,
       );
     }
-  });
+  }, { ...DUEL_SAFE_OPTIONS, label: 'duel:queue' }));
 
   // Cancelar búsqueda
   socket.on('duel:cancel', () => {
@@ -479,14 +519,14 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
   });
 
   // Abandono voluntario de duelo activo (el jugador navegó fuera de la página)
-  socket.on('duel:leave', async () => {
+  socket.on('duel:leave', safeHandler(socket, 'duel:error', async () => {
     const duelId = playerDuels.get(user.userId);
     if (!duelId) return;
     const duel = activeDuels.get(duelId);
     if (!duel || duel.status === 'finished') return;
     const opponent = duel.players.find((p) => p.userId !== user.userId);
     await endDuel(io, duel, opponent?.userId ?? null, 'opponent_disconnected');
-  });
+  }, { ...DUEL_SAFE_OPTIONS, label: 'duel:leave' }));
 
   // Jugador listo para empezar
   socket.on('duel:ready', () => {
@@ -508,19 +548,7 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
   });
 
   // Enviar respuesta
-  socket.on('duel:answer', async (data: {
-    questionId: string;
-    answer: string;
-    timeRemaining: number;
-    mechanicUsage?: {
-      key: 'intel5050' | 'focusTime' | 'streakShield';
-      action: 'trigger';
-      questionId?: string;
-      roundIndex?: number;
-      value?: number;
-    };
-    coordinates?: { lat: number; lng: number };
-  }) => {
+  socket.on('duel:answer', safeHandler(socket, 'duel:error', async (rawData?: unknown) => {
     if (isRateLimited(user.userId, 'duel:answer', 60)) {
       emitSocketError(
         socket,
@@ -529,6 +557,9 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
       );
       return;
     }
+
+    const data = parseSocketPayload(socket, 'duel:error', duelAnswerSchema, rawData);
+    if (data === null) return;
 
     const duelId = playerDuels.get(user.userId);
     if (!duelId) return;
@@ -553,11 +584,7 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
     // Si ya respondió, permitir cambio solo si el round aún no se está resolviendo
     if (player.answers.length >= duel.currentQuestionIndex + 1) {
       if (duel.resolvingQuestionIndex === duel.currentQuestionIndex) return;
-      if (duel.players.every((p) => p.answers.length > duel.currentQuestionIndex)) return;
-      // Reemplazar respuesta anterior: descontar puntos y quitar del array
-      const prevAnswer = player.answers[duel.currentQuestionIndex];
-      player.score -= prevAnswer.points;
-      player.answers.splice(duel.currentQuestionIndex, 1);
+      if (duel.players.every((p) => hasSettledAnswer(p, duel.currentQuestionIndex))) return;
     }
 
     // Mutex lock to prevent race conditions on concurrent answer submissions
@@ -610,14 +637,29 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
       // Revalidar por si el duelo avanzó/cerró mientras validábamos
       if (
         duel.status !== 'playing' ||
-        duel.currentQuestionIndex !== player.pendingQuestionIndex ||
-        player.answers.length >= duel.currentQuestionIndex + 1
+        duel.currentQuestionIndex !== player.pendingQuestionIndex
       ) {
         player.pendingQuestionIndex = undefined;
         return;
       }
 
-      player.answers.push(result);
+      // Reemplazo de respuesta (si ya había una) en un único paso síncrono, tras
+      // validar la nueva: si validateAnswer lanza, la respuesta previa se conserva.
+      const answerIdx = duel.currentQuestionIndex;
+      const prevAnswer = player.answers[answerIdx];
+      if (prevAnswer) {
+        if (duel.resolvingQuestionIndex === answerIdx) {
+          player.pendingQuestionIndex = undefined;
+          return;
+        }
+        player.score -= prevAnswer.points;
+        player.answers[answerIdx] = result;
+      } else if (player.answers.length === answerIdx) {
+        player.answers.push(result);
+      } else {
+        player.pendingQuestionIndex = undefined;
+        return;
+      }
       player.score += result.points;
       player.pendingQuestionIndex = undefined;
 
@@ -629,7 +671,7 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
 
       // Si ambos respondieron, mostrar resultado y pasar a siguiente pregunta
       if (
-        duel.players.every((p) => p.answers.length > duel.currentQuestionIndex) &&
+        duel.players.every((p) => hasSettledAnswer(p, duel.currentQuestionIndex)) &&
         shouldResolveQuestion(
           duel.status,
           duel.currentQuestionIndex,
@@ -642,11 +684,11 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
     } finally {
       processingAnswers.delete(lockKey);
     }
-  });
+  }, { ...DUEL_SAFE_OPTIONS, label: 'duel:answer' }));
 
   // Desconexión durante duelo
   // Resume a duel after reconnection: emit current state to the reconnecting player
-  socket.on('duel:resume', async () => {
+  socket.on('duel:resume', safeHandler(socket, 'duel:error', async () => {
     const duelId = playerDuels.get(user.userId);
 
     if (!duelId) {
@@ -719,7 +761,7 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
       question: publicQuestion,
       scores: duel.players.map((p) => ({ userId: p.userId, score: p.score })),
     });
-  });
+  }, { ...DUEL_SAFE_OPTIONS, label: 'duel:resume' }));
 
   socket.on('disconnect', () => {
     const duelId = playerDuels.get(user.userId);
@@ -783,7 +825,10 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
 }
 
 /**
- * Crea un nuevo duelo entre dos jugadores
+ * Crea un nuevo duelo entre dos jugadores. Si la creación falla (preguntas
+ * insuficientes, filtros inválidos, error de DB), ambos jugadores reciben un
+ * `duel:error` y se limpia todo el estado para que no queden atrapados con
+ * DUEL_ALREADY_IN_PROGRESS.
  */
 async function createDuel(
   io: SocketIOServer,
@@ -794,9 +839,60 @@ async function createDuel(
   mode: DuelMode = 'classic',
   rated = false,
   ladder?: CompetitiveLadder,
-) {
+): Promise<void> {
   const duelId = generateDuelId();
+  try {
+    await createDuelUnsafe(io, duelId, player1, player2, category, filters, mode, rated, ladder);
+  } catch (error) {
+    console.error(`[duel] error creando duelo ${duelId}:`, error);
+    abortDuelCreation(io, duelId, [player1, player2], error);
+  }
+}
 
+function abortDuelCreation(
+  io: SocketIOServer,
+  duelId: string,
+  players: QueuedPlayer[],
+  error: unknown
+): void {
+  const readyTimeout = readyTimeouts.get(duelId);
+  if (readyTimeout) clearTimeout(readyTimeout);
+  readyTimeouts.delete(duelId);
+
+  activeDuels.delete(duelId);
+  void clearActiveDuelSnapshot(duelId);
+
+  const appError = toSocketAppError(
+    error,
+    'DUEL_ERROR_GENERIC',
+    'No se pudo crear el duelo'
+  );
+
+  for (const player of players) {
+    if (playerDuels.get(player.userId) === duelId) {
+      playerDuels.delete(player.userId);
+      void persistPlayerDuel(player.userId, null);
+    }
+    try {
+      io.sockets?.sockets?.get(player.socketId)?.leave(duelId);
+      emitSocketError(io.to(player.socketId), 'duel:error', appError);
+    } catch (emitErr) {
+      console.error(`[duel] no se pudo notificar fallo de creación a ${player.userId}:`, emitErr);
+    }
+  }
+}
+
+async function createDuelUnsafe(
+  io: SocketIOServer,
+  duelId: string,
+  player1: QueuedPlayer,
+  player2: QueuedPlayer,
+  category?: Category,
+  filters?: QuestionFilters,
+  mode: DuelMode = 'classic',
+  rated = false,
+  ladder?: CompetitiveLadder,
+) {
   const geoChallengeGame = mode === 'geo-challenge' ? buildGeoChallengeDuelGame() : null;
   const geoChallengeRounds = geoChallengeGame?.rounds;
   const questions: DuelQuestion[] = geoChallengeRounds
@@ -1171,7 +1267,8 @@ async function endDuel(
   io: SocketIOServer,
   duel: ActiveDuel,
   winnerId: string | null,
-  reason: 'completed' | 'opponent_disconnected' | 'cancelled'
+  reason: 'completed' | 'opponent_disconnected' | 'cancelled',
+  attempt = 1
 ) {
   if (duel.status === 'finalizing' || duel.status === 'finished') return;
   duel.status = 'finalizing';
@@ -1202,6 +1299,10 @@ async function endDuel(
   try {
     const persistence = await persistDuelResults(duelSnapshot, winnerId, reason);
 
+    // Logros post-duelo (FIRST_WIN, etc.). Aislado: un fallo aquí nunca debe
+    // romper el cierre del duelo ni disparar el retry de persistencia.
+    const newAchievements = await evaluateDuelAchievements(duel, winnerId);
+
     io.to(duel.id).emit('duel:finished', {
       reason,
       winnerId,
@@ -1209,6 +1310,7 @@ async function endDuel(
       results: finalResults,
       rated: duel.rated,
       ladder: duel.ladder,
+      newAchievements,
     });
 
     // Los duelos no actualizan el ranking global Classic.
@@ -1296,12 +1398,81 @@ async function endDuel(
     activeDuels.delete(duel.id);
     await clearActiveDuelSnapshot(duel.id);
   } catch (error) {
-    console.error(`Error guardando resultados del duelo ${duel.id}:`, error);
+    console.error(
+      `Error guardando resultados del duelo ${duel.id} (intento ${attempt}/${MAX_PERSIST_ATTEMPTS}):`,
+      error
+    );
+
+    if (attempt >= MAX_PERSIST_ATTEMPTS) {
+      abandonDuelAfterPersistFailure(io, duel);
+      return;
+    }
+
     const retryTimer = setTimeout(() => {
       if (activeDuels.get(duel.id) !== duel) return;
       duel.status = 'waiting';
-      void endDuel(io, duel, winnerId, reason);
-    }, 5_000);
+      void endDuel(io, duel, winnerId, reason, attempt + 1);
+    }, PERSIST_RETRY_DELAY_MS);
     retryTimer.unref();
   }
+}
+
+// Tras agotar los reintentos: liberar a los jugadores y avisar del error en
+// lugar de reintentar para siempre (el duelo no se persistió).
+function abandonDuelAfterPersistFailure(io: SocketIOServer, duel: ActiveDuel): void {
+  console.error(`[duel] abandonando duelo ${duel.id}: persistencia agotó ${MAX_PERSIST_ATTEMPTS} intentos`);
+
+  const readyTimeout = readyTimeouts.get(duel.id);
+  if (readyTimeout) clearTimeout(readyTimeout);
+  readyTimeouts.delete(duel.id);
+
+  for (const p of duel.players) {
+    const timer = disconnectTimers.get(p.userId);
+    if (timer) clearTimeout(timer);
+    disconnectTimers.delete(p.userId);
+    if (playerDuels.get(p.userId) === duel.id) {
+      playerDuels.delete(p.userId);
+      void persistPlayerDuel(p.userId, null);
+    }
+  }
+
+  duel.status = 'finished';
+  activeDuels.delete(duel.id);
+  void clearActiveDuelSnapshot(duel.id);
+
+  try {
+    emitSocketError(
+      io.to(duel.id),
+      'duel:error',
+      new AppError('DUEL_ERROR_GENERIC', 500, 'No se pudieron guardar los resultados del duelo')
+    );
+  } catch (emitErr) {
+    console.error(`[duel] no se pudo notificar el abandono del duelo ${duel.id}:`, emitErr);
+  }
+}
+
+async function evaluateDuelAchievements(
+  duel: ActiveDuel,
+  winnerId: string | null
+): Promise<Record<string, string[]>> {
+  const earned: Record<string, string[]> = {};
+  await Promise.all(
+    duel.players.map(async (player) => {
+      try {
+        const keys = await evaluateAchievementsAfterGame({
+          userId: player.userId,
+          correctCount: player.answers.filter((a) => a.isCorrect).length,
+          totalQuestions: duel.questions.length,
+          score: player.score,
+          isDuel: true,
+          isWin: winnerId !== null && player.userId === winnerId,
+        });
+        earned[player.userId] = keys;
+      } catch (err) {
+        console.error(`[duel] error evaluando logros de ${player.userId} (duelo ${duel.id}):`, err);
+        earned[player.userId] = [];
+      }
+    })
+  );
+  return earned;
 }

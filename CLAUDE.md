@@ -209,7 +209,7 @@ VITE_BASE_PATH=/                         # Sub-ruta para GitHub Pages
 
 | Herramienta | Versión | Rol |
 |---|---|---|
-| Node.js | 20 | Runtime |
+| Node.js | 20 (CI) / 22 (Docker) | Runtime |
 | Express | 4.18.3 | HTTP server |
 | TypeScript | 5.4.2 (strict) | Tipado |
 | Prisma | 5.10.0 | ORM para PostgreSQL |
@@ -341,9 +341,9 @@ Migraciones actuales (10 total, hasta `20260521_add_survival_mode`).
 
 | Archivo | Contenido |
 |---|---|
-| `countries.json` | 195+ países: nombre, capital, continente, coordenadas, código ISO |
-| `cities.json` | 1000+ ciudades con coordenadas |
-| `monuments.json` | 50+ monumentos: nombre (EN/ES), país, coordenadas, URL imagen Wikimedia, atribución |
+| `countries.json` | 197 países: nombre, capital, continente, coordenadas, código ISO |
+| `cities.json` | 596 ciudades con coordenadas |
+| `monuments.json` | 97 monumentos: nombre (EN/ES), país, coordenadas, URL imagen Wikimedia, atribución |
 | `country-catalog.v1.json` | Metadata extendida: subregión, población, área, complejidad de bandera, insular/landlocked |
 
 Para agregar monumentos: editar `data/monuments.json` y luego ejecutar el script de seed para importarlos a la DB.

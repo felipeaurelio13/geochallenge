@@ -66,7 +66,7 @@ export function DailyChallengePage() {
   const pageStateRef = useRef<PageState>(pageState);
   pageStateRef.current = pageState;
   const abandonTrackedRef = useRef(false);
-  const pendingAnswerRef = useRef<{ questionId: string; answer: string } | null>(null);
+  const pendingAnswerRef = useRef<{ questionId: string; answer: string; timedOut: boolean } | null>(null);
 
   const extendedTimeEnabled = useUiStore((s) => s.extendedTimeEnabled);
 
@@ -119,15 +119,26 @@ export function DailyChallengePage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentIndex, pageState, showResult, extendedTimeEnabled]);
 
-  async function handleSubmit(forcedAnswer?: string) {
+  // Prevent accidental tab close / reload while a round is in progress.
+  useEffect(() => {
+    if (pageState !== 'playing') return;
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [pageState]);
+
+  async function handleSubmit({ timedOut: isTimeout = false }: { timedOut?: boolean } = {}) {
     if (showResult || isSubmittingAnswer || lockedAnswer) return;
-    const answer = forcedAnswer ?? selected ?? '';
-    const isTimeout = !answer;
+    // On timeout we still submit whatever the player had selected (if anything).
+    const answer = selected ?? '';
 
     setLockedAnswer(true);
     setIsSubmittingAnswer(true);
     setRoundSubmitError(null);
-    pendingAnswerRef.current = { questionId: currentQuestion?.id ?? '', answer };
+    pendingAnswerRef.current = { questionId: currentQuestion?.id ?? '', answer, timedOut: isTimeout };
 
     try {
       const res = await api.dailyAnswer({
@@ -155,12 +166,12 @@ export function DailyChallengePage() {
     setRoundSubmitError(null);
     setIsSubmittingAnswer(true);
     try {
-      const { questionId, answer } = pendingAnswerRef.current;
+      const { questionId, answer, timedOut: wasTimeout } = pendingAnswerRef.current;
       const res = await api.dailyAnswer({ questionId, answer, dayKey: dayKey ?? undefined });
       if (res.isCorrect) setCorrectCount((c) => c + 1);
-      setResults((prev) => [...prev, { isCorrect: res.isCorrect, timedOut: !answer }]);
+      setResults((prev) => [...prev, { isCorrect: res.isCorrect, timedOut: wasTimeout }]);
       setLastCorrectAnswer(res.correctAnswer);
-      setTimedOut(!answer);
+      setTimedOut(wasTimeout);
       setLastCountryCode(res.countryCode ?? null);
       setLastRegion(res.region ?? null);
       setShowResult(true);
@@ -174,7 +185,7 @@ export function DailyChallengePage() {
 
   function handleTimeComplete() {
     if (showResult) return;
-    handleSubmit('');
+    handleSubmit({ timedOut: true });
   }
 
   async function handleNext() {
@@ -216,7 +227,7 @@ export function DailyChallengePage() {
   }
 
   async function handleShare(correct: number) {
-    const today = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const today = new Date().toLocaleDateString(i18n.language, { day: '2-digit', month: '2-digit', year: 'numeric' });
     const result = await shareImage({ correctCount: correct, category: 'DAILY', date: today });
     if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
     if (result === 'shared') setShareFeedback(t('share.shared'));

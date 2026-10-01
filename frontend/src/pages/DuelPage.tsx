@@ -271,7 +271,9 @@ export function DuelPage() {
         setMechanicsEnabled(true);
         setMechanicsAllowed(data.mechanics.allowed ?? []);
         setMechanicsAvailable({
-          intel5050: data.mechanics.limits?.intel5050 ?? 1,
+          // Disabled until server-authoritative mechanic support is available.
+          // Intel 50/50 is never offered in duels: the HUD button renders disabled with x0.
+          intel5050: 0,
           focusTime: data.mechanics.limits?.focusTime ?? 1,
           streakShield: 0,
         });
@@ -562,7 +564,7 @@ export function DuelPage() {
   // Auto-submit on option selection (non-MAP). Called with the new option value directly
   // to avoid reading stale selectedAnswer state.
   const handleAutoSubmitAnswer = (option: string) => {
-    if (!currentQuestion || showResult || isSyncingRound) return;
+    if (!currentQuestion || showResult || isSyncingRound || hasSubmittedCurrentQuestionRef.current) return;
     hasSubmittedCurrentQuestionRef.current = true;
     setHasSubmittedThisQuestion(true);
     socketService.submitDuelAnswer(currentQuestion.id, option, timeRemaining, undefined, pendingMechanicUsage);
@@ -571,7 +573,7 @@ export function DuelPage() {
 
   // Option selection handler: auto-submits for non-MAP, plain select for MAP
   const handleOptionSelectDuel = (option: string) => {
-    if (showResult || isSyncingRound) return;
+    if (showResult || isSyncingRound || hasSubmittedCurrentQuestionRef.current) return;
     if (isGeoDuel && geoRound) {
       setGeoSelectionIds((current) => geoRound.selectionMode === 'ordered'
         ? current.includes(option)
@@ -584,11 +586,6 @@ export function DuelPage() {
     if (currentQuestion?.category !== 'MAP' && option !== selectedAnswer) {
       handleAutoSubmitAnswer(option);
     }
-  };
-
-  const handleUseIntel5050 = () => {
-    // Disabled until server-authoritative mechanic support is available.
-    // Cannot determine incorrect options without access to correctAnswer from the question payload.
   };
 
   const handleUseFocusTime = () => {
@@ -1145,7 +1142,7 @@ export function DuelPage() {
       onOptionSelect={handleOptionSelectDuel}
       showResult={showResult}
       hiddenOptionIndexes={disabledOptionIndexes}
-      disableOptions={showResult || isSyncingRound}
+      disableOptions={showResult || isSyncingRound || hasSubmittedThisQuestion}
       optionsGridClassName="game-options-grid"
       actionTray={
         <RoundActionTray
@@ -1172,7 +1169,6 @@ export function DuelPage() {
               <MechanicsHud
                 available={mechanicsAvailable}
                 disabled={showResult || duelState !== 'playing'}
-                onUseIntel5050={handleUseIntel5050}
                 onUseFocusTime={handleUseFocusTime}
               />
             ) : undefined

@@ -28,6 +28,8 @@ import {
   recordQuestionStarted,
   getQuestionStartedAt,
   extendGameSession,
+  getGameQuestionsByIds,
+  buildQuestionUniquenessKey,
   updateSessionToAuthenticated,
   recordMechanicUsageAtomic,
   AnswerResult,
@@ -383,12 +385,16 @@ router.post('/extend-session', optionalAuth, async (req: AuthRequest, res: Respo
       return;
     }
 
+    // Claves de unicidad de lo ya servido, para que la extensión no repita preguntas
+    const servedQuestions = await getGameQuestionsByIds(existingSession.questionIds);
+    const excludeQuestionKeys = servedQuestions.map(buildQuestionUniquenessKey);
+
     // Categoría y filtros derivados de la sesión, no del cliente
     const questions = await getQuestionsForStreakGame(
       existingSession.category as Category | undefined,
       existingSession.questionIds,
       3,
-      [],
+      excludeQuestionKeys,
       existingSession.filters as QuestionFilters | undefined,
     );
     if (questions.length === 0) {
@@ -654,7 +660,7 @@ router.post('/mechanic', optionalAuth, async (req: AuthRequest, res: Response) =
       .filter(({ opt }: { opt: string }) => opt.toLowerCase().trim() !== correctAnswer.toLowerCase().trim())
       .map(({ idx }: { idx: number }) => idx);
 
-    const shuffled = [...incorrectIndexes].sort(() => Math.random() - 0.5);
+    const shuffled = shuffleArray(incorrectIndexes);
     const hiddenOptionIndexes = shuffled.slice(0, Math.min(2, shuffled.length));
 
     res.json({
@@ -723,6 +729,24 @@ router.post('/finish', authenticateJWT, async (req: AuthRequest, res: Response) 
 
     const category = session.category;
     const variant = session.variant;
+
+    // Una sesión sin respuestas no es una partida jugada: no se persiste, no
+    // toca leaderboards ni otorga logros (evita FIRST_GAME sin jugar).
+    if (answeredQuestions === 0) {
+      res.json({
+        message: 'Partida finalizada',
+        gameId: null,
+        totalScore: 0,
+        correctCount: 0,
+        totalQuestions: expectedTotalQuestions,
+        answeredQuestions: 0,
+        accuracy: 0,
+        isHighScore: false,
+        details: [],
+        newAchievements: [],
+      });
+      return;
+    }
 
     // Guardar resultado
     const { gameId, totalScore, isHighScore } = await saveGameResult(
@@ -1345,11 +1369,13 @@ router.post('/daily/submit', authenticateJWT, async (req: AuthRequest, res: Resp
       points: number;
     }> = [];
 
+    let storedAnswersCount = 0;
     for (const stop of plan.stops) {
       const stored = await redis.get(`daily:answer:${userId}:${resolvedDayKey}:${stop.questionId}`);
       let isCorrect = false;
       let points = 0;
       if (stored !== null) {
+        storedAnswersCount += 1;
         const a = JSON.parse(stored) as { isCorrect: boolean; points: number };
         isCorrect = a.isCorrect;
         points = a.points ?? (isCorrect ? DAILY_POINTS_PER_CORRECT : 0);
@@ -1388,6 +1414,25 @@ router.post('/daily/submit', authenticateJWT, async (req: AuthRequest, res: Resp
           dailyStreak: userRow.dailyStreak ?? 1,
           playedAt: new Date().toISOString(),
         },
+      });
+      return;
+    }
+
+    // Día anterior al último enviado: reenviar movería lastDailyDate hacia atrás
+    // y permitiría reiniciar/farmear la racha.
+    if (userRow?.lastDailyDate != null && resolvedDayKey < userRow.lastDailyDate) {
+      res.status(409).json({
+        error: 'El reto de ese día ya fue superado por un envío posterior.',
+        code: 'DAILY_ALREADY_SUBMITTED',
+      });
+      return;
+    }
+
+    // Sin respuestas almacenadas no hay partida: no avanza racha ni logros.
+    if (storedAnswersCount === 0) {
+      res.status(400).json({
+        error: 'No hay respuestas registradas para el reto de hoy.',
+        code: 'DAILY_NO_ANSWERS',
       });
       return;
     }

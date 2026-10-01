@@ -666,6 +666,7 @@
     {"name": "Colombo", "country": "Sri Lanka", "lat": 6.9271, "lng": 79.8612},
     {"name": "Kandy", "country": "Sri Lanka", "lat": 7.2906, "lng": 80.6337},
     {"name": "Galle", "country": "Sri Lanka", "lat": 6.0535, "lng": 80.2210},
+    {"name": "Sri Jayawardenepura Kotte", "country": "Sri Lanka", "lat": 6.9108, "lng": 79.8878},
 
     {"name": "Khartoum", "country": "Sudan", "lat": 15.5007, "lng": 32.5599},
     {"name": "Omdurman", "country": "Sudan", "lat": 15.6445, "lng": 32.4777},

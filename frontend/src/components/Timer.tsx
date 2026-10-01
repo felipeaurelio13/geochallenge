@@ -5,6 +5,7 @@ import { useUiStore } from '../store/useUiStore';
 
 const URGENCY_THRESHOLD_SECONDS = 3;
 const HURRY_ANNOUNCE_THRESHOLD_SECONDS = 5;
+const TICK_INTERVAL_MS = 250;
 
 interface TimerProps {
   duration: number;
@@ -25,7 +26,8 @@ export function Timer({ duration, timeRemaining, onTick, onComplete, isActive, c
   const { t } = useTranslation();
   const prefersReducedMotion = useUiStore((state) => state.prefersReducedMotion);
   const intervalRef = useRef<number | null>(null);
-  const timeRemainingRef = useRef(timeRemaining);
+  const endAtRef = useRef<number | null>(null);
+  const lastEmittedRef = useRef(timeRemaining);
   const onTickRef = useRef(onTick);
   const onCompleteRef = useRef(onComplete);
   const hasAnnouncedHurryRef = useRef(false);
@@ -33,9 +35,22 @@ export function Timer({ duration, timeRemaining, onTick, onComplete, isActive, c
   const prevTimeRemainingRef = useRef(timeRemaining);
   const [hurryAnnouncement, setHurryAnnouncement] = useState('');
 
-  useEffect(() => { timeRemainingRef.current = timeRemaining; }, [timeRemaining]);
   useEffect(() => { onTickRef.current = onTick; }, [onTick]);
   useEffect(() => { onCompleteRef.current = onComplete; }, [onComplete]);
+
+  // Wall-clock deadline: derived from the controlled `timeRemaining` whenever the
+  // timer (re)starts or the parent changes the value externally (new round, bonus
+  // time). While paused the deadline is dropped, so remaining time stays frozen.
+  useEffect(() => {
+    if (!isActive) {
+      endAtRef.current = null;
+      return;
+    }
+    if (endAtRef.current === null || timeRemaining !== lastEmittedRef.current) {
+      endAtRef.current = Date.now() + timeRemaining * 1000;
+      lastEmittedRef.current = timeRemaining;
+    }
+  }, [timeRemaining, isActive]);
 
   useEffect(() => {
     if (!isActive) {
@@ -46,18 +61,32 @@ export function Timer({ duration, timeRemaining, onTick, onComplete, isActive, c
       return;
     }
 
-    intervalRef.current = window.setInterval(() => {
-      const newTime = timeRemainingRef.current - 1;
-      onTickRef.current(newTime);
-      if (newTime <= 0) {
+    // Derive remaining time from the clock instead of counting ticks, so a
+    // throttled/backgrounded tab does not make the timer drift.
+    const sync = () => {
+      if (endAtRef.current === null) return;
+      const remaining = Math.max(0, Math.ceil((endAtRef.current - Date.now()) / 1000));
+      if (remaining === lastEmittedRef.current) return;
+      lastEmittedRef.current = remaining;
+      onTickRef.current(remaining);
+      if (remaining <= 0) {
         onCompleteRef.current();
       }
-    }, 1000);
+    };
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') sync();
+    };
+
+    intervalRef.current = window.setInterval(sync, TICK_INTERVAL_MS);
+    document.addEventListener('visibilitychange', handleVisibility);
 
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
+      document.removeEventListener('visibilitychange', handleVisibility);
     };
   }, [isActive]);
 

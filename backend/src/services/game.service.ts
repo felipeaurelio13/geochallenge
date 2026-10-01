@@ -308,6 +308,13 @@ export async function extendGameSession(
         session.questionIds.push(q.id);
         session.correctAnswers[q.id] = q.correctAnswer;
         session.optionsPerQuestion[q.id] = q.options;
+        session.questionMeta = session.questionMeta ?? {};
+        session.questionMeta[q.id] = {
+          category: q.category,
+          difficulty: q.difficulty,
+          continent: q.continent,
+          countryCode: q.countryCode,
+        };
       }
     }
     await redis.hset(gameSessionKey(sessionId), SESSION_METADATA_FIELD, JSON.stringify(session));
@@ -487,23 +494,14 @@ export async function getQuestionsForGame(
   const compatibleFilters = getCompatibleFilters(category, filters);
   const baseWhere = { isAvailable: true, id: { notIn: excludeIds }, ...buildFilterWhere(compatibleFilters) };
 
-  // Buscar preguntas en la base de datos
-  let questions = await prisma.question.findMany({
+  // MIXED / sin categoría: todas las categorías jugables en una sola query.
+  const isMixed = category === Category.MIXED || !category;
+  const questions = await prisma.question.findMany({
     where: {
       ...baseWhere,
-      ...(category && category !== Category.MIXED && { category }),
+      ...(isMixed ? { category: { in: PLAYABLE_CATEGORIES } } : { category }),
     },
   });
-
-  // Si hay categoría MIXED, obtener de todas las categorías en una sola query
-  if (category === Category.MIXED || !category) {
-    questions = await prisma.question.findMany({
-      where: {
-        ...baseWhere,
-        category: { in: PLAYABLE_CATEGORIES },
-      },
-    });
-  }
 
   // Seleccionar aleatoriamente
   const selectedQuestions = selectRandom(questions, count);

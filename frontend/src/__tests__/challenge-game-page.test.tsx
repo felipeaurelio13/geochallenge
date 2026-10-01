@@ -6,6 +6,15 @@ const mocks = vi.hoisted(() => ({
   navigateMock: vi.fn(),
   apiGetMock: vi.fn(),
   apiPostMock: vi.fn(),
+  confirmMock: vi.fn(),
+}));
+
+vi.mock('../hooks/useConfirmDialog', () => ({
+  useConfirmDialog: () => ({
+    confirm: mocks.confirmMock,
+    confirmDialog: null,
+    isOpen: false,
+  }),
 }));
 
 vi.mock('react-router-dom', () => ({
@@ -72,6 +81,7 @@ vi.mock('../components', () => ({
 describe('ChallengeGamePage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.confirmMock.mockResolvedValue(true);
     mocks.apiPostMock.mockResolvedValue({ success: true });
     mocks.apiGetMock.mockResolvedValue({
       questions: [
@@ -122,5 +132,35 @@ describe('ChallengeGamePage', () => {
 
     expect(screen.getByRole('button', { name: 'game.submit' })).toBeEnabled();
     expect(screen.queryByRole('button', { name: 'game.clearSelection' })).not.toBeInTheDocument();
+  });
+
+  it('muestra un contador de preguntas en lugar de un puntaje fijo en 0', async () => {
+    render(<ChallengeGamePage />);
+
+    await screen.findByRole('button', { name: 'Santiago' });
+    expect(screen.getByText('1/1')).toBeInTheDocument();
+    expect(screen.queryByText('score')).not.toBeInTheDocument();
+  });
+
+  it('pide confirmación antes de salir y solo navega si el jugador confirma', async () => {
+    mocks.confirmMock.mockResolvedValueOnce(false);
+    render(<ChallengeGamePage />);
+
+    const exitButton = await screen.findByRole('button', { name: 'game.exit' });
+    fireEvent.click(exitButton);
+    await waitFor(() => expect(mocks.confirmMock).toHaveBeenCalledWith('game.confirmExit'));
+    expect(mocks.navigateMock).not.toHaveBeenCalled();
+
+    fireEvent.click(exitButton);
+    await waitFor(() => expect(mocks.navigateMock).toHaveBeenCalledWith('/challenges'));
+  });
+
+  it('registra un guard de beforeunload mientras el desafío está en curso', async () => {
+    render(<ChallengeGamePage />);
+    await screen.findByRole('button', { name: 'Santiago' });
+
+    const event = new Event('beforeunload', { cancelable: true });
+    window.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(true);
   });
 });

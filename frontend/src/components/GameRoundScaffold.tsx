@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { QuestionCard } from './QuestionCard';
 import { OptionButton } from './OptionButton';
@@ -18,6 +18,8 @@ type GameRoundScaffoldProps = {
   selectedAnswer: string | null;
   /** Respuesta correcta devuelta por el backend para la ronda ya confirmada. */
   correctAnswer?: string;
+  /** true cuando el servidor no revela la respuesta tras responder (ver OptionButton.lockedResult). */
+  lockedResult?: boolean;
   onOptionSelect: (option: string) => void;
   showResult: boolean;
   disableOptions?: boolean;
@@ -45,6 +47,7 @@ export function GameRoundScaffold({
   mapContent,
   selectedAnswer,
   correctAnswer,
+  lockedResult = false,
   onOptionSelect,
   showResult,
   disableOptions = false,
@@ -60,6 +63,16 @@ export function GameRoundScaffold({
   feedback,
 }: GameRoundScaffoldProps) {
   const { i18n } = useTranslation();
+  // Keep each option's onClick referentially stable across timer-tick re-renders
+  // so React.memo on OptionButton can skip them; the latest handler is read via ref.
+  const onOptionSelectRef = useRef(onOptionSelect);
+  useEffect(() => {
+    onOptionSelectRef.current = onOptionSelect;
+  }, [onOptionSelect]);
+  const optionClickHandlers = useMemo(
+    () => question.options.map((option) => () => onOptionSelectRef.current(option)),
+    [question.options]
+  );
   const isCapitalQuestion = !isMapQuestion && question.category === 'CAPITAL';
   const hasMediaQuestion = !isMapQuestion && (question.category === 'FLAG' || question.category === 'SILHOUETTE' || question.category === 'MONUMENT');
 
@@ -102,12 +115,13 @@ export function GameRoundScaffold({
               option={option}
               displayLabel={getOptionDisplayLabel(question, option, i18n.language)}
               index={index}
-              onClick={() => onOptionSelect(option)}
+              onClick={optionClickHandlers[index]}
               disabled={showResult || disableOptions || imageReplacementFailed || hiddenOptionIndexes.includes(index)}
               eliminated={hiddenOptionIndexes.includes(index)}
               selected={selectedAnswer === option}
               isCorrect={showResult && correctAnswer === option}
               showResult={showResult}
+              lockedResult={lockedResult}
             />
             ))}
           </div>

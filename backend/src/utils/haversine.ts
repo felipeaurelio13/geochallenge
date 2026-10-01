@@ -32,18 +32,3 @@ export function haversineDistance(
 function toRadians(degrees: number): number {
   return degrees * (Math.PI / 180);
 }
-
-/**
- * Calcula el puntaje basado en la distancia para preguntas de mapa
- * @param distance Distancia en km entre la respuesta y el punto correcto
- * @returns Puntaje (0-100)
- */
-export function calculateMapScore(distance: number): number {
-  if (distance < 15) return 100;
-  if (distance < 30) return 90;
-  if (distance < 75) return 75;
-  if (distance < 150) return 50;
-  if (distance < 300) return 25;
-  if (distance < 500) return 10;
-  return 0;
-}

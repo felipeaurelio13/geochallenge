@@ -217,8 +217,8 @@ function CountryCard({
               {countryName}
             </span>
             {country.stamped && (
-              <span className="shrink-0 text-success-500" title={t('passport.stamped', 'Sellado')}>
-                <span className="sr-only">{t('passport.stamped', 'Sellado')}</span>
+              <span className="shrink-0 text-success-500" title={t('passport.stampedLabel', 'Sellado')}>
+                <span className="sr-only">{t('passport.stampedLabel', 'Sellado')}</span>
                 <GeoIcon name="challenge" size={14} />
               </span>
             )}
@@ -260,11 +260,11 @@ function CountryCard({
 function SkillRow({ skill }: { skill: SkillMastery }) {
   const { t } = useTranslation();
   const categoryLabels: Record<string, string> = {
-    FLAG: t('categories.flag', 'Banderas'),
-    CAPITAL: t('categories.capital', 'Capitales'),
-    MAP: t('categories.map', 'Mapas'),
-    SILHOUETTE: t('categories.silhouette', 'Siluetas'),
-    MONUMENT: t('categories.monument', 'Monumentos'),
+    FLAG: t('categories.flags', 'Banderas'),
+    CAPITAL: t('categories.capitals', 'Capitales'),
+    MAP: t('categories.maps', 'Mapas'),
+    SILHOUETTE: t('categories.silhouettes', 'Siluetas'),
+    MONUMENT: t('categories.monuments', 'Monumentos'),
   };
 
   return (
