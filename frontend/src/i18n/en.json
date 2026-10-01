@@ -732,6 +732,7 @@
     "metric": {
       "sum": "Monthly total",
       "best": "All-time best",
+      "month": "Best this month",
       "sumHint": "Ranked by total accumulated points this month",
       "bestHint": "Ranked by best single game ever",
       "monthHint": "Ranked by best single game this month"

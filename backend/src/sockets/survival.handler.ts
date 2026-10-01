@@ -11,6 +11,7 @@ import {
 import { AppError } from '../utils/appError.js';
 import { emitSocketError } from '../utils/respondWithError.js';
 import { trackServerEvent } from '../services/telemetry.service.js';
+import { distanceBucket as bucketDistance } from '../utils/scoring.js';
 import { persistSurvivalFinalization } from '../services/survivalPersistence.service.js';
 import {
   parseSocketPayload,
@@ -463,9 +464,7 @@ function resolveRound(io: SocketIOServer, match: ActiveSurvivalMatch, round: num
   for (const player of match.players) {
     const answer = player.answers[round - 1];
     if (answer) {
-      const distanceBucket = answer.distance !== undefined
-        ? (answer.distance < 100 ? '<100km' : answer.distance < 500 ? '100-500km' : answer.distance < 1000 ? '500-1000km' : answer.distance < 2000 ? '1000-2000km' : '>2000km')
-        : undefined;
+      const distanceBucket = bucketDistance(answer.distance);
       trackServerEvent({
         name: 'question_answered',
         userId: player.userId,

@@ -204,6 +204,7 @@ vi.mock('../services/mastery.service.js', () => ({
 }));
 
 vi.mock('../utils/scoring.js', () => ({
+  distanceBucket: vi.fn(() => undefined),
   shuffleArray: vi.fn((arr: unknown[]) => [...arr]),
   calculateScore: vi.fn((isCorrect: boolean) => isCorrect ? 100 : 0),
   calculateMapScore: vi.fn(() => 60),

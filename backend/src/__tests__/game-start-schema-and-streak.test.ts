@@ -17,6 +17,7 @@ vi.mock('../config/database.js', () => ({
 }));
 
 vi.mock('../utils/scoring.js', () => ({
+  distanceBucket: vi.fn(() => undefined),
   calculateScore: vi.fn(),
   calculateMapScore: vi.fn(),
   shuffleArray: <T>(values: T[]) => values,

@@ -38,7 +38,7 @@ import {
   type SoloGameType,
 } from '../services/game.service.js';
 import { effectiveTimeRemainingSeconds } from '../utils/serverTiming.js';
-import { shuffleArray } from '../utils/scoring.js';
+import { distanceBucket as bucketDistance, shuffleArray } from '../utils/scoring.js';
 import { getRedis } from '../config/redis.js';
 import { prisma } from '../config/database.js';
 import {
@@ -548,9 +548,7 @@ router.post('/answer', optionalAuth, async (req: AuthRequest, res: Response) => 
     const { stored, isFirstAnswer } = await storeAnswerResult(sessionId, questionId, result);
 
     if (isFirstAnswer) {
-      const distanceBucket = stored.distance !== undefined
-        ? (stored.distance < 100 ? '<100km' : stored.distance < 500 ? '100-500km' : stored.distance < 1000 ? '500-1000km' : stored.distance < 2000 ? '1000-2000km' : '>2000km')
-        : undefined;
+      const distanceBucket = bucketDistance(stored.distance);
       trackServerEvent({
         name: 'question_answered',
         userId: session.userId,
