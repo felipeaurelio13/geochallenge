@@ -4,6 +4,7 @@ import {
   calculateMapScore,
   calculateTimeBonus,
   calculateRoundPoints,
+  distanceBucket,
 } from '../utils/scoring.js';
 import { config } from '../config/env.js';
 import { haversineDistance } from '../utils/haversine.js';
@@ -156,5 +157,25 @@ describe('Haversine Distance', () => {
     const distance = haversineDistance(londonLat, londonLon, parisLat, parisLon);
     expect(distance).toBeGreaterThan(340);
     expect(distance).toBeLessThan(350);
+  });
+});
+
+describe('distanceBucket', () => {
+  it('maps distances to telemetry buckets with exclusive upper bounds', () => {
+    expect(distanceBucket(0)).toBe('<100km');
+    expect(distanceBucket(99.9)).toBe('<100km');
+    expect(distanceBucket(100)).toBe('100-500km');
+    expect(distanceBucket(499.9)).toBe('100-500km');
+    expect(distanceBucket(500)).toBe('500-1000km');
+    expect(distanceBucket(999.9)).toBe('500-1000km');
+    expect(distanceBucket(1000)).toBe('1000-2000km');
+    expect(distanceBucket(1999.9)).toBe('1000-2000km');
+    expect(distanceBucket(2000)).toBe('>2000km');
+    expect(distanceBucket(15000)).toBe('>2000km');
+  });
+
+  it('returns undefined when there is no distance', () => {
+    expect(distanceBucket(undefined)).toBeUndefined();
+    expect(distanceBucket(null)).toBeUndefined();
   });
 });

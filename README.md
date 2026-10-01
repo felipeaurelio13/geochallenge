@@ -51,7 +51,7 @@ geochallenge/
 
 ## Requisitos locales
 
-- Node.js 20
+- Node.js 20 (CI) / 22 (Docker)
 - npm
 - Docker y Docker Compose, recomendado para PostgreSQL y Redis locales
 - Git

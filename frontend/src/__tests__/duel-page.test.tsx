@@ -439,6 +439,35 @@ describe('DuelPage socket flow', () => {
     expect(screen.queryByRole('button', { name: 'game.clearSelection' })).not.toBeInTheDocument();
   });
 
+  it('no emite una segunda respuesta si el jugador toca otra opción tras responder', async () => {
+    render(<DuelPage />);
+
+    act(() => {
+      mocks.handlers.get('duel:question')?.forEach((cb) =>
+        cb({
+          questionIndex: 0,
+          totalQuestions: 10,
+          question: {
+            id: 'dq1',
+            questionText: 'Capital de Chile',
+            options: ['Santiago', 'Lima', 'Bogotá', 'Quito'],
+            correctAnswer: 'Santiago',
+            category: 'CAPITAL',
+          },
+        })
+      );
+    });
+
+    const santiago = await screen.findByRole('button', { name: 'Santiago' });
+    const lima = screen.getByRole('button', { name: 'Lima' });
+    fireEvent.click(santiago);
+    fireEvent.click(lima);
+    fireEvent.click(santiago);
+
+    expect(lima).toBeDisabled();
+    expect(mocks.submitDuelAnswerMock).toHaveBeenCalledTimes(1);
+  });
+
   it('prioriza una interfaz limpia sin mensajes de bajo tiempo en el cuerpo', async () => {
     render(<DuelPage />);
 

@@ -181,4 +181,25 @@ describe('OptionButton', () => {
     expect(button.className).toContain('option-button-base');
     expect(screen.getByText('Bolivia').className).toContain('line-through');
   });
+
+  it('muestra la opción elegida como bloqueada (no incorrecta) cuando el servidor no revela la respuesta', () => {
+    render(
+      <>
+        <OptionButton option="Argentina" index={0} onClick={() => {}} disabled selected showResult lockedResult />
+        <OptionButton option="Chile" index={1} onClick={() => {}} disabled selected={false} showResult lockedResult />
+      </>
+    );
+
+    const [chosen, other] = screen.getAllByRole('button');
+    expect(chosen).toHaveAttribute('data-state', 'submitted');
+    expect(chosen.className).not.toContain('error');
+    expect(chosen).toHaveTextContent('a11y.answerLocked');
+    expect(chosen).not.toHaveTextContent('a11y.incorrectAnswer');
+    expect(other).toHaveAttribute('data-state', 'locked');
+  });
+
+  it('sigue marcando la opción correcta aunque lockedResult esté activo', () => {
+    render(<OptionButton option="Chile" index={1} onClick={() => {}} disabled selected isCorrect showResult lockedResult />);
+    expect(screen.getByRole('button')).toHaveAttribute('data-state', 'correct');
+  });
 });

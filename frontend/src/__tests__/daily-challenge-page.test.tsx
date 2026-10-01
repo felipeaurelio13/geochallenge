@@ -228,6 +228,61 @@ describe('DailyChallengePage — World Tour', () => {
     expect(dailyAnswerMock).toBeDefined();
   });
 
+  it('timeout submits the selected-but-unsubmitted option and still reports time up', async () => {
+    render(<DailyChallengePage />);
+    fireEvent.click(await screen.findByRole('button', { name: /daily\.startJourney|Comenzar/i }));
+    await screen.findByText('progress');
+
+    fireEvent.click(screen.getByRole('button', { name: 'B' }));
+    fireEvent.click(screen.getByRole('button', { name: 'timer' }));
+
+    await waitFor(() => {
+      expect(dailyAnswerMock).toHaveBeenCalledWith(expect.objectContaining({ questionId: 'dq1', answer: 'B' }));
+    });
+    expect(await screen.findByText('game.timeUp')).toBeInTheDocument();
+  });
+
+  it('timeout without a selection submits an empty answer', async () => {
+    render(<DailyChallengePage />);
+    fireEvent.click(await screen.findByRole('button', { name: /daily\.startJourney|Comenzar/i }));
+    await screen.findByText('progress');
+
+    fireEvent.click(screen.getByRole('button', { name: 'timer' }));
+
+    await waitFor(() => {
+      expect(dailyAnswerMock).toHaveBeenCalledWith(expect.objectContaining({ questionId: 'dq1', answer: '' }));
+    });
+    expect(await screen.findByText('game.timeUp')).toBeInTheDocument();
+  });
+
+  it('a normal submit is not reported as a timeout even with an empty selection path', async () => {
+    render(<DailyChallengePage />);
+    fireEvent.click(await screen.findByRole('button', { name: /daily\.startJourney|Comenzar/i }));
+    await screen.findByText('progress');
+
+    fireEvent.click(screen.getByRole('button', { name: 'A' }));
+    fireEvent.click(screen.getByRole('button', { name: 'game.submit' }));
+
+    expect(await screen.findByText('game.correct')).toBeInTheDocument();
+    expect(screen.queryByText('game.timeUp')).not.toBeInTheDocument();
+  });
+
+  it('guards against accidental tab close only while playing', async () => {
+    render(<DailyChallengePage />);
+    await screen.findByText('daily.worldTourTitle');
+
+    const idleEvent = new Event('beforeunload', { cancelable: true });
+    window.dispatchEvent(idleEvent);
+    expect(idleEvent.defaultPrevented).toBe(false);
+
+    fireEvent.click(await screen.findByRole('button', { name: /daily\.startJourney|Comenzar/i }));
+    await screen.findByText('progress');
+
+    const playingEvent = new Event('beforeunload', { cancelable: true });
+    window.dispatchEvent(playingEvent);
+    expect(playingEvent.defaultPrevented).toBe(true);
+  });
+
   it('error /answer does NOT present as incorrect', async () => {
     dailyAnswerMock.mockRejectedValueOnce(new Error('Network error'));
     render(<DailyChallengePage />);

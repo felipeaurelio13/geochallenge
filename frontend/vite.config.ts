@@ -48,6 +48,26 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,jpg,jpeg,svg,woff2}'],
         navigateFallback: 'index.html',
         navigateFallbackDenylist: [/^\/api\//],
+        runtimeCaching: [
+          {
+            urlPattern: ({ url, request }: { url: URL; request: Request }) =>
+              request.destination === 'image' &&
+              [
+                'flagcdn.com',
+                'flagpedia.net',
+                'cdn.jsdelivr.net',
+                'raw.githubusercontent.com',
+                'upload.wikimedia.org',
+                'commons.wikimedia.org', // monument URLs (Special:FilePath) redirect to upload.wikimedia.org
+              ].includes(url.hostname),
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'game-images',
+              cacheableResponse: { statuses: [0, 200] },
+              expiration: { maxEntries: 300, maxAgeSeconds: 60 * 60 * 24 * 30 },
+            },
+          },
+        ],
       },
     }),
   ],

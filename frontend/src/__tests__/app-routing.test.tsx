@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import React from 'react';
-import { appRoutes, SinglePlayerGameLayout, RankingsPage, CompetitionPage } from '../App';
+import { appRoutes, SinglePlayerGameLayout, RankingsPage, CompetitionPage, NotFoundPage } from '../App';
 
 describe('App single-player routing', () => {
   it('keeps trial and its results in a separate public game provider', () => {
@@ -58,5 +58,15 @@ describe('Competition routing', () => {
 
     expect(pageElement.type).toBe(CompetitionPage);
     expect(protectedElement.type).not.toBe(CompetitionPage);
+  });
+});
+
+describe('Not found routing', () => {
+  it('renders NotFoundPage for unknown paths instead of silently redirecting', () => {
+    const rootRoute = appRoutes[0];
+    const catchAll = rootRoute.children?.find((route) => route.path === '*');
+
+    expect(catchAll).toBeDefined();
+    expect((catchAll?.element as React.ReactElement).type).toBe(NotFoundPage);
   });
 });

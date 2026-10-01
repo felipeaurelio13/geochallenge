@@ -1,6 +1,19 @@
 import { config } from '../config/env.js';
 
-const MAP_MAX_DISTANCE_KM = 2000;
+export const MAP_MAX_DISTANCE_KM = 2000;
+export const MAP_CORRECT_THRESHOLD_KM = 500;
+
+/**
+ * Bucket de distancia para telemetría de preguntas de mapa.
+ */
+export function distanceBucket(distanceKm?: number | null): string | undefined {
+  if (distanceKm === undefined || distanceKm === null) return undefined;
+  if (distanceKm < 100) return '<100km';
+  if (distanceKm < 500) return '100-500km';
+  if (distanceKm < 1000) return '500-1000km';
+  if (distanceKm < 2000) return '1000-2000km';
+  return '>2000km';
+}
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));

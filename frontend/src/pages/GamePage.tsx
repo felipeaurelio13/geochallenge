@@ -19,11 +19,12 @@ import { MonumentAttribution } from '../components/MonumentAttribution';
 import { Category, GameFilters, MechanicUsage, Question, filtersToParams } from '../types';
 import { GAME_CONSTANTS } from '../constants/game';
 import { useConfirmDialog, useHaptics } from '../hooks';
+import { useAnswerShortcuts } from '../hooks/useAnswerShortcuts';
 import { areMechanicsV2Enabled } from '../config/featureFlags';
 import { trackUxEvent } from '../utils/uxTelemetry';
 import { generateFunFact } from '../utils/funFacts';
 import { applyExtendedTime, getQuestionDuration } from '../utils/questionTiming';
-import { useUiStore } from '../store/useUiStore';
+import { uiStoreActions, useUiStore } from '../store/useUiStore';
 
 const MapInteractive = lazy(() =>
   import('../components/MapInteractive').then((m) => ({ default: m.MapInteractive }))
@@ -90,7 +91,7 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
 
   const { questions, currentIndex, score, results, status } = state;
   const haptics = useHaptics();
-  const { confirm, confirmDialog } = useConfirmDialog();
+  const { confirm, confirmDialog, isOpen: isConfirmDialogOpen } = useConfirmDialog();
 
   const [timeRemaining, setTimeRemaining] = useState(TIME_PER_QUESTION);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
@@ -108,6 +109,7 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
   });
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [mechanicPending, setMechanicPending] = useState(false);
   const [imageReplacementFailed, setImageReplacementFailed] = useState(false);
   const [isRetryingImage, setIsRetryingImage] = useState(false);
   const [previousScore, setPreviousScore] = useState(0);
@@ -134,10 +136,6 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
   const mechanicsConfig = state.config?.mechanics;
   const mechanicsRuntimeEnabled = mechanicsFeatureEnabled && Boolean(mechanicsConfig?.enabled);
   const mechanicsAllowed = new Set(mechanicsConfig?.allowed ?? []);
-
-  useEffect(() => {
-    setGlobalTimeRemaining(Math.max(0, timeRemaining));
-  }, [setGlobalTimeRemaining, timeRemaining]);
 
   useEffect(() => {
     if (!mechanicsRuntimeEnabled || !mechanicsConfig) {
@@ -229,40 +227,6 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
     initGame();
   }, [category, gameType, gameFilters, practiceCountryCode, startGame, startPractice, confirm, isTrial]);
 
-  // Keyboard shortcuts: A/B/C/D to select, Enter to submit/next
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      if (!currentQuestion || isMapQuestion) return;
-
-      if (!showResult) {
-        const keyMap: Record<string, number> = { a: 0, b: 1, c: 2, d: 3 };
-        const idx = keyMap[e.key.toLowerCase()];
-        if (idx !== undefined && idx < currentQuestion.options.length) {
-          if (disabledOptionIndexes.includes(idx)) {
-            trackUxEvent('option_mis_tap', {
-              mode: gameType,
-              questionId: currentQuestion.id,
-              value: idx,
-            });
-            return;
-          }
-          setSelectedAnswer(currentQuestion.options[idx]);
-        }
-        if (e.key === 'Enter' && selectedAnswer) {
-          handleSubmitAnswer();
-        }
-      } else if (e.key === 'Enter' || e.key.toLowerCase() === 'n') {
-        handleNextQuestion();
-      }
-    },
-    [currentQuestion, disabledOptionIndexes, gameType, isMapQuestion, showResult, selectedAnswer]
-  );
-
-  useEffect(() => {
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleKeyDown]);
-
   useEffect(() => {
     return () => {
       if (!abandonTrackedRef.current && status === 'playing') {
@@ -276,6 +240,14 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
       }
     };
   }, []);
+
+  const handleTimerTick = useCallback(
+    (time: number) => {
+      setTimeRemaining(time);
+      setGlobalTimeRemaining(time);
+    },
+    [setGlobalTimeRemaining]
+  );
 
   // Handle time running out
   const handleTimeComplete = () => {
@@ -293,33 +265,36 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
     if (!currentQuestion || isMapQuestion || showResult || !mechanicsRuntimeEnabled) return;
     if (!mechanicsAllowed.has('intel5050') || mechanicsAvailable.intel5050 <= 0) return;
 
-    const sessionId = state.config?.sessionId;
-    if (sessionId) {
-      try {
-        const result = await api.useMechanic({
-          sessionId,
-          questionId: currentQuestion.id,
-          mechanic: 'intel5050',
-        });
-        setDisabledOptionIndexes(result.hiddenOptionIndexes);
-        setMechanicsAvailable((prev) => ({
-          ...prev,
-          intel5050: result.remaining,
-        }));
-        setPendingMechanicUsage({
-          key: 'intel5050',
-          action: 'trigger',
-          questionId: currentQuestion.id,
-          roundIndex: currentIndex,
-          value: result.hiddenOptionIndexes.length,
-        });
-        haptics.tap();
-        return;
-      } catch {
-        return;
-      }
-    }
+    if (mechanicPending || isSubmitting) return;
 
+    const sessionId = state.config?.sessionId;
+    if (!sessionId) return;
+
+    setMechanicPending(true);
+    try {
+      const result = await api.useMechanic({
+        sessionId,
+        questionId: currentQuestion.id,
+        mechanic: 'intel5050',
+      });
+      setDisabledOptionIndexes(result.hiddenOptionIndexes);
+      setMechanicsAvailable((prev) => ({
+        ...prev,
+        intel5050: result.remaining,
+      }));
+      setPendingMechanicUsage({
+        key: 'intel5050',
+        action: 'trigger',
+        questionId: currentQuestion.id,
+        roundIndex: currentIndex,
+        value: result.hiddenOptionIndexes.length,
+      });
+      haptics.tap();
+    } catch {
+      uiStoreActions.pushToast({ type: 'info', message: t('mechanics.useFailed') });
+    } finally {
+      setMechanicPending(false);
+    }
   };
 
   const handleUseFocusTime = () => {
@@ -471,6 +446,16 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
     }
   };
 
+  useAnswerShortcuts({
+    options: currentQuestion && !isMapQuestion ? currentQuestion.options : [],
+    onSelect: handleOptionSelect,
+    onSubmit: handleSubmitAnswer,
+    onNext: handleNextQuestion,
+    enabled: Boolean(currentQuestion) && !isConfirmDialogOpen && !isLoading && !error,
+    showResult,
+    canSubmit: hasSelection,
+  });
+
   // Part 4.2: primer intento de reemplazo automático (disparado por
   // onImageError de QuestionCard/GameRoundScaffold cuando la imagen original
   // Y el fallback CDN fallan). Si ESTE intento también falla, mostramos la UI
@@ -606,10 +591,7 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
               <Timer
                 duration={roundDuration}
                 timeRemaining={timeRemaining}
-                onTick={(time) => {
-                  setTimeRemaining(time);
-                  setGlobalTimeRemaining(time);
-                }}
+                onTick={handleTimerTick}
                 onComplete={handleTimeComplete}
                 isActive={!showResult && !imageReplacementFailed && status === 'playing'}
                 compact={isPerfectRoundPilot}
@@ -735,7 +717,7 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
             !isPerfectRoundPilot && mechanicsRuntimeEnabled && !showResult ? (
               <MechanicsHud
                 available={mechanicsAvailable}
-                disabled={false}
+                disabled={isSubmitting || mechanicPending}
                 onUseIntel5050={handleUseIntel5050}
                 onUseFocusTime={handleUseFocusTime}
               />

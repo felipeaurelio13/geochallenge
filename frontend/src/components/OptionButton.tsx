@@ -17,6 +17,12 @@ interface OptionButtonProps {
   selected: boolean;
   isCorrect?: boolean;
   showResult: boolean;
+  /**
+   * El servidor aún no revela la respuesta correcta (p.ej. desafíos puntuados al
+   * final). Con showResult activo, la opción elegida se muestra como "respuesta
+   * enviada" en estilo neutro en vez de marcarse como incorrecta.
+   */
+  lockedResult?: boolean;
 }
 
 const optionLetters = ['A', 'B', 'C', 'D'];
@@ -31,9 +37,11 @@ export const OptionButton = React.memo(function OptionButton({
   selected,
   isCorrect,
   showResult,
+  lockedResult = false,
 }: OptionButtonProps) {
   const { t } = useTranslation();
   const renderedLabel = displayLabel ?? option;
+  const isSubmittedUnrevealed = showResult && lockedResult && !isCorrect && selected;
   // focus-visible: only show focus ring on KEYBOARD navigation, not on touch/click.
   // Antes el browser dejaba un focus ring azul sobre la última opción tras click
   // o navegación — los QA rounds 1-3 lo reportaron como "parece pre-seleccionado".
@@ -49,6 +57,8 @@ export const OptionButton = React.memo(function OptionButton({
     'bg-[var(--color-surface-muted)] border-[var(--color-border)] text-[var(--color-text-muted)] cursor-not-allowed';
   const lockedStateClasses =
     'bg-[var(--color-surface-muted)] border-[var(--color-border)] text-[var(--color-text-secondary)] cursor-not-allowed opacity-60';
+  const submittedStateClasses =
+    'bg-primary/10 border-primary text-[var(--color-text-primary)] ring-1 ring-primary/25 cursor-not-allowed';
   const eliminatedStateClasses =
     'bg-[var(--color-surface-muted)] border-[var(--color-border)] text-[var(--color-text-muted)] cursor-not-allowed opacity-50';
   const correctStateClasses =
@@ -58,6 +68,7 @@ export const OptionButton = React.memo(function OptionButton({
 
   const getButtonClasses = () => {
     if (showResult) {
+      if (isSubmittedUnrevealed) return `${baseClasses} ${submittedStateClasses}`;
       if (isCorrect) return `${baseClasses} ${correctStateClasses}`;
       if (selected && !isCorrect) return `${baseClasses} ${wrongStateClasses}`;
       return `${baseClasses} ${lockedStateClasses}`;
@@ -84,7 +95,7 @@ export const OptionButton = React.memo(function OptionButton({
       aria-pressed={selected}
       data-state={
         showResult
-          ? (isCorrect ? 'correct' : selected ? 'wrong' : 'locked')
+          ? (isCorrect ? 'correct' : isSubmittedUnrevealed ? 'submitted' : selected ? 'wrong' : 'locked')
           : eliminated
             ? 'eliminated'
             : selected
@@ -98,6 +109,8 @@ export const OptionButton = React.memo(function OptionButton({
         className={`option-button-index flex h-7 w-7 shrink-0 rounded-full items-center justify-center self-center font-bold text-xs transition-colors sm:text-sm ${
           showResult && isCorrect
             ? 'bg-success-soft text-success'
+            : isSubmittedUnrevealed
+              ? 'bg-primary/80 text-app-on-accent'
             : showResult && selected && !isCorrect
               ? 'bg-error-soft text-error'
             : eliminated
@@ -107,9 +120,10 @@ export const OptionButton = React.memo(function OptionButton({
                 : 'bg-[var(--color-border)] text-[var(--color-text-secondary)]'
         }`}
       >
-        {showResult && isCorrect ? '✓' : showResult && selected && !isCorrect ? '✕' : eliminated ? '—' : optionLetters[index]}
+        {showResult && isCorrect ? '✓' : isSubmittedUnrevealed ? optionLetters[index] : showResult && selected && !isCorrect ? '✕' : eliminated ? '—' : optionLetters[index]}
         {showResult && isCorrect && <span className="sr-only">{t('a11y.correctAnswer')}</span>}
-        {showResult && selected && !isCorrect && <span className="sr-only">{t('a11y.incorrectAnswer')}</span>}
+        {isSubmittedUnrevealed && <span className="sr-only">{t('a11y.answerLocked')}</span>}
+        {showResult && selected && !isCorrect && !isSubmittedUnrevealed && <span className="sr-only">{t('a11y.incorrectAnswer')}</span>}
         {!showResult && eliminated && <span className="sr-only">{t('a11y.eliminatedOption')}</span>}
       </span>
 
@@ -122,6 +136,8 @@ export const OptionButton = React.memo(function OptionButton({
       <span className="flex w-[4.75rem] shrink-0 items-center justify-end text-right text-[0.68rem] font-semibold leading-tight" aria-live="polite">
         {showResult && isCorrect ? (
           <span className="text-success">{t('game.correctLabel')}</span>
+        ) : isSubmittedUnrevealed ? (
+          <span className="text-primary">{t('game.yourAnswer')}</span>
         ) : showResult && selected ? (
           <span className="text-error">{t('game.yourAnswer')}</span>
         ) : null}

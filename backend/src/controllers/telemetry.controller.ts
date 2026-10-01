@@ -11,7 +11,7 @@ const clientEventSchema = z.object({
   eventKey: z.string().min(1).max(128),
   name: z.string().min(1).max(64),
   clientSessionId: z.string().min(1).max(128),
-  occurredAt: z.string().min(1),
+  occurredAt: z.string().datetime({ offset: true }),
   properties: z.record(z.unknown()).optional(),
 });
 

@@ -13,6 +13,7 @@ interface FlashCardProps {
   disabled?: boolean;
   disabledOptions?: string[];
   feedback?: 'correct' | 'incorrect' | null;
+  correctAnswer?: string | null;
   onImageError?: () => void;
 }
 
@@ -25,7 +26,7 @@ const ALT_KEY: Record<string, { key: string; fallback: string }> = {
   MONUMENT: { key: 'flash.altMonument', fallback: 'Monumento' },
 };
 
-export function FlashCard({ question, onAnswer, disabled, disabledOptions = [], feedback, onImageError }: FlashCardProps) {
+export function FlashCard({ question, onAnswer, disabled, disabledOptions = [], feedback, correctAnswer = null, onImageError }: FlashCardProps) {
   const { t, i18n } = useTranslation();
   const [optionA, optionB] = useMemo(() => {
     const opts = question.options.slice(0, 2);
@@ -54,6 +55,11 @@ export function FlashCard({ question, onAnswer, disabled, disabledOptions = [], 
     onSwipeRight: () => handleAnswer(optionB),
     threshold: 40,
   });
+
+  const optionClass = (option: string) =>
+    feedback === 'incorrect' && correctAnswer && option === correctAnswer
+      ? 'border-success-500 bg-success-500/20 ring-2 ring-success-500 disabled:opacity-100'
+      : 'border-[var(--color-border)] bg-[var(--color-surface-muted)]';
 
   const feedbackClass =
     feedback === 'correct'
@@ -96,8 +102,9 @@ export function FlashCard({ question, onAnswer, disabled, disabledOptions = [], 
           type="button"
           onClick={() => handleAnswer(optionA)}
           disabled={disabled || disabledOptions.includes(optionA)}
-          className="pressable min-h-16 rounded-md border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 py-4 text-base font-semibold text-[var(--color-text-primary)] transition-colors hover:border-primary/50 hover:bg-[var(--color-surface)] active:bg-[var(--color-surface)] disabled:cursor-not-allowed disabled:opacity-60"
-          aria-label={`Opción A: ${displayA}`}
+          data-correct={feedback === 'incorrect' && !!correctAnswer && optionA === correctAnswer ? 'true' : undefined}
+          className={`pressable min-h-16 rounded-md border ${optionClass(optionA)} px-3 py-4 text-base font-semibold text-[var(--color-text-primary)] transition-colors hover:border-primary/50 hover:bg-[var(--color-surface)] active:bg-[var(--color-surface)] disabled:cursor-not-allowed disabled:opacity-60`}
+          aria-label={t('flash.optionA', { label: displayA })}
         >
           <span className="mr-2 text-xs text-[var(--color-text-muted)]">←</span>
           {displayA}
@@ -106,8 +113,9 @@ export function FlashCard({ question, onAnswer, disabled, disabledOptions = [], 
           type="button"
           onClick={() => handleAnswer(optionB)}
           disabled={disabled || disabledOptions.includes(optionB)}
-          className="pressable min-h-16 rounded-md border border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 py-4 text-base font-semibold text-[var(--color-text-primary)] transition-colors hover:border-primary/50 hover:bg-[var(--color-surface)] active:bg-[var(--color-surface)] disabled:cursor-not-allowed disabled:opacity-60"
-          aria-label={`Opción B: ${displayB}`}
+          data-correct={feedback === 'incorrect' && !!correctAnswer && optionB === correctAnswer ? 'true' : undefined}
+          className={`pressable min-h-16 rounded-md border ${optionClass(optionB)} px-3 py-4 text-base font-semibold text-[var(--color-text-primary)] transition-colors hover:border-primary/50 hover:bg-[var(--color-surface)] active:bg-[var(--color-surface)] disabled:cursor-not-allowed disabled:opacity-60`}
+          aria-label={t('flash.optionB', { label: displayB })}
         >
           {displayB}
           <span className="ml-2 text-xs text-[var(--color-text-muted)]">→</span>

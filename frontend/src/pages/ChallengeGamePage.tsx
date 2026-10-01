@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../services/api';
 import {
   Timer,
-  ScoreDisplay,
   ProgressBar,
   LoadingSpinner,
   GameRoundScaffold,
@@ -16,6 +15,7 @@ import { MonumentAttribution } from '../components/MonumentAttribution';
 import { Question } from '../types';
 import { getApiErrorMessage } from '../utils/apiError';
 import { useHaptics } from '../hooks';
+import { useConfirmDialog } from '../hooks/useConfirmDialog';
 import { areMechanicsV2Enabled } from '../config/featureFlags';
 import { getQuestionDuration } from '../utils/questionTiming';
 import { trackUxEvent } from '../utils/uxTelemetry';
@@ -30,10 +30,10 @@ export function ChallengeGamePage() {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { confirm, confirmDialog } = useConfirmDialog();
 
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [score, _setScore] = useState(0);
   const [results, setResults] = useState<Array<{ isCorrect?: boolean }>>([]);
   // Respuestas crudas para el backend: el servidor las valida y calcula el score.
   const answersRef = useRef<
@@ -50,7 +50,6 @@ export function ChallengeGamePage() {
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [mapLocation, setMapLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [showResult, setShowResult] = useState(false);
-  const [previousScore, setPreviousScore] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [alreadyPlayed, setAlreadyPlayed] = useState(false);
@@ -114,6 +113,24 @@ export function ChallengeGamePage() {
     };
   }, [currentIndex, isSubmitting]);
 
+  // Prevent accidental tab close / reload while the challenge run is in progress.
+  useEffect(() => {
+    if (loading || alreadyPlayed || error || questions.length === 0) return;
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [loading, alreadyPlayed, error, questions.length]);
+
+  const handleExit = async () => {
+    if (!(await confirm(t('game.confirmExit')))) return;
+    abandonTrackedRef.current = true;
+    runStartedRef.current = false;
+    navigate('/challenges');
+  };
+
   const handleTimeComplete = () => {
     if (!showResult) {
       handleSubmitAnswer();
@@ -132,7 +149,6 @@ export function ChallengeGamePage() {
       });
     }
 
-    setPreviousScore(score);
     haptics.tap();
 
     setResults((prev) => {
@@ -169,7 +185,7 @@ export function ChallengeGamePage() {
         );
         navigate(`/challenges/${id}/results`, {
           state: {
-            score: response.result?.score ?? score,
+            score: response.result?.score ?? 0,
             correctAnswers: response.result?.correctCount ?? 0,
             totalQuestions: questions.length,
           },
@@ -231,13 +247,16 @@ export function ChallengeGamePage() {
   }
 
   return (
+    <>
+    {confirmDialog}
     <GameRoundScaffold
       rootClassName="bg-[var(--color-bg-app)]"
       header={
         <header className="sticky top-0 z-30 border-b border-[var(--color-border)] bg-[var(--color-surface-muted)] px-3 pb-2 pt-2 backdrop-blur sm:px-4">
           <div className="mx-auto flex w-full max-w-4xl items-center justify-between gap-3">
             <button
-              onClick={() => { abandonTrackedRef.current = true; runStartedRef.current = false; navigate('/challenges'); }}
+              onClick={handleExit}
+              aria-label={t('game.exit')}
               className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm font-medium text-[var(--color-text-primary)] transition-colors hover:border-primary/60 hover:text-app-text"
             >
               ← {t('game.exit')}
@@ -248,7 +267,12 @@ export function ChallengeGamePage() {
             </div>
 
             <div className="min-w-chip rounded-xl bg-[var(--color-surface)] px-3 py-2">
-              <ScoreDisplay score={score} previousScore={previousScore} showAnimation={showResult} />
+              <span
+                className="block text-center text-sm font-bold tabular-nums text-[var(--color-text-primary)]"
+                aria-label={t('game.questionOf', { current: currentIndex + 1, total: questions.length })}
+              >
+                {currentIndex + 1}/{questions.length}
+              </span>
             </div>
 
             <Timer
@@ -280,6 +304,7 @@ export function ChallengeGamePage() {
       selectedAnswer={selectedAnswer}
       onOptionSelect={setSelectedAnswer}
       showResult={showResult}
+      lockedResult
       hiddenOptionIndexes={disabledOptionIndexes}
       optionsGridClassName="game-options-grid"
       mapContent={
@@ -327,5 +352,6 @@ export function ChallengeGamePage() {
         />
       }
     />
+    </>
   );
 }

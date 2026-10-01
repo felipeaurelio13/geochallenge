@@ -141,28 +141,35 @@ async function aggregateRankedFromDb(opts: {
   return typeof limit === 'number' ? aggregated.slice(0, limit) : aggregated;
 }
 
+/**
+ * Resuelve usernames (una sola query a User). Con `useUserGamesPlayed` también
+ * toma `gamesPlayed` de la tabla User: lo necesitan los caminos Redis, cuyas
+ * entradas solo traen score. Los caminos de agregación DB ya traen su propio
+ * conteo (partidas dentro del scope/filtros) y no deben sobrescribirlo.
+ */
 async function attachUsernames(
   entries: AggregatedRow[],
-  baseRank: number
+  baseRank: number,
+  useUserGamesPlayed: boolean = false
 ): Promise<LeaderboardEntry[]> {
   if (entries.length === 0) return [];
   const userIds = entries.map((e) => e.userId);
   const users = await prisma.user.findMany({
     where: { id: { in: userIds } },
-    select: { id: true, username: true },
+    select: { id: true, username: true, gamesPlayed: true },
   });
-  const userMap = new Map(users.map((u) => [u.id, u.username]));
+  const userMap = new Map(users.map((u) => [u.id, u]));
   const resolved: LeaderboardEntry[] = [];
   for (const entry of entries) {
-    const username = userMap.get(entry.userId);
-    if (!username) continue;
+    const user = userMap.get(entry.userId);
+    if (!user?.username) continue;
     resolved.push({
       rank: baseRank + resolved.length,
       userId: entry.userId,
-      username,
+      username: user.username,
       score: entry.score,
       bestScore: entry.bestScore,
-      gamesPlayed: entry.gamesPlayed,
+      gamesPlayed: useUserGamesPlayed ? (user.gamesPlayed ?? 0) : entry.gamesPlayed,
     });
   }
   return resolved;
@@ -321,19 +328,7 @@ export async function getTopLeaderboard(
       const score = parseFloat(results[i + 1]);
       entries.push({ userId: results[i], score, bestScore: score, gamesPlayed: 0 });
     }
-    const withUsernames = await attachUsernames(entries, 1);
-    // Backfill gamesPlayed from User table for the Redis path
-    if (withUsernames.length > 0) {
-      const ids = withUsernames.map((e) => e.userId);
-      const counts = await prisma.user.findMany({
-        where: { id: { in: ids } },
-        select: { id: true, gamesPlayed: true },
-      });
-      const byId = new Map(counts.map((u) => [u.id, u.gamesPlayed]));
-      for (const e of withUsernames) {
-        e.gamesPlayed = byId.get(e.userId) ?? 0;
-      }
-    }
+    const withUsernames = await attachUsernames(entries, 1, true);
     return withUsernames;
   } catch {
     console.warn('[leaderboard] Redis unavailable, falling back to DB for global leaderboard');
@@ -464,7 +459,7 @@ export async function getUserLeaderboardContext(
       const s = parseFloat(results[i + 1]);
       entries.push({ userId: results[i], score: s, bestScore: s, gamesPlayed: 0 });
     }
-    const neighbors = await attachUsernames(entries, start + 1);
+    const neighbors = await attachUsernames(entries, start + 1, true);
     const userRank = neighbors.find((n) => n.userId === userId) ?? null;
     if (!userRank) {
       return contextFromGlobalDb(userId, userRankInfo, surrounding);

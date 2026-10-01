@@ -1,4 +1,5 @@
 import { Router, Response, Request } from 'express';
+import crypto from 'crypto';
 import { authenticateJWT, optionalAuth, AuthRequest } from '../middleware/auth.js';
 import { config } from '../config/env.js';
 import {
@@ -229,6 +230,15 @@ router.get('/stats', async (_req, res: Response) => {
  *
  * Body opcional: { scope: 'global' | 'season' | 'all', seasonId?: 'YYYY-MM' }
  */
+// Compara en tiempo constante; se hashean ambos valores para igualar longitudes
+// sin filtrar la longitud del token esperado.
+function isAdminTokenValid(provided: unknown, expected: string): boolean {
+  if (typeof provided !== 'string') return false;
+  const a = crypto.createHash('sha256').update(provided).digest();
+  const b = crypto.createHash('sha256').update(expected).digest();
+  return crypto.timingSafeEqual(a, b);
+}
+
 router.post('/admin/rebuild', async (req: Request, res: Response) => {
   const expected = config.adminToken;
   if (!expected) {
@@ -236,7 +246,7 @@ router.post('/admin/rebuild', async (req: Request, res: Response) => {
     return;
   }
   const provided = req.headers['x-admin-token'];
-  if (provided !== expected) {
+  if (!isAdminTokenValid(provided, expected)) {
     res.status(401).json({ error: 'No autorizado' });
     return;
   }

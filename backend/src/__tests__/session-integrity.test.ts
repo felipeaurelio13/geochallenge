@@ -5,6 +5,7 @@ import express from 'express';
 import { AddressInfo } from 'node:net';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import gameRouter from '../controllers/game.controller.js';
+import { getQuestionsForStreakGame, buildQuestionUniquenessKey } from '../services/game.service.js';
 
 const mocks = vi.hoisted(() => {
   const redisStore = new Map<string, string>();
@@ -331,6 +332,30 @@ describe('POST /game/finish — session integrity', () => {
     } finally { server.close(); }
   });
 
+  it('finish sin respuestas no persiste, no toca leaderboard ni evalúa achievements (sin FIRST_GAME gratis)', async () => {
+    const { server, baseUrl } = startServer();
+    primeSession();
+    const createMock = (await import('../config/database.js')).prisma.gameResult.create as unknown as ReturnType<typeof vi.fn>;
+    createMock.mockClear();
+    try {
+      const res = await fetch(`${baseUrl}/api/game/finish`, {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ sessionId: 'test-session-1', gameType: 'single' }),
+      });
+      expect(res.status).toBe(200);
+      const body = await res.json() as {
+        gameId: string | null; totalScore: number; correctCount: number; totalQuestions: number;
+        answeredQuestions: number; accuracy: number; isHighScore: boolean; newAchievements: string[]; details: unknown[];
+      };
+      expect(body).toMatchObject({
+        gameId: null, totalScore: 0, correctCount: 0, totalQuestions: 10,
+        answeredQuestions: 0, accuracy: 0, isHighScore: false, newAchievements: [], details: [],
+      });
+      expect(createMock).not.toHaveBeenCalled();
+      expect(mocks.achievementsEval).not.toHaveBeenCalled();
+    } finally { server.close(); }
+  });
+
   it('finish derives from session answers, ignores client body', async () => {
     const { server, baseUrl } = startServer();
     primeSession();
@@ -637,6 +662,78 @@ describe('POST /game/extend-session — streak refill', () => {
       const body = await res.json() as { questions: Array<Record<string, unknown>> };
       expect(body.questions.length).toBeGreaterThan(0);
       for (const q of body.questions) { expect(q).not.toHaveProperty('correctAnswer'); }
+    } finally { server.close(); }
+  });
+
+  it('excluye por clave de unicidad lo ya servido y escribe questionMeta de las preguntas nuevas', async () => {
+    const { server, baseUrl } = startServer();
+    const served = mocks.TEST_QUESTIONS.slice(0, 7);
+    const fresh = mocks.TEST_QUESTIONS.slice(7, 10);
+    mocks.sessionStore.set('streak-session-meta', {
+      sessionId: 'streak-session-meta',
+      userId: 'user-1',
+      gameMode: 'SINGLE',
+      variant: 'STREAK',
+      category: 'MIXED',
+      questionIds: served.map((q: { id: string }) => q.id),
+      correctAnswers: Object.fromEntries(served.map((q: { id: string; correctAnswer: string }) => [q.id, q.correctAnswer])),
+      optionsPerQuestion: Object.fromEntries(served.map((q: { id: string; options: string[] }) => [q.id, [...q.options]])),
+      answeredQuestionIds: [],
+      questionResults: {},
+      mechanicsUsage: {},
+      createdAt: Date.now(),
+      expiresAt: Date.now() + 7200000,
+    });
+    const streakMock = vi.mocked(getQuestionsForStreakGame);
+    streakMock.mockClear();
+    streakMock.mockResolvedValueOnce(
+      fresh.map((q: { id: string; category: string; correctAnswer: string; options: string[]; difficulty: string; continent: string; countryCode: string }) => ({
+        id: q.id,
+        category: q.category as never,
+        questionText: '',
+        options: [...q.options],
+        correctAnswer: q.correctAnswer,
+        difficulty: q.difficulty,
+        continent: q.continent,
+        countryCode: q.countryCode,
+      }))
+    );
+    try {
+      const res = await fetch(`${baseUrl}/api/game/extend-session`, {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ sessionId: 'streak-session-meta' }),
+      });
+      expect(res.status).toBe(200);
+
+      // Claves de exclusión: una por cada pregunta ya servida (no un array vacío).
+      const call = streakMock.mock.calls[0];
+      const excludeKeys = call[3] as string[];
+      const expectedKeys = served.map((q: { category: string; imageUrl: string | null; questionData: string; correctAnswer: string }) =>
+        buildQuestionUniquenessKey({
+          category: q.category as never,
+          imageUrl: q.imageUrl ?? undefined,
+          questionData: q.questionData,
+          correctAnswer: q.correctAnswer,
+        })
+      );
+      expect(excludeKeys).toHaveLength(7);
+      expect(excludeKeys).toEqual(expect.arrayContaining(expectedKeys));
+      expect(call[1]).toEqual(served.map((q: { id: string }) => q.id));
+
+      // questionMeta para telemetría de las preguntas extendidas.
+      const stored = mocks.sessionStore.get('streak-session-meta') as unknown as {
+        questionIds: string[];
+        questionMeta: Record<string, { category: string; difficulty?: string; continent?: string; countryCode?: string }>;
+      };
+      expect(stored.questionIds).toHaveLength(10);
+      for (const q of fresh) {
+        expect(stored.questionMeta[q.id]).toEqual({
+          category: q.category,
+          difficulty: q.difficulty,
+          continent: q.continent,
+          countryCode: q.countryCode,
+        });
+      }
     } finally { server.close(); }
   });
 

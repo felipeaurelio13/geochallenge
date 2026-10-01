@@ -20,6 +20,7 @@ import { useHaptics, useImagePreloader } from '../hooks';
 import { toAppPath } from '../utils/routing';
 import { getSocketErrorMessage } from '../utils/apiError';
 import { trackUxEvent } from '../utils/uxTelemetry';
+import { useConfirmDialog } from '../hooks/useConfirmDialog';
 
 const MapInteractive = lazy(() =>
   import('../components/MapInteractive').then((m) => ({ default: m.MapInteractive }))
@@ -97,6 +98,7 @@ export function SurvivalPage() {
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const haptics = useHaptics();
+  const { confirm, confirmDialog } = useConfirmDialog();
 
   const category = parseSurvivalCategory(searchParams.get('category'));
 
@@ -141,6 +143,17 @@ export function SurvivalPage() {
   const statusRef = useRef<PageStatus>(status);
   statusRef.current = status;
   const abandonTrackedRef = useRef(false);
+
+  // Prevent accidental tab close / reload while a match round is in progress.
+  useEffect(() => {
+    if (status !== 'playing') return;
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [status]);
 
   // Part 1.1: pub-sub de conexión — si el socket entra en error mientras
   // estamos en cola/sala/jugando, mostramos un aviso con Reintentar/Menú en
@@ -491,7 +504,7 @@ export function SurvivalPage() {
   // sends only the last-selected option (avoids the processingAnswers lock race).
   const handleOptionSelect = useCallback(
     (option: string) => {
-      if (showResult || status === 'spectating') return;
+      if (showResult || status === 'spectating' || hasAnsweredRef.current) return;
       setSelectedAnswer(option);
       if (currentQuestion?.category !== 'MAP') {
         if (!matchId || !currentQuestion) return;
@@ -500,6 +513,7 @@ export function SurvivalPage() {
         const capturedTime = timeRemaining;
         answerDebounceRef.current = setTimeout(() => {
           answerDebounceRef.current = null;
+          if (hasAnsweredRef.current) return;
           hasAnsweredRef.current = true;
           setHasSubmittedThisRound(true);
           socketService.socket?.emit('survival:answer', {
@@ -521,9 +535,15 @@ export function SurvivalPage() {
     return <span className="text-lg text-app-subtle">#{rank}</span>;
   }
 
+  const handleExitMatch = async () => {
+    // Leaving a live match forfeits it, so ask first (spectators have nothing to lose).
+    if (status === 'playing' && !(await confirm(t('game.confirmExit')))) return;
+    navigate(toAppPath('/menu'));
+  };
+
   const backButton = (
     <button
-      onClick={() => navigate(toAppPath('/menu'))}
+      onClick={handleExitMatch}
       className="flex items-center gap-1.5 rounded-lg border border-app-border bg-app-surface/80 px-3 py-1.5 text-xs text-app-secondary hover:text-app-text"
     >
       ← {t('survival.backToMenu')}
@@ -811,6 +831,8 @@ export function SurvivalPage() {
   const difficultyLabel = difficulty ? t(`survival.difficulty.${difficulty.toLowerCase()}`) : '';
 
   return (
+    <>
+    {confirmDialog}
     <GameRoundScaffold
       rootClassName="bg-[var(--color-bg-app)]"
       header={
@@ -900,7 +922,7 @@ export function SurvivalPage() {
       correctAnswer={showResult ? resultCorrectAnswer : undefined}
       onOptionSelect={handleOptionSelect}
       showResult={showResult}
-      disableOptions={isSpectating || showResult}
+      disableOptions={isSpectating || showResult || hasSubmittedThisRound}
       actionTray={
         <RoundActionTray
           mode="duel"
@@ -924,5 +946,6 @@ export function SurvivalPage() {
         />
       }
     />
+    </>
   );
 }

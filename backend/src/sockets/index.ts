@@ -63,10 +63,13 @@ export function setupSocketHandlers(io: SocketIOServer) {
     // Handler de desconexión
     socket.on('disconnect', (reason) => {
       console.log(`🔌 Usuario desconectado: ${user.username} - ${reason}`);
-      userSockets.delete(user.userId);
+      if (userSockets.get(user.userId) === socket.id) {
+        userSockets.delete(user.userId);
+      }
 
-      // Remover de cola de matchmaking si estaba esperando
-      matchmakingQueue.removePlayer(user.userId);
+      // Remover de cola de matchmaking solo si la entrada es de ESTE socket
+      // (un disconnect tardío de un socket viejo no debe borrar la del nuevo).
+      matchmakingQueue.removePlayerIfSocket(user.userId, socket.id);
     });
 
     // Ping para mantener conexión viva

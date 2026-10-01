@@ -1,5 +1,6 @@
 import { config } from '../config/env.js';
 import { haversineDistance } from './haversine.js';
+import { distanceBucket as toDistanceBucket, MAP_CORRECT_THRESHOLD_KM, MAP_MAX_DISTANCE_KM } from './scoring.js';
 
 /**
  * Evaluación server-side de respuestas enviadas por el cliente al terminar
@@ -23,9 +24,6 @@ export interface EvaluableQuestion {
   latitude?: number | null;
   longitude?: number | null;
 }
-
-const MAP_CORRECT_THRESHOLD_KM = 500;
-const MAP_MAX_DISTANCE_KM = 2000;
 
 export interface AnswerDetail {
   questionId: string;
@@ -82,11 +80,7 @@ export function evaluateTimedAnswers(
         const accuracyFactor = Math.max(0, 1 - distanceKm / MAP_MAX_DISTANCE_KM);
         questionPoints = Math.round(config.game.basePoints * accuracyFactor);
       }
-      if (distanceKm < 100) distanceBucket = '<100km';
-      else if (distanceKm < 500) distanceBucket = '100-500km';
-      else if (distanceKm < 1000) distanceBucket = '500-1000km';
-      else if (distanceKm < 2000) distanceBucket = '1000-2000km';
-      else distanceBucket = '>2000km';
+      distanceBucket = toDistanceBucket(distanceKm);
     } else if (submitted.answer && submitted.answer === question.correctAnswer) {
       isCorrect = true;
       questionPoints = config.game.basePoints;

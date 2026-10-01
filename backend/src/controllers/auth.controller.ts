@@ -15,6 +15,23 @@ const router = Router();
 
 const RESET_TOKEN_TTL_MS = 30 * 60 * 1000; // 30 minutos
 
+// Hash bcrypt (cost 12) de una contraseña descartable: se compara cuando el
+// usuario no existe para que login tarde lo mismo exista o no el email.
+const DUMMY_PASSWORD_HASH = '$2a$12$Wx0gACXEwE87lHSr37g3DuNDQZE9EcZ2UmHNN2lmrYb1nkXIsGktS';
+
+/**
+ * Si `error` es una violación de unicidad de Prisma (P2002), devuelve qué campo
+ * chocó ('email' | 'username'); `null` si es otro error.
+ */
+function getUniqueViolationField(error: unknown): 'email' | 'username' | null {
+  const e = error as { code?: string; meta?: { target?: unknown } } | null;
+  if (e?.code !== 'P2002') return null;
+  const target = e.meta?.target;
+  const targetText = Array.isArray(target) ? target.join(',') : typeof target === 'string' ? target : '';
+  if (targetText.toLowerCase().includes('username')) return 'username';
+  return 'email';
+}
+
 function hashToken(rawToken: string): string {
   return crypto.createHash('sha256').update(rawToken).digest('hex');
 }
@@ -91,24 +108,36 @@ router.post('/register', authLimiter, async (req: Request, res: Response) => {
     // Hash de la contraseña
     const passwordHash = await bcrypt.hash(password, 12);
 
-    // Crear usuario
-    const user = await prisma.user.create({
-      data: {
-        username: normalizedUsername,
-        email: normalizedEmail,
-        passwordHash,
-        preferredLanguage,
-      },
-      select: {
-        id: true,
-        username: true,
-        email: true,
-        preferredLanguage: true,
-        highScore: true,
-        gamesPlayed: true,
-        createdAt: true,
-      },
-    });
+    // Crear usuario (la carrera check-then-write se resuelve por la restricción única)
+    let user;
+    try {
+      user = await prisma.user.create({
+        data: {
+          username: normalizedUsername,
+          email: normalizedEmail,
+          passwordHash,
+          preferredLanguage,
+        },
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          preferredLanguage: true,
+          highScore: true,
+          gamesPlayed: true,
+          createdAt: true,
+        },
+      });
+    } catch (createError) {
+      const field = getUniqueViolationField(createError);
+      if (field === 'username') {
+        throw new AppError('AUTH_USERNAME_TAKEN', 400, 'El nombre de usuario ya está registrado');
+      }
+      if (field === 'email') {
+        throw new AppError('AUTH_EMAIL_TAKEN', 400, 'El email ya está registrado');
+      }
+      throw createError;
+    }
 
     // Generar token
     const token = generateToken({
@@ -158,14 +187,11 @@ router.post('/login', authLimiter, async (req: Request, res: Response) => {
       },
     });
 
-    if (!user) {
-      throw new AppError('AUTH_INVALID_CREDENTIALS', 401, 'Credenciales inválidas');
-    }
+    // Siempre ejecutar bcrypt.compare (contra un hash dummy si no hay usuario)
+    // para no filtrar por timing qué emails existen.
+    const validPassword = await bcrypt.compare(password, user?.passwordHash ?? DUMMY_PASSWORD_HASH);
 
-    // Verificar contraseña
-    const validPassword = await bcrypt.compare(password, user.passwordHash);
-
-    if (!validPassword) {
+    if (!user || !validPassword) {
       throw new AppError('AUTH_INVALID_CREDENTIALS', 401, 'Credenciales inválidas');
     }
 
@@ -393,23 +419,31 @@ router.put('/profile', authenticateJWT, async (req: AuthRequest, res: Response) 
       }
     }
 
-    const user = await prisma.user.update({
-      where: { id: req.user!.userId },
-      data: {
-        ...(username && { username }),
-        ...(preferredLanguage && { preferredLanguage }),
-      },
-      select: {
-        id: true,
-        username: true,
-        email: true,
-        preferredLanguage: true,
-        highScore: true,
-        gamesPlayed: true,
-        wins: true,
-        losses: true,
-      },
-    });
+    let user;
+    try {
+      user = await prisma.user.update({
+        where: { id: req.user!.userId },
+        data: {
+          ...(username && { username }),
+          ...(preferredLanguage && { preferredLanguage }),
+        },
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          preferredLanguage: true,
+          highScore: true,
+          gamesPlayed: true,
+          wins: true,
+          losses: true,
+        },
+      });
+    } catch (updateError) {
+      if (getUniqueViolationField(updateError) !== null) {
+        throw new AppError('AUTH_USERNAME_TAKEN', 400, 'El nombre de usuario ya está en uso');
+      }
+      throw updateError;
+    }
 
     res.json({ user });
   } catch (error) {
