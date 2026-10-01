@@ -64,6 +64,9 @@ export function useAnswerShortcuts({
     if (!enabled) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      // A component that already consumed the key (e.g. the map drops a pin on
+      // Enter and calls preventDefault) must not also trigger submit/next here.
+      if (e.defaultPrevented) return;
       if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
       if (isTextEntryTarget(e.target)) return;
 

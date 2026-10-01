@@ -63,6 +63,17 @@ describe('useAnswerShortcuts', () => {
     expect(second.onSubmit).not.toHaveBeenCalled();
   });
 
+  it('ignores a key another handler already consumed (defaultPrevented), e.g. Enter on the map', () => {
+    const { onSubmit, onNext, onSelect, getByText } = setup();
+    const surface = getByText('btn').parentElement as HTMLElement;
+    surface.addEventListener('keydown', (e) => e.preventDefault());
+    fireEvent.keyDown(surface, { key: 'Enter' });
+    fireEvent.keyDown(surface, { key: 'a' });
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(onNext).not.toHaveBeenCalled();
+    expect(onSelect).not.toHaveBeenCalled();
+  });
+
   it('advances with Enter or N once a result is shown, even with no options (map)', () => {
     const { onNext, onSubmit, onSelect } = setup({ showResult: true, options: [] });
     fireEvent.keyDown(window, { key: 'Enter' });
