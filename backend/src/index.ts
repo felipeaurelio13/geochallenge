@@ -37,6 +37,7 @@ const io = new SocketIOServer(httpServer, {
     methods: ['GET', 'POST'],
     credentials: true,
   },
+  maxHttpBufferSize: 1e5,
 });
 
 // Middleware

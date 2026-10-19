@@ -1750,6 +1750,42 @@
         "license": "CC BY-SA 2.0",
         "sourceUrl": "https://commons.wikimedia.org/wiki/File:Whitehaven_Beach%2C_Whitsunday_Island%2C_Queensland.jpg"
       }
+    },
+    {
+      "slug": "matterhorn",
+      "name": {
+        "en": "Matterhorn",
+        "es": "Monte Cervino"
+      },
+      "country": "Switzerland",
+      "continent": "Europe",
+      "latitude": 45.9763,
+      "longitude": 7.6586,
+      "difficulty": "MEDIUM",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Matterhorn_Riffelsee_2005-06-11.jpg?width=400",
+      "attribution": {
+        "author": "Dirk Beyer",
+        "license": "CC BY-SA 2.5",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Matterhorn_Riffelsee_2005-06-11.jpg"
+      }
+    },
+    {
+      "slug": "giants-causeway",
+      "name": {
+        "en": "Giant's Causeway",
+        "es": "Calzada del Gigante"
+      },
+      "country": "United Kingdom",
+      "continent": "Europe",
+      "latitude": 55.2408,
+      "longitude": -6.5116,
+      "difficulty": "MEDIUM",
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Causeway-code_poet-4.jpg?width=400",
+      "attribution": {
+        "author": "code poet",
+        "license": "CC BY-SA 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Causeway-code_poet-4.jpg"
+      }
     }
   ]
 }
