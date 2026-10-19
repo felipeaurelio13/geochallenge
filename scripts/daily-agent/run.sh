@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Daily improvement agent for GeoChallenge.
-# Runs Claude Code headless against a structured audit prompt and publishes
+# Runs Antigravity (agy) headless against a structured audit prompt and publishes
 # findings as a single GitHub issue per day.
 #
 # Modes:
@@ -13,11 +13,9 @@
 set -uo pipefail
 
 # launchd does not inherit user shell PATH — set it explicitly.
-export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${PATH:-}"
+export PATH="/Users/felipelorca/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${PATH:-}"
 
-# If invoked from within an existing Claude Code session, the harness injects
-# transient session credentials that are NOT valid for sub-processes. Unset
-# them so the spawned `claude` falls back to the user's stored OAuth login.
+# Clear any transient credentials from wrapper sessions if present
 unset ANTHROPIC_API_KEY ANTHROPIC_BASE_URL ANTHROPIC_AUTH_TOKEN \
       CLAUDE_CODE_ENTRYPOINT CLAUDE_CODE_SESSION_ID CLAUDE_CODE_EXECPATH \
       CLAUDECODE CLAUDE_AGENT_SDK_VERSION CLAUDE_EFFORT
@@ -76,7 +74,7 @@ require_cmd() {
     exit 1
   fi
 }
-require_cmd claude
+require_cmd agy
 require_cmd gh
 require_cmd jq
 require_cmd git
@@ -152,43 +150,25 @@ PROMPT_FILE="$SCRIPT_DIR/prompt.md"
 RENDERED_PROMPT="$RUN_DIR/prompt-rendered.md"
 sed "s|{{RUN_DIR}}|$RUN_DIR|g" "$PROMPT_FILE" > "$RENDERED_PROMPT"
 
-# ---- Invoke Claude ---------------------------------------------------------
-log "Invoking Claude (this typically takes 1-3 minutes)..."
+# ---- Invoke Antigravity ----------------------------------------------------
+log "Invoking Antigravity (this typically takes 1-3 minutes)..."
 
-# Tools whitelist:
-#   Read, Grep, Glob — repo inspection
-#   WebFetch, WebSearch — external context
-#   Bash(curl:*) — URL HEAD checks
-#   Write — the prompt restricts writes to RUN_DIR
-ALLOWED_TOOLS="Read Grep Glob WebFetch WebSearch Bash(curl:*) Write"
-
-CLAUDE_OUTPUT="$RUN_DIR/claude-output.json"
-CLAUDE_STDERR="$RUN_DIR/claude-stderr.log"
+AGY_OUTPUT="$RUN_DIR/antigravity-output.txt"
+AGY_STDERR="$RUN_DIR/antigravity-stderr.log"
 
 set +e
-claude -p \
-  --output-format json \
-  --max-budget-usd 3 \
-  --permission-mode acceptEdits \
-  --allowed-tools $ALLOWED_TOOLS \
+agy \
+  --model gemini-3.8-flash-high \
+  --dangerously-skip-permissions \
   --add-dir "$RUN_DIR" \
-  --model sonnet \
-  < "$RENDERED_PROMPT" \
-  > "$CLAUDE_OUTPUT" 2> "$CLAUDE_STDERR"
-CLAUDE_EXIT=$?
+  -p "$(cat "$RENDERED_PROMPT")" \
+  > "$AGY_OUTPUT" 2> "$AGY_STDERR"
+AGY_EXIT=$?
 set -e
 
-if [ "$CLAUDE_EXIT" -ne 0 ]; then
-  # Detect the most common headless failure: stale OAuth token.
-  if jq -e 'select(.api_error_status == 401)' "$CLAUDE_OUTPUT" >/dev/null 2>&1; then
-    log_err "Claude returned 401 (auth). OAuth token does not work in headless mode."
-    log_err "Fix: run 'claude setup-token' once to generate a long-lived token,"
-    log_err "then 'launchctl unload && launchctl load' the LaunchAgent."
-    log_run "claude_auth_401" "" 0 0
-  else
-    log_err "Claude exited with code $CLAUDE_EXIT. See $CLAUDE_STDERR"
-    log_run "claude_failed" "" 0 0
-  fi
+if [ "$AGY_EXIT" -ne 0 ]; then
+  log_err "Antigravity exited with code $AGY_EXIT. See $AGY_STDERR"
+  log_run "antigravity_failed" "" 0 0
   exit 1
 fi
 
@@ -197,7 +177,7 @@ FINDINGS_JSON="$RUN_DIR/findings.json"
 ISSUE_BODY="$RUN_DIR/issue-body.md"
 
 if [ ! -f "$FINDINGS_JSON" ]; then
-  log_err "Claude did not produce findings.json. Inspect $CLAUDE_OUTPUT."
+  log_err "Antigravity did not produce findings.json. Inspect $AGY_OUTPUT."
   log_run "no_findings_file" "" 0 0
   exit 1
 fi
@@ -308,5 +288,83 @@ if [ "$GH_EXIT" -ne 0 ] || [ -z "$ISSUE_URL" ]; then
 fi
 
 log "Issue created: $ISSUE_URL"
+
+# ---- Auto-Improvement Phase ------------------------------------------------
+if [ "$MODE" != "dry-run" ] && [ "$FINDINGS_COUNT" -gt 0 ]; then
+  log "Starting automated improvement phase..."
+  BRANCH_NAME="daily-improvements-$DATE"
+
+  # Branch from current state
+  git checkout master --quiet 2>/dev/null || true
+  git checkout -B "$BRANCH_NAME" --quiet 2>/dev/null
+
+  AUTO_FIX_PROMPT="You are the Daily Auto-Improvement Engineer for GeoChallenge.
+A daily audit detected actionable findings for $DATE in:
+$RUN_DIR/findings.json
+
+Summary:
+$(cat "$ISSUE_BODY")
+
+YOUR TASK:
+Implement safe, concrete, non-breaking improvements directly in the codebase:
+1. Run 'npm audit fix --package-lock-only' in backend/ and frontend/ if vulnerabilities exist.
+2. Apply verified data additions to data/monuments.json or data/countries.json if proposed.
+3. Apply safe security configurations, type fixes, or CI workflow updates proposed.
+4. Keep changes minimal, clean, and directly addressing the findings.
+5. Do NOT introduce syntax errors, breaking major version upgrades, or unrelated modifications.
+6. When done, write a short summary of the applied changes to $RUN_DIR/applied-fixes.md."
+
+  AGY_FIX_OUTPUT="$RUN_DIR/antigravity-fix-output.txt"
+  AGY_FIX_STDERR="$RUN_DIR/antigravity-fix-stderr.log"
+
+  log "Invoking Antigravity to implement safe fixes..."
+  agy \
+    --model gemini-3.8-flash-high \
+    --dangerously-skip-permissions \
+    --add-dir "$RUN_DIR" \
+    -p "$AUTO_FIX_PROMPT" \
+    > "$AGY_FIX_OUTPUT" 2> "$AGY_FIX_STDERR" || true
+
+  # Check if files were modified
+  if [ -n "$(git status --porcelain)" ]; then
+    log "Fixes applied by Antigravity. Committing and creating Pull Request..."
+    git add -A
+    git commit -m "chore(daily-improvements): automated fixes for $DATE" --quiet
+
+    if git push -u origin "$BRANCH_NAME" --force --quiet 2>"$RUN_DIR/git-push-stderr.log"; then
+      PR_BODY="Automated daily improvements addressing issue $ISSUE_URL:
+
+$(cat "$ISSUE_BODY")"
+      if [ -f "$RUN_DIR/applied-fixes.md" ]; then
+        PR_BODY="### Applied Fixes
+$(cat "$RUN_DIR/applied-fixes.md")
+
+---
+
+$PR_BODY"
+      fi
+
+      PR_URL="$(gh pr create \
+        --title "Automated Daily Improvements — $DATE" \
+        --body "$PR_BODY" \
+        --label "daily-improvement" \
+        --head "$BRANCH_NAME" \
+        --base "master" 2>"$RUN_DIR/gh-pr-stderr.log" || true)"
+
+      if [ -n "$PR_URL" ]; then
+        log "Pull Request created: $PR_URL"
+        gh issue comment "$ISSUE_URL" --body "Created automated Pull Request with proposed fixes: $PR_URL" 2>/dev/null || true
+      fi
+    else
+      log_err "git push failed. See $RUN_DIR/git-push-stderr.log"
+    fi
+  else
+    log "No automated file changes applied by Antigravity."
+  fi
+
+  # Return to master
+  git checkout master --quiet 2>/dev/null || true
+fi
+
 log_run "ok" "$ISSUE_URL" "$FINDINGS_COUNT" "$CRITICAL_COUNT"
 exit 0
