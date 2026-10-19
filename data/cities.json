@@ -230,6 +230,7 @@
     {"name": "Santa Ana", "country": "El Salvador", "lat": 13.9940, "lng": -89.5597},
     {"name": "San Miguel", "country": "El Salvador", "lat": 13.4833, "lng": -88.1833},
 
+    {"name": "Ciudad de la Paz", "country": "Equatorial Guinea", "lat": 1.5833, "lng": 10.8333},
     {"name": "Malabo", "country": "Equatorial Guinea", "lat": 3.7523, "lng": 8.7741},
     {"name": "Bata", "country": "Equatorial Guinea", "lat": 1.8667, "lng": 9.7833},
 

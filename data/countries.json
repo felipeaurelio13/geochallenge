@@ -52,7 +52,7 @@
     {"name": "Ecuador", "capital": "Quito", "continent": "South America", "lat": -0.1807, "lng": -78.4678, "flag": "ec"},
     {"name": "Egypt", "capital": "Cairo", "continent": "Africa", "lat": 30.0444, "lng": 31.2357, "flag": "eg"},
     {"name": "El Salvador", "capital": "San Salvador", "continent": "North America", "lat": 13.6929, "lng": -89.2182, "flag": "sv"},
-    {"name": "Equatorial Guinea", "capital": "Malabo", "continent": "Africa", "lat": 3.7523, "lng": 8.7741, "flag": "gq"},
+    {"name": "Equatorial Guinea", "capital": "Ciudad de la Paz", "continent": "Africa", "lat": 1.5833, "lng": 10.8333, "flag": "gq"},
     {"name": "Eritrea", "capital": "Asmara", "continent": "Africa", "lat": 15.3229, "lng": 38.9251, "flag": "er"},
     {"name": "Estonia", "capital": "Tallinn", "continent": "Europe", "lat": 59.4370, "lng": 24.7536, "flag": "ee"},
     {"name": "Eswatini", "capital": "Mbabane", "continent": "Africa", "lat": -26.3054, "lng": 31.1367, "flag": "sz"},

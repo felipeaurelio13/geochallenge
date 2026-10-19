@@ -21,8 +21,8 @@ export const userSockets = new Map<string, string>();
 /**
  * Middleware para autenticar sockets
  */
-function authenticateSocket(socket: Socket, next: (err?: Error) => void) {
-  const token = socket.handshake.auth.token || socket.handshake.query.token;
+export function authenticateSocket(socket: Socket, next: (err?: Error) => void) {
+  const token = socket.handshake.auth?.token;
 
   if (!token) {
     return next(new Error('Token de autenticación requerido'));
