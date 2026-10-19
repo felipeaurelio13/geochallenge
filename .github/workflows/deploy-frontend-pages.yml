@@ -6,6 +6,7 @@ on:
       - master
     paths:
       - 'frontend/**'
+      - 'data/**'
       - '.github/workflows/deploy-frontend-pages.yml'
       - '.github/workflows/frontend-quality.yml'
   workflow_dispatch:
