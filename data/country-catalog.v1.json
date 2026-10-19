@@ -836,10 +836,10 @@
     {
       "iso2": "GQ",
       "name": "Equatorial Guinea",
-      "capital": "Malabo",
+      "capital": "Ciudad de la Paz",
       "continent": "Africa",
-      "lat": 3.7523,
-      "lng": 8.7741,
+      "lat": 1.5833,
+      "lng": 10.8333,
       "flag": "gq",
       "status": "active",
       "isInsular": false,
