@@ -35,6 +35,10 @@ interface City {
   lng: number;
 }
 interface Monument {
+  slug?: string;
+  country?: string;
+  continent?: string;
+  imageUrl?: string;
   lat?: number;
   lng?: number;
   latitude?: number;
@@ -85,6 +89,11 @@ describe('data integrity', () => {
 
     it('cities.json has no duplicate (name, country) pairs', () => {
       expect(duplicates(cities.map((c) => `${c.name}|${c.country}`))).toEqual([]);
+    });
+
+    it('monuments.json has no duplicate slugs or imageUrls', () => {
+      expect(duplicates(monuments.map((m) => m.slug as string))).toEqual([]);
+      expect(duplicates(monuments.map((m) => m.imageUrl as string))).toEqual([]);
     });
   });
 
@@ -168,6 +177,16 @@ describe('data integrity', () => {
         })
         .filter((c) => c.km > MAX_CAPITAL_DRIFT_KM);
       expect(drifted).toEqual([]);
+    });
+
+    it('monuments.json countries exist in countries.json with matching continents', () => {
+      const countryMap = new Map(countries.map((c) => [c.name, c.continent]));
+      const bad = monuments.filter((m) => {
+        const country = m.country as string;
+        const continent = m.continent as string;
+        return !countryMap.has(country) || countryMap.get(country) !== continent;
+      });
+      expect(bad.map((m) => `${m.slug} (${m.country})`)).toEqual([]);
     });
   });
 });
