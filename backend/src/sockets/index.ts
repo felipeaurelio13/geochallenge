@@ -1,7 +1,7 @@
 import { Server as SocketIOServer, Socket } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import { config } from '../config/env.js';
-import { JwtPayload } from '../middleware/auth.js';
+import { JwtPayload, ALLOWED_JWT_ALGORITHMS } from '../middleware/auth.js';
 import { setupDuelHandlers, MatchmakingQueue, startDuelWatchdog } from './duel.handler.js';
 import { setupSurvivalHandlers } from './survival.handler.js';
 
@@ -29,7 +29,9 @@ export function authenticateSocket(socket: Socket, next: (err?: Error) => void) 
   }
 
   try {
-    const decoded = jwt.verify(token as string, config.jwt.secret) as JwtPayload;
+    const decoded = jwt.verify(token as string, config.jwt.secret, {
+      algorithms: ALLOWED_JWT_ALGORITHMS,
+    }) as JwtPayload;
     socket.user = decoded;
     next();
   } catch (error) {
