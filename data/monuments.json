@@ -1822,6 +1822,60 @@
         "sourceUrl": "https://commons.wikimedia.org/wiki/File:Torii_path_with_lantern_at_Fushimi_Inari_Taisha_Shrine,_Kyoto,_Japan.jpg"
       },
       "difficulty": "EASY"
+    },
+    {
+      "slug": "bran-castle",
+      "name": {
+        "en": "Bran Castle",
+        "es": "Castillo de Bran"
+      },
+      "country": "Romania",
+      "continent": "Europe",
+      "latitude": 45.5149,
+      "longitude": 25.3672,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Bran_Castle_TB1.jpg?width=400",
+      "attribution": {
+        "author": "Todor Bozhinov",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bran_Castle_TB1.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "sigiriya",
+      "name": {
+        "en": "Sigiriya",
+        "es": "Sigiriya"
+      },
+      "country": "Sri Lanka",
+      "continent": "Asia",
+      "latitude": 7.957,
+      "longitude": 80.7603,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Sigiriya.jpg?width=400",
+      "attribution": {
+        "author": "Bernard Gagnon",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sigiriya.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "trevi-fountain",
+      "name": {
+        "en": "Trevi Fountain",
+        "es": "Fontana de Trevi"
+      },
+      "country": "Italy",
+      "continent": "Europe",
+      "latitude": 41.9009,
+      "longitude": 12.4833,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Trevi_Fountain_-_Roma.jpg?width=400",
+      "attribution": {
+        "author": "NikonZ7II",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Trevi_Fountain_-_Roma.jpg"
+      },
+      "difficulty": "EASY"
     }
   ]
 }

@@ -35,10 +35,17 @@ interface City {
   lng: number;
 }
 interface Monument {
+  slug?: string;
+  name?: { en?: string; es?: string };
+  country?: string;
+  continent?: string;
   lat?: number;
   lng?: number;
   latitude?: number;
   longitude?: number;
+  imageUrl?: string;
+  attribution?: { author?: string; license?: string; sourceUrl?: string };
+  difficulty?: string;
   [key: string]: unknown;
 }
 
@@ -85,6 +92,13 @@ describe('data integrity', () => {
 
     it('cities.json has no duplicate (name, country) pairs', () => {
       expect(duplicates(cities.map((c) => `${c.name}|${c.country}`))).toEqual([]);
+    });
+
+    it('monuments.json has no duplicate slugs or imageUrls', () => {
+      const slugs = monuments.map((m) => m.slug as string);
+      const imageUrls = monuments.map((m) => m.imageUrl as string);
+      expect(duplicates(slugs)).toEqual([]);
+      expect(duplicates(imageUrls)).toEqual([]);
     });
   });
 
@@ -168,6 +182,17 @@ describe('data integrity', () => {
         })
         .filter((c) => c.km > MAX_CAPITAL_DRIFT_KM);
       expect(drifted).toEqual([]);
+    });
+
+    it('monuments.json countries exist in countries.json with matching continents', () => {
+      const continentByCountry = new Map(countries.map((c) => [c.name, c.continent]));
+      const mismatched = monuments
+        .filter((m) => {
+          const expected = continentByCountry.get(m.country as string);
+          return !expected || expected !== m.continent;
+        })
+        .map((m) => `${m.slug} (${m.country} -> ${m.continent})`);
+      expect(mismatched).toEqual([]);
     });
   });
 });
