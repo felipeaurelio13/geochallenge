@@ -46,7 +46,7 @@ describe('ChallengesPage', () => {
     // del header y el botón del empty-state. La quitamos: el header y el
     // empty-state cubren la llamada a crear.
     expect(await screen.findByRole('button', { name: /\+ challenges.create/i })).toBeInTheDocument();
-    expect(screen.getAllByRole('button', { name: 'challenges.createMultiplayerCta' }).length).toBeGreaterThan(0);
+    expect((await screen.findAllByRole('button', { name: 'challenges.createMultiplayerCta' })).length).toBeGreaterThan(0);
   });
 
   it('crea desafíos multijugador con categorías, cupo y tiempo', async () => {

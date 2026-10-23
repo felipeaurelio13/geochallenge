@@ -13,6 +13,8 @@ export interface AuthRequest extends Request {
   user?: JwtPayload;
 }
 
+export const ALLOWED_JWT_ALGORITHMS: jwt.Algorithm[] = ['HS256'];
+
 async function resolveBypassUser(req: AuthRequest): Promise<JwtPayload | null> {
   if (!config.testAuthBypass.enabled || !config.testAuthBypass.secret) {
     return null;
@@ -74,7 +76,9 @@ export async function authenticateJWT(
   const token = authHeader.split(' ')[1];
 
   try {
-    const decoded = jwt.verify(token, config.jwt.secret) as JwtPayload;
+    const decoded = jwt.verify(token, config.jwt.secret, {
+      algorithms: ALLOWED_JWT_ALGORITHMS,
+    }) as JwtPayload;
     req.user = decoded;
     next();
   } catch (error) {
@@ -111,7 +115,9 @@ export async function optionalAuth(
   const token = authHeader.split(' ')[1];
 
   try {
-    const decoded = jwt.verify(token, config.jwt.secret) as JwtPayload;
+    const decoded = jwt.verify(token, config.jwt.secret, {
+      algorithms: ALLOWED_JWT_ALGORITHMS,
+    }) as JwtPayload;
     req.user = decoded;
   } catch {
     // Token inválido, pero continuamos sin usuario
@@ -125,6 +131,7 @@ export async function optionalAuth(
  */
 export function generateToken(payload: JwtPayload): string {
   return jwt.sign(payload, config.jwt.secret, {
+    algorithm: 'HS256',
     expiresIn: config.jwt.expiresIn,
   } as jwt.SignOptions);
 }
