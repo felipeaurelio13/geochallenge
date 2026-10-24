@@ -1876,6 +1876,60 @@
         "sourceUrl": "https://commons.wikimedia.org/wiki/File:Preikestolen_Norge.jpg"
       },
       "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "himeji-castle",
+      "name": {
+        "en": "Himeji Castle",
+        "es": "Castillo Himeji"
+      },
+      "country": "Japan",
+      "continent": "Asia",
+      "latitude": 34.8394,
+      "longitude": 134.6939,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Himeji_castle_in_may_2015.jpg?width=400",
+      "attribution": {
+        "author": "Nikos Kitsakis",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Himeji_castle_in_may_2015.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "charles-bridge",
+      "name": {
+        "en": "Charles Bridge",
+        "es": "Puente Carlos"
+      },
+      "country": "Czech Republic",
+      "continent": "Europe",
+      "latitude": 50.0865,
+      "longitude": 14.4114,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Charles_Bridge_Prague.jpg?width=400",
+      "attribution": {
+        "author": "DOWIMA",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Charles_Bridge_Prague.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "chillon-castle",
+      "name": {
+        "en": "Chillon Castle",
+        "es": "Castillo de Chillon"
+      },
+      "country": "Switzerland",
+      "continent": "Europe",
+      "latitude": 46.4142,
+      "longitude": 6.9275,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Chillon-Castle.JPG?width=400",
+      "attribution": {
+        "author": "Alexey M.",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Chillon-Castle.JPG"
+      },
+      "difficulty": "MEDIUM"
     }
   ]
 }
