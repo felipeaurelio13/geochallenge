@@ -47,6 +47,7 @@ import {
   safeHandler,
   toSocketAppError,
 } from './socketSchemas.js';
+import { SocketRateLimiter } from './socketRateLimiter.js';
 
 export type DuelMode = 'classic' | 'geo-challenge';
 
@@ -335,18 +336,16 @@ async function clearActiveDuelSnapshot(duelId: string): Promise<void> {
   }
 }
 
-// Per-user event rate limiter (keyed by userId so reconnections don't reset the counter)
-const eventCounts = new Map<string, { count: number; resetAt: number }>();
-function isRateLimited(userId: string, event: string, maxPerMinute: number = 30): boolean {
-  const key = `${userId}:${event}`;
-  const now = Date.now();
-  const entry = eventCounts.get(key);
-  if (!entry || now > entry.resetAt) {
-    eventCounts.set(key, { count: 1, resetAt: now + 60000 });
-    return false;
+// Per-user event rate limiter con ventana deslizante y limpieza de memoria
+const duelEventLimiters = new Map<string, SocketRateLimiter>();
+export function isRateLimited(userId: string, event: string, maxPerMinute: number = 30): boolean {
+  const key = `${event}:${maxPerMinute}`;
+  let limiter = duelEventLimiters.get(key);
+  if (!limiter) {
+    limiter = new SocketRateLimiter(60_000, maxPerMinute);
+    duelEventLimiters.set(key, limiter);
   }
-  entry.count++;
-  return entry.count > maxPerMinute;
+  return !limiter.isAllowed(userId);
 }
 
 const READY_TIMEOUT_MS = 7000;
@@ -816,10 +815,8 @@ export function setupDuelHandlers(io: SocketIOServer, socket: Socket, queue: Mat
     }
 
     // Clean up rate limiter entries for this user
-    for (const key of eventCounts.keys()) {
-      if (key.startsWith(`${user.userId}:`)) {
-        eventCounts.delete(key);
-      }
+    for (const limiter of duelEventLimiters.values()) {
+      limiter.reset(user.userId);
     }
   });
 }
