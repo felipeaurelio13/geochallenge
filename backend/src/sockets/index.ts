@@ -4,6 +4,9 @@ import { config } from '../config/env.js';
 import { JwtPayload } from '../middleware/auth.js';
 import { setupDuelHandlers, MatchmakingQueue, startDuelWatchdog } from './duel.handler.js';
 import { setupSurvivalHandlers } from './survival.handler.js';
+import { rateLimitSocketConnection } from './socketRateLimiter.js';
+
+export { rateLimitSocketConnection } from './socketRateLimiter.js';
 
 // Extend Socket type to include user info
 declare module 'socket.io' {
@@ -41,6 +44,9 @@ export function authenticateSocket(socket: Socket, next: (err?: Error) => void) 
  * Configura los handlers de Socket.IO
  */
 export function setupSocketHandlers(io: SocketIOServer) {
+  // Middleware de rate limiting de conexiones (OWASP API4:2023)
+  io.use(rateLimitSocketConnection);
+
   // Middleware de autenticación
   io.use(authenticateSocket);
 
