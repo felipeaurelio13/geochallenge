@@ -1,4 +1,7 @@
 import rateLimit, { type RateLimitRequestHandler } from 'express-rate-limit';
+import { RedisStore } from 'rate-limit-redis';
+import { getRedis } from '../config/redis.js';
+import { config } from '../config/env.js';
 
 const FIFTEEN_MINUTES_IN_MS = 15 * 60 * 1000;
 
@@ -9,6 +12,32 @@ export function calculateRetryAfterSeconds(resetTime?: Date, now = Date.now()): 
 
   const remainingSeconds = Math.ceil((resetTime.getTime() - now) / 1000);
   return Math.max(1, remainingSeconds);
+}
+
+export interface RedisRateLimitStoreOptions {
+  forceEnabled?: boolean;
+  sendCommand?: (...args: string[]) => Promise<any>;
+}
+
+export function createRedisRateLimitStore(
+  prefix: string,
+  options?: RedisRateLimitStoreOptions,
+) {
+  // In test environment without explicit opt-in, use the default MemoryStore
+  // so unit tests do not require an active Redis daemon.
+  if (config.nodeEnv === 'test' && !options?.forceEnabled) {
+    return undefined;
+  }
+
+  return new RedisStore({
+    prefix: `rl:${prefix}:`,
+    sendCommand:
+      options?.sendCommand ??
+      (async (...args: string[]) => {
+        const redis = getRedis();
+        return (redis.call as (...callArgs: unknown[]) => Promise<any>)(args[0], ...args.slice(1));
+      }),
+  });
 }
 
 // 100 req / 15min era ~7 rpm: una sesión normal (login + menu probing +
@@ -25,6 +54,8 @@ export const globalLimiter = rateLimit({
   max: 1000,
   standardHeaders: true,
   legacyHeaders: false,
+  passOnStoreError: true,
+  store: createRedisRateLimitStore('global'),
   message: globalErrorMessage,
   handler: (req, res, _next, options) => {
     const requestWithRateLimit = req as typeof req & { rateLimit?: { resetTime?: Date } };
@@ -49,6 +80,8 @@ export const authLimiter: RateLimitRequestHandler = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skipSuccessfulRequests: true,
+  passOnStoreError: true,
+  store: createRedisRateLimitStore('auth'),
   message: authErrorMessage,
   handler: (req, res, _next, options) => {
     const requestWithRateLimit = req as typeof req & { rateLimit?: { resetTime?: Date } };

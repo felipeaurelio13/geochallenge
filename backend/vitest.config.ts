@@ -5,7 +5,7 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     include: ['src/**/*.test.ts'],
-    pool: 'threads',
+    pool: 'forks',
     coverage: {
       reporter: ['text', 'json', 'html'],
     },

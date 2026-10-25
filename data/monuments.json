@@ -1876,6 +1876,60 @@
         "sourceUrl": "https://commons.wikimedia.org/wiki/File:Preikestolen_Norge.jpg"
       },
       "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "schonbrunn-palace",
+      "name": {
+        "en": "Schönbrunn Palace",
+        "es": "Palacio de Schönbrunn"
+      },
+      "country": "Austria",
+      "continent": "Europe",
+      "latitude": 48.1848,
+      "longitude": 16.3122,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Sch%C3%B6nbrunn_Palace.jpg?width=400",
+      "attribution": {
+        "author": "Philipp Mayer",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sch%C3%B6nbrunn_Palace.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "prambanan",
+      "name": {
+        "en": "Prambanan",
+        "es": "Prambanan"
+      },
+      "country": "Indonesia",
+      "continent": "Asia",
+      "latitude": -7.752,
+      "longitude": 110.4914,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Prambanan_Temple_Yogyakarta_Indonesia.jpg?width=400",
+      "attribution": {
+        "author": "Christopher Michel",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Prambanan_Temple_Yogyakarta_Indonesia.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "mezquita-cordoba",
+      "name": {
+        "en": "Mosque-Cathedral of Córdoba",
+        "es": "Mezquita-Catedral de Córdoba"
+      },
+      "country": "Spain",
+      "continent": "Europe",
+      "latitude": 37.8789,
+      "longitude": -4.7794,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Cordoba_Mezquita.jpg?width=400",
+      "attribution": {
+        "author": "Jim Gordon",
+        "license": "CC BY 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Cordoba_Mezquita.jpg"
+      },
+      "difficulty": "EASY"
     }
   ]
 }
