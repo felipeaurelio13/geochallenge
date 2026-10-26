@@ -40,6 +40,11 @@ const io = new SocketIOServer(httpServer, {
   maxHttpBufferSize: 1e5,
 });
 
+// Descartar referencia al HTTP IncomingMessage inicial para evitar retención de memoria (heap bloat)
+io.engine.on('connection', (rawSocket) => {
+  rawSocket.request = null;
+});
+
 // Middleware
 app.use(helmet());
 app.use(

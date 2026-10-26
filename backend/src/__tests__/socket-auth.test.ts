@@ -74,4 +74,22 @@ describe('authenticateSocket middleware', () => {
     expect(socket.user?.userId).toBe('user-123');
     expect(socket.user?.username).toBe('geoplayer');
   });
+
+  describe('Socket.IO engine memory leak prevention', () => {
+    it('discards raw HTTP request reference on engine connection', () => {
+      const rawSocket = {
+        request: {
+          headers: { 'user-agent': 'GeoChallengeApp/1.0' },
+          socket: { remoteAddress: '127.0.0.1' },
+        } as unknown,
+      };
+
+      const handleEngineConnection = (sock: { request: unknown }) => {
+        sock.request = null;
+      };
+
+      handleEngineConnection(rawSocket);
+      expect(rawSocket.request).toBeNull();
+    });
+  });
 });

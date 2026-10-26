@@ -1876,6 +1876,24 @@
         "sourceUrl": "https://commons.wikimedia.org/wiki/File:Preikestolen_Norge.jpg"
       },
       "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "pantheon-rome",
+      "name": {
+        "en": "Pantheon",
+        "es": "Panteón de Roma"
+      },
+      "country": "Italy",
+      "continent": "Europe",
+      "latitude": 41.8986,
+      "longitude": 12.4769,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Pantheon_Rome.jpg?width=400",
+      "attribution": {
+        "author": "AlMare",
+        "license": "Public domain",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pantheon_Rome.jpg"
+      },
+      "difficulty": "EASY"
     }
   ]
 }
