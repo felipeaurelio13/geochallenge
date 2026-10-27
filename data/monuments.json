@@ -1876,6 +1876,24 @@
         "sourceUrl": "https://commons.wikimedia.org/wiki/File:Preikestolen_Norge.jpg"
       },
       "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "terracotta-army",
+      "name": {
+        "en": "Terracotta Army",
+        "es": "Guerreros de terracota"
+      },
+      "country": "China",
+      "continent": "Asia",
+      "latitude": 34.3846,
+      "longitude": 109.2729,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Terracotta_Army%2C_View_of_Pit_1.jpg?width=400",
+      "attribution": {
+        "author": "Jean-Marie Hullot",
+        "license": "CC BY 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Terracotta_Army,_View_of_Pit_1.jpg"
+      },
+      "difficulty": "EASY"
     }
   ]
 }
