@@ -59,15 +59,30 @@ vi.mock('../components', () => ({
   LoadingSpinner: () => <div>loading</div>,
   Button: ({ onClick, children }: any) => <button onClick={onClick}>{children}</button>,
   Timer: () => <div>timer</div>,
-  RoundActionTray: () => <div>tray</div>,
-  GameRoundScaffold: ({ header, question, onOptionSelect, disableOptions, showResult }: any) => (
+  RoundActionTray: ({ showResult, isWaiting, canSubmit, onSubmit }: any) => (
+    <div>
+      {!showResult && !isWaiting && (
+        <button type="button" onClick={onSubmit} disabled={!canSubmit}>game.submit</button>
+      )}
+    </div>
+  ),
+  GameRoundScaffold: ({ header, question, onOptionSelect, disableOptions, showResult, isMapQuestion, mapContent, actionTray }: any) => (
     <div>
       {header}
-      {question.options.map((option: string) => (
+      {isMapQuestion ? mapContent : question.options.map((option: string) => (
         <button key={option} onClick={() => onOptionSelect(option)} disabled={showResult || disableOptions}>
           {option}
         </button>
       ))}
+      {actionTray}
+    </div>
+  ),
+}));
+
+vi.mock('../components/MapInteractive', () => ({
+  MapInteractive: ({ showKeyboardHint, onLocationSelect }: { showKeyboardHint?: boolean; onLocationSelect: (lat: number, lng: number) => void }) => (
+    <div data-testid="map-interactive" data-show-keyboard-hint={showKeyboardHint ? 'true' : 'false'}>
+      <button type="button" onClick={() => onLocationSelect(1, 2)}>map</button>
     </div>
   ),
 }));
@@ -106,6 +121,60 @@ describe('SurvivalPage guards', () => {
     vi.clearAllMocks();
     mocks.handlers.clear();
     mocks.confirmMock.mockResolvedValue(true);
+  });
+
+  it('muestra la pista del mapa solo en la primera ronda de mapa', async () => {
+    render(<SurvivalPage />);
+    emit('survival:matched', {
+      matchId: 'm1',
+      category: 'MAP',
+      fillTimeRemaining: 15,
+      maxPlayers: 2,
+      players: [{ userId: 'u1', username: 'player1', lives: 4, score: 0, eliminated: false }],
+    });
+    emit('survival:question', {
+      round: 1,
+      difficulty: 'EASY',
+      timeLimit: 15,
+      players: [{ userId: 'u1', username: 'player1', lives: 4, score: 0, eliminated: false }],
+      question: {
+        id: 'sm1',
+        category: 'MAP',
+        questionText: 'Ubica París',
+        options: [],
+        correctAnswer: '',
+      },
+    });
+
+    const map = await screen.findByTestId('map-interactive');
+    expect(map).toHaveAttribute('data-show-keyboard-hint', 'true');
+
+    fireEvent.click(map.querySelector('button')!);
+    fireEvent.click(screen.getByRole('button', { name: 'game.submit' }));
+    await waitFor(() => {
+      expect(mocks.socketMock.emit).toHaveBeenCalledWith(
+        'survival:answer',
+        expect.objectContaining({ questionId: 'sm1', coordinates: { lat: 1, lng: 2 } }),
+      );
+    });
+
+    emit('survival:question', {
+      round: 2,
+      difficulty: 'EASY',
+      timeLimit: 15,
+      players: [{ userId: 'u1', username: 'player1', lives: 4, score: 0, eliminated: false }],
+      question: {
+        id: 'sm2',
+        category: 'MAP',
+        questionText: 'Ubica Roma',
+        options: [],
+        correctAnswer: '',
+      },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('map-interactive')).toHaveAttribute('data-show-keyboard-hint', 'false');
+    });
   });
 
   it('emite una sola respuesta aunque el jugador toque otra opción tras el envío', async () => {

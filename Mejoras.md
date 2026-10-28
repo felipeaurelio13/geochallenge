@@ -759,7 +759,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 54. Llevar la pista de controles del mapa a duelos y retos — ⬜ Pendiente
+## 54. Llevar la pista de controles del mapa a duelos y retos — ✅ Desarrollada
 
 **Área:** accesibilidad / `DuelPage`, `GeoChallengesPage`, `SurvivalPage`.
 
@@ -769,7 +769,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** la pista aparece una sola vez por partida con mapa; no se muestra en rondas sin mapa ni tras el resultado; no tapa el mapa; se puede cerrar con teclado; funciona en ES/EN en los tres modos.
 
-**Entrega:** commit `mejora 54: pista del mapa en duelos y retos`.
+**Entrega:** commit `mejora 54: pista del mapa en duelos y retos`. La pista se muestra una vez por partida en duelos, supervivencia y retos diarios, y se oculta tras responder el primer mapa. GeoRetos no monta `MapInteractive` —usa alternativas sobre datos—, así que no recibe una pista de teclado inexistente.
 
 ---
 
@@ -882,3 +882,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** solo se marca la fila cuyo número coincide; no aparece si la ronda fue correcta; se lee en ES/EN; no cambia el orden, los filtros ni el copiado; no duplica la etiqueta visible del resumen.
 
 **Entrega:** commit `mejora 62: marca de la ronda más lenta en el repaso`.
+
+---
+
+## 63. Devolver el foco al mapa al cerrar la pista — ⬜ Pendiente
+
+**Área:** accesibilidad / `MapInteractive`.
+
+**Problema:** al cerrar la pista de controles, el botón de cierre desaparece y el foco del teclado se pierde en el documento. Un usuario que navega sin ratón tiene que volver a recorrer la pantalla para llegar al mapa.
+
+**Propuesta:** al cerrar la pista, mover el foco al contenedor interactivo del mapa en lugar de dejar que el navegador lo pierda. No mover el foco en el render inicial ni al cambiar de pregunta.
+
+**Aceptación:** cerrar la pista deja el foco en el mapa; el foco inicial de la pantalla no cambia; funciona con teclado y lector de pantalla; no afecta al arrastre ni a la selección táctil; se cubre con test.
+
+**Entrega:** commit `mejora 63: foco al cerrar la pista del mapa`.

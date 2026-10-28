@@ -78,6 +78,14 @@ vi.mock('../components', () => ({
   ),
 }));
 
+vi.mock('../components/MapInteractive', () => ({
+  MapInteractive: ({ showKeyboardHint, onLocationSelect }: { showKeyboardHint?: boolean; onLocationSelect: (lat: number, lng: number) => void }) => (
+    <div data-testid="map-interactive" data-show-keyboard-hint={showKeyboardHint ? 'true' : 'false'}>
+      <button type="button" onClick={() => onLocationSelect(1, 2)}>map</button>
+    </div>
+  ),
+}));
+
 describe('ChallengeGamePage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -93,6 +101,28 @@ describe('ChallengeGamePage', () => {
           category: 'CAPITAL',
         },
       ],
+    });
+  });
+
+  it('muestra la pista del mapa solo en la primera ronda de mapa', async () => {
+    mocks.apiGetMock.mockResolvedValueOnce({
+      questions: [
+        { id: 'm1', questionText: 'Ubica París', options: [], correctAnswer: '', category: 'MAP' },
+        { id: 'm2', questionText: 'Ubica Roma', options: [], correctAnswer: '', category: 'MAP' },
+      ],
+    });
+
+    render(<ChallengeGamePage />);
+
+    const map = await screen.findByTestId('map-interactive');
+    expect(map).toHaveAttribute('data-show-keyboard-hint', 'true');
+
+    fireEvent.click(map.querySelector('button')!);
+    fireEvent.click(screen.getByRole('button', { name: 'game.submit' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'game.next' }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('map-interactive')).toHaveAttribute('data-show-keyboard-hint', 'false');
     });
   });
 

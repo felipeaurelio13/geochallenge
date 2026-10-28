@@ -66,6 +66,7 @@ export function ChallengeGamePage() {
 
   const currentQuestion = questions[currentIndex];
   const isMapQuestion = currentQuestion?.category === 'MAP';
+  const hasAnsweredMapQuestion = questions.slice(0, currentIndex).some((question) => question.category === 'MAP');
   const hasSelection = Boolean(selectedAnswer || mapLocation);
   const isLastQuestion = currentIndex >= questions.length - 1;
   const effectiveDuration = getQuestionDuration(currentQuestion?.category, timePerQuestion);
@@ -316,6 +317,7 @@ export function ChallengeGamePage() {
             correctLocation={null}
             showResult={showResult}
             disabled={showResult}
+            showKeyboardHint={Boolean(isMapQuestion) && !hasAnsweredMapQuestion}
           />
         </Suspense>
       }
