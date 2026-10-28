@@ -142,7 +142,7 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
     if (slowest.elapsedSeconds === fastest.elapsedSeconds) return null;
     const question = questions.find((item) => item.id === slowest.questionId);
     if (!question) return null;
-    return { question, seconds: slowest.elapsedSeconds };
+    return { question, seconds: slowest.elapsedSeconds, number: results.indexOf(slowest) + 1 };
   }, [questions, results]);
   const weakestCategory = categoryStats.find((stat) => stat.accuracy < 100) ?? null;
   const unlockedAchievements = useMemo(
@@ -377,6 +377,7 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
           {slowestAnswer && (
             <p className="mt-1 text-xs text-app-secondary">
               {t('results.slowestQuestion', {
+                number: slowestAnswer.number,
                 question: getLocalizedQuestionText(slowestAnswer.question, t, currentLanguage),
                 seconds: slowestAnswer.seconds.toLocaleString(currentLanguage, { maximumFractionDigits: 1 }),
               })}

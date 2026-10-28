@@ -121,7 +121,7 @@ vi.mock('react-i18next', () => ({
       }
 
       if (key === 'results.slowestQuestion') {
-        return `Ronda más lenta: ${options?.question} (${options?.seconds} s)`;
+        return `Ronda más lenta (#${options?.number}): ${options?.question} (${options?.seconds} s)`;
       }
 
       if (key === 'game.questionCapital') {
@@ -363,8 +363,8 @@ describe('ResultsPage', () => {
     try {
       render(<ResultsPage />);
 
-      const slowest = screen.getByText(/Ronda más lenta:/);
-      expect(slowest).toHaveTextContent('¿Cuál es la capital de Chile? (9 s)');
+      const slowest = screen.getByText(/Ronda más lenta/);
+      expect(slowest).toHaveTextContent('Ronda más lenta (#8): ¿Cuál es la capital de Chile? (9 s)');
       expect(slowest.textContent).not.toContain('Santiago');
     } finally {
       mocks.gameState.results = originalResults;
@@ -381,7 +381,7 @@ describe('ResultsPage', () => {
     try {
       render(<ResultsPage />);
 
-      expect(screen.queryByText(/Ronda más lenta:/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/Ronda más lenta/)).not.toBeInTheDocument();
     } finally {
       mocks.gameState.results = originalResults;
     }
@@ -390,7 +390,7 @@ describe('ResultsPage', () => {
   it('oculta la ronda más lenta cuando la sesión no trae tiempos', () => {
     render(<ResultsPage />);
 
-    expect(screen.queryByText(/Ronda más lenta:/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Ronda más lenta/)).not.toBeInTheDocument();
   });
 
   it.each(['single', 'streak', 'practice'] as const)('replays %s with the same configuration', async (gameType) => {

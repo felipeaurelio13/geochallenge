@@ -535,7 +535,7 @@
     "accuracy": "Accuracy",
     "averageTime": "Average time per answer",
     "averageTimeValue": "{{seconds}}s",
-    "slowestQuestion": "Slowest round: {{question}} ({{seconds}}s)",
+    "slowestQuestion": "Slowest round (#{{number}}): {{question}} ({{seconds}}s)",
     "totalTime": "Total game time",
     "totalTimeValueMinutes": "{{minutes}}m {{seconds}}s",
     "totalTimeValueSeconds": "{{seconds}}s",

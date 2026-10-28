@@ -745,7 +745,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 53. Incluir el número de pregunta en la ronda más lenta — ⬜ Pendiente
+## 53. Incluir el número de pregunta en la ronda más lenta — ✅ Desarrollada
 
 **Área:** aprendizaje / `ResultsPage`.
 
@@ -755,7 +755,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** el número coincide con la posición real de la ronda; el texto sigue sin revelar la respuesta correcta; se lee en ES/EN; no cambia cuando la ronda más lenta no se muestra; no afecta al repaso.
 
-**Entrega:** commit `mejora 53: número de la ronda más lenta`.
+**Entrega:** commit `mejora 53: número de la ronda más lenta`. El resumen añade `#{{number}}` con la posición real de la respuesta más lenta, sin cambiar las condiciones de ocultado ni revelar la respuesta.
 
 ---
 
@@ -868,3 +868,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** la ronda coincide con el menor tiempo registrado; no duplica la más lenta cuando todas duran lo mismo; se lee en ES/EN; no aparece sin tiempos suficientes; no altera el repaso ni el texto de compartir.
 
 **Entrega:** commit `mejora 61: ronda más rápida en el resumen`.
+
+---
+
+## 62. Resaltar la ronda más lenta dentro del repaso — ⬜ Pendiente
+
+**Área:** aprendizaje / `ResultsPage`.
+
+**Problema:** el resumen nombra la ronda más lenta, pero en el repaso no hay ninguna marca que permita encontrarla entre varios fallos parecidos. El jugador tiene que contar o comparar tiempos a mano.
+
+**Propuesta:** reutilizar el número calculado para la ronda más lenta y añadir un badge “Ronda más lenta” a la fila correspondiente del repaso cuando esa ronda sea un fallo. Mantener el badge fuera del texto copiado y del orden.
+
+**Aceptación:** solo se marca la fila cuyo número coincide; no aparece si la ronda fue correcta; se lee en ES/EN; no cambia el orden, los filtros ni el copiado; no duplica la etiqueta visible del resumen.
+
+**Entrega:** commit `mejora 62: marca de la ronda más lenta en el repaso`.
