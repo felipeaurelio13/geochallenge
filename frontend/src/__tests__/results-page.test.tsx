@@ -675,6 +675,16 @@ describe('ResultsPage', () => {
     expect(screen.getByText('Repaso copiado: 2 fallos')).toBeInTheDocument();
   });
 
+  it('reserva altura para el aviso de compartir la racha', () => {
+    mocks.search = 'gameType=streak';
+
+    render(<ResultsPage />);
+
+    const feedback = screen.getByTestId('streak-share-feedback');
+    expect(feedback).toHaveClass('min-h-5');
+    expect(feedback).toBeEmptyDOMElement();
+  });
+
   it('reserva altura para el aviso de copiado del repaso', () => {
     render(<ResultsPage />);
 

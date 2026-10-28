@@ -665,7 +665,7 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
               <Button onClick={handleShareStreak} disabled={streakShareStatus === 'sharing'} variant="secondary" fullWidth>
                 {streakShareStatus === 'sharing' ? t('common.loading') : t('results.shareStreakButton')}
               </Button>
-              <p className="mt-2 text-xs text-success" aria-live="polite">{streakShareFeedback}</p>
+              <p data-testid="streak-share-feedback" className="mt-2 min-h-5 text-xs text-success" aria-live="polite">{streakShareFeedback}</p>
             </>
           ) : <ShareButton variant="secondary" size="md" payload={{ title: t('app.name'), text: shareText }} />}
           {!isTrial && !isPracticeMode && (

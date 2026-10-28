@@ -969,7 +969,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 69. Reservar espacio para el aviso de compartir la racha — ⬜ Pendiente
+## 69. Reservar espacio para el aviso de compartir la racha — ✅ Desarrollada
 
 **Área:** estabilidad visual / `ResultsPage`.
 
@@ -979,7 +979,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** el bloque de ranking no se mueve al aparecer o desaparecer el aviso; el espacio no deja un hueco visible; el aviso sigue siendo perceptible; no afecta a modos sin racha; se cubre con test de estructura.
 
-**Entrega:** commit `mejora 69: espacio estable para el aviso de racha`.
+**Entrega:** commit `mejora 69: espacio estable para el aviso de racha`. El aviso reserva `min-h-5` desde el primer render; el bloque de ranking ya no se mueve al compartir y la región `aria-live` se conserva.
 
 ---
 
@@ -1092,3 +1092,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** el fallo se anuncia una sola vez; el reintento sigue disponible; el aviso no duplica el texto del botón; se lee en ES/EN; no interfiere con el spinner ni con la posición; se cubre con test.
 
 **Entrega:** commit `mejora 77: aviso accesible de ranking fallido`.
+
+---
+
+## 78. Mantener visible el aviso de compartir la racha hasta la siguiente acción — ⬜ Pendiente
+
+**Área:** usabilidad / `ResultsPage`.
+
+**Problema:** el aviso de compartir la racha desaparece a los tres segundos. Quien mira la pantalla con calma o usa un lector de pantalla puede perder la confirmación antes de procesarla.
+
+**Propuesta:** mantener el mensaje hasta que el jugador vuelva a compartir o cambie de pantalla, en lugar de borrarlo por tiempo. Mantener la región `aria-live` y el espacio reservado.
+
+**Aceptación:** el aviso no desaparece solo; un nuevo intento lo actualiza; no se acumulan mensajes; no afecta a otros avisos; se lee en ES/EN; se cubre con test de persistencia.
+
+**Entrega:** commit `mejora 78: aviso de racha persistente`.
