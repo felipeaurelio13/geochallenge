@@ -61,6 +61,8 @@ vi.mock('react-i18next', () => ({
         'results.reviewCopy': 'Copiar repaso',
         'results.reviewCopyTitle': 'Fallos de GeoChallenge',
         'results.reviewCopied': 'Repaso copiado',
+        'results.reviewCopiedOne': 'Repaso copiado: 1 fallo',
+        'results.reviewCopiedMany': 'Repaso copiado: {{count}} fallos',
         'results.reviewCopyError': 'No se pudo copiar el repaso',
         'results.yourAnswer': 'Tu respuesta',
         'results.noAnswer': 'Sin respuesta',
@@ -134,6 +136,14 @@ vi.mock('react-i18next', () => ({
 
       if (key === 'results.playCategory') {
         return `Jugar ${options?.category}`;
+      }
+
+      if (key === 'results.reviewCopiedOne') {
+        return 'Repaso copiado: 1 fallo';
+      }
+
+      if (key === 'results.reviewCopiedMany') {
+        return `Repaso copiado: ${options?.count} fallos`;
       }
 
       if (key === 'results.reviewExpandedMany') {
@@ -584,6 +594,7 @@ describe('ResultsPage', () => {
       const copied = mocks.writeTextMock.mock.calls[mocks.writeTextMock.mock.calls.length - 1]?.[0] as string;
       expect(copied).toContain('¿Cuál es la capital de Perú?');
       expect(copied).not.toContain('game.questionFlag');
+      expect(screen.getByText('Repaso copiado: 1 fallo')).toBeInTheDocument();
 
       fireEvent.click(within(filter).getByRole('button', { name: 'Todos (2)' }));
 
@@ -612,7 +623,18 @@ describe('ResultsPage', () => {
     expect(copied).toContain('10. Capitales');
     expect(copied).not.toContain('Dato curioso');
     expect(copied).not.toContain('Difícil');
-    expect(screen.getByText('Repaso copiado')).toBeInTheDocument();
+    expect(screen.getByText('Repaso copiado: 2 fallos')).toBeInTheDocument();
+  });
+
+  it('no anuncia un conteo cuando el copiado del repaso falla', async () => {
+    mocks.writeTextMock.mockRejectedValueOnce(new Error('denied'));
+
+    render(<ResultsPage />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Copiar repaso' }));
+
+    expect(await screen.findByText('No se pudo copiar el repaso')).toBeInTheDocument();
+    expect(screen.queryByText(/Repaso copiado:/)).not.toBeInTheDocument();
   });
 
   it('no muestra filtros de repaso cuando todos los fallos son de una categoría', () => {    render(<ResultsPage />);

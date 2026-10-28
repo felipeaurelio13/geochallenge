@@ -519,6 +519,8 @@
     "reviewCopy": "Copy review",
     "reviewCopyTitle": "GeoChallenge mistakes",
     "reviewCopied": "Review copied",
+    "reviewCopiedOne": "Review copied: 1 mistake",
+    "reviewCopiedMany": "Review copied: {{count}} mistakes",
     "reviewCopyError": "Couldn't copy the review",
     "funFactLabel": "Fun fact",
     "yourAnswer": "Your answer",

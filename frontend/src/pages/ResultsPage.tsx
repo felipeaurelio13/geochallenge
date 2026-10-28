@@ -314,7 +314,11 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
 
     try {
       await navigator.clipboard.writeText(text);
-      setReviewCopyFeedback(t('results.reviewCopied'));
+      const copiedCount = visibleReviewMistakes.length;
+      setReviewCopyFeedback(t(
+        copiedCount === 1 ? 'results.reviewCopiedOne' : 'results.reviewCopiedMany',
+        { count: copiedCount },
+      ));
     } catch {
       setReviewCopyFeedback(t('results.reviewCopyError'));
     }

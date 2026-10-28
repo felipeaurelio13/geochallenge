@@ -519,6 +519,8 @@
     "reviewCopy": "Copiar repaso",
     "reviewCopyTitle": "Fallos de GeoChallenge",
     "reviewCopied": "Repaso copiado",
+    "reviewCopiedOne": "Repaso copiado: 1 fallo",
+    "reviewCopiedMany": "Repaso copiado: {{count}} fallos",
     "reviewCopyError": "No se pudo copiar el repaso",
     "funFactLabel": "Dato curioso",
     "yourAnswer": "Tu respuesta",

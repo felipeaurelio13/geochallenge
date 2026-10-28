@@ -843,7 +843,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 60. Anunciar cuántos fallos se copiaron del repaso — ⬜ Pendiente
+## 60. Anunciar cuántos fallos se copiaron del repaso — ✅ Desarrollada
 
 **Área:** accesibilidad / `ResultsPage`.
 
@@ -853,7 +853,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** el conteo coincide con las filas visibles; usa singular o plural según corresponda; se lee en ES/EN; no se anuncia si el copiado falla; no duplica el aviso existente ni interfiere con los anuncios de orden o filtro.
 
-**Entrega:** commit `mejora 60: conteo al copiar el repaso`.
+**Entrega:** commit `mejora 60: conteo al copiar el repaso`. El aviso de éxito usa singular/plural con el número de filas visibles; el error mantiene su mensaje sin conteo y no se anuncia nada en el render inicial.
 
 ---
 
@@ -966,3 +966,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** el reintento solo aparece tras un error; vuelve a pedir el ranking; muestra carga durante el reintento; no cambia la altura de la fila; no afecta a práctica ni prueba; se cubre con test de error y reintento.
 
 **Entrega:** commit `mejora 68: reintento de carga del ranking`.
+
+---
+
+## 69. Reservar espacio para el aviso de compartir la racha — ⬜ Pendiente
+
+**Área:** estabilidad visual / `ResultsPage`.
+
+**Problema:** en modo racha, el aviso de compartir aparece y desaparece debajo del botón sin altura reservada. Al hacerlo empuja el bloque de ranking y puede mover el contenido mientras el jugador apunta al botón.
+
+**Propuesta:** reservar una altura mínima para el aviso, igual que ya hacen el botón de compartir general y el aviso de copiado del repaso. Mantener la región `aria-live` y el tiempo de desaparición actuales.
+
+**Aceptación:** el bloque de ranking no se mueve al aparecer o desaparecer el aviso; el espacio no deja un hueco visible; el aviso sigue siendo perceptible; no afecta a modos sin racha; se cubre con test de estructura.
+
+**Entrega:** commit `mejora 69: espacio estable para el aviso de racha`.
