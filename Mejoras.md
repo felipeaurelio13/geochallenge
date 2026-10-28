@@ -325,7 +325,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 23. Reflejar el progreso de la ronda en el título de la pestaña — ⬜ Pendiente
+## 23. Reflejar el progreso de la ronda en el título de la pestaña — ✅ Desarrollada
 
 **Área:** orientación / `GamePage`.
 
@@ -335,7 +335,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** el título muestra “Pregunta X de Y · GeoChallenge” en ES/EN, se actualiza al avanzar, no se queda pegado en resultados y no rompe el título base en otras rutas.
 
-**Entrega:** commit `mejora 23: progreso en el título de la pestaña`.
+**Entrega:** commit `mejora 23: progreso en el título de la pestaña`. El título se actualiza durante la partida y vuelve al nombre base al terminar, salir o desmontar la pantalla.
 
 ---
 
@@ -462,3 +462,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** el control aparece solo cuando la página tiene contenido suficiente; el foco termina en el titular; el scroll es instantáneo con reducción de movimiento; funciona con teclado y en ES/EN.
 
 **Entrega:** commit `mejora 32: volver al resumen de resultados`.
+
+---
+
+## 33. Llevar el progreso de ronda al título en los demás modos de juego — ⬜ Pendiente
+
+**Área:** orientación / duelos, retos y modos rápidos.
+
+**Problema:** la partida individual ya muestra la ronda en la pestaña, pero duelos, retos diarios y modos rápidos conservan el título genérico. Al cambiar de pestaña, esos modos siguen sin contexto.
+
+**Propuesta:** reutilizar la misma clave `game.tabProgress` y el mismo patrón de restauración en las pantallas de juego restantes, respetando el total propio de cada modo.
+
+**Aceptación:** cada modo activo muestra “Pregunta X de Y · GeoChallenge”; el título se restaura al terminar o salir; no se pisan títulos entre pantallas montadas a la vez; funciona en ES/EN.
+
+**Entrega:** commit `mejora 33: progreso en el título de los demás modos`.

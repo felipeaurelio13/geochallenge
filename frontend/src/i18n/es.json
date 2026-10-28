@@ -409,6 +409,7 @@
     "streak": "Racha",
     "streakLabel": "Racha actual: {{count}}",
     "questionOf": "Pregunta {{current}} de {{total}}",
+    "tabProgress": "Pregunta {{current}} de {{total}}",
     "lastQuestion": "Última pregunta",
     "questionFlag": "¿A qué país pertenece esta bandera?",
     "questionCapital": "¿Cuál es la capital de {{country}}?",

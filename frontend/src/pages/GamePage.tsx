@@ -295,6 +295,15 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
   }, [category, gameType, gameFilters, practiceCountryCode, startGame, startPractice, confirm, isTrial, startAttempt]);
 
   useEffect(() => {
+    if ((status !== 'playing' && status !== 'reviewing') || !currentQuestion) return;
+
+    document.title = `${t('game.tabProgress', { current: currentIndex + 1, total: questions.length })} · ${t('app.name')}`;
+    return () => {
+      document.title = t('app.name');
+    };
+  }, [status, currentQuestion, currentIndex, questions.length, t]);
+
+  useEffect(() => {
     return () => {
       if (!abandonTrackedRef.current && status === 'playing') {
         abandonTrackedRef.current = true;

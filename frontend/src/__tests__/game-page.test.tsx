@@ -212,6 +212,15 @@ describe('GamePage ending flow', () => {
     expect(optionsGrid).not.toHaveClass('sm:grid-cols-2');
   });
 
+  it('refleja el progreso de la ronda en el título de la pestaña y lo restaura al salir', () => {
+    const { unmount } = render(<GamePage />);
+
+    expect(document.title).toBe('game.tabProgress · app.name');
+
+    unmount();
+    expect(document.title).toBe('app.name');
+  });
+
   it('usa el contador compacto en header y elimina progreso redundante en Single/Mixed', () => {
     render(<GamePage />);
 
