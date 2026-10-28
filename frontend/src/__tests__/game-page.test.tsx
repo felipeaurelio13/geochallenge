@@ -328,6 +328,25 @@ describe('GamePage ending flow', () => {
     expect(mocks.nextQuestionMock).not.toHaveBeenCalled();
   });
 
+  it('envía una sola respuesta aunque el envío se dispare dos veces seguidas', async () => {
+    let resolveSubmit!: (value: { isCorrect: boolean; points: number }) => void;
+    mocks.submitAnswerMock.mockReturnValue(new Promise((resolve) => {
+      resolveSubmit = resolve;
+    }));
+
+    render(<GamePage />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Santiago' }));
+    const submitButton = screen.getByRole('button', { name: 'game.submit' });
+    fireEvent.click(submitButton);
+    fireEvent.click(submitButton);
+
+    expect(mocks.submitAnswerMock).toHaveBeenCalledTimes(1);
+
+    resolveSubmit({ isCorrect: true, points: 100 });
+    await screen.findByText('game.correct');
+  });
+
   it('incrementa el score de 1 en 1 cuando hay aciertos en streak', async () => {
     mockedSearchParams = 'category=CAPITAL&mode=streak';
     mocks.gameState.score = 0;

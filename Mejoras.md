@@ -17,7 +17,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 1. Evitar respuestas duplicadas por doble disparo del temporizador o de Enter — ⬜ Pendiente
+## 1. Evitar respuestas duplicadas por doble disparo del temporizador o de Enter — ✅ Desarrollada
 
 **Área:** integridad de partida / `GamePage`.
 
@@ -157,6 +157,14 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## Backlog de seguimiento
+## 11. Resumen de precisión por categoría en resultados — ⬜ Pendiente
 
-Las oportunidades nuevas se añaden al final de este documento después de completar cada entrega.
+**Área:** aprendizaje / `ResultsPage`.
+
+**Problema:** al terminar una partida mixta el jugador ve una nota global, pero no qué tipo de pregunta le está costando (banderas, capitales, mapas, siluetas o monumentos). Sin ese dato, la siguiente práctica es a ciegas.
+
+**Propuesta:** calcular la precisión por categoría con las preguntas y resultados reales de la sesión y mostrarla en una sección compacta, solo cuando haya al menos dos categorías y un mínimo de respuestas por categoría.
+
+**Aceptación:** la suma coincide con el total de la partida; no aparece con una sola categoría; el detalle es legible en móvil y con lector de pantalla.
+
+**Entrega:** commit `mejora 11: precisión por categoría en resultados`.

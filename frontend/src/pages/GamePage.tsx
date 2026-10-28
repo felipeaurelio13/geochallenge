@@ -116,6 +116,11 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
   const prefersReducedMotion = useUiStore((s) => s.prefersReducedMotion);
   const extendedTimeEnabled = useUiStore((s) => s.extendedTimeEnabled);
   const abandonTrackedRef = useRef(false);
+  // Synchronous lock: React state (`isSubmitting`) does not update between two
+  // events fired in the same tick, so the timer's onComplete + Enter (or a
+  // double tap) could submit the same question twice and double-count it
+  // locally even though the backend is idempotent.
+  const submitLockRef = useRef(false);
 
   const currentQuestion: Question | null = questions[currentIndex] || null;
   const isMapQuestion = currentQuestion?.category === 'MAP';
@@ -320,7 +325,9 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
 
   // Submit answer
   const handleSubmitAnswer = async () => {
-    if (!currentQuestion || showResult || isSubmitting) return;
+    if (!currentQuestion || showResult || isSubmitting || submitLockRef.current) return;
+
+    submitLockRef.current = true;
 
     let answer: string;
     if (isMapQuestion) {
@@ -361,6 +368,7 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
       setFunFact(generateFunFact(currentQuestion, i18n.language === 'en' ? 'en' : 'es'));
     } catch (err: any) {
       console.error('Error submitting answer:', err);
+      submitLockRef.current = false;
       setIsSubmitting(false);
       setError(err.message || t('game.error'));
     }
@@ -409,6 +417,7 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
         setError(err.message || t('game.error'));
       }
     } else {
+      submitLockRef.current = false;
       nextQuestion();
       setSelectedAnswer(null);
       setMapLocation(null);
