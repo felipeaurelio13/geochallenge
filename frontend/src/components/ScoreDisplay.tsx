@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useAnimation } from '../hooks';
 import { useUiStore } from '../store/useUiStore';
 import type { AnswerResult } from '../types';
+import { formatScoreBreakdown, getScoreBreakdownParts } from '../utils/scoreBreakdown';
 
 interface ScoreDisplayProps {
   score: number;
@@ -44,17 +45,7 @@ export function ScoreDisplay({ score, previousScore = 0, showAnimation = true, l
   }, [score, previousScore, prefersReducedMotion, showAnimation, triggerAnimation]);
 
   const pointsGained = score - previousScore;
-  const scoreBreakdownParts = [
-    { value: lastResult?.basePoints ?? 0, label: t('game.scoreBreakdownBase') },
-    { value: lastResult?.timeBonus ?? 0, label: t('game.scoreBreakdownTime') },
-    { value: lastResult?.comboBonus ?? 0, label: t('game.scoreBreakdownCombo') },
-    { value: lastResult?.accuracyBonus ?? 0, label: t('game.scoreBreakdownAccuracy') },
-  ].filter((part) => part.value > 0);
-
-  const scoreBreakdownText =
-    scoreBreakdownParts.length > 0
-      ? scoreBreakdownParts.map((part) => `${part.value} ${part.label}`).join(' + ')
-      : null;
+  const scoreBreakdownText = formatScoreBreakdown(getScoreBreakdownParts(lastResult, t));
 
   return (
     <div className="text-center" aria-live="polite">

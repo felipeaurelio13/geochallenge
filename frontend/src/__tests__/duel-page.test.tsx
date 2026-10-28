@@ -199,8 +199,33 @@ describe('DuelPage socket flow', () => {
     expect(await screen.findByText('rival')).toBeInTheDocument();
   });
 
-  it('juega GeoRetos en duelo con 10 rondas y conserva el orden seleccionado', async () => {
-    mocks.searchParams = 'mode=geo-challenge';
+  it('refleja la ronda activa en el título de la pestaña y lo restaura al salir', async () => {
+    const { unmount } = render(<DuelPage />);
+
+    act(() => {
+      mocks.handlers.get('duel:question')?.forEach((cb) => cb({
+        questionIndex: 0,
+        totalQuestions: 10,
+        timeLimit: 25,
+        question: {
+          id: 'q1',
+          category: 'FLAG',
+          questionText: '¿A qué país pertenece esta bandera?',
+          options: ['Chile', 'Perú'],
+          correctAnswer: '',
+        },
+      }));
+    });
+
+    await waitFor(() => {
+      expect(document.title).toBe('game.tabProgress:{"current":1,"total":10} · app.name');
+    });
+
+    unmount();
+    expect(document.title).toBe('app.name');
+  });
+
+  it('juega GeoRetos en duelo con 10 rondas y conserva el orden seleccionado', async () => {    mocks.searchParams = 'mode=geo-challenge';
     render(<DuelPage />);
 
     expect(mocks.joinDuelQueueMock).toHaveBeenCalledWith('MIXED', {}, 'geo-challenge', false);

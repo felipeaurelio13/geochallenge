@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, Ref } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AnswerStatusBadge } from './AnswerStatusBadge';
 import { Button } from './atoms/Button';
@@ -28,6 +28,14 @@ type RoundActionTrayProps = {
   /** Single/Mixed piloto: una única acción con geometría constante. */
   stableAction?: boolean;
   validatingLabel?: string;
+  /** Error de red al guardar la respuesta: mantiene la ronda y ofrece reintentar. */
+  submitError?: string | null;
+  onRetrySubmit?: () => void;
+  retryLabel?: string;
+  /** Anuncia el resultado en una región live; desactivar si ya se anuncia fuera. */
+  announceResult?: boolean;
+  /** Acción principal tras revelar el resultado; permite llevar el foco a ella. */
+  nextButtonRef?: Ref<HTMLButtonElement>;
 };
 
 const CONTAINER_CLASS =
@@ -55,26 +63,52 @@ export function RoundActionTray({
   summarySlot,
   stableAction = false,
   validatingLabel,
+  submitError = null,
+  onRetrySubmit,
+  retryLabel,
+  announceResult = true,
+  nextButtonRef,
 }: RoundActionTrayProps) {
   const { t } = useTranslation();
   void mode;
+  const resolvedResultLabel = resultLabel ?? (isCorrect ? t('game.correct') : t('game.incorrect'));
+  const resultAnnouncement = showResult
+    ? !isCorrect && correctAnswer
+      ? `${resolvedResultLabel}. ${t('game.correctAnswerWas')} ${correctAnswer}.`
+      : resolvedResultLabel
+    : '';
+  const resultAnnouncementRegion = announceResult ? (
+    <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+      {resultAnnouncement}
+    </p>
+  ) : null;
   const wrapperClassName =
     'mx-auto flex w-full max-w-4xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between';
 
   if (stableAction) {
+    const hasSubmitError = Boolean(submitError && onRetrySubmit);
     const actionLabel = isSubmitting
       ? validatingLabel ?? waitingLabel ?? submitLabel
-      : showResult
-        ? nextLabel ?? submitLabel
-        : submitLabel;
-    const handleAction = showResult ? onNext : onSubmit;
+      : hasSubmitError
+        ? retryLabel ?? t('error.retry')
+        : showResult
+          ? nextLabel ?? submitLabel
+          : submitLabel;
+    const handleAction = hasSubmitError ? onRetrySubmit : showResult ? onNext : onSubmit;
 
     return (
       <div className={CONTAINER_CLASS} data-testid="mobile-action-tray">
         <div className="mx-auto w-full max-w-4xl">
+          {resultAnnouncementRegion}
+          {hasSubmitError && (
+            <p role="alert" className="mb-2 text-center text-xs font-medium text-error">
+              {submitError}
+            </p>
+          )}
           <Button
+            ref={nextButtonRef}
             onClick={handleAction}
-            disabled={isSubmitting || (!showResult && !canSubmit)}
+            disabled={isSubmitting || (!showResult && !hasSubmitError && !canSubmit)}
             fullWidth
             size="lg"
             aria-live="polite"
@@ -91,20 +125,32 @@ export function RoundActionTray({
 
   return (
     <div className={`${CONTAINER_CLASS} ${showResult ? 'max-h-[45dvh] overflow-y-auto' : ''}`} data-testid="mobile-action-tray">
+      {resultAnnouncementRegion}
       <div className={wrapperClassName}>
         {summarySlot}
 
-        {!showResult && !isWaiting && !autoSubmit && (
+        {!showResult && !isWaiting && !autoSubmit && submitError && (
+          <div className="flex flex-1 flex-col justify-center gap-2 rounded-md border border-error/40 bg-error/10 px-3 py-2 sm:flex-row sm:items-center sm:justify-between" role="alert">
+            <p className="text-sm leading-snug text-app-text">{submitError}</p>
+            {onRetrySubmit && (
+              <Button onClick={onRetrySubmit} disabled={isSubmitting} className="w-full shrink-0 py-1.5 sm:w-auto">
+                {retryLabel ?? t('error.retry')}
+              </Button>
+            )}
+          </div>
+        )}
+
+        {!showResult && !isWaiting && !autoSubmit && !submitError && (
           <div className="flex flex-1 flex-col justify-center gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
             <Button
               onClick={onSubmit}
-              disabled={!canSubmit}
+              disabled={!canSubmit || isSubmitting}
               className="w-full py-1.5 disabled:opacity-70 sm:w-auto"
             >
-              {submitLabel}
+              {isSubmitting ? validatingLabel ?? submitLabel : submitLabel}
             </Button>
 
-            {selectionAssistiveText && canSubmit && (
+            {selectionAssistiveText && canSubmit && !isSubmitting && (
               <p className="sr-only" aria-live="polite">{selectionAssistiveText}</p>
             )}
           </div>
@@ -148,6 +194,7 @@ export function RoundActionTray({
 
             {nextLabel && onNext && (
               <Button
+                ref={nextButtonRef}
                 onClick={onNext}
                 disabled={isSubmitting}
                 variant="secondary"

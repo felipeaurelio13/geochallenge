@@ -22,6 +22,7 @@ import { GeoIcon } from '../components/atoms/GeoIcon';
 import { GeoMark } from '../components/atoms/GeoMark';
 import { FullScreenError } from '../components/molecules/FullScreenError';
 import { useConfirmDialog } from '../hooks/useConfirmDialog';
+import { useProgressDocumentTitle } from '../hooks/useProgressDocumentTitle';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { trackUxEvent } from '../utils/uxTelemetry';
@@ -108,6 +109,12 @@ export function GeoChallengesPage() {
       : selectedOptionIds.length === 1
   );
   const resultsForProgress = answers.map((answer) => ({ isCorrect: answer.isCorrect }));
+
+  useProgressDocumentTitle(
+    status === 'playing' && Boolean(currentRound),
+    roundIndex + 1,
+    game?.rounds.length ?? 0,
+  );
 
   const loadGame = useCallback(async () => {
     setStatus('loading');

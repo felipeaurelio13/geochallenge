@@ -1,3 +1,4 @@
+import { createRef } from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { RoundActionTray } from '../components/RoundActionTray';
@@ -146,5 +147,143 @@ describe('RoundActionTray', () => {
     );
     const resultButton = screen.getByRole('button', { name: 'Ver resultados' });
     expect(resultButton.className).toBe(className);
+  });
+
+  it('anuncia el resultado y la respuesta correcta en una única región live', () => {
+    const { rerender } = render(
+      <RoundActionTray
+        mode="single"
+        showResult={false}
+        canSubmit
+        submitLabel="Confirmar"
+        onSubmit={vi.fn()}
+      />
+    );
+
+    const liveRegion = screen.getByRole('status');
+    expect(liveRegion).toHaveAttribute('aria-live', 'polite');
+    expect(liveRegion).toHaveAttribute('aria-atomic', 'true');
+    expect(liveRegion.className).toContain('sr-only');
+    expect(liveRegion.textContent).toBe('');
+
+    rerender(
+      <RoundActionTray
+        mode="single"
+        showResult
+        canSubmit={false}
+        submitLabel="Confirmar"
+        resultLabel="Incorrecto"
+        correctAnswer="Chile"
+        onSubmit={vi.fn()}
+      />
+    );
+
+    expect(screen.getAllByRole('status')).toHaveLength(1);
+    expect(screen.getByRole('status')).toHaveTextContent('Incorrecto');
+    expect(screen.getByRole('status')).toHaveTextContent('Chile');
+  });
+
+  it('no repite la respuesta correcta cuando el resultado es un acierto', () => {
+    render(
+      <RoundActionTray
+        mode="single"
+        showResult
+        canSubmit={false}
+        submitLabel="Confirmar"
+        resultLabel="Correcto"
+        isCorrect
+        correctAnswer="Chile"
+        onSubmit={vi.fn()}
+      />
+    );
+
+    expect(screen.getByRole('status').textContent).toBe('Correcto');
+  });
+
+  it('expone la acción de continuación para llevar el foco al revelar el resultado', () => {
+    const nextButtonRef = createRef<HTMLButtonElement>();
+
+    render(
+      <RoundActionTray
+        mode="single"
+        showResult
+        canSubmit={false}
+        submitLabel="Confirmar"
+        nextLabel="Siguiente"
+        nextButtonRef={nextButtonRef}
+        onSubmit={vi.fn()}
+        onNext={vi.fn()}
+      />
+    );
+
+    expect(nextButtonRef.current).toBe(screen.getByRole('button', { name: 'Siguiente' }));
+  });
+
+  it('permite desactivar el anuncio cuando la pantalla ya lo hace fuera del tray', () => {
+    render(
+      <RoundActionTray
+        mode="single"
+        stableAction
+        showResult
+        canSubmit={false}
+        submitLabel="Confirmar"
+        nextLabel="Siguiente"
+        resultLabel="Correcto"
+        announceResult={false}
+        onSubmit={vi.fn()}
+        onNext={vi.fn()}
+      />
+    );
+
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  });
+
+  it('muestra el error de envío y reintenta sin perder la ronda', () => {
+    const onRetrySubmit = vi.fn();
+
+    render(
+      <RoundActionTray
+        mode="single"
+        showResult={false}
+        canSubmit
+        submitLabel="Confirmar"
+        submitError="No pudimos guardar tu respuesta."
+        onRetrySubmit={onRetrySubmit}
+        retryLabel="Reintentar"
+        onSubmit={vi.fn()}
+      />
+    );
+
+    expect(screen.getByRole('alert')).toHaveTextContent('No pudimos guardar tu respuesta.');
+    expect(screen.queryByRole('button', { name: 'Confirmar' })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Reintentar' }));
+    expect(onRetrySubmit).toHaveBeenCalledTimes(1);
+  });
+
+  it('en la acción estable convierte el botón en reintento y mantiene la geometría', () => {
+    const onRetrySubmit = vi.fn();
+
+    render(
+      <RoundActionTray
+        mode="single"
+        stableAction
+        showResult={false}
+        canSubmit
+        submitLabel="Confirmar"
+        submitError="Sin conexión."
+        onRetrySubmit={onRetrySubmit}
+        retryLabel="Reintentar"
+        onSubmit={vi.fn()}
+      />
+    );
+
+    const retryButton = screen.getByRole('button', { name: 'Reintentar' });
+    expect(retryButton).toBeEnabled();
+    expect(retryButton).toHaveClass('min-h-12');
+    expect(screen.getByRole('alert')).toHaveTextContent('Sin conexión.');
+
+    fireEvent.click(retryButton);
+    expect(onRetrySubmit).toHaveBeenCalledTimes(1);
   });
 });

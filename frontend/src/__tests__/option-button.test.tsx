@@ -30,6 +30,48 @@ describe('OptionButton', () => {
     expect(onClick).toHaveBeenCalledTimes(1);
   });
 
+  it('declara los atajos numérico y de letra solo cuando están activos y son accionables', () => {
+    const { rerender } = render(
+      <OptionButton
+        option="Argentina"
+        index={0}
+        onClick={() => {}}
+        disabled={false}
+        selected={false}
+        showResult={false}
+      />
+    );
+
+    expect(screen.getByRole('button')).not.toHaveAttribute('aria-keyshortcuts');
+
+    rerender(
+      <OptionButton
+        option="Argentina"
+        index={0}
+        onClick={() => {}}
+        disabled={false}
+        selected={false}
+        showResult={false}
+        shortcutsEnabled
+      />
+    );
+    expect(screen.getByRole('button')).toHaveAttribute('aria-keyshortcuts', '1 A');
+
+    rerender(
+      <OptionButton
+        option="Chile"
+        index={3}
+        onClick={() => {}}
+        disabled
+        eliminated
+        selected={false}
+        showResult={false}
+        shortcutsEnabled
+      />
+    );
+    expect(screen.getByRole('button')).not.toHaveAttribute('aria-keyshortcuts');
+  });
+
   it('reemplaza la letra por icono de resultado para ahorrar espacio en mobile', () => {
     render(
       <>

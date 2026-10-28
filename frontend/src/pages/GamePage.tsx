@@ -1,5 +1,5 @@
 import { useEffect, useCallback, useState, useMemo, useRef, lazy, Suspense } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useBlocker, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { useGame } from '../context/GameContext';
@@ -20,9 +20,12 @@ import { Category, GameFilters, MechanicUsage, Question, filtersToParams } from 
 import { GAME_CONSTANTS } from '../constants/game';
 import { useConfirmDialog, useHaptics } from '../hooks';
 import { useAnswerShortcuts } from '../hooks/useAnswerShortcuts';
+import { useProgressDocumentTitle } from '../hooks/useProgressDocumentTitle';
 import { areMechanicsV2Enabled } from '../config/featureFlags';
 import { trackUxEvent } from '../utils/uxTelemetry';
 import { generateFunFact } from '../utils/funFacts';
+import { CATEGORY_LABEL_KEYS } from '../utils/categoryLabels';
+import { formatScoreBreakdown, getScoreBreakdownParts } from '../utils/scoreBreakdown';
 import { applyExtendedTime, getQuestionDuration } from '../utils/questionTiming';
 import { uiStoreActions, useUiStore } from '../store/useUiStore';
 
@@ -108,7 +111,9 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
     streakShield: 0,
   });
   const [error, setError] = useState<string | null>(null);
+  const [startAttempt, setStartAttempt] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [mechanicPending, setMechanicPending] = useState(false);
   const [imageReplacementFailed, setImageReplacementFailed] = useState(false);
   const [isRetryingImage, setIsRetryingImage] = useState(false);
@@ -116,6 +121,15 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
   const prefersReducedMotion = useUiStore((s) => s.prefersReducedMotion);
   const extendedTimeEnabled = useUiStore((s) => s.extendedTimeEnabled);
   const abandonTrackedRef = useRef(false);
+  const allowNavigationRef = useRef(false);
+  // Synchronous lock: React state (`isSubmitting`) does not update between two
+  // events fired in the same tick, so the timer's onComplete + Enter (or a
+  // double tap) could submit the same question twice and double-count it
+  // locally even though the backend is idempotent.
+  const submitLockRef = useRef(false);
+  const questionHeadingRef = useRef<HTMLHeadingElement>(null);
+  const nextActionRef = useRef<HTMLButtonElement>(null);
+  const previousShowResultRef = useRef(false);
 
   const currentQuestion: Question | null = questions[currentIndex] || null;
   const isMapQuestion = currentQuestion?.category === 'MAP';
@@ -136,6 +150,64 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
   const mechanicsConfig = state.config?.mechanics;
   const mechanicsRuntimeEnabled = mechanicsFeatureEnabled && Boolean(mechanicsConfig?.enabled);
   const mechanicsAllowed = new Set(mechanicsConfig?.allowed ?? []);
+  const lastResult = results[results.length - 1] ?? null;
+  const answeredCount = results.length;
+  const hasAnsweredMapQuestion = results.some((result) =>
+    questions.some((question) => question.id === result.questionId && question.category === 'MAP')
+  );
+  const exitConfirmation = answeredCount > 0
+    ? t('game.confirmExitProgress', { answered: answeredCount, total: questions.length })
+    : t('game.confirmExitEmpty');
+
+  const shouldBlockNavigation = useCallback(
+    ({ currentLocation, nextLocation }: { currentLocation: { pathname: string }; nextLocation: { pathname: string } }) => {
+      if (allowNavigationRef.current) return false;
+      if (status !== 'playing' && status !== 'reviewing') return false;
+      return currentLocation.pathname !== nextLocation.pathname;
+    },
+    [status]
+  );
+  const blocker = useBlocker(shouldBlockNavigation);
+
+  useEffect(() => {
+    if (blocker.state !== 'blocked') return;
+
+    let active = true;
+    void confirm(exitConfirmation).then((confirmed) => {
+      if (!active) return;
+      if (!confirmed) {
+        blocker.reset();
+        return;
+      }
+
+      allowNavigationRef.current = true;
+      abandonTrackedRef.current = true;
+      trackUxEvent('game_abandoned', {
+        mode: gameType,
+        questionId: currentQuestion?.id,
+        roundIndex: currentIndex,
+        reason: 'navigation',
+      });
+      resetGame();
+      blocker.proceed();
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [blocker, confirm, exitConfirmation, gameType, currentQuestion?.id, currentIndex, resetGame]);
+  const currentStreak = results.reduce(
+    (streak, result) => (result.isCorrect ? streak + 1 : 0),
+    0
+  );
+  const scoreBreakdownText = formatScoreBreakdown(getScoreBreakdownParts(lastResult, t));
+  const roundResultHint = [
+    streakGameOver ? (t('game.streakBroken', { count: results.filter((r) => r.isCorrect).length }) as string) : null,
+    funFact,
+    lastAnswerCorrect && scoreBreakdownText
+      ? (t('game.scoreBreakdownDetail', { breakdown: scoreBreakdownText }) as string)
+      : null,
+  ].filter(Boolean).join(' · ') || undefined;
 
   useEffect(() => {
     if (!mechanicsRuntimeEnabled || !mechanicsConfig) {
@@ -225,7 +297,13 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
       }
     };
     initGame();
-  }, [category, gameType, gameFilters, practiceCountryCode, startGame, startPractice, confirm, isTrial]);
+  }, [category, gameType, gameFilters, practiceCountryCode, startGame, startPractice, confirm, isTrial, startAttempt]);
+
+  useProgressDocumentTitle(
+    (status === 'playing' || status === 'reviewing') && Boolean(currentQuestion),
+    currentIndex + 1,
+    questions.length,
+  );
 
   useEffect(() => {
     return () => {
@@ -240,6 +318,11 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
       }
     };
   }, []);
+
+  const handleRetryStart = () => {
+    setError(null);
+    setStartAttempt((attempt) => attempt + 1);
+  };
 
   const handleTimerTick = useCallback(
     (time: number) => {
@@ -320,7 +403,10 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
 
   // Submit answer
   const handleSubmitAnswer = async () => {
-    if (!currentQuestion || showResult || isSubmitting) return;
+    if (!currentQuestion || showResult || isSubmitting || submitLockRef.current) return;
+
+    submitLockRef.current = true;
+    setSubmitError(null);
 
     let answer: string;
     if (isMapQuestion) {
@@ -333,7 +419,8 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
     setIsSubmitting(true);
 
     try {
-      const result = await submitAnswer(answer, mapLocation || undefined, pendingMechanicUsage);
+      const elapsedSeconds = Math.min(roundDuration, Math.max(0, roundDuration - timeRemaining));
+      const result = await submitAnswer(answer, mapLocation || undefined, pendingMechanicUsage, elapsedSeconds);
       setPendingMechanicUsage(undefined);
 
       if (result.isCorrect) {
@@ -351,24 +438,31 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
         setShowResult(true);
         abandonTrackedRef.current = true;
         finishGame()
-          .then(() => navigate(resultsPath))
+          .then(() => {
+            allowNavigationRef.current = true;
+            navigate(resultsPath);
+          })
           .catch((err: Error) => setError(err.message || t('game.error')));
         return;
       }
 
       setLastAnswerCorrect(result.isCorrect);
       setShowResult(true);
-      setFunFact(generateFunFact(currentQuestion, i18n.language === 'en' ? 'en' : 'es'));
+      setFunFact(generateFunFact(currentQuestion, i18n.language === 'en' ? 'en' : 'es', result.correctAnswer));
     } catch (err: any) {
       console.error('Error submitting answer:', err);
+      submitLockRef.current = false;
       setIsSubmitting(false);
-      setError(err.message || t('game.error'));
+      // Keep the round, the selection and the remaining time: a transient
+      // network failure must not throw the player back to a full-screen error.
+      setSubmitError(t('game.submitError'));
     }
   };
 
   // Move to next question
   const handleNextQuestion = async () => {
     if (streakGameOver) {
+      allowNavigationRef.current = true;
       navigate(resultsPath);
       return;
     }
@@ -404,11 +498,13 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
       abandonTrackedRef.current = true;
       try {
         if (!isTrial) await finishGame();
+        allowNavigationRef.current = true;
         navigate(resultsPath);
       } catch (err: any) {
         setError(err.message || t('game.error'));
       }
     } else {
+      submitLockRef.current = false;
       nextQuestion();
       setSelectedAnswer(null);
       setMapLocation(null);
@@ -419,6 +515,7 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
       setDisabledOptionIndexes([]);
       setPendingMechanicUsage(undefined);
       setIsSubmitting(false);
+      setSubmitError(null);
       setImageReplacementFailed(false);
     }
   };
@@ -456,6 +553,20 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
     canSubmit: hasSelection,
   });
 
+  // Foco predecible: al cargar una pregunta el enunciado recibe el foco y, al
+  // revelar el resultado, la acción para continuar queda lista para Enter.
+  useEffect(() => {
+    if (status !== 'playing') return;
+    questionHeadingRef.current?.focus();
+  }, [currentIndex, status]);
+
+  useEffect(() => {
+    if (showResult && !previousShowResultRef.current) {
+      nextActionRef.current?.focus();
+    }
+    previousShowResultRef.current = showResult;
+  }, [showResult]);
+
   // Part 4.2: primer intento de reemplazo automático (disparado por
   // onImageError de QuestionCard/GameRoundScaffold cuando la imagen original
   // Y el fallback CDN fallan). Si ESTE intento también falla, mostramos la UI
@@ -489,6 +600,7 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
     if (currentIndex >= questions.length - 1) {
       handleNextQuestion();
     } else {
+      submitLockRef.current = false;
       nextQuestion();
       setSelectedAnswer(null);
       setMapLocation(null);
@@ -498,6 +610,7 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
       setGlobalTimeRemaining(roundDuration);
       setDisabledOptionIndexes([]);
       setPendingMechanicUsage(undefined);
+      setSubmitError(null);
     }
   };
 
@@ -519,6 +632,8 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
         message={error || undefined}
         backTo={exitPath}
         backLabel={t(isTrial ? 'common.back' : 'common.backToMenu')}
+        onRetry={handleRetryStart}
+        retryLabel={t('error.retry')}
       />
     );
   }
@@ -544,7 +659,7 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
           <div className="max-w-4xl mx-auto grid grid-cols-[auto_1fr_auto] items-center gap-2.5 sm:gap-4">
             <button
               onClick={async () => {
-                if (await confirm(t('game.confirmExit'))) {
+                if (await confirm(exitConfirmation)) {
                   abandonTrackedRef.current = true;
                   trackUxEvent('game_abandoned', {
                     mode: gameType,
@@ -553,6 +668,7 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
                     reason: 'navigation',
                   });
                   resetGame();
+                  allowNavigationRef.current = true;
                   navigate(exitPath);
                 }
               }}
@@ -566,6 +682,14 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
               {isPerfectRoundPilot ? (
                 <p className="text-sm font-semibold tabular-nums text-[var(--color-text-primary)] sm:text-base">
                   {currentIndex + 1} / {questions.length}
+                  <span className="ml-1 whitespace-nowrap text-xs font-medium text-app-secondary">
+                    · {t(CATEGORY_LABEL_KEYS[currentQuestion.category])}
+                  </span>
+                  {isLastQuestion ? (
+                    <span className="mt-0.5 block text-[0.65rem] font-semibold uppercase tracking-wide text-app-secondary">
+                      {t('game.lastQuestion')}
+                    </span>
+                  ) : null}
                 </p>
               ) : (
                 <>
@@ -585,6 +709,15 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
                   )}
                 </>
               )}
+              {!shouldUseStreakFlow && currentStreak >= 2 ? (
+                <div className="mt-1 hidden justify-center sm:flex">
+                  <StreakCombo
+                    combo={currentStreak}
+                    label={t('game.streak', 'Racha')}
+                    aria-label={t('game.streakLabel', { count: currentStreak, defaultValue: 'Racha actual: {{count}}' })}
+                  />
+                </div>
+              ) : null}
             </div>
 
             <div className="justify-self-end pr-[max(env(safe-area-inset-right),0.5rem)] sm:pr-[max(env(safe-area-inset-right),0.75rem)] md:pr-0">
@@ -593,7 +726,7 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
                 timeRemaining={timeRemaining}
                 onTick={handleTimerTick}
                 onComplete={handleTimeComplete}
-                isActive={!showResult && !imageReplacementFailed && status === 'playing'}
+                isActive={!showResult && !isConfirmDialogOpen && !imageReplacementFailed && !submitError && status === 'playing'}
                 compact={isPerfectRoundPilot}
               />
             </div>
@@ -617,13 +750,23 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
           </div>
         ) : (
           <div className="bg-[var(--color-surface)] px-3 py-1 sm:px-4 sm:py-1.5">
-            <div className="max-w-4xl mx-auto overflow-x-hidden">
-              <ProgressBar
-                current={currentIndex + 1}
-                total={questions.length}
-                results={results}
-                showCurrentResult={showResult}
-              />
+            <div className="max-w-4xl mx-auto flex items-center gap-2 overflow-x-hidden">
+              <div className="min-w-0 flex-1">
+                <ProgressBar
+                  current={currentIndex + 1}
+                  total={questions.length}
+                  results={results}
+                  showCurrentResult={showResult}
+                />
+              </div>
+              <span className="hidden shrink-0 whitespace-nowrap text-[0.65rem] font-semibold uppercase tracking-wide text-app-secondary sm:inline">
+                {t(CATEGORY_LABEL_KEYS[currentQuestion.category])}
+              </span>
+              {isLastQuestion ? (
+                <span className="shrink-0 whitespace-nowrap text-[0.65rem] font-semibold uppercase tracking-wide text-app-secondary">
+                  {t('game.lastQuestion')}
+                </span>
+              ) : null}
             </div>
           </div>
         )
@@ -633,6 +776,13 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
       totalQuestions={questions.length}
       compactQuestionCard={shouldUseCompactQuestionCard}
       minimalQuestionCard={isPerfectRoundPilot}
+      questionHeadingRef={questionHeadingRef}
+      shortcutHint={
+        currentIndex === 0 && !showResult && !isMapQuestion
+          ? t('game.keyboardHint')
+          : undefined
+      }
+      answerShortcutsEnabled={!isMapQuestion}
       isMapQuestion={Boolean(isMapQuestion)}
       mapContent={
         <Suspense fallback={<LoadingSpinner size="lg" />}>
@@ -647,6 +797,7 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
             }
             showResult={showResult}
             disabled={showResult}
+            showKeyboardHint={isMapQuestion && !hasAnsweredMapQuestion}
           />
         </Suspense>
       }
@@ -681,6 +832,11 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
                   ) : null}
                 </div>
                 {funFact ? <p className="mt-1 text-xs leading-snug text-[var(--color-text-secondary)]">{funFact}</p> : null}
+                {lastAnswerCorrect && scoreBreakdownText ? (
+                  <p className="mt-1 text-[0.68rem] leading-snug text-[var(--color-text-muted)]">
+                    {t('game.scoreBreakdownDetail', { breakdown: scoreBreakdownText })}
+                  </p>
+                ) : null}
               </>
             </div>
           ) : null
@@ -692,16 +848,17 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
           showResult={showResult}
           canSubmit={hasSelection}
           isSubmitting={isSubmitting}
+          nextButtonRef={nextActionRef}
           stableAction={isPerfectRoundPilot}
           validatingLabel={t('game.validating')}
+          submitError={submitError}
+          onRetrySubmit={handleSubmitAnswer}
+          retryLabel={t('game.submitRetry')}
           submitLabel={t('game.submit')}
           nextLabel={streakGameOver ? t('game.seeResults') : shouldUseStreakFlow ? t('game.next') : isLastQuestion ? t('game.seeResults') : t('game.next')}
           resultLabel={lastAnswerCorrect ? t('game.correct') : t('game.incorrect')}
-          resultHint={isPerfectRoundPilot ? undefined : (
-            streakGameOver
-              ? (t('game.streakBroken', { count: results.filter((r) => r.isCorrect).length }) as string)
-              : (funFact ?? undefined)
-          )}
+          announceResult={!isPerfectRoundPilot}
+          resultHint={isPerfectRoundPilot ? undefined : roundResultHint}
           resultAttribution={isPerfectRoundPilot ? undefined : (
             currentQuestion && currentQuestion.category === 'MONUMENT'
               ? <MonumentAttribution question={currentQuestion} />

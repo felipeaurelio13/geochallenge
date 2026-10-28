@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents, Circle, useMap } from 'react-leaflet';
 import type { Map as LeafletMap } from 'leaflet';
 import { DivIcon, latLngBounds } from 'leaflet';
 import { useTranslation } from 'react-i18next';
+import { GAME_CONSTANTS } from '../constants/game';
 import 'leaflet/dist/leaflet.css';
 
 /** How far (in screen pixels) one arrow-key press pans the map. */
@@ -28,6 +29,7 @@ interface MapInteractiveProps {
   showResult: boolean;
   disabled: boolean;
   questionId?: string;
+  showKeyboardHint?: boolean;
 }
 
 const MAP_DEFAULT_VIEW = {
@@ -149,8 +151,11 @@ export function MapInteractive({
   showResult,
   disabled,
   questionId,
+  showKeyboardHint = false,
 }: MapInteractiveProps) {
   const { t } = useTranslation();
+  const [hintDismissed, setHintDismissed] = useState(false);
+  const showHint = showKeyboardHint && !showResult && !hintDismissed;
 
   const calculateDistance = useCallback(() => {
     if (!selectedLocation || !correctLocation) return null;
@@ -223,6 +228,22 @@ export function MapInteractive({
     // 3 design audit). Ahora el mapa fluye: min razonable, max = 100% del flex
     // container disponible.
     <div className="relative flex h-full min-h-0 flex-col">
+      {showHint && (
+        <div
+          data-testid="map-keyboard-hint"
+          className="mb-2 flex items-start gap-2 rounded-md border border-app-border bg-app-surface px-3 py-2 text-xs text-app-secondary"
+        >
+          <p className="min-w-0 flex-1">{t('map.keyboardInstructions')}</p>
+          <button
+            type="button"
+            onClick={() => setHintDismissed(true)}
+            aria-label={t('common.close')}
+            className="-my-2 flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-md text-base text-app-secondary hover:bg-app-muted hover:text-app-text"
+          >
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+      )}
       <p id="map-keyboard-instructions" className="sr-only">
         {t('map.keyboardInstructions')}
       </p>
@@ -276,7 +297,7 @@ export function MapInteractive({
               />
               <Circle
                 center={[correctLocation.lat, correctLocation.lng]}
-                radius={150000}
+                radius={GAME_CONSTANTS.MAP_CORRECT_THRESHOLD_KM * 1000}
                 pathOptions={{
                   color: 'var(--color-success-500)',
                   fillColor: 'var(--color-success-500)',
@@ -286,6 +307,22 @@ export function MapInteractive({
             </>
           )}
         </MapContainer>
+
+        {showResult && selectedLocation && correctLocation && (
+          <div
+            data-testid="map-legend"
+            className="pointer-events-none absolute bottom-3 left-3 z-[1000] flex flex-col gap-1 rounded-lg bg-app-card/95 px-3 py-2 text-xs font-medium text-app-text shadow-md shadow-black/20"
+          >
+            <span className="flex items-center gap-2">
+              <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-[#2563EB]" />
+              {t('game.yourAnswer')}
+            </span>
+            <span className="flex items-center gap-2">
+              <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-[#16a34a]" />
+              {t('game.correctLocation')}
+            </span>
+          </div>
+        )}
 
         {/* Subtle crosshair at the exact viewport center — useful for every
             user as a "here's where Enter/Space will drop the pin" reference,

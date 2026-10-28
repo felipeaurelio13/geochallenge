@@ -21,6 +21,7 @@ import { toAppPath } from '../utils/routing';
 import { getSocketErrorMessage } from '../utils/apiError';
 import { trackUxEvent } from '../utils/uxTelemetry';
 import { useConfirmDialog } from '../hooks/useConfirmDialog';
+import { useProgressDocumentTitle } from '../hooks/useProgressDocumentTitle';
 
 const MapInteractive = lazy(() =>
   import('../components/MapInteractive').then((m) => ({ default: m.MapInteractive }))
@@ -143,6 +144,8 @@ export function SurvivalPage() {
   const statusRef = useRef<PageStatus>(status);
   statusRef.current = status;
   const abandonTrackedRef = useRef(false);
+
+  useProgressDocumentTitle(status === 'playing' && Boolean(currentQuestion), currentRound);
 
   // Prevent accidental tab close / reload while a match round is in progress.
   useEffect(() => {

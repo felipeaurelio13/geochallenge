@@ -304,6 +304,8 @@ export interface Answer {
   questionId: string;
   answer: string;
   timeRemaining: number;
+  /** Wall-clock seconds spent before confirming; used only for post-game stats. */
+  elapsedSeconds?: number;
   mechanicUsage?: MechanicUsage;
   coordinates?: {
     lat: number;
@@ -331,6 +333,7 @@ export interface AnswerResult {
   accuracyBonus?: number;
   distance?: number;
   correctLocation?: { lat: number; lng: number };
+  elapsedSeconds?: number;
 }
 
 export interface GameConfig {
