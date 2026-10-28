@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, useMapEvents, Circle, useMap } from 'r
 import type { Map as LeafletMap } from 'leaflet';
 import { DivIcon, latLngBounds } from 'leaflet';
 import { useTranslation } from 'react-i18next';
+import { GAME_CONSTANTS } from '../constants/game';
 import 'leaflet/dist/leaflet.css';
 
 /** How far (in screen pixels) one arrow-key press pans the map. */
@@ -276,7 +277,7 @@ export function MapInteractive({
               />
               <Circle
                 center={[correctLocation.lat, correctLocation.lng]}
-                radius={150000}
+                radius={GAME_CONSTANTS.MAP_CORRECT_THRESHOLD_KM * 1000}
                 pathOptions={{
                   color: 'var(--color-success-500)',
                   fillColor: 'var(--color-success-500)',

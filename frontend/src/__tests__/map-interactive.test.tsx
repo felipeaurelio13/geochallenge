@@ -22,7 +22,7 @@ vi.mock('react-leaflet', () => ({
   MapContainer: ({ children, className }: any) => <div data-testid="leaflet-map" className={className}>{children}</div>,
   TileLayer: () => null,
   Marker: () => null,
-  Circle: () => null,
+  Circle: ({ radius }: any) => <div data-testid="map-result-circle" data-radius={radius} />,
   useMapEvents: () => null,
   useMap: () => mocks.fakeMap,
 }));
@@ -43,6 +43,21 @@ describe('MapInteractive neutral viewport reset', () => {
   it('resets to neutral view only while selecting a new answer', () => {
     expect(shouldResetMapView(false)).toBe(true);
     expect(shouldResetMapView(true)).toBe(false);
+  });
+
+  it('draws the success circle with the same 500 km tolerance used by scoring', () => {
+    render(
+      <MapInteractive
+        onLocationSelect={() => {}}
+        selectedLocation={{ lat: -33.45, lng: -70.66 }}
+        correctLocation={{ lat: -33.45, lng: -70.66 }}
+        showResult
+        disabled={false}
+        questionId="q-map"
+      />
+    );
+
+    expect(screen.getByTestId('map-result-circle')).toHaveAttribute('data-radius', '500000');
   });
 
   it('renders map inside rounded surface container without overflow', () => {

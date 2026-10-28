@@ -59,7 +59,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 4. Corregir el radio visual de acierto en preguntas de mapa — ⬜ Pendiente
+## 4. Corregir el radio visual de acierto en preguntas de mapa — ✅ Desarrollada
 
 **Área:** justicia percibida / `MapInteractive`.
 
@@ -196,3 +196,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** aparece solo en la última pregunta, en ES/EN, y no altera la altura del header ni la visibilidad de las alternativas en móvil.
 
 **Entrega:** commit `mejora 13: aviso de última pregunta`.
+
+---
+
+## 14. Identificar en el mapa cuál pin es tu respuesta y cuál la correcta — ⬜ Pendiente
+
+**Área:** claridad / `MapInteractive`.
+
+**Problema:** al revelar el resultado aparecen dos pines (azul y verde) y un círculo, pero nada indica cuál es la ubicación elegida y cuál la correcta. El color por sí solo no basta, especialmente con daltonismo.
+
+**Propuesta:** añadir una leyenda breve sobre el mapa con los dos marcadores y sus etiquetas (“Tu respuesta”, “Lugar correcto”), visible solo en el resultado y sin tapar el mapa en móvil.
+
+**Aceptación:** la leyenda no intercepta clics, se lee en ES/EN y no aparece antes de confirmar.
+
+**Entrega:** commit `mejora 14: leyenda de marcadores del mapa`.
