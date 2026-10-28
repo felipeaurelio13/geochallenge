@@ -560,6 +560,7 @@
     "viewRankings": "View Rankings",
     "shareScore": "Share your score",
     "shareText": "🎯 I just finished a GeoChallenge round with {{score}} points ({{correct}}/{{total}} correct, {{accuracy}} accuracy). Think you can beat me?",
+    "shareTextWithTime": "🎯 I just finished a GeoChallenge round with {{score}} points ({{correct}}/{{total}} correct, {{accuracy}} accuracy) in {{duration}}. Think you can beat me?",
     "copied": "Result ready to share!",
     "shareButton": "Share result",
     "pointsBreakdownTitle": "What gave you the most points",

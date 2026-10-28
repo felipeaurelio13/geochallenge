@@ -100,6 +100,10 @@ vi.mock('react-i18next', () => ({
         return `🎯 ${options?.score} pts ${options?.correct}/${options?.total} (${options?.accuracy})`;
       }
 
+      if (key === 'results.shareTextWithTime') {
+        return `🎯 ${options?.score} pts ${options?.correct}/${options?.total} (${options?.accuracy}) en ${options?.duration}`;
+      }
+
       if (key === 'results.categoryAccuracyValue') {
         return `${options?.correct} de ${options?.total} · ${options?.accuracy}%`;
       }
@@ -314,6 +318,39 @@ describe('ResultsPage', () => {
     } finally {
       mocks.gameState.results = originalResults;
     }
+  });
+
+  it('incluye la duración en el texto de compartir cuando la sesión trae tiempos', async () => {
+    const originalResults = mocks.gameState.results;
+    mocks.gameState.results = originalResults.map((result) => ({
+      ...result,
+      elapsedSeconds: 4,
+    })) as typeof mocks.gameState.results;
+
+    try {
+      render(<ResultsPage />);
+
+      fireEvent.click(screen.getByRole('button', { name: /compartir resultado/i }));
+
+      await waitFor(() => expect(mocks.writeTextMock).toHaveBeenCalled());
+      const shared = mocks.writeTextMock.mock.calls[mocks.writeTextMock.mock.calls.length - 1]?.[0] as string;
+      expect(shared).toContain('en 40 s');
+      expect(shared).not.toContain('min');
+    } finally {
+      mocks.gameState.results = originalResults;
+    }
+  });
+
+  it('mantiene el texto de compartir sin duración cuando no hay tiempos', async () => {
+    render(<ResultsPage />);
+
+    fireEvent.click(screen.getByRole('button', { name: /compartir resultado/i }));
+
+    await waitFor(() => expect(mocks.writeTextMock).toHaveBeenCalled());
+    const shared = mocks.writeTextMock.mock.calls[mocks.writeTextMock.mock.calls.length - 1]?.[0] as string;
+    expect(shared).not.toContain(' en ');
+    expect(shared).not.toContain('min');
+    expect(shared).not.toContain(' s');
   });
 
   it('señala la ronda más lenta sin revelar la respuesta correcta', () => {

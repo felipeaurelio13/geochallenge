@@ -717,7 +717,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 51. Incluir la duración en el texto de compartir resultados — ⬜ Pendiente
+## 51. Incluir la duración en el texto de compartir resultados — ✅ Desarrollada
 
 **Área:** compartir / `ResultsPage`.
 
@@ -727,7 +727,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** el texto incluye la duración solo con tiempos válidos; se lee en ES/EN; no duplica la duración si ya estuviera presente; no cambia el texto cuando no hay datos; los tests de compartir cubren ambos casos.
 
-**Entrega:** commit `mejora 51: duración en el texto de compartir`.
+**Entrega:** commit `mejora 51: duración en el texto de compartir`. Un template nuevo añade la duración compacta solo cuando la sesión trae tiempos válidos; sin tiempos se conserva el texto anterior.
 
 ---
 
@@ -840,3 +840,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** la práctica conserva los filtros compatibles; funciona también sin filtros; no altera el destino de “Jugar de nuevo” ni el de las categorías; se cubre con test de navegación.
 
 **Entrega:** commit `mejora 59: filtros al practicar desde el repaso`.
+
+---
+
+## 60. Anunciar cuántos fallos se copiaron del repaso — ⬜ Pendiente
+
+**Área:** accesibilidad / `ResultsPage`.
+
+**Problema:** al copiar el repaso, el aviso solo confirma que la acción terminó. Un usuario de lector de pantalla no sabe cuántos fallos se copiaron ni si el filtro activo dejó fuera parte de la lista.
+
+**Propuesta:** reutilizar la región `aria-live` del repaso para anunciar el número de fallos copiados junto al mensaje de éxito, derivado de `visibleReviewMistakes.length`. Mantener el mensaje de error sin conteo y no anunciar en el render inicial.
+
+**Aceptación:** el conteo coincide con las filas visibles; usa singular o plural según corresponda; se lee en ES/EN; no se anuncia si el copiado falla; no duplica el aviso existente ni interfiere con los anuncios de orden o filtro.
+
+**Entrega:** commit `mejora 60: conteo al copiar el repaso`.

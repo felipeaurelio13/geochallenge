@@ -213,9 +213,14 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
     { key: 'accuracyBonus', label: t('results.accuracyBonus'), value: results.reduce((sum, r) => sum + (r.accuracyBonus ?? 0), 0) },
   ].filter((item) => item.value > 0);
 
-  const shareText = t('results.shareText', {
-    score, correct: correctAnswers, total: totalQuestions, accuracy: `${percentage}%`,
-  });
+  const shareText = formattedTotalAnswerSeconds
+    ? t('results.shareTextWithTime', {
+        score, correct: correctAnswers, total: totalQuestions, accuracy: `${percentage}%`,
+        duration: formattedTotalAnswerSeconds,
+      })
+    : t('results.shareText', {
+        score, correct: correctAnswers, total: totalQuestions, accuracy: `${percentage}%`,
+      });
 
   const getPerformanceMessage = () => {
     if (isStreakMode) {

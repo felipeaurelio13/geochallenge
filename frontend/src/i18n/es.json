@@ -560,6 +560,7 @@
     "viewRankings": "Ver rankings",
     "shareScore": "Comparte tu puntuación",
     "shareText": "🎯 Terminé una partida en GeoChallenge con {{score}} puntos ({{correct}}/{{total}} correctas, {{accuracy}} de precisión). ¿Te animas a superarme?",
+    "shareTextWithTime": "🎯 Terminé una partida en GeoChallenge con {{score}} puntos ({{correct}}/{{total}} correctas, {{accuracy}} de precisión) en {{duration}}. ¿Te animas a superarme?",
     "copied": "¡Resultado listo para compartir!",
     "shareButton": "Compartir resultado",
     "pointsBreakdownTitle": "Qué te dio más puntos",
