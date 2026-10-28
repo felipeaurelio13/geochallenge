@@ -59,7 +59,10 @@ describe('QuestionCard', () => {
 
     render(<QuestionCard question={question} questionNumber={1} totalQuestions={10} compact />);
 
-    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('¿Cuál es la capital de Chile?');
+    const heading = screen.getByRole('heading', { level: 2 });
+    expect(heading).toHaveTextContent('Pregunta 1 de 10');
+    expect(heading).toHaveTextContent('¿Cuál es la capital de Chile?');
+    expect(heading.closest('.question-card')).not.toHaveAttribute('aria-label');
   });
 
   it('permite enfocar el enunciado sin añadirlo al orden de tabulación', () => {

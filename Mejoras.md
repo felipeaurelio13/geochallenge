@@ -255,7 +255,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 18. Anunciar el número de pregunta al enfocar el enunciado — ⬜ Pendiente
+## 18. Anunciar el número de pregunta al enfocar el enunciado — ✅ Desarrollada
 
 **Área:** accesibilidad / `QuestionCard`.
 
@@ -265,7 +265,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** al enfocar el enunciado se escucha una sola vez el número y el texto de la pregunta, en ES/EN; no cambia la altura ni el layout visible.
 
-**Entrega:** commit `mejora 18: número de pregunta en el enunciado accesible`.
+**Entrega:** commit `mejora 18: número de pregunta en el enunciado accesible`. El “Pregunta X de Y” vive dentro del `h2` enfocable como texto `sr-only`; el contenedor ya no repite la etiqueta.
 
 ---
 
@@ -392,3 +392,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** la etiqueta aparece en ES/EN; distingue partida normal, práctica y trial; no se muestra si falta configuración; no añade altura al bloque de acciones ni desplaza el CTA principal.
 
 **Entrega:** commit `mejora 27: contexto de la partida en resultados`.
+
+---
+
+## 28. Mostrar la categoría de la ronda actual en el encabezado — ⬜ Pendiente
+
+**Área:** orientación / `GamePage`.
+
+**Problema:** en una partida mixta el encabezado solo muestra el número de pregunta. El jugador descubre el tipo de desafío al mirar el enunciado, y no puede anticipar si viene un mapa, una bandera o una capital.
+
+**Propuesta:** añadir una etiqueta compacta con la categoría localizada junto al contador de progreso, reutilizando las etiquetas de categoría y sin añadir una fila nueva en móvil.
+
+**Aceptación:** la etiqueta se actualiza al avanzar; se lee en ES/EN; no tapa el temporizador ni el botón de salida; no aparece en modos donde la categoría es sensible o no está definida.
+
+**Entrega:** commit `mejora 28: categoría de la ronda en el encabezado`.

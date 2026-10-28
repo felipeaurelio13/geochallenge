@@ -128,7 +128,6 @@ export function QuestionCard({
 
   return (
     <div
-      aria-label={t('game.questionOf', { current: questionNumber, total: totalQuestions })}
       className={`question-card ${(minimal || showQuestionImage) ? 'question-card--minimal px-1 py-1 sm:px-2 sm:py-2' : `rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-muted)] ${compact ? 'px-4 py-2 sm:px-5 sm:py-3' : 'px-4 py-4 sm:px-6 sm:py-6'}`} ${isCompactMediaMode ? 'question-card--with-media' : ''}`}
     >
       <div className="text-center">
@@ -223,7 +222,10 @@ export function QuestionCard({
         )}
 
         <div className={`flex ${compact ? 'flex-row items-start justify-center gap-1.5 text-left' : 'flex-col items-center'} ${question.category === 'CAPITAL' ? 'w-full justify-center text-center' : ''}`}>
-          <h2 ref={headingRef} tabIndex={-1} className={headingClassName}>{getQuestionText()}</h2>
+          <h2 ref={headingRef} tabIndex={-1} className={headingClassName}>
+            <span className="sr-only">{t('game.questionOf', { current: questionNumber, total: totalQuestions })}. </span>
+            {getQuestionText()}
+          </h2>
 
           {!minimal && question.difficulty && question.category !== 'FLAG' && question.category !== 'MONUMENT' && (
             <div className={compact ? 'mt-0.5 shrink-0' : 'mt-5'}>
