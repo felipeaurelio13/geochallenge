@@ -801,7 +801,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 57. Anunciar cuántos fallos quedan al filtrar el repaso — ⬜ Pendiente
+## 57. Anunciar cuántos fallos quedan al filtrar el repaso — ✅ Desarrollada
 
 **Área:** accesibilidad / `ResultsPage`.
 
@@ -811,7 +811,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** el anuncio ocurre solo tras elegir un filtro; informa categoría y cantidad; se lee en ES/EN; no duplica el `aria-pressed` del chip; no interfiere con los anuncios de orden o expansión.
 
-**Entrega:** commit `mejora 57: anuncio del filtro del repaso`.
+**Entrega:** commit `mejora 57: anuncio del filtro del repaso`. Elegir un chip anuncia la categoría y el total visible; “Todos” usa un mensaje propio con el total y el render inicial no anuncia nada.
 
 ---
 
@@ -924,3 +924,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** el tiempo copiado coincide con el visible; solo aparece con datos válidos; se lee en ES/EN; no cambia el texto cuando falta; el copiado sigue respetando filtro y orden.
 
 **Entrega:** commit `mejora 65: tiempo por fallo en el repaso copiado`.
+
+---
+
+## 66. Reservar espacio para el aviso de copiado del repaso — ⬜ Pendiente
+
+**Área:** estabilidad visual / `ResultsPage`.
+
+**Problema:** el aviso “Repaso copiado” se inserta sobre una línea vacía y empuja hacia abajo la lista de fallos justo después de pulsar copiar. En móvil el salto se nota y puede hacer perder la posición de lectura.
+
+**Propuesta:** reservar una altura mínima para el aviso, igual que ya hace el botón de compartir, sin mostrarlo hasta que exista un mensaje. Mantener la región `aria-live` y el tiempo de desaparición actuales.
+
+**Aceptación:** la lista no cambia de posición al aparecer o desaparecer el aviso; el espacio reservado no deja un hueco visible; el aviso sigue siendo perceptible; no afecta al filtro ni al orden; se cubre con test de estructura.
+
+**Entrega:** commit `mejora 66: espacio estable para el aviso de copiado`.

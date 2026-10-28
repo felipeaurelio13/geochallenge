@@ -273,6 +273,19 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
     setReviewAnnouncement(t(next === 'slowest' ? 'results.reviewSortedByTime' : 'results.reviewSortedOriginal'));
   };
 
+  const handleFilterReview = (filterCategory: Category | 'ALL') => {
+    setReviewCategory(filterCategory);
+    const count = reviewFilterCount(filterCategory);
+    if (filterCategory === 'ALL') {
+      setReviewAnnouncement(t(count === 1 ? 'results.reviewFilterAllOne' : 'results.reviewFilterAllMany', { count }));
+    } else {
+      setReviewAnnouncement(t(count === 1 ? 'results.reviewFilteredOne' : 'results.reviewFilteredMany', {
+        category: t(CATEGORY_LABEL_KEYS[filterCategory]),
+        count,
+      }));
+    }
+  };
+
   const handleBackToSummary = () => {
     const heading = summaryHeadingRef.current;
     if (!heading) return;
@@ -502,7 +515,7 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
                     <button
                       key={filterCategory}
                       type="button"
-                      onClick={() => setReviewCategory(filterCategory)}
+                      onClick={() => handleFilterReview(filterCategory)}
                       aria-pressed={isActive}
                       className={`min-h-9 rounded-full border px-2.5 text-xs font-medium ${isActive
                         ? 'border-primary bg-primary text-app-on-accent'

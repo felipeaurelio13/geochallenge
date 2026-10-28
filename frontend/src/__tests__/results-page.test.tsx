@@ -140,6 +140,22 @@ vi.mock('react-i18next', () => ({
         return `Se expandieron ${options?.count} respuestas`;
       }
 
+      if (key === 'results.reviewFilteredOne') {
+        return `Mostrando ${options?.category}: ${options?.count} fallo`;
+      }
+
+      if (key === 'results.reviewFilteredMany') {
+        return `Mostrando ${options?.category}: ${options?.count} fallos`;
+      }
+
+      if (key === 'results.reviewFilterAllOne') {
+        return `Mostrando todos los fallos: ${options?.count} fallo`;
+      }
+
+      if (key === 'results.reviewFilterAllMany') {
+        return `Mostrando todos los fallos: ${options?.count} fallos`;
+      }
+
       if (key === 'results.reviewCollapsedMany') {
         return `Se contrajeron ${options?.count} respuestas`;
       }
@@ -548,6 +564,7 @@ describe('ResultsPage', () => {
       const rows = Array.from(section.querySelectorAll('details'));
       const filter = within(section).getByRole('group', { name: 'Filtrar el repaso por categoría' });
 
+      expect(screen.queryByText(/Mostrando/)).not.toBeInTheDocument();
       expect(within(filter).getByRole('button', { name: 'Todos (2)' })).toHaveAttribute('aria-pressed', 'true');
       expect(within(filter).getByRole('button', { name: 'Banderas (1)' })).toBeInTheDocument();
       expect(within(filter).getByRole('button', { name: 'Capitales (1)' })).toBeInTheDocument();
@@ -557,6 +574,7 @@ describe('ResultsPage', () => {
 
       fireEvent.click(within(filter).getByRole('button', { name: 'Capitales (1)' }));
 
+      expect(screen.getByText('Mostrando Capitales: 1 fallo')).toBeInTheDocument();
       expect(section).toHaveTextContent('1 fallo');
       expect(rows[0]).toHaveAttribute('hidden');
       expect(rows[1]).not.toHaveAttribute('hidden');
@@ -569,6 +587,7 @@ describe('ResultsPage', () => {
 
       fireEvent.click(within(filter).getByRole('button', { name: 'Todos (2)' }));
 
+      expect(screen.getByText('Mostrando todos los fallos: 2 fallos')).toBeInTheDocument();
       expect(section).toHaveTextContent('2 fallos');
       expect(rows[0]).not.toHaveAttribute('hidden');
       expect(rows[0].open).toBe(true);
