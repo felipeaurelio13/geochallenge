@@ -955,7 +955,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 68. Permitir reintentar la carga del ranking cuando falla — ⬜ Pendiente
+## 68. Permitir reintentar la carga del ranking cuando falla — ✅ Desarrollada
 
 **Área:** resiliencia / `ResultsPage`.
 
@@ -965,7 +965,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** el reintento solo aparece tras un error; vuelve a pedir el ranking; muestra carga durante el reintento; no cambia la altura de la fila; no afecta a práctica ni prueba; se cubre con test de error y reintento.
 
-**Entrega:** commit `mejora 68: reintento de carga del ranking`.
+**Entrega:** commit `mejora 68: reintento de carga del ranking`. La fila estable cambia el estado vacío por un botón de reintento tras un error, vuelve a pedir el ranking y muestra el spinner mientras dura.
 
 ---
 
@@ -1078,3 +1078,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** la precisión copiada coincide con la visible; se lee en ES/EN; no duplica el conteo de fallos; no altera el formato de cada fallo; se cubre con test del texto copiado.
 
 **Entrega:** commit `mejora 76: precisión en el repaso copiado`.
+
+---
+
+## 77. Anunciar que el ranking no se pudo cargar — ⬜ Pendiente
+
+**Área:** accesibilidad / `ResultsPage`.
+
+**Problema:** cuando falla la petición de ranking, el spinner desaparece y aparece un botón de reintento, pero un lector de pantalla no recibe ningún aviso del cambio. El jugador puede quedarse esperando una posición que ya no va a llegar.
+
+**Propuesta:** anunciar el fallo en una región `aria-live` junto a la fila de ranking y mantener el botón de reintento como acción. No anunciar si la petición se recupera sin error.
+
+**Aceptación:** el fallo se anuncia una sola vez; el reintento sigue disponible; el aviso no duplica el texto del botón; se lee en ES/EN; no interfiere con el spinner ni con la posición; se cubre con test.
+
+**Entrega:** commit `mejora 77: aviso accesible de ranking fallido`.

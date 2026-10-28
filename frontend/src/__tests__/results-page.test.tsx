@@ -86,6 +86,7 @@ vi.mock('react-i18next', () => ({
         'results.modeStreak': 'Racha',
         'results.modeTrial': 'Partida de prueba',
         'results.yourRank': 'Tu posición',
+        'results.retryRank': 'Reintentar ranking',
         'results.playAgain': 'Jugar de nuevo',
         'results.viewRankings': 'Ver rankings',
         'results.shareScore': 'Comparte tu puntuación',
@@ -488,6 +489,22 @@ describe('ResultsPage', () => {
     await waitFor(() => expect(within(row).queryByText('loading')).not.toBeInTheDocument());
     expect(row).toHaveClass('min-h-12');
     expect(within(row).queryByText(/#/)).not.toBeInTheDocument();
+  });
+
+  it('permite reintentar la carga del ranking tras un fallo', async () => {
+    mocks.getMyRankMock.mockRejectedValueOnce(new Error('offline'));
+
+    render(<ResultsPage />);
+
+    const retry = await screen.findByRole('button', { name: 'Reintentar ranking' });
+    expect(mocks.getMyRankMock).toHaveBeenCalledTimes(1);
+    expect(screen.queryByText('#1')).not.toBeInTheDocument();
+
+    fireEvent.click(retry);
+
+    await waitFor(() => expect(mocks.getMyRankMock).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(screen.getByText('#1')).toBeInTheDocument());
+    expect(screen.queryByRole('button', { name: 'Reintentar ranking' })).not.toBeInTheDocument();
   });
 
   it('places replay before review and sharing, and shows actual missed answers', () => {

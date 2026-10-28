@@ -564,6 +564,7 @@
     "categoryAccuracyValue": "{{correct}} de {{total}} · {{accuracy}}%",
     "practiceWeakest": "Practicar {{category}}",
     "yourRank": "Tu posición",
+    "retryRank": "Reintentar ranking",
     "playAgain": "Otra partida",
     "viewRankings": "Ver rankings",
     "shareScore": "Comparte tu puntuación",

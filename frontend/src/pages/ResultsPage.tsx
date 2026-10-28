@@ -211,16 +211,24 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
   }, []);
 
   const [userRank, setUserRank] = useState<number | null>(null);
+  const [rankError, setRankError] = useState(false);
+  const [rankAttempt, setRankAttempt] = useState(0);
   const [loading, setLoading] = useState(!isPracticeMode && !isTrial);
   useEffect(() => {
     if (isPracticeMode || isTrial || results.length === 0) return;
     let active = true;
     api.getMyRank()
       .then((rankData) => { if (active) setUserRank(rankData.userRank?.rank || null); })
-      .catch(() => {})
+      .catch(() => { if (active) setRankError(true); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, [isPracticeMode, isTrial, results.length]);
+  }, [isPracticeMode, isTrial, results.length, rankAttempt]);
+
+  const handleRetryRank = () => {
+    setLoading(true);
+    setRankError(false);
+    setRankAttempt((attempt) => attempt + 1);
+  };
 
   const pointsBreakdown = [
     { key: 'basePoints', label: t('results.basePoints'), value: results.reduce((sum, r) => sum + (r.basePoints ?? 0), 0) },
@@ -663,7 +671,15 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
           {!isTrial && !isPracticeMode && (
             <div className="mt-4 flex min-h-12 items-center justify-between gap-3" data-testid="results-rank-row">
               <div className="flex min-h-12 min-w-0 flex-1 items-center">
-                {loading ? <LoadingSpinner size="sm" /> : userRank ? <p className="text-sm text-app-secondary">{t('results.yourRank')} <strong className="text-app-text">#{userRank}</strong></p> : null}
+                {loading ? <LoadingSpinner size="sm" /> : rankError ? (
+                  <button
+                    type="button"
+                    onClick={handleRetryRank}
+                    className="min-h-11 rounded-md px-2 text-xs font-semibold text-primary hover:bg-primary/10 hover:text-primary/80"
+                  >
+                    {t('results.retryRank')}
+                  </button>
+                ) : userRank ? <p className="text-sm text-app-secondary">{t('results.yourRank')} <strong className="text-app-text">#{userRank}</strong></p> : null}
               </div>
               <Button onClick={() => navigate('/rankings')} variant="ghost">{t('results.viewRankings')}</Button>
             </div>
