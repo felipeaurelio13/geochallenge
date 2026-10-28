@@ -77,6 +77,7 @@ describe('QuestionCard', () => {
     expect(heading).toHaveTextContent('Dificultad: game.difficulty.medium');
     expect(heading).toHaveTextContent('¿Cuál es la capital de Chile?');
     expect(heading.closest('.question-card')).not.toHaveAttribute('aria-label');
+    expect(screen.getByText('game.difficulty.medium')).toHaveAttribute('aria-hidden', 'true');
   });
 
   it('permite enfocar el enunciado sin añadirlo al orden de tabulación', () => {
@@ -172,6 +173,7 @@ describe('QuestionCard', () => {
     expect(heading.className).toContain('text-[clamp(1.05rem,4vw,1.28rem)]');
     expect(difficultyBadge.className).toContain('absolute');
     expect(difficultyBadge.className).toContain('top-2');
+    expect(difficultyBadge).toHaveAttribute('aria-hidden', 'true');
   });
   it('normaliza códigos ISO de bandera en mayúsculas para mantener contrato con flagcdn', () => {
     const question = {

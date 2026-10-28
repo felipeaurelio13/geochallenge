@@ -577,7 +577,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 41. Evitar que la dificultad se anuncie dos veces con lector de pantalla — ⬜ Pendiente
+## 41. Evitar que la dificultad se anuncie dos veces con lector de pantalla — ✅ Desarrollada
 
 **Área:** accesibilidad / `QuestionCard`.
 
@@ -587,4 +587,18 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** la dificultad se escucha una sola vez al enfocar el enunciado; el badge sigue visible; no se oculta ninguna información que no esté ya anunciada; funciona en todas las categorías con badge.
 
-**Entrega:** commit `mejora 41: badge de dificultad sin duplicado accesible`.
+**Entrega:** commit `mejora 41: badge de dificultad sin duplicado accesible`. Los badges visuales quedan `aria-hidden`; la dificultad sigue disponible en el anuncio del encabezado.
+
+---
+
+## 42. Mostrar una pista visible de los controles del mapa — ⬜ Pendiente
+
+**Área:** accesibilidad / `MapInteractive`.
+
+**Problema:** el mapa se puede mover con flechas, hacer zoom con `+`/`-` y marcar con Enter, pero esas instrucciones solo existen para lectores de pantalla. Un usuario vidente que llega con teclado no descubre los controles y depende del ratón.
+
+**Propuesta:** mostrar una pista compacta y descartable sobre o bajo el mapa en la primera pregunta de mapa, reutilizando `map.keyboardInstructions` y ocultándola cuando el resultado ya está visible.
+
+**Aceptación:** la pista no tapa el mapa ni el crosshair; no aparece en preguntas que no son de mapa; se puede cerrar o ignora en móvil táctil; se lee en ES/EN; no intercepta clics.
+
+**Entrega:** commit `mejora 42: pista visible de controles del mapa`.

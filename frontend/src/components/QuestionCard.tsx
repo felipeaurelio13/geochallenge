@@ -153,6 +153,7 @@ export function QuestionCard({
 
               {!minimal && (question.category === 'FLAG' || question.category === 'MONUMENT') && question.difficulty && (
                 <span
+                  aria-hidden="true"
                   className={`absolute right-2 top-2 inline-block rounded-full px-2 py-0.5 text-[0.62rem] font-semibold sm:text-[0.68rem] ${getDifficultyClass()}`}
                 >
                   {t(getDifficultyKey())}
@@ -236,7 +237,7 @@ export function QuestionCard({
 
           {!minimal && question.difficulty && question.category !== 'FLAG' && question.category !== 'MONUMENT' && (
             <div className={compact ? 'mt-0.5 shrink-0' : 'mt-5'}>
-              <span className={`inline-block rounded-full ${compact ? 'px-2.5 py-0.5 text-[0.65rem] sm:text-xs' : 'px-3.5 py-1 text-xs sm:text-sm'} font-semibold ${getDifficultyClass()}`}>
+              <span aria-hidden="true" className={`inline-block rounded-full ${compact ? 'px-2.5 py-0.5 text-[0.65rem] sm:text-xs' : 'px-3.5 py-1 text-xs sm:text-sm'} font-semibold ${getDifficultyClass()}`}>
                 {t(getDifficultyKey())}
               </span>
             </div>
