@@ -514,6 +514,8 @@
     "correct": "Correctas",
     "incorrect": "Incorrectas",
     "accuracy": "Precisión",
+    "averageTime": "Tiempo medio por respuesta",
+    "averageTimeValue": "{{seconds}} s",
     "categoryAccuracyTitle": "Precisión por categoría",
     "categoryAccuracyDescription": "Así se reparten tus aciertos por tipo de pregunta.",
     "categoryAccuracyValue": "{{correct}} de {{total}} · {{accuracy}}%",

@@ -369,7 +369,8 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
     setIsSubmitting(true);
 
     try {
-      const result = await submitAnswer(answer, mapLocation || undefined, pendingMechanicUsage);
+      const elapsedSeconds = Math.min(roundDuration, Math.max(0, roundDuration - timeRemaining));
+      const result = await submitAnswer(answer, mapLocation || undefined, pendingMechanicUsage, elapsedSeconds);
       setPendingMechanicUsage(undefined);
 
       if (result.isCorrect) {

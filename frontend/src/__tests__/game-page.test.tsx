@@ -471,6 +471,8 @@ describe('GamePage ending flow', () => {
     fireEvent.click(submitButton);
 
     expect(mocks.submitAnswerMock).toHaveBeenCalledTimes(1);
+    expect(mocks.submitAnswerMock.mock.calls[0][3]).toBeGreaterThanOrEqual(0);
+    expect(mocks.submitAnswerMock.mock.calls[0][3]).toBeLessThanOrEqual(10);
 
     resolveSubmit({ isCorrect: true, points: 100 });
     await screen.findByText('game.correct');

@@ -213,7 +213,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 15. Mostrar el tiempo medio por respuesta en resultados — ⬜ Pendiente
+## 15. Mostrar el tiempo medio por respuesta en resultados — ✅ Desarrollada
 
 **Área:** aprendizaje / `ResultsPage`.
 
@@ -223,7 +223,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** el promedio es coherente con la duración configurada; se muestra redondeado y en ES/EN; no aparece en partidas sin respuestas registradas.
 
-**Entrega:** commit `mejora 15: tiempo medio por respuesta en resultados`.
+**Entrega:** commit `mejora 15: tiempo medio por respuesta en resultados`. El tiempo se registra al confirmar cada respuesta y se resume bajo las métricas; si una sesión antigua no trae tiempos, la línea no se muestra.
 
 ---
 
@@ -350,3 +350,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** el atajo solo aparece con al menos dos categorías y una precisión menor al 100%; conserva la categoría elegida al reiniciar; funciona en ES/EN y no desplaza las acciones principales.
 
 **Entrega:** commit `mejora 24: practicar la categoría más floja`.
+
+---
+
+## 25. Mostrar el tiempo dedicado en cada fallo del repaso — ⬜ Pendiente
+
+**Área:** aprendizaje / `ResultsPage`.
+
+**Problema:** el repaso ya explica qué falló, pero no cuánto tiempo se dedicó a esa pregunta. Sin ese dato no se distingue un error de conocimiento de uno por apuro o por duda prolongada.
+
+**Propuesta:** mostrar el tiempo registrado junto a cada fallo del repaso, reutilizando el dato de la sesión y el mismo formato localizado del tiempo medio. Si el fallo no tiene tiempo registrado, omitir la etiqueta.
+
+**Aceptación:** cada fallo con tiempo lo muestra dentro del detalle desplegable; no aparece en filas sin dato; no revela la respuesta con la fila cerrada y no altera el orden del repaso.
+
+**Entrega:** commit `mejora 25: tiempo por fallo en el repaso`.

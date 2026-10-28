@@ -25,7 +25,8 @@ interface GameContextType {
   submitAnswer: (
     answer: string,
     coordinates?: { lat: number; lng: number },
-    mechanicUsage?: MechanicUsage
+    mechanicUsage?: MechanicUsage,
+    elapsedSeconds?: number
   ) => Promise<AnswerResult>;
   nextQuestion: () => void;
   finishGame: () => Promise<GameResult>;
@@ -172,7 +173,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     async (
       answer: string,
       coordinates?: { lat: number; lng: number },
-      mechanicUsage?: MechanicUsage
+      mechanicUsage?: MechanicUsage,
+      elapsedSeconds?: number
     ): Promise<AnswerResult> => {
       const { questions, currentIndex, timeRemaining, config } = stateRef.current;
       const currentQuestion = questions[currentIndex];
@@ -190,6 +192,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         questionId: currentQuestion.id,
         answer,
         timeRemaining: reportedTimeRemaining,
+        elapsedSeconds,
         mechanicUsage,
         coordinates,
       };
@@ -216,6 +219,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         accuracyBonus: result.accuracyBonus,
         distance: result.distance,
         correctLocation: (result as { correctLocation?: { lat: number; lng: number } }).correctLocation,
+        elapsedSeconds,
       };
 
       setState((prev) => ({

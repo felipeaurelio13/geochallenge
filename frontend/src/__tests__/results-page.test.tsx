@@ -46,6 +46,7 @@ vi.mock('react-i18next', () => ({
         'results.correct': 'Correctas',
         'results.incorrect': 'Incorrectas',
         'results.accuracy': 'Precisión',
+        'results.averageTime': 'Tiempo medio por respuesta',
         'results.categoryAccuracyTitle': 'Precisión por categoría',
         'results.categoryAccuracyDescription': 'Así se reparten tus aciertos por tipo de pregunta.',
         'categories.flags': 'Banderas',
@@ -70,6 +71,10 @@ vi.mock('react-i18next', () => ({
 
       if (key === 'results.categoryAccuracyValue') {
         return `${options?.correct} de ${options?.total} · ${options?.accuracy}%`;
+      }
+
+      if (key === 'results.averageTimeValue') {
+        return `${options?.seconds} s`;
       }
 
       return translations[key] ?? key;
@@ -118,6 +123,24 @@ describe('ResultsPage', () => {
     expect(screen.getByText('80%')).toBeInTheDocument();
     expect(screen.getByText('1,100')).toBeInTheDocument();
     expect(container.querySelectorAll('article.min-w-0').length).toBe(0);
+    expect(screen.queryByText(/Tiempo medio por respuesta/)).not.toBeInTheDocument();
+  });
+
+  it('muestra el tiempo medio por respuesta cuando la sesión trae tiempos', () => {
+    const originalResults = mocks.gameState.results;
+    mocks.gameState.results = originalResults.map((result, index) => ({
+      ...result,
+      elapsedSeconds: index < 5 ? 4 : 8,
+    })) as typeof mocks.gameState.results;
+
+    try {
+      render(<ResultsPage />);
+
+      expect(screen.getByText(/Tiempo medio por respuesta/)).toBeInTheDocument();
+      expect(screen.getByText('6 s')).toBeInTheDocument();
+    } finally {
+      mocks.gameState.results = originalResults;
+    }
   });
 
   it.each(['single', 'streak', 'practice'] as const)('replays %s with the same configuration', async (gameType) => {

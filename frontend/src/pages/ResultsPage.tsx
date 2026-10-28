@@ -69,6 +69,16 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
       }))
       .sort((a, b) => a.accuracy - b.accuracy);
   }, [questions, results]);
+  const averageAnswerSeconds = useMemo(() => {
+    const elapsed = results
+      .map((result) => result.elapsedSeconds)
+      .filter((value): value is number => typeof value === 'number' && Number.isFinite(value) && value >= 0);
+    if (!elapsed.length) return null;
+    return elapsed.reduce((sum, value) => sum + value, 0) / elapsed.length;
+  }, [results]);
+  const formattedAverageAnswerSeconds = averageAnswerSeconds === null
+    ? null
+    : averageAnswerSeconds.toLocaleString(currentLanguage, { maximumFractionDigits: 1 });
   const unlockedAchievements = useMemo(
     () => (lastNewAchievements ?? []).map((key) => getAchievementDisplay(key, currentLanguage)),
     [lastNewAchievements, currentLanguage],
@@ -184,6 +194,14 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
             <div className="px-2"><p className="text-lg font-semibold tabular-nums text-app-text">{score.toLocaleString()}</p><p className="text-xs text-app-secondary">{t('results.points')}</p></div>
             <div className="px-2"><p className="text-lg font-semibold tabular-nums text-app-text">{bestStreak}</p><p className="text-xs text-app-secondary">{t('results.bestRun')}</p></div>
           </div>
+          {formattedAverageAnswerSeconds !== null && (
+            <p className="mt-2 text-xs text-app-secondary">
+              {t('results.averageTime')}:{' '}
+              <span className="font-semibold tabular-nums text-app-text">
+                {t('results.averageTimeValue', { seconds: formattedAverageAnswerSeconds })}
+              </span>
+            </p>
+          )}
         </section>
 
         <section className="mt-5 flex flex-col gap-2.5" data-testid="results-action-tray">
