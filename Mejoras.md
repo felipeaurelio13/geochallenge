@@ -941,7 +941,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 67. Incluir el total de fallos en el repaso copiado — ⬜ Pendiente
+## 67. Incluir el total de fallos en el repaso copiado — ✅ Desarrollada
 
 **Área:** aprendizaje / `ResultsPage`.
 
@@ -951,7 +951,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** el total coincide con las filas copiadas; respeta el filtro activo; se lee en ES/EN; no aparece si no hay fallos; no duplica el contador visible del repaso.
 
-**Entrega:** commit `mejora 67: total de fallos en el repaso copiado`.
+**Entrega:** commit `mejora 67: total de fallos en el repaso copiado`. El texto añade una línea con el conteo visible entre el título y la lista, usando singular/plural y respetando el filtro activo.
 
 ---
 
@@ -1064,3 +1064,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** el número coincide con las filas visibles; cambia al filtrar; usa singular o plural; se lee en ES/EN; no cambia el layout de forma abrupta; no altera el texto copiado.
 
 **Entrega:** commit `mejora 75: conteo en el botón de copiar repaso`.
+
+---
+
+## 76. Incluir la precisión de la partida en el repaso copiado — ⬜ Pendiente
+
+**Área:** aprendizaje / `ResultsPage`.
+
+**Problema:** el repaso copiado reúne fallos, tiempos y datos, pero no la precisión global. Al estudiar fuera de la app no queda claro si esos fallos representan una partida floja o una buena con pocos errores.
+
+**Propuesta:** añadir una línea de precisión junto a las de duración y tiempo medio, reutilizando `percentage`. Omitirla solo si no hay respuestas, caso que ya redirige fuera de resultados.
+
+**Aceptación:** la precisión copiada coincide con la visible; se lee en ES/EN; no duplica el conteo de fallos; no altera el formato de cada fallo; se cubre con test del texto copiado.
+
+**Entrega:** commit `mejora 76: precisión en el repaso copiado`.

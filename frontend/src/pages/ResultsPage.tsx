@@ -323,7 +323,14 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
         ...(funFact ? [`${t('results.funFactLabel')}: ${funFact}`] : []),
       ].join('\n');
     });
-    const text = [t('results.reviewCopyTitle'), ...lines].join('\n\n');
+    const text = [
+      t('results.reviewCopyTitle'),
+      t(
+        visibleReviewMistakes.length === 1 ? 'results.reviewCountOne' : 'results.reviewCountMany',
+        { count: visibleReviewMistakes.length },
+      ),
+      ...lines,
+    ].join('\n\n');
 
     try {
       await navigator.clipboard.writeText(text);

@@ -623,6 +623,7 @@ describe('ResultsPage', () => {
       const copied = mocks.writeTextMock.mock.calls[mocks.writeTextMock.mock.calls.length - 1]?.[0] as string;
       expect(copied).toContain('¿Cuál es la capital de Perú?');
       expect(copied).not.toContain('game.questionFlag');
+      expect(copied).toContain('1 fallo');
       expect(screen.getByText('Repaso copiado: 1 fallo')).toBeInTheDocument();
 
       fireEvent.click(within(filter).getByRole('button', { name: 'Todos (2)' }));
@@ -650,6 +651,7 @@ describe('ResultsPage', () => {
     expect(copied).toContain('Tu respuesta: Lima');
     expect(copied).toContain('La respuesta correcta era: Santiago');
     expect(copied).toContain('10. Capitales');
+    expect(copied).toContain('Fallos de GeoChallenge\n\n2 fallos');
     expect(copied).not.toContain('Dato curioso');
     expect(copied).not.toContain('Difícil');
     expect(copied).not.toContain('Tiempo dedicado');
