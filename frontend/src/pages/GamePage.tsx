@@ -677,6 +677,12 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
       compactQuestionCard={shouldUseCompactQuestionCard}
       minimalQuestionCard={isPerfectRoundPilot}
       questionHeadingRef={questionHeadingRef}
+      shortcutHint={
+        currentIndex === 0 && !showResult && !isMapQuestion
+          ? t('game.keyboardHint')
+          : undefined
+      }
+      answerShortcutsEnabled={!isMapQuestion}
       isMapQuestion={Boolean(isMapQuestion)}
       mapContent={
         <Suspense fallback={<LoadingSpinner size="lg" />}>

@@ -35,6 +35,10 @@ type GameRoundScaffoldProps = {
   minimalQuestionCard?: boolean;
   feedback?: ReactNode;
   questionHeadingRef?: Ref<HTMLHeadingElement>;
+  /** Pista de atajos visible solo en dispositivos con puntero fino. */
+  shortcutHint?: ReactNode;
+  /** Declara los atajos 1–4/A–D en cada alternativa cuando están activos. */
+  answerShortcutsEnabled?: boolean;
 };
 
 export function GameRoundScaffold({
@@ -63,6 +67,8 @@ export function GameRoundScaffold({
   minimalQuestionCard = false,
   feedback,
   questionHeadingRef,
+  shortcutHint,
+  answerShortcutsEnabled = false,
 }: GameRoundScaffoldProps) {
   const { i18n } = useTranslation();
   // Keep each option's onClick referentially stable across timer-tick re-renders
@@ -107,6 +113,12 @@ export function GameRoundScaffold({
         />
       </div>
 
+      {shortcutHint ? (
+        <p className="hidden pb-1 text-center text-[0.68rem] font-medium leading-snug text-app-subtle [@media(hover:hover)_and_(pointer:fine)]:block">
+          {shortcutHint}
+        </p>
+      ) : null}
+
       {isMapQuestion ? (
         <div id="game-options" className="min-h-0 flex-1 overflow-hidden">{mapContent}</div>
       ) : (
@@ -125,6 +137,7 @@ export function GameRoundScaffold({
               isCorrect={showResult && correctAnswer === option}
               showResult={showResult}
               lockedResult={lockedResult}
+              shortcutsEnabled={answerShortcutsEnabled}
             />
             ))}
           </div>

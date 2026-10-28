@@ -23,9 +23,12 @@ interface OptionButtonProps {
    * enviada" en estilo neutro en vez de marcarse como incorrecta.
    */
   lockedResult?: boolean;
+  /** Solo cuando la pantalla tiene atajos de teclado 1–4/A–D activos. */
+  shortcutsEnabled?: boolean;
 }
 
 const optionLetters = ['A', 'B', 'C', 'D'];
+const optionShortcuts = optionLetters.map((letter, index) => `${index + 1} ${letter}`);
 
 export const OptionButton = React.memo(function OptionButton({
   option,
@@ -38,6 +41,7 @@ export const OptionButton = React.memo(function OptionButton({
   isCorrect,
   showResult,
   lockedResult = false,
+  shortcutsEnabled = false,
 }: OptionButtonProps) {
   const { t } = useTranslation();
   const renderedLabel = displayLabel ?? option;
@@ -95,6 +99,7 @@ export const OptionButton = React.memo(function OptionButton({
       disabled={disabled}
       className={getButtonClasses()}
       aria-pressed={selected}
+      aria-keyshortcuts={shortcutsEnabled && !disabled && !eliminated ? optionShortcuts[index] : undefined}
       data-state={
         showResult
           ? (isCorrect ? 'correct' : isSubmittedUnrevealed ? 'submitted' : selected ? 'wrong' : 'locked')

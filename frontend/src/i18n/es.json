@@ -426,6 +426,7 @@
     "notBad": "No está mal",
     "farAway": "Un poco lejos",
     "submit": "Confirmar",
+    "keyboardHint": "1–4 o A–D para elegir · Enter para confirmar",
     "correct": "¡Correcto!",
     "incorrect": "Incorrecto",
     "yourAnswer": "Tu respuesta",

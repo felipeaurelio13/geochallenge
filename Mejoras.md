@@ -115,7 +115,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 8. Hacer descubribles los atajos de teclado — ⬜ Pendiente
+## 8. Hacer descubribles los atajos de teclado — ✅ Desarrollada
 
 **Área:** accesibilidad / `OptionButton`, `GamePage`.
 
@@ -125,7 +125,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** la pista no consume altura en móvil, no tapa ninguna alternativa y desaparece tras la primera respuesta.
 
-**Entrega:** commit `mejora 8: atajos de teclado descubribles`.
+**Entrega:** commit `mejora 8: atajos de teclado descubribles`. Cada alternativa declara `aria-keyshortcuts` solo cuando los atajos están activos y la pista aparece en la primera pregunta únicamente en dispositivos con puntero fino.
 
 ---
 
@@ -252,3 +252,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** el tiempo no baja mientras la confirmación está abierta; al cancelar se reanuda desde el mismo valor; el envío por timeout no se dispara durante la pausa.
 
 **Entrega:** commit `mejora 17: pausa del temporizador en el diálogo de salida`.
+
+---
+
+## 18. Anunciar el número de pregunta al enfocar el enunciado — ⬜ Pendiente
+
+**Área:** accesibilidad / `QuestionCard`.
+
+**Problema:** desde la mejora 7 el foco llega al enunciado al empezar cada ronda, pero el lector de pantalla solo lee el texto de la pregunta. El contador visual de progreso no se anuncia, así que el jugador no sabe en qué punto de la partida está.
+
+**Propuesta:** incluir dentro del encabezado enfocable un texto `sr-only` con “Pregunta X de Y”, reutilizando la clave `game.questionOf`. Mantener el contador visual sin cambios y evitar duplicarlo en el `aria-label` del contenedor.
+
+**Aceptación:** al enfocar el enunciado se escucha una sola vez el número y el texto de la pregunta, en ES/EN; no cambia la altura ni el layout visible.
+
+**Entrega:** commit `mejora 18: número de pregunta en el enunciado accesible`.

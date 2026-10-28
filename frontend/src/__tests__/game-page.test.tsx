@@ -122,13 +122,14 @@ vi.mock('../components', () => ({
       {showResult && resultLabel && <p>{resultLabel}</p>}
     </div>
   ),
-  GameRoundScaffold: ({ header, progress, actionTray, mapContent, isMapQuestion, question, onOptionSelect, showResult, disableOptions, optionsGridClassName, feedback, questionHeadingRef, rootClassName = 'universal-layout bg-gray-900' }: any) => (
+  GameRoundScaffold: ({ header, progress, actionTray, mapContent, isMapQuestion, question, onOptionSelect, showResult, disableOptions, optionsGridClassName, feedback, questionHeadingRef, shortcutHint, rootClassName = 'universal-layout bg-gray-900' }: any) => (
     <div className={rootClassName}>
       {header}
       {progress}
       <main role="main" className="content-area">
         <h2 key={question.id} ref={questionHeadingRef} tabIndex={-1} data-testid="question-heading">question-heading</h2>
         <div data-testid="question-card" data-compact="true">question-card</div>
+        {shortcutHint && <p>{shortcutHint}</p>}
         {isMapQuestion ? mapContent : (
           <div className={optionsGridClassName}>
             {question.options.map((option: string) => (
@@ -261,6 +262,18 @@ describe('GamePage ending flow', () => {
 
     const nextButton = await screen.findByRole('button', { name: 'game.seeResults' });
     await waitFor(() => expect(nextButton).toHaveFocus());
+  });
+
+  it('muestra la pista de atajos solo antes de la primera respuesta', async () => {
+    render(<GamePage />);
+
+    expect(screen.getByText('game.keyboardHint')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Santiago' }));
+    fireEvent.click(screen.getByRole('button', { name: 'game.submit' }));
+
+    await screen.findByText('game.correct');
+    expect(screen.queryByText('game.keyboardHint')).not.toBeInTheDocument();
   });
 
   it('devuelve el foco al enunciado al cargar otra pregunta', async () => {

@@ -12,12 +12,13 @@ vi.mock('../utils/monumentOptions', () => ({
 }));
 
 vi.mock('../components/OptionButton', () => ({
-  OptionButton: ({ option, displayLabel, isCorrect, selected, showResult }: {
+  OptionButton: ({ option, displayLabel, isCorrect, selected, showResult, shortcutsEnabled }: {
     option: string;
     displayLabel?: string;
     isCorrect?: boolean;
     selected: boolean;
     showResult: boolean;
+    shortcutsEnabled?: boolean;
   }) => (
     <button
       type="button"
@@ -25,6 +26,7 @@ vi.mock('../components/OptionButton', () => ({
       data-correct={isCorrect ? 'true' : 'false'}
       data-selected={selected ? 'true' : 'false'}
       data-show-result={showResult ? 'true' : 'false'}
+      data-shortcuts={shortcutsEnabled ? 'true' : 'false'}
     >
       {displayLabel ?? option}
     </button>
@@ -70,6 +72,40 @@ describe('GameRoundScaffold', () => {
     expect(footer).toContainElement(screen.getByTestId('tray'));
   });
 
+
+  it('muestra la pista de atajos antes de las opciones solo en puntero fino', () => {
+    const capitalQuestion = {
+      ...question,
+      category: 'CAPITAL',
+      options: ['Santiago', 'Lima', 'Bogotá', 'Quito'],
+    } as Question;
+
+    render(
+      <GameRoundScaffold
+        header={<div>header</div>}
+        question={capitalQuestion}
+        questionNumber={1}
+        totalQuestions={10}
+        isMapQuestion={false}
+        mapContent={null}
+        selectedAnswer={null}
+        onOptionSelect={() => {}}
+        showResult={false}
+        shortcutHint="1–4 o A–D para elegir"
+        answerShortcutsEnabled
+        actionTray={<div>tray</div>}
+      />
+    );
+
+    const hint = screen.getByText('1–4 o A–D para elegir');
+    expect(hint.className).toContain('hidden');
+    expect(hint.className).toContain('[@media(hover:hover)_and_(pointer:fine)]:block');
+
+    const optionsWrapper = document.querySelector('.game-options-wrap');
+    expect(optionsWrapper).toBeInTheDocument();
+    expect(hint.compareDocumentPosition(optionsWrapper!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.getAllByRole('button').every((button) => button.getAttribute('data-shortcuts') === 'true')).toBe(true);
+  });
 
   it('en preguntas con media mantiene bloque de opciones expandible para mostrar las 4 alternativas', () => {
     const flagQuestion = {
