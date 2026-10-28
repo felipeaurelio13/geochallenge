@@ -402,6 +402,8 @@
     "preparing": "Preparando juego...",
     "error": "Error",
     "confirmExit": "¿Seguro que quieres salir? Perderás tu progreso.",
+    "confirmExitProgress": "¿Salir ahora? Llevas {{answered}} de {{total}} respuestas y perderás el resto.",
+    "confirmExitEmpty": "¿Salir ahora? Todavía no has respondido ninguna pregunta.",
     "exit": "Salir",
     "score": "Puntuación",
     "streak": "Racha",

@@ -148,6 +148,10 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
   const mechanicsRuntimeEnabled = mechanicsFeatureEnabled && Boolean(mechanicsConfig?.enabled);
   const mechanicsAllowed = new Set(mechanicsConfig?.allowed ?? []);
   const lastResult = results[results.length - 1] ?? null;
+  const answeredCount = results.length;
+  const exitConfirmation = answeredCount > 0
+    ? t('game.confirmExitProgress', { answered: answeredCount, total: questions.length })
+    : t('game.confirmExitEmpty');
   const currentStreak = results.reduce(
     (streak, result) => (result.isCorrect ? streak + 1 : 0),
     0
@@ -599,7 +603,7 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
           <div className="max-w-4xl mx-auto grid grid-cols-[auto_1fr_auto] items-center gap-2.5 sm:gap-4">
             <button
               onClick={async () => {
-                if (await confirm(t('game.confirmExit'))) {
+                if (await confirm(exitConfirmation)) {
                   abandonTrackedRef.current = true;
                   trackUxEvent('game_abandoned', {
                     mode: gameType,

@@ -62,7 +62,12 @@ vi.mock('react-router-dom', () => ({
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string) => key,
+    t: (key: string, options?: Record<string, unknown>) => {
+      if (key === 'game.confirmExitProgress') {
+        return `game.confirmExitProgress:${options?.answered}/${options?.total}`;
+      }
+      return key;
+    },
     i18n: { language: 'es' },
   }),
 }));
@@ -281,6 +286,27 @@ describe('GamePage ending flow', () => {
 
     const nextButton = await screen.findByRole('button', { name: 'game.seeResults' });
     await waitFor(() => expect(nextButton).toHaveFocus());
+  });
+
+  it('incluye el progreso real en la confirmación de salida', async () => {
+    render(<GamePage />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'game.exit' }));
+
+    await waitFor(() => {
+      expect(confirmDialogStable.confirm).toHaveBeenCalledWith('game.confirmExitProgress:1/1');
+    });
+  });
+
+  it('no habla de progreso perdido si todavía no hay respuestas', async () => {
+    mocks.gameState.results = [];
+    render(<GamePage />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'game.exit' }));
+
+    await waitFor(() => {
+      expect(confirmDialogStable.confirm).toHaveBeenCalledWith('game.confirmExitEmpty');
+    });
   });
 
   it('muestra la pista de atajos solo antes de la primera respuesta', async () => {

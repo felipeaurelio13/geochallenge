@@ -171,7 +171,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 12. Decir cuánto progreso se pierde al salir de la partida — ⬜ Pendiente
+## 12. Decir cuánto progreso se pierde al salir de la partida — ✅ Desarrollada
 
 **Área:** claridad / `GamePage`.
 
@@ -181,7 +181,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** el mensaje refleja el estado real; con cero respuestas no habla de progreso perdido; sigue funcionando en ES/EN.
 
-**Entrega:** commit `mejora 12: confirmación de salida con progreso concreto`.
+**Entrega:** commit `mejora 12: confirmación de salida con progreso concreto`. El diálogo muestra respuestas confirmadas y total; con cero respuestas usa un mensaje distinto que no habla de progreso perdido.
 
 ---
 
@@ -308,3 +308,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** cada fallo con dato disponible lo muestra en ES/EN; los fallos sin dato no dejan un hueco vacío; no se revela nada con la fila cerrada.
 
 **Entrega:** commit `mejora 21: dato curioso en el repaso de fallos`.
+
+---
+
+## 22. Llevar el foco al resumen al entrar en resultados — ⬜ Pendiente
+
+**Área:** accesibilidad / `ResultsPage`.
+
+**Problema:** al terminar la partida se navega a resultados, pero el foco se queda en el documento o en el botón que ya no existe. Un usuario de lector de pantalla no recibe confirmación de que la partida terminó ni del resultado obtenido.
+
+**Propuesta:** enfocar el encabezado principal de resultados al montar la pantalla (`tabIndex=-1`), de forma que se anuncie el titular y quede disponible la navegación por secciones. No mover el foco si el usuario ya está interactuando con la página.
+
+**Aceptación:** al entrar se anuncia el titular una vez; el foco sigue un orden lógico hacia las acciones y el repaso; no hay salto visual ni scroll inesperado.
+
+**Entrega:** commit `mejora 22: foco en el resumen de resultados`.

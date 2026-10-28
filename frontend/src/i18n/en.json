@@ -402,6 +402,8 @@
     "preparing": "Preparing game...",
     "error": "Error",
     "confirmExit": "Are you sure you want to exit? You will lose your progress.",
+    "confirmExitProgress": "Leave now? You have answered {{answered}} of {{total}} questions and will lose the rest.",
+    "confirmExitEmpty": "Leave now? You haven't answered any questions yet.",
     "exit": "Exit",
     "score": "Score",
     "streak": "Streak",
