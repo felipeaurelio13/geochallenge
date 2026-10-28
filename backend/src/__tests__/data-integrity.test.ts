@@ -86,6 +86,11 @@ describe('data integrity', () => {
     it('cities.json has no duplicate (name, country) pairs', () => {
       expect(duplicates(cities.map((c) => `${c.name}|${c.country}`))).toEqual([]);
     });
+
+    it('monuments.json has no duplicate slugs or en names', () => {
+      expect(duplicates(monuments.map((m) => m.slug as string))).toEqual([]);
+      expect(duplicates(monuments.map((m) => (m.name as { en: string }).en))).toEqual([]);
+    });
   });
 
   describe('coordinate ranges', () => {

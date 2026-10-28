@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents, Circle, useMap } from 'react-leaflet';
 import type { Map as LeafletMap } from 'leaflet';
-import { DivIcon, latLngBounds } from 'leaflet';
+import { DivIcon, LatLngBounds } from 'leaflet';
 import { useTranslation } from 'react-i18next';
 import 'leaflet/dist/leaflet.css';
 
@@ -69,7 +69,7 @@ function ResultViewportController({
     if (lngDiff > 180) correctLng -= 360;
     else if (lngDiff < -180) correctLng += 360;
 
-    const bounds = latLngBounds(
+    const bounds = new LatLngBounds(
       [selectedLocation!.lat, userLng],
       [correctLocation.lat, correctLng]
     );

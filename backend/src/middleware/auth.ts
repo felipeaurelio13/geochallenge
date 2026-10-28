@@ -74,7 +74,9 @@ export async function authenticateJWT(
   const token = authHeader.split(' ')[1];
 
   try {
-    const decoded = jwt.verify(token, config.jwt.secret) as JwtPayload;
+    const decoded = jwt.verify(token, config.jwt.secret, {
+      algorithms: ['HS256'],
+    }) as JwtPayload;
     req.user = decoded;
     next();
   } catch (error) {
@@ -111,7 +113,9 @@ export async function optionalAuth(
   const token = authHeader.split(' ')[1];
 
   try {
-    const decoded = jwt.verify(token, config.jwt.secret) as JwtPayload;
+    const decoded = jwt.verify(token, config.jwt.secret, {
+      algorithms: ['HS256'],
+    }) as JwtPayload;
     req.user = decoded;
   } catch {
     // Token inválido, pero continuamos sin usuario
@@ -126,5 +130,6 @@ export async function optionalAuth(
 export function generateToken(payload: JwtPayload): string {
   return jwt.sign(payload, config.jwt.secret, {
     expiresIn: config.jwt.expiresIn,
+    algorithm: 'HS256',
   } as jwt.SignOptions);
 }

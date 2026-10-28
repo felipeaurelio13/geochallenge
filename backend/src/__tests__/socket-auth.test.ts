@@ -74,4 +74,19 @@ describe('authenticateSocket middleware', () => {
     expect(socket.user?.userId).toBe('user-123');
     expect(socket.user?.username).toBe('geoplayer');
   });
+
+  it('rechaza conexión cuando el token fue firmado con un algoritmo no permitido (ej. HS512)', () => {
+    const invalidAlgToken = jwt.sign(validPayload, config.jwt.secret, { algorithm: 'HS512' });
+    const socket = createMockSocket({
+      auth: { token: invalidAlgToken },
+    });
+    const next = vi.fn();
+
+    authenticateSocket(socket, next);
+
+    expect(next).toHaveBeenCalledTimes(1);
+    expect(next).toHaveBeenCalledWith(expect.any(Error));
+    expect(next.mock.calls[0][0].message).toBe('Token inválido');
+    expect(socket.user).toBeUndefined();
+  });
 });

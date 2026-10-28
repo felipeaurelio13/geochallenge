@@ -29,7 +29,9 @@ export function authenticateSocket(socket: Socket, next: (err?: Error) => void) 
   }
 
   try {
-    const decoded = jwt.verify(token as string, config.jwt.secret) as JwtPayload;
+    const decoded = jwt.verify(token as string, config.jwt.secret, {
+      algorithms: ['HS256'],
+    }) as JwtPayload;
     socket.user = decoded;
     next();
   } catch (error) {
