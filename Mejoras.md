@@ -619,7 +619,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 44. Resumir el tiempo total dedicado a la partida — ⬜ Pendiente
+## 44. Resumir el tiempo total dedicado a la partida — ✅ Desarrollada
 
 **Área:** aprendizaje / `ResultsPage`.
 
@@ -629,7 +629,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** el total es la suma de los tiempos finitos registrados; se lee en ES/EN; se omite sin datos; no desplaza el CTA principal ni el desglose de puntos; no cambia el repaso.
 
-**Entrega:** commit `mejora 44: tiempo total de la partida`.
+**Entrega:** commit `mejora 44: tiempo total de la partida`. La suma de tiempos se muestra bajo la ronda más lenta en formato “X min Y s” o “X s”; se omite sin datos y reutiliza los tiempos ya filtrados.
 
 ---
 
@@ -714,3 +714,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** la práctica conserva los filtros compatibles presentes en la URL; no arrastra la categoría anterior; sigue funcionando sin filtros; no cambia el destino de “Jugar de nuevo”; se cubre con tests.
 
 **Entrega:** commit `mejora 50: filtros al practicar una categoría`.
+
+---
+
+## 51. Incluir la duración en el texto de compartir resultados — ⬜ Pendiente
+
+**Área:** compartir / `ResultsPage`.
+
+**Problema:** el texto compartido resume puntos, aciertos y precisión, pero no cuánto duró la partida. Quien compara un resultado rápido con uno pausado pierde ese contexto fuera de la app.
+
+**Propuesta:** añadir la duración total al `shareText` cuando la sesión tenga tiempos registrados, reutilizando el formato compacto del resumen. Mantener el texto actual si no hay datos para no inventar una duración.
+
+**Aceptación:** el texto incluye la duración solo con tiempos válidos; se lee en ES/EN; no duplica la duración si ya estuviera presente; no cambia el texto cuando no hay datos; los tests de compartir cubren ambos casos.
+
+**Entrega:** commit `mejora 51: duración en el texto de compartir`.

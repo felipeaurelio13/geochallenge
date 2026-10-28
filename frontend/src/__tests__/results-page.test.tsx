@@ -49,6 +49,7 @@ vi.mock('react-i18next', () => ({
         'results.accuracy': 'Precisión',
         'results.averageTime': 'Tiempo medio por respuesta',
         'results.answerTime': 'Tiempo dedicado',
+        'results.totalTime': 'Tiempo total de la partida',
         'results.backToSummary': 'Volver al resumen',
         'results.playCategoryShort': 'Jugar',
         'results.reviewSortSlowest': 'Ordenar por tiempo',
@@ -93,6 +94,14 @@ vi.mock('react-i18next', () => ({
       }
 
       if (key === 'results.averageTimeValue') {
+        return `${options?.seconds} s`;
+      }
+
+      if (key === 'results.totalTimeValueMinutes') {
+        return `${options?.minutes} min ${options?.seconds} s`;
+      }
+
+      if (key === 'results.totalTimeValueSeconds') {
         return `${options?.seconds} s`;
       }
 
@@ -167,6 +176,7 @@ describe('ResultsPage', () => {
     expect(screen.getByText('1,100')).toBeInTheDocument();
     expect(container.querySelectorAll('article.min-w-0').length).toBe(0);
     expect(screen.queryByText(/Tiempo medio por respuesta/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Tiempo total de la partida/)).not.toBeInTheDocument();
   });
 
   it('muestra el modo y la categoría de la partida', () => {
@@ -263,8 +273,27 @@ describe('ResultsPage', () => {
 
       expect(screen.getByText(/Tiempo medio por respuesta/)).toBeInTheDocument();
       expect(screen.getByText('6 s')).toBeInTheDocument();
+      expect(screen.getByText(/Tiempo total de la partida/)).toBeInTheDocument();
+      expect(screen.getByText('1 min 0 s')).toBeInTheDocument();
       expect(screen.getAllByText('Tiempo dedicado')).toHaveLength(2);
       expect(screen.getAllByText('8 s')).toHaveLength(2);
+    } finally {
+      mocks.gameState.results = originalResults;
+    }
+  });
+
+  it('muestra el tiempo total en segundos cuando no llega al minuto', () => {
+    const originalResults = mocks.gameState.results;
+    mocks.gameState.results = originalResults.map((result) => ({
+      ...result,
+      elapsedSeconds: 4,
+    })) as typeof mocks.gameState.results;
+
+    try {
+      render(<ResultsPage />);
+
+      expect(screen.getByText('40 s')).toBeInTheDocument();
+      expect(screen.queryByText(/^\d+ min/)).not.toBeInTheDocument();
     } finally {
       mocks.gameState.results = originalResults;
     }

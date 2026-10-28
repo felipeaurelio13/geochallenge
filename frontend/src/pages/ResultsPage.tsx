@@ -92,16 +92,31 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
       }))
       .sort((a, b) => a.accuracy - b.accuracy);
   }, [questions, results]);
-  const averageAnswerSeconds = useMemo(() => {
-    const elapsed = results
-      .map((result) => result.elapsedSeconds)
-      .filter((value): value is number => typeof value === 'number' && Number.isFinite(value) && value >= 0);
-    if (!elapsed.length) return null;
-    return elapsed.reduce((sum, value) => sum + value, 0) / elapsed.length;
-  }, [results]);
+  const elapsedAnswerSeconds = useMemo(() => results
+    .map((result) => result.elapsedSeconds)
+    .filter((value): value is number => typeof value === 'number' && Number.isFinite(value) && value >= 0), [results]);
+  const averageAnswerSeconds = elapsedAnswerSeconds.length
+    ? elapsedAnswerSeconds.reduce((sum, value) => sum + value, 0) / elapsedAnswerSeconds.length
+    : null;
+  const totalAnswerSeconds = elapsedAnswerSeconds.length
+    ? elapsedAnswerSeconds.reduce((sum, value) => sum + value, 0)
+    : null;
   const formattedAverageAnswerSeconds = averageAnswerSeconds === null
     ? null
     : averageAnswerSeconds.toLocaleString(currentLanguage, { maximumFractionDigits: 1 });
+  const formattedTotalAnswerSeconds = totalAnswerSeconds === null
+    ? null
+    : (() => {
+        const total = Math.round(totalAnswerSeconds);
+        return total >= 60
+          ? t('results.totalTimeValueMinutes', {
+              minutes: Math.floor(total / 60),
+              seconds: total % 60,
+            })
+          : t('results.totalTimeValueSeconds', {
+              seconds: total.toLocaleString(currentLanguage),
+            });
+      })();
   const slowestAnswer = useMemo(() => {
     const timed = results.filter(
       (result): result is typeof result & { elapsedSeconds: number } =>
@@ -318,6 +333,12 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
                 question: getLocalizedQuestionText(slowestAnswer.question, t, currentLanguage),
                 seconds: slowestAnswer.seconds.toLocaleString(currentLanguage, { maximumFractionDigits: 1 }),
               })}
+            </p>
+          )}
+          {formattedTotalAnswerSeconds && (
+            <p className="mt-1 text-xs text-app-secondary">
+              {t('results.totalTime')}:{' '}
+              <span className="font-semibold tabular-nums text-app-text">{formattedTotalAnswerSeconds}</span>
             </p>
           )}
         </section>
