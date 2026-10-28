@@ -339,17 +339,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 24. Ofrecer practicar la categoría más floja desde resultados — ⬜ Pendiente
+## 24. Ofrecer jugar la categoría más floja desde resultados — ✅ Desarrollada
 
 **Área:** aprendizaje / `ResultsPage`.
 
 **Problema:** el desglose por categoría muestra dónde falla el jugador, pero no ofrece una acción directa. Para practicar esa debilidad hay que volver al menú, elegir la categoría y configurar otra partida.
 
-**Propuesta:** añadir un atajo junto al desglose que abra una partida de práctica con la categoría con menor precisión, reutilizando la ruta y los parámetros de práctica existentes.
+**Propuesta:** añadir un atajo junto al desglose que abra una partida individual con la categoría de menor precisión, reutilizando la ruta y los parámetros existentes. Se descartó la práctica adaptativa porque su contrato actual no filtra por categoría.
 
-**Aceptación:** el atajo solo aparece con al menos dos categorías y una precisión menor al 100%; conserva la categoría elegida al reiniciar; funciona en ES/EN y no desplaza las acciones principales.
+**Aceptación:** el atajo solo aparece con al menos dos categorías y una precisión menor al 100%; abre la categoría más floja; funciona en ES/EN y no desplaza las acciones principales.
 
-**Entrega:** commit `mejora 24: practicar la categoría más floja`.
+**Entrega:** commit `mejora 24: practicar la categoría más floja`. La acción reutiliza `category` y `gameType=single`; el resto de filtros no se arrastra para no reabrir una partida demasiado restringida.
 
 ---
 
@@ -476,3 +476,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** cada modo activo muestra “Pregunta X de Y · GeoChallenge”; el título se restaura al terminar o salir; no se pisan títulos entre pantallas montadas a la vez; funciona en ES/EN.
 
 **Entrega:** commit `mejora 33: progreso en el título de los demás modos`.
+
+---
+
+## 34. Permitir elegir cualquier categoría del desglose, no solo la más floja — ⬜ Pendiente
+
+**Área:** aprendizaje / `ResultsPage`.
+
+**Problema:** el atajo actual solo apunta a la categoría con menor precisión. Si el jugador quiere reforzar una categoría concreta —porque le interesa o porque empató con otra— debe volver al menú y configurarla a mano.
+
+**Propuesta:** convertir cada fila del desglose en una acción compacta que abra una partida individual de esa categoría, reutilizando el mismo destino del atajo actual y manteniendo la fila legible en móvil.
+
+**Aceptación:** cada fila permite jugar su categoría; el botón tiene nombre accesible en ES/EN; no tapa el porcentaje; no cambia el orden por precisión; funciona con teclado.
+
+**Entrega:** commit `mejora 34: jugar cualquier categoría del desglose`.

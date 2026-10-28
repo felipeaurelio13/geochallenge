@@ -521,6 +521,7 @@
     "categoryAccuracyTitle": "Precisión por categoría",
     "categoryAccuracyDescription": "Así se reparten tus aciertos por tipo de pregunta.",
     "categoryAccuracyValue": "{{correct}} de {{total}} · {{accuracy}}%",
+    "practiceWeakest": "Practicar {{category}}",
     "yourRank": "Tu posición",
     "playAgain": "Otra partida",
     "viewRankings": "Ver rankings",

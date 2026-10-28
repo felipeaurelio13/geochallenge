@@ -78,6 +78,10 @@ vi.mock('react-i18next', () => ({
         return `${options?.seconds} s`;
       }
 
+      if (key === 'results.practiceWeakest') {
+        return `Practicar ${options?.category}`;
+      }
+
       return translations[key] ?? key;
     },
   }),
@@ -274,6 +278,11 @@ describe('ResultsPage', () => {
       expect(within(section).getByText('Capitales')).toBeInTheDocument();
       expect(screen.getByText('1 de 2 · 50%')).toBeInTheDocument();
       expect(screen.getByText('2 de 2 · 100%')).toBeInTheDocument();
+
+      fireEvent.click(within(section).getByRole('button', { name: 'Practicar Banderas' }));
+      expect(mocks.resetGameMock).toHaveBeenCalledOnce();
+      expect(mocks.navigateMock).toHaveBeenCalledWith('/game/single?category=FLAG&gameType=single');
+
       await waitFor(() => expect(mocks.getMyRankMock).toHaveBeenCalled());
     } finally {
       mocks.gameState.questions = originalQuestions;

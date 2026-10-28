@@ -80,6 +80,7 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
   const formattedAverageAnswerSeconds = averageAnswerSeconds === null
     ? null
     : averageAnswerSeconds.toLocaleString(currentLanguage, { maximumFractionDigits: 1 });
+  const weakestCategory = categoryStats.find((stat) => stat.accuracy < 100) ?? null;
   const unlockedAchievements = useMemo(
     () => (lastNewAchievements ?? []).map((key) => getAchievementDisplay(key, currentLanguage)),
     [lastNewAchievements, currentLanguage],
@@ -159,6 +160,19 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
     else if (result === 'error') setStreakShareFeedback(t('share.error'));
     feedbackTimer.current = setTimeout(() => setStreakShareFeedback(''), 3000);
   }, [shareStreakImage, correctAnswers, category, score, t, currentLanguage]);
+
+  const handlePracticeWeakestCategory = () => {
+    if (!weakestCategory) return;
+    const destination = `/game/single?category=${weakestCategory.category}&gameType=single`;
+    trackUxEvent('mode_selected', {
+      destination,
+      gameMode: 'single',
+      category: weakestCategory.category,
+      source: 'results_category',
+    });
+    resetGame();
+    navigate(destination);
+  };
 
   const handlePlayAgain = (easy = false) => {
     const params = new URLSearchParams({ category, gameType });
@@ -246,6 +260,11 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
                 </li>
               ))}
             </ul>
+            {!isTrial && weakestCategory && (
+              <Button variant="secondary" fullWidth className="mt-3" onClick={handlePracticeWeakestCategory}>
+                {t('results.practiceWeakest', { category: t(CATEGORY_LABEL_KEYS[weakestCategory.category]) })}
+              </Button>
+            )}
           </section>
         )}
 
