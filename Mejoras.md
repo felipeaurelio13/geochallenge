@@ -479,7 +479,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 34. Permitir elegir cualquier categoría del desglose, no solo la más floja — ⬜ Pendiente
+## 34. Permitir elegir cualquier categoría del desglose, no solo la más floja — ✅ Desarrollada
 
 **Área:** aprendizaje / `ResultsPage`.
 
@@ -489,7 +489,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** cada fila permite jugar su categoría; el botón tiene nombre accesible en ES/EN; no tapa el porcentaje; no cambia el orden por precisión; funciona con teclado.
 
-**Entrega:** commit `mejora 34: jugar cualquier categoría del desglose`.
+**Entrega:** commit `mejora 34: jugar cualquier categoría del desglose`. Cada fila suma una acción compacta “Jugar” con nombre accesible que incluye la categoría, reutiliza el destino del atajo a la más floja y se oculta en la partida de prueba.
 
 ---
 
@@ -658,3 +658,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** el título muestra la ronda actual durante la partida; no aparece “de 0” ni un total inventado; se restaura al terminar o salir; funciona en ES/EN; no altera los títulos de los demás modos.
 
 **Entrega:** commit `mejora 46: ronda actual en el título de supervivencia`.
+
+---
+
+## 47. Copiar el repaso de fallos como texto de estudio — ⬜ Pendiente
+
+**Área:** aprendizaje / `ResultsPage`.
+
+**Problema:** el repaso es interactivo y se pierde al salir de la página. Un jugador que quiere repasar sin conexión o llevar sus fallos a notas debe transcribirlos a mano, uno por uno.
+
+**Propuesta:** añadir una acción secundaria en el repaso que copie un texto plano con categoría, enunciado, respuesta del jugador y respuesta correcta de cada fallo. Mostrar confirmación inline con `aria-live` y reutilizar el patrón de copiado existente.
+
+**Aceptación:** el texto respeta el idioma activo; incluye todos los fallos visibles; no se ofrece sin fallos; el botón no tapa el contador ni el control de expandir; funciona con teclado y en móvil.
+
+**Entrega:** commit `mejora 47: copiar el repaso de fallos`.

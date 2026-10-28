@@ -526,6 +526,8 @@
     "averageTimeValue": "{{seconds}} s",
     "slowestQuestion": "Ronda más lenta: {{question}} ({{seconds}} s)",
     "backToSummary": "Volver al resumen",
+    "playCategory": "Jugar {{category}}",
+    "playCategoryShort": "Jugar",
     "modeSingle": "Un jugador",
     "modePractice": "Práctica",
     "modeStreak": "Racha",

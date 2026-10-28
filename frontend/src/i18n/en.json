@@ -526,6 +526,8 @@
     "averageTimeValue": "{{seconds}}s",
     "slowestQuestion": "Slowest round: {{question}} ({{seconds}}s)",
     "backToSummary": "Back to summary",
+    "playCategory": "Play {{category}}",
+    "playCategoryShort": "Play",
     "modeSingle": "Single player",
     "modePractice": "Practice",
     "modeStreak": "Streak",

@@ -215,17 +215,21 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
     heading.focus({ preventScroll: true });
   };
 
-  const handlePracticeWeakestCategory = () => {
-    if (!weakestCategory) return;
-    const destination = `/game/single?category=${weakestCategory.category}&gameType=single`;
+  const handlePracticeCategory = (categoryToPlay: Category, source = 'results_category_row') => {
+    const destination = `/game/single?category=${categoryToPlay}&gameType=single`;
     trackUxEvent('mode_selected', {
       destination,
       gameMode: 'single',
-      category: weakestCategory.category,
-      source: 'results_category',
+      category: categoryToPlay,
+      source,
     });
     resetGame();
     navigate(destination);
+  };
+
+  const handlePracticeWeakestCategory = () => {
+    if (!weakestCategory) return;
+    handlePracticeCategory(weakestCategory.category, 'results_category');
   };
 
   const handlePlayAgain = (easy = false) => {
@@ -317,11 +321,21 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
             <p className="mt-1 text-sm text-app-secondary">{t('results.categoryAccuracyDescription')}</p>
             <ul className="mt-3 space-y-2">
               {categoryStats.map(({ category, correct, total, accuracy }) => (
-                <li key={category} className="flex items-center justify-between gap-3 text-sm">
-                  <span className="min-w-0 break-words text-app-text">{t(CATEGORY_LABEL_KEYS[category])}</span>
+                <li key={category} className="flex items-center gap-2 text-sm">
+                  <span className="min-w-0 flex-1 break-words text-app-text">{t(CATEGORY_LABEL_KEYS[category])}</span>
                   <span className="shrink-0 tabular-nums text-app-secondary">
                     {t('results.categoryAccuracyValue', { correct, total, accuracy })}
                   </span>
+                  {!isTrial && (
+                    <button
+                      type="button"
+                      onClick={() => handlePracticeCategory(category)}
+                      className="min-h-11 shrink-0 rounded-md px-2 text-xs font-semibold text-primary hover:bg-primary/10 hover:text-primary/80"
+                      aria-label={t('results.playCategory', { category: t(CATEGORY_LABEL_KEYS[category]) })}
+                    >
+                      {t('results.playCategoryShort')}
+                    </button>
+                  )}
                 </li>
               ))}
             </ul>

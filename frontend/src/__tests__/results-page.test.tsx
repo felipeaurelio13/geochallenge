@@ -50,6 +50,7 @@ vi.mock('react-i18next', () => ({
         'results.averageTime': 'Tiempo medio por respuesta',
         'results.answerTime': 'Tiempo dedicado',
         'results.backToSummary': 'Volver al resumen',
+        'results.playCategoryShort': 'Jugar',
         'results.categoryAccuracyTitle': 'Precisión por categoría',
         'results.categoryAccuracyDescription': 'Así se reparten tus aciertos por tipo de pregunta.',
         'results.funFactLabel': 'Dato curioso',
@@ -100,6 +101,10 @@ vi.mock('react-i18next', () => ({
 
       if (key === 'results.practiceWeakest') {
         return `Practicar ${options?.category}`;
+      }
+
+      if (key === 'results.playCategory') {
+        return `Jugar ${options?.category}`;
       }
 
       return translations[key] ?? key;
@@ -422,6 +427,10 @@ describe('ResultsPage', () => {
       fireEvent.click(within(section).getByRole('button', { name: 'Practicar Banderas' }));
       expect(mocks.resetGameMock).toHaveBeenCalledOnce();
       expect(mocks.navigateMock).toHaveBeenCalledWith('/game/single?category=FLAG&gameType=single');
+
+      fireEvent.click(within(section).getByRole('button', { name: 'Jugar Capitales' }));
+      expect(mocks.resetGameMock).toHaveBeenCalledTimes(2);
+      expect(mocks.navigateMock).toHaveBeenLastCalledWith('/game/single?category=CAPITAL&gameType=single');
 
       await waitFor(() => expect(mocks.getMyRankMock).toHaveBeenCalled());
     } finally {
