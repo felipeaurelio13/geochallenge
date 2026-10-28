@@ -53,7 +53,10 @@ const confirmDialogStable = vi.hoisted(() => ({
 
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigateMock,
-  useSearchParams: () => [new URLSearchParams(mockedSearchParams)],
+  useSearchParams: () => {
+    const params = React.useMemo(() => new URLSearchParams(mockedSearchParams), [mockedSearchParams]);
+    return [params, vi.fn()];
+  },
   Link: ({ children, to }: { children: React.ReactNode; to: string }) => <a href={to}>{children}</a>,
 }));
 
@@ -302,6 +305,21 @@ describe('GamePage ending flow', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'game.seeResults' }));
     await waitFor(() => expect(mocks.navigateMock).toHaveBeenCalledWith('/play/results'));
     expect(mocks.finishGameMock).not.toHaveBeenCalled();
+  });
+
+  it('permite reintentar el inicio sin salir al menú y conserva la configuración', async () => {
+    mocks.startGameMock.mockRejectedValueOnce(new Error('offline'));
+    mockedSearchParams = 'category=CAPITAL&difficulty=HARD';
+
+    render(<GamePage />);
+
+    await screen.findByText('offline');
+    fireEvent.click(screen.getByRole('button', { name: 'error.retry' }));
+
+    await waitFor(() => expect(mocks.startGameMock).toHaveBeenCalledTimes(2));
+    expect(mocks.startGameMock.mock.calls[1]).toEqual(mocks.startGameMock.mock.calls[0]);
+    expect(mocks.navigateMock).not.toHaveBeenCalled();
+    await screen.findByRole('button', { name: 'Santiago' });
   });
 
   it('does not downgrade a trial when fewer than five questions are available', async () => {

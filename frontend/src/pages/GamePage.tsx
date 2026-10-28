@@ -109,6 +109,7 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
     streakShield: 0,
   });
   const [error, setError] = useState<string | null>(null);
+  const [startAttempt, setStartAttempt] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [mechanicPending, setMechanicPending] = useState(false);
@@ -244,7 +245,7 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
       }
     };
     initGame();
-  }, [category, gameType, gameFilters, practiceCountryCode, startGame, startPractice, confirm, isTrial]);
+  }, [category, gameType, gameFilters, practiceCountryCode, startGame, startPractice, confirm, isTrial, startAttempt]);
 
   useEffect(() => {
     return () => {
@@ -259,6 +260,11 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
       }
     };
   }, []);
+
+  const handleRetryStart = () => {
+    setError(null);
+    setStartAttempt((attempt) => attempt + 1);
+  };
 
   const handleTimerTick = useCallback(
     (time: number) => {
@@ -562,6 +568,8 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
         message={error || undefined}
         backTo={exitPath}
         backLabel={t(isTrial ? 'common.back' : 'common.backToMenu')}
+        onRetry={handleRetryStart}
+        retryLabel={t('error.retry')}
       />
     );
   }

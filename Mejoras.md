@@ -129,7 +129,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 9. Permitir reintentar el inicio de partida sin salir al menú — ⬜ Pendiente
+## 9. Permitir reintentar el inicio de partida sin salir al menú — ✅ Desarrollada
 
 **Área:** recuperación / `GamePage`.
 
@@ -139,7 +139,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** un fallo transitorio se resuelve con “Reintentar” sin perder la configuración; si vuelve a fallar, la pantalla sigue ofreciendo salida.
 
-**Entrega:** commit `mejora 9: reintentar el inicio de partida`.
+**Entrega:** commit `mejora 9: reintentar el inicio de partida`. `FullScreenError` recibe un reintento explícito que relanza la carga con la misma categoría, modo y filtros, manteniendo la salida al menú.
 
 ---
 
@@ -227,17 +227,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 16. Repaso de las preguntas falladas al terminar la partida — ⬜ Pendiente
+## 16. Evitar spoilers en el repaso de preguntas falladas — ⬜ Pendiente
 
 **Área:** aprendizaje / `ResultsPage`.
 
-**Problema:** la pantalla final muestra métricas agregadas, pero no permite revisar qué preguntas se fallaron ni cuál era la respuesta correcta. El aprendizaje se corta justo cuando el jugador tiene más interés.
+**Problema:** el repaso de fallos ya existe y es colapsable, pero el resumen de cada fila muestra la respuesta correcta antes de abrirla. El jugador no puede intentar recordarla y el repaso pierde valor como refuerzo.
 
-**Propuesta:** añadir una sección colapsable “Repasa lo que falló” con la pregunta, la respuesta elegida y la correcta, reutilizando los datos reales de la sesión. No mostrarla si no hubo fallos.
+**Propuesta:** dejar en el resumen solo el número y el enunciado; mostrar la respuesta elegida, la correcta y el contexto dentro del detalle desplegado. Mantener el orden de la partida y el botón de practicar fallos.
 
-**Aceptación:** aparece solo con fallos, respeta el orden de la partida, es legible en móvil y con lector de pantalla, y no desplaza ni tapa el CTA de repetir.
+**Aceptación:** con la fila cerrada no se lee la respuesta correcta; al abrirla aparece una sola vez junto con la respuesta del jugador; sigue siendo legible en móvil y con lector de pantalla.
 
-**Entrega:** commit `mejora 16: repaso de preguntas falladas`.
+**Entrega:** commit `mejora 16: repaso sin spoilers`.
 
 ---
 
@@ -266,3 +266,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** al enfocar el enunciado se escucha una sola vez el número y el texto de la pregunta, en ES/EN; no cambia la altura ni el layout visible.
 
 **Entrega:** commit `mejora 18: número de pregunta en el enunciado accesible`.
+
+---
+
+## 19. Confirmar la salida al usar el botón atrás del navegador — ⬜ Pendiente
+
+**Área:** integridad de partida / `GamePage`.
+
+**Problema:** el botón de salir pide confirmación, pero el botón atrás del navegador abandona la partida en curso sin avisar. El jugador puede perder el progreso por un gesto accidental, sobre todo en móvil.
+
+**Propuesta:** bloquear la navegación fuera de la ruta de juego mientras la partida esté activa y reutilizar el mismo diálogo de confirmación. Permitir salir sin fricción cuando la partida ya terminó o se está en resultados.
+
+**Aceptación:** atrás pide confirmación solo durante una partida activa; cancelar mantiene la ronda y el tiempo; confirmar sale y registra el abandono una sola vez.
+
+**Entrega:** commit `mejora 19: confirmación al abandonar con el botón atrás`.
