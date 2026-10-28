@@ -510,6 +510,8 @@
     "reviewExpandedMany": "Se expandieron {{count}} respuestas",
     "reviewCollapsedOne": "Se contrajo 1 respuesta",
     "reviewCollapsedMany": "Se contrajeron {{count}} respuestas",
+    "reviewFilterLabel": "Filtrar el repaso por categoría",
+    "reviewFilterAll": "Todos",
     "funFactLabel": "Dato curioso",
     "yourAnswer": "Tu respuesta",
     "noAnswer": "Sin respuesta",

@@ -54,6 +54,8 @@ vi.mock('react-i18next', () => ({
         'results.playCategoryShort': 'Jugar',
         'results.reviewSortSlowest': 'Ordenar por tiempo',
         'results.reviewSortOriginal': 'Orden de la partida',
+        'results.reviewFilterLabel': 'Filtrar el repaso por categoría',
+        'results.reviewFilterAll': 'Todos',
         'results.categoryAccuracyTitle': 'Precisión por categoría',
         'results.categoryAccuracyDescription': 'Así se reparten tus aciertos por tipo de pregunta.',
         'results.funFactLabel': 'Dato curioso',
@@ -446,6 +448,57 @@ describe('ResultsPage', () => {
     } finally {
       mocks.gameState.results = originalResults;
     }
+  });
+
+  it('filtra el repaso por categoría sin perder el estado de expansión', () => {
+    const originalQuestions = mocks.gameState.questions;
+    const originalResults = mocks.gameState.results;
+    mocks.gameState.questions = [
+      { id: 'flag-1', category: 'FLAG', questionData: 'Chile', questionText: 'Bandera', options: [] },
+      { id: 'cap-1', category: 'CAPITAL', questionData: 'Perú', questionText: 'Capital', options: [] },
+      { id: 'map-1', category: 'MAP', questionData: 'Argentina', questionText: 'Mapa', options: [] },
+    ] as typeof mocks.gameState.questions;
+    mocks.gameState.results = [
+      { questionId: 'flag-1', isCorrect: false, correctAnswer: 'Chile', userAnswer: 'Perú' },
+      { questionId: 'cap-1', isCorrect: false, correctAnswer: 'Lima', userAnswer: 'Quito' },
+      { questionId: 'map-1', isCorrect: true, correctAnswer: 'Argentina', userAnswer: 'Argentina' },
+    ] as typeof mocks.gameState.results;
+
+    try {
+      render(<ResultsPage />);
+
+      const section = screen.getByRole('heading', { name: /results\.reviewTitle/ }).closest('section')!;
+      const rows = Array.from(section.querySelectorAll('details'));
+      const filter = within(section).getByRole('group', { name: 'Filtrar el repaso por categoría' });
+
+      expect(within(filter).getByRole('button', { name: 'Todos' })).toHaveAttribute('aria-pressed', 'true');
+      expect(within(filter).getByRole('button', { name: 'Banderas' })).toBeInTheDocument();
+      expect(within(filter).getByRole('button', { name: 'Capitales' })).toBeInTheDocument();
+
+      fireEvent.click(rows[0].querySelector('summary')!);
+      expect(rows[0].open).toBe(true);
+
+      fireEvent.click(within(filter).getByRole('button', { name: 'Capitales' }));
+
+      expect(section).toHaveTextContent('1 fallo');
+      expect(rows[0]).toHaveAttribute('hidden');
+      expect(rows[1]).not.toHaveAttribute('hidden');
+
+      fireEvent.click(within(filter).getByRole('button', { name: 'Todos' }));
+
+      expect(section).toHaveTextContent('2 fallos');
+      expect(rows[0]).not.toHaveAttribute('hidden');
+      expect(rows[0].open).toBe(true);
+    } finally {
+      mocks.gameState.questions = originalQuestions;
+      mocks.gameState.results = originalResults;
+    }
+  });
+
+  it('no muestra filtros de repaso cuando todos los fallos son de una categoría', () => {
+    render(<ResultsPage />);
+
+    expect(screen.queryByRole('group', { name: 'Filtrar el repaso por categoría' })).not.toBeInTheDocument();
   });
 
   it('incluye el dato curioso en el detalle de un fallo', () => {    const originalQuestions = mocks.gameState.questions;

@@ -510,6 +510,8 @@
     "reviewExpandedMany": "Expanded {{count}} answers",
     "reviewCollapsedOne": "Collapsed 1 answer",
     "reviewCollapsedMany": "Collapsed {{count}} answers",
+    "reviewFilterLabel": "Filter review by category",
+    "reviewFilterAll": "All",
     "funFactLabel": "Fun fact",
     "yourAnswer": "Your answer",
     "noAnswer": "No answer",

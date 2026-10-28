@@ -39,6 +39,7 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
   const [streakShareFeedback, setStreakShareFeedback] = useState('');
   const [allReviewOpen, setAllReviewOpen] = useState(false);
   const [reviewSort, setReviewSort] = useState<'original' | 'slowest'>('original');
+  const [reviewCategory, setReviewCategory] = useState<Category | 'ALL'>('ALL');
   const [reviewAnnouncement, setReviewAnnouncement] = useState('');
   const [showBackToSummary, setShowBackToSummary] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -67,6 +68,11 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
     if (bTime === null) return -1;
     return bTime - aTime || a.number - b.number;
   });
+  const reviewCategories = Array.from(new Set(mistakes.map(({ question }) => question.category)));
+  const visibleReviewMistakes = reviewCategory === 'ALL'
+    ? reviewMistakes
+    : reviewMistakes.filter(({ question }) => question.category === reviewCategory);
+  const reviewFilterOptions: Array<Category | 'ALL'> = ['ALL', ...reviewCategories];
   const bestStreak = results.reduce(
     (streak, result) => {
       const current = result.isCorrect ? streak.current + 1 : 0;
@@ -235,7 +241,7 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
 
   const toggleAllReview = () => {
     const next = !allReviewOpen;
-    reviewListRef.current?.querySelectorAll('details').forEach((details) => {
+    reviewListRef.current?.querySelectorAll('details:not([hidden])').forEach((details) => {
       (details as HTMLDetailsElement).open = next;
     });
     setAllReviewOpen(next);
@@ -399,7 +405,7 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
               <h2 id="review-title" className="text-lg font-semibold text-app-text">
                 {t('results.reviewTitle')}
                 <span className="ml-2 align-middle text-xs font-normal text-app-secondary">
-                  {t(mistakes.length === 1 ? 'results.reviewCountOne' : 'results.reviewCountMany', { count: mistakes.length })}
+                  {t(visibleReviewMistakes.length === 1 ? 'results.reviewCountOne' : 'results.reviewCountMany', { count: visibleReviewMistakes.length })}
                 </span>
               </h2>
               {mistakes.length >= 2 && (
@@ -425,6 +431,28 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
                 </button>
               )}
             </div>
+            {reviewCategories.length >= 2 && (
+              <div className="mt-3 flex flex-wrap gap-1.5" role="group" aria-label={t('results.reviewFilterLabel')}>
+                {reviewFilterOptions.map((filterCategory) => {
+                  const isActive = reviewCategory === filterCategory;
+                  return (
+                    <button
+                      key={filterCategory}
+                      type="button"
+                      onClick={() => setReviewCategory(filterCategory)}
+                      aria-pressed={isActive}
+                      className={`min-h-9 rounded-full border px-2.5 text-xs font-medium ${isActive
+                        ? 'border-primary bg-primary text-app-on-accent'
+                        : 'border-app-border bg-app-surface text-app-secondary hover:bg-app-muted hover:text-app-text'}`}
+                    >
+                      {filterCategory === 'ALL'
+                        ? t('results.reviewFilterAll')
+                        : t(CATEGORY_LABEL_KEYS[filterCategory])}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
             <p className="sr-only" role="status" aria-live="polite">{reviewAnnouncement}</p>
             <div ref={reviewListRef} className="mt-4 space-y-2">
               {reviewMistakes.map(({ result, question, number }) => {
@@ -433,8 +461,9 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
                   currentLanguage === 'en' ? 'en' : 'es',
                   result.correctAnswer,
                 );
+                const isHiddenByFilter = reviewCategory !== 'ALL' && question.category !== reviewCategory;
                 return (
-                <details key={result.questionId} className="rounded-lg border border-app-border bg-app-surface p-3">
+                <details key={result.questionId} hidden={isHiddenByFilter} className="rounded-lg border border-app-border bg-app-surface p-3">
                   <summary className="min-h-11 cursor-pointer text-sm font-medium text-app-text">
                     {number}. {getLocalizedQuestionText(question, t, currentLanguage)}
                     <span className="ml-2 inline-block align-middle rounded-full border border-app-border bg-app-muted px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-app-secondary">

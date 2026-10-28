@@ -605,7 +605,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 43. Filtrar el repaso por categoría — ⬜ Pendiente
+## 43. Filtrar el repaso por categoría — ✅ Desarrollada
 
 **Área:** aprendizaje / `ResultsPage`.
 
@@ -615,7 +615,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** los filtros solo muestran categorías con fallos; el contador del encabezado refleja el filtro activo; no se pierde el estado de expansión; funciona con teclado y en ES/EN; no aparece con una sola categoría.
 
-**Entrega:** commit `mejora 43: filtros de categoría en el repaso`.
+**Entrega:** commit `mejora 43: filtros de categoría en el repaso`. Los filtros derivan de las categorías con fallos, usan `aria-pressed`, actualizan el contador y ocultan filas sin desmontarlas para conservar su estado de expansión.
 
 ---
 
@@ -770,3 +770,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** la pista aparece una sola vez por partida con mapa; no se muestra en rondas sin mapa ni tras el resultado; no tapa el mapa; se puede cerrar con teclado; funciona en ES/EN en los tres modos.
 
 **Entrega:** commit `mejora 54: pista del mapa en duelos y retos`.
+
+---
+
+## 55. Mostrar el número de fallos en cada filtro de categoría — ⬜ Pendiente
+
+**Área:** aprendizaje / `ResultsPage`.
+
+**Problema:** los filtros del repaso muestran solo el nombre de la categoría. Antes de elegir uno, el jugador no sabe si va a ver un fallo o cinco, y “Todos” tampoco anticipa el total.
+
+**Propuesta:** añadir el conteo entre paréntesis a cada filtro, derivado de la misma lista de fallos, incluyendo “Todos”. Mantener el nombre accesible completo y el estado `aria-pressed`.
+
+**Aceptación:** cada conteo coincide con las filas de esa categoría; “Todos” suma el total; el texto se lee en ES/EN; no cambia el layout de forma abrupta; no aparecen filtros sin fallos.
+
+**Entrega:** commit `mejora 55: conteo en los filtros del repaso`.
