@@ -311,7 +311,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 22. Llevar el foco al resumen al entrar en resultados — ⬜ Pendiente
+## 22. Llevar el foco al resumen al entrar en resultados — ✅ Desarrollada
 
 **Área:** accesibilidad / `ResultsPage`.
 
@@ -321,7 +321,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** al entrar se anuncia el titular una vez; el foco sigue un orden lógico hacia las acciones y el repaso; no hay salto visual ni scroll inesperado.
 
-**Entrega:** commit `mejora 22: foco en el resumen de resultados`.
+**Entrega:** commit `mejora 22: foco en el resumen de resultados`. El titular recibe foco al montar con `preventScroll` y sin mover el foco si el usuario ya estaba interactuando con la página.
 
 ---
 
@@ -448,3 +448,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** la ronda señalada es la de mayor tiempo real; el texto se lee en ES/EN; no revela la respuesta correcta; no aparece en sesiones sin datos de tiempo.
 
 **Entrega:** commit `mejora 31: pregunta más lenta de la partida`.
+
+---
+
+## 32. Volver al resumen desde el final de resultados — ⬜ Pendiente
+
+**Área:** navegación / `ResultsPage`.
+
+**Problema:** con varios fallos y el desglose de puntos, la página de resultados se alarga. Después de revisar el final, volver a las acciones principales exige un scroll largo, especialmente en móvil.
+
+**Propuesta:** añadir al final un control “Volver al resumen” que desplace la vista al titular y devuelva el foco a él, respetando `prefers-reduced-motion`. Mantener las acciones principales donde están.
+
+**Aceptación:** el control aparece solo cuando la página tiene contenido suficiente; el foco termina en el titular; el scroll es instantáneo con reducción de movimiento; funciona con teclado y en ES/EN.
+
+**Entrega:** commit `mejora 32: volver al resumen de resultados`.

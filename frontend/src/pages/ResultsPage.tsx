@@ -103,6 +103,15 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
     }
   }, [unlockedAchievements, t, isTrial]);
 
+  const summaryHeadingRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    const heading = summaryHeadingRef.current;
+    if (!heading) return;
+    if (document.activeElement && document.activeElement !== document.body) return;
+    heading.focus({ preventScroll: true });
+  }, []);
+
   const [userRank, setUserRank] = useState<number | null>(null);
   const [loading, setLoading] = useState(!isPracticeMode && !isTrial);
   useEffect(() => {
@@ -181,7 +190,7 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
             </span>
             <span className="mt-1 text-xs text-app-secondary">{t('results.correct')}</span>
           </div>
-          <h1 className="mt-4 text-2xl font-semibold text-app-text sm:text-3xl">
+          <h1 ref={summaryHeadingRef} tabIndex={-1} className="mt-4 text-2xl font-semibold text-app-text outline-none sm:text-3xl">
             {isStreakMode ? t('results.streakHeadline', { count: correctAnswers }) : getPerformanceMessage()}
           </h1>
           <p className="mt-2 text-sm text-app-secondary">

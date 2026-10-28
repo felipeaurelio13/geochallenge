@@ -127,6 +127,13 @@ describe('ResultsPage', () => {
     expect(screen.queryByText(/Tiempo medio por respuesta/)).not.toBeInTheDocument();
   });
 
+  it('lleva el foco al titular del resumen al entrar', async () => {
+    render(<ResultsPage />);
+
+    const heading = screen.getByRole('heading', { level: 1 });
+    await waitFor(() => expect(heading).toHaveFocus());
+  });
+
   it('muestra el tiempo medio por respuesta cuando la sesión trae tiempos', () => {
     const originalResults = mocks.gameState.results;
     mocks.gameState.results = originalResults.map((result, index) => ({
