@@ -590,8 +590,10 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
             </>
           ) : <ShareButton variant="secondary" size="md" payload={{ title: t('app.name'), text: shareText }} />}
           {!isTrial && !isPracticeMode && (
-            <div className="mt-4 flex items-center justify-between gap-3">
-              {loading ? <LoadingSpinner size="sm" /> : userRank ? <p className="text-sm text-app-secondary">{t('results.yourRank')} <strong className="text-app-text">#{userRank}</strong></p> : null}
+            <div className="mt-4 flex min-h-12 items-center justify-between gap-3" data-testid="results-rank-row">
+              <div className="flex min-h-12 min-w-0 flex-1 items-center">
+                {loading ? <LoadingSpinner size="sm" /> : userRank ? <p className="text-sm text-app-secondary">{t('results.yourRank')} <strong className="text-app-text">#{userRank}</strong></p> : null}
+              </div>
               <Button onClick={() => navigate('/rankings')} variant="ghost">{t('results.viewRankings')}</Button>
             </div>
           )}

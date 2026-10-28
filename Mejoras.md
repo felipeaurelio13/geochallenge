@@ -731,7 +731,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 52. Reservar espacio para el ranking mientras carga — ⬜ Pendiente
+## 52. Reservar espacio para el ranking mientras carga — ✅ Desarrollada
 
 **Área:** estabilidad visual / `ResultsPage`.
 
@@ -741,7 +741,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** el bloque no cambia de altura entre cargando, con ranking y sin ranking; el spinner sigue siendo perceptible; no afecta a los modos que no piden ranking; se cubre con un test de estructura.
 
-**Entrega:** commit `mejora 52: espacio estable para el ranking`.
+**Entrega:** commit `mejora 52: espacio estable para el ranking`. La fila de ranking reserva `min-h-12` para spinner, posición y estado sin dato, sin alterar los modos que no consultan ranking.
 
 ---
 
@@ -854,3 +854,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** el conteo coincide con las filas visibles; usa singular o plural según corresponda; se lee en ES/EN; no se anuncia si el copiado falla; no duplica el aviso existente ni interfiere con los anuncios de orden o filtro.
 
 **Entrega:** commit `mejora 60: conteo al copiar el repaso`.
+
+---
+
+## 61. Mostrar también la ronda más rápida en el resumen — ⬜ Pendiente
+
+**Área:** aprendizaje / `ResultsPage`.
+
+**Problema:** el resumen destaca la ronda más lenta, pero no la más rápida. El jugador ve dónde perdió tiempo, pero no qué pregunta resolvió con seguridad y puede usar esa referencia para repetir el patrón.
+
+**Propuesta:** reutilizar la lista de respuestas cronometradas para calcular la ronda más rápida y mostrarla junto a la más lenta, con el mismo formato de enunciado y segundos y sin revelar la respuesta correcta. Ocultarla cuando no haya al menos dos tiempos válidos.
+
+**Aceptación:** la ronda coincide con el menor tiempo registrado; no duplica la más lenta cuando todas duran lo mismo; se lee en ES/EN; no aparece sin tiempos suficientes; no altera el repaso ni el texto de compartir.
+
+**Entrega:** commit `mejora 61: ronda más rápida en el resumen`.

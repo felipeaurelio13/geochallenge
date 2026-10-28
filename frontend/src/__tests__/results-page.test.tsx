@@ -408,6 +408,33 @@ describe('ResultsPage', () => {
     }
   });
 
+  it('reserva una altura estable para la fila de ranking durante la carga', async () => {
+    let resolveRank: (value: { userRank: { rank: number } }) => void = () => {};
+    mocks.getMyRankMock.mockReturnValueOnce(new Promise((resolve) => { resolveRank = resolve; }));
+
+    render(<ResultsPage />);
+
+    const row = screen.getByTestId('results-rank-row');
+    expect(row).toHaveClass('min-h-12');
+    expect(within(row).getByText('loading')).toBeInTheDocument();
+
+    resolveRank({ userRank: { rank: 4 } });
+
+    await waitFor(() => expect(within(row).getByText('#4')).toBeInTheDocument());
+    expect(row).toHaveClass('min-h-12');
+  });
+
+  it('mantiene la fila de ranking sin posición cuando la API no devuelve rango', async () => {
+    mocks.getMyRankMock.mockResolvedValueOnce({ userRank: null });
+
+    render(<ResultsPage />);
+
+    const row = screen.getByTestId('results-rank-row');
+    await waitFor(() => expect(within(row).queryByText('loading')).not.toBeInTheDocument());
+    expect(row).toHaveClass('min-h-12');
+    expect(within(row).queryByText(/#/)).not.toBeInTheDocument();
+  });
+
   it('places replay before review and sharing, and shows actual missed answers', () => {
     render(<ResultsPage />);
     const tray = screen.getByTestId('results-action-tray');
