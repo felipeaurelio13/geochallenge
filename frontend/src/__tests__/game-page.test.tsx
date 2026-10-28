@@ -212,6 +212,20 @@ describe('GamePage ending flow', () => {
     expect(optionsGrid).not.toHaveClass('sm:grid-cols-2');
   });
 
+  it('muestra la categoría de la ronda en el encabezado', () => {
+    mocks.gameState.questions.push({
+      id: 'q2',
+      questionText: 'Capital de Perú',
+      options: ['Lima', 'Bogotá', 'Quito', 'Santiago'],
+      correctAnswer: 'Lima',
+      category: 'CAPITAL',
+    });
+
+    render(<GamePage />);
+
+    expect(screen.getByText(/categories\.capitals/)).toBeInTheDocument();
+  });
+
   it('refleja el progreso de la ronda en el título de la pestaña y lo restaura al salir', () => {
     const { unmount } = render(<GamePage />);
 

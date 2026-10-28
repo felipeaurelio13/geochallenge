@@ -395,7 +395,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 28. Mostrar la categoría de la ronda actual en el encabezado — ⬜ Pendiente
+## 28. Mostrar la categoría de la ronda actual en el encabezado — ✅ Desarrollada
 
 **Área:** orientación / `GamePage`.
 
@@ -405,7 +405,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** la etiqueta se actualiza al avanzar; se lee en ES/EN; no tapa el temporizador ni el botón de salida; no aparece en modos donde la categoría es sensible o no está definida.
 
-**Entrega:** commit `mejora 28: categoría de la ronda en el encabezado`.
+**Entrega:** commit `mejora 28: categoría de la ronda en el encabezado`. La etiqueta se integra en el contador del piloto y en la fila de progreso del resto de modos; las claves de categoría se movieron a `utils/categoryLabels.ts` para reutilizarlas entre juego y resultados.
 
 ---
 
@@ -532,3 +532,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** la dificultad aparece en ES/EN; no se inventa cuando falta; no desplaza las métricas ni las acciones; se actualiza al repetir la partida con otro nivel.
 
 **Entrega:** commit `mejora 37: dificultad en el resumen final`.
+
+---
+
+## 38. Mantener la categoría visible también en la última pregunta — ⬜ Pendiente
+
+**Área:** orientación / `GamePage`.
+
+**Problema:** la categoría de la ronda se oculta en la última pregunta para dejar espacio al aviso “Última pregunta”. El jugador pierde el contexto justo en la ronda decisiva, y el encabezado cambia de contenido sin explicación.
+
+**Propuesta:** reorganizar la línea del contador para mostrar ambos datos sin desbordar en móvil, por ejemplo con la categoría en una línea secundaria compacta o con un formato abreviado que no compita con el aviso.
+
+**Aceptación:** la categoría y “Última pregunta” se ven a la vez en la última ronda; no se corta ni se desborda en 320 px; no aumenta la altura del header en el resto de rondas; funciona en ES/EN.
+
+**Entrega:** commit `mejora 38: categoría en la última pregunta`.

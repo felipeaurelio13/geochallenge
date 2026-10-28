@@ -23,6 +23,7 @@ import { useAnswerShortcuts } from '../hooks/useAnswerShortcuts';
 import { areMechanicsV2Enabled } from '../config/featureFlags';
 import { trackUxEvent } from '../utils/uxTelemetry';
 import { generateFunFact } from '../utils/funFacts';
+import { CATEGORY_LABEL_KEYS } from '../utils/categoryLabels';
 import { formatScoreBreakdown, getScoreBreakdownParts } from '../utils/scoreBreakdown';
 import { applyExtendedTime, getQuestionDuration } from '../utils/questionTiming';
 import { uiStoreActions, useUiStore } from '../store/useUiStore';
@@ -684,7 +685,11 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
                     <span className="ml-1 whitespace-nowrap text-xs font-medium text-app-secondary">
                       · {t('game.lastQuestion')}
                     </span>
-                  ) : null}
+                  ) : (
+                    <span className="ml-1 whitespace-nowrap text-xs font-medium text-app-secondary">
+                      · {t(CATEGORY_LABEL_KEYS[currentQuestion.category])}
+                    </span>
+                  )}
                 </p>
               ) : (
                 <>
@@ -754,6 +759,9 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
                   showCurrentResult={showResult}
                 />
               </div>
+              <span className="hidden shrink-0 whitespace-nowrap text-[0.65rem] font-semibold uppercase tracking-wide text-app-secondary sm:inline">
+                {t(CATEGORY_LABEL_KEYS[currentQuestion.category])}
+              </span>
               {isLastQuestion ? (
                 <span className="shrink-0 whitespace-nowrap text-[0.65rem] font-semibold uppercase tracking-wide text-app-secondary">
                   {t('game.lastQuestion')}

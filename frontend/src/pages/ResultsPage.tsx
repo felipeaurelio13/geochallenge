@@ -10,17 +10,9 @@ import { uiStoreActions, useUiStore } from '../store/useUiStore';
 import { getAchievementDisplay } from '../utils/achievements';
 import { getLocalizedQuestionText } from '../utils/questionText';
 import { generateFunFact } from '../utils/funFacts';
+import { CATEGORY_LABEL_KEYS } from '../utils/categoryLabels';
 import { trackUxEvent } from '../utils/uxTelemetry';
 import type { Category } from '../types';
-
-const CATEGORY_LABEL_KEYS: Record<Category, string> = {
-  MIXED: 'categories.mixed',
-  FLAG: 'categories.flags',
-  CAPITAL: 'categories.capitals',
-  MAP: 'categories.maps',
-  SILHOUETTE: 'categories.silhouettes',
-  MONUMENT: 'categories.monuments',
-};
 
 export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
   const { t, i18n } = useTranslation();
