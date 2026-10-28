@@ -409,6 +409,7 @@
     "streak": "Streak",
     "streakLabel": "Current streak: {{count}}",
     "questionOf": "Question {{current}} of {{total}}",
+    "lastQuestion": "Last question",
     "questionFlag": "Which country does this flag belong to?",
     "questionCapital": "What is the capital of {{country}}?",
     "questionMap": "Where is {{capital}}?",

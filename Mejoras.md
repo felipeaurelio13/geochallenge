@@ -185,7 +185,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 13. Avisar que la pregunta actual es la última — ⬜ Pendiente
+## 13. Avisar que la pregunta actual es la última — ✅ Desarrollada
 
 **Área:** ritmo / `GamePage`.
 
@@ -195,7 +195,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** aparece solo en la última pregunta, en ES/EN, y no altera la altura del header ni la visibilidad de las alternativas en móvil.
 
-**Entrega:** commit `mejora 13: aviso de última pregunta`.
+**Entrega:** commit `mejora 13: aviso de última pregunta`. La etiqueta se integra en la línea del contador en el piloto y en la fila de progreso en el resto, sin añadir altura ni tocar el CTA.
 
 ---
 
@@ -322,3 +322,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** al entrar se anuncia el titular una vez; el foco sigue un orden lógico hacia las acciones y el repaso; no hay salto visual ni scroll inesperado.
 
 **Entrega:** commit `mejora 22: foco en el resumen de resultados`.
+
+---
+
+## 23. Reflejar el progreso de la ronda en el título de la pestaña — ⬜ Pendiente
+
+**Área:** orientación / `GamePage`.
+
+**Problema:** el título de la pestaña no cambia durante la partida. Si el jugador cambia de pestaña o vuelve al navegador, no puede saber en qué ronda está sin entrar de nuevo al juego.
+
+**Propuesta:** actualizar `document.title` mientras la partida está activa con la pregunta actual y el total; restaurar el título de la app al salir, terminar o desmontar la pantalla.
+
+**Aceptación:** el título muestra “Pregunta X de Y · GeoChallenge” en ES/EN, se actualiza al avanzar, no se queda pegado en resultados y no rompe el título base en otras rutas.
+
+**Entrega:** commit `mejora 23: progreso en el título de la pestaña`.

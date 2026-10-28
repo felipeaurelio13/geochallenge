@@ -309,6 +309,24 @@ describe('GamePage ending flow', () => {
     });
   });
 
+  it('avisa solo cuando la pregunta actual es la última', () => {
+    mocks.gameState.questions.push({
+      id: 'q2',
+      questionText: 'Capital de Perú',
+      options: ['Lima', 'Bogotá', 'Quito', 'Santiago'],
+      correctAnswer: 'Lima',
+      category: 'CAPITAL',
+    });
+    const { rerender } = render(<GamePage />);
+
+    expect(screen.queryByText(/game.lastQuestion/)).not.toBeInTheDocument();
+
+    mocks.gameState.currentIndex = 1;
+    rerender(<GamePage />);
+
+    expect(screen.getByText(/game.lastQuestion/)).toBeInTheDocument();
+  });
+
   it('muestra la pista de atajos solo antes de la primera respuesta', async () => {
     render(<GamePage />);
 
