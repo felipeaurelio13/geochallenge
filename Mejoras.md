@@ -661,7 +661,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 47. Copiar el repaso de fallos como texto de estudio — ⬜ Pendiente
+## 47. Copiar el repaso de fallos como texto de estudio — ✅ Desarrollada
 
 **Área:** aprendizaje / `ResultsPage`.
 
@@ -671,7 +671,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** el texto respeta el idioma activo; incluye todos los fallos visibles; no se ofrece sin fallos; el botón no tapa el contador ni el control de expandir; funciona con teclado y en móvil.
 
-**Entrega:** commit `mejora 47: copiar el repaso de fallos`.
+**Entrega:** commit `mejora 47: copiar el repaso de fallos`. El botón copia solo las filas visibles con categoría, enunciado, respuesta del jugador y respuesta correcta; muestra confirmación o error inline y limpia el aviso a los 3 s.
 
 ---
 
@@ -784,3 +784,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** cada conteo coincide con las filas de esa categoría; “Todos” suma el total; el texto se lee en ES/EN; no cambia el layout de forma abrupta; no aparecen filtros sin fallos.
 
 **Entrega:** commit `mejora 55: conteo en los filtros del repaso`.
+
+---
+
+## 56. Incluir el dato curioso en el repaso copiado — ⬜ Pendiente
+
+**Área:** aprendizaje / `ResultsPage`.
+
+**Problema:** el texto copiado resume pregunta, respuesta del jugador y respuesta correcta, pero deja fuera el dato curioso que la interfaz ya muestra. Quien estudia fuera de la app pierde el contexto que ayuda a recordar el país.
+
+**Propuesta:** añadir el dato curioso al bloque de cada fallo cuando exista, reutilizando `generateFunFact` y la etiqueta ya localizada. Mantener el formato plano y omitirlo cuando no haya dato.
+
+**Aceptación:** el dato copiado coincide con el visible; solo aparece cuando existe; no duplica la respuesta correcta; se lee en ES/EN; no cambia el texto cuando no hay dato; el copiado sigue respetando el filtro activo.
+
+**Entrega:** commit `mejora 56: dato curioso en el repaso copiado`.

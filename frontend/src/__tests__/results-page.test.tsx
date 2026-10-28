@@ -56,6 +56,13 @@ vi.mock('react-i18next', () => ({
         'results.reviewSortOriginal': 'Orden de la partida',
         'results.reviewFilterLabel': 'Filtrar el repaso por categoría',
         'results.reviewFilterAll': 'Todos',
+        'results.reviewCopy': 'Copiar repaso',
+        'results.reviewCopyTitle': 'Fallos de GeoChallenge',
+        'results.reviewCopied': 'Repaso copiado',
+        'results.reviewCopyError': 'No se pudo copiar el repaso',
+        'results.yourAnswer': 'Tu respuesta',
+        'results.noAnswer': 'Sin respuesta',
+        'game.correctAnswerWas': 'La respuesta correcta era',
         'results.categoryAccuracyTitle': 'Precisión por categoría',
         'results.categoryAccuracyDescription': 'Así se reparten tus aciertos por tipo de pregunta.',
         'results.funFactLabel': 'Dato curioso',
@@ -450,7 +457,7 @@ describe('ResultsPage', () => {
     }
   });
 
-  it('filtra el repaso por categoría sin perder el estado de expansión', () => {
+  it('filtra el repaso por categoría sin perder el estado de expansión', async () => {
     const originalQuestions = mocks.gameState.questions;
     const originalResults = mocks.gameState.results;
     mocks.gameState.questions = [
@@ -484,6 +491,12 @@ describe('ResultsPage', () => {
       expect(rows[0]).toHaveAttribute('hidden');
       expect(rows[1]).not.toHaveAttribute('hidden');
 
+      fireEvent.click(within(section).getByRole('button', { name: 'Copiar repaso' }));
+      await waitFor(() => expect(mocks.writeTextMock).toHaveBeenCalled());
+      const copied = mocks.writeTextMock.mock.calls[mocks.writeTextMock.mock.calls.length - 1]?.[0] as string;
+      expect(copied).toContain('¿Cuál es la capital de Perú?');
+      expect(copied).not.toContain('game.questionFlag');
+
       fireEvent.click(within(filter).getByRole('button', { name: 'Todos' }));
 
       expect(section).toHaveTextContent('2 fallos');
@@ -495,8 +508,23 @@ describe('ResultsPage', () => {
     }
   });
 
-  it('no muestra filtros de repaso cuando todos los fallos son de una categoría', () => {
+  it('copia el repaso visible como texto de estudio', async () => {
     render(<ResultsPage />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Copiar repaso' }));
+
+    await waitFor(() => {
+      expect(mocks.writeTextMock).toHaveBeenCalledWith(expect.stringContaining('Fallos de GeoChallenge'));
+    });
+    const copied = mocks.writeTextMock.mock.calls[mocks.writeTextMock.mock.calls.length - 1]?.[0] as string;
+    expect(copied).toContain('9. Capitales — ¿Cuál es la capital de Chile?');
+    expect(copied).toContain('Tu respuesta: Lima');
+    expect(copied).toContain('La respuesta correcta era: Santiago');
+    expect(copied).toContain('10. Capitales');
+    expect(screen.getByText('Repaso copiado')).toBeInTheDocument();
+  });
+
+  it('no muestra filtros de repaso cuando todos los fallos son de una categoría', () => {    render(<ResultsPage />);
 
     expect(screen.queryByRole('group', { name: 'Filtrar el repaso por categoría' })).not.toBeInTheDocument();
   });

@@ -41,10 +41,12 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
   const [reviewSort, setReviewSort] = useState<'original' | 'slowest'>('original');
   const [reviewCategory, setReviewCategory] = useState<Category | 'ALL'>('ALL');
   const [reviewAnnouncement, setReviewAnnouncement] = useState('');
+  const [reviewCopyFeedback, setReviewCopyFeedback] = useState('');
   const [showBackToSummary, setShowBackToSummary] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const reviewListRef = useRef<HTMLDivElement>(null);
   const feedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const reviewCopyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prefersReducedMotion = useUiStore((s) => s.prefersReducedMotion);
   const hasToastedAchievements = useRef(false);
   const { score, questions, results } = state;
@@ -150,6 +152,7 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
 
   useEffect(() => () => {
     if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
+    if (reviewCopyTimer.current) clearTimeout(reviewCopyTimer.current);
   }, []);
 
   useEffect(() => {
@@ -259,6 +262,29 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
     if (!heading) return;
     heading.scrollIntoView?.({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' });
     heading.focus({ preventScroll: true });
+  };
+
+  const handleCopyReview = async () => {
+    const lines = visibleReviewMistakes.map(({ question, result, number }) => {
+      const userAnswer = question.category === 'MAP' && result.distance != null
+        ? t('results.mapDistance', { distance: Math.round(result.distance).toLocaleString(currentLanguage) })
+        : result.userAnswer || t('results.noAnswer');
+      return [
+        `${number}. ${t(CATEGORY_LABEL_KEYS[question.category])} — ${getLocalizedQuestionText(question, t, currentLanguage)}`,
+        `${t('results.yourAnswer')}: ${userAnswer}`,
+        `${t('game.correctAnswerWas')}: ${result.correctAnswer}`,
+      ].join('\n');
+    });
+    const text = [t('results.reviewCopyTitle'), ...lines].join('\n\n');
+
+    try {
+      await navigator.clipboard.writeText(text);
+      setReviewCopyFeedback(t('results.reviewCopied'));
+    } catch {
+      setReviewCopyFeedback(t('results.reviewCopyError'));
+    }
+    if (reviewCopyTimer.current) clearTimeout(reviewCopyTimer.current);
+    reviewCopyTimer.current = setTimeout(() => setReviewCopyFeedback(''), 3000);
   };
 
   const handlePracticeCategory = (categoryToPlay: Category, source = 'results_category_row') => {
@@ -420,16 +446,25 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
             </div>
             <div className="mt-1 flex flex-wrap items-center justify-between gap-2">
               <p className="min-w-0 flex-1 text-sm text-app-secondary">{t('results.reviewDescription')}</p>
-              {mistakes.length >= 2 && (
+              <div className="flex shrink-0 flex-wrap items-center justify-end gap-1">
                 <button
                   type="button"
-                  onClick={() => setReviewSort((current) => (current === 'original' ? 'slowest' : 'original'))}
-                  aria-pressed={reviewSort === 'slowest'}
+                  onClick={handleCopyReview}
                   className="min-h-11 shrink-0 rounded-md px-2 text-xs font-medium text-primary hover:bg-primary/10 hover:text-primary/80"
                 >
-                  {t(reviewSort === 'slowest' ? 'results.reviewSortOriginal' : 'results.reviewSortSlowest')}
+                  {t('results.reviewCopy')}
                 </button>
-              )}
+                {mistakes.length >= 2 && (
+                  <button
+                    type="button"
+                    onClick={() => setReviewSort((current) => (current === 'original' ? 'slowest' : 'original'))}
+                    aria-pressed={reviewSort === 'slowest'}
+                    className="min-h-11 shrink-0 rounded-md px-2 text-xs font-medium text-primary hover:bg-primary/10 hover:text-primary/80"
+                  >
+                    {t(reviewSort === 'slowest' ? 'results.reviewSortOriginal' : 'results.reviewSortSlowest')}
+                  </button>
+                )}
+              </div>
             </div>
             {reviewCategories.length >= 2 && (
               <div className="mt-3 flex flex-wrap gap-1.5" role="group" aria-label={t('results.reviewFilterLabel')}>
@@ -453,6 +488,7 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
                 })}
               </div>
             )}
+            <p className="mt-2 text-xs text-success" aria-live="polite">{reviewCopyFeedback}</p>
             <p className="sr-only" role="status" aria-live="polite">{reviewAnnouncement}</p>
             <div ref={reviewListRef} className="mt-4 space-y-2">
               {reviewMistakes.map(({ result, question, number }) => {
