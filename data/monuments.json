@@ -1822,6 +1822,60 @@
         "sourceUrl": "https://commons.wikimedia.org/wiki/File:Torii_path_with_lantern_at_Fushimi_Inari_Taisha_Shrine,_Kyoto,_Japan.jpg"
       },
       "difficulty": "EASY"
+    },
+    {
+      "slug": "pena-palace",
+      "name": {
+        "en": "Pena Palace",
+        "es": "Palacio da Pena"
+      },
+      "country": "Portugal",
+      "continent": "Europe",
+      "latitude": 38.7876,
+      "longitude": -9.3906,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Sintra_Portugal_Pal%C3%A1cio_da_Pena-01.jpg?width=400",
+      "attribution": {
+        "author": "CEphoto, Uwe Aranas",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sintra_Portugal_Pal%C3%A1cio_da_Pena-01.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "pamukkale",
+      "name": {
+        "en": "Pamukkale",
+        "es": "Pamukkale"
+      },
+      "country": "Turkey",
+      "continent": "Asia",
+      "latitude": 37.9248,
+      "longitude": 29.1213,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/TR_Pamukkale_White_Terraces_asv2020-02_img16.jpg?width=400",
+      "attribution": {
+        "author": "A.Savin",
+        "license": "FAL",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:TR_Pamukkale_White_Terraces_asv2020-02_img16.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "preikestolen",
+      "name": {
+        "en": "Preikestolen",
+        "es": "Preikestolen"
+      },
+      "country": "Norway",
+      "continent": "Europe",
+      "latitude": 58.9864,
+      "longitude": 6.1887,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Preikestolen_Norge.jpg?width=400",
+      "attribution": {
+        "author": "Stefan Krause",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Preikestolen_Norge.jpg"
+      },
+      "difficulty": "MEDIUM"
     }
   ]
 }
