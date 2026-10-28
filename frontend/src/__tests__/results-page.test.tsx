@@ -656,6 +656,14 @@ describe('ResultsPage', () => {
     expect(screen.getByText('Repaso copiado: 2 fallos')).toBeInTheDocument();
   });
 
+  it('reserva altura para el aviso de copiado del repaso', () => {
+    render(<ResultsPage />);
+
+    const feedback = screen.getByTestId('review-copy-feedback');
+    expect(feedback).toHaveClass('min-h-5');
+    expect(feedback).toBeEmptyDOMElement();
+  });
+
   it('no anuncia un conteo cuando el copiado del repaso falla', async () => {
     mocks.writeTextMock.mockRejectedValueOnce(new Error('denied'));
 

@@ -927,7 +927,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 66. Reservar espacio para el aviso de copiado del repaso — ⬜ Pendiente
+## 66. Reservar espacio para el aviso de copiado del repaso — ✅ Desarrollada
 
 **Área:** estabilidad visual / `ResultsPage`.
 
@@ -937,7 +937,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** la lista no cambia de posición al aparecer o desaparecer el aviso; el espacio reservado no deja un hueco visible; el aviso sigue siendo perceptible; no afecta al filtro ni al orden; se cubre con test de estructura.
 
-**Entrega:** commit `mejora 66: espacio estable para el aviso de copiado`.
+**Entrega:** commit `mejora 66: espacio estable para el aviso de copiado`. El aviso reserva `min-h-5` desde el primer render; la lista no se desplaza al aparecer o desaparecer y la región `aria-live` se mantiene.
 
 ---
 
@@ -1050,3 +1050,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** el tiempo medio copiado coincide con el visible; solo aparece con tiempos válidos; se lee en ES/EN; no cambia el texto si falta; el copiado sigue respetando filtro y orden.
 
 **Entrega:** commit `mejora 74: tiempo medio en el repaso copiado`.
+
+---
+
+## 75. Indicar cuántos fallos copiará el botón de repaso — ⬜ Pendiente
+
+**Área:** usabilidad / `ResultsPage`.
+
+**Problema:** el botón “Copiar repaso” no anticipa el alcance de la acción. Con un filtro activo, el jugador no sabe si copiará todos los fallos o solo los visibles hasta que revisa el texto.
+
+**Propuesta:** añadir el número de fallos visibles al texto del botón, reutilizando el mismo conteo de la lista. Mantener el nombre accesible completo y el estado de feedback actuales.
+
+**Aceptación:** el número coincide con las filas visibles; cambia al filtrar; usa singular o plural; se lee en ES/EN; no cambia el layout de forma abrupta; no altera el texto copiado.
+
+**Entrega:** commit `mejora 75: conteo en el botón de copiar repaso`.

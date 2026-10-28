@@ -555,7 +555,7 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
                 })}
               </div>
             )}
-            <p className="mt-2 text-xs text-success" aria-live="polite">{reviewCopyFeedback}</p>
+            <p data-testid="review-copy-feedback" className="mt-2 min-h-5 text-xs text-success" aria-live="polite">{reviewCopyFeedback}</p>
             <p className="sr-only" role="status" aria-live="polite">{reviewAnnouncement}</p>
             <div ref={reviewListRef} className="mt-4 space-y-2">
               {reviewMistakes.map(({ result, question, number }) => {
