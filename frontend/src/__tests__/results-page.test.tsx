@@ -126,6 +126,10 @@ vi.mock('react-i18next', () => ({
         return `Ronda más lenta (#${options?.number}): ${options?.question} (${options?.seconds} s)`;
       }
 
+      if (key === 'results.fastestQuestion') {
+        return `Ronda más rápida (#${options?.number}): ${options?.question} (${options?.seconds} s)`;
+      }
+
       if (key === 'game.questionCapital') {
         return `¿Cuál es la capital de ${options?.country}?`;
       }
@@ -392,6 +396,9 @@ describe('ResultsPage', () => {
       const slowest = screen.getByText(/Ronda más lenta/);
       expect(slowest).toHaveTextContent('Ronda más lenta (#8): ¿Cuál es la capital de Chile? (9 s)');
       expect(slowest.textContent).not.toContain('Santiago');
+      const fastest = screen.getByText(/Ronda más rápida/);
+      expect(fastest).toHaveTextContent('Ronda más rápida (#1): ¿Cuál es la capital de Chile? (4 s)');
+      expect(fastest.textContent).not.toContain('Santiago');
     } finally {
       mocks.gameState.results = originalResults;
     }
@@ -417,6 +424,24 @@ describe('ResultsPage', () => {
     render(<ResultsPage />);
 
     expect(screen.queryByText(/Ronda más lenta/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Ronda más rápida/)).not.toBeInTheDocument();
+  });
+
+  it('oculta ambas rondas extremas cuando todas duran lo mismo', () => {
+    const originalResults = mocks.gameState.results;
+    mocks.gameState.results = originalResults.map((result) => ({
+      ...result,
+      elapsedSeconds: 5,
+    })) as typeof mocks.gameState.results;
+
+    try {
+      render(<ResultsPage />);
+
+      expect(screen.queryByText(/Ronda más lenta/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/Ronda más rápida/)).not.toBeInTheDocument();
+    } finally {
+      mocks.gameState.results = originalResults;
+    }
   });
 
   it.each(['single', 'streak', 'practice'] as const)('replays %s with the same configuration', async (gameType) => {

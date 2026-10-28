@@ -542,6 +542,7 @@
     "averageTime": "Tiempo medio por respuesta",
     "averageTimeValue": "{{seconds}} s",
     "slowestQuestion": "Ronda más lenta (#{{number}}): {{question}} ({{seconds}} s)",
+    "fastestQuestion": "Ronda más rápida (#{{number}}): {{question}} ({{seconds}} s)",
     "totalTime": "Tiempo total de la partida",
     "totalTimeValueMinutes": "{{minutes}} min {{seconds}} s",
     "totalTimeValueSeconds": "{{seconds}} s",

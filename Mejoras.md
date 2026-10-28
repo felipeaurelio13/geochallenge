@@ -857,7 +857,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 61. Mostrar también la ronda más rápida en el resumen — ⬜ Pendiente
+## 61. Mostrar también la ronda más rápida en el resumen — ✅ Desarrollada
 
 **Área:** aprendizaje / `ResultsPage`.
 
@@ -867,7 +867,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** la ronda coincide con el menor tiempo registrado; no duplica la más lenta cuando todas duran lo mismo; se lee en ES/EN; no aparece sin tiempos suficientes; no altera el repaso ni el texto de compartir.
 
-**Entrega:** commit `mejora 61: ronda más rápida en el resumen`.
+**Entrega:** commit `mejora 61: ronda más rápida en el resumen`. El mismo cálculo de tiempos devuelve la ronda más rápida y la muestra junto a la más lenta; ambas se ocultan si no hay tiempos suficientes o todas duran igual.
 
 ---
 
@@ -980,3 +980,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** el bloque de ranking no se mueve al aparecer o desaparecer el aviso; el espacio no deja un hueco visible; el aviso sigue siendo perceptible; no afecta a modos sin racha; se cubre con test de estructura.
 
 **Entrega:** commit `mejora 69: espacio estable para el aviso de racha`.
+
+---
+
+## 70. Dar un acceso directo al repaso desde el resumen — ⬜ Pendiente
+
+**Área:** usabilidad / `ResultsPage`.
+
+**Problema:** cuando hay fallos, el repaso queda después del desglose por categoría y de las acciones. En móvil, un jugador que quiere revisar sus errores debe recorrer media página sin saber cuánto falta.
+
+**Propuesta:** añadir junto a las acciones un botón secundario “Revisar fallos” que solo aparece si hay fallos y lleva el foco al título del repaso, reutilizando el patrón de “Volver al resumen”. Mantener el orden actual del contenido.
+
+**Aceptación:** el atajo solo aparece con fallos; lleva foco y scroll al repaso; respeta movimiento reducido; se lee en ES/EN; no duplica el botón de practicar fallos; se cubre con test de navegación interna.
+
+**Entrega:** commit `mejora 70: acceso directo al repaso`.

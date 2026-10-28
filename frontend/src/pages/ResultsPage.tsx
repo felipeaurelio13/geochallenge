@@ -147,8 +147,18 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
     ));
     if (slowest.elapsedSeconds === fastest.elapsedSeconds) return null;
     const question = questions.find((item) => item.id === slowest.questionId);
-    if (!question) return null;
-    return { question, seconds: slowest.elapsedSeconds, number: results.indexOf(slowest) + 1 };
+    const fastestQuestion = questions.find((item) => item.id === fastest.questionId);
+    if (!question || !fastestQuestion) return null;
+    return {
+      question,
+      seconds: slowest.elapsedSeconds,
+      number: results.indexOf(slowest) + 1,
+      fastest: {
+        question: fastestQuestion,
+        seconds: fastest.elapsedSeconds,
+        number: results.indexOf(fastest) + 1,
+      },
+    };
   }, [questions, results]);
   const weakestCategory = categoryStats.find((stat) => stat.accuracy < 100) ?? null;
   const unlockedAchievements = useMemo(
@@ -404,13 +414,22 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
             </p>
           )}
           {slowestAnswer && (
-            <p className="mt-1 text-xs text-app-secondary">
-              {t('results.slowestQuestion', {
-                number: slowestAnswer.number,
-                question: getLocalizedQuestionText(slowestAnswer.question, t, currentLanguage),
-                seconds: slowestAnswer.seconds.toLocaleString(currentLanguage, { maximumFractionDigits: 1 }),
-              })}
-            </p>
+            <>
+              <p className="mt-1 text-xs text-app-secondary">
+                {t('results.slowestQuestion', {
+                  number: slowestAnswer.number,
+                  question: getLocalizedQuestionText(slowestAnswer.question, t, currentLanguage),
+                  seconds: slowestAnswer.seconds.toLocaleString(currentLanguage, { maximumFractionDigits: 1 }),
+                })}
+              </p>
+              <p className="mt-1 text-xs text-app-secondary">
+                {t('results.fastestQuestion', {
+                  number: slowestAnswer.fastest.number,
+                  question: getLocalizedQuestionText(slowestAnswer.fastest.question, t, currentLanguage),
+                  seconds: slowestAnswer.fastest.seconds.toLocaleString(currentLanguage, { maximumFractionDigits: 1 }),
+                })}
+              </p>
+            </>
           )}
           {formattedTotalAnswerSeconds && (
             <p className="mt-1 text-xs text-app-secondary">
