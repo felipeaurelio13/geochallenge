@@ -284,7 +284,12 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
         {mistakes.length > 0 && (
           <section className="mt-6 border-t border-app-border pt-5" aria-labelledby="review-title">
             <div className="flex items-start justify-between gap-3">
-              <h2 id="review-title" className="text-lg font-semibold text-app-text">{t('results.reviewTitle')}</h2>
+              <h2 id="review-title" className="text-lg font-semibold text-app-text">
+                {t('results.reviewTitle')}
+                <span className="ml-2 align-middle text-xs font-normal text-app-secondary">
+                  {t(mistakes.length === 1 ? 'results.reviewCountOne' : 'results.reviewCountMany', { count: mistakes.length })}
+                </span>
+              </h2>
               {mistakes.length >= 2 && (
                 <button
                   type="button"

@@ -500,6 +500,8 @@
     "perfectGoal": "All correct! Try another game to keep it up.",
     "bestRun": "Best streak",
     "reviewTitle": "Remember these answers",
+    "reviewCountOne": "{{count}} mistake",
+    "reviewCountMany": "{{count}} mistakes",
     "reviewDescription": "Review the questions you missed before playing again.",
     "expandAll": "Expand all",
     "collapseAll": "Collapse all",

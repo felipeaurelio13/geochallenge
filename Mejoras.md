@@ -423,7 +423,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 30. Anunciar cuántos fallos hay en el repaso — ⬜ Pendiente
+## 30. Anunciar cuántos fallos hay en el repaso — ✅ Desarrollada
 
 **Área:** accesibilidad / `ResultsPage`.
 
@@ -433,7 +433,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** el encabezado anuncia el total correcto en ES/EN; se actualiza si cambia el número de fallos; no aparece cuando no hay fallos; no duplica el número en cada fila.
 
-**Entrega:** commit `mejora 30: total de fallos en el repaso`.
+**Entrega:** commit `mejora 30: total de fallos en el repaso`. El encabezado suma un contador con formas singular y plural y mantiene el título y la descripción existentes.
 
 ---
 
@@ -602,3 +602,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** la pista no tapa el mapa ni el crosshair; no aparece en preguntas que no son de mapa; se puede cerrar o ignora en móvil táctil; se lee en ES/EN; no intercepta clics.
 
 **Entrega:** commit `mejora 42: pista visible de controles del mapa`.
+
+---
+
+## 43. Filtrar el repaso por categoría — ⬜ Pendiente
+
+**Área:** aprendizaje / `ResultsPage`.
+
+**Problema:** en una partida mixta con varios fallos, el repaso mezcla banderas, capitales, mapas y siluetas. Aunque cada fila ya muestra su categoría, no se puede aislar un tipo de error para concentrarse en él.
+
+**Propuesta:** añadir filtros compactos por categoría sobre la lista de fallos, derivados de las categorías presentes. Mantener “Todos” como estado inicial y no cambiar el orden interno de cada grupo.
+
+**Aceptación:** los filtros solo muestran categorías con fallos; el contador del encabezado refleja el filtro activo; no se pierde el estado de expansión; funciona con teclado y en ES/EN; no aparece con una sola categoría.
+
+**Entrega:** commit `mejora 43: filtros de categoría en el repaso`.

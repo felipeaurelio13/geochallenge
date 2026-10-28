@@ -53,6 +53,8 @@ vi.mock('react-i18next', () => ({
         'results.funFactLabel': 'Dato curioso',
         'results.expandAll': 'Expandir todo',
         'results.collapseAll': 'Contraer todo',
+        'results.reviewCountOne': '1 fallo',
+        'results.reviewCountMany': '2 fallos',
         'categories.flags': 'Banderas',
         'categories.capitals': 'Capitales',
         'categories.mixed': 'Mixto',
@@ -189,7 +191,8 @@ describe('ResultsPage', () => {
   it('places replay before review and sharing, and shows actual missed answers', () => {
     render(<ResultsPage />);
     const tray = screen.getByTestId('results-action-tray');
-    const review = screen.getByRole('heading', { name: 'results.reviewTitle' });
+    const review = screen.getByRole('heading', { name: /results\.reviewTitle/ });
+    expect(review).toHaveTextContent('2 fallos');
     expect(tray.compareDocumentPosition(review) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(document.querySelectorAll('details')).toHaveLength(2);
     expect(screen.getAllByText('Lima')).toHaveLength(2);
@@ -199,7 +202,7 @@ describe('ResultsPage', () => {
   it('expande y contrae todos los fallos del repaso', () => {
     render(<ResultsPage />);
 
-    const section = screen.getByRole('heading', { name: 'results.reviewTitle' }).closest('section')!;
+    const section = screen.getByRole('heading', { name: /results\.reviewTitle/ }).closest('section')!;
     const rows = Array.from(section.querySelectorAll('details'));
 
     expect(rows).toHaveLength(2);

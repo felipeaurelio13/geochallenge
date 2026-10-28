@@ -500,6 +500,8 @@
     "perfectGoal": "¡Todas correctas! Prueba otra partida para mantener el nivel.",
     "bestRun": "Mejor racha",
     "reviewTitle": "Llévate estas respuestas",
+    "reviewCountOne": "{{count}} fallo",
+    "reviewCountMany": "{{count}} fallos",
     "reviewDescription": "Revisa las preguntas que fallaste antes de volver a jugar.",
     "expandAll": "Expandir todo",
     "collapseAll": "Contraer todo",
