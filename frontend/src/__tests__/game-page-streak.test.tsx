@@ -65,6 +65,7 @@ vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigateMock,
   useSearchParams: () => [mocks.searchParams],
   Link: ({ children, to }: { children: React.ReactNode; to: string }) => <a href={to}>{children}</a>,
+  useBlocker: () => ({ state: 'unblocked', proceed: vi.fn(), reset: vi.fn() }),
 }));
 
 vi.mock('react-i18next', () => ({

@@ -269,7 +269,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 19. Confirmar la salida al usar el botón atrás del navegador — ⬜ Pendiente
+## 19. Confirmar la salida al usar el botón atrás del navegador — ✅ Desarrollada
 
 **Área:** integridad de partida / `GamePage`.
 
@@ -279,7 +279,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** atrás pide confirmación solo durante una partida activa; cancelar mantiene la ronda y el tiempo; confirmar sale y registra el abandono una sola vez.
 
-**Entrega:** commit `mejora 19: confirmación al abandonar con el botón atrás`.
+**Entrega:** commit `mejora 19: confirmación al abandonar con el botón atrás`. `useBlocker` retiene la navegación durante la partida, reutiliza el diálogo de salida y solo registra el abandono si se confirma; los flujos de fin de partida quedan exentos.
 
 ---
 
@@ -406,3 +406,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** la etiqueta se actualiza al avanzar; se lee en ES/EN; no tapa el temporizador ni el botón de salida; no aparece en modos donde la categoría es sensible o no está definida.
 
 **Entrega:** commit `mejora 28: categoría de la ronda en el encabezado`.
+
+---
+
+## 29. Repetir solo las preguntas falladas de esta partida — ⬜ Pendiente
+
+**Área:** aprendizaje / `ResultsPage`, práctica.
+
+**Problema:** el repaso identifica los fallos, pero la práctica posterior vuelve a mezclar preguntas del historial. El jugador no puede reforzar exactamente los errores que acaba de cometer.
+
+**Propuesta:** añadir una acción que inicie una práctica con los `questionId` de los fallos de la sesión actual, reutilizando el flujo de práctica y sin alterar el contrato de partidas normales. Si no hay fallos, no mostrar la acción.
+
+**Aceptación:** la práctica contiene solo preguntas falladas de la partida; no duplica preguntas; funciona en ES/EN; conserva el orden del repaso y no afecta el botón principal.
+
+**Entrega:** commit `mejora 29: practicar solo los fallos de la partida`.

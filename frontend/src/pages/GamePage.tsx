@@ -1,5 +1,5 @@
 import { useEffect, useCallback, useState, useMemo, useRef, lazy, Suspense } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useBlocker, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { useGame } from '../context/GameContext';
@@ -119,6 +119,7 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
   const prefersReducedMotion = useUiStore((s) => s.prefersReducedMotion);
   const extendedTimeEnabled = useUiStore((s) => s.extendedTimeEnabled);
   const abandonTrackedRef = useRef(false);
+  const allowNavigationRef = useRef(false);
   // Synchronous lock: React state (`isSubmitting`) does not update between two
   // events fired in the same tick, so the timer's onComplete + Enter (or a
   // double tap) could submit the same question twice and double-count it
@@ -152,6 +153,44 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
   const exitConfirmation = answeredCount > 0
     ? t('game.confirmExitProgress', { answered: answeredCount, total: questions.length })
     : t('game.confirmExitEmpty');
+
+  const shouldBlockNavigation = useCallback(
+    ({ currentLocation, nextLocation }: { currentLocation: { pathname: string }; nextLocation: { pathname: string } }) => {
+      if (allowNavigationRef.current) return false;
+      if (status !== 'playing' && status !== 'reviewing') return false;
+      return currentLocation.pathname !== nextLocation.pathname;
+    },
+    [status]
+  );
+  const blocker = useBlocker(shouldBlockNavigation);
+
+  useEffect(() => {
+    if (blocker.state !== 'blocked') return;
+
+    let active = true;
+    void confirm(exitConfirmation).then((confirmed) => {
+      if (!active) return;
+      if (!confirmed) {
+        blocker.reset();
+        return;
+      }
+
+      allowNavigationRef.current = true;
+      abandonTrackedRef.current = true;
+      trackUxEvent('game_abandoned', {
+        mode: gameType,
+        questionId: currentQuestion?.id,
+        roundIndex: currentIndex,
+        reason: 'navigation',
+      });
+      resetGame();
+      blocker.proceed();
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [blocker, confirm, exitConfirmation, gameType, currentQuestion?.id, currentIndex, resetGame]);
   const currentStreak = results.reduce(
     (streak, result) => (result.isCorrect ? streak + 1 : 0),
     0
@@ -388,7 +427,10 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
         setShowResult(true);
         abandonTrackedRef.current = true;
         finishGame()
-          .then(() => navigate(resultsPath))
+          .then(() => {
+            allowNavigationRef.current = true;
+            navigate(resultsPath);
+          })
           .catch((err: Error) => setError(err.message || t('game.error')));
         return;
       }
@@ -409,6 +451,7 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
   // Move to next question
   const handleNextQuestion = async () => {
     if (streakGameOver) {
+      allowNavigationRef.current = true;
       navigate(resultsPath);
       return;
     }
@@ -444,6 +487,7 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
       abandonTrackedRef.current = true;
       try {
         if (!isTrial) await finishGame();
+        allowNavigationRef.current = true;
         navigate(resultsPath);
       } catch (err: any) {
         setError(err.message || t('game.error'));
@@ -613,6 +657,7 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
                     reason: 'navigation',
                   });
                   resetGame();
+                  allowNavigationRef.current = true;
                   navigate(exitPath);
                 }
               }}

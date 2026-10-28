@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { render, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 
 const mockStartAdaptivePractice = vi.fn();
 const mockStartGame = vi.fn();
@@ -40,6 +40,23 @@ vi.mock('react-i18next', () => ({
 import { GamePage } from '../pages/GamePage';
 import { GameProvider } from '../context/GameContext';
 
+function renderPracticeGame(path: string) {
+  const router = createMemoryRouter(
+    [
+      {
+        path: '/game/single',
+        element: (
+          <GameProvider>
+            <GamePage />
+          </GameProvider>
+        ),
+      },
+    ],
+    { initialEntries: [path] }
+  );
+  return render(<RouterProvider router={router} />);
+}
+
 describe('GamePage — practice mode', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -61,13 +78,7 @@ describe('GamePage — practice mode', () => {
       },
     });
 
-    render(
-      <MemoryRouter initialEntries={['/game/single?gameType=practice']}>
-        <GameProvider>
-          <GamePage />
-        </GameProvider>
-      </MemoryRouter>
-    );
+    renderPracticeGame('/game/single?gameType=practice');
 
     await waitFor(() => {
       expect(mockStartAdaptivePractice).toHaveBeenCalled();
@@ -78,13 +89,7 @@ describe('GamePage — practice mode', () => {
   it('does NOT use offline fallback for practice mode', async () => {
     mockStartAdaptivePractice.mockRejectedValue(new Error('Network error'));
 
-    render(
-      <MemoryRouter initialEntries={['/game/single?gameType=practice']}>
-        <GameProvider>
-          <GamePage />
-        </GameProvider>
-      </MemoryRouter>
-    );
+    renderPracticeGame('/game/single?gameType=practice');
 
     await waitFor(() => {
       expect(mockStartAdaptivePractice).toHaveBeenCalled();
@@ -98,13 +103,7 @@ describe('GamePage — practice mode', () => {
       gameConfig: { questionsCount: 1, timePerQuestion: 10, category: 'MIXED', gameType: 'practice', mechanics: { enabled: false, allowed: [], limits: {} } },
     });
 
-    render(
-      <MemoryRouter initialEntries={['/game/single?gameType=practice&countryCode=CL']}>
-        <GameProvider>
-          <GamePage />
-        </GameProvider>
-      </MemoryRouter>
-    );
+    renderPracticeGame('/game/single?gameType=practice&countryCode=CL');
 
     await waitFor(() => {
       expect(mockStartAdaptivePractice).toHaveBeenCalledWith('CL');

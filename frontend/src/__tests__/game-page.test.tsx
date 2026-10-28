@@ -52,6 +52,12 @@ const confirmDialogStable = vi.hoisted(() => ({
   isOpen: false,
 }));
 
+const blockerMock = vi.hoisted(() => ({
+  state: 'unblocked' as 'unblocked' | 'blocked',
+  proceed: vi.fn(),
+  reset: vi.fn(),
+}));
+
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigateMock,
   useSearchParams: () => {
@@ -59,6 +65,7 @@ vi.mock('react-router-dom', () => ({
     return [params, vi.fn()];
   },
   Link: ({ children, to }: { children: React.ReactNode; to: string }) => <a href={to}>{children}</a>,
+  useBlocker: () => blockerMock,
 }));
 
 vi.mock('react-i18next', () => ({
@@ -156,6 +163,7 @@ vi.mock('../components', () => ({
 describe('GamePage ending flow', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    blockerMock.state = 'unblocked';
     mockedSearchParams = 'category=MIXED';
     mocks.gameState.questions = [
       {
@@ -297,6 +305,33 @@ describe('GamePage ending flow', () => {
     await waitFor(() => {
       expect(confirmDialogStable.confirm).toHaveBeenCalledWith('game.confirmExitProgress:1/1');
     });
+  });
+
+  it('pide confirmación al abandonar con el botón atrás y reanuda si se cancela', async () => {
+    blockerMock.state = 'blocked';
+    confirmDialogStable.confirm.mockResolvedValueOnce(false);
+
+    render(<GamePage />);
+
+    await waitFor(() => {
+      expect(confirmDialogStable.confirm).toHaveBeenCalledWith('game.confirmExitProgress:1/1');
+    });
+    await waitFor(() => expect(blockerMock.reset).toHaveBeenCalled());
+    expect(blockerMock.proceed).not.toHaveBeenCalled();
+    expect(mocks.resetGameMock).not.toHaveBeenCalled();
+  });
+
+  it('abandona y registra la salida si se confirma el botón atrás', async () => {
+    blockerMock.state = 'blocked';
+
+    render(<GamePage />);
+
+    await waitFor(() => expect(blockerMock.proceed).toHaveBeenCalled());
+    expect(mocks.resetGameMock).toHaveBeenCalled();
+    expect(uxMocks.trackUxEvent).toHaveBeenCalledWith(
+      'game_abandoned',
+      expect.objectContaining({ reason: 'navigation' }),
+    );
   });
 
   it('pausa el temporizador mientras el diálogo de salida está abierto', () => {
@@ -554,6 +589,7 @@ describe('GamePage ending flow', () => {
 describe('GamePage abandonment guard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    blockerMock.state = 'unblocked';
     mockedSearchParams = 'category=MIXED';
     mocks.gameState.questions = [
       {

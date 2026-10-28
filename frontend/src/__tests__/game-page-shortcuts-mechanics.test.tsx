@@ -22,6 +22,7 @@ const confirmDialogStable = vi.hoisted(() => ({
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigateMock,
   useSearchParams: () => [new URLSearchParams('category=CAPITAL')],
+  useBlocker: () => ({ state: 'unblocked', proceed: vi.fn(), reset: vi.fn() }),
 }));
 
 vi.mock('react-i18next', () => ({
@@ -134,7 +135,7 @@ describe('GamePage keyboard shortcuts', () => {
     fireEvent.keyDown(window, { key: '2' });
     fireEvent.keyDown(window, { key: 'Enter' });
 
-    await waitFor(() => expect(mocks.submitAnswerMock).toHaveBeenCalledWith('Lima', undefined, undefined));
+    await waitFor(() => expect(mocks.submitAnswerMock).toHaveBeenCalledWith('Lima', undefined, undefined, expect.any(Number)));
     await screen.findByRole('button', { name: 'game.next' });
 
     fireEvent.keyDown(window, { key: 'n' });
@@ -171,7 +172,7 @@ describe('GamePage keyboard shortcuts', () => {
 
     fireEvent.click(await screen.findByRole('button', { name: 'pick-location' }));
     fireEvent.keyDown(window, { key: 'Enter' });
-    await waitFor(() => expect(mocks.submitAnswerMock).toHaveBeenCalledWith('10,20', { lat: 10, lng: 20 }, undefined));
+    await waitFor(() => expect(mocks.submitAnswerMock).toHaveBeenCalledWith('10,20', { lat: 10, lng: 20 }, undefined, expect.any(Number)));
     await screen.findByRole('button', { name: 'game.next' });
 
     fireEvent.keyDown(window, { key: 'Enter' });
