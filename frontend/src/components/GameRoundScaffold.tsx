@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useMemo, useRef } from 'react';
+import { ReactNode, Ref, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { QuestionCard } from './QuestionCard';
 import { OptionButton } from './OptionButton';
@@ -34,6 +34,7 @@ type GameRoundScaffoldProps = {
   onSkipQuestion?: () => void;
   minimalQuestionCard?: boolean;
   feedback?: ReactNode;
+  questionHeadingRef?: Ref<HTMLHeadingElement>;
 };
 
 export function GameRoundScaffold({
@@ -61,6 +62,7 @@ export function GameRoundScaffold({
   onSkipQuestion,
   minimalQuestionCard = false,
   feedback,
+  questionHeadingRef,
 }: GameRoundScaffoldProps) {
   const { i18n } = useTranslation();
   // Keep each option's onClick referentially stable across timer-tick re-renders
@@ -101,6 +103,7 @@ export function GameRoundScaffold({
           onRetryImage={onRetryImage}
           onSkipQuestion={onSkipQuestion}
           minimal={minimalQuestionCard || isMapQuestion || hasMediaQuestion}
+          headingRef={questionHeadingRef}
         />
       </div>
 

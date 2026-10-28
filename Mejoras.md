@@ -101,7 +101,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 7. Gestionar el foco al revelar el resultado y al pasar de pregunta — ⬜ Pendiente
+## 7. Gestionar el foco al revelar el resultado y al pasar de pregunta — ✅ Desarrollada
 
 **Área:** accesibilidad / `GamePage`, `QuestionCard`.
 
@@ -111,7 +111,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** el foco sigue un orden predecible en una partida completa solo con teclado.
 
-**Entrega:** commit `mejora 7: foco predecible entre ronda y ronda`.
+**Entrega:** commit `mejora 7: foco predecible entre ronda y ronda`. El enunciado es enfocable (`tabIndex=-1`) al cargar la pregunta y la acción de continuar recibe el foco al revelar el resultado, sin alterar el orden de tabulación normal.
 
 ---
 
@@ -238,3 +238,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** aparece solo con fallos, respeta el orden de la partida, es legible en móvil y con lector de pantalla, y no desplaza ni tapa el CTA de repetir.
 
 **Entrega:** commit `mejora 16: repaso de preguntas falladas`.
+
+---
+
+## 17. Pausar el temporizador mientras el diálogo de salida está abierto — ⬜ Pendiente
+
+**Área:** justicia / `GamePage`, `Timer`.
+
+**Problema:** al pulsar salir se abre una confirmación, pero el temporizador de la ronda sigue corriendo. Si el jugador duda o cancela, puede encontrarse con menos tiempo —o con la ronda enviada por timeout— solo por haber abierto el diálogo.
+
+**Propuesta:** incluir `isConfirmDialogOpen` en la condición `isActive` del `Timer` y reanudar con el tiempo restante exacto al cerrar el diálogo. No pausar por otros diálogos ni por perder foco de la ventana.
+
+**Aceptación:** el tiempo no baja mientras la confirmación está abierta; al cancelar se reanuda desde el mismo valor; el envío por timeout no se dispara durante la pausa.
+
+**Entrega:** commit `mejora 17: pausa del temporizador en el diálogo de salida`.

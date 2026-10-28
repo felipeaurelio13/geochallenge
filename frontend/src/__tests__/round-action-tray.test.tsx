@@ -1,3 +1,4 @@
+import { createRef } from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { RoundActionTray } from '../components/RoundActionTray';
@@ -197,6 +198,25 @@ describe('RoundActionTray', () => {
     );
 
     expect(screen.getByRole('status').textContent).toBe('Correcto');
+  });
+
+  it('expone la acción de continuación para llevar el foco al revelar el resultado', () => {
+    const nextButtonRef = createRef<HTMLButtonElement>();
+
+    render(
+      <RoundActionTray
+        mode="single"
+        showResult
+        canSubmit={false}
+        submitLabel="Confirmar"
+        nextLabel="Siguiente"
+        nextButtonRef={nextButtonRef}
+        onSubmit={vi.fn()}
+        onNext={vi.fn()}
+      />
+    );
+
+    expect(nextButtonRef.current).toBe(screen.getByRole('button', { name: 'Siguiente' }));
   });
 
   it('permite desactivar el anuncio cuando la pantalla ya lo hace fuera del tray', () => {

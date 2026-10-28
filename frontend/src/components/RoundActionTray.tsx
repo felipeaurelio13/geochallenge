@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, Ref } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AnswerStatusBadge } from './AnswerStatusBadge';
 import { Button } from './atoms/Button';
@@ -34,6 +34,8 @@ type RoundActionTrayProps = {
   retryLabel?: string;
   /** Anuncia el resultado en una región live; desactivar si ya se anuncia fuera. */
   announceResult?: boolean;
+  /** Acción principal tras revelar el resultado; permite llevar el foco a ella. */
+  nextButtonRef?: Ref<HTMLButtonElement>;
 };
 
 const CONTAINER_CLASS =
@@ -65,6 +67,7 @@ export function RoundActionTray({
   onRetrySubmit,
   retryLabel,
   announceResult = true,
+  nextButtonRef,
 }: RoundActionTrayProps) {
   const { t } = useTranslation();
   void mode;
@@ -103,6 +106,7 @@ export function RoundActionTray({
             </p>
           )}
           <Button
+            ref={nextButtonRef}
             onClick={handleAction}
             disabled={isSubmitting || (!showResult && !hasSubmitError && !canSubmit)}
             fullWidth
@@ -190,6 +194,7 @@ export function RoundActionTray({
 
             {nextLabel && onNext && (
               <Button
+                ref={nextButtonRef}
                 onClick={onNext}
                 disabled={isSubmitting}
                 variant="secondary"

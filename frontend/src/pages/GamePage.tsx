@@ -123,6 +123,9 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
   // double tap) could submit the same question twice and double-count it
   // locally even though the backend is idempotent.
   const submitLockRef = useRef(false);
+  const questionHeadingRef = useRef<HTMLHeadingElement>(null);
+  const nextActionRef = useRef<HTMLButtonElement>(null);
+  const previousShowResultRef = useRef(false);
 
   const currentQuestion: Question | null = questions[currentIndex] || null;
   const isMapQuestion = currentQuestion?.category === 'MAP';
@@ -480,6 +483,20 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
     canSubmit: hasSelection,
   });
 
+  // Foco predecible: al cargar una pregunta el enunciado recibe el foco y, al
+  // revelar el resultado, la acción para continuar queda lista para Enter.
+  useEffect(() => {
+    if (status !== 'playing') return;
+    questionHeadingRef.current?.focus();
+  }, [currentIndex, status]);
+
+  useEffect(() => {
+    if (showResult && !previousShowResultRef.current) {
+      nextActionRef.current?.focus();
+    }
+    previousShowResultRef.current = showResult;
+  }, [showResult]);
+
   // Part 4.2: primer intento de reemplazo automático (disparado por
   // onImageError de QuestionCard/GameRoundScaffold cuando la imagen original
   // Y el fallback CDN fallan). Si ESTE intento también falla, mostramos la UI
@@ -659,6 +676,7 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
       totalQuestions={questions.length}
       compactQuestionCard={shouldUseCompactQuestionCard}
       minimalQuestionCard={isPerfectRoundPilot}
+      questionHeadingRef={questionHeadingRef}
       isMapQuestion={Boolean(isMapQuestion)}
       mapContent={
         <Suspense fallback={<LoadingSpinner size="lg" />}>
@@ -723,6 +741,7 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
           showResult={showResult}
           canSubmit={hasSelection}
           isSubmitting={isSubmitting}
+          nextButtonRef={nextActionRef}
           stableAction={isPerfectRoundPilot}
           validatingLabel={t('game.validating')}
           submitError={submitError}

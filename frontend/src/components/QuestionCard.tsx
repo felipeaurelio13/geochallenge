@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, type Ref } from 'react';
 import { Question } from '../types';
 import { useImageWithFallback } from '../hooks/useImageWithFallback';
 import { useTranslation } from 'react-i18next';
@@ -22,6 +22,8 @@ interface QuestionCardProps {
   onRetryImage?: () => void;
   onSkipQuestion?: () => void;
   minimal?: boolean;
+  /** Permite llevar el foco al enunciado al cargar una pregunta nueva. */
+  headingRef?: Ref<HTMLHeadingElement>;
 }
 
 export function QuestionCard({
@@ -34,6 +36,7 @@ export function QuestionCard({
   onRetryImage,
   onSkipQuestion,
   minimal = false,
+  headingRef,
 }: QuestionCardProps) {
   const { t, i18n } = useTranslation();
 
@@ -220,7 +223,7 @@ export function QuestionCard({
         )}
 
         <div className={`flex ${compact ? 'flex-row items-start justify-center gap-1.5 text-left' : 'flex-col items-center'} ${question.category === 'CAPITAL' ? 'w-full justify-center text-center' : ''}`}>
-          <h2 className={headingClassName}>{getQuestionText()}</h2>
+          <h2 ref={headingRef} tabIndex={-1} className={headingClassName}>{getQuestionText()}</h2>
 
           {!minimal && question.difficulty && question.category !== 'FLAG' && question.category !== 'MONUMENT' && (
             <div className={compact ? 'mt-0.5 shrink-0' : 'mt-5'}>

@@ -109,7 +109,7 @@ vi.mock('../components', () => ({
   LoadingSpinner: ({ text }: { text?: string }) => <div>{text || 'loading'}</div>,
   MechanicsHud: () => <div>mechanics-hud</div>,
   StreakCombo: ({ combo }: { combo: number }) => <div data-testid="streak-combo">streak {combo}</div>,
-  RoundActionTray: ({ showResult, canSubmit, submitLabel, nextLabel, onSubmit, onNext, resultLabel, submitError, onRetrySubmit, retryLabel }: any) => (
+  RoundActionTray: ({ showResult, canSubmit, submitLabel, nextLabel, onSubmit, onNext, resultLabel, submitError, onRetrySubmit, retryLabel, nextButtonRef }: any) => (
     <div data-testid="mobile-action-tray" className="fixed bottom-0">
       {!showResult && submitError && (
         <div role="alert">
@@ -118,15 +118,16 @@ vi.mock('../components', () => ({
         </div>
       )}
       {!showResult && !submitError && <button onClick={onSubmit} disabled={!canSubmit}>{submitLabel}</button>}
-      {showResult && nextLabel && <button onClick={onNext}>{nextLabel}</button>}
+      {showResult && nextLabel && <button ref={nextButtonRef} onClick={onNext}>{nextLabel}</button>}
       {showResult && resultLabel && <p>{resultLabel}</p>}
     </div>
   ),
-  GameRoundScaffold: ({ header, progress, actionTray, mapContent, isMapQuestion, question, onOptionSelect, showResult, disableOptions, optionsGridClassName, feedback, rootClassName = 'universal-layout bg-gray-900' }: any) => (
+  GameRoundScaffold: ({ header, progress, actionTray, mapContent, isMapQuestion, question, onOptionSelect, showResult, disableOptions, optionsGridClassName, feedback, questionHeadingRef, rootClassName = 'universal-layout bg-gray-900' }: any) => (
     <div className={rootClassName}>
       {header}
       {progress}
       <main role="main" className="content-area">
+        <h2 key={question.id} ref={questionHeadingRef} tabIndex={-1} data-testid="question-heading">question-heading</h2>
         <div data-testid="question-card" data-compact="true">question-card</div>
         {isMapQuestion ? mapContent : (
           <div className={optionsGridClassName}>
@@ -247,6 +248,36 @@ describe('GamePage ending flow', () => {
       expect(mocks.finishGameMock).toHaveBeenCalledTimes(1);
       expect(mocks.navigateMock).toHaveBeenCalledWith('/results?category=MIXED&gameType=single');
     });
+  });
+
+  it('lleva el foco al enunciado y luego a la acción de la ronda', async () => {
+    render(<GamePage />);
+
+    const heading = screen.getByTestId('question-heading');
+    await waitFor(() => expect(heading).toHaveFocus());
+
+    fireEvent.click(screen.getByRole('button', { name: 'Santiago' }));
+    fireEvent.click(screen.getByRole('button', { name: 'game.submit' }));
+
+    const nextButton = await screen.findByRole('button', { name: 'game.seeResults' });
+    await waitFor(() => expect(nextButton).toHaveFocus());
+  });
+
+  it('devuelve el foco al enunciado al cargar otra pregunta', async () => {
+    mocks.gameState.questions.push({
+      id: 'q2',
+      questionText: 'Capital de Perú',
+      options: ['Lima', 'Bogotá', 'Quito', 'Santiago'],
+      correctAnswer: 'Lima',
+      category: 'CAPITAL',
+    });
+    const { rerender } = render(<GamePage />);
+    await waitFor(() => expect(screen.getByTestId('question-heading')).toHaveFocus());
+
+    mocks.gameState.currentIndex = 1;
+    rerender(<GamePage />);
+
+    await waitFor(() => expect(screen.getByTestId('question-heading')).toHaveFocus());
   });
 
   it('plays a five-question trial using the real start flow without saving a ranked result', async () => {
