@@ -913,7 +913,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 65. Incluir el tiempo de respuesta en el repaso copiado — ⬜ Pendiente
+## 65. Incluir el tiempo de respuesta en el repaso copiado — ✅ Desarrollada
 
 **Área:** aprendizaje / `ResultsPage`.
 
@@ -923,7 +923,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** el tiempo copiado coincide con el visible; solo aparece con datos válidos; se lee en ES/EN; no cambia el texto cuando falta; el copiado sigue respetando filtro y orden.
 
-**Entrega:** commit `mejora 65: tiempo por fallo en el repaso copiado`.
+**Entrega:** commit `mejora 65: tiempo por fallo en el repaso copiado`. Cada bloque añade `Tiempo dedicado` con el mismo formato del detalle visible solo cuando `elapsedSeconds` es válido.
 
 ---
 
@@ -1036,3 +1036,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** la pista menciona Escape en ES/EN; el texto sigue siendo legible en móvil; no cambia el comportamiento del cierre; no afecta al lector de pantalla; se cubre con test de contenido.
 
 **Entrega:** commit `mejora 73: atajo Escape en la pista del mapa`.
+
+---
+
+## 74. Incluir el tiempo medio por respuesta en el repaso copiado — ⬜ Pendiente
+
+**Área:** aprendizaje / `ResultsPage`.
+
+**Problema:** el repaso copiado ya puede incluir la duración total, pero no el ritmo medio. Al comparar sesiones o detectar dudas recurrentes falta la referencia principal que sí muestra el resumen.
+
+**Propuesta:** añadir una línea de tiempo medio junto al título del repaso copiado cuando existan respuestas cronometradas, reutilizando `formattedAverageAnswerSeconds`. Omitirla cuando no haya datos.
+
+**Aceptación:** el tiempo medio copiado coincide con el visible; solo aparece con tiempos válidos; se lee en ES/EN; no cambia el texto si falta; el copiado sigue respetando filtro y orden.
+
+**Entrega:** commit `mejora 74: tiempo medio en el repaso copiado`.

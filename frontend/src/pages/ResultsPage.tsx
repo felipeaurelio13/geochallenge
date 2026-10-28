@@ -316,6 +316,9 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
       return [
         `${number}. ${t(CATEGORY_LABEL_KEYS[question.category])}${question.difficulty ? ` · ${t(`game.difficulty.${question.difficulty.toLowerCase()}`)}` : ''} — ${getLocalizedQuestionText(question, t, currentLanguage)}`,
         `${t('results.yourAnswer')}: ${userAnswer}`,
+        ...(typeof result.elapsedSeconds === 'number' && Number.isFinite(result.elapsedSeconds) && result.elapsedSeconds >= 0
+          ? [`${t('results.answerTime')}: ${t('results.averageTimeValue', { seconds: result.elapsedSeconds.toLocaleString(currentLanguage) })}`]
+          : []),
         `${t('game.correctAnswerWas')}: ${result.correctAnswer}`,
         ...(funFact ? [`${t('results.funFactLabel')}: ${funFact}`] : []),
       ].join('\n');

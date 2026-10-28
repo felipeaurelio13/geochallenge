@@ -652,6 +652,7 @@ describe('ResultsPage', () => {
     expect(copied).toContain('10. Capitales');
     expect(copied).not.toContain('Dato curioso');
     expect(copied).not.toContain('Difícil');
+    expect(copied).not.toContain('Tiempo dedicado');
     expect(screen.getByText('Repaso copiado: 2 fallos')).toBeInTheDocument();
   });
 
@@ -801,6 +802,36 @@ describe('ResultsPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'results.practiceMistakes' }));
 
     expect(mocks.navigateMock).toHaveBeenCalledWith('/game/single?gameType=practice');
+  });
+
+  it('incluye el tiempo de respuesta de un fallo en el repaso copiado', async () => {
+    const originalQuestions = mocks.gameState.questions;
+    const originalResults = mocks.gameState.results;
+    mocks.gameState.questions = [
+      {
+        id: 'q1',
+        category: 'CAPITAL',
+        questionData: 'Chile',
+        questionText: 'Capital',
+        options: [],
+      },
+    ] as unknown as typeof mocks.gameState.questions;
+    mocks.gameState.results = [
+      { questionId: 'q1', isCorrect: false, correctAnswer: 'Santiago', userAnswer: 'Lima', elapsedSeconds: 8 },
+    ] as typeof mocks.gameState.results;
+
+    try {
+      render(<ResultsPage />);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Copiar repaso' }));
+
+      await waitFor(() => expect(mocks.writeTextMock).toHaveBeenCalled());
+      const copied = mocks.writeTextMock.mock.calls[mocks.writeTextMock.mock.calls.length - 1]?.[0] as string;
+      expect(copied).toContain('Tiempo dedicado: 8 s');
+    } finally {
+      mocks.gameState.questions = originalQuestions;
+      mocks.gameState.results = originalResults;
+    }
   });
 
   it('no revela la respuesta correcta en el resumen del repaso', () => {
