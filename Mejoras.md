@@ -31,7 +31,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 2. Datos curiosos para banderas y siluetas — ⬜ Pendiente
+## 2. Datos curiosos para banderas y siluetas — ✅ Desarrollada
 
 **Área:** aprendizaje / `utils/funFacts.ts`.
 
@@ -168,3 +168,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** la suma coincide con el total de la partida; no aparece con una sola categoría; el detalle es legible en móvil y con lector de pantalla.
 
 **Entrega:** commit `mejora 11: precisión por categoría en resultados`.
+
+---
+
+## 12. Decir cuánto progreso se pierde al salir de la partida — ⬜ Pendiente
+
+**Área:** claridad / `GamePage`.
+
+**Problema:** el diálogo de salida dice “perderás tu progreso”, pero no cuánto. En una partida larga el jugador no sabe si abandona la ronda 1 o la 9, y decide a ciegas.
+
+**Propuesta:** incluir en el mensaje el número de respuestas ya confirmadas y el total (`Llevas 4 de 10 respuestas`). Reutilizar `useConfirmDialog` y las claves i18n existentes, sin añadir otro diálogo.
+
+**Aceptación:** el mensaje refleja el estado real; con cero respuestas no habla de progreso perdido; sigue funcionando en ES/EN.
+
+**Entrega:** commit `mejora 12: confirmación de salida con progreso concreto`.

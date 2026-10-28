@@ -237,7 +237,7 @@ export function DailyChallengePage() {
   }
 
   const funFact = showResult && currentQuestion
-    ? generateFunFact(currentQuestion, i18n.language === 'en' ? 'en' : 'es')
+    ? generateFunFact(currentQuestion, i18n.language === 'en' ? 'en' : 'es', lastCorrectAnswer)
     : null;
 
   if (pageState === 'loading') {

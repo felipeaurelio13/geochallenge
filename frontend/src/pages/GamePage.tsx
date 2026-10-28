@@ -365,7 +365,7 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
 
       setLastAnswerCorrect(result.isCorrect);
       setShowResult(true);
-      setFunFact(generateFunFact(currentQuestion, i18n.language === 'en' ? 'en' : 'es'));
+      setFunFact(generateFunFact(currentQuestion, i18n.language === 'en' ? 'en' : 'es', result.correctAnswer));
     } catch (err: any) {
       console.error('Error submitting answer:', err);
       submitLockRef.current = false;

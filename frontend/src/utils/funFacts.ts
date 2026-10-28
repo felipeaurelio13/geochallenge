@@ -52,9 +52,20 @@ const POP_TIER_EN: Record<string, string> = {
   VERY_SMALL: 'a country with a small population',
 };
 
-function getCountryName(q: Question): string | null {
+function getCountryName(q: Question, revealedCountry?: string | null): string | null {
   if (q.category === 'FLAG' || q.category === 'SILHOUETTE') {
-    return ''; // correctAnswer no longer available client-side
+    // questionData is the country name for flags/silhouettes. If a payload only
+    // carries a code (e.g. "CL"), fall back to the answer the server revealed
+    // after submission so the fact never reads like "CL is an island nation".
+    const raw = typeof q.questionData === 'string' ? q.questionData.trim() : '';
+    const looksLikeCode = /^[A-Z]{2,3}$/.test(raw);
+    if (raw && !looksLikeCode) return raw;
+    if (revealedCountry?.trim()) return revealedCountry.trim();
+    if (raw) return raw;
+    if (q.questionData && typeof q.questionData === 'object') {
+      return (q.questionData as { country?: string }).country ?? null;
+    }
+    return null;
   }
   if (q.category === 'CAPITAL' || q.category === 'MAP') {
     if (typeof q.questionData === 'string') return q.questionData;
@@ -65,10 +76,10 @@ function getCountryName(q: Question): string | null {
   return null;
 }
 
-export function generateFunFact(q: Question, lang: Lang): string | null {
+export function generateFunFact(q: Question, lang: Lang, revealedCountry?: string | null): string | null {
   if (q.category === 'MONUMENT') return null;
 
-  const country = getCountryName(q);
+  const country = getCountryName(q, revealedCountry);
   if (!country) return null;
 
   const location =
