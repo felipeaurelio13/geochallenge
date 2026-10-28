@@ -675,7 +675,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 48. Anunciar el nuevo orden del repaso al cambiarlo — ⬜ Pendiente
+## 48. Anunciar el nuevo orden del repaso al cambiarlo — ✅ Desarrollada
 
 **Área:** accesibilidad / `ResultsPage`.
 
@@ -685,7 +685,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** el anuncio solo ocurre tras una acción del usuario; se lee en ES/EN; no duplica el nombre del botón; no interfiere con `aria-pressed`; no aparece en el DOM inicial si no se ha cambiado el orden.
 
-**Entrega:** commit `mejora 48: anuncio del orden del repaso`.
+**Entrega:** commit `mejora 48: anuncio del orden del repaso`. El mismo `role="status"` del repaso anuncia “Repaso ordenado por tiempo” o “Repaso en orden de partida” solo al usar el control, sin mover el foco.
 
 ---
 
@@ -798,3 +798,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** el dato copiado coincide con el visible; solo aparece cuando existe; no duplica la respuesta correcta; se lee en ES/EN; no cambia el texto cuando no hay dato; el copiado sigue respetando el filtro activo.
 
 **Entrega:** commit `mejora 56: dato curioso en el repaso copiado`.
+
+---
+
+## 57. Anunciar cuántos fallos quedan al filtrar el repaso — ⬜ Pendiente
+
+**Área:** accesibilidad / `ResultsPage`.
+
+**Problema:** al elegir un filtro de categoría, el contador y la lista cambian, pero un usuario de lector de pantalla que permanece en el chip no recibe confirmación de cuántas filas quedaron visibles.
+
+**Propuesta:** reutilizar la región `aria-live` del repaso para anunciar la categoría activa y el número de fallos resultantes. Mantener “Todos” como caso con el total y no anunciar en el render inicial.
+
+**Aceptación:** el anuncio ocurre solo tras elegir un filtro; informa categoría y cantidad; se lee en ES/EN; no duplica el `aria-pressed` del chip; no interfiere con los anuncios de orden o expansión.
+
+**Entrega:** commit `mejora 57: anuncio del filtro del repaso`.

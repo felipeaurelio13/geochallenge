@@ -242,8 +242,7 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
     feedbackTimer.current = setTimeout(() => setStreakShareFeedback(''), 3000);
   }, [shareStreakImage, correctAnswers, category, score, t, currentLanguage]);
 
-  const toggleAllReview = () => {
-    const next = !allReviewOpen;
+  const toggleAllReview = () => {    const next = !allReviewOpen;
     reviewListRef.current?.querySelectorAll('details:not([hidden])').forEach((details) => {
       (details as HTMLDetailsElement).open = next;
     });
@@ -255,6 +254,12 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
         : count === 1 ? 'results.reviewCollapsedOne' : 'results.reviewCollapsedMany',
       { count },
     ));
+  };
+
+  const handleToggleReviewSort = () => {
+    const next = reviewSort === 'original' ? 'slowest' : 'original';
+    setReviewSort(next);
+    setReviewAnnouncement(t(next === 'slowest' ? 'results.reviewSortedByTime' : 'results.reviewSortedOriginal'));
   };
 
   const handleBackToSummary = () => {
@@ -457,7 +462,7 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
                 {mistakes.length >= 2 && (
                   <button
                     type="button"
-                    onClick={() => setReviewSort((current) => (current === 'original' ? 'slowest' : 'original'))}
+                    onClick={handleToggleReviewSort}
                     aria-pressed={reviewSort === 'slowest'}
                     className="min-h-11 shrink-0 rounded-md px-2 text-xs font-medium text-primary hover:bg-primary/10 hover:text-primary/80"
                   >

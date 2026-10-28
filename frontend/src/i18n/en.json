@@ -544,6 +544,8 @@
     "playCategoryShort": "Play",
     "reviewSortSlowest": "Sort by time",
     "reviewSortOriginal": "Game order",
+    "reviewSortedByTime": "Review sorted by time",
+    "reviewSortedOriginal": "Review back in game order",
     "modeSingle": "Single player",
     "modePractice": "Practice",
     "modeStreak": "Streak",

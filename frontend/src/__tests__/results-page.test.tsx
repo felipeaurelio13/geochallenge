@@ -54,6 +54,8 @@ vi.mock('react-i18next', () => ({
         'results.playCategoryShort': 'Jugar',
         'results.reviewSortSlowest': 'Ordenar por tiempo',
         'results.reviewSortOriginal': 'Orden de la partida',
+        'results.reviewSortedByTime': 'Repaso ordenado por tiempo',
+        'results.reviewSortedOriginal': 'Repaso en orden de partida',
         'results.reviewFilterLabel': 'Filtrar el repaso por categoría',
         'results.reviewFilterAll': 'Todos',
         'results.reviewCopy': 'Copiar repaso',
@@ -416,19 +418,23 @@ describe('ResultsPage', () => {
 
       const section = screen.getByRole('heading', { name: /results\.reviewTitle/ }).closest('section')!;
       const rows = () => Array.from(section.querySelectorAll('summary')).map((row) => row.textContent ?? '');
+      const announcement = within(section).getByRole('status');
 
       expect(rows()[0]).toMatch(/^9\./);
       expect(rows()[1]).toMatch(/^10\./);
+      expect(announcement).toHaveTextContent('');
 
       fireEvent.click(within(section).getByRole('button', { name: 'Ordenar por tiempo' }));
 
       expect(within(section).getByRole('button', { name: 'Orden de la partida' })).toHaveAttribute('aria-pressed', 'true');
+      expect(announcement).toHaveTextContent('Repaso ordenado por tiempo');
       expect(rows()[0]).toMatch(/^10\./);
       expect(rows()[1]).toMatch(/^9\./);
 
       fireEvent.click(within(section).getByRole('button', { name: 'Orden de la partida' }));
 
       expect(within(section).getByRole('button', { name: 'Ordenar por tiempo' })).toHaveAttribute('aria-pressed', 'false');
+      expect(announcement).toHaveTextContent('Repaso en orden de partida');
       expect(rows()[0]).toMatch(/^9\./);
       expect(rows()[1]).toMatch(/^10\./);
     } finally {
