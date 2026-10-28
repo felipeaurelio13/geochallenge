@@ -353,7 +353,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 25. Mostrar el tiempo dedicado en cada fallo del repaso — ⬜ Pendiente
+## 25. Mostrar el tiempo dedicado en cada fallo del repaso — ✅ Desarrollada
 
 **Área:** aprendizaje / `ResultsPage`.
 
@@ -363,7 +363,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** cada fallo con tiempo lo muestra dentro del detalle desplegable; no aparece en filas sin dato; no revela la respuesta con la fila cerrada y no altera el orden del repaso.
 
-**Entrega:** commit `mejora 25: tiempo por fallo en el repaso`.
+**Entrega:** commit `mejora 25: tiempo por fallo en el repaso`. El dato se muestra dentro del detalle con el mismo formato localizado del tiempo medio y se omite si la sesión no lo registró.
 
 ---
 
@@ -490,3 +490,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** cada fila permite jugar su categoría; el botón tiene nombre accesible en ES/EN; no tapa el porcentaje; no cambia el orden por precisión; funciona con teclado.
 
 **Entrega:** commit `mejora 34: jugar cualquier categoría del desglose`.
+
+---
+
+## 35. Ordenar el repaso por tiempo dedicado — ⬜ Pendiente
+
+**Área:** aprendizaje / `ResultsPage`.
+
+**Problema:** el repaso conserva el orden de la partida, pero el tiempo dedicado revela otro patrón: fallos por apuro frente a fallos por duda. Sin una forma de ordenarlos, ese dato queda aislado en cada fila.
+
+**Propuesta:** añadir un control compacto que alterne entre el orden original y el tiempo dedicado de mayor a menor, dejando al final los fallos sin tiempo registrado. Mantener el número original de cada pregunta.
+
+**Aceptación:** el orden original sigue siendo el inicial; el control se anuncia en ES/EN; los fallos sin tiempo no se mezclan con los que sí lo tienen; no se pierde el estado del control al abrir un detalle.
+
+**Entrega:** commit `mejora 35: ordenar el repaso por tiempo`.

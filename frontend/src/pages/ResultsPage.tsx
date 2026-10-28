@@ -293,6 +293,9 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
                     )}
                     <dl className="min-w-0 space-y-2 break-words text-sm">
                       <div><dt className="text-app-secondary">{t('results.yourAnswer')}</dt><dd className="text-app-text">{question.category === 'MAP' && result.distance != null ? t('results.mapDistance', { distance: Math.round(result.distance).toLocaleString(currentLanguage) }) : result.userAnswer || t('results.noAnswer')}</dd></div>
+                      {typeof result.elapsedSeconds === 'number' && Number.isFinite(result.elapsedSeconds) && (
+                        <div><dt className="text-app-secondary">{t('results.answerTime')}</dt><dd className="text-app-text">{t('results.averageTimeValue', { seconds: result.elapsedSeconds.toLocaleString(currentLanguage) })}</dd></div>
+                      )}
                       <div><dt className="text-app-secondary">{t('game.correctAnswerWas')}</dt><dd className="font-semibold text-success">{result.correctAnswer}</dd></div>
                       {funFact && (
                         <div>

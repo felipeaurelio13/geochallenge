@@ -47,6 +47,7 @@ vi.mock('react-i18next', () => ({
         'results.incorrect': 'Incorrectas',
         'results.accuracy': 'Precisión',
         'results.averageTime': 'Tiempo medio por respuesta',
+        'results.answerTime': 'Tiempo dedicado',
         'results.categoryAccuracyTitle': 'Precisión por categoría',
         'results.categoryAccuracyDescription': 'Así se reparten tus aciertos por tipo de pregunta.',
         'results.funFactLabel': 'Dato curioso',
@@ -150,6 +151,8 @@ describe('ResultsPage', () => {
 
       expect(screen.getByText(/Tiempo medio por respuesta/)).toBeInTheDocument();
       expect(screen.getByText('6 s')).toBeInTheDocument();
+      expect(screen.getAllByText('Tiempo dedicado')).toHaveLength(2);
+      expect(screen.getAllByText('8 s')).toHaveLength(2);
     } finally {
       mocks.gameState.results = originalResults;
     }

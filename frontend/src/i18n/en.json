@@ -518,6 +518,7 @@
     "accuracy": "Accuracy",
     "averageTime": "Average time per answer",
     "averageTimeValue": "{{seconds}}s",
+    "answerTime": "Time spent",
     "categoryAccuracyTitle": "Accuracy by category",
     "categoryAccuracyDescription": "How your correct answers break down by question type.",
     "categoryAccuracyValue": "{{correct}} of {{total}} · {{accuracy}}%",
