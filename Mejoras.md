@@ -45,7 +45,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 3. Reintento en línea cuando falla el envío de una respuesta — ⬜ Pendiente
+## 3. Reintento en línea cuando falla el envío de una respuesta — ✅ Desarrollada
 
 **Área:** resiliencia / `GamePage`.
 
@@ -182,3 +182,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** el mensaje refleja el estado real; con cero respuestas no habla de progreso perdido; sigue funcionando en ES/EN.
 
 **Entrega:** commit `mejora 12: confirmación de salida con progreso concreto`.
+
+---
+
+## 13. Avisar que la pregunta actual es la última — ⬜ Pendiente
+
+**Área:** ritmo / `GamePage`.
+
+**Problema:** el jugador descubre que era la última pregunta recién al ver “Ver resultados”. Ese cambio de expectativa llega tarde y corta la sensación de cierre.
+
+**Propuesta:** mostrar una etiqueta discreta “Última pregunta” junto al contador de ronda cuando `currentIndex` sea el último, sin reemplazar el contador ni el CTA.
+
+**Aceptación:** aparece solo en la última pregunta, en ES/EN, y no altera la altura del header ni la visibilidad de las alternativas en móvil.
+
+**Entrega:** commit `mejora 13: aviso de última pregunta`.

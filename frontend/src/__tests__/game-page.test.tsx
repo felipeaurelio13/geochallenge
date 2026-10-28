@@ -109,9 +109,15 @@ vi.mock('../components', () => ({
   LoadingSpinner: ({ text }: { text?: string }) => <div>{text || 'loading'}</div>,
   MechanicsHud: () => <div>mechanics-hud</div>,
   StreakCombo: ({ combo }: { combo: number }) => <div data-testid="streak-combo">streak {combo}</div>,
-  RoundActionTray: ({ showResult, canSubmit, submitLabel, nextLabel, onSubmit, onNext, resultLabel }: any) => (
+  RoundActionTray: ({ showResult, canSubmit, submitLabel, nextLabel, onSubmit, onNext, resultLabel, submitError, onRetrySubmit, retryLabel }: any) => (
     <div data-testid="mobile-action-tray" className="fixed bottom-0">
-      {!showResult && <button onClick={onSubmit} disabled={!canSubmit}>{submitLabel}</button>}
+      {!showResult && submitError && (
+        <div role="alert">
+          <p>{submitError}</p>
+          <button onClick={onRetrySubmit}>{retryLabel}</button>
+        </div>
+      )}
+      {!showResult && !submitError && <button onClick={onSubmit} disabled={!canSubmit}>{submitLabel}</button>}
       {showResult && nextLabel && <button onClick={onNext}>{nextLabel}</button>}
       {showResult && resultLabel && <p>{resultLabel}</p>}
     </div>
@@ -345,6 +351,25 @@ describe('GamePage ending flow', () => {
 
     resolveSubmit({ isCorrect: true, points: 100 });
     await screen.findByText('game.correct');
+  });
+
+  it('mantiene la ronda y ofrece reintentar cuando falla el envío', async () => {
+    mocks.submitAnswerMock.mockRejectedValueOnce(new Error('offline'));
+
+    render(<GamePage />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Santiago' }));
+    fireEvent.click(screen.getByRole('button', { name: 'game.submit' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('game.submitError');
+    expect(screen.getByRole('button', { name: 'Santiago' })).toBeInTheDocument();
+    expect(screen.queryByText('game.error')).not.toBeInTheDocument();
+
+    mocks.submitAnswerMock.mockResolvedValueOnce({ isCorrect: true, points: 100 });
+    fireEvent.click(screen.getByRole('button', { name: 'game.submitRetry' }));
+
+    await screen.findByText('game.correct');
+    expect(mocks.submitAnswerMock).toHaveBeenCalledTimes(2);
   });
 
   it('incrementa el score de 1 en 1 cuando hay aciertos en streak', async () => {

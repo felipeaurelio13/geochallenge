@@ -147,4 +147,53 @@ describe('RoundActionTray', () => {
     const resultButton = screen.getByRole('button', { name: 'Ver resultados' });
     expect(resultButton.className).toBe(className);
   });
+
+  it('muestra el error de envío y reintenta sin perder la ronda', () => {
+    const onRetrySubmit = vi.fn();
+
+    render(
+      <RoundActionTray
+        mode="single"
+        showResult={false}
+        canSubmit
+        submitLabel="Confirmar"
+        submitError="No pudimos guardar tu respuesta."
+        onRetrySubmit={onRetrySubmit}
+        retryLabel="Reintentar"
+        onSubmit={vi.fn()}
+      />
+    );
+
+    expect(screen.getByRole('alert')).toHaveTextContent('No pudimos guardar tu respuesta.');
+    expect(screen.queryByRole('button', { name: 'Confirmar' })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Reintentar' }));
+    expect(onRetrySubmit).toHaveBeenCalledTimes(1);
+  });
+
+  it('en la acción estable convierte el botón en reintento y mantiene la geometría', () => {
+    const onRetrySubmit = vi.fn();
+
+    render(
+      <RoundActionTray
+        mode="single"
+        stableAction
+        showResult={false}
+        canSubmit
+        submitLabel="Confirmar"
+        submitError="Sin conexión."
+        onRetrySubmit={onRetrySubmit}
+        retryLabel="Reintentar"
+        onSubmit={vi.fn()}
+      />
+    );
+
+    const retryButton = screen.getByRole('button', { name: 'Reintentar' });
+    expect(retryButton).toBeEnabled();
+    expect(retryButton).toHaveClass('min-h-12');
+    expect(screen.getByRole('alert')).toHaveTextContent('Sin conexión.');
+
+    fireEvent.click(retryButton);
+    expect(onRetrySubmit).toHaveBeenCalledTimes(1);
+  });
 });

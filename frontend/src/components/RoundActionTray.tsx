@@ -28,6 +28,10 @@ type RoundActionTrayProps = {
   /** Single/Mixed piloto: una única acción con geometría constante. */
   stableAction?: boolean;
   validatingLabel?: string;
+  /** Error de red al guardar la respuesta: mantiene la ronda y ofrece reintentar. */
+  submitError?: string | null;
+  onRetrySubmit?: () => void;
+  retryLabel?: string;
 };
 
 const CONTAINER_CLASS =
@@ -55,6 +59,9 @@ export function RoundActionTray({
   summarySlot,
   stableAction = false,
   validatingLabel,
+  submitError = null,
+  onRetrySubmit,
+  retryLabel,
 }: RoundActionTrayProps) {
   const { t } = useTranslation();
   void mode;
@@ -62,19 +69,27 @@ export function RoundActionTray({
     'mx-auto flex w-full max-w-4xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between';
 
   if (stableAction) {
+    const hasSubmitError = Boolean(submitError && onRetrySubmit);
     const actionLabel = isSubmitting
       ? validatingLabel ?? waitingLabel ?? submitLabel
-      : showResult
-        ? nextLabel ?? submitLabel
-        : submitLabel;
-    const handleAction = showResult ? onNext : onSubmit;
+      : hasSubmitError
+        ? retryLabel ?? t('error.retry')
+        : showResult
+          ? nextLabel ?? submitLabel
+          : submitLabel;
+    const handleAction = hasSubmitError ? onRetrySubmit : showResult ? onNext : onSubmit;
 
     return (
       <div className={CONTAINER_CLASS} data-testid="mobile-action-tray">
         <div className="mx-auto w-full max-w-4xl">
+          {hasSubmitError && (
+            <p role="alert" className="mb-2 text-center text-xs font-medium text-error">
+              {submitError}
+            </p>
+          )}
           <Button
             onClick={handleAction}
-            disabled={isSubmitting || (!showResult && !canSubmit)}
+            disabled={isSubmitting || (!showResult && !hasSubmitError && !canSubmit)}
             fullWidth
             size="lg"
             aria-live="polite"
@@ -94,17 +109,28 @@ export function RoundActionTray({
       <div className={wrapperClassName}>
         {summarySlot}
 
-        {!showResult && !isWaiting && !autoSubmit && (
+        {!showResult && !isWaiting && !autoSubmit && submitError && (
+          <div className="flex flex-1 flex-col justify-center gap-2 rounded-md border border-error/40 bg-error/10 px-3 py-2 sm:flex-row sm:items-center sm:justify-between" role="alert">
+            <p className="text-sm leading-snug text-app-text">{submitError}</p>
+            {onRetrySubmit && (
+              <Button onClick={onRetrySubmit} disabled={isSubmitting} className="w-full shrink-0 py-1.5 sm:w-auto">
+                {retryLabel ?? t('error.retry')}
+              </Button>
+            )}
+          </div>
+        )}
+
+        {!showResult && !isWaiting && !autoSubmit && !submitError && (
           <div className="flex flex-1 flex-col justify-center gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
             <Button
               onClick={onSubmit}
-              disabled={!canSubmit}
+              disabled={!canSubmit || isSubmitting}
               className="w-full py-1.5 disabled:opacity-70 sm:w-auto"
             >
-              {submitLabel}
+              {isSubmitting ? validatingLabel ?? submitLabel : submitLabel}
             </Button>
 
-            {selectionAssistiveText && canSubmit && (
+            {selectionAssistiveText && canSubmit && !isSubmitting && (
               <p className="sr-only" aria-live="polite">{selectionAssistiveText}</p>
             )}
           </div>

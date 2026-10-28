@@ -431,6 +431,8 @@
     "yourAnswer": "Tu respuesta",
     "itWas": "Era {{answer}}",
     "validating": "Validando…",
+    "submitError": "No pudimos guardar tu respuesta. Revisa tu conexión e inténtalo de nuevo.",
+    "submitRetry": "Reintentar",
     "timeUp": "Tiempo agotado",
     "correctAnswerWas": "La respuesta correcta era",
     "correctLabel": "Correcta",

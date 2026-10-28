@@ -431,6 +431,8 @@
     "yourAnswer": "Your answer",
     "itWas": "It was {{answer}}",
     "validating": "Validating…",
+    "submitError": "We couldn't save your answer. Check your connection and try again.",
+    "submitRetry": "Try again",
     "timeUp": "Time's up",
     "correctAnswerWas": "The correct answer was",
     "correctLabel": "Correct",

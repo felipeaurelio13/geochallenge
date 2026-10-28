@@ -109,6 +109,7 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
   });
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [mechanicPending, setMechanicPending] = useState(false);
   const [imageReplacementFailed, setImageReplacementFailed] = useState(false);
   const [isRetryingImage, setIsRetryingImage] = useState(false);
@@ -328,6 +329,7 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
     if (!currentQuestion || showResult || isSubmitting || submitLockRef.current) return;
 
     submitLockRef.current = true;
+    setSubmitError(null);
 
     let answer: string;
     if (isMapQuestion) {
@@ -370,7 +372,9 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
       console.error('Error submitting answer:', err);
       submitLockRef.current = false;
       setIsSubmitting(false);
-      setError(err.message || t('game.error'));
+      // Keep the round, the selection and the remaining time: a transient
+      // network failure must not throw the player back to a full-screen error.
+      setSubmitError(t('game.submitError'));
     }
   };
 
@@ -428,6 +432,7 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
       setDisabledOptionIndexes([]);
       setPendingMechanicUsage(undefined);
       setIsSubmitting(false);
+      setSubmitError(null);
       setImageReplacementFailed(false);
     }
   };
@@ -498,6 +503,7 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
     if (currentIndex >= questions.length - 1) {
       handleNextQuestion();
     } else {
+      submitLockRef.current = false;
       nextQuestion();
       setSelectedAnswer(null);
       setMapLocation(null);
@@ -507,6 +513,7 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
       setGlobalTimeRemaining(roundDuration);
       setDisabledOptionIndexes([]);
       setPendingMechanicUsage(undefined);
+      setSubmitError(null);
     }
   };
 
@@ -602,7 +609,7 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
                 timeRemaining={timeRemaining}
                 onTick={handleTimerTick}
                 onComplete={handleTimeComplete}
-                isActive={!showResult && !imageReplacementFailed && status === 'playing'}
+                isActive={!showResult && !imageReplacementFailed && !submitError && status === 'playing'}
                 compact={isPerfectRoundPilot}
               />
             </div>
@@ -703,6 +710,9 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
           isSubmitting={isSubmitting}
           stableAction={isPerfectRoundPilot}
           validatingLabel={t('game.validating')}
+          submitError={submitError}
+          onRetrySubmit={handleSubmitAnswer}
+          retryLabel={t('game.submitRetry')}
           submitLabel={t('game.submit')}
           nextLabel={streakGameOver ? t('game.seeResults') : shouldUseStreakFlow ? t('game.next') : isLastQuestion ? t('game.seeResults') : t('game.next')}
           resultLabel={lastAnswerCorrect ? t('game.correct') : t('game.incorrect')}
