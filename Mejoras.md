@@ -871,7 +871,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 62. Resaltar la ronda más lenta dentro del repaso — ⬜ Pendiente
+## 62. Resaltar la ronda más lenta dentro del repaso — ✅ Desarrollada
 
 **Área:** aprendizaje / `ResultsPage`.
 
@@ -881,7 +881,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** solo se marca la fila cuyo número coincide; no aparece si la ronda fue correcta; se lee en ES/EN; no cambia el orden, los filtros ni el copiado; no duplica la etiqueta visible del resumen.
 
-**Entrega:** commit `mejora 62: marca de la ronda más lenta en el repaso`.
+**Entrega:** commit `mejora 62: marca de la ronda más lenta en el repaso`. El resumen de cada fallo compara su número con el de la ronda más lenta y añade un badge solo a esa fila, sin tocar orden, filtros ni copiado.
 
 ---
 
@@ -994,3 +994,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** el atajo solo aparece con fallos; lleva foco y scroll al repaso; respeta movimiento reducido; se lee en ES/EN; no duplica el botón de practicar fallos; se cubre con test de navegación interna.
 
 **Entrega:** commit `mejora 70: acceso directo al repaso`.
+
+---
+
+## 71. Incluir la duración total en el repaso copiado — ⬜ Pendiente
+
+**Área:** aprendizaje / `ResultsPage`.
+
+**Problema:** el repaso copiado reúne fallos y datos, pero no cuánto duró la partida. Al comparar sesiones de estudio fuera de la app se pierde la referencia de ritmo.
+
+**Propuesta:** añadir una línea de duración total junto al título del repaso copiado cuando existan tiempos válidos, reutilizando `formattedTotalAnswerSeconds`. Omitirla cuando no haya datos.
+
+**Aceptación:** la duración copiada coincide con el resumen visible; solo aparece con tiempos válidos; se lee en ES/EN; no cambia el texto si falta; el copiado sigue respetando filtro y orden.
+
+**Entrega:** commit `mejora 71: duración total en el repaso copiado`.

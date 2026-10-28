@@ -70,6 +70,7 @@ vi.mock('react-i18next', () => ({
         'results.categoryAccuracyTitle': 'Precisión por categoría',
         'results.categoryAccuracyDescription': 'Así se reparten tus aciertos por tipo de pregunta.',
         'results.funFactLabel': 'Dato curioso',
+        'results.slowestBadge': 'Ronda más lenta',
         'results.expandAll': 'Expandir todo',
         'results.collapseAll': 'Contraer todo',
         'results.reviewCountOne': '1 fallo',
@@ -387,18 +388,21 @@ describe('ResultsPage', () => {
     const originalResults = mocks.gameState.results;
     mocks.gameState.results = originalResults.map((result, index) => ({
       ...result,
-      elapsedSeconds: index < 5 ? 4 : index === 7 ? 9 : 8,
+      elapsedSeconds: index < 5 ? 4 : index === 8 ? 9 : 8,
     })) as typeof mocks.gameState.results;
 
     try {
       render(<ResultsPage />);
 
-      const slowest = screen.getByText(/Ronda más lenta/);
-      expect(slowest).toHaveTextContent('Ronda más lenta (#8): ¿Cuál es la capital de Chile? (9 s)');
+      const slowest = screen.getByText(/Ronda más lenta \(#9\)/);
+      expect(slowest).toHaveTextContent('Ronda más lenta (#9): ¿Cuál es la capital de Chile? (9 s)');
       expect(slowest.textContent).not.toContain('Santiago');
       const fastest = screen.getByText(/Ronda más rápida/);
       expect(fastest).toHaveTextContent('Ronda más rápida (#1): ¿Cuál es la capital de Chile? (4 s)');
       expect(fastest.textContent).not.toContain('Santiago');
+      const badge = screen.getByTestId('review-slowest-badge');
+      expect(badge.closest('summary')).toHaveTextContent('9.');
+      expect(screen.getAllByTestId('review-slowest-badge')).toHaveLength(1);
     } finally {
       mocks.gameState.results = originalResults;
     }

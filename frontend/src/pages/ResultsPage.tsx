@@ -574,6 +574,14 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
                         {t(`game.difficulty.${question.difficulty.toLowerCase()}`)}
                       </span>
                     )}
+                    {slowestAnswer?.number === number && (
+                      <span
+                        data-testid="review-slowest-badge"
+                        className="ml-1 inline-block align-middle rounded-full border border-warning-500/40 bg-warning-500/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-warning-500"
+                      >
+                        {t('results.slowestBadge')}
+                      </span>
+                    )}
                   </summary>
                   <div className="mt-3 flex items-start gap-3 border-t border-app-border pt-3">
                     {question.imageUrl && (
