@@ -773,7 +773,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 55. Mostrar el número de fallos en cada filtro de categoría — ⬜ Pendiente
+## 55. Mostrar el número de fallos en cada filtro de categoría — ✅ Desarrollada
 
 **Área:** aprendizaje / `ResultsPage`.
 
@@ -783,7 +783,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** cada conteo coincide con las filas de esa categoría; “Todos” suma el total; el texto se lee en ES/EN; no cambia el layout de forma abrupta; no aparecen filtros sin fallos.
 
-**Entrega:** commit `mejora 55: conteo en los filtros del repaso`.
+**Entrega:** commit `mejora 55: conteo en los filtros del repaso`. Cada chip muestra `(n)` derivado de los mismos fallos; “Todos” suma el total y conserva `aria-pressed`.
 
 ---
 
@@ -896,3 +896,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** cerrar la pista deja el foco en el mapa; el foco inicial de la pantalla no cambia; funciona con teclado y lector de pantalla; no afecta al arrastre ni a la selección táctil; se cubre con test.
 
 **Entrega:** commit `mejora 63: foco al cerrar la pista del mapa`.
+
+---
+
+## 64. Cerrar la pista del mapa con Escape — ⬜ Pendiente
+
+**Área:** accesibilidad / `MapInteractive`.
+
+**Problema:** la pista de controles solo se puede cerrar con el botón visible. Un usuario de teclado que ya conoce las instrucciones espera poder descartarla con Escape sin tabular hasta la “×”.
+
+**Propuesta:** escuchar `Escape` mientras la pista está visible y cerrarla con el mismo estado que usa el botón, reutilizando el manejo de foco que corresponda. No interceptar Escape cuando la pista ya está cerrada ni cuando el foco está en otro control.
+
+**Aceptación:** Escape cierra la pista visible; no afecta al mapa ni a la selección; no se dispara tras cerrarla; funciona igual en todos los modos con mapa; se cubre con test de teclado.
+
+**Entrega:** commit `mejora 64: cerrar la pista del mapa con Escape`.

@@ -548,14 +548,14 @@ describe('ResultsPage', () => {
       const rows = Array.from(section.querySelectorAll('details'));
       const filter = within(section).getByRole('group', { name: 'Filtrar el repaso por categoría' });
 
-      expect(within(filter).getByRole('button', { name: 'Todos' })).toHaveAttribute('aria-pressed', 'true');
-      expect(within(filter).getByRole('button', { name: 'Banderas' })).toBeInTheDocument();
-      expect(within(filter).getByRole('button', { name: 'Capitales' })).toBeInTheDocument();
+      expect(within(filter).getByRole('button', { name: 'Todos (2)' })).toHaveAttribute('aria-pressed', 'true');
+      expect(within(filter).getByRole('button', { name: 'Banderas (1)' })).toBeInTheDocument();
+      expect(within(filter).getByRole('button', { name: 'Capitales (1)' })).toBeInTheDocument();
 
       fireEvent.click(rows[0].querySelector('summary')!);
       expect(rows[0].open).toBe(true);
 
-      fireEvent.click(within(filter).getByRole('button', { name: 'Capitales' }));
+      fireEvent.click(within(filter).getByRole('button', { name: 'Capitales (1)' }));
 
       expect(section).toHaveTextContent('1 fallo');
       expect(rows[0]).toHaveAttribute('hidden');
@@ -567,7 +567,7 @@ describe('ResultsPage', () => {
       expect(copied).toContain('¿Cuál es la capital de Perú?');
       expect(copied).not.toContain('game.questionFlag');
 
-      fireEvent.click(within(filter).getByRole('button', { name: 'Todos' }));
+      fireEvent.click(within(filter).getByRole('button', { name: 'Todos (2)' }));
 
       expect(section).toHaveTextContent('2 fallos');
       expect(rows[0]).not.toHaveAttribute('hidden');

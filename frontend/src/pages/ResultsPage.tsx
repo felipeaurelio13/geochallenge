@@ -71,6 +71,12 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
     return bTime - aTime || a.number - b.number;
   });
   const reviewCategories = Array.from(new Set(mistakes.map(({ question }) => question.category)));
+  const reviewCategoryCounts = mistakes.reduce((counts, { question }) => {
+    counts.set(question.category, (counts.get(question.category) ?? 0) + 1);
+    return counts;
+  }, new Map<Category, number>());
+  const reviewFilterCount = (filterCategory: Category | 'ALL') =>
+    filterCategory === 'ALL' ? mistakes.length : reviewCategoryCounts.get(filterCategory) ?? 0;
   const visibleReviewMistakes = reviewCategory === 'ALL'
     ? reviewMistakes
     : reviewMistakes.filter(({ question }) => question.category === reviewCategory);
@@ -498,7 +504,7 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
                     >
                       {filterCategory === 'ALL'
                         ? t('results.reviewFilterAll')
-                        : t(CATEGORY_LABEL_KEYS[filterCategory])}
+                        : t(CATEGORY_LABEL_KEYS[filterCategory])} ({reviewFilterCount(filterCategory)})
                     </button>
                   );
                 })}
