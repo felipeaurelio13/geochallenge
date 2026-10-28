@@ -285,10 +285,16 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
       const userAnswer = question.category === 'MAP' && result.distance != null
         ? t('results.mapDistance', { distance: Math.round(result.distance).toLocaleString(currentLanguage) })
         : result.userAnswer || t('results.noAnswer');
+      const funFact = generateFunFact(
+        question,
+        currentLanguage === 'en' ? 'en' : 'es',
+        result.correctAnswer,
+      );
       return [
         `${number}. ${t(CATEGORY_LABEL_KEYS[question.category])} — ${getLocalizedQuestionText(question, t, currentLanguage)}`,
         `${t('results.yourAnswer')}: ${userAnswer}`,
         `${t('game.correctAnswerWas')}: ${result.correctAnswer}`,
+        ...(funFact ? [`${t('results.funFactLabel')}: ${funFact}`] : []),
       ].join('\n');
     });
     const text = [t('results.reviewCopyTitle'), ...lines].join('\n\n');

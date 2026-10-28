@@ -591,6 +591,7 @@ describe('ResultsPage', () => {
     expect(copied).toContain('Tu respuesta: Lima');
     expect(copied).toContain('La respuesta correcta era: Santiago');
     expect(copied).toContain('10. Capitales');
+    expect(copied).not.toContain('Dato curioso');
     expect(screen.getByText('Repaso copiado')).toBeInTheDocument();
   });
 
@@ -620,6 +621,38 @@ describe('ResultsPage', () => {
 
       expect(screen.getByText('Dato curioso')).toBeInTheDocument();
       expect(screen.getByText('Chile se encuentra en América del Sur.')).toBeInTheDocument();
+    } finally {
+      mocks.gameState.questions = originalQuestions;
+      mocks.gameState.results = originalResults;
+    }
+  });
+
+  it('incluye el dato curioso en el repaso copiado cuando existe', async () => {
+    const originalQuestions = mocks.gameState.questions;
+    const originalResults = mocks.gameState.results;
+    mocks.gameState.questions = [
+      {
+        id: 'q1',
+        category: 'CAPITAL',
+        questionData: 'Chile',
+        continent: 'South America',
+        questionText: 'Capital',
+        options: [],
+      },
+    ] as unknown as typeof mocks.gameState.questions;
+    mocks.gameState.results = [
+      { questionId: 'q1', isCorrect: false, correctAnswer: 'Santiago', userAnswer: 'Lima' },
+    ] as typeof mocks.gameState.results;
+
+    try {
+      render(<ResultsPage />);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Copiar repaso' }));
+
+      await waitFor(() => expect(mocks.writeTextMock).toHaveBeenCalled());
+      const copied = mocks.writeTextMock.mock.calls[mocks.writeTextMock.mock.calls.length - 1]?.[0] as string;
+      expect(copied).toContain('Dato curioso: Chile se encuentra en América del Sur.');
+      expect(copied).toContain('La respuesta correcta era: Santiago');
     } finally {
       mocks.gameState.questions = originalQuestions;
       mocks.gameState.results = originalResults;

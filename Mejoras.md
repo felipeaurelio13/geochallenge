@@ -787,7 +787,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 56. Incluir el dato curioso en el repaso copiado — ⬜ Pendiente
+## 56. Incluir el dato curioso en el repaso copiado — ✅ Desarrollada
 
 **Área:** aprendizaje / `ResultsPage`.
 
@@ -797,7 +797,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** el dato copiado coincide con el visible; solo aparece cuando existe; no duplica la respuesta correcta; se lee en ES/EN; no cambia el texto cuando no hay dato; el copiado sigue respetando el filtro activo.
 
-**Entrega:** commit `mejora 56: dato curioso en el repaso copiado`.
+**Entrega:** commit `mejora 56: dato curioso en el repaso copiado`. Cada fallo copiado añade `Dato curioso: …` solo cuando `generateFunFact` devuelve texto, respetando filtro y orden.
 
 ---
 
@@ -910,3 +910,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** Escape cierra la pista visible; no afecta al mapa ni a la selección; no se dispara tras cerrarla; funciona igual en todos los modos con mapa; se cubre con test de teclado.
 
 **Entrega:** commit `mejora 64: cerrar la pista del mapa con Escape`.
+
+---
+
+## 65. Incluir el tiempo de respuesta en el repaso copiado — ⬜ Pendiente
+
+**Área:** aprendizaje / `ResultsPage`.
+
+**Problema:** cada fallo visible muestra cuánto tardó la respuesta, pero el texto copiado omite ese dato. Al estudiar fuera de la app se pierde la señal de qué fallos fueron por duda prolongada.
+
+**Propuesta:** añadir una línea de tiempo por fallo cuando `elapsedSeconds` sea válido, reutilizando `results.averageTimeValue` y el mismo formato que la fila visible. Omitirla cuando no haya tiempo registrado.
+
+**Aceptación:** el tiempo copiado coincide con el visible; solo aparece con datos válidos; se lee en ES/EN; no cambia el texto cuando falta; el copiado sigue respetando filtro y orden.
+
+**Entrega:** commit `mejora 65: tiempo por fallo en el repaso copiado`.
