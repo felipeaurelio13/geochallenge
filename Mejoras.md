@@ -829,7 +829,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 59. Conservar los filtros al practicar desde el repaso — ⬜ Pendiente
+## 59. Conservar los filtros al practicar desde el repaso — ✅ Desarrollada
 
 **Área:** continuidad / `ResultsPage`.
 
@@ -839,7 +839,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** la práctica conserva los filtros compatibles; funciona también sin filtros; no altera el destino de “Jugar de nuevo” ni el de las categorías; se cubre con test de navegación.
 
-**Entrega:** commit `mejora 59: filtros al practicar desde el repaso`.
+**Entrega:** commit `mejora 59: filtros al practicar desde el repaso`. El botón de práctica usa el mismo helper de filtros preservados, mantiene `gameType=practice` y no arrastra la categoría de la partida.
 
 ---
 
@@ -952,3 +952,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** el total coincide con las filas copiadas; respeta el filtro activo; se lee en ES/EN; no aparece si no hay fallos; no duplica el contador visible del repaso.
 
 **Entrega:** commit `mejora 67: total de fallos en el repaso copiado`.
+
+---
+
+## 68. Permitir reintentar la carga del ranking cuando falla — ⬜ Pendiente
+
+**Área:** resiliencia / `ResultsPage`.
+
+**Problema:** si `getMyRank` falla, la fila de ranking queda vacía y el jugador no tiene forma de recuperar su posición sin recargar toda la página.
+
+**Propuesta:** reutilizar la fila estable del ranking para mostrar un botón de reintento tras un fallo, con el mismo estado de carga y la misma petición. Mantener oculto el botón mientras carga o cuando ya hay posición.
+
+**Aceptación:** el reintento solo aparece tras un error; vuelve a pedir el ranking; muestra carga durante el reintento; no cambia la altura de la fila; no afecta a práctica ni prueba; se cubre con test de error y reintento.
+
+**Entrega:** commit `mejora 68: reintento de carga del ranking`.

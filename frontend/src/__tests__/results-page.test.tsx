@@ -731,6 +731,27 @@ describe('ResultsPage', () => {
     }
   });
 
+  it('conserva los filtros al practicar los fallos desde el repaso', () => {
+    mocks.search = 'category=FLAG&gameType=single&continent=Europe&difficulty=HARD&isInsular=true&countryCode=CL';
+
+    render(<ResultsPage />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'results.practiceMistakes' }));
+
+    expect(mocks.resetGameMock).toHaveBeenCalledOnce();
+    expect(mocks.navigateMock).toHaveBeenCalledWith(
+      '/game/single?gameType=practice&continent=Europe&difficulty=HARD&isInsular=true&countryCode=CL',
+    );
+  });
+
+  it('practica los fallos sin filtros cuando la partida no los tenía', () => {
+    render(<ResultsPage />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'results.practiceMistakes' }));
+
+    expect(mocks.navigateMock).toHaveBeenCalledWith('/game/single?gameType=practice');
+  });
+
   it('no revela la respuesta correcta en el resumen del repaso', () => {
     render(<ResultsPage />);
 

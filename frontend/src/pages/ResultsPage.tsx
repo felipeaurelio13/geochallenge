@@ -575,7 +575,11 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
               })}
             </div>
             {!isTrial && !isPracticeMode && (
-              <Button variant="secondary" fullWidth className="mt-3" onClick={() => { resetGame(); navigate('/game/single?gameType=practice'); }}>
+              <Button variant="secondary" fullWidth className="mt-3" onClick={() => {
+                const params = appendPreservedFilters(new URLSearchParams({ gameType: 'practice' }));
+                resetGame();
+                navigate(`/game/single?${params}`);
+              }}>
                 {t('results.practiceMistakes')}
               </Button>
             )}
