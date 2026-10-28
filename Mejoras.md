@@ -241,7 +241,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 17. Pausar el temporizador mientras el diálogo de salida está abierto — ⬜ Pendiente
+## 17. Pausar el temporizador mientras el diálogo de salida está abierto — ✅ Desarrollada
 
 **Área:** justicia / `GamePage`, `Timer`.
 
@@ -251,7 +251,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** el tiempo no baja mientras la confirmación está abierta; al cancelar se reanuda desde el mismo valor; el envío por timeout no se dispara durante la pausa.
 
-**Entrega:** commit `mejora 17: pausa del temporizador en el diálogo de salida`.
+**Entrega:** commit `mejora 17: pausa del timer en el diálogo de salida`. El temporizador se detiene mientras la confirmación está abierta y retoma desde el mismo valor al cancelar.
 
 ---
 
@@ -378,3 +378,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** el control aparece solo con dos o más fallos; alterna todas las filas; se anuncia en ES/EN; funciona con teclado y no mueve el foco fuera del control al usarlo.
 
 **Entrega:** commit `mejora 26: expandir todo el repaso`.
+
+---
+
+## 27. Identificar el modo y la categoría de la partida en resultados — ⬜ Pendiente
+
+**Área:** orientación / `ResultsPage`.
+
+**Problema:** el resumen final celebra el resultado, pero no recuerda qué partida se acaba de jugar. Si el jugador vuelve más tarde o comparte la pantalla, el contexto depende de la memoria o de las métricas por categoría.
+
+**Propuesta:** añadir una etiqueta breve bajo el titular con el modo y la categoría localizados, reutilizando las etiquetas existentes. Mantenerla fuera del bloque de acciones y sin duplicar la información del repaso.
+
+**Aceptación:** la etiqueta aparece en ES/EN; distingue partida normal, práctica y trial; no se muestra si falta configuración; no añade altura al bloque de acciones ni desplaza el CTA principal.
+
+**Entrega:** commit `mejora 27: contexto de la partida en resultados`.

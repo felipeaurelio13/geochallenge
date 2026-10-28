@@ -49,6 +49,7 @@ const uxMocks = vi.hoisted(() => ({
 const confirmDialogStable = vi.hoisted(() => ({
   confirm: vi.fn().mockResolvedValue(true),
   confirmDialog: null,
+  isOpen: false,
 }));
 
 vi.mock('react-router-dom', () => ({
@@ -105,7 +106,7 @@ vi.mock('../hooks', async () => {
 });
 
 vi.mock('../components', () => ({
-  Timer: () => <div>timer</div>,
+  Timer: ({ isActive }: { isActive: boolean }) => <div data-testid="timer" data-active={isActive ? 'true' : 'false'}>timer</div>,
   QuestionCard: ({ compact }: { compact?: boolean }) => (
     <div data-testid="question-card" data-compact={compact ? 'true' : 'false'}>question-card</div>
   ),
@@ -296,6 +297,16 @@ describe('GamePage ending flow', () => {
     await waitFor(() => {
       expect(confirmDialogStable.confirm).toHaveBeenCalledWith('game.confirmExitProgress:1/1');
     });
+  });
+
+  it('pausa el temporizador mientras el diálogo de salida está abierto', () => {
+    confirmDialogStable.isOpen = true;
+    try {
+      render(<GamePage />);
+      expect(screen.getByTestId('timer')).toHaveAttribute('data-active', 'false');
+    } finally {
+      confirmDialogStable.isOpen = false;
+    }
   });
 
   it('no habla de progreso perdido si todavía no hay respuestas', async () => {

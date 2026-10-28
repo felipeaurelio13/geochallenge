@@ -667,7 +667,7 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
                 timeRemaining={timeRemaining}
                 onTick={handleTimerTick}
                 onComplete={handleTimeComplete}
-                isActive={!showResult && !imageReplacementFailed && !submitError && status === 'playing'}
+                isActive={!showResult && !isConfirmDialogOpen && !imageReplacementFailed && !submitError && status === 'playing'}
                 compact={isPerfectRoundPilot}
               />
             </div>
