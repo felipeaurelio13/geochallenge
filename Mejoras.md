@@ -283,7 +283,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 20. Mostrar la categoría de cada fallo en el repaso — ⬜ Pendiente
+## 20. Mostrar la categoría de cada fallo en el repaso — ✅ Desarrollada
 
 **Área:** aprendizaje / `ResultsPage`.
 
@@ -293,7 +293,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** cada fallo muestra su categoría en ES/EN, no altera el orden ni el detalle desplegable y no aparece en partidas sin fallos.
 
-**Entrega:** commit `mejora 20: categoría en el repaso de fallos`.
+**Entrega:** commit `mejora 20: categoría en el repaso de fallos`. La etiqueta se integra en el resumen de cada fila, no revela la respuesta y desaparece cuando no hay fallos.
 
 ---
 
@@ -420,3 +420,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** la práctica contiene solo preguntas falladas de la partida; no duplica preguntas; funciona en ES/EN; conserva el orden del repaso y no afecta el botón principal.
 
 **Entrega:** commit `mejora 29: practicar solo los fallos de la partida`.
+
+---
+
+## 30. Anunciar cuántos fallos hay en el repaso — ⬜ Pendiente
+
+**Área:** accesibilidad / `ResultsPage`.
+
+**Problema:** el título “Llévate estas respuestas” no dice cuántas preguntas fallaron. Un lector de pantalla debe recorrer la lista para descubrir su tamaño, y un vistazo rápido tampoco revela cuánto queda por revisar.
+
+**Propuesta:** incluir el número de fallos en el encabezado del repaso, con una clave i18n que contemple singular y plural, sin alterar el texto descriptivo ni la lista.
+
+**Aceptación:** el encabezado anuncia el total correcto en ES/EN; se actualiza si cambia el número de fallos; no aparece cuando no hay fallos; no duplica el número en cada fila.
+
+**Entrega:** commit `mejora 30: total de fallos en el repaso`.

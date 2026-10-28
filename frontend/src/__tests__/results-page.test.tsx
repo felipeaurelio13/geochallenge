@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { GameConfig } from '../types';
@@ -168,6 +168,12 @@ describe('ResultsPage', () => {
     expect(screen.getAllByText('Santiago')).toHaveLength(2);
   });
 
+  it('muestra la categoría en cada fallo del repaso', () => {
+    render(<ResultsPage />);
+
+    expect(screen.getAllByText('Capitales')).toHaveLength(2);
+  });
+
   it('no revela la respuesta correcta en el resumen del repaso', () => {
     render(<ResultsPage />);
 
@@ -227,9 +233,9 @@ describe('ResultsPage', () => {
     try {
       render(<ResultsPage />);
 
-      expect(screen.getByRole('heading', { name: 'Precisión por categoría' })).toBeInTheDocument();
-      expect(screen.getByText('Banderas')).toBeInTheDocument();
-      expect(screen.getByText('Capitales')).toBeInTheDocument();
+      const section = screen.getByRole('heading', { name: 'Precisión por categoría' }).closest('section')!;
+      expect(within(section).getByText('Banderas')).toBeInTheDocument();
+      expect(within(section).getByText('Capitales')).toBeInTheDocument();
       expect(screen.getByText('1 de 2 · 50%')).toBeInTheDocument();
       expect(screen.getByText('2 de 2 · 100%')).toBeInTheDocument();
       await waitFor(() => expect(mocks.getMyRankMock).toHaveBeenCalled());
