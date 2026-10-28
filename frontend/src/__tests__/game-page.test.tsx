@@ -122,7 +122,7 @@ vi.mock('../components', () => ({
       {showResult && resultLabel && <p>{resultLabel}</p>}
     </div>
   ),
-  GameRoundScaffold: ({ header, progress, actionTray, mapContent, isMapQuestion, question, onOptionSelect, showResult, disableOptions, optionsGridClassName, rootClassName = 'universal-layout bg-gray-900' }: any) => (
+  GameRoundScaffold: ({ header, progress, actionTray, mapContent, isMapQuestion, question, onOptionSelect, showResult, disableOptions, optionsGridClassName, feedback, rootClassName = 'universal-layout bg-gray-900' }: any) => (
     <div className={rootClassName}>
       {header}
       {progress}
@@ -135,6 +135,7 @@ vi.mock('../components', () => ({
             ))}
           </div>
         )}
+        {feedback}
       </main>
       {actionTray}
     </div>
@@ -351,6 +352,30 @@ describe('GamePage ending flow', () => {
 
     resolveSubmit({ isCorrect: true, points: 100 });
     await screen.findByText('game.correct');
+  });
+
+  it('muestra el desglose real de puntos tras acertar', async () => {
+    mocks.submitAnswerMock.mockResolvedValueOnce({
+      isCorrect: true,
+      points: 135,
+      basePoints: 100,
+      timeBonus: 35,
+    });
+    mocks.gameState.results = [Object.assign({ isCorrect: true }, {
+      questionId: 'q1',
+      correctAnswer: 'Santiago',
+      userAnswer: 'Santiago',
+      points: 135,
+      basePoints: 100,
+      timeBonus: 35,
+    })];
+
+    render(<GamePage />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Santiago' }));
+    fireEvent.click(screen.getByRole('button', { name: 'game.submit' }));
+
+    expect(await screen.findByText('game.scoreBreakdownDetail')).toBeInTheDocument();
   });
 
   it('mantiene la ronda y ofrece reintentar cuando falla el envío', async () => {

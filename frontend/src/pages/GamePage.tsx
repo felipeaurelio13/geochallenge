@@ -23,6 +23,7 @@ import { useAnswerShortcuts } from '../hooks/useAnswerShortcuts';
 import { areMechanicsV2Enabled } from '../config/featureFlags';
 import { trackUxEvent } from '../utils/uxTelemetry';
 import { generateFunFact } from '../utils/funFacts';
+import { formatScoreBreakdown, getScoreBreakdownParts } from '../utils/scoreBreakdown';
 import { applyExtendedTime, getQuestionDuration } from '../utils/questionTiming';
 import { uiStoreActions, useUiStore } from '../store/useUiStore';
 
@@ -142,6 +143,15 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
   const mechanicsConfig = state.config?.mechanics;
   const mechanicsRuntimeEnabled = mechanicsFeatureEnabled && Boolean(mechanicsConfig?.enabled);
   const mechanicsAllowed = new Set(mechanicsConfig?.allowed ?? []);
+  const lastResult = results[results.length - 1] ?? null;
+  const scoreBreakdownText = formatScoreBreakdown(getScoreBreakdownParts(lastResult, t));
+  const roundResultHint = [
+    streakGameOver ? (t('game.streakBroken', { count: results.filter((r) => r.isCorrect).length }) as string) : null,
+    funFact,
+    lastAnswerCorrect && scoreBreakdownText
+      ? (t('game.scoreBreakdownDetail', { breakdown: scoreBreakdownText }) as string)
+      : null,
+  ].filter(Boolean).join(' · ') || undefined;
 
   useEffect(() => {
     if (!mechanicsRuntimeEnabled || !mechanicsConfig) {
@@ -697,6 +707,11 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
                   ) : null}
                 </div>
                 {funFact ? <p className="mt-1 text-xs leading-snug text-[var(--color-text-secondary)]">{funFact}</p> : null}
+                {lastAnswerCorrect && scoreBreakdownText ? (
+                  <p className="mt-1 text-[0.68rem] leading-snug text-[var(--color-text-muted)]">
+                    {t('game.scoreBreakdownDetail', { breakdown: scoreBreakdownText })}
+                  </p>
+                ) : null}
               </>
             </div>
           ) : null
@@ -716,11 +731,7 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
           submitLabel={t('game.submit')}
           nextLabel={streakGameOver ? t('game.seeResults') : shouldUseStreakFlow ? t('game.next') : isLastQuestion ? t('game.seeResults') : t('game.next')}
           resultLabel={lastAnswerCorrect ? t('game.correct') : t('game.incorrect')}
-          resultHint={isPerfectRoundPilot ? undefined : (
-            streakGameOver
-              ? (t('game.streakBroken', { count: results.filter((r) => r.isCorrect).length }) as string)
-              : (funFact ?? undefined)
-          )}
+          resultHint={isPerfectRoundPilot ? undefined : roundResultHint}
           resultAttribution={isPerfectRoundPilot ? undefined : (
             currentQuestion && currentQuestion.category === 'MONUMENT'
               ? <MonumentAttribution question={currentQuestion} />

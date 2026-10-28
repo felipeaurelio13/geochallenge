@@ -465,6 +465,7 @@
       "pending": "pendiente"
     },
     "scoreBreakdownSummary": "+{{points}} ({{breakdown}})",
+    "scoreBreakdownDetail": "Cómo se sumó: {{breakdown}}",
     "scoreBreakdownBase": "base",
     "scoreBreakdownTime": "rápido",
     "scoreBreakdownCombo": "racha",

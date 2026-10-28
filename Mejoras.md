@@ -73,7 +73,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 5. Mostrar el desglose de puntos en el feedback de la ronda — ⬜ Pendiente
+## 5. Mostrar el desglose de puntos en el feedback de la ronda — ✅ Desarrollada
 
 **Área:** transparencia / `GamePage`, `RoundActionTray`.
 
@@ -210,3 +210,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** la leyenda no intercepta clics, se lee en ES/EN y no aparece antes de confirmar.
 
 **Entrega:** commit `mejora 14: leyenda de marcadores del mapa`.
+
+---
+
+## 15. Mostrar el tiempo medio por respuesta en resultados — ⬜ Pendiente
+
+**Área:** aprendizaje / `ResultsPage`.
+
+**Problema:** la pantalla final muestra precisión y puntos, pero no si el jugador respondió con calma o contra reloj. Esa información explica por qué perdió el bonus de velocidad y ayuda a ajustar el ritmo.
+
+**Propuesta:** calcular el tiempo medio por respuesta con las respuestas reales de la sesión y el tiempo configurado, y mostrarlo junto a precisión, puntos y mejor racha. No inventar datos si faltan respuestas.
+
+**Aceptación:** el promedio es coherente con la duración configurada; se muestra redondeado y en ES/EN; no aparece en partidas sin respuestas registradas.
+
+**Entrega:** commit `mejora 15: tiempo medio por respuesta en resultados`.

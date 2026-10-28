@@ -465,6 +465,7 @@
       "pending": "pending"
     },
     "scoreBreakdownSummary": "+{{points}} ({{breakdown}})",
+    "scoreBreakdownDetail": "Scored as: {{breakdown}}",
     "scoreBreakdownBase": "base",
     "scoreBreakdownTime": "fast",
     "scoreBreakdownCombo": "streak",
