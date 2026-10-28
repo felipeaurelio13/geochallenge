@@ -549,7 +549,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 39. Incluir la categoría en el anuncio accesible de la pregunta — ⬜ Pendiente
+## 39. Incluir la categoría en el anuncio accesible de la pregunta — ✅ Desarrollada
 
 **Área:** accesibilidad / `QuestionCard`.
 
@@ -559,4 +559,18 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** al enfocar el enunciado se escuchan número, categoría y texto; no se altera el layout visible; funciona en ES/EN para todas las categorías, incluida la mixta.
 
-**Entrega:** commit `mejora 39: categoría en el anuncio accesible`.
+**Entrega:** commit `mejora 39: categoría en el anuncio accesible`. El `sr-only` del `h2` encadena número, categoría y enunciado en una sola lectura, sin cambios visuales.
+
+---
+
+## 40. Incluir la dificultad en el anuncio accesible de la pregunta — ⬜ Pendiente
+
+**Área:** accesibilidad / `QuestionCard`.
+
+**Problema:** la dificultad aparece como badge visual en algunas categorías, pero no forma parte del texto que se anuncia al enfocar el enunciado. Un usuario de lector de pantalla no sabe si la ronda es fácil, media o difícil.
+
+**Propuesta:** añadir la dificultad localizada al `sr-only` del encabezado, solo cuando la pregunta la tenga, reutilizando `game.difficulty.*` y sin duplicar el badge visual.
+
+**Aceptación:** el anuncio incluye la dificultad cuando existe; se omite si falta; no cambia el layout; se lee en ES/EN y no repite la etiqueta visual como texto suelto.
+
+**Entrega:** commit `mejora 40: dificultad en el anuncio accesible`.

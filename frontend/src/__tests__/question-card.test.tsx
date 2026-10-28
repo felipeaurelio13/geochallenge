@@ -36,6 +36,14 @@ vi.mock('react-i18next', () => ({
         return `Pregunta ${vars?.current} de ${vars?.total}`;
       }
 
+      if (key === 'game.categoryAnnouncement') {
+        return `Categoría: ${vars?.category}`;
+      }
+
+      if (key === 'categories.capitals') {
+        return 'Capitales';
+      }
+
       if (key.startsWith('game.difficulty.')) {
         return key;
       }
@@ -61,6 +69,7 @@ describe('QuestionCard', () => {
 
     const heading = screen.getByRole('heading', { level: 2 });
     expect(heading).toHaveTextContent('Pregunta 1 de 10');
+    expect(heading).toHaveTextContent('Categoría: Capitales');
     expect(heading).toHaveTextContent('¿Cuál es la capital de Chile?');
     expect(heading.closest('.question-card')).not.toHaveAttribute('aria-label');
   });

@@ -4,6 +4,7 @@ import { useImageWithFallback } from '../hooks/useImageWithFallback';
 import { useTranslation } from 'react-i18next';
 import { getLocalizedQuestionText } from '../utils/questionText';
 import { GeoMark } from './atoms/GeoMark';
+import { CATEGORY_LABEL_KEYS } from '../utils/categoryLabels';
 
 interface QuestionCardProps {
   question: Question;
@@ -223,7 +224,10 @@ export function QuestionCard({
 
         <div className={`flex ${compact ? 'flex-row items-start justify-center gap-1.5 text-left' : 'flex-col items-center'} ${question.category === 'CAPITAL' ? 'w-full justify-center text-center' : ''}`}>
           <h2 ref={headingRef} tabIndex={-1} className={headingClassName}>
-            <span className="sr-only">{t('game.questionOf', { current: questionNumber, total: totalQuestions })}. </span>
+            <span className="sr-only">
+              {t('game.questionOf', { current: questionNumber, total: totalQuestions })}.{' '}
+              {t('game.categoryAnnouncement', { category: t(CATEGORY_LABEL_KEYS[question.category]) })}.{' '}
+            </span>
             {getQuestionText()}
           </h2>
 
