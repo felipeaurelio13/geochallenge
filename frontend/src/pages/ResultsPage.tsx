@@ -248,7 +248,6 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
                 <details key={result.questionId} className="rounded-lg border border-app-border bg-app-surface p-3">
                   <summary className="min-h-11 cursor-pointer text-sm font-medium text-app-text">
                     {number}. {getLocalizedQuestionText(question, t, currentLanguage)}
-                    <span className="mt-1 block pl-4 font-normal text-primary">{result.correctAnswer}</span>
                   </summary>
                   <div className="mt-3 flex items-start gap-3 border-t border-app-border pt-3">
                     {question.imageUrl && (

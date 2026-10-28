@@ -227,7 +227,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 16. Evitar spoilers en el repaso de preguntas falladas — ⬜ Pendiente
+## 16. Evitar spoilers en el repaso de preguntas falladas — ✅ Desarrollada
 
 **Área:** aprendizaje / `ResultsPage`.
 
@@ -237,7 +237,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** con la fila cerrada no se lee la respuesta correcta; al abrirla aparece una sola vez junto con la respuesta del jugador; sigue siendo legible en móvil y con lector de pantalla.
 
-**Entrega:** commit `mejora 16: repaso sin spoilers`.
+**Entrega:** commit `mejora 16: repaso sin spoilers`. El resumen conserva solo el número y el enunciado; la respuesta correcta queda dentro del detalle desplegable, junto al resto de la explicación.
 
 ---
 
@@ -364,3 +364,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** cada fallo con tiempo lo muestra dentro del detalle desplegable; no aparece en filas sin dato; no revela la respuesta con la fila cerrada y no altera el orden del repaso.
 
 **Entrega:** commit `mejora 25: tiempo por fallo en el repaso`.
+
+---
+
+## 26. Expandir o contraer todo el repaso con un solo control — ⬜ Pendiente
+
+**Área:** aprendizaje / `ResultsPage`.
+
+**Problema:** cuando hay varios fallos, revisar uno por uno exige abrir cada fila. Para comparar errores o leer el repaso completo, el jugador repite el mismo gesto varias veces.
+
+**Propuesta:** añadir un control compacto que abra o cierre todas las filas del repaso a la vez, con una etiqueta que refleje la acción disponible. Mantener el estado por fila y no reordenar el contenido.
+
+**Aceptación:** el control aparece solo con dos o más fallos; alterna todas las filas; se anuncia en ES/EN; funciona con teclado y no mueve el foco fuera del control al usarlo.
+
+**Entrega:** commit `mejora 26: expandir todo el repaso`.

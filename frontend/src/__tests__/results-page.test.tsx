@@ -165,7 +165,15 @@ describe('ResultsPage', () => {
     expect(tray.compareDocumentPosition(review) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(document.querySelectorAll('details')).toHaveLength(2);
     expect(screen.getAllByText('Lima')).toHaveLength(2);
-    expect(screen.getAllByText('Santiago')).toHaveLength(4);
+    expect(screen.getAllByText('Santiago')).toHaveLength(2);
+  });
+
+  it('no revela la respuesta correcta en el resumen del repaso', () => {
+    render(<ResultsPage />);
+
+    const summaries = Array.from(document.querySelectorAll('summary')).map((summary) => summary.textContent ?? '');
+    expect(summaries.length).toBeGreaterThan(0);
+    expect(summaries.join(' ')).not.toContain('Santiago');
   });
 
   it('keeps trial replay public and does not request a private ranking', () => {
