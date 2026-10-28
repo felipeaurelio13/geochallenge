@@ -51,6 +51,8 @@ vi.mock('react-i18next', () => ({
         'results.answerTime': 'Tiempo dedicado',
         'results.backToSummary': 'Volver al resumen',
         'results.playCategoryShort': 'Jugar',
+        'results.reviewSortSlowest': 'Ordenar por tiempo',
+        'results.reviewSortOriginal': 'Orden de la partida',
         'results.categoryAccuracyTitle': 'Precisión por categoría',
         'results.categoryAccuracyDescription': 'Así se reparten tus aciertos por tipo de pregunta.',
         'results.funFactLabel': 'Dato curioso',
@@ -325,8 +327,60 @@ describe('ResultsPage', () => {
     expect(rows.every((row) => !row.open)).toBe(true);
   });
 
-  it('incluye el dato curioso en el detalle de un fallo', () => {
-    const originalQuestions = mocks.gameState.questions;
+  it('ordena el repaso por tiempo y vuelve al orden de partida', () => {
+    const originalResults = mocks.gameState.results;
+    mocks.gameState.results = originalResults.map((result, index) => ({
+      ...result,
+      elapsedSeconds: index === 8 ? 2 : index === 9 ? 9 : undefined,
+    })) as typeof mocks.gameState.results;
+
+    try {
+      render(<ResultsPage />);
+
+      const section = screen.getByRole('heading', { name: /results\.reviewTitle/ }).closest('section')!;
+      const rows = () => Array.from(section.querySelectorAll('summary')).map((row) => row.textContent ?? '');
+
+      expect(rows()[0]).toMatch(/^9\./);
+      expect(rows()[1]).toMatch(/^10\./);
+
+      fireEvent.click(within(section).getByRole('button', { name: 'Ordenar por tiempo' }));
+
+      expect(within(section).getByRole('button', { name: 'Orden de la partida' })).toHaveAttribute('aria-pressed', 'true');
+      expect(rows()[0]).toMatch(/^10\./);
+      expect(rows()[1]).toMatch(/^9\./);
+
+      fireEvent.click(within(section).getByRole('button', { name: 'Orden de la partida' }));
+
+      expect(within(section).getByRole('button', { name: 'Ordenar por tiempo' })).toHaveAttribute('aria-pressed', 'false');
+      expect(rows()[0]).toMatch(/^9\./);
+      expect(rows()[1]).toMatch(/^10\./);
+    } finally {
+      mocks.gameState.results = originalResults;
+    }
+  });
+
+  it('deja al final los fallos sin tiempo registrado al ordenar', () => {
+    const originalResults = mocks.gameState.results;
+    mocks.gameState.results = originalResults.map((result, index) => ({
+      ...result,
+      elapsedSeconds: index === 9 ? 9 : undefined,
+    })) as typeof mocks.gameState.results;
+
+    try {
+      render(<ResultsPage />);
+
+      const section = screen.getByRole('heading', { name: /results\.reviewTitle/ }).closest('section')!;
+      fireEvent.click(within(section).getByRole('button', { name: 'Ordenar por tiempo' }));
+
+      const rows = Array.from(section.querySelectorAll('summary')).map((row) => row.textContent ?? '');
+      expect(rows[0]).toMatch(/^10\./);
+      expect(rows[1]).toMatch(/^9\./);
+    } finally {
+      mocks.gameState.results = originalResults;
+    }
+  });
+
+  it('incluye el dato curioso en el detalle de un fallo', () => {    const originalQuestions = mocks.gameState.questions;
     const originalResults = mocks.gameState.results;
     mocks.gameState.questions = [
       {

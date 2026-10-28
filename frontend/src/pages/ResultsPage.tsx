@@ -34,6 +34,7 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
   const { share: shareStreakImage, status: streakShareStatus } = useStreakShareImage();
   const [streakShareFeedback, setStreakShareFeedback] = useState('');
   const [allReviewOpen, setAllReviewOpen] = useState(false);
+  const [reviewSort, setReviewSort] = useState<'original' | 'slowest'>('original');
   const [showBackToSummary, setShowBackToSummary] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const reviewListRef = useRef<HTMLDivElement>(null);
@@ -48,6 +49,18 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
   const mistakes = results.flatMap((result, index) => {
     const question = questions.find((q) => q.id === result.questionId);
     return !result.isCorrect && question ? [{ result, question, number: index + 1 }] : [];
+  });
+  const reviewMistakes = reviewSort === 'original' ? mistakes : [...mistakes].sort((a, b) => {
+    const aTime = typeof a.result.elapsedSeconds === 'number' && Number.isFinite(a.result.elapsedSeconds) && a.result.elapsedSeconds >= 0
+      ? a.result.elapsedSeconds
+      : null;
+    const bTime = typeof b.result.elapsedSeconds === 'number' && Number.isFinite(b.result.elapsedSeconds) && b.result.elapsedSeconds >= 0
+      ? b.result.elapsedSeconds
+      : null;
+    if (aTime === null && bTime === null) return a.number - b.number;
+    if (aTime === null) return 1;
+    if (bTime === null) return -1;
+    return bTime - aTime || a.number - b.number;
   });
   const bestStreak = results.reduce(
     (streak, result) => {
@@ -366,9 +379,21 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
                 </button>
               )}
             </div>
-            <p className="mt-1 text-sm text-app-secondary">{t('results.reviewDescription')}</p>
+            <div className="mt-1 flex flex-wrap items-center justify-between gap-2">
+              <p className="min-w-0 flex-1 text-sm text-app-secondary">{t('results.reviewDescription')}</p>
+              {mistakes.length >= 2 && (
+                <button
+                  type="button"
+                  onClick={() => setReviewSort((current) => (current === 'original' ? 'slowest' : 'original'))}
+                  aria-pressed={reviewSort === 'slowest'}
+                  className="min-h-11 shrink-0 rounded-md px-2 text-xs font-medium text-primary hover:bg-primary/10 hover:text-primary/80"
+                >
+                  {t(reviewSort === 'slowest' ? 'results.reviewSortOriginal' : 'results.reviewSortSlowest')}
+                </button>
+              )}
+            </div>
             <div ref={reviewListRef} className="mt-4 space-y-2">
-              {mistakes.map(({ result, question, number }) => {
+              {reviewMistakes.map(({ result, question, number }) => {
                 const funFact = generateFunFact(
                   question,
                   currentLanguage === 'en' ? 'en' : 'es',

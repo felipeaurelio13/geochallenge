@@ -528,6 +528,8 @@
     "backToSummary": "Volver al resumen",
     "playCategory": "Jugar {{category}}",
     "playCategoryShort": "Jugar",
+    "reviewSortSlowest": "Ordenar por tiempo",
+    "reviewSortOriginal": "Orden de la partida",
     "modeSingle": "Un jugador",
     "modePractice": "Práctica",
     "modeStreak": "Racha",

@@ -493,7 +493,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 35. Ordenar el repaso por tiempo dedicado — ⬜ Pendiente
+## 35. Ordenar el repaso por tiempo dedicado — ✅ Desarrollada
 
 **Área:** aprendizaje / `ResultsPage`.
 
@@ -503,7 +503,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** el orden original sigue siendo el inicial; el control se anuncia en ES/EN; los fallos sin tiempo no se mezclan con los que sí lo tienen; no se pierde el estado del control al abrir un detalle.
 
-**Entrega:** commit `mejora 35: ordenar el repaso por tiempo`.
+**Entrega:** commit `mejora 35: ordenar el repaso por tiempo`. El repaso alterna entre orden de partida y tiempo descendente con `aria-pressed`; los fallos sin tiempo quedan al final y cada fila conserva su número original.
 
 ---
 
@@ -672,3 +672,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** el texto respeta el idioma activo; incluye todos los fallos visibles; no se ofrece sin fallos; el botón no tapa el contador ni el control de expandir; funciona con teclado y en móvil.
 
 **Entrega:** commit `mejora 47: copiar el repaso de fallos`.
+
+---
+
+## 48. Anunciar el nuevo orden del repaso al cambiarlo — ⬜ Pendiente
+
+**Área:** accesibilidad / `ResultsPage`.
+
+**Problema:** el control de orden cambia la lista y expone `aria-pressed`, pero un usuario de lector de pantalla no recibe confirmación de que las filas se reordenaron ni bajo qué criterio. El foco sigue en el botón y el cambio puede pasar inadvertido.
+
+**Propuesta:** añadir una región `aria-live="polite"` que anuncie “Repaso ordenado por tiempo” o “Repaso en orden de partida” al alternar, sin mover el foco ni repetir el anuncio al abrir detalles.
+
+**Aceptación:** el anuncio solo ocurre tras una acción del usuario; se lee en ES/EN; no duplica el nombre del botón; no interfiere con `aria-pressed`; no aparece en el DOM inicial si no se ha cambiado el orden.
+
+**Entrega:** commit `mejora 48: anuncio del orden del repaso`.

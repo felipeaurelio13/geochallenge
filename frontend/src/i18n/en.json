@@ -528,6 +528,8 @@
     "backToSummary": "Back to summary",
     "playCategory": "Play {{category}}",
     "playCategoryShort": "Play",
+    "reviewSortSlowest": "Sort by time",
+    "reviewSortOriginal": "Game order",
     "modeSingle": "Single player",
     "modePractice": "Practice",
     "modeStreak": "Streak",
