@@ -25,7 +25,10 @@ vi.mock('react-router-dom', () => ({
 }));
 
 const i18nMock = vi.hoisted(() => {
-  const t = (key: string) => key;
+  const t = (key: string, params?: Record<string, string | number>) => {
+    if (key === 'game.tabRound') return `Ronda ${params?.current}`;
+    return key;
+  };
   return { t, i18n: { language: 'es' } };
 });
 
@@ -124,6 +127,17 @@ describe('SurvivalPage guards', () => {
 
     const answers = mocks.socketMock.emit.mock.calls.filter(([event]) => event === 'survival:answer');
     expect(answers).toHaveLength(1);
+  });
+
+  it('refleja la ronda actual en el título sin inventar el total', async () => {
+    const { unmount } = render(<SurvivalPage />);
+    startRound();
+
+    await screen.findByRole('button', { name: 'Santiago' });
+    await waitFor(() => expect(document.title).toBe('Ronda 1 · app.name'));
+
+    unmount();
+    expect(document.title).toBe('app.name');
   });
 
   it('pide confirmación antes de abandonar una partida en curso', async () => {

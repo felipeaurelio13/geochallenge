@@ -412,6 +412,7 @@
     "categoryAnnouncement": "Category: {{category}}",
     "difficultyAnnouncement": "Difficulty: {{difficulty}}",
     "tabProgress": "Question {{current}} of {{total}}",
+    "tabRound": "Round {{current}}",
     "lastQuestion": "Last question",
     "questionFlag": "Which country does this flag belong to?",
     "questionCapital": "What is the capital of {{country}}?",

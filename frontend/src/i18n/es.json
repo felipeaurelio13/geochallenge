@@ -412,6 +412,7 @@
     "categoryAnnouncement": "Categoría: {{category}}",
     "difficultyAnnouncement": "Dificultad: {{difficulty}}",
     "tabProgress": "Pregunta {{current}} de {{total}}",
+    "tabRound": "Ronda {{current}}",
     "lastQuestion": "Última pregunta",
     "questionFlag": "¿A qué país pertenece esta bandera?",
     "questionCapital": "¿Cuál es la capital de {{country}}?",

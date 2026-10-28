@@ -647,7 +647,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 46. Mostrar la ronda de supervivencia en la pestaña sin inventar el total — ⬜ Pendiente
+## 46. Mostrar la ronda de supervivencia en la pestaña sin inventar el total — ✅ Desarrollada
 
 **Área:** orientación / `SurvivalPage`.
 
@@ -657,7 +657,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** el título muestra la ronda actual durante la partida; no aparece “de 0” ni un total inventado; se restaura al terminar o salir; funciona en ES/EN; no altera los títulos de los demás modos.
 
-**Entrega:** commit `mejora 46: ronda actual en el título de supervivencia`.
+**Entrega:** commit `mejora 46: ronda actual en el título de supervivencia`. El hook acepta un total opcional y usa `game.tabRound` cuando no existe; supervivencia muestra “Ronda X · GeoChallenge” durante la partida y restaura el título al salir.
 
 ---
 
@@ -742,3 +742,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** el bloque no cambia de altura entre cargando, con ranking y sin ranking; el spinner sigue siendo perceptible; no afecta a los modos que no piden ranking; se cubre con un test de estructura.
 
 **Entrega:** commit `mejora 52: espacio estable para el ranking`.
+
+---
+
+## 53. Incluir el número de pregunta en la ronda más lenta — ⬜ Pendiente
+
+**Área:** aprendizaje / `ResultsPage`.
+
+**Problema:** la línea de la ronda más lenta muestra el enunciado y los segundos, pero no su posición en la partida. Si dos preguntas comparten un enunciado parecido o el texto es largo, no queda claro a qué ronda volver en el repaso.
+
+**Propuesta:** añadir el número original de la pregunta al texto de la ronda más lenta, reutilizando el índice que ya calcula el repaso. Mantener el resto del formato y las mismas condiciones de ocultado.
+
+**Aceptación:** el número coincide con la posición real de la ronda; el texto sigue sin revelar la respuesta correcta; se lee en ES/EN; no cambia cuando la ronda más lenta no se muestra; no afecta al repaso.
+
+**Entrega:** commit `mejora 53: número de la ronda más lenta`.

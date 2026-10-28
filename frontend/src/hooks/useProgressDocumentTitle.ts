@@ -5,12 +5,15 @@ import { useTranslation } from 'react-i18next';
  * Refleja la ronda activa en el título de la pestaña y lo restaura al salir.
  * Se usa en las pantallas de juego que conocen su progreso total.
  */
-export function useProgressDocumentTitle(active: boolean, current: number, total: number) {
+export function useProgressDocumentTitle(active: boolean, current: number, total?: number) {
   const { t } = useTranslation();
 
   useEffect(() => {
-    if (!active || total <= 0) return;
-    const progressTitle = `${t('game.tabProgress', { current, total })} · ${t('app.name')}`;
+    if (!active || current <= 0 || (typeof total === 'number' && total <= 0)) return;
+    const progress = typeof total === 'number' && total > 0
+      ? t('game.tabProgress', { current, total })
+      : t('game.tabRound', { current });
+    const progressTitle = `${progress} · ${t('app.name')}`;
     document.title = progressTitle;
     return () => {
       // No pisar el título de otra pantalla que haya tomado el control.
