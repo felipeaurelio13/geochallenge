@@ -394,6 +394,7 @@ describe('GamePage ending flow', () => {
     rerender(<GamePage />);
 
     expect(screen.getByText(/game.lastQuestion/)).toBeInTheDocument();
+    expect(screen.getByText(/categories\.capitals/)).toBeInTheDocument();
   });
 
   it('muestra la pista de atajos solo antes de la primera respuesta', async () => {

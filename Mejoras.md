@@ -535,7 +535,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 38. Mantener la categoría visible también en la última pregunta — ⬜ Pendiente
+## 38. Mantener la categoría visible también en la última pregunta — ✅ Desarrollada
 
 **Área:** orientación / `GamePage`.
 
@@ -545,4 +545,18 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** la categoría y “Última pregunta” se ven a la vez en la última ronda; no se corta ni se desborda en 320 px; no aumenta la altura del header en el resto de rondas; funciona en ES/EN.
 
-**Entrega:** commit `mejora 38: categoría en la última pregunta`.
+**Entrega:** commit `mejora 38: categoría en la última pregunta`. El contador conserva la categoría y añade el aviso de última ronda en una segunda línea compacta, solo cuando corresponde.
+
+---
+
+## 39. Incluir la categoría en el anuncio accesible de la pregunta — ⬜ Pendiente
+
+**Área:** accesibilidad / `QuestionCard`.
+
+**Problema:** el encabezado muestra la categoría visualmente, y el enunciado enfocable anuncia “Pregunta X de Y” y el texto, pero no el tipo de pregunta. Un usuario de lector de pantalla no recibe ese contexto.
+
+**Propuesta:** sumar la categoría localizada al texto `sr-only` que ya vive dentro del encabezado enfocable, reutilizando `CATEGORY_LABEL_KEYS`. Mantener el anuncio en una sola pasada y sin duplicarlo en el contenedor.
+
+**Aceptación:** al enfocar el enunciado se escuchan número, categoría y texto; no se altera el layout visible; funciona en ES/EN para todas las categorías, incluida la mixta.
+
+**Entrega:** commit `mejora 39: categoría en el anuncio accesible`.

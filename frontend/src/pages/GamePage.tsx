@@ -681,15 +681,14 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
               {isPerfectRoundPilot ? (
                 <p className="text-sm font-semibold tabular-nums text-[var(--color-text-primary)] sm:text-base">
                   {currentIndex + 1} / {questions.length}
+                  <span className="ml-1 whitespace-nowrap text-xs font-medium text-app-secondary">
+                    · {t(CATEGORY_LABEL_KEYS[currentQuestion.category])}
+                  </span>
                   {isLastQuestion ? (
-                    <span className="ml-1 whitespace-nowrap text-xs font-medium text-app-secondary">
-                      · {t('game.lastQuestion')}
+                    <span className="mt-0.5 block text-[0.65rem] font-semibold uppercase tracking-wide text-app-secondary">
+                      {t('game.lastQuestion')}
                     </span>
-                  ) : (
-                    <span className="ml-1 whitespace-nowrap text-xs font-medium text-app-secondary">
-                      · {t(CATEGORY_LABEL_KEYS[currentQuestion.category])}
-                    </span>
-                  )}
+                  ) : null}
                 </p>
               ) : (
                 <>
