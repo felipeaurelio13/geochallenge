@@ -521,7 +521,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 37. Incluir la dificultad de la partida en el resumen final — ⬜ Pendiente
+## 37. Incluir la dificultad de la partida en el resumen final — ✅ Desarrollada
 
 **Área:** orientación / `ResultsPage`.
 
@@ -531,7 +531,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** la dificultad aparece en ES/EN; no se inventa cuando falta; no desplaza las métricas ni las acciones; se actualiza al repetir la partida con otro nivel.
 
-**Entrega:** commit `mejora 37: dificultad en el resumen final`.
+**Entrega:** commit `mejora 37: dificultad en el resumen final`. La línea de contexto añade la dificultad localizada solo si el parámetro es EASY/MEDIUM/HARD; valores desconocidos se omiten.
 
 ---
 
@@ -700,3 +700,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** el badge solo aparece cuando existe dificultad; no duplica el texto del enunciado; el resumen sigue siendo legible en móvil; se lee en ES/EN; no altera el orden ni el contador del repaso.
 
 **Entrega:** commit `mejora 49: dificultad por fallo en el repaso`.
+
+---
+
+## 50. Conservar los filtros al practicar una categoría desde resultados — ⬜ Pendiente
+
+**Área:** continuidad / `ResultsPage`.
+
+**Problema:** el atajo a una categoría del desglose construye el destino solo con categoría y modo. Si la partida era de Europa en difícil, la práctica pierde esos filtros y cambia las condiciones sin avisar.
+
+**Propuesta:** reutilizar los parámetros de configuración que ya conserva “Jugar de nuevo” (`continent`, `difficulty`, `isInsular`, `isLandlocked`, `countryCode`) al abrir la práctica de una categoría, manteniendo la categoría elegida como reemplazo de la anterior.
+
+**Aceptación:** la práctica conserva los filtros compatibles presentes en la URL; no arrastra la categoría anterior; sigue funcionando sin filtros; no cambia el destino de “Jugar de nuevo”; se cubre con tests.
+
+**Entrega:** commit `mejora 50: filtros al practicar una categoría`.

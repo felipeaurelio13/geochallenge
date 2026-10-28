@@ -63,6 +63,9 @@ vi.mock('react-i18next', () => ({
         'categories.flags': 'Banderas',
         'categories.capitals': 'Capitales',
         'categories.mixed': 'Mixto',
+        'game.difficulty.easy': 'Fácil',
+        'game.difficulty.medium': 'Medio',
+        'game.difficulty.hard': 'Difícil',
         'results.modeSingle': 'Un jugador',
         'results.modePractice': 'Práctica',
         'results.modeStreak': 'Racha',
@@ -167,6 +170,20 @@ describe('ResultsPage', () => {
   });
 
   it('muestra el modo y la categoría de la partida', () => {
+    render(<ResultsPage />);
+
+    expect(screen.getByText('Un jugador · Mixto')).toBeInTheDocument();
+  });
+
+  it('incluye la dificultad configurada en el resumen', () => {
+    mocks.search = 'difficulty=HARD';
+    render(<ResultsPage />);
+
+    expect(screen.getByText('Un jugador · Mixto · Difícil')).toBeInTheDocument();
+  });
+
+  it('omite una dificultad desconocida en el resumen', () => {
+    mocks.search = 'difficulty=EXTREME';
     render(<ResultsPage />);
 
     expect(screen.getByText('Un jugador · Mixto')).toBeInTheDocument();

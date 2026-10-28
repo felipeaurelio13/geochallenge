@@ -31,6 +31,10 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
         ? 'results.modeStreak'
         : 'results.modeSingle';
   const categoryLabelKey = CATEGORY_LABEL_KEYS[category as Category] ?? CATEGORY_LABEL_KEYS.MIXED;
+  const difficultyParam = searchParams.get('difficulty');
+  const difficultyLabel = difficultyParam === 'EASY' || difficultyParam === 'MEDIUM' || difficultyParam === 'HARD'
+    ? t(`game.difficulty.${difficultyParam.toLowerCase()}`)
+    : null;
   const { share: shareStreakImage, status: streakShareStatus } = useStreakShareImage();
   const [streakShareFeedback, setStreakShareFeedback] = useState('');
   const [allReviewOpen, setAllReviewOpen] = useState(false);
@@ -287,7 +291,7 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
             {isStreakMode ? t('results.streakHeadline', { count: correctAnswers }) : getPerformanceMessage()}
           </h1>
           <p className="mt-1 text-xs font-medium tracking-wide text-app-secondary">
-            {t(modeLabelKey)} · {t(categoryLabelKey)}
+            {t(modeLabelKey)} · {t(categoryLabelKey)}{difficultyLabel ? ` · ${difficultyLabel}` : ''}
           </p>
           <p className="mt-2 text-sm text-app-secondary">
             {isTrial ? t('results.trialNotice') : isPracticeMode ? t('results.practiceSubtitle')
