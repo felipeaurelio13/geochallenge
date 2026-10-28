@@ -55,6 +55,11 @@ vi.mock('react-i18next', () => ({
         'results.collapseAll': 'Contraer todo',
         'categories.flags': 'Banderas',
         'categories.capitals': 'Capitales',
+        'categories.mixed': 'Mixto',
+        'results.modeSingle': 'Un jugador',
+        'results.modePractice': 'Práctica',
+        'results.modeStreak': 'Racha',
+        'results.modeTrial': 'Partida de prueba',
         'results.yourRank': 'Tu posición',
         'results.playAgain': 'Jugar de nuevo',
         'results.viewRankings': 'Ver rankings',
@@ -132,6 +137,12 @@ describe('ResultsPage', () => {
     expect(screen.getByText('1,100')).toBeInTheDocument();
     expect(container.querySelectorAll('article.min-w-0').length).toBe(0);
     expect(screen.queryByText(/Tiempo medio por respuesta/)).not.toBeInTheDocument();
+  });
+
+  it('muestra el modo y la categoría de la partida', () => {
+    render(<ResultsPage />);
+
+    expect(screen.getByText('Un jugador · Mixto')).toBeInTheDocument();
   });
 
   it('lleva el foco al titular del resumen al entrar', async () => {

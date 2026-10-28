@@ -31,6 +31,14 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
   const isStreakMode = gameType === 'streak';
   const isPracticeMode = gameType === 'practice';
   const category = state.config?.category ?? searchParams.get('category') ?? 'MIXED';
+  const modeLabelKey = isTrial
+    ? 'results.modeTrial'
+    : isPracticeMode
+      ? 'results.modePractice'
+      : isStreakMode
+        ? 'results.modeStreak'
+        : 'results.modeSingle';
+  const categoryLabelKey = CATEGORY_LABEL_KEYS[category as Category] ?? CATEGORY_LABEL_KEYS.MIXED;
   const { share: shareStreakImage, status: streakShareStatus } = useStreakShareImage();
   const [streakShareFeedback, setStreakShareFeedback] = useState('');
   const [allReviewOpen, setAllReviewOpen] = useState(false);
@@ -217,6 +225,9 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
           <h1 ref={summaryHeadingRef} tabIndex={-1} className="mt-4 text-2xl font-semibold text-app-text outline-none sm:text-3xl">
             {isStreakMode ? t('results.streakHeadline', { count: correctAnswers }) : getPerformanceMessage()}
           </h1>
+          <p className="mt-1 text-xs font-medium tracking-wide text-app-secondary">
+            {t(modeLabelKey)} · {t(categoryLabelKey)}
+          </p>
           <p className="mt-2 text-sm text-app-secondary">
             {isTrial ? t('results.trialNotice') : isPracticeMode ? t('results.practiceSubtitle')
               : t(isStreakMode ? 'results.nextStreakGoal' : percentage === 100 ? 'results.perfectGoal' : 'results.nextGoal', {

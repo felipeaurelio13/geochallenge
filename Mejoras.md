@@ -381,7 +381,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 27. Identificar el modo y la categoría de la partida en resultados — ⬜ Pendiente
+## 27. Identificar el modo y la categoría de la partida en resultados — ✅ Desarrollada
 
 **Área:** orientación / `ResultsPage`.
 
@@ -391,7 +391,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** la etiqueta aparece en ES/EN; distingue partida normal, práctica y trial; no se muestra si falta configuración; no añade altura al bloque de acciones ni desplaza el CTA principal.
 
-**Entrega:** commit `mejora 27: contexto de la partida en resultados`.
+**Entrega:** commit `mejora 27: contexto de la partida en resultados`. La línea bajo el titular combina modo y categoría localizados y cubre single, práctica, racha y trial.
 
 ---
 
@@ -518,3 +518,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** el anuncio aparece solo tras usar el control; informa la acción y el total; se lee en ES/EN; no se dispara al abrir una fila individual; no altera el layout visible.
 
 **Entrega:** commit `mejora 36: anuncio de expandir todo el repaso`.
+
+---
+
+## 37. Incluir la dificultad de la partida en el resumen final — ⬜ Pendiente
+
+**Área:** orientación / `ResultsPage`.
+
+**Problema:** el resumen ya identifica modo y categoría, pero no la dificultad configurada. Un 60% en fácil y un 60% en difícil cuentan historias distintas, y el jugador no puede interpretar el resultado sin recordar la configuración.
+
+**Propuesta:** sumar la dificultad localizada a la línea de contexto cuando exista, reutilizando las etiquetas de dificultad y los parámetros actuales de la partida. Omitirla si no se configuró.
+
+**Aceptación:** la dificultad aparece en ES/EN; no se inventa cuando falta; no desplaza las métricas ni las acciones; se actualiza al repetir la partida con otro nivel.
+
+**Entrega:** commit `mejora 37: dificultad en el resumen final`.
