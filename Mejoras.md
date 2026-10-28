@@ -689,7 +689,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 49. Mostrar la dificultad de cada fallo en el repaso — ⬜ Pendiente
+## 49. Mostrar la dificultad de cada fallo en el repaso — ✅ Desarrollada
 
 **Área:** aprendizaje / `ResultsPage`.
 
@@ -699,7 +699,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** el badge solo aparece cuando existe dificultad; no duplica el texto del enunciado; el resumen sigue siendo legible en móvil; se lee en ES/EN; no altera el orden ni el contador del repaso.
 
-**Entrega:** commit `mejora 49: dificultad por fallo en el repaso`.
+**Entrega:** commit `mejora 49: dificultad por fallo en el repaso`. Cada resumen añade un badge con `game.difficulty.*` solo si la pregunta trae dificultad; no altera contador, orden ni filtros.
 
 ---
 
@@ -812,3 +812,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** el anuncio ocurre solo tras elegir un filtro; informa categoría y cantidad; se lee en ES/EN; no duplica el `aria-pressed` del chip; no interfiere con los anuncios de orden o expansión.
 
 **Entrega:** commit `mejora 57: anuncio del filtro del repaso`.
+
+---
+
+## 58. Incluir la dificultad en el texto copiado del repaso — ⬜ Pendiente
+
+**Área:** aprendizaje / `ResultsPage`.
+
+**Problema:** el repaso copiado identifica la categoría y las respuestas, pero no la dificultad que la interfaz ya muestra en cada fila. Al estudiar fuera de la app se pierde la señal de qué fallos eran de nivel alto.
+
+**Propuesta:** añadir la dificultad localizada a la línea de encabezado de cada fallo copiado cuando exista, reutilizando `game.difficulty.*` y el mismo criterio que el badge visible.
+
+**Aceptación:** la dificultad copiada coincide con la visible; se omite si falta; no duplica la categoría; se lee en ES/EN; no cambia el texto cuando no hay dificultad; el copiado sigue respetando filtro y orden.
+
+**Entrega:** commit `mejora 58: dificultad en el repaso copiado`.

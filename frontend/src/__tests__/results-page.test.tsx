@@ -568,6 +568,21 @@ describe('ResultsPage', () => {
     expect(screen.getAllByText('Capitales')).toHaveLength(2);
   });
 
+  it('muestra la dificultad de un fallo solo cuando la pregunta la trae', () => {
+    const originalQuestions = mocks.gameState.questions;
+    mocks.gameState.questions = originalQuestions.map((question, index) => (
+      index === 9 ? { ...question, difficulty: 'HARD' } : question
+    )) as typeof mocks.gameState.questions;
+
+    try {
+      render(<ResultsPage />);
+
+      expect(screen.getAllByText('Difícil')).toHaveLength(1);
+    } finally {
+      mocks.gameState.questions = originalQuestions;
+    }
+  });
+
   it('no revela la respuesta correcta en el resumen del repaso', () => {
     render(<ResultsPage />);
 

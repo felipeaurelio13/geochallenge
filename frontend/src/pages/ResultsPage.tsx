@@ -510,6 +510,11 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
                     <span className="ml-2 inline-block align-middle rounded-full border border-app-border bg-app-muted px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-app-secondary">
                       {t(CATEGORY_LABEL_KEYS[question.category])}
                     </span>
+                    {question.difficulty && (
+                      <span className="ml-1 inline-block align-middle rounded-full border border-app-border bg-app-surface px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-app-secondary">
+                        {t(`game.difficulty.${question.difficulty.toLowerCase()}`)}
+                      </span>
+                    )}
                   </summary>
                   <div className="mt-3 flex items-start gap-3 border-t border-app-border pt-3">
                     {question.imageUrl && (
