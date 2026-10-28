@@ -162,6 +162,7 @@ describe('GamePage ending flow', () => {
     ];
     mocks.gameState.currentIndex = 0;
     mocks.gameState.score = 100;
+    mocks.gameState.results = [{ isCorrect: true }];
     mocks.gameState.status = 'playing';
     mocks.submitAnswerMock.mockResolvedValue({ isCorrect: true });
   });
@@ -252,6 +253,21 @@ describe('GamePage ending flow', () => {
       expect(mocks.finishGameMock).toHaveBeenCalledTimes(1);
       expect(mocks.navigateMock).toHaveBeenCalledWith('/results?category=MIXED&gameType=single');
     });
+  });
+
+  it('muestra la racha clásica desde el segundo acierto y la oculta al fallar', () => {
+    mocks.gameState.results = [{ isCorrect: true }, { isCorrect: true }];
+    const { rerender } = render(<GamePage />);
+
+    const badge = screen.getByTestId('streak-combo');
+    expect(badge).toHaveTextContent('streak 2');
+    expect(badge.parentElement).toHaveClass('hidden');
+    expect(badge.parentElement).toHaveClass('sm:flex');
+
+    mocks.gameState.results = [{ isCorrect: true }, { isCorrect: true }, { isCorrect: false }];
+    rerender(<GamePage />);
+
+    expect(screen.queryByTestId('streak-combo')).not.toBeInTheDocument();
   });
 
   it('lleva el foco al enunciado y luego a la acción de la ronda', async () => {

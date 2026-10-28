@@ -148,6 +148,10 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
   const mechanicsRuntimeEnabled = mechanicsFeatureEnabled && Boolean(mechanicsConfig?.enabled);
   const mechanicsAllowed = new Set(mechanicsConfig?.allowed ?? []);
   const lastResult = results[results.length - 1] ?? null;
+  const currentStreak = results.reduce(
+    (streak, result) => (result.isCorrect ? streak + 1 : 0),
+    0
+  );
   const scoreBreakdownText = formatScoreBreakdown(getScoreBreakdownParts(lastResult, t));
   const roundResultHint = [
     streakGameOver ? (t('game.streakBroken', { count: results.filter((r) => r.isCorrect).length }) as string) : null,
@@ -636,6 +640,15 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
                   )}
                 </>
               )}
+              {!shouldUseStreakFlow && currentStreak >= 2 ? (
+                <div className="mt-1 hidden justify-center sm:flex">
+                  <StreakCombo
+                    combo={currentStreak}
+                    label={t('game.streak', 'Racha')}
+                    aria-label={t('game.streakLabel', { count: currentStreak, defaultValue: 'Racha actual: {{count}}' })}
+                  />
+                </div>
+              ) : null}
             </div>
 
             <div className="justify-self-end pr-[max(env(safe-area-inset-right),0.5rem)] sm:pr-[max(env(safe-area-inset-right),0.75rem)] md:pr-0">

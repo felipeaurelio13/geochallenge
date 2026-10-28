@@ -143,7 +143,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 10. Mostrar un indicador de racha en partida clásica — ⬜ Pendiente
+## 10. Mostrar un indicador de racha en partida clásica — ✅ Desarrollada
 
 **Área:** engagement / `GamePage`.
 
@@ -153,7 +153,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** el badge aparece desde el segundo acierto, se reinicia al fallar y no aparece en móvil si reduce el espacio de las alternativas.
 
-**Entrega:** commit `mejora 10: indicador de racha en clásico`.
+**Entrega:** commit `mejora 10: indicador de racha en clásico`. El badge reutiliza `StreakCombo`, aparece desde el segundo acierto consecutivo y solo se muestra desde `sm` para no quitar altura a las alternativas en móvil.
 
 ---
 
@@ -280,3 +280,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** atrás pide confirmación solo durante una partida activa; cancelar mantiene la ronda y el tiempo; confirmar sale y registra el abandono una sola vez.
 
 **Entrega:** commit `mejora 19: confirmación al abandonar con el botón atrás`.
+
+---
+
+## 20. Mostrar la categoría de cada fallo en el repaso — ⬜ Pendiente
+
+**Área:** aprendizaje / `ResultsPage`.
+
+**Problema:** el repaso de fallos muestra la pregunta y las respuestas, pero no el tipo de pregunta. En una partida mixta cuesta ver si los errores se concentran en banderas, capitales, mapas o siluetas, y la práctica posterior vuelve a ser a ciegas.
+
+**Propuesta:** añadir una etiqueta compacta con la categoría localizada en cada fila del repaso, reutilizando las etiquetas de categoría existentes. Mantenerla fuera del resumen si revela información de la respuesta.
+
+**Aceptación:** cada fallo muestra su categoría en ES/EN, no altera el orden ni el detalle desplegable y no aparece en partidas sin fallos.
+
+**Entrega:** commit `mejora 20: categoría en el repaso de fallos`.
