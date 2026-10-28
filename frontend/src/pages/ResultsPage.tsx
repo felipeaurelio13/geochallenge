@@ -82,6 +82,25 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
   const formattedAverageAnswerSeconds = averageAnswerSeconds === null
     ? null
     : averageAnswerSeconds.toLocaleString(currentLanguage, { maximumFractionDigits: 1 });
+  const slowestAnswer = useMemo(() => {
+    const timed = results.filter(
+      (result): result is typeof result & { elapsedSeconds: number } =>
+        typeof result.elapsedSeconds === 'number' &&
+        Number.isFinite(result.elapsedSeconds) &&
+        result.elapsedSeconds >= 0,
+    );
+    if (timed.length < 2) return null;
+    const slowest = timed.reduce((max, result) => (
+      result.elapsedSeconds > max.elapsedSeconds ? result : max
+    ));
+    const fastest = timed.reduce((min, result) => (
+      result.elapsedSeconds < min.elapsedSeconds ? result : min
+    ));
+    if (slowest.elapsedSeconds === fastest.elapsedSeconds) return null;
+    const question = questions.find((item) => item.id === slowest.questionId);
+    if (!question) return null;
+    return { question, seconds: slowest.elapsedSeconds };
+  }, [questions, results]);
   const weakestCategory = categoryStats.find((stat) => stat.accuracy < 100) ?? null;
   const unlockedAchievements = useMemo(
     () => (lastNewAchievements ?? []).map((key) => getAchievementDisplay(key, currentLanguage)),
@@ -237,6 +256,14 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
               <span className="font-semibold tabular-nums text-app-text">
                 {t('results.averageTimeValue', { seconds: formattedAverageAnswerSeconds })}
               </span>
+            </p>
+          )}
+          {slowestAnswer && (
+            <p className="mt-1 text-xs text-app-secondary">
+              {t('results.slowestQuestion', {
+                question: getLocalizedQuestionText(slowestAnswer.question, t, currentLanguage),
+                seconds: slowestAnswer.seconds.toLocaleString(currentLanguage, { maximumFractionDigits: 1 }),
+              })}
             </p>
           )}
         </section>

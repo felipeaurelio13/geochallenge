@@ -88,6 +88,14 @@ vi.mock('react-i18next', () => ({
         return `${options?.seconds} s`;
       }
 
+      if (key === 'results.slowestQuestion') {
+        return `Ronda más lenta: ${options?.question} (${options?.seconds} s)`;
+      }
+
+      if (key === 'game.questionCapital') {
+        return `¿Cuál es la capital de ${options?.country}?`;
+      }
+
       if (key === 'results.practiceWeakest') {
         return `Practicar ${options?.category}`;
       }
@@ -171,6 +179,46 @@ describe('ResultsPage', () => {
     } finally {
       mocks.gameState.results = originalResults;
     }
+  });
+
+  it('señala la ronda más lenta sin revelar la respuesta correcta', () => {
+    const originalResults = mocks.gameState.results;
+    mocks.gameState.results = originalResults.map((result, index) => ({
+      ...result,
+      elapsedSeconds: index < 5 ? 4 : index === 7 ? 9 : 8,
+    })) as typeof mocks.gameState.results;
+
+    try {
+      render(<ResultsPage />);
+
+      const slowest = screen.getByText(/Ronda más lenta:/);
+      expect(slowest).toHaveTextContent('¿Cuál es la capital de Chile? (9 s)');
+      expect(slowest.textContent).not.toContain('Santiago');
+    } finally {
+      mocks.gameState.results = originalResults;
+    }
+  });
+
+  it('oculta la ronda más lenta cuando todas comparten el mismo tiempo', () => {
+    const originalResults = mocks.gameState.results;
+    mocks.gameState.results = originalResults.map((result) => ({
+      ...result,
+      elapsedSeconds: 5,
+    })) as typeof mocks.gameState.results;
+
+    try {
+      render(<ResultsPage />);
+
+      expect(screen.queryByText(/Ronda más lenta:/)).not.toBeInTheDocument();
+    } finally {
+      mocks.gameState.results = originalResults;
+    }
+  });
+
+  it('oculta la ronda más lenta cuando la sesión no trae tiempos', () => {
+    render(<ResultsPage />);
+
+    expect(screen.queryByText(/Ronda más lenta:/)).not.toBeInTheDocument();
   });
 
   it.each(['single', 'streak', 'practice'] as const)('replays %s with the same configuration', async (gameType) => {

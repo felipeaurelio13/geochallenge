@@ -524,6 +524,7 @@
     "accuracy": "Accuracy",
     "averageTime": "Average time per answer",
     "averageTimeValue": "{{seconds}}s",
+    "slowestQuestion": "Slowest round: {{question}} ({{seconds}}s)",
     "modeSingle": "Single player",
     "modePractice": "Practice",
     "modeStreak": "Streak",

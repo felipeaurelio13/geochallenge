@@ -437,7 +437,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 31. Señalar la pregunta más lenta de la partida — ⬜ Pendiente
+## 31. Señalar la pregunta más lenta de la partida — ✅ Desarrollada
 
 **Área:** aprendizaje / `ResultsPage`.
 
@@ -447,7 +447,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** la ronda señalada es la de mayor tiempo real; el texto se lee en ES/EN; no revela la respuesta correcta; no aparece en sesiones sin datos de tiempo.
 
-**Entrega:** commit `mejora 31: pregunta más lenta de la partida`.
+**Entrega:** commit `mejora 31: pregunta más lenta de la partida`. Bajo el tiempo medio aparece el enunciado localizado y los segundos de la ronda con mayor tiempo; se omite sin datos o cuando todas las rondas comparten el mismo valor.
 
 ---
 
@@ -616,3 +616,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** los filtros solo muestran categorías con fallos; el contador del encabezado refleja el filtro activo; no se pierde el estado de expansión; funciona con teclado y en ES/EN; no aparece con una sola categoría.
 
 **Entrega:** commit `mejora 43: filtros de categoría en el repaso`.
+
+---
+
+## 44. Resumir el tiempo total dedicado a la partida — ⬜ Pendiente
+
+**Área:** aprendizaje / `ResultsPage`.
+
+**Problema:** el tiempo medio y la ronda más lenta describen el ritmo, pero no cuánto duró realmente la partida. Un jugador que quiere comparar sesiones o controlar su ritmo no tiene una cifra total a la vista.
+
+**Propuesta:** sumar los tiempos registrados y mostrar el total junto a las métricas de tiempo, en formato compacto de minutos y segundos. Ocultarlo cuando no haya tiempos y no duplicar la información del repaso.
+
+**Aceptación:** el total es la suma de los tiempos finitos registrados; se lee en ES/EN; se omite sin datos; no desplaza el CTA principal ni el desglose de puntos; no cambia el repaso.
+
+**Entrega:** commit `mejora 44: tiempo total de la partida`.
