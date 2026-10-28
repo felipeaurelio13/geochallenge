@@ -433,6 +433,7 @@
     "correct": "¡Correcto!",
     "incorrect": "Incorrecto",
     "yourAnswer": "Tu respuesta",
+    "correctLocation": "Lugar correcto",
     "itWas": "Era {{answer}}",
     "validating": "Validando…",
     "submitError": "No pudimos guardar tu respuesta. Revisa tu conexión e inténtalo de nuevo.",

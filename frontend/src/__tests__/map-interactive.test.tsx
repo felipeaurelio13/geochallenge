@@ -79,6 +79,41 @@ describe('MapInteractive neutral viewport reset', () => {
   });
 });
 
+describe('MapInteractive result legend', () => {
+  function renderResultMap(overrides: Partial<ComponentProps<typeof MapInteractive>> = {}) {
+    return render(
+      <MapInteractive
+        onLocationSelect={() => {}}
+        selectedLocation={{ lat: -33.45, lng: -70.66 }}
+        correctLocation={{ lat: 40.71, lng: -74.0 }}
+        showResult
+        disabled
+        questionId="q-map"
+        {...overrides}
+      />
+    );
+  }
+
+  it('does not reveal the marker legend before confirming the answer', () => {
+    renderResultMap({ showResult: false });
+    expect(screen.queryByTestId('map-legend')).not.toBeInTheDocument();
+  });
+
+  it('labels the selected and correct markers once the result is shown', () => {
+    renderResultMap();
+    const legend = screen.getByTestId('map-legend');
+
+    expect(legend).toHaveTextContent('game.yourAnswer');
+    expect(legend).toHaveTextContent('game.correctLocation');
+    expect(legend).toHaveClass('pointer-events-none');
+  });
+
+  it('omits the legend when there is no reference location to compare', () => {
+    renderResultMap({ correctLocation: null });
+    expect(screen.queryByTestId('map-legend')).not.toBeInTheDocument();
+  });
+});
+
 describe('MapInteractive keyboard support (a11y phase 2)', () => {
   beforeEach(() => {
     vi.clearAllMocks();

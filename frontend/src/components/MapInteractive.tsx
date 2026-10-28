@@ -288,6 +288,22 @@ export function MapInteractive({
           )}
         </MapContainer>
 
+        {showResult && selectedLocation && correctLocation && (
+          <div
+            data-testid="map-legend"
+            className="pointer-events-none absolute bottom-3 left-3 z-[1000] flex flex-col gap-1 rounded-lg bg-app-card/95 px-3 py-2 text-xs font-medium text-app-text shadow-md shadow-black/20"
+          >
+            <span className="flex items-center gap-2">
+              <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-[#2563EB]" />
+              {t('game.yourAnswer')}
+            </span>
+            <span className="flex items-center gap-2">
+              <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-[#16a34a]" />
+              {t('game.correctLocation')}
+            </span>
+          </div>
+        )}
+
         {/* Subtle crosshair at the exact viewport center — useful for every
             user as a "here's where Enter/Space will drop the pin" reference,
             not just keyboard users (common map-picker UX). */}

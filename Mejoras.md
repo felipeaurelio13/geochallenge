@@ -199,7 +199,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 14. Identificar en el mapa cuál pin es tu respuesta y cuál la correcta — ⬜ Pendiente
+## 14. Identificar en el mapa cuál pin es tu respuesta y cuál la correcta — ✅ Desarrollada
 
 **Área:** claridad / `MapInteractive`.
 
@@ -209,7 +209,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** la leyenda no intercepta clics, se lee en ES/EN y no aparece antes de confirmar.
 
-**Entrega:** commit `mejora 14: leyenda de marcadores del mapa`.
+**Entrega:** commit `mejora 14: leyenda de marcadores del mapa`. La leyenda aparece solo con el resultado y ambos puntos, usa los mismos colores de los pines y no intercepta clics (`pointer-events-none`).
 
 ---
 
@@ -336,3 +336,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** el título muestra “Pregunta X de Y · GeoChallenge” en ES/EN, se actualiza al avanzar, no se queda pegado en resultados y no rompe el título base en otras rutas.
 
 **Entrega:** commit `mejora 23: progreso en el título de la pestaña`.
+
+---
+
+## 24. Ofrecer practicar la categoría más floja desde resultados — ⬜ Pendiente
+
+**Área:** aprendizaje / `ResultsPage`.
+
+**Problema:** el desglose por categoría muestra dónde falla el jugador, pero no ofrece una acción directa. Para practicar esa debilidad hay que volver al menú, elegir la categoría y configurar otra partida.
+
+**Propuesta:** añadir un atajo junto al desglose que abra una partida de práctica con la categoría con menor precisión, reutilizando la ruta y los parámetros de práctica existentes.
+
+**Aceptación:** el atajo solo aparece con al menos dos categorías y una precisión menor al 100%; conserva la categoría elegida al reiniciar; funciona en ES/EN y no desplaza las acciones principales.
+
+**Entrega:** commit `mejora 24: practicar la categoría más floja`.
