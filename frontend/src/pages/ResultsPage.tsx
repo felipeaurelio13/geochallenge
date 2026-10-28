@@ -33,6 +33,8 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
   const category = state.config?.category ?? searchParams.get('category') ?? 'MIXED';
   const { share: shareStreakImage, status: streakShareStatus } = useStreakShareImage();
   const [streakShareFeedback, setStreakShareFeedback] = useState('');
+  const [allReviewOpen, setAllReviewOpen] = useState(false);
+  const reviewListRef = useRef<HTMLDivElement>(null);
   const feedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prefersReducedMotion = useUiStore((s) => s.prefersReducedMotion);
   const hasToastedAchievements = useRef(false);
@@ -161,6 +163,14 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
     feedbackTimer.current = setTimeout(() => setStreakShareFeedback(''), 3000);
   }, [shareStreakImage, correctAnswers, category, score, t, currentLanguage]);
 
+  const toggleAllReview = () => {
+    const next = !allReviewOpen;
+    reviewListRef.current?.querySelectorAll('details').forEach((details) => {
+      (details as HTMLDetailsElement).open = next;
+    });
+    setAllReviewOpen(next);
+  };
+
   const handlePracticeWeakestCategory = () => {
     if (!weakestCategory) return;
     const destination = `/game/single?category=${weakestCategory.category}&gameType=single`;
@@ -270,9 +280,20 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
 
         {mistakes.length > 0 && (
           <section className="mt-6 border-t border-app-border pt-5" aria-labelledby="review-title">
-            <h2 id="review-title" className="text-lg font-semibold text-app-text">{t('results.reviewTitle')}</h2>
+            <div className="flex items-start justify-between gap-3">
+              <h2 id="review-title" className="text-lg font-semibold text-app-text">{t('results.reviewTitle')}</h2>
+              {mistakes.length >= 2 && (
+                <button
+                  type="button"
+                  onClick={toggleAllReview}
+                  className="mt-0.5 min-h-11 shrink-0 rounded-md px-2 text-sm font-medium text-primary hover:text-primary/80"
+                >
+                  {t(allReviewOpen ? 'results.collapseAll' : 'results.expandAll')}
+                </button>
+              )}
+            </div>
             <p className="mt-1 text-sm text-app-secondary">{t('results.reviewDescription')}</p>
-            <div className="mt-4 space-y-2">
+            <div ref={reviewListRef} className="mt-4 space-y-2">
               {mistakes.map(({ result, question, number }) => {
                 const funFact = generateFunFact(
                   question,

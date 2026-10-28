@@ -499,6 +499,8 @@
     "bestRun": "Mejor racha",
     "reviewTitle": "Llévate estas respuestas",
     "reviewDescription": "Revisa las preguntas que fallaste antes de volver a jugar.",
+    "expandAll": "Expandir todo",
+    "collapseAll": "Contraer todo",
     "funFactLabel": "Dato curioso",
     "yourAnswer": "Tu respuesta",
     "noAnswer": "Sin respuesta",

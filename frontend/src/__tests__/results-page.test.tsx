@@ -51,6 +51,8 @@ vi.mock('react-i18next', () => ({
         'results.categoryAccuracyTitle': 'Precisión por categoría',
         'results.categoryAccuracyDescription': 'Así se reparten tus aciertos por tipo de pregunta.',
         'results.funFactLabel': 'Dato curioso',
+        'results.expandAll': 'Expandir todo',
+        'results.collapseAll': 'Contraer todo',
         'categories.flags': 'Banderas',
         'categories.capitals': 'Capitales',
         'results.yourRank': 'Tu posición',
@@ -181,6 +183,22 @@ describe('ResultsPage', () => {
     expect(document.querySelectorAll('details')).toHaveLength(2);
     expect(screen.getAllByText('Lima')).toHaveLength(2);
     expect(screen.getAllByText('Santiago')).toHaveLength(2);
+  });
+
+  it('expande y contrae todos los fallos del repaso', () => {
+    render(<ResultsPage />);
+
+    const section = screen.getByRole('heading', { name: 'results.reviewTitle' }).closest('section')!;
+    const rows = Array.from(section.querySelectorAll('details'));
+
+    expect(rows).toHaveLength(2);
+    expect(rows.every((row) => !row.open)).toBe(true);
+
+    fireEvent.click(within(section).getByRole('button', { name: 'Expandir todo' }));
+    expect(rows.every((row) => row.open)).toBe(true);
+
+    fireEvent.click(within(section).getByRole('button', { name: 'Contraer todo' }));
+    expect(rows.every((row) => !row.open)).toBe(true);
   });
 
   it('incluye el dato curioso en el detalle de un fallo', () => {

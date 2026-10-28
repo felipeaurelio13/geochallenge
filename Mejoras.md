@@ -367,7 +367,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 26. Expandir o contraer todo el repaso con un solo control — ⬜ Pendiente
+## 26. Expandir o contraer todo el repaso con un solo control — ✅ Desarrollada
 
 **Área:** aprendizaje / `ResultsPage`.
 
@@ -377,7 +377,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** el control aparece solo con dos o más fallos; alterna todas las filas; se anuncia en ES/EN; funciona con teclado y no mueve el foco fuera del control al usarlo.
 
-**Entrega:** commit `mejora 26: expandir todo el repaso`.
+**Entrega:** commit `mejora 26: expandir todo el repaso`. El control aparece con dos o más fallos, alterna todas las filas y mantiene el estado por fila cuando se abre un detalle manualmente.
 
 ---
 
@@ -504,3 +504,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** el orden original sigue siendo el inicial; el control se anuncia en ES/EN; los fallos sin tiempo no se mezclan con los que sí lo tienen; no se pierde el estado del control al abrir un detalle.
 
 **Entrega:** commit `mejora 35: ordenar el repaso por tiempo`.
+
+---
+
+## 36. Anunciar el efecto de expandir o contraer todo el repaso — ⬜ Pendiente
+
+**Área:** accesibilidad / `ResultsPage`.
+
+**Problema:** el control cambia varias filas a la vez, pero un usuario de lector de pantalla no recibe confirmación del cambio: el foco sigue en el botón y no sabe cuántos detalles se abrieron o cerraron.
+
+**Propuesta:** añadir una región `aria-live="polite"` que anuncie la acción realizada y el número de respuestas afectadas, sin mover el foco ni repetir el contenido de los detalles.
+
+**Aceptación:** el anuncio aparece solo tras usar el control; informa la acción y el total; se lee en ES/EN; no se dispara al abrir una fila individual; no altera el layout visible.
+
+**Entrega:** commit `mejora 36: anuncio de expandir todo el repaso`.
