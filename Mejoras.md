@@ -899,7 +899,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 64. Cerrar la pista del mapa con Escape — ⬜ Pendiente
+## 64. Cerrar la pista del mapa con Escape — ✅ Desarrollada
 
 **Área:** accesibilidad / `MapInteractive`.
 
@@ -909,7 +909,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** Escape cierra la pista visible; no afecta al mapa ni a la selección; no se dispara tras cerrarla; funciona igual en todos los modos con mapa; se cubre con test de teclado.
 
-**Entrega:** commit `mejora 64: cerrar la pista del mapa con Escape`.
+**Entrega:** commit `mejora 64: cerrar la pista del mapa con Escape`. Escape cierra la pista tanto desde su botón como desde el mapa, devuelve el foco al mapa y no hace nada cuando la pista ya está cerrada.
 
 ---
 
@@ -1022,3 +1022,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** el control solo aparece tras cerrar la pista; al pulsarlo vuelve a mostrarse; no tapa el mapa ni el resultado; se puede usar con teclado; se lee en ES/EN; no afecta a la selección táctil.
 
 **Entrega:** commit `mejora 72: reabrir la pista del mapa`.
+
+---
+
+## 73. Indicar en la pista que se cierra con Escape — ⬜ Pendiente
+
+**Área:** usabilidad / `MapInteractive`.
+
+**Problema:** la pista ya se puede cerrar con Escape, pero el texto solo menciona flechas, zoom y Enter. Quien usa teclado no descubre el atajo y sigue tabulando hasta la “×”.
+
+**Propuesta:** añadir una nota breve y localizada al texto de la pista, por ejemplo “Esc para cerrar”, sin alargar el bloque en móvil ni repetir el botón visible.
+
+**Aceptación:** la pista menciona Escape en ES/EN; el texto sigue siendo legible en móvil; no cambia el comportamiento del cierre; no afecta al lector de pantalla; se cubre con test de contenido.
+
+**Entrega:** commit `mejora 73: atajo Escape en la pista del mapa`.

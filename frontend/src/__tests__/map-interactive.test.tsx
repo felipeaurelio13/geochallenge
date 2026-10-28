@@ -96,6 +96,27 @@ describe('MapInteractive neutral viewport reset', () => {
     expect(surface).toHaveFocus();
   });
 
+  it('cierra la pista de teclado con Escape y devuelve el foco al mapa', () => {
+    render(
+      <MapInteractive
+        onLocationSelect={() => {}}
+        selectedLocation={null}
+        correctLocation={null}
+        showResult={false}
+        disabled={false}
+        questionId="q-map"
+        showKeyboardHint
+      />
+    );
+
+    const close = screen.getByRole('button', { name: 'common.close' });
+    close.focus();
+    fireEvent.keyDown(close, { key: 'Escape' });
+
+    expect(screen.queryByTestId('map-keyboard-hint')).not.toBeInTheDocument();
+    expect(document.querySelector('.map-surface')).toHaveFocus();
+  });
+
   it('oculta la pista de teclado cuando ya se muestra el resultado', () => {
     render(
       <MapInteractive

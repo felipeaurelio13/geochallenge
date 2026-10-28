@@ -158,10 +158,10 @@ export function MapInteractive({
   const showHint = showKeyboardHint && !showResult && !hintDismissed;
   const mapSurfaceRef = useRef<HTMLDivElement>(null);
 
-  const dismissHint = () => {
+  const dismissHint = useCallback(() => {
     setHintDismissed(true);
     mapSurfaceRef.current?.focus({ preventScroll: true });
-  };
+  }, []);
 
   const calculateDistance = useCallback(() => {
     if (!selectedLocation || !correctLocation) return null;
@@ -220,11 +220,17 @@ export function MapInteractive({
             onLocationSelect(center.lat, center.lng);
           }
           break;
+        case 'Escape':
+          if (showHint) {
+            e.preventDefault();
+            dismissHint();
+          }
+          break;
         default:
           break;
       }
     },
-    [disabled, onLocationSelect, showResult]
+    [disabled, onLocationSelect, showResult, showHint, dismissHint]
   );
 
   return (
@@ -238,6 +244,12 @@ export function MapInteractive({
         <div
           data-testid="map-keyboard-hint"
           className="mb-2 flex items-start gap-2 rounded-md border border-app-border bg-app-surface px-3 py-2 text-xs text-app-secondary"
+          onKeyDown={(event) => {
+            if (event.key === 'Escape') {
+              event.preventDefault();
+              dismissHint();
+            }
+          }}
         >
           <p className="min-w-0 flex-1">{t('map.keyboardInstructions')}</p>
           <button
