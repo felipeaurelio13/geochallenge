@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents, Circle, useMap } from 'react-leaflet';
 import type { Map as LeafletMap } from 'leaflet';
 import { DivIcon, latLngBounds } from 'leaflet';
@@ -29,6 +29,7 @@ interface MapInteractiveProps {
   showResult: boolean;
   disabled: boolean;
   questionId?: string;
+  showKeyboardHint?: boolean;
 }
 
 const MAP_DEFAULT_VIEW = {
@@ -150,8 +151,11 @@ export function MapInteractive({
   showResult,
   disabled,
   questionId,
+  showKeyboardHint = false,
 }: MapInteractiveProps) {
   const { t } = useTranslation();
+  const [hintDismissed, setHintDismissed] = useState(false);
+  const showHint = showKeyboardHint && !showResult && !hintDismissed;
 
   const calculateDistance = useCallback(() => {
     if (!selectedLocation || !correctLocation) return null;
@@ -224,6 +228,22 @@ export function MapInteractive({
     // 3 design audit). Ahora el mapa fluye: min razonable, max = 100% del flex
     // container disponible.
     <div className="relative flex h-full min-h-0 flex-col">
+      {showHint && (
+        <div
+          data-testid="map-keyboard-hint"
+          className="mb-2 flex items-start gap-2 rounded-md border border-app-border bg-app-surface px-3 py-2 text-xs text-app-secondary"
+        >
+          <p className="min-w-0 flex-1">{t('map.keyboardInstructions')}</p>
+          <button
+            type="button"
+            onClick={() => setHintDismissed(true)}
+            aria-label={t('common.close')}
+            className="-my-2 flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-md text-base text-app-secondary hover:bg-app-muted hover:text-app-text"
+          >
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+      )}
       <p id="map-keyboard-instructions" className="sr-only">
         {t('map.keyboardInstructions')}
       </p>

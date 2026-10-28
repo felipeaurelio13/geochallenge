@@ -152,6 +152,9 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
   const mechanicsAllowed = new Set(mechanicsConfig?.allowed ?? []);
   const lastResult = results[results.length - 1] ?? null;
   const answeredCount = results.length;
+  const hasAnsweredMapQuestion = results.some((result) =>
+    questions.some((question) => question.id === result.questionId && question.category === 'MAP')
+  );
   const exitConfirmation = answeredCount > 0
     ? t('game.confirmExitProgress', { answered: answeredCount, total: questions.length })
     : t('game.confirmExitEmpty');
@@ -794,6 +797,7 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
             }
             showResult={showResult}
             disabled={showResult}
+            showKeyboardHint={isMapQuestion && !hasAnsweredMapQuestion}
           />
         </Suspense>
       }

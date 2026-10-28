@@ -591,7 +591,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 42. Mostrar una pista visible de los controles del mapa — ⬜ Pendiente
+## 42. Mostrar una pista visible de los controles del mapa — ✅ Desarrollada
 
 **Área:** accesibilidad / `MapInteractive`.
 
@@ -601,7 +601,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** la pista no tapa el mapa ni el crosshair; no aparece en preguntas que no son de mapa; se puede cerrar o ignora en móvil táctil; se lee en ES/EN; no intercepta clics.
 
-**Entrega:** commit `mejora 42: pista visible de controles del mapa`.
+**Entrega:** commit `mejora 42: pista visible de controles del mapa`. La partida individual muestra la pista sobre el mapa en su primera ronda de mapa, con botón de cierre y sin solaparlo; se oculta al mostrar el resultado.
 
 ---
 
@@ -756,3 +756,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** el número coincide con la posición real de la ronda; el texto sigue sin revelar la respuesta correcta; se lee en ES/EN; no cambia cuando la ronda más lenta no se muestra; no afecta al repaso.
 
 **Entrega:** commit `mejora 53: número de la ronda más lenta`.
+
+---
+
+## 54. Llevar la pista de controles del mapa a duelos y retos — ⬜ Pendiente
+
+**Área:** accesibilidad / `DuelPage`, `GeoChallengesPage`, `SurvivalPage`.
+
+**Problema:** la pista visible de controles del mapa solo se activa en la partida individual. En duelos, GeoRetos y supervivencia el mapa sigue dependiendo de instrucciones solo accesibles o del descubrimiento casual del teclado.
+
+**Propuesta:** reutilizar `showKeyboardHint` en las demás pantallas con mapa, mostrándola en la primera ronda de mapa de cada partida y descartándola tras el primer uso o cierre. Mantener el comportamiento táctil sin cambios.
+
+**Aceptación:** la pista aparece una sola vez por partida con mapa; no se muestra en rondas sin mapa ni tras el resultado; no tapa el mapa; se puede cerrar con teclado; funciona en ES/EN en los tres modos.
+
+**Entrega:** commit `mejora 54: pista del mapa en duelos y retos`.

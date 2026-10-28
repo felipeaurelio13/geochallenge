@@ -60,6 +60,54 @@ describe('MapInteractive neutral viewport reset', () => {
     expect(screen.getByTestId('map-result-circle')).toHaveAttribute('data-radius', '500000');
   });
 
+  it('muestra una pista de teclado descartable solo cuando se solicita', () => {
+    const { rerender } = render(
+      <MapInteractive
+        onLocationSelect={() => {}}
+        selectedLocation={null}
+        correctLocation={null}
+        showResult={false}
+        disabled={false}
+        questionId="q-map"
+      />
+    );
+
+    expect(screen.queryByTestId('map-keyboard-hint')).not.toBeInTheDocument();
+
+    rerender(
+      <MapInteractive
+        onLocationSelect={() => {}}
+        selectedLocation={null}
+        correctLocation={null}
+        showResult={false}
+        disabled={false}
+        questionId="q-map"
+        showKeyboardHint
+      />
+    );
+
+    expect(screen.getByTestId('map-keyboard-hint')).toHaveTextContent('map.keyboardInstructions');
+
+    fireEvent.click(screen.getByRole('button', { name: 'common.close' }));
+    expect(screen.queryByTestId('map-keyboard-hint')).not.toBeInTheDocument();
+  });
+
+  it('oculta la pista de teclado cuando ya se muestra el resultado', () => {
+    render(
+      <MapInteractive
+        onLocationSelect={() => {}}
+        selectedLocation={{ lat: -33.45, lng: -70.66 }}
+        correctLocation={{ lat: 40.71, lng: -74.0 }}
+        showResult
+        disabled
+        questionId="q-map"
+        showKeyboardHint
+      />
+    );
+
+    expect(screen.queryByTestId('map-keyboard-hint')).not.toBeInTheDocument();
+  });
+
   it('renders map inside rounded surface container without overflow', () => {
     const { container } = render(
       <MapInteractive
