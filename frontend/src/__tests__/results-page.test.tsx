@@ -49,6 +49,7 @@ vi.mock('react-i18next', () => ({
         'results.averageTime': 'Tiempo medio por respuesta',
         'results.categoryAccuracyTitle': 'Precisión por categoría',
         'results.categoryAccuracyDescription': 'Así se reparten tus aciertos por tipo de pregunta.',
+        'results.funFactLabel': 'Dato curioso',
         'categories.flags': 'Banderas',
         'categories.capitals': 'Capitales',
         'results.yourRank': 'Tu posición',
@@ -166,6 +167,34 @@ describe('ResultsPage', () => {
     expect(document.querySelectorAll('details')).toHaveLength(2);
     expect(screen.getAllByText('Lima')).toHaveLength(2);
     expect(screen.getAllByText('Santiago')).toHaveLength(2);
+  });
+
+  it('incluye el dato curioso en el detalle de un fallo', () => {
+    const originalQuestions = mocks.gameState.questions;
+    const originalResults = mocks.gameState.results;
+    mocks.gameState.questions = [
+      {
+        id: 'q1',
+        category: 'CAPITAL',
+        questionData: 'Chile',
+        continent: 'South America',
+        questionText: 'Capital',
+        options: [],
+      },
+    ] as unknown as typeof mocks.gameState.questions;
+    mocks.gameState.results = [
+      { questionId: 'q1', isCorrect: false, correctAnswer: 'Santiago', userAnswer: 'Lima' },
+    ] as typeof mocks.gameState.results;
+
+    try {
+      render(<ResultsPage />);
+
+      expect(screen.getByText('Dato curioso')).toBeInTheDocument();
+      expect(screen.getByText('Chile se encuentra en América del Sur.')).toBeInTheDocument();
+    } finally {
+      mocks.gameState.questions = originalQuestions;
+      mocks.gameState.results = originalResults;
+    }
   });
 
   it('muestra la categoría en cada fallo del repaso', () => {

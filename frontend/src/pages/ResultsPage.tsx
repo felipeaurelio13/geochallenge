@@ -9,6 +9,7 @@ import { useStreakShareImage } from '../hooks/useStreakShareImage';
 import { uiStoreActions, useUiStore } from '../store/useUiStore';
 import { getAchievementDisplay } from '../utils/achievements';
 import { getLocalizedQuestionText } from '../utils/questionText';
+import { generateFunFact } from '../utils/funFacts';
 import { trackUxEvent } from '../utils/uxTelemetry';
 import type { Category } from '../types';
 
@@ -244,7 +245,13 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
             <h2 id="review-title" className="text-lg font-semibold text-app-text">{t('results.reviewTitle')}</h2>
             <p className="mt-1 text-sm text-app-secondary">{t('results.reviewDescription')}</p>
             <div className="mt-4 space-y-2">
-              {mistakes.map(({ result, question, number }) => (
+              {mistakes.map(({ result, question, number }) => {
+                const funFact = generateFunFact(
+                  question,
+                  currentLanguage === 'en' ? 'en' : 'es',
+                  result.correctAnswer,
+                );
+                return (
                 <details key={result.questionId} className="rounded-lg border border-app-border bg-app-surface p-3">
                   <summary className="min-h-11 cursor-pointer text-sm font-medium text-app-text">
                     {number}. {getLocalizedQuestionText(question, t, currentLanguage)}
@@ -259,10 +266,17 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
                     <dl className="min-w-0 space-y-2 break-words text-sm">
                       <div><dt className="text-app-secondary">{t('results.yourAnswer')}</dt><dd className="text-app-text">{question.category === 'MAP' && result.distance != null ? t('results.mapDistance', { distance: Math.round(result.distance).toLocaleString(currentLanguage) }) : result.userAnswer || t('results.noAnswer')}</dd></div>
                       <div><dt className="text-app-secondary">{t('game.correctAnswerWas')}</dt><dd className="font-semibold text-success">{result.correctAnswer}</dd></div>
+                      {funFact && (
+                        <div>
+                          <dt className="text-app-secondary">{t('results.funFactLabel')}</dt>
+                          <dd className="text-app-text">{funFact}</dd>
+                        </div>
+                      )}
                     </dl>
                   </div>
                 </details>
-              ))}
+                );
+              })}
             </div>
             {!isTrial && !isPracticeMode && (
               <Button variant="secondary" fullWidth className="mt-3" onClick={() => { resetGame(); navigate('/game/single?gameType=practice'); }}>

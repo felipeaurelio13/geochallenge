@@ -297,7 +297,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 21. Incluir el dato curioso en el repaso de fallos — ⬜ Pendiente
+## 21. Incluir el dato curioso en el repaso de fallos — ✅ Desarrollada
 
 **Área:** aprendizaje / `ResultsPage`.
 
@@ -307,7 +307,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** cada fallo con dato disponible lo muestra en ES/EN; los fallos sin dato no dejan un hueco vacío; no se revela nada con la fila cerrada.
 
-**Entrega:** commit `mejora 21: dato curioso en el repaso de fallos`.
+**Entrega:** commit `mejora 21: dato curioso en el repaso de fallos`. El dato se calcula con la misma utilidad de la ronda y se muestra dentro del detalle, después de la respuesta correcta; si no hay contexto disponible, no deja un hueco.
 
 ---
 
@@ -434,3 +434,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** el encabezado anuncia el total correcto en ES/EN; se actualiza si cambia el número de fallos; no aparece cuando no hay fallos; no duplica el número en cada fila.
 
 **Entrega:** commit `mejora 30: total de fallos en el repaso`.
+
+---
+
+## 31. Señalar la pregunta más lenta de la partida — ⬜ Pendiente
+
+**Área:** aprendizaje / `ResultsPage`.
+
+**Problema:** el tiempo medio indica el ritmo global, pero no qué ronda concentró la duda. Una sola pregunta muy lenta puede explicar la pérdida de bonus y no se distingue del resto.
+
+**Propuesta:** identificar la respuesta con mayor tiempo registrado y mostrarla junto al tiempo medio, con el enunciado localizado y los segundos dedicados. Ocultarla cuando no hay tiempos o cuando todas las rondas comparten el mismo valor.
+
+**Aceptación:** la ronda señalada es la de mayor tiempo real; el texto se lee en ES/EN; no revela la respuesta correcta; no aparece en sesiones sin datos de tiempo.
+
+**Entrega:** commit `mejora 31: pregunta más lenta de la partida`.
