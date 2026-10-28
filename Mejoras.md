@@ -563,7 +563,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 40. Incluir la dificultad en el anuncio accesible de la pregunta — ⬜ Pendiente
+## 40. Incluir la dificultad en el anuncio accesible de la pregunta — ✅ Desarrollada
 
 **Área:** accesibilidad / `QuestionCard`.
 
@@ -573,4 +573,18 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** el anuncio incluye la dificultad cuando existe; se omite si falta; no cambia el layout; se lee en ES/EN y no repite la etiqueta visual como texto suelto.
 
-**Entrega:** commit `mejora 40: dificultad en el anuncio accesible`.
+**Entrega:** commit `mejora 40: dificultad en el anuncio accesible`. La dificultad se suma al `sr-only` solo si existe y se mantiene el badge visual sin cambios.
+
+---
+
+## 41. Evitar que la dificultad se anuncie dos veces con lector de pantalla — ⬜ Pendiente
+
+**Área:** accesibilidad / `QuestionCard`.
+
+**Problema:** la dificultad ya se anuncia dentro del encabezado enfocable, pero el badge visual sigue expuesto como texto suelto en el árbol accesible. Al recorrer la tarjeta, un lector de pantalla puede leerla otra vez sin contexto.
+
+**Propuesta:** marcar los badges visuales de dificultad como `aria-hidden="true"` cuando su información ya está incluida en el anuncio del encabezado, sin ocultarlos visualmente ni afectar a las pruebas de layout.
+
+**Aceptación:** la dificultad se escucha una sola vez al enfocar el enunciado; el badge sigue visible; no se oculta ninguna información que no esté ya anunciada; funciona en todas las categorías con badge.
+
+**Entrega:** commit `mejora 41: badge de dificultad sin duplicado accesible`.

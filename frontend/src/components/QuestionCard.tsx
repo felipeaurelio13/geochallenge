@@ -227,6 +227,9 @@ export function QuestionCard({
             <span className="sr-only">
               {t('game.questionOf', { current: questionNumber, total: totalQuestions })}.{' '}
               {t('game.categoryAnnouncement', { category: t(CATEGORY_LABEL_KEYS[question.category]) })}.{' '}
+              {question.difficulty
+                ? `${t('game.difficultyAnnouncement', { difficulty: t(getDifficultyKey()) })}. `
+                : null}
             </span>
             {getQuestionText()}
           </h2>

@@ -410,6 +410,7 @@
     "streakLabel": "Racha actual: {{count}}",
     "questionOf": "Pregunta {{current}} de {{total}}",
     "categoryAnnouncement": "Categoría: {{category}}",
+    "difficultyAnnouncement": "Dificultad: {{difficulty}}",
     "tabProgress": "Pregunta {{current}} de {{total}}",
     "lastQuestion": "Última pregunta",
     "questionFlag": "¿A qué país pertenece esta bandera?",
