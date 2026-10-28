@@ -88,8 +88,12 @@ describe('MapInteractive neutral viewport reset', () => {
 
     expect(screen.getByTestId('map-keyboard-hint')).toHaveTextContent('map.keyboardInstructions');
 
+    const surface = document.querySelector('.map-surface');
+    expect(surface).not.toHaveFocus();
+
     fireEvent.click(screen.getByRole('button', { name: 'common.close' }));
     expect(screen.queryByTestId('map-keyboard-hint')).not.toBeInTheDocument();
+    expect(surface).toHaveFocus();
   });
 
   it('oculta la pista de teclado cuando ya se muestra el resultado', () => {

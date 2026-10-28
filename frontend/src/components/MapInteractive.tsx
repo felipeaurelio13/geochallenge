@@ -156,6 +156,12 @@ export function MapInteractive({
   const { t } = useTranslation();
   const [hintDismissed, setHintDismissed] = useState(false);
   const showHint = showKeyboardHint && !showResult && !hintDismissed;
+  const mapSurfaceRef = useRef<HTMLDivElement>(null);
+
+  const dismissHint = () => {
+    setHintDismissed(true);
+    mapSurfaceRef.current?.focus({ preventScroll: true });
+  };
 
   const calculateDistance = useCallback(() => {
     if (!selectedLocation || !correctLocation) return null;
@@ -236,7 +242,7 @@ export function MapInteractive({
           <p className="min-w-0 flex-1">{t('map.keyboardInstructions')}</p>
           <button
             type="button"
-            onClick={() => setHintDismissed(true)}
+            onClick={dismissHint}
             aria-label={t('common.close')}
             className="-my-2 flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-md text-base text-app-secondary hover:bg-app-muted hover:text-app-text"
           >
@@ -255,6 +261,7 @@ export function MapInteractive({
       */}
       {/* eslint-disable jsx-a11y/no-noninteractive-tabindex, jsx-a11y/no-noninteractive-element-interactions */}
       <div
+        ref={mapSurfaceRef}
         className="map-surface relative flex-1 min-h-[12.5rem] overflow-hidden rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/70"
         tabIndex={0}
         role="application"

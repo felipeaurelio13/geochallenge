@@ -885,7 +885,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 63. Devolver el foco al mapa al cerrar la pista — ⬜ Pendiente
+## 63. Devolver el foco al mapa al cerrar la pista — ✅ Desarrollada
 
 **Área:** accesibilidad / `MapInteractive`.
 
@@ -895,7 +895,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** cerrar la pista deja el foco en el mapa; el foco inicial de la pantalla no cambia; funciona con teclado y lector de pantalla; no afecta al arrastre ni a la selección táctil; se cubre con test.
 
-**Entrega:** commit `mejora 63: foco al cerrar la pista del mapa`.
+**Entrega:** commit `mejora 63: foco al cerrar la pista del mapa`. Cerrar la pista mueve el foco al contenedor del mapa con `preventScroll`; el render inicial no roba el foco.
 
 ---
 
@@ -1008,3 +1008,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** la duración copiada coincide con el resumen visible; solo aparece con tiempos válidos; se lee en ES/EN; no cambia el texto si falta; el copiado sigue respetando filtro y orden.
 
 **Entrega:** commit `mejora 71: duración total en el repaso copiado`.
+
+---
+
+## 72. Permitir reabrir la pista de controles del mapa — ⬜ Pendiente
+
+**Área:** usabilidad / `MapInteractive`.
+
+**Problema:** una vez cerrada la pista, no hay forma de recuperarla sin recargar la partida. Quien la descarta sin leerla o la necesita más tarde queda sin referencia de teclado.
+
+**Propuesta:** mostrar un control discreto sobre el mapa, solo cuando la pista ya se cerró y sigue habiendo una ronda de mapa activa, para volver a abrirla. Reutilizar el estado de descarte y la etiqueta accesible existente.
+
+**Aceptación:** el control solo aparece tras cerrar la pista; al pulsarlo vuelve a mostrarse; no tapa el mapa ni el resultado; se puede usar con teclado; se lee en ES/EN; no afecta a la selección táctil.
+
+**Entrega:** commit `mejora 72: reabrir la pista del mapa`.
