@@ -148,6 +148,76 @@ describe('RoundActionTray', () => {
     expect(resultButton.className).toBe(className);
   });
 
+  it('anuncia el resultado y la respuesta correcta en una única región live', () => {
+    const { rerender } = render(
+      <RoundActionTray
+        mode="single"
+        showResult={false}
+        canSubmit
+        submitLabel="Confirmar"
+        onSubmit={vi.fn()}
+      />
+    );
+
+    const liveRegion = screen.getByRole('status');
+    expect(liveRegion).toHaveAttribute('aria-live', 'polite');
+    expect(liveRegion).toHaveAttribute('aria-atomic', 'true');
+    expect(liveRegion.className).toContain('sr-only');
+    expect(liveRegion.textContent).toBe('');
+
+    rerender(
+      <RoundActionTray
+        mode="single"
+        showResult
+        canSubmit={false}
+        submitLabel="Confirmar"
+        resultLabel="Incorrecto"
+        correctAnswer="Chile"
+        onSubmit={vi.fn()}
+      />
+    );
+
+    expect(screen.getAllByRole('status')).toHaveLength(1);
+    expect(screen.getByRole('status')).toHaveTextContent('Incorrecto');
+    expect(screen.getByRole('status')).toHaveTextContent('Chile');
+  });
+
+  it('no repite la respuesta correcta cuando el resultado es un acierto', () => {
+    render(
+      <RoundActionTray
+        mode="single"
+        showResult
+        canSubmit={false}
+        submitLabel="Confirmar"
+        resultLabel="Correcto"
+        isCorrect
+        correctAnswer="Chile"
+        onSubmit={vi.fn()}
+      />
+    );
+
+    expect(screen.getByRole('status').textContent).toBe('Correcto');
+  });
+
+  it('permite desactivar el anuncio cuando la pantalla ya lo hace fuera del tray', () => {
+    render(
+      <RoundActionTray
+        mode="single"
+        stableAction
+        showResult
+        canSubmit={false}
+        submitLabel="Confirmar"
+        nextLabel="Siguiente"
+        resultLabel="Correcto"
+        announceResult={false}
+        onSubmit={vi.fn()}
+        onNext={vi.fn()}
+      />
+    );
+
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  });
+
   it('muestra el error de envío y reintenta sin perder la ronda', () => {
     const onRetrySubmit = vi.fn();
 

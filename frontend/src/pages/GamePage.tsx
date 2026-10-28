@@ -731,6 +731,7 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
           submitLabel={t('game.submit')}
           nextLabel={streakGameOver ? t('game.seeResults') : shouldUseStreakFlow ? t('game.next') : isLastQuestion ? t('game.seeResults') : t('game.next')}
           resultLabel={lastAnswerCorrect ? t('game.correct') : t('game.incorrect')}
+          announceResult={!isPerfectRoundPilot}
           resultHint={isPerfectRoundPilot ? undefined : roundResultHint}
           resultAttribution={isPerfectRoundPilot ? undefined : (
             currentQuestion && currentQuestion.category === 'MONUMENT'

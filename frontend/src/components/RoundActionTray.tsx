@@ -32,6 +32,8 @@ type RoundActionTrayProps = {
   submitError?: string | null;
   onRetrySubmit?: () => void;
   retryLabel?: string;
+  /** Anuncia el resultado en una región live; desactivar si ya se anuncia fuera. */
+  announceResult?: boolean;
 };
 
 const CONTAINER_CLASS =
@@ -62,9 +64,21 @@ export function RoundActionTray({
   submitError = null,
   onRetrySubmit,
   retryLabel,
+  announceResult = true,
 }: RoundActionTrayProps) {
   const { t } = useTranslation();
   void mode;
+  const resolvedResultLabel = resultLabel ?? (isCorrect ? t('game.correct') : t('game.incorrect'));
+  const resultAnnouncement = showResult
+    ? !isCorrect && correctAnswer
+      ? `${resolvedResultLabel}. ${t('game.correctAnswerWas')} ${correctAnswer}.`
+      : resolvedResultLabel
+    : '';
+  const resultAnnouncementRegion = announceResult ? (
+    <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+      {resultAnnouncement}
+    </p>
+  ) : null;
   const wrapperClassName =
     'mx-auto flex w-full max-w-4xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between';
 
@@ -82,6 +96,7 @@ export function RoundActionTray({
     return (
       <div className={CONTAINER_CLASS} data-testid="mobile-action-tray">
         <div className="mx-auto w-full max-w-4xl">
+          {resultAnnouncementRegion}
           {hasSubmitError && (
             <p role="alert" className="mb-2 text-center text-xs font-medium text-error">
               {submitError}
@@ -106,6 +121,7 @@ export function RoundActionTray({
 
   return (
     <div className={`${CONTAINER_CLASS} ${showResult ? 'max-h-[45dvh] overflow-y-auto' : ''}`} data-testid="mobile-action-tray">
+      {resultAnnouncementRegion}
       <div className={wrapperClassName}>
         {summarySlot}
 

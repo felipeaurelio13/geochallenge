@@ -87,7 +87,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 6. Anunciar el resultado de la ronda a lectores de pantalla en todos los modos — ⬜ Pendiente
+## 6. Anunciar el resultado de la ronda a lectores de pantalla en todos los modos — ✅ Desarrollada
 
 **Área:** accesibilidad / `RoundActionTray`, `AnswerStatusBadge`.
 
@@ -97,7 +97,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** el resultado se anuncia una vez, en ES y EN, sin interrumpir la navegación por teclado.
 
-**Entrega:** commit `mejora 6: anuncio accesible del resultado`.
+**Entrega:** commit `mejora 6: anuncio accesible del resultado`. Región `role="status"` persistente en `RoundActionTray`, con resultado y respuesta correcta; desactivada en el piloto para no duplicar el anuncio existente.
 
 ---
 
@@ -224,3 +224,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** el promedio es coherente con la duración configurada; se muestra redondeado y en ES/EN; no aparece en partidas sin respuestas registradas.
 
 **Entrega:** commit `mejora 15: tiempo medio por respuesta en resultados`.
+
+---
+
+## 16. Repaso de las preguntas falladas al terminar la partida — ⬜ Pendiente
+
+**Área:** aprendizaje / `ResultsPage`.
+
+**Problema:** la pantalla final muestra métricas agregadas, pero no permite revisar qué preguntas se fallaron ni cuál era la respuesta correcta. El aprendizaje se corta justo cuando el jugador tiene más interés.
+
+**Propuesta:** añadir una sección colapsable “Repasa lo que falló” con la pregunta, la respuesta elegida y la correcta, reutilizando los datos reales de la sesión. No mostrarla si no hubo fallos.
+
+**Aceptación:** aparece solo con fallos, respeta el orden de la partida, es legible en móvil y con lector de pantalla, y no desplaza ni tapa el CTA de repetir.
+
+**Entrega:** commit `mejora 16: repaso de preguntas falladas`.
