@@ -61,6 +61,8 @@ const mocks = vi.hoisted(() => ({
       'game.exit': 'Salir',
       'game.confirmExit': '¿Salir?',
       'game.timeRemaining': '{{seconds}} segundos',
+      'game.tabProgress': 'Pregunta {{current}} de {{total}}',
+      'app.name': 'GeoChallenge',
     };
     let value = translations[key] ?? key;
     for (const [optionKey, optionValue] of Object.entries(options ?? {})) {
@@ -213,8 +215,19 @@ describe('GeoChallengesPage V2', () => {
     expect(startButton).toBeInTheDocument();
   });
 
-  it('cuatro kinds nuevos renderizan en el briefing', async () => {
-    render(<GeoChallengesPage />);
+  it('refleja la ronda activa en el título de la pestaña y lo restaura al salir', async () => {
+    const { unmount } = render(<GeoChallengesPage />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Comenzar la vuelta al mundo' }));
+
+    await waitFor(() => {
+      expect(document.title).toBe('Pregunta 1 de 7 · GeoChallenge');
+    });
+
+    unmount();
+    expect(document.title).toBe('GeoChallenge');
+  });
+
+  it('cuatro kinds nuevos renderizan en el briefing', async () => {    render(<GeoChallengesPage />);
 
     expect(await screen.findByText('Proximidad de capitales')).toBeInTheDocument();
     expect(screen.getByText('Conteo de fronteras')).toBeInTheDocument();

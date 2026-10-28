@@ -20,6 +20,7 @@ import { Category, GameFilters, MechanicUsage, Question, filtersToParams } from 
 import { GAME_CONSTANTS } from '../constants/game';
 import { useConfirmDialog, useHaptics } from '../hooks';
 import { useAnswerShortcuts } from '../hooks/useAnswerShortcuts';
+import { useProgressDocumentTitle } from '../hooks/useProgressDocumentTitle';
 import { areMechanicsV2Enabled } from '../config/featureFlags';
 import { trackUxEvent } from '../utils/uxTelemetry';
 import { generateFunFact } from '../utils/funFacts';
@@ -295,14 +296,11 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
     initGame();
   }, [category, gameType, gameFilters, practiceCountryCode, startGame, startPractice, confirm, isTrial, startAttempt]);
 
-  useEffect(() => {
-    if ((status !== 'playing' && status !== 'reviewing') || !currentQuestion) return;
-
-    document.title = `${t('game.tabProgress', { current: currentIndex + 1, total: questions.length })} · ${t('app.name')}`;
-    return () => {
-      document.title = t('app.name');
-    };
-  }, [status, currentQuestion, currentIndex, questions.length, t]);
+  useProgressDocumentTitle(
+    (status === 'playing' || status === 'reviewing') && Boolean(currentQuestion),
+    currentIndex + 1,
+    questions.length,
+  );
 
   useEffect(() => {
     return () => {

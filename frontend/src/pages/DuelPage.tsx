@@ -32,6 +32,7 @@ import {
 } from '../types';
 import { GAME_CONSTANTS } from '../constants/game';
 import { useHaptics, useImagePreloader } from '../hooks';
+import { useProgressDocumentTitle } from '../hooks/useProgressDocumentTitle';
 import { areMechanicsV2Enabled } from '../config/featureFlags';
 import { trackUxEvent } from '../utils/uxTelemetry';
 import { getSocketErrorMessage } from '../utils/apiError';
@@ -161,6 +162,12 @@ export function DuelPage() {
   ) : false;
   const hasSelection = isGeoDuel ? hasCompleteGeoSelection : Boolean(selectedAnswer || mapLocation);
   useImagePreloader(duelImageUrls, 0); // skip=0: aún no hay ninguna imagen mostrándose
+
+  useProgressDocumentTitle(
+    Boolean(currentQuestion) && !duelResult,
+    questionNumber,
+    totalQuestions,
+  );
 
   const duelFilters = useMemo<GameFilters>(() => {
     const f: GameFilters = {};

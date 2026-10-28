@@ -465,7 +465,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 33. Llevar el progreso de ronda al título en los demás modos de juego — ⬜ Pendiente
+## 33. Llevar el progreso de ronda al título en los demás modos de juego — ✅ Desarrollada
 
 **Área:** orientación / duelos, retos y modos rápidos.
 
@@ -475,7 +475,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** cada modo activo muestra “Pregunta X de Y · GeoChallenge”; el título se restaura al terminar o salir; no se pisan títulos entre pantallas montadas a la vez; funciona en ES/EN.
 
-**Entrega:** commit `mejora 33: progreso en el título de los demás modos`.
+**Entrega:** commit `mejora 33: progreso en el título de los demás modos`. Se extrajo `useProgressDocumentTitle` y ahora lo usan partida individual, duelo clásico/GeoRetos y GeoRetos diarios; la limpieza solo restaura el título si nadie más lo cambió. Supervivencia queda fuera porque no conoce el total de rondas hasta el final.
 
 ---
 
@@ -644,3 +644,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** el nombre accesible del `main` coincide con el titular visible en ES/EN; no se anuncia dos veces; no hay cambios visuales; los tests siguen usando el titular como referencia.
 
 **Entrega:** commit `mejora 45: landmark de resultados con titular localizado`.
+
+---
+
+## 46. Mostrar la ronda de supervivencia en la pestaña sin inventar el total — ⬜ Pendiente
+
+**Área:** orientación / `SurvivalPage`.
+
+**Problema:** supervivencia no conoce el total de rondas hasta que termina la partida, así que quedó fuera del título de progreso. Al cambiar de pestaña, el modo activo sigue mostrando el título genérico aunque la ronda sí se conoce.
+
+**Propuesta:** añadir una clave compacta tipo “Ronda {{current}} · GeoChallenge” y usarla solo mientras el modo está jugando, sin fabricar un total. Restaurar el título al salir y mantener `game.tabProgress` para los modos que sí conocen el total.
+
+**Aceptación:** el título muestra la ronda actual durante la partida; no aparece “de 0” ni un total inventado; se restaura al terminar o salir; funciona en ES/EN; no altera los títulos de los demás modos.
+
+**Entrega:** commit `mejora 46: ronda actual en el título de supervivencia`.
