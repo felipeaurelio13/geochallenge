@@ -815,7 +815,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 58. Incluir la dificultad en el texto copiado del repaso — ⬜ Pendiente
+## 58. Incluir la dificultad en el texto copiado del repaso — ✅ Desarrollada
 
 **Área:** aprendizaje / `ResultsPage`.
 
@@ -825,7 +825,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** la dificultad copiada coincide con la visible; se omite si falta; no duplica la categoría; se lee en ES/EN; no cambia el texto cuando no hay dificultad; el copiado sigue respetando filtro y orden.
 
-**Entrega:** commit `mejora 58: dificultad en el repaso copiado`.
+**Entrega:** commit `mejora 58: dificultad en el repaso copiado`. El encabezado de cada fallo añade ` · Dificultad` solo si la pregunta la trae, con la misma etiqueta localizada que el badge visible.
 
 ---
 
@@ -938,3 +938,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** la lista no cambia de posición al aparecer o desaparecer el aviso; el espacio reservado no deja un hueco visible; el aviso sigue siendo perceptible; no afecta al filtro ni al orden; se cubre con test de estructura.
 
 **Entrega:** commit `mejora 66: espacio estable para el aviso de copiado`.
+
+---
+
+## 67. Incluir el total de fallos en el repaso copiado — ⬜ Pendiente
+
+**Área:** aprendizaje / `ResultsPage`.
+
+**Problema:** el texto copiado empieza directamente con la lista. Quien lo recibe fuera de la app no sabe cuántos fallos contiene ni si el filtro activo dejó fuera parte del repaso.
+
+**Propuesta:** añadir una línea de resumen bajo el título con el número de fallos copiados, derivado de `visibleReviewMistakes.length`, usando singular o plural. Mantener el título y el resto del formato.
+
+**Aceptación:** el total coincide con las filas copiadas; respeta el filtro activo; se lee en ES/EN; no aparece si no hay fallos; no duplica el contador visible del repaso.
+
+**Entrega:** commit `mejora 67: total de fallos en el repaso copiado`.

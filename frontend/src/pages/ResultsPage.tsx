@@ -304,7 +304,7 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
         result.correctAnswer,
       );
       return [
-        `${number}. ${t(CATEGORY_LABEL_KEYS[question.category])} — ${getLocalizedQuestionText(question, t, currentLanguage)}`,
+        `${number}. ${t(CATEGORY_LABEL_KEYS[question.category])}${question.difficulty ? ` · ${t(`game.difficulty.${question.difficulty.toLowerCase()}`)}` : ''} — ${getLocalizedQuestionText(question, t, currentLanguage)}`,
         `${t('results.yourAnswer')}: ${userAnswer}`,
         `${t('game.correctAnswerWas')}: ${result.correctAnswer}`,
         ...(funFact ? [`${t('results.funFactLabel')}: ${funFact}`] : []),

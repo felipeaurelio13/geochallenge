@@ -611,6 +611,7 @@ describe('ResultsPage', () => {
     expect(copied).toContain('La respuesta correcta era: Santiago');
     expect(copied).toContain('10. Capitales');
     expect(copied).not.toContain('Dato curioso');
+    expect(copied).not.toContain('Difícil');
     expect(screen.getByText('Repaso copiado')).toBeInTheDocument();
   });
 
@@ -696,6 +697,37 @@ describe('ResultsPage', () => {
       expect(screen.getAllByText('Difícil')).toHaveLength(1);
     } finally {
       mocks.gameState.questions = originalQuestions;
+    }
+  });
+
+  it('incluye la dificultad de un fallo en el repaso copiado', async () => {
+    const originalQuestions = mocks.gameState.questions;
+    const originalResults = mocks.gameState.results;
+    mocks.gameState.questions = [
+      {
+        id: 'q1',
+        category: 'CAPITAL',
+        questionData: 'Chile',
+        questionText: 'Capital',
+        options: [],
+        difficulty: 'HARD',
+      },
+    ] as unknown as typeof mocks.gameState.questions;
+    mocks.gameState.results = [
+      { questionId: 'q1', isCorrect: false, correctAnswer: 'Santiago', userAnswer: 'Lima' },
+    ] as typeof mocks.gameState.results;
+
+    try {
+      render(<ResultsPage />);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Copiar repaso' }));
+
+      await waitFor(() => expect(mocks.writeTextMock).toHaveBeenCalled());
+      const copied = mocks.writeTextMock.mock.calls[mocks.writeTextMock.mock.calls.length - 1]?.[0] as string;
+      expect(copied).toContain('1. Capitales · Difícil — ¿Cuál es la capital de Chile?');
+    } finally {
+      mocks.gameState.questions = originalQuestions;
+      mocks.gameState.results = originalResults;
     }
   });
 
