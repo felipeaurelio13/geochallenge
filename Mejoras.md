@@ -633,7 +633,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 45. Nombrar el landmark de resultados con el titular localizado — ⬜ Pendiente
+## 45. Nombrar el landmark de resultados con el titular localizado — ✅ Desarrollada
 
 **Área:** accesibilidad / `ResultsPage`.
 
@@ -643,7 +643,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** el nombre accesible del `main` coincide con el titular visible en ES/EN; no se anuncia dos veces; no hay cambios visuales; los tests siguen usando el titular como referencia.
 
-**Entrega:** commit `mejora 45: landmark de resultados con titular localizado`.
+**Entrega:** commit `mejora 45: landmark de resultados con titular localizado`. El `main` usa `aria-labelledby` hacia el `h1`, que ahora tiene id; se eliminó la etiqueta fija en inglés y no se añadieron claves nuevas.
 
 ---
 
@@ -728,3 +728,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** el texto incluye la duración solo con tiempos válidos; se lee en ES/EN; no duplica la duración si ya estuviera presente; no cambia el texto cuando no hay datos; los tests de compartir cubren ambos casos.
 
 **Entrega:** commit `mejora 51: duración en el texto de compartir`.
+
+---
+
+## 52. Reservar espacio para el ranking mientras carga — ⬜ Pendiente
+
+**Área:** estabilidad visual / `ResultsPage`.
+
+**Problema:** al final de resultados, la fila de ranking aparece después de una petición asíncrona. Mientras carga solo se ve un spinner pequeño y, al llegar el dato, el bloque cambia de altura y puede empujar el contenido en móvil.
+
+**Propuesta:** reservar una altura mínima estable para la fila de ranking y mostrar el spinner dentro de ese espacio. Si la petición falla o no hay ranking, mantener la altura sin dejar un hueco visible.
+
+**Aceptación:** el bloque no cambia de altura entre cargando, con ranking y sin ranking; el spinner sigue siendo perceptible; no afecta a los modos que no piden ranking; se cubre con un test de estructura.
+
+**Entrega:** commit `mejora 52: espacio estable para el ranking`.

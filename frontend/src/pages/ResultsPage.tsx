@@ -291,7 +291,7 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
 
   return (
     <div ref={scrollContainerRef} className="h-full min-h-0 overflow-y-auto bg-[var(--color-bg-app)] px-4 py-5 pt-[calc(env(safe-area-inset-top)+1.25rem)] pb-[calc(env(safe-area-inset-bottom)+1.25rem)] sm:px-6 sm:py-8">
-      <main className={`mx-auto w-full max-w-xl ${prefersReducedMotion ? '' : 'animate-fade-in'}`} aria-label="results-summary">
+      <main className={`mx-auto w-full max-w-xl ${prefersReducedMotion ? '' : 'animate-fade-in'}`} aria-labelledby="results-summary-title">
         <section className="text-center">
           <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-app-secondary">
             {t(isTrial ? 'results.trialLabel' : isPracticeMode ? 'results.practiceTitle' : 'results.gameOver')}
@@ -302,7 +302,7 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
             </span>
             <span className="mt-1 text-xs text-app-secondary">{t('results.correct')}</span>
           </div>
-          <h1 ref={summaryHeadingRef} tabIndex={-1} className="mt-4 text-2xl font-semibold text-app-text outline-none sm:text-3xl">
+          <h1 ref={summaryHeadingRef} id="results-summary-title" tabIndex={-1} className="mt-4 text-2xl font-semibold text-app-text outline-none sm:text-3xl">
             {isStreakMode ? t('results.streakHeadline', { count: correctAnswers }) : getPerformanceMessage()}
           </h1>
           <p className="mt-1 text-xs font-medium tracking-wide text-app-secondary">

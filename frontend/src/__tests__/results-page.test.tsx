@@ -206,6 +206,12 @@ describe('ResultsPage', () => {
     await waitFor(() => expect(heading).toHaveFocus());
   });
 
+  it('nombra el landmark de resultados con el titular visible', () => {
+    render(<ResultsPage />);
+
+    expect(screen.getByRole('main')).toHaveAccessibleName('¡Muy bien!');
+  });
+
   it('vuelve al resumen con foco y scroll suave cuando la página es larga', async () => {
     const scrollHeightSpy = vi.spyOn(Element.prototype, 'scrollHeight', 'get').mockReturnValue(2000);
     const clientHeightSpy = vi.spyOn(Element.prototype, 'clientHeight', 'get').mockReturnValue(500);
