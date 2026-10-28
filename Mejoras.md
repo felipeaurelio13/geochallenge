@@ -703,7 +703,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 50. Conservar los filtros al practicar una categoría desde resultados — ⬜ Pendiente
+## 50. Conservar los filtros al practicar una categoría desde resultados — ✅ Desarrollada
 
 **Área:** continuidad / `ResultsPage`.
 
@@ -713,7 +713,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** la práctica conserva los filtros compatibles presentes en la URL; no arrastra la categoría anterior; sigue funcionando sin filtros; no cambia el destino de “Jugar de nuevo”; se cubre con tests.
 
-**Entrega:** commit `mejora 50: filtros al practicar una categoría`.
+**Entrega:** commit `mejora 50: filtros al practicar una categoría`. Un helper conserva `continent`, `difficulty`, `isInsular`, `isLandlocked` y `countryCode`; lo comparten “Jugar de nuevo” y las acciones de categoría, sin arrastrar la categoría anterior.
 
 ---
 
@@ -826,3 +826,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** la dificultad copiada coincide con la visible; se omite si falta; no duplica la categoría; se lee en ES/EN; no cambia el texto cuando no hay dificultad; el copiado sigue respetando filtro y orden.
 
 **Entrega:** commit `mejora 58: dificultad en el repaso copiado`.
+
+---
+
+## 59. Conservar los filtros al practicar desde el repaso — ⬜ Pendiente
+
+**Área:** continuidad / `ResultsPage`.
+
+**Problema:** el botón de práctica del repaso abre una sesión nueva sin los filtros de la partida. Tras revisar fallos de Europa en difícil, la práctica vuelve al conjunto global y cambia el contexto sin avisar.
+
+**Propuesta:** aplicar el mismo helper de filtros preservados al destino de práctica del repaso, manteniendo `gameType=practice` y sin arrastrar la categoría anterior.
+
+**Aceptación:** la práctica conserva los filtros compatibles; funciona también sin filtros; no altera el destino de “Jugar de nuevo” ni el de las categorías; se cubre con test de navegación.
+
+**Entrega:** commit `mejora 59: filtros al practicar desde el repaso`.

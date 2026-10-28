@@ -292,8 +292,17 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
     reviewCopyTimer.current = setTimeout(() => setReviewCopyFeedback(''), 3000);
   };
 
+  const appendPreservedFilters = (params: URLSearchParams) => {
+    for (const key of ['continent', 'difficulty', 'isInsular', 'isLandlocked', 'countryCode']) {
+      const value = searchParams.get(key);
+      if (value) params.set(key, value);
+    }
+    return params;
+  };
+
   const handlePracticeCategory = (categoryToPlay: Category, source = 'results_category_row') => {
-    const destination = `/game/single?category=${categoryToPlay}&gameType=single`;
+    const params = appendPreservedFilters(new URLSearchParams({ category: categoryToPlay, gameType: 'single' }));
+    const destination = `/game/single?${params}`;
     trackUxEvent('mode_selected', {
       destination,
       gameMode: 'single',
@@ -310,11 +319,7 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
   };
 
   const handlePlayAgain = (easy = false) => {
-    const params = new URLSearchParams({ category, gameType });
-    for (const key of ['continent', 'difficulty', 'isInsular', 'isLandlocked', 'countryCode']) {
-      const value = searchParams.get(key);
-      if (value) params.set(key, value);
-    }
+    const params = appendPreservedFilters(new URLSearchParams({ category, gameType }));
     if (easy) params.set('difficulty', 'EASY');
     const destination = isTrial ? '/play' : `/game/single?${params}`;
     trackUxEvent('mode_selected', { destination, gameMode: gameType, category, source: 'results', trial: isTrial });

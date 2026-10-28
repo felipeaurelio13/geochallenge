@@ -626,6 +626,7 @@ describe('ResultsPage', () => {
   it('resume la precisión por categoría cuando hay al menos dos', async () => {
     const originalQuestions = mocks.gameState.questions;
     const originalResults = mocks.gameState.results;
+    mocks.search = 'difficulty=HARD&continent=Europe';
     mocks.gameState.questions = [
       { id: 'flag-1', category: 'FLAG', questionData: 'Chile', questionText: 'Bandera', options: [] },
       { id: 'flag-2', category: 'FLAG', questionData: 'Perú', questionText: 'Bandera', options: [] },
@@ -650,11 +651,11 @@ describe('ResultsPage', () => {
 
       fireEvent.click(within(section).getByRole('button', { name: 'Practicar Banderas' }));
       expect(mocks.resetGameMock).toHaveBeenCalledOnce();
-      expect(mocks.navigateMock).toHaveBeenCalledWith('/game/single?category=FLAG&gameType=single');
+      expect(mocks.navigateMock).toHaveBeenCalledWith('/game/single?category=FLAG&gameType=single&continent=Europe&difficulty=HARD');
 
       fireEvent.click(within(section).getByRole('button', { name: 'Jugar Capitales' }));
       expect(mocks.resetGameMock).toHaveBeenCalledTimes(2);
-      expect(mocks.navigateMock).toHaveBeenLastCalledWith('/game/single?category=CAPITAL&gameType=single');
+      expect(mocks.navigateMock).toHaveBeenLastCalledWith('/game/single?category=CAPITAL&gameType=single&continent=Europe&difficulty=HARD');
 
       await waitFor(() => expect(mocks.getMyRankMock).toHaveBeenCalled());
     } finally {
