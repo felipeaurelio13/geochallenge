@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { GameConfig } from '../types';
 import { ResultsPage } from '../pages/ResultsPage';
+import { uiStoreActions } from '../store/useUiStore';
 
 const mocks = vi.hoisted(() => ({
   navigateMock: vi.fn(),
@@ -48,6 +49,7 @@ vi.mock('react-i18next', () => ({
         'results.accuracy': 'Precisión',
         'results.averageTime': 'Tiempo medio por respuesta',
         'results.answerTime': 'Tiempo dedicado',
+        'results.backToSummary': 'Volver al resumen',
         'results.categoryAccuracyTitle': 'Precisión por categoría',
         'results.categoryAccuracyDescription': 'Así se reparten tus aciertos por tipo de pregunta.',
         'results.funFactLabel': 'Dato curioso',
@@ -160,6 +162,61 @@ describe('ResultsPage', () => {
 
     const heading = screen.getByRole('heading', { level: 1 });
     await waitFor(() => expect(heading).toHaveFocus());
+  });
+
+  it('vuelve al resumen con foco y scroll suave cuando la página es larga', async () => {
+    const scrollHeightSpy = vi.spyOn(Element.prototype, 'scrollHeight', 'get').mockReturnValue(2000);
+    const clientHeightSpy = vi.spyOn(Element.prototype, 'clientHeight', 'get').mockReturnValue(500);
+    const scrollIntoViewMock = vi.fn();
+    Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
+      configurable: true,
+      writable: true,
+      value: scrollIntoViewMock,
+    });
+
+    try {
+      render(<ResultsPage />);
+
+      fireEvent.click(await screen.findByRole('button', { name: 'Volver al resumen' }));
+
+      expect(scrollIntoViewMock).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' });
+      expect(screen.getByRole('heading', { level: 1 })).toHaveFocus();
+    } finally {
+      scrollHeightSpy.mockRestore();
+      clientHeightSpy.mockRestore();
+      Reflect.deleteProperty(HTMLElement.prototype, 'scrollIntoView');
+    }
+  });
+
+  it('usa scroll instantáneo al volver al resumen con movimiento reducido', async () => {
+    const scrollHeightSpy = vi.spyOn(Element.prototype, 'scrollHeight', 'get').mockReturnValue(2000);
+    const clientHeightSpy = vi.spyOn(Element.prototype, 'clientHeight', 'get').mockReturnValue(500);
+    const scrollIntoViewMock = vi.fn();
+    Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
+      configurable: true,
+      writable: true,
+      value: scrollIntoViewMock,
+    });
+    uiStoreActions.setPrefersReducedMotion(true);
+
+    try {
+      render(<ResultsPage />);
+
+      fireEvent.click(await screen.findByRole('button', { name: 'Volver al resumen' }));
+
+      expect(scrollIntoViewMock).toHaveBeenCalledWith({ behavior: 'auto', block: 'start' });
+    } finally {
+      uiStoreActions.setPrefersReducedMotion(false);
+      scrollHeightSpy.mockRestore();
+      clientHeightSpy.mockRestore();
+      Reflect.deleteProperty(HTMLElement.prototype, 'scrollIntoView');
+    }
+  });
+
+  it('no ofrece volver al resumen cuando la página no desborda', () => {
+    render(<ResultsPage />);
+
+    expect(screen.queryByRole('button', { name: 'Volver al resumen' })).not.toBeInTheDocument();
   });
 
   it('muestra el tiempo medio por respuesta cuando la sesión trae tiempos', () => {

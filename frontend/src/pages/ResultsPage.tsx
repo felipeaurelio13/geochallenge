@@ -34,6 +34,8 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
   const { share: shareStreakImage, status: streakShareStatus } = useStreakShareImage();
   const [streakShareFeedback, setStreakShareFeedback] = useState('');
   const [allReviewOpen, setAllReviewOpen] = useState(false);
+  const [showBackToSummary, setShowBackToSummary] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const reviewListRef = useRef<HTMLDivElement>(null);
   const feedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prefersReducedMotion = useUiStore((s) => s.prefersReducedMotion);
@@ -134,6 +136,22 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
     heading.focus({ preventScroll: true });
   }, []);
 
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    const updateVisibility = () => {
+      setShowBackToSummary(container.scrollHeight > container.clientHeight + 240);
+    };
+    updateVisibility();
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(updateVisibility);
+    observer?.observe(container);
+    window.addEventListener('resize', updateVisibility);
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener('resize', updateVisibility);
+    };
+  }, []);
+
   const [userRank, setUserRank] = useState<number | null>(null);
   const [loading, setLoading] = useState(!isPracticeMode && !isTrial);
   useEffect(() => {
@@ -190,6 +208,13 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
     setAllReviewOpen(next);
   };
 
+  const handleBackToSummary = () => {
+    const heading = summaryHeadingRef.current;
+    if (!heading) return;
+    heading.scrollIntoView?.({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' });
+    heading.focus({ preventScroll: true });
+  };
+
   const handlePracticeWeakestCategory = () => {
     if (!weakestCategory) return;
     const destination = `/game/single?category=${weakestCategory.category}&gameType=single`;
@@ -221,7 +246,7 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
   }
 
   return (
-    <div className="h-full min-h-0 overflow-y-auto bg-[var(--color-bg-app)] px-4 py-5 pt-[calc(env(safe-area-inset-top)+1.25rem)] pb-[calc(env(safe-area-inset-bottom)+1.25rem)] sm:px-6 sm:py-8">
+    <div ref={scrollContainerRef} className="h-full min-h-0 overflow-y-auto bg-[var(--color-bg-app)] px-4 py-5 pt-[calc(env(safe-area-inset-top)+1.25rem)] pb-[calc(env(safe-area-inset-bottom)+1.25rem)] sm:px-6 sm:py-8">
       <main className={`mx-auto w-full max-w-xl ${prefersReducedMotion ? '' : 'animate-fade-in'}`} aria-label="results-summary">
         <section className="text-center">
           <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-app-secondary">
@@ -413,6 +438,18 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
             </div>
           )}
         </section>
+
+        {showBackToSummary && (
+          <div className="mt-6 border-t border-app-border pt-4 text-center">
+            <button
+              type="button"
+              onClick={handleBackToSummary}
+              className="min-h-11 rounded-md px-3 text-sm font-medium text-primary hover:text-primary/80"
+            >
+              {t('results.backToSummary')}
+            </button>
+          </div>
+        )}
       </main>
     </div>
   );

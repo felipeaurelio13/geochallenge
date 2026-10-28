@@ -525,6 +525,7 @@
     "averageTime": "Average time per answer",
     "averageTimeValue": "{{seconds}}s",
     "slowestQuestion": "Slowest round: {{question}} ({{seconds}}s)",
+    "backToSummary": "Back to summary",
     "modeSingle": "Single player",
     "modePractice": "Practice",
     "modeStreak": "Streak",

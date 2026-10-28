@@ -451,7 +451,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 32. Volver al resumen desde el final de resultados — ⬜ Pendiente
+## 32. Volver al resumen desde el final de resultados — ✅ Desarrollada
 
 **Área:** navegación / `ResultsPage`.
 
@@ -461,7 +461,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** el control aparece solo cuando la página tiene contenido suficiente; el foco termina en el titular; el scroll es instantáneo con reducción de movimiento; funciona con teclado y en ES/EN.
 
-**Entrega:** commit `mejora 32: volver al resumen de resultados`.
+**Entrega:** commit `mejora 32: volver al resumen de resultados`. El control aparece solo si el contenedor desborda, desplaza el titular a la vista y le devuelve el foco; con movimiento reducido usa scroll instantáneo.
 
 ---
 
@@ -630,3 +630,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** el total es la suma de los tiempos finitos registrados; se lee en ES/EN; se omite sin datos; no desplaza el CTA principal ni el desglose de puntos; no cambia el repaso.
 
 **Entrega:** commit `mejora 44: tiempo total de la partida`.
+
+---
+
+## 45. Nombrar el landmark de resultados con el titular localizado — ⬜ Pendiente
+
+**Área:** accesibilidad / `ResultsPage`.
+
+**Problema:** el `<main>` de resultados usa `aria-label="results-summary"`, un texto fijo en inglés que no cambia con el idioma. Un lector de pantalla anuncia una etiqueta distinta al resto de la interfaz y no coincide con el titular visible.
+
+**Propuesta:** quitar la etiqueta fija y asociar el landmark con el `h1` existente mediante `aria-labelledby`, reutilizando el texto ya localizado y sin añadir una nueva clave de traducción.
+
+**Aceptación:** el nombre accesible del `main` coincide con el titular visible en ES/EN; no se anuncia dos veces; no hay cambios visuales; los tests siguen usando el titular como referencia.
+
+**Entrega:** commit `mejora 45: landmark de resultados con titular localizado`.

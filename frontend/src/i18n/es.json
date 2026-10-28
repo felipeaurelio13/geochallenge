@@ -525,6 +525,7 @@
     "averageTime": "Tiempo medio por respuesta",
     "averageTimeValue": "{{seconds}} s",
     "slowestQuestion": "Ronda más lenta: {{question}} ({{seconds}} s)",
+    "backToSummary": "Volver al resumen",
     "modeSingle": "Un jugador",
     "modePractice": "Práctica",
     "modeStreak": "Racha",
