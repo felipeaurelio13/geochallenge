@@ -10,6 +10,16 @@ import { uiStoreActions, useUiStore } from '../store/useUiStore';
 import { getAchievementDisplay } from '../utils/achievements';
 import { getLocalizedQuestionText } from '../utils/questionText';
 import { trackUxEvent } from '../utils/uxTelemetry';
+import type { Category } from '../types';
+
+const CATEGORY_LABEL_KEYS: Record<Category, string> = {
+  MIXED: 'categories.mixed',
+  FLAG: 'categories.flags',
+  CAPITAL: 'categories.capitals',
+  MAP: 'categories.maps',
+  SILHOUETTE: 'categories.silhouettes',
+  MONUMENT: 'categories.monuments',
+};
 
 export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
   const { t, i18n } = useTranslation();
@@ -41,6 +51,24 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
     },
     { current: 0, best: 0 },
   ).best;
+  const categoryStats = useMemo(() => {
+    const stats = new Map<Category, { correct: number; total: number }>();
+    for (const result of results) {
+      const question = questions.find((item) => item.id === result.questionId);
+      if (!question) continue;
+      const entry = stats.get(question.category) ?? { correct: 0, total: 0 };
+      entry.total += 1;
+      if (result.isCorrect) entry.correct += 1;
+      stats.set(question.category, entry);
+    }
+    return Array.from(stats.entries())
+      .map(([category, value]) => ({
+        category,
+        ...value,
+        accuracy: Math.round((value.correct / value.total) * 100),
+      }))
+      .sort((a, b) => a.accuracy - b.accuracy);
+  }, [questions, results]);
   const unlockedAchievements = useMemo(
     () => (lastNewAchievements ?? []).map((key) => getAchievementDisplay(key, currentLanguage)),
     [lastNewAchievements, currentLanguage],
@@ -173,6 +201,25 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
             {t(isTrial ? 'results.backHome' : 'common.backToMenu')}
           </Button>
         </section>
+
+        {categoryStats.length >= 2 && (
+          <section className="mt-6 border-t border-app-border pt-5" aria-labelledby="category-accuracy-title">
+            <h2 id="category-accuracy-title" className="text-lg font-semibold text-app-text">
+              {t('results.categoryAccuracyTitle')}
+            </h2>
+            <p className="mt-1 text-sm text-app-secondary">{t('results.categoryAccuracyDescription')}</p>
+            <ul className="mt-3 space-y-2">
+              {categoryStats.map(({ category, correct, total, accuracy }) => (
+                <li key={category} className="flex items-center justify-between gap-3 text-sm">
+                  <span className="min-w-0 break-words text-app-text">{t(CATEGORY_LABEL_KEYS[category])}</span>
+                  <span className="shrink-0 tabular-nums text-app-secondary">
+                    {t('results.categoryAccuracyValue', { correct, total, accuracy })}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         {mistakes.length > 0 && (
           <section className="mt-6 border-t border-app-border pt-5" aria-labelledby="review-title">

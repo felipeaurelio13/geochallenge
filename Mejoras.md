@@ -157,7 +157,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 11. Resumen de precisión por categoría en resultados — ⬜ Pendiente
+## 11. Resumen de precisión por categoría en resultados — ✅ Desarrollada
 
 **Área:** aprendizaje / `ResultsPage`.
 
@@ -167,7 +167,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** la suma coincide con el total de la partida; no aparece con una sola categoría; el detalle es legible en móvil y con lector de pantalla.
 
-**Entrega:** commit `mejora 11: precisión por categoría en resultados`.
+**Entrega:** commit `mejora 11: precisión por categoría en resultados`. La sección se calcula con las respuestas reales, ordena de menor a mayor precisión y solo aparece cuando hay al menos dos categorías.
 
 ---
 
@@ -294,3 +294,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** cada fallo muestra su categoría en ES/EN, no altera el orden ni el detalle desplegable y no aparece en partidas sin fallos.
 
 **Entrega:** commit `mejora 20: categoría en el repaso de fallos`.
+
+---
+
+## 21. Incluir el dato curioso en el repaso de fallos — ⬜ Pendiente
+
+**Área:** aprendizaje / `ResultsPage`.
+
+**Problema:** el repaso muestra la respuesta correcta, pero no el contexto que ya se enseña al responder (región, insularidad, población). El jugador corrige el dato, pero no se lleva el porqué ni un ancla para recordarlo.
+
+**Propuesta:** reutilizar `generateFunFact` con la pregunta y la respuesta correcta de cada fallo y mostrarlo dentro del detalle desplegado, después de la respuesta correcta.
+
+**Aceptación:** cada fallo con dato disponible lo muestra en ES/EN; los fallos sin dato no dejan un hueco vacío; no se revela nada con la fila cerrada.
+
+**Entrega:** commit `mejora 21: dato curioso en el repaso de fallos`.

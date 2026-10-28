@@ -46,6 +46,10 @@ vi.mock('react-i18next', () => ({
         'results.correct': 'Correctas',
         'results.incorrect': 'Incorrectas',
         'results.accuracy': 'Precisión',
+        'results.categoryAccuracyTitle': 'Precisión por categoría',
+        'results.categoryAccuracyDescription': 'Así se reparten tus aciertos por tipo de pregunta.',
+        'categories.flags': 'Banderas',
+        'categories.capitals': 'Capitales',
         'results.yourRank': 'Tu posición',
         'results.playAgain': 'Jugar de nuevo',
         'results.viewRankings': 'Ver rankings',
@@ -62,6 +66,10 @@ vi.mock('react-i18next', () => ({
 
       if (key === 'results.shareText') {
         return `🎯 ${options?.score} pts ${options?.correct}/${options?.total} (${options?.accuracy})`;
+      }
+
+      if (key === 'results.categoryAccuracyValue') {
+        return `${options?.correct} de ${options?.total} · ${options?.accuracy}%`;
       }
 
       return translations[key] ?? key;
@@ -160,6 +168,44 @@ describe('ResultsPage', () => {
     // natural al final del documento — la página entera es scroll vertical.
     expect(screen.getByTestId('results-action-tray')).not.toHaveClass('sticky');
     expect(screen.getByTestId('results-action-tray')).not.toHaveClass('backdrop-blur-sm');
+  });
+
+  it('no muestra precisión por categoría cuando solo hay una', async () => {
+    render(<ResultsPage />);
+
+    expect(screen.queryByRole('heading', { name: 'Precisión por categoría' })).not.toBeInTheDocument();
+    await waitFor(() => expect(mocks.getMyRankMock).toHaveBeenCalled());
+  });
+
+  it('resume la precisión por categoría cuando hay al menos dos', async () => {
+    const originalQuestions = mocks.gameState.questions;
+    const originalResults = mocks.gameState.results;
+    mocks.gameState.questions = [
+      { id: 'flag-1', category: 'FLAG', questionData: 'Chile', questionText: 'Bandera', options: [] },
+      { id: 'flag-2', category: 'FLAG', questionData: 'Perú', questionText: 'Bandera', options: [] },
+      { id: 'cap-1', category: 'CAPITAL', questionData: 'Chile', questionText: 'Capital', options: [] },
+      { id: 'cap-2', category: 'CAPITAL', questionData: 'Perú', questionText: 'Capital', options: [] },
+    ] as typeof mocks.gameState.questions;
+    mocks.gameState.results = [
+      { questionId: 'flag-1', isCorrect: true, correctAnswer: 'Chile', userAnswer: 'Chile' },
+      { questionId: 'flag-2', isCorrect: false, correctAnswer: 'Perú', userAnswer: 'Chile' },
+      { questionId: 'cap-1', isCorrect: true, correctAnswer: 'Santiago', userAnswer: 'Santiago' },
+      { questionId: 'cap-2', isCorrect: true, correctAnswer: 'Lima', userAnswer: 'Lima' },
+    ] as typeof mocks.gameState.results;
+
+    try {
+      render(<ResultsPage />);
+
+      expect(screen.getByRole('heading', { name: 'Precisión por categoría' })).toBeInTheDocument();
+      expect(screen.getByText('Banderas')).toBeInTheDocument();
+      expect(screen.getByText('Capitales')).toBeInTheDocument();
+      expect(screen.getByText('1 de 2 · 50%')).toBeInTheDocument();
+      expect(screen.getByText('2 de 2 · 100%')).toBeInTheDocument();
+      await waitFor(() => expect(mocks.getMyRankMock).toHaveBeenCalled());
+    } finally {
+      mocks.gameState.questions = originalQuestions;
+      mocks.gameState.results = originalResults;
+    }
   });
 
   it('deshabilita compartir mientras está en progreso para evitar toques dobles', async () => {
