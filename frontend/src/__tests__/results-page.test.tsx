@@ -109,6 +109,14 @@ vi.mock('react-i18next', () => ({
         return `Jugar ${options?.category}`;
       }
 
+      if (key === 'results.reviewExpandedMany') {
+        return `Se expandieron ${options?.count} respuestas`;
+      }
+
+      if (key === 'results.reviewCollapsedMany') {
+        return `Se contrajeron ${options?.count} respuestas`;
+      }
+
       return translations[key] ?? key;
     },
   }),
@@ -316,15 +324,23 @@ describe('ResultsPage', () => {
 
     const section = screen.getByRole('heading', { name: /results\.reviewTitle/ }).closest('section')!;
     const rows = Array.from(section.querySelectorAll('details'));
+    const announcement = within(section).getByRole('status');
 
     expect(rows).toHaveLength(2);
     expect(rows.every((row) => !row.open)).toBe(true);
+    expect(announcement).toHaveTextContent('');
+
+    fireEvent.click(rows[0].querySelector('summary')!);
+    expect(rows[0].open).toBe(true);
+    expect(announcement).toHaveTextContent('');
 
     fireEvent.click(within(section).getByRole('button', { name: 'Expandir todo' }));
     expect(rows.every((row) => row.open)).toBe(true);
+    expect(announcement).toHaveTextContent('Se expandieron 2 respuestas');
 
     fireEvent.click(within(section).getByRole('button', { name: 'Contraer todo' }));
     expect(rows.every((row) => !row.open)).toBe(true);
+    expect(announcement).toHaveTextContent('Se contrajeron 2 respuestas');
   });
 
   it('ordena el repaso por tiempo y vuelve al orden de partida', () => {

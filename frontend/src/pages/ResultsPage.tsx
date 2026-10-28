@@ -35,6 +35,7 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
   const [streakShareFeedback, setStreakShareFeedback] = useState('');
   const [allReviewOpen, setAllReviewOpen] = useState(false);
   const [reviewSort, setReviewSort] = useState<'original' | 'slowest'>('original');
+  const [reviewAnnouncement, setReviewAnnouncement] = useState('');
   const [showBackToSummary, setShowBackToSummary] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const reviewListRef = useRef<HTMLDivElement>(null);
@@ -219,6 +220,13 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
       (details as HTMLDetailsElement).open = next;
     });
     setAllReviewOpen(next);
+    const count = mistakes.length;
+    setReviewAnnouncement(t(
+      next
+        ? count === 1 ? 'results.reviewExpandedOne' : 'results.reviewExpandedMany'
+        : count === 1 ? 'results.reviewCollapsedOne' : 'results.reviewCollapsedMany',
+      { count },
+    ));
   };
 
   const handleBackToSummary = () => {
@@ -392,6 +400,7 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
                 </button>
               )}
             </div>
+            <p className="sr-only" role="status" aria-live="polite">{reviewAnnouncement}</p>
             <div ref={reviewListRef} className="mt-4 space-y-2">
               {reviewMistakes.map(({ result, question, number }) => {
                 const funFact = generateFunFact(

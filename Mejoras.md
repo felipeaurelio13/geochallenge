@@ -507,7 +507,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 36. Anunciar el efecto de expandir o contraer todo el repaso — ⬜ Pendiente
+## 36. Anunciar el efecto de expandir o contraer todo el repaso — ✅ Desarrollada
 
 **Área:** accesibilidad / `ResultsPage`.
 
@@ -517,7 +517,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** el anuncio aparece solo tras usar el control; informa la acción y el total; se lee en ES/EN; no se dispara al abrir una fila individual; no altera el layout visible.
 
-**Entrega:** commit `mejora 36: anuncio de expandir todo el repaso`.
+**Entrega:** commit `mejora 36: anuncio de expandir todo el repaso`. Una región `role="status"` informa la acción y el número de respuestas; permanece vacía al abrir una fila individual y no mueve el foco.
 
 ---
 
@@ -686,3 +686,17 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 **Aceptación:** el anuncio solo ocurre tras una acción del usuario; se lee en ES/EN; no duplica el nombre del botón; no interfiere con `aria-pressed`; no aparece en el DOM inicial si no se ha cambiado el orden.
 
 **Entrega:** commit `mejora 48: anuncio del orden del repaso`.
+
+---
+
+## 49. Mostrar la dificultad de cada fallo en el repaso — ⬜ Pendiente
+
+**Área:** aprendizaje / `ResultsPage`.
+
+**Problema:** el repaso identifica la categoría de cada fallo, pero no su dificultad. Un fallo en una pregunta difícil y otro en una fácil se leen igual, aunque exigen estrategias distintas.
+
+**Propuesta:** añadir al resumen de cada fila un badge compacto con la dificultad cuando la pregunta la traiga, reutilizando `game.difficulty.*` y el estilo de los badges existentes. Ocultarlo si falta el dato.
+
+**Aceptación:** el badge solo aparece cuando existe dificultad; no duplica el texto del enunciado; el resumen sigue siendo legible en móvil; se lee en ES/EN; no altera el orden ni el contador del repaso.
+
+**Entrega:** commit `mejora 49: dificultad por fallo en el repaso`.
