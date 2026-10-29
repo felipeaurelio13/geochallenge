@@ -244,17 +244,17 @@ export function MapInteractive({
         <div
           data-testid="map-keyboard-hint"
           className="mb-2 flex items-start gap-2 rounded-md border border-app-border bg-app-surface px-3 py-2 text-xs text-app-secondary"
-          onKeyDown={(event) => {
-            if (event.key === 'Escape') {
-              event.preventDefault();
-              dismissHint();
-            }
-          }}
         >
           <p className="min-w-0 flex-1">{t('map.keyboardInstructions')}</p>
           <button
             type="button"
             onClick={dismissHint}
+            onKeyDown={(event) => {
+              if (event.key === 'Escape') {
+                event.preventDefault();
+                dismissHint();
+              }
+            }}
             aria-label={t('common.close')}
             className="-my-2 flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-md text-base text-app-secondary hover:bg-app-muted hover:text-app-text"
           >
