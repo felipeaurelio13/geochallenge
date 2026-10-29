@@ -855,7 +855,7 @@ describe('ResultsPage', () => {
     ] as unknown as typeof mocks.gameState.questions;
     mocks.gameState.results = [
       { questionId: 'q1', isCorrect: false, correctAnswer: 'Santiago', userAnswer: 'Lima', elapsedSeconds: 8 },
-    ] as typeof mocks.gameState.results;
+    ] as unknown as typeof mocks.gameState.results;
 
     try {
       render(<ResultsPage />);
