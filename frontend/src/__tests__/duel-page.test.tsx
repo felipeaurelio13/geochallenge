@@ -106,9 +106,13 @@ vi.mock('../components', () => ({
 }));
 
 vi.mock('../components/MapInteractive', () => ({
-  MapInteractive: ({ questionId }: { questionId?: string }) => (
-    <div data-testid="map-interactive" data-question-id={questionId}>
-      map
+  MapInteractive: ({ questionId, showKeyboardHint, onLocationSelect }: { questionId?: string; showKeyboardHint?: boolean; onLocationSelect: (lat: number, lng: number) => void }) => (
+    <div
+      data-testid="map-interactive"
+      data-question-id={questionId}
+      data-show-keyboard-hint={showKeyboardHint ? 'true' : 'false'}
+    >
+      <button type="button" onClick={() => onLocationSelect(1, 2)}>map</button>
     </div>
   ),
 }));
@@ -538,6 +542,52 @@ describe('DuelPage socket flow', () => {
 
     const map = await screen.findByTestId('map-interactive');
     expect(map).toHaveAttribute('data-question-id', 'map-1');
+  });
+
+  it('muestra la pista del mapa solo en la primera ronda de mapa', async () => {
+    render(<DuelPage />);
+
+    act(() => {
+      mocks.handlers.get('duel:question')?.forEach((cb) =>
+        cb({
+          questionIndex: 0,
+          totalQuestions: 10,
+          question: {
+            id: 'map-1',
+            questionText: 'Ubica París',
+            options: [],
+            correctAnswer: '',
+            category: 'MAP',
+          },
+        })
+      );
+    });
+
+    const map = await screen.findByTestId('map-interactive');
+    expect(map).toHaveAttribute('data-show-keyboard-hint', 'true');
+
+    fireEvent.click(map.querySelector('button')!);
+    fireEvent.click(screen.getByRole('button', { name: 'game.submit' }));
+
+    act(() => {
+      mocks.handlers.get('duel:question')?.forEach((cb) =>
+        cb({
+          questionIndex: 1,
+          totalQuestions: 10,
+          question: {
+            id: 'map-2',
+            questionText: 'Ubica Roma',
+            options: [],
+            correctAnswer: '',
+            category: 'MAP',
+          },
+        })
+      );
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('map-interactive')).toHaveAttribute('data-show-keyboard-hint', 'false');
+    });
   });
 
   it('mantiene una sola suscripción de sockets aunque cambie el score', async () => {

@@ -731,7 +731,7 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 ---
 
-## 52. Reservar espacio para el ranking mientras carga — ⬜ Pendiente
+## 52. Reservar espacio para el ranking mientras carga — ✅ Desarrollada
 
 **Área:** estabilidad visual / `ResultsPage`.
 
@@ -741,11 +741,11 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** el bloque no cambia de altura entre cargando, con ranking y sin ranking; el spinner sigue siendo perceptible; no afecta a los modos que no piden ranking; se cubre con un test de estructura.
 
-**Entrega:** commit `mejora 52: espacio estable para el ranking`.
+**Entrega:** commit `mejora 52: espacio estable para el ranking`. La fila de ranking reserva `min-h-12` para spinner, posición y estado sin dato, sin alterar los modos que no consultan ranking.
 
 ---
 
-## 53. Incluir el número de pregunta en la ronda más lenta — ⬜ Pendiente
+## 53. Incluir el número de pregunta en la ronda más lenta — ✅ Desarrollada
 
 **Área:** aprendizaje / `ResultsPage`.
 
@@ -755,11 +755,11 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** el número coincide con la posición real de la ronda; el texto sigue sin revelar la respuesta correcta; se lee en ES/EN; no cambia cuando la ronda más lenta no se muestra; no afecta al repaso.
 
-**Entrega:** commit `mejora 53: número de la ronda más lenta`.
+**Entrega:** commit `mejora 53: número de la ronda más lenta`. El resumen añade `#{{number}}` con la posición real de la respuesta más lenta, sin cambiar las condiciones de ocultado ni revelar la respuesta.
 
 ---
 
-## 54. Llevar la pista de controles del mapa a duelos y retos — ⬜ Pendiente
+## 54. Llevar la pista de controles del mapa a duelos y retos — ✅ Desarrollada
 
 **Área:** accesibilidad / `DuelPage`, `GeoChallengesPage`, `SurvivalPage`.
 
@@ -769,11 +769,11 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** la pista aparece una sola vez por partida con mapa; no se muestra en rondas sin mapa ni tras el resultado; no tapa el mapa; se puede cerrar con teclado; funciona en ES/EN en los tres modos.
 
-**Entrega:** commit `mejora 54: pista del mapa en duelos y retos`.
+**Entrega:** commit `mejora 54: pista del mapa en duelos y retos`. La pista se muestra una vez por partida en duelos, supervivencia y retos diarios, y se oculta tras responder el primer mapa. GeoRetos no monta `MapInteractive` —usa alternativas sobre datos—, así que no recibe una pista de teclado inexistente.
 
 ---
 
-## 55. Mostrar el número de fallos en cada filtro de categoría — ⬜ Pendiente
+## 55. Mostrar el número de fallos en cada filtro de categoría — ✅ Desarrollada
 
 **Área:** aprendizaje / `ResultsPage`.
 
@@ -783,11 +783,11 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** cada conteo coincide con las filas de esa categoría; “Todos” suma el total; el texto se lee en ES/EN; no cambia el layout de forma abrupta; no aparecen filtros sin fallos.
 
-**Entrega:** commit `mejora 55: conteo en los filtros del repaso`.
+**Entrega:** commit `mejora 55: conteo en los filtros del repaso`. Cada chip muestra `(n)` derivado de los mismos fallos; “Todos” suma el total y conserva `aria-pressed`.
 
 ---
 
-## 56. Incluir el dato curioso en el repaso copiado — ⬜ Pendiente
+## 56. Incluir el dato curioso en el repaso copiado — ✅ Desarrollada
 
 **Área:** aprendizaje / `ResultsPage`.
 
@@ -797,11 +797,11 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** el dato copiado coincide con el visible; solo aparece cuando existe; no duplica la respuesta correcta; se lee en ES/EN; no cambia el texto cuando no hay dato; el copiado sigue respetando el filtro activo.
 
-**Entrega:** commit `mejora 56: dato curioso en el repaso copiado`.
+**Entrega:** commit `mejora 56: dato curioso en el repaso copiado`. Cada fallo copiado añade `Dato curioso: …` solo cuando `generateFunFact` devuelve texto, respetando filtro y orden.
 
 ---
 
-## 57. Anunciar cuántos fallos quedan al filtrar el repaso — ⬜ Pendiente
+## 57. Anunciar cuántos fallos quedan al filtrar el repaso — ✅ Desarrollada
 
 **Área:** accesibilidad / `ResultsPage`.
 
@@ -811,11 +811,11 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** el anuncio ocurre solo tras elegir un filtro; informa categoría y cantidad; se lee en ES/EN; no duplica el `aria-pressed` del chip; no interfiere con los anuncios de orden o expansión.
 
-**Entrega:** commit `mejora 57: anuncio del filtro del repaso`.
+**Entrega:** commit `mejora 57: anuncio del filtro del repaso`. Elegir un chip anuncia la categoría y el total visible; “Todos” usa un mensaje propio con el total y el render inicial no anuncia nada.
 
 ---
 
-## 58. Incluir la dificultad en el texto copiado del repaso — ⬜ Pendiente
+## 58. Incluir la dificultad en el texto copiado del repaso — ✅ Desarrollada
 
 **Área:** aprendizaje / `ResultsPage`.
 
@@ -825,11 +825,11 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** la dificultad copiada coincide con la visible; se omite si falta; no duplica la categoría; se lee en ES/EN; no cambia el texto cuando no hay dificultad; el copiado sigue respetando filtro y orden.
 
-**Entrega:** commit `mejora 58: dificultad en el repaso copiado`.
+**Entrega:** commit `mejora 58: dificultad en el repaso copiado`. El encabezado de cada fallo añade ` · Dificultad` solo si la pregunta la trae, con la misma etiqueta localizada que el badge visible.
 
 ---
 
-## 59. Conservar los filtros al practicar desde el repaso — ⬜ Pendiente
+## 59. Conservar los filtros al practicar desde el repaso — ✅ Desarrollada
 
 **Área:** continuidad / `ResultsPage`.
 
@@ -839,11 +839,11 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** la práctica conserva los filtros compatibles; funciona también sin filtros; no altera el destino de “Jugar de nuevo” ni el de las categorías; se cubre con test de navegación.
 
-**Entrega:** commit `mejora 59: filtros al practicar desde el repaso`.
+**Entrega:** commit `mejora 59: filtros al practicar desde el repaso`. El botón de práctica usa el mismo helper de filtros preservados, mantiene `gameType=practice` y no arrastra la categoría de la partida.
 
 ---
 
-## 60. Anunciar cuántos fallos se copiaron del repaso — ⬜ Pendiente
+## 60. Anunciar cuántos fallos se copiaron del repaso — ✅ Desarrollada
 
 **Área:** accesibilidad / `ResultsPage`.
 
@@ -853,4 +853,256 @@ Revisión completa del juego (frontend, backend y experiencia de partida) con un
 
 **Aceptación:** el conteo coincide con las filas visibles; usa singular o plural según corresponda; se lee en ES/EN; no se anuncia si el copiado falla; no duplica el aviso existente ni interfiere con los anuncios de orden o filtro.
 
-**Entrega:** commit `mejora 60: conteo al copiar el repaso`.
+**Entrega:** commit `mejora 60: conteo al copiar el repaso`. El aviso de éxito usa singular/plural con el número de filas visibles; el error mantiene su mensaje sin conteo y no se anuncia nada en el render inicial.
+
+---
+
+## 61. Mostrar también la ronda más rápida en el resumen — ✅ Desarrollada
+
+**Área:** aprendizaje / `ResultsPage`.
+
+**Problema:** el resumen destaca la ronda más lenta, pero no la más rápida. El jugador ve dónde perdió tiempo, pero no qué pregunta resolvió con seguridad y puede usar esa referencia para repetir el patrón.
+
+**Propuesta:** reutilizar la lista de respuestas cronometradas para calcular la ronda más rápida y mostrarla junto a la más lenta, con el mismo formato de enunciado y segundos y sin revelar la respuesta correcta. Ocultarla cuando no haya al menos dos tiempos válidos.
+
+**Aceptación:** la ronda coincide con el menor tiempo registrado; no duplica la más lenta cuando todas duran lo mismo; se lee en ES/EN; no aparece sin tiempos suficientes; no altera el repaso ni el texto de compartir.
+
+**Entrega:** commit `mejora 61: ronda más rápida en el resumen`. El mismo cálculo de tiempos devuelve la ronda más rápida y la muestra junto a la más lenta; ambas se ocultan si no hay tiempos suficientes o todas duran igual.
+
+---
+
+## 62. Resaltar la ronda más lenta dentro del repaso — ✅ Desarrollada
+
+**Área:** aprendizaje / `ResultsPage`.
+
+**Problema:** el resumen nombra la ronda más lenta, pero en el repaso no hay ninguna marca que permita encontrarla entre varios fallos parecidos. El jugador tiene que contar o comparar tiempos a mano.
+
+**Propuesta:** reutilizar el número calculado para la ronda más lenta y añadir un badge “Ronda más lenta” a la fila correspondiente del repaso cuando esa ronda sea un fallo. Mantener el badge fuera del texto copiado y del orden.
+
+**Aceptación:** solo se marca la fila cuyo número coincide; no aparece si la ronda fue correcta; se lee en ES/EN; no cambia el orden, los filtros ni el copiado; no duplica la etiqueta visible del resumen.
+
+**Entrega:** commit `mejora 62: marca de la ronda más lenta en el repaso`. El resumen de cada fallo compara su número con el de la ronda más lenta y añade un badge solo a esa fila, sin tocar orden, filtros ni copiado.
+
+---
+
+## 63. Devolver el foco al mapa al cerrar la pista — ✅ Desarrollada
+
+**Área:** accesibilidad / `MapInteractive`.
+
+**Problema:** al cerrar la pista de controles, el botón de cierre desaparece y el foco del teclado se pierde en el documento. Un usuario que navega sin ratón tiene que volver a recorrer la pantalla para llegar al mapa.
+
+**Propuesta:** al cerrar la pista, mover el foco al contenedor interactivo del mapa en lugar de dejar que el navegador lo pierda. No mover el foco en el render inicial ni al cambiar de pregunta.
+
+**Aceptación:** cerrar la pista deja el foco en el mapa; el foco inicial de la pantalla no cambia; funciona con teclado y lector de pantalla; no afecta al arrastre ni a la selección táctil; se cubre con test.
+
+**Entrega:** commit `mejora 63: foco al cerrar la pista del mapa`. Cerrar la pista mueve el foco al contenedor del mapa con `preventScroll`; el render inicial no roba el foco.
+
+---
+
+## 64. Cerrar la pista del mapa con Escape — ✅ Desarrollada
+
+**Área:** accesibilidad / `MapInteractive`.
+
+**Problema:** la pista de controles solo se puede cerrar con el botón visible. Un usuario de teclado que ya conoce las instrucciones espera poder descartarla con Escape sin tabular hasta la “×”.
+
+**Propuesta:** escuchar `Escape` mientras la pista está visible y cerrarla con el mismo estado que usa el botón, reutilizando el manejo de foco que corresponda. No interceptar Escape cuando la pista ya está cerrada ni cuando el foco está en otro control.
+
+**Aceptación:** Escape cierra la pista visible; no afecta al mapa ni a la selección; no se dispara tras cerrarla; funciona igual en todos los modos con mapa; se cubre con test de teclado.
+
+**Entrega:** commit `mejora 64: cerrar la pista del mapa con Escape`. Escape cierra la pista tanto desde su botón como desde el mapa, devuelve el foco al mapa y no hace nada cuando la pista ya está cerrada.
+
+---
+
+## 65. Incluir el tiempo de respuesta en el repaso copiado — ✅ Desarrollada
+
+**Área:** aprendizaje / `ResultsPage`.
+
+**Problema:** cada fallo visible muestra cuánto tardó la respuesta, pero el texto copiado omite ese dato. Al estudiar fuera de la app se pierde la señal de qué fallos fueron por duda prolongada.
+
+**Propuesta:** añadir una línea de tiempo por fallo cuando `elapsedSeconds` sea válido, reutilizando `results.averageTimeValue` y el mismo formato que la fila visible. Omitirla cuando no haya tiempo registrado.
+
+**Aceptación:** el tiempo copiado coincide con el visible; solo aparece con datos válidos; se lee en ES/EN; no cambia el texto cuando falta; el copiado sigue respetando filtro y orden.
+
+**Entrega:** commit `mejora 65: tiempo por fallo en el repaso copiado`. Cada bloque añade `Tiempo dedicado` con el mismo formato del detalle visible solo cuando `elapsedSeconds` es válido.
+
+---
+
+## 66. Reservar espacio para el aviso de copiado del repaso — ✅ Desarrollada
+
+**Área:** estabilidad visual / `ResultsPage`.
+
+**Problema:** el aviso “Repaso copiado” se inserta sobre una línea vacía y empuja hacia abajo la lista de fallos justo después de pulsar copiar. En móvil el salto se nota y puede hacer perder la posición de lectura.
+
+**Propuesta:** reservar una altura mínima para el aviso, igual que ya hace el botón de compartir, sin mostrarlo hasta que exista un mensaje. Mantener la región `aria-live` y el tiempo de desaparición actuales.
+
+**Aceptación:** la lista no cambia de posición al aparecer o desaparecer el aviso; el espacio reservado no deja un hueco visible; el aviso sigue siendo perceptible; no afecta al filtro ni al orden; se cubre con test de estructura.
+
+**Entrega:** commit `mejora 66: espacio estable para el aviso de copiado`. El aviso reserva `min-h-5` desde el primer render; la lista no se desplaza al aparecer o desaparecer y la región `aria-live` se mantiene.
+
+---
+
+## 67. Incluir el total de fallos en el repaso copiado — ✅ Desarrollada
+
+**Área:** aprendizaje / `ResultsPage`.
+
+**Problema:** el texto copiado empieza directamente con la lista. Quien lo recibe fuera de la app no sabe cuántos fallos contiene ni si el filtro activo dejó fuera parte del repaso.
+
+**Propuesta:** añadir una línea de resumen bajo el título con el número de fallos copiados, derivado de `visibleReviewMistakes.length`, usando singular o plural. Mantener el título y el resto del formato.
+
+**Aceptación:** el total coincide con las filas copiadas; respeta el filtro activo; se lee en ES/EN; no aparece si no hay fallos; no duplica el contador visible del repaso.
+
+**Entrega:** commit `mejora 67: total de fallos en el repaso copiado`. El texto añade una línea con el conteo visible entre el título y la lista, usando singular/plural y respetando el filtro activo.
+
+---
+
+## 68. Permitir reintentar la carga del ranking cuando falla — ✅ Desarrollada
+
+**Área:** resiliencia / `ResultsPage`.
+
+**Problema:** si `getMyRank` falla, la fila de ranking queda vacía y el jugador no tiene forma de recuperar su posición sin recargar toda la página.
+
+**Propuesta:** reutilizar la fila estable del ranking para mostrar un botón de reintento tras un fallo, con el mismo estado de carga y la misma petición. Mantener oculto el botón mientras carga o cuando ya hay posición.
+
+**Aceptación:** el reintento solo aparece tras un error; vuelve a pedir el ranking; muestra carga durante el reintento; no cambia la altura de la fila; no afecta a práctica ni prueba; se cubre con test de error y reintento.
+
+**Entrega:** commit `mejora 68: reintento de carga del ranking`. La fila estable cambia el estado vacío por un botón de reintento tras un error, vuelve a pedir el ranking y muestra el spinner mientras dura.
+
+---
+
+## 69. Reservar espacio para el aviso de compartir la racha — ✅ Desarrollada
+
+**Área:** estabilidad visual / `ResultsPage`.
+
+**Problema:** en modo racha, el aviso de compartir aparece y desaparece debajo del botón sin altura reservada. Al hacerlo empuja el bloque de ranking y puede mover el contenido mientras el jugador apunta al botón.
+
+**Propuesta:** reservar una altura mínima para el aviso, igual que ya hacen el botón de compartir general y el aviso de copiado del repaso. Mantener la región `aria-live` y el tiempo de desaparición actuales.
+
+**Aceptación:** el bloque de ranking no se mueve al aparecer o desaparecer el aviso; el espacio no deja un hueco visible; el aviso sigue siendo perceptible; no afecta a modos sin racha; se cubre con test de estructura.
+
+**Entrega:** commit `mejora 69: espacio estable para el aviso de racha`. El aviso reserva `min-h-5` desde el primer render; el bloque de ranking ya no se mueve al compartir y la región `aria-live` se conserva.
+
+---
+
+## 70. Dar un acceso directo al repaso desde el resumen — ⬜ Pendiente
+
+**Área:** usabilidad / `ResultsPage`.
+
+**Problema:** cuando hay fallos, el repaso queda después del desglose por categoría y de las acciones. En móvil, un jugador que quiere revisar sus errores debe recorrer media página sin saber cuánto falta.
+
+**Propuesta:** añadir junto a las acciones un botón secundario “Revisar fallos” que solo aparece si hay fallos y lleva el foco al título del repaso, reutilizando el patrón de “Volver al resumen”. Mantener el orden actual del contenido.
+
+**Aceptación:** el atajo solo aparece con fallos; lleva foco y scroll al repaso; respeta movimiento reducido; se lee en ES/EN; no duplica el botón de practicar fallos; se cubre con test de navegación interna.
+
+**Entrega:** commit `mejora 70: acceso directo al repaso`.
+
+---
+
+## 71. Incluir la duración total en el repaso copiado — ⬜ Pendiente
+
+**Área:** aprendizaje / `ResultsPage`.
+
+**Problema:** el repaso copiado reúne fallos y datos, pero no cuánto duró la partida. Al comparar sesiones de estudio fuera de la app se pierde la referencia de ritmo.
+
+**Propuesta:** añadir una línea de duración total junto al título del repaso copiado cuando existan tiempos válidos, reutilizando `formattedTotalAnswerSeconds`. Omitirla cuando no haya datos.
+
+**Aceptación:** la duración copiada coincide con el resumen visible; solo aparece con tiempos válidos; se lee en ES/EN; no cambia el texto si falta; el copiado sigue respetando filtro y orden.
+
+**Entrega:** commit `mejora 71: duración total en el repaso copiado`.
+
+---
+
+## 72. Permitir reabrir la pista de controles del mapa — ⬜ Pendiente
+
+**Área:** usabilidad / `MapInteractive`.
+
+**Problema:** una vez cerrada la pista, no hay forma de recuperarla sin recargar la partida. Quien la descarta sin leerla o la necesita más tarde queda sin referencia de teclado.
+
+**Propuesta:** mostrar un control discreto sobre el mapa, solo cuando la pista ya se cerró y sigue habiendo una ronda de mapa activa, para volver a abrirla. Reutilizar el estado de descarte y la etiqueta accesible existente.
+
+**Aceptación:** el control solo aparece tras cerrar la pista; al pulsarlo vuelve a mostrarse; no tapa el mapa ni el resultado; se puede usar con teclado; se lee en ES/EN; no afecta a la selección táctil.
+
+**Entrega:** commit `mejora 72: reabrir la pista del mapa`.
+
+---
+
+## 73. Indicar en la pista que se cierra con Escape — ⬜ Pendiente
+
+**Área:** usabilidad / `MapInteractive`.
+
+**Problema:** la pista ya se puede cerrar con Escape, pero el texto solo menciona flechas, zoom y Enter. Quien usa teclado no descubre el atajo y sigue tabulando hasta la “×”.
+
+**Propuesta:** añadir una nota breve y localizada al texto de la pista, por ejemplo “Esc para cerrar”, sin alargar el bloque en móvil ni repetir el botón visible.
+
+**Aceptación:** la pista menciona Escape en ES/EN; el texto sigue siendo legible en móvil; no cambia el comportamiento del cierre; no afecta al lector de pantalla; se cubre con test de contenido.
+
+**Entrega:** commit `mejora 73: atajo Escape en la pista del mapa`.
+
+---
+
+## 74. Incluir el tiempo medio por respuesta en el repaso copiado — ⬜ Pendiente
+
+**Área:** aprendizaje / `ResultsPage`.
+
+**Problema:** el repaso copiado ya puede incluir la duración total, pero no el ritmo medio. Al comparar sesiones o detectar dudas recurrentes falta la referencia principal que sí muestra el resumen.
+
+**Propuesta:** añadir una línea de tiempo medio junto al título del repaso copiado cuando existan respuestas cronometradas, reutilizando `formattedAverageAnswerSeconds`. Omitirla cuando no haya datos.
+
+**Aceptación:** el tiempo medio copiado coincide con el visible; solo aparece con tiempos válidos; se lee en ES/EN; no cambia el texto si falta; el copiado sigue respetando filtro y orden.
+
+**Entrega:** commit `mejora 74: tiempo medio en el repaso copiado`.
+
+---
+
+## 75. Indicar cuántos fallos copiará el botón de repaso — ⬜ Pendiente
+
+**Área:** usabilidad / `ResultsPage`.
+
+**Problema:** el botón “Copiar repaso” no anticipa el alcance de la acción. Con un filtro activo, el jugador no sabe si copiará todos los fallos o solo los visibles hasta que revisa el texto.
+
+**Propuesta:** añadir el número de fallos visibles al texto del botón, reutilizando el mismo conteo de la lista. Mantener el nombre accesible completo y el estado de feedback actuales.
+
+**Aceptación:** el número coincide con las filas visibles; cambia al filtrar; usa singular o plural; se lee en ES/EN; no cambia el layout de forma abrupta; no altera el texto copiado.
+
+**Entrega:** commit `mejora 75: conteo en el botón de copiar repaso`.
+
+---
+
+## 76. Incluir la precisión de la partida en el repaso copiado — ⬜ Pendiente
+
+**Área:** aprendizaje / `ResultsPage`.
+
+**Problema:** el repaso copiado reúne fallos, tiempos y datos, pero no la precisión global. Al estudiar fuera de la app no queda claro si esos fallos representan una partida floja o una buena con pocos errores.
+
+**Propuesta:** añadir una línea de precisión junto a las de duración y tiempo medio, reutilizando `percentage`. Omitirla solo si no hay respuestas, caso que ya redirige fuera de resultados.
+
+**Aceptación:** la precisión copiada coincide con la visible; se lee en ES/EN; no duplica el conteo de fallos; no altera el formato de cada fallo; se cubre con test del texto copiado.
+
+**Entrega:** commit `mejora 76: precisión en el repaso copiado`.
+
+---
+
+## 77. Anunciar que el ranking no se pudo cargar — ⬜ Pendiente
+
+**Área:** accesibilidad / `ResultsPage`.
+
+**Problema:** cuando falla la petición de ranking, el spinner desaparece y aparece un botón de reintento, pero un lector de pantalla no recibe ningún aviso del cambio. El jugador puede quedarse esperando una posición que ya no va a llegar.
+
+**Propuesta:** anunciar el fallo en una región `aria-live` junto a la fila de ranking y mantener el botón de reintento como acción. No anunciar si la petición se recupera sin error.
+
+**Aceptación:** el fallo se anuncia una sola vez; el reintento sigue disponible; el aviso no duplica el texto del botón; se lee en ES/EN; no interfiere con el spinner ni con la posición; se cubre con test.
+
+**Entrega:** commit `mejora 77: aviso accesible de ranking fallido`.
+
+---
+
+## 78. Mantener visible el aviso de compartir la racha hasta la siguiente acción — ⬜ Pendiente
+
+**Área:** usabilidad / `ResultsPage`.
+
+**Problema:** el aviso de compartir la racha desaparece a los tres segundos. Quien mira la pantalla con calma o usa un lector de pantalla puede perder la confirmación antes de procesarla.
+
+**Propuesta:** mantener el mensaje hasta que el jugador vuelva a compartir o cambie de pantalla, en lugar de borrarlo por tiempo. Mantener la región `aria-live` y el espacio reservado.
+
+**Aceptación:** el aviso no desaparece solo; un nuevo intento lo actualiza; no se acumulan mensajes; no afecta a otros avisos; se lee en ES/EN; se cubre con test de persistencia.
+
+**Entrega:** commit `mejora 78: aviso de racha persistente`.

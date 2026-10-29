@@ -136,6 +136,7 @@ export function DuelPage() {
     streakShield: 0,
   });
   const [hasSubmittedThisQuestion, setHasSubmittedThisQuestion] = useState(false);
+  const [hasAnsweredMapQuestion, setHasAnsweredMapQuestion] = useState(false);
   const [duelImageUrls, setDuelImageUrls] = useState<string[]>([]);
   const [ratingDisplay, setRatingDisplay] = useState<RatingDisplayState>({ status: 'idle' });
   // Part 1.1: reassurance cuando isSyncingRound se alarga + timeout de conexión inicial.
@@ -556,6 +557,7 @@ export function DuelPage() {
       const coordinates = mapLocation || undefined;
       const answer = mapLocation ? `${mapLocation.lat},${mapLocation.lng}` : '0,0';
       hasSubmittedCurrentQuestionRef.current = true;
+      setHasAnsweredMapQuestion(true);
       socketService.submitDuelAnswer(currentQuestion.id, answer, timeRemaining, coordinates, pendingMechanicUsage);
       setPendingMechanicUsage(undefined);
       setDuelState('waiting');
@@ -1141,6 +1143,7 @@ export function DuelPage() {
             correctLocation={showResult ? resultCorrectLocation : null}
             showResult={showResult}
             disabled={showResult || duelState === 'waiting'}
+            showKeyboardHint={isMapQuestion && !hasAnsweredMapQuestion && duelState === 'playing'}
           />
         </Suspense>
       }

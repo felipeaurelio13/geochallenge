@@ -61,6 +61,8 @@ vi.mock('react-i18next', () => ({
         'results.reviewCopy': 'Copiar repaso',
         'results.reviewCopyTitle': 'Fallos de GeoChallenge',
         'results.reviewCopied': 'Repaso copiado',
+        'results.reviewCopiedOne': 'Repaso copiado: 1 fallo',
+        'results.reviewCopiedMany': 'Repaso copiado: {{count}} fallos',
         'results.reviewCopyError': 'No se pudo copiar el repaso',
         'results.yourAnswer': 'Tu respuesta',
         'results.noAnswer': 'Sin respuesta',
@@ -68,6 +70,7 @@ vi.mock('react-i18next', () => ({
         'results.categoryAccuracyTitle': 'Precisión por categoría',
         'results.categoryAccuracyDescription': 'Así se reparten tus aciertos por tipo de pregunta.',
         'results.funFactLabel': 'Dato curioso',
+        'results.slowestBadge': 'Ronda más lenta',
         'results.expandAll': 'Expandir todo',
         'results.collapseAll': 'Contraer todo',
         'results.reviewCountOne': '1 fallo',
@@ -83,6 +86,7 @@ vi.mock('react-i18next', () => ({
         'results.modeStreak': 'Racha',
         'results.modeTrial': 'Partida de prueba',
         'results.yourRank': 'Tu posición',
+        'results.retryRank': 'Reintentar ranking',
         'results.playAgain': 'Jugar de nuevo',
         'results.viewRankings': 'Ver rankings',
         'results.shareScore': 'Comparte tu puntuación',
@@ -121,7 +125,11 @@ vi.mock('react-i18next', () => ({
       }
 
       if (key === 'results.slowestQuestion') {
-        return `Ronda más lenta: ${options?.question} (${options?.seconds} s)`;
+        return `Ronda más lenta (#${options?.number}): ${options?.question} (${options?.seconds} s)`;
+      }
+
+      if (key === 'results.fastestQuestion') {
+        return `Ronda más rápida (#${options?.number}): ${options?.question} (${options?.seconds} s)`;
       }
 
       if (key === 'game.questionCapital') {
@@ -136,8 +144,32 @@ vi.mock('react-i18next', () => ({
         return `Jugar ${options?.category}`;
       }
 
+      if (key === 'results.reviewCopiedOne') {
+        return 'Repaso copiado: 1 fallo';
+      }
+
+      if (key === 'results.reviewCopiedMany') {
+        return `Repaso copiado: ${options?.count} fallos`;
+      }
+
       if (key === 'results.reviewExpandedMany') {
         return `Se expandieron ${options?.count} respuestas`;
+      }
+
+      if (key === 'results.reviewFilteredOne') {
+        return `Mostrando ${options?.category}: ${options?.count} fallo`;
+      }
+
+      if (key === 'results.reviewFilteredMany') {
+        return `Mostrando ${options?.category}: ${options?.count} fallos`;
+      }
+
+      if (key === 'results.reviewFilterAllOne') {
+        return `Mostrando todos los fallos: ${options?.count} fallo`;
+      }
+
+      if (key === 'results.reviewFilterAllMany') {
+        return `Mostrando todos los fallos: ${options?.count} fallos`;
       }
 
       if (key === 'results.reviewCollapsedMany') {
@@ -357,15 +389,21 @@ describe('ResultsPage', () => {
     const originalResults = mocks.gameState.results;
     mocks.gameState.results = originalResults.map((result, index) => ({
       ...result,
-      elapsedSeconds: index < 5 ? 4 : index === 7 ? 9 : 8,
+      elapsedSeconds: index < 5 ? 4 : index === 8 ? 9 : 8,
     })) as typeof mocks.gameState.results;
 
     try {
       render(<ResultsPage />);
 
-      const slowest = screen.getByText(/Ronda más lenta:/);
-      expect(slowest).toHaveTextContent('¿Cuál es la capital de Chile? (9 s)');
+      const slowest = screen.getByText(/Ronda más lenta \(#9\)/);
+      expect(slowest).toHaveTextContent('Ronda más lenta (#9): ¿Cuál es la capital de Chile? (9 s)');
       expect(slowest.textContent).not.toContain('Santiago');
+      const fastest = screen.getByText(/Ronda más rápida/);
+      expect(fastest).toHaveTextContent('Ronda más rápida (#1): ¿Cuál es la capital de Chile? (4 s)');
+      expect(fastest.textContent).not.toContain('Santiago');
+      const badge = screen.getByTestId('review-slowest-badge');
+      expect(badge.closest('summary')).toHaveTextContent('9.');
+      expect(screen.getAllByTestId('review-slowest-badge')).toHaveLength(1);
     } finally {
       mocks.gameState.results = originalResults;
     }
@@ -381,7 +419,7 @@ describe('ResultsPage', () => {
     try {
       render(<ResultsPage />);
 
-      expect(screen.queryByText(/Ronda más lenta:/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/Ronda más lenta/)).not.toBeInTheDocument();
     } finally {
       mocks.gameState.results = originalResults;
     }
@@ -390,7 +428,25 @@ describe('ResultsPage', () => {
   it('oculta la ronda más lenta cuando la sesión no trae tiempos', () => {
     render(<ResultsPage />);
 
-    expect(screen.queryByText(/Ronda más lenta:/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Ronda más lenta/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Ronda más rápida/)).not.toBeInTheDocument();
+  });
+
+  it('oculta ambas rondas extremas cuando todas duran lo mismo', () => {
+    const originalResults = mocks.gameState.results;
+    mocks.gameState.results = originalResults.map((result) => ({
+      ...result,
+      elapsedSeconds: 5,
+    })) as typeof mocks.gameState.results;
+
+    try {
+      render(<ResultsPage />);
+
+      expect(screen.queryByText(/Ronda más lenta/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/Ronda más rápida/)).not.toBeInTheDocument();
+    } finally {
+      mocks.gameState.results = originalResults;
+    }
   });
 
   it.each(['single', 'streak', 'practice'] as const)('replays %s with the same configuration', async (gameType) => {
@@ -406,6 +462,49 @@ describe('ResultsPage', () => {
       expect(mocks.getMyRankMock).not.toHaveBeenCalled();
       expect(screen.queryByText('Jugar de nuevo')).not.toBeInTheDocument();
     }
+  });
+
+  it('reserva una altura estable para la fila de ranking durante la carga', async () => {
+    let resolveRank: (value: { userRank: { rank: number } }) => void = () => {};
+    mocks.getMyRankMock.mockReturnValueOnce(new Promise((resolve) => { resolveRank = resolve; }));
+
+    render(<ResultsPage />);
+
+    const row = screen.getByTestId('results-rank-row');
+    expect(row).toHaveClass('min-h-12');
+    expect(within(row).getByText('loading')).toBeInTheDocument();
+
+    resolveRank({ userRank: { rank: 4 } });
+
+    await waitFor(() => expect(within(row).getByText('#4')).toBeInTheDocument());
+    expect(row).toHaveClass('min-h-12');
+  });
+
+  it('mantiene la fila de ranking sin posición cuando la API no devuelve rango', async () => {
+    mocks.getMyRankMock.mockResolvedValueOnce({ userRank: null });
+
+    render(<ResultsPage />);
+
+    const row = screen.getByTestId('results-rank-row');
+    await waitFor(() => expect(within(row).queryByText('loading')).not.toBeInTheDocument());
+    expect(row).toHaveClass('min-h-12');
+    expect(within(row).queryByText(/#/)).not.toBeInTheDocument();
+  });
+
+  it('permite reintentar la carga del ranking tras un fallo', async () => {
+    mocks.getMyRankMock.mockRejectedValueOnce(new Error('offline'));
+
+    render(<ResultsPage />);
+
+    const retry = await screen.findByRole('button', { name: 'Reintentar ranking' });
+    expect(mocks.getMyRankMock).toHaveBeenCalledTimes(1);
+    expect(screen.queryByText('#1')).not.toBeInTheDocument();
+
+    fireEvent.click(retry);
+
+    await waitFor(() => expect(mocks.getMyRankMock).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(screen.getByText('#1')).toBeInTheDocument());
+    expect(screen.queryByRole('button', { name: 'Reintentar ranking' })).not.toBeInTheDocument();
   });
 
   it('places replay before review and sharing, and shows actual missed answers', () => {
@@ -521,15 +620,17 @@ describe('ResultsPage', () => {
       const rows = Array.from(section.querySelectorAll('details'));
       const filter = within(section).getByRole('group', { name: 'Filtrar el repaso por categoría' });
 
-      expect(within(filter).getByRole('button', { name: 'Todos' })).toHaveAttribute('aria-pressed', 'true');
-      expect(within(filter).getByRole('button', { name: 'Banderas' })).toBeInTheDocument();
-      expect(within(filter).getByRole('button', { name: 'Capitales' })).toBeInTheDocument();
+      expect(screen.queryByText(/Mostrando/)).not.toBeInTheDocument();
+      expect(within(filter).getByRole('button', { name: 'Todos (2)' })).toHaveAttribute('aria-pressed', 'true');
+      expect(within(filter).getByRole('button', { name: 'Banderas (1)' })).toBeInTheDocument();
+      expect(within(filter).getByRole('button', { name: 'Capitales (1)' })).toBeInTheDocument();
 
       fireEvent.click(rows[0].querySelector('summary')!);
       expect(rows[0].open).toBe(true);
 
-      fireEvent.click(within(filter).getByRole('button', { name: 'Capitales' }));
+      fireEvent.click(within(filter).getByRole('button', { name: 'Capitales (1)' }));
 
+      expect(screen.getByText('Mostrando Capitales: 1 fallo')).toBeInTheDocument();
       expect(section).toHaveTextContent('1 fallo');
       expect(rows[0]).toHaveAttribute('hidden');
       expect(rows[1]).not.toHaveAttribute('hidden');
@@ -539,9 +640,12 @@ describe('ResultsPage', () => {
       const copied = mocks.writeTextMock.mock.calls[mocks.writeTextMock.mock.calls.length - 1]?.[0] as string;
       expect(copied).toContain('¿Cuál es la capital de Perú?');
       expect(copied).not.toContain('game.questionFlag');
+      expect(copied).toContain('1 fallo');
+      expect(screen.getByText('Repaso copiado: 1 fallo')).toBeInTheDocument();
 
-      fireEvent.click(within(filter).getByRole('button', { name: 'Todos' }));
+      fireEvent.click(within(filter).getByRole('button', { name: 'Todos (2)' }));
 
+      expect(screen.getByText('Mostrando todos los fallos: 2 fallos')).toBeInTheDocument();
       expect(section).toHaveTextContent('2 fallos');
       expect(rows[0]).not.toHaveAttribute('hidden');
       expect(rows[0].open).toBe(true);
@@ -564,7 +668,40 @@ describe('ResultsPage', () => {
     expect(copied).toContain('Tu respuesta: Lima');
     expect(copied).toContain('La respuesta correcta era: Santiago');
     expect(copied).toContain('10. Capitales');
-    expect(screen.getByText('Repaso copiado')).toBeInTheDocument();
+    expect(copied).toContain('Fallos de GeoChallenge\n\n2 fallos');
+    expect(copied).not.toContain('Dato curioso');
+    expect(copied).not.toContain('Difícil');
+    expect(copied).not.toContain('Tiempo dedicado');
+    expect(screen.getByText('Repaso copiado: 2 fallos')).toBeInTheDocument();
+  });
+
+  it('reserva altura para el aviso de compartir la racha', () => {
+    mocks.search = 'gameType=streak';
+
+    render(<ResultsPage />);
+
+    const feedback = screen.getByTestId('streak-share-feedback');
+    expect(feedback).toHaveClass('min-h-5');
+    expect(feedback).toBeEmptyDOMElement();
+  });
+
+  it('reserva altura para el aviso de copiado del repaso', () => {
+    render(<ResultsPage />);
+
+    const feedback = screen.getByTestId('review-copy-feedback');
+    expect(feedback).toHaveClass('min-h-5');
+    expect(feedback).toBeEmptyDOMElement();
+  });
+
+  it('no anuncia un conteo cuando el copiado del repaso falla', async () => {
+    mocks.writeTextMock.mockRejectedValueOnce(new Error('denied'));
+
+    render(<ResultsPage />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Copiar repaso' }));
+
+    expect(await screen.findByText('No se pudo copiar el repaso')).toBeInTheDocument();
+    expect(screen.queryByText(/Repaso copiado:/)).not.toBeInTheDocument();
   });
 
   it('no muestra filtros de repaso cuando todos los fallos son de una categoría', () => {    render(<ResultsPage />);
@@ -599,6 +736,38 @@ describe('ResultsPage', () => {
     }
   });
 
+  it('incluye el dato curioso en el repaso copiado cuando existe', async () => {
+    const originalQuestions = mocks.gameState.questions;
+    const originalResults = mocks.gameState.results;
+    mocks.gameState.questions = [
+      {
+        id: 'q1',
+        category: 'CAPITAL',
+        questionData: 'Chile',
+        continent: 'South America',
+        questionText: 'Capital',
+        options: [],
+      },
+    ] as unknown as typeof mocks.gameState.questions;
+    mocks.gameState.results = [
+      { questionId: 'q1', isCorrect: false, correctAnswer: 'Santiago', userAnswer: 'Lima' },
+    ] as typeof mocks.gameState.results;
+
+    try {
+      render(<ResultsPage />);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Copiar repaso' }));
+
+      await waitFor(() => expect(mocks.writeTextMock).toHaveBeenCalled());
+      const copied = mocks.writeTextMock.mock.calls[mocks.writeTextMock.mock.calls.length - 1]?.[0] as string;
+      expect(copied).toContain('Dato curioso: Chile se encuentra en América del Sur.');
+      expect(copied).toContain('La respuesta correcta era: Santiago');
+    } finally {
+      mocks.gameState.questions = originalQuestions;
+      mocks.gameState.results = originalResults;
+    }
+  });
+
   it('muestra la categoría en cada fallo del repaso', () => {
     render(<ResultsPage />);
 
@@ -617,6 +786,88 @@ describe('ResultsPage', () => {
       expect(screen.getAllByText('Difícil')).toHaveLength(1);
     } finally {
       mocks.gameState.questions = originalQuestions;
+    }
+  });
+
+  it('incluye la dificultad de un fallo en el repaso copiado', async () => {
+    const originalQuestions = mocks.gameState.questions;
+    const originalResults = mocks.gameState.results;
+    mocks.gameState.questions = [
+      {
+        id: 'q1',
+        category: 'CAPITAL',
+        questionData: 'Chile',
+        questionText: 'Capital',
+        options: [],
+        difficulty: 'HARD',
+      },
+    ] as unknown as typeof mocks.gameState.questions;
+    mocks.gameState.results = [
+      { questionId: 'q1', isCorrect: false, correctAnswer: 'Santiago', userAnswer: 'Lima' },
+    ] as typeof mocks.gameState.results;
+
+    try {
+      render(<ResultsPage />);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Copiar repaso' }));
+
+      await waitFor(() => expect(mocks.writeTextMock).toHaveBeenCalled());
+      const copied = mocks.writeTextMock.mock.calls[mocks.writeTextMock.mock.calls.length - 1]?.[0] as string;
+      expect(copied).toContain('1. Capitales · Difícil — ¿Cuál es la capital de Chile?');
+    } finally {
+      mocks.gameState.questions = originalQuestions;
+      mocks.gameState.results = originalResults;
+    }
+  });
+
+  it('conserva los filtros al practicar los fallos desde el repaso', () => {
+    mocks.search = 'category=FLAG&gameType=single&continent=Europe&difficulty=HARD&isInsular=true&countryCode=CL';
+
+    render(<ResultsPage />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'results.practiceMistakes' }));
+
+    expect(mocks.resetGameMock).toHaveBeenCalledOnce();
+    expect(mocks.navigateMock).toHaveBeenCalledWith(
+      '/game/single?gameType=practice&continent=Europe&difficulty=HARD&isInsular=true&countryCode=CL',
+    );
+  });
+
+  it('practica los fallos sin filtros cuando la partida no los tenía', () => {
+    render(<ResultsPage />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'results.practiceMistakes' }));
+
+    expect(mocks.navigateMock).toHaveBeenCalledWith('/game/single?gameType=practice');
+  });
+
+  it('incluye el tiempo de respuesta de un fallo en el repaso copiado', async () => {
+    const originalQuestions = mocks.gameState.questions;
+    const originalResults = mocks.gameState.results;
+    mocks.gameState.questions = [
+      {
+        id: 'q1',
+        category: 'CAPITAL',
+        questionData: 'Chile',
+        questionText: 'Capital',
+        options: [],
+      },
+    ] as unknown as typeof mocks.gameState.questions;
+    mocks.gameState.results = [
+      { questionId: 'q1', isCorrect: false, correctAnswer: 'Santiago', userAnswer: 'Lima', elapsedSeconds: 8 },
+    ] as unknown as typeof mocks.gameState.results;
+
+    try {
+      render(<ResultsPage />);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Copiar repaso' }));
+
+      await waitFor(() => expect(mocks.writeTextMock).toHaveBeenCalled());
+      const copied = mocks.writeTextMock.mock.calls[mocks.writeTextMock.mock.calls.length - 1]?.[0] as string;
+      expect(copied).toContain('Tiempo dedicado: 8 s');
+    } finally {
+      mocks.gameState.questions = originalQuestions;
+      mocks.gameState.results = originalResults;
     }
   });
 

@@ -71,6 +71,12 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
     return bTime - aTime || a.number - b.number;
   });
   const reviewCategories = Array.from(new Set(mistakes.map(({ question }) => question.category)));
+  const reviewCategoryCounts = mistakes.reduce((counts, { question }) => {
+    counts.set(question.category, (counts.get(question.category) ?? 0) + 1);
+    return counts;
+  }, new Map<Category, number>());
+  const reviewFilterCount = (filterCategory: Category | 'ALL') =>
+    filterCategory === 'ALL' ? mistakes.length : reviewCategoryCounts.get(filterCategory) ?? 0;
   const visibleReviewMistakes = reviewCategory === 'ALL'
     ? reviewMistakes
     : reviewMistakes.filter(({ question }) => question.category === reviewCategory);
@@ -141,8 +147,18 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
     ));
     if (slowest.elapsedSeconds === fastest.elapsedSeconds) return null;
     const question = questions.find((item) => item.id === slowest.questionId);
-    if (!question) return null;
-    return { question, seconds: slowest.elapsedSeconds };
+    const fastestQuestion = questions.find((item) => item.id === fastest.questionId);
+    if (!question || !fastestQuestion) return null;
+    return {
+      question,
+      seconds: slowest.elapsedSeconds,
+      number: results.indexOf(slowest) + 1,
+      fastest: {
+        question: fastestQuestion,
+        seconds: fastest.elapsedSeconds,
+        number: results.indexOf(fastest) + 1,
+      },
+    };
   }, [questions, results]);
   const weakestCategory = categoryStats.find((stat) => stat.accuracy < 100) ?? null;
   const unlockedAchievements = useMemo(
@@ -195,16 +211,24 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
   }, []);
 
   const [userRank, setUserRank] = useState<number | null>(null);
+  const [rankError, setRankError] = useState(false);
+  const [rankAttempt, setRankAttempt] = useState(0);
   const [loading, setLoading] = useState(!isPracticeMode && !isTrial);
   useEffect(() => {
     if (isPracticeMode || isTrial || results.length === 0) return;
     let active = true;
     api.getMyRank()
       .then((rankData) => { if (active) setUserRank(rankData.userRank?.rank || null); })
-      .catch(() => {})
+      .catch(() => { if (active) setRankError(true); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, [isPracticeMode, isTrial, results.length]);
+  }, [isPracticeMode, isTrial, results.length, rankAttempt]);
+
+  const handleRetryRank = () => {
+    setLoading(true);
+    setRankError(false);
+    setRankAttempt((attempt) => attempt + 1);
+  };
 
   const pointsBreakdown = [
     { key: 'basePoints', label: t('results.basePoints'), value: results.reduce((sum, r) => sum + (r.basePoints ?? 0), 0) },
@@ -267,6 +291,19 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
     setReviewAnnouncement(t(next === 'slowest' ? 'results.reviewSortedByTime' : 'results.reviewSortedOriginal'));
   };
 
+  const handleFilterReview = (filterCategory: Category | 'ALL') => {
+    setReviewCategory(filterCategory);
+    const count = reviewFilterCount(filterCategory);
+    if (filterCategory === 'ALL') {
+      setReviewAnnouncement(t(count === 1 ? 'results.reviewFilterAllOne' : 'results.reviewFilterAllMany', { count }));
+    } else {
+      setReviewAnnouncement(t(count === 1 ? 'results.reviewFilteredOne' : 'results.reviewFilteredMany', {
+        category: t(CATEGORY_LABEL_KEYS[filterCategory]),
+        count,
+      }));
+    }
+  };
+
   const handleBackToSummary = () => {
     const heading = summaryHeadingRef.current;
     if (!heading) return;
@@ -279,17 +316,37 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
       const userAnswer = question.category === 'MAP' && result.distance != null
         ? t('results.mapDistance', { distance: Math.round(result.distance).toLocaleString(currentLanguage) })
         : result.userAnswer || t('results.noAnswer');
+      const funFact = generateFunFact(
+        question,
+        currentLanguage === 'en' ? 'en' : 'es',
+        result.correctAnswer,
+      );
       return [
-        `${number}. ${t(CATEGORY_LABEL_KEYS[question.category])} — ${getLocalizedQuestionText(question, t, currentLanguage)}`,
+        `${number}. ${t(CATEGORY_LABEL_KEYS[question.category])}${question.difficulty ? ` · ${t(`game.difficulty.${question.difficulty.toLowerCase()}`)}` : ''} — ${getLocalizedQuestionText(question, t, currentLanguage)}`,
         `${t('results.yourAnswer')}: ${userAnswer}`,
+        ...(typeof result.elapsedSeconds === 'number' && Number.isFinite(result.elapsedSeconds) && result.elapsedSeconds >= 0
+          ? [`${t('results.answerTime')}: ${t('results.averageTimeValue', { seconds: result.elapsedSeconds.toLocaleString(currentLanguage) })}`]
+          : []),
         `${t('game.correctAnswerWas')}: ${result.correctAnswer}`,
+        ...(funFact ? [`${t('results.funFactLabel')}: ${funFact}`] : []),
       ].join('\n');
     });
-    const text = [t('results.reviewCopyTitle'), ...lines].join('\n\n');
+    const text = [
+      t('results.reviewCopyTitle'),
+      t(
+        visibleReviewMistakes.length === 1 ? 'results.reviewCountOne' : 'results.reviewCountMany',
+        { count: visibleReviewMistakes.length },
+      ),
+      ...lines,
+    ].join('\n\n');
 
     try {
       await navigator.clipboard.writeText(text);
-      setReviewCopyFeedback(t('results.reviewCopied'));
+      const copiedCount = visibleReviewMistakes.length;
+      setReviewCopyFeedback(t(
+        copiedCount === 1 ? 'results.reviewCopiedOne' : 'results.reviewCopiedMany',
+        { count: copiedCount },
+      ));
     } catch {
       setReviewCopyFeedback(t('results.reviewCopyError'));
     }
@@ -375,12 +432,22 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
             </p>
           )}
           {slowestAnswer && (
-            <p className="mt-1 text-xs text-app-secondary">
-              {t('results.slowestQuestion', {
-                question: getLocalizedQuestionText(slowestAnswer.question, t, currentLanguage),
-                seconds: slowestAnswer.seconds.toLocaleString(currentLanguage, { maximumFractionDigits: 1 }),
-              })}
-            </p>
+            <>
+              <p className="mt-1 text-xs text-app-secondary">
+                {t('results.slowestQuestion', {
+                  number: slowestAnswer.number,
+                  question: getLocalizedQuestionText(slowestAnswer.question, t, currentLanguage),
+                  seconds: slowestAnswer.seconds.toLocaleString(currentLanguage, { maximumFractionDigits: 1 }),
+                })}
+              </p>
+              <p className="mt-1 text-xs text-app-secondary">
+                {t('results.fastestQuestion', {
+                  number: slowestAnswer.fastest.number,
+                  question: getLocalizedQuestionText(slowestAnswer.fastest.question, t, currentLanguage),
+                  seconds: slowestAnswer.fastest.seconds.toLocaleString(currentLanguage, { maximumFractionDigits: 1 }),
+                })}
+              </p>
+            </>
           )}
           {formattedTotalAnswerSeconds && (
             <p className="mt-1 text-xs text-app-secondary">
@@ -489,7 +556,7 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
                     <button
                       key={filterCategory}
                       type="button"
-                      onClick={() => setReviewCategory(filterCategory)}
+                      onClick={() => handleFilterReview(filterCategory)}
                       aria-pressed={isActive}
                       className={`min-h-9 rounded-full border px-2.5 text-xs font-medium ${isActive
                         ? 'border-primary bg-primary text-app-on-accent'
@@ -497,13 +564,13 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
                     >
                       {filterCategory === 'ALL'
                         ? t('results.reviewFilterAll')
-                        : t(CATEGORY_LABEL_KEYS[filterCategory])}
+                        : t(CATEGORY_LABEL_KEYS[filterCategory])} ({reviewFilterCount(filterCategory)})
                     </button>
                   );
                 })}
               </div>
             )}
-            <p className="mt-2 text-xs text-success" aria-live="polite">{reviewCopyFeedback}</p>
+            <p data-testid="review-copy-feedback" className="mt-2 min-h-5 text-xs text-success" aria-live="polite">{reviewCopyFeedback}</p>
             <p className="sr-only" role="status" aria-live="polite">{reviewAnnouncement}</p>
             <div ref={reviewListRef} className="mt-4 space-y-2">
               {reviewMistakes.map(({ result, question, number }) => {
@@ -523,6 +590,14 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
                     {question.difficulty && (
                       <span className="ml-1 inline-block align-middle rounded-full border border-app-border bg-app-surface px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-app-secondary">
                         {t(`game.difficulty.${question.difficulty.toLowerCase()}`)}
+                      </span>
+                    )}
+                    {slowestAnswer?.number === number && (
+                      <span
+                        data-testid="review-slowest-badge"
+                        className="ml-1 inline-block align-middle rounded-full border border-warning-500/40 bg-warning-500/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-warning-500"
+                      >
+                        {t('results.slowestBadge')}
                       </span>
                     )}
                   </summary>
@@ -549,7 +624,11 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
               })}
             </div>
             {!isTrial && !isPracticeMode && (
-              <Button variant="secondary" fullWidth className="mt-3" onClick={() => { resetGame(); navigate('/game/single?gameType=practice'); }}>
+              <Button variant="secondary" fullWidth className="mt-3" onClick={() => {
+                const params = appendPreservedFilters(new URLSearchParams({ gameType: 'practice' }));
+                resetGame();
+                navigate(`/game/single?${params}`);
+              }}>
                 {t('results.practiceMistakes')}
               </Button>
             )}
@@ -586,12 +665,22 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
               <Button onClick={handleShareStreak} disabled={streakShareStatus === 'sharing'} variant="secondary" fullWidth>
                 {streakShareStatus === 'sharing' ? t('common.loading') : t('results.shareStreakButton')}
               </Button>
-              <p className="mt-2 text-xs text-success" aria-live="polite">{streakShareFeedback}</p>
+              <p data-testid="streak-share-feedback" className="mt-2 min-h-5 text-xs text-success" aria-live="polite">{streakShareFeedback}</p>
             </>
           ) : <ShareButton variant="secondary" size="md" payload={{ title: t('app.name'), text: shareText }} />}
           {!isTrial && !isPracticeMode && (
-            <div className="mt-4 flex items-center justify-between gap-3">
-              {loading ? <LoadingSpinner size="sm" /> : userRank ? <p className="text-sm text-app-secondary">{t('results.yourRank')} <strong className="text-app-text">#{userRank}</strong></p> : null}
+            <div className="mt-4 flex min-h-12 items-center justify-between gap-3" data-testid="results-rank-row">
+              <div className="flex min-h-12 min-w-0 flex-1 items-center">
+                {loading ? <LoadingSpinner size="sm" /> : rankError ? (
+                  <button
+                    type="button"
+                    onClick={handleRetryRank}
+                    className="min-h-11 rounded-md px-2 text-xs font-semibold text-primary hover:bg-primary/10 hover:text-primary/80"
+                  >
+                    {t('results.retryRank')}
+                  </button>
+                ) : userRank ? <p className="text-sm text-app-secondary">{t('results.yourRank')} <strong className="text-app-text">#{userRank}</strong></p> : null}
+              </div>
               <Button onClick={() => navigate('/rankings')} variant="ghost">{t('results.viewRankings')}</Button>
             </div>
           )}

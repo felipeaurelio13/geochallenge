@@ -136,6 +136,7 @@ export function SurvivalPage() {
   const hasAnsweredRef = useRef(false);
   const answerDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [hasSubmittedThisRound, setHasSubmittedThisRound] = useState(false);
+  const [hasAnsweredMapQuestion, setHasAnsweredMapQuestion] = useState(false);
   // Part 1.1: mismo pub-sub de conexión que DuelPage.
   const [connectionError, setConnectionError] = useState(false);
   // Part 5.3: ronda en la que ESTE usuario fue eliminado (para "Llegaste a la
@@ -494,6 +495,7 @@ export function SurvivalPage() {
     if (currentQuestion.category === 'MAP' && !mapLocation) return;
 
     hasAnsweredRef.current = true;
+    if (currentQuestion.category === 'MAP') setHasAnsweredMapQuestion(true);
     setHasSubmittedThisRound(true);
     socketService.socket?.emit('survival:answer', {
       questionId: currentQuestion.id,
@@ -918,6 +920,7 @@ export function SurvivalPage() {
             correctLocation={showResult ? resultCorrectLocation : null}
             showResult={showResult}
             disabled={showResult || isSpectating}
+            showKeyboardHint={isMapQuestion && !hasAnsweredMapQuestion && status === 'playing'}
           />
         </Suspense>
       }
