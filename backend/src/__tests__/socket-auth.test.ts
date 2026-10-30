@@ -59,6 +59,21 @@ describe('authenticateSocket middleware', () => {
     expect(socket.user).toBeUndefined();
   });
 
+  it('rechaza conexión cuando el token de auth está firmado con algoritmo no permitido (HS384)', () => {
+    const invalidAlgToken = jwt.sign(validPayload, config.jwt.secret, { algorithm: 'HS384' });
+    const socket = createMockSocket({
+      auth: { token: invalidAlgToken },
+    });
+    const next = vi.fn();
+
+    authenticateSocket(socket, next);
+
+    expect(next).toHaveBeenCalledTimes(1);
+    expect(next).toHaveBeenCalledWith(expect.any(Error));
+    expect(next.mock.calls[0][0].message).toBe('Token inválido');
+    expect(socket.user).toBeUndefined();
+  });
+
   it('autentica exitosamente y asigna socket.user cuando el token viene en handshake.auth', () => {
     const validToken = jwt.sign(validPayload, config.jwt.secret);
     const socket = createMockSocket({
