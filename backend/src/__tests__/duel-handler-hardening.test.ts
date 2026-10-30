@@ -130,6 +130,34 @@ describe('duel handler hardening', () => {
       expect(a.emitted.filter((e) => e.data?.code === 'VALIDATION_FAILED')).toHaveLength(4);
       expect(mocks.validateAnswer).not.toHaveBeenCalled();
     });
+
+    it('valida estrictamente mechanicUsage en duel:answer', async () => {
+      const { a } = setup('v5-a', 'v5-b');
+      await a.fire('duel:answer', {
+        questionId: 'q1',
+        answer: 'a',
+        mechanicUsage: { key: 'invalidKey', action: 'trigger' },
+      });
+      await a.fire('duel:answer', {
+        questionId: 'q1',
+        answer: 'a',
+        mechanicUsage: { key: 'intel5050', action: 'wrong' },
+      });
+      await a.fire('duel:answer', {
+        questionId: 'q1',
+        answer: 'a',
+        mechanicUsage: { key: 'intel5050', action: 'trigger', roundIndex: -1 },
+      });
+      expect(a.emitted.filter((e) => e.data?.code === 'VALIDATION_FAILED')).toHaveLength(3);
+
+      const beforeValidCount = a.emitted.filter((e) => e.data?.code === 'VALIDATION_FAILED').length;
+      await a.fire('duel:answer', {
+        questionId: 'q1',
+        answer: 'a',
+        mechanicUsage: { key: 'intel5050', action: 'trigger', roundIndex: 0 },
+      });
+      expect(a.emitted.filter((e) => e.data?.code === 'VALIDATION_FAILED')).toHaveLength(beforeValidCount);
+    });
   });
 
   describe('fallo en createDuel', () => {
