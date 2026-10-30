@@ -1930,6 +1930,60 @@
         "sourceUrl": "https://commons.wikimedia.org/wiki/File:Trevi_Fountain_-_Roma.jpg"
       },
       "difficulty": "EASY"
+    },
+    {
+      "slug": "pantheon",
+      "name": {
+        "en": "Pantheon",
+        "es": "Panteón de Roma"
+      },
+      "country": "Italy",
+      "continent": "Europe",
+      "latitude": 41.8986,
+      "longitude": 12.4768,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Pantheon_%28Rome%29_-_Right_side_and_front.jpg?width=400",
+      "attribution": {
+        "author": "NikonZ7II",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pantheon_(Rome)_-_Right_side_and_front.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "terracotta-army",
+      "name": {
+        "en": "Terracotta Army",
+        "es": "Guerreros de terracota"
+      },
+      "country": "China",
+      "continent": "Asia",
+      "latitude": 34.385,
+      "longitude": 109.2802,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/51714-Terracota-Army.jpg?width=400",
+      "attribution": {
+        "author": "xiquinhosilva",
+        "license": "CC BY 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:51714-Terracota-Army.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "lake-louise",
+      "name": {
+        "en": "Lake Louise",
+        "es": "Lago Louise"
+      },
+      "country": "Canada",
+      "continent": "North America",
+      "latitude": 51.4117,
+      "longitude": -116.2281,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/1_lake_louise_pano_2019.jpg?width=400",
+      "attribution": {
+        "author": "Chensiyuan",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:1_lake_louise_pano_2019.jpg"
+      },
+      "difficulty": "MEDIUM"
     }
   ]
 }
