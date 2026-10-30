@@ -119,6 +119,12 @@ app.use((err: Error & { status?: number; statusCode?: number; type?: string }, _
 });
 
 // Setup Socket.IO handlers
+// Reducir memoria por conexión: Socket.IO conserva la solicitud HTTP inicial.
+// No usamos socket.request ni express-session en los handlers.
+io.engine.on('connection', (rawSocket) => {
+  rawSocket.request = null;
+});
+
 setupSocketHandlers(io);
 
 // Startup
