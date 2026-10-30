@@ -1984,6 +1984,60 @@
         "sourceUrl": "https://commons.wikimedia.org/wiki/File:1_lake_louise_pano_2019.jpg"
       },
       "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "cliffs-of-moher",
+      "name": {
+        "en": "Cliffs of Moher",
+        "es": "Acantilados de Moher"
+      },
+      "country": "Ireland",
+      "continent": "Europe",
+      "latitude": 52.9715,
+      "longitude": -9.4309,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Cliffs_of_Moher.jpg?width=400",
+      "attribution": {
+        "author": "François Rejeté",
+        "license": "CC BY 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Cliffs_of_Moher.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "cologne-cathedral",
+      "name": {
+        "en": "Cologne Cathedral",
+        "es": "Catedral de Colonia"
+      },
+      "country": "Germany",
+      "continent": "Europe",
+      "latitude": 50.9413,
+      "longitude": 6.9583,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/K%C3%B6lner_Dom_vom_K%C3%B6lnTriangle.jpg?width=400",
+      "attribution": {
+        "author": "Raimond Spekking",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:K%C3%B6lner_Dom_vom_K%C3%B6lnTriangle.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "kiyomizu-dera",
+      "name": {
+        "en": "Kiyomizu-dera",
+        "es": "Kiyomizu-dera"
+      },
+      "country": "Japan",
+      "continent": "Asia",
+      "latitude": 34.9949,
+      "longitude": 135.785,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Kiyomizu-dera.jpg?width=400",
+      "attribution": {
+        "author": "kazuh",
+        "license": "CC BY 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Kiyomizu-dera.jpg"
+      },
+      "difficulty": "MEDIUM"
     }
   ]
 }

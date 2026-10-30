@@ -34,6 +34,14 @@ export const socketCoordinatesSchema = z.object({
 const nullToUndefined = <T extends z.ZodTypeAny>(schema: T) =>
   z.preprocess((v) => (v === null ? undefined : v), schema.optional());
 
+export const socketMechanicUsageSchema = z.object({
+  key: z.enum(['intel5050', 'focusTime', 'streakShield']),
+  action: z.literal('trigger'),
+  questionId: nullToUndefined(z.string().max(MAX_ID_LENGTH)),
+  roundIndex: nullToUndefined(z.number().int().min(0)),
+  value: nullToUndefined(z.number().finite()),
+});
+
 export const duelQueueSchema = z
   .object({
     category: nullToUndefined(socketCategorySchema),
@@ -48,7 +56,7 @@ export const duelAnswerSchema = z.object({
   answer: z.string().max(MAX_ANSWER_LENGTH),
   // El cliente lo envía pero el servidor nunca lo usa para puntuar.
   timeRemaining: nullToUndefined(z.number().finite()),
-  mechanicUsage: nullToUndefined(z.object({}).passthrough()),
+  mechanicUsage: nullToUndefined(socketMechanicUsageSchema),
   coordinates: nullToUndefined(socketCoordinatesSchema),
 });
 
