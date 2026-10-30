@@ -325,6 +325,7 @@ export function ChallengeGamePage() {
         <RoundActionTray
           mode="challenge"
           showResult={showResult}
+          resultLabel={t('a11y.answerLocked')}
           canSubmit={hasSelection}
           isSubmitting={isSubmitting}
           submitLabel={t('game.submit')}
