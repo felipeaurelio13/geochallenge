@@ -4,6 +4,7 @@ import { config } from '../config/env.js';
 import { JwtPayload, ALLOWED_JWT_ALGORITHMS } from '../middleware/auth.js';
 import { setupDuelHandlers, MatchmakingQueue, startDuelWatchdog } from './duel.handler.js';
 import { setupSurvivalHandlers } from './survival.handler.js';
+import { createSocketEventRateLimiter } from './rateLimiter.js';
 
 // Extend Socket type to include user info
 declare module 'socket.io' {
@@ -55,6 +56,9 @@ export function setupSocketHandlers(io: SocketIOServer) {
 
     // Registrar socket del usuario
     userSockets.set(user.userId, socket.id);
+
+    // Throttling de eventos a nivel de socket (OWASP API4:2023)
+    socket.use(createSocketEventRateLimiter(socket));
 
     // Setup duel handlers
     setupDuelHandlers(io, socket, matchmakingQueue);
