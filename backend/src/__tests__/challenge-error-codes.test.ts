@@ -12,13 +12,16 @@ vi.mock('../middleware/auth.js', () => ({
   },
 }));
 
-function startServer() {
+function startServer(): Promise<{ server: ReturnType<express.Express['listen']>; baseUrl: string }> {
   const app = express();
   app.use(express.json());
   app.use('/api/challenges', challengeRouter);
-  const server = app.listen(0);
-  const baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
-  return { server, baseUrl };
+  return new Promise((resolve) => {
+    const server = app.listen(0, () => {
+      const baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+      resolve({ server, baseUrl });
+    });
+  });
 }
 
 describe('challenge.service — throw sites migrados a AppError', () => {
@@ -62,7 +65,7 @@ describe('POST /api/challenges — respuesta HTTP incluye code y params del AppE
 
     // maxPlayers=4 pasa la validación Zod del router (min 2, max 8) — el
     // AppError viene del service mockeado, no de un 400 de validación previo.
-    const { server, baseUrl } = startServer();
+    const { server, baseUrl } = await startServer();
     const response = await fetch(`${baseUrl}/api/challenges`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -81,7 +84,7 @@ describe('POST /api/challenges — respuesta HTTP incluye code y params del AppE
     vi.spyOn(challengeService, 'createChallenge').mockRejectedValue(new Error('db down'));
     vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    const { server, baseUrl } = startServer();
+    const { server, baseUrl } = await startServer();
     const response = await fetch(`${baseUrl}/api/challenges`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },

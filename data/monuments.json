@@ -2038,6 +2038,132 @@
         "sourceUrl": "https://commons.wikimedia.org/wiki/File:Kiyomizu-dera.jpg"
       },
       "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "himeji-castle",
+      "name": {
+        "en": "Himeji Castle",
+        "es": "Castillo Himeji"
+      },
+      "country": "Japan",
+      "continent": "Asia",
+      "latitude": 34.8394,
+      "longitude": 134.6939,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Himeji_castle_in_may_2015.jpg?width=400",
+      "attribution": {
+        "author": "Nikos Kitsakis",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Himeji_castle_in_may_2015.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "charles-bridge",
+      "name": {
+        "en": "Charles Bridge",
+        "es": "Puente Carlos"
+      },
+      "country": "Czech Republic",
+      "continent": "Europe",
+      "latitude": 50.0865,
+      "longitude": 14.4114,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Charles_Bridge_Prague.jpg?width=400",
+      "attribution": {
+        "author": "DOWIMA",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Charles_Bridge_Prague.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "chillon-castle",
+      "name": {
+        "en": "Chillon Castle",
+        "es": "Castillo de Chillon"
+      },
+      "country": "Switzerland",
+      "continent": "Europe",
+      "latitude": 46.4142,
+      "longitude": 6.9275,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Chillon-Castle.JPG?width=400",
+      "attribution": {
+        "author": "Alexey M.",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Chillon-Castle.JPG"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "schonbrunn-palace",
+      "name": {
+        "en": "Schönbrunn Palace",
+        "es": "Palacio de Schönbrunn"
+      },
+      "country": "Austria",
+      "continent": "Europe",
+      "latitude": 48.1848,
+      "longitude": 16.3122,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Sch%C3%B6nbrunn_Palace.jpg?width=400",
+      "attribution": {
+        "author": "Philipp Mayer",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sch%C3%B6nbrunn_Palace.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "prambanan",
+      "name": {
+        "en": "Prambanan",
+        "es": "Prambanan"
+      },
+      "country": "Indonesia",
+      "continent": "Asia",
+      "latitude": -7.752,
+      "longitude": 110.4914,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Prambanan_Temple_Yogyakarta_Indonesia.jpg?width=400",
+      "attribution": {
+        "author": "Christopher Michel",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Prambanan_Temple_Yogyakarta_Indonesia.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "mezquita-cordoba",
+      "name": {
+        "en": "Mosque-Cathedral of Córdoba",
+        "es": "Mezquita-Catedral de Córdoba"
+      },
+      "country": "Spain",
+      "continent": "Europe",
+      "latitude": 37.8789,
+      "longitude": -4.7794,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Cordoba_Mezquita.jpg?width=400",
+      "attribution": {
+        "author": "Jim Gordon",
+        "license": "CC BY 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Cordoba_Mezquita.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "gateway-of-india",
+      "name": {
+        "en": "Gateway of India",
+        "es": "Puerta de la India"
+      },
+      "country": "India",
+      "continent": "Asia",
+      "latitude": 18.922,
+      "longitude": 72.8347,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Gateway_of_India_Mumbai.jpg?width=400",
+      "attribution": {
+        "author": "Pdpics (pdpics.com)",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Gateway_of_India_Mumbai.jpg"
+      },
+      "difficulty": "MEDIUM"
     }
   ]
 }
