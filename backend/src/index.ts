@@ -20,7 +20,10 @@ import telemetryController from './controllers/telemetry.controller.js';
 import masteryController from './controllers/mastery.controller.js';
 import competitionController from './controllers/competition.controller.js';
 import worldEventController from './controllers/worldEvent.controller.js';
-import { globalLimiter } from './middleware/rateLimit.js';
+import {
+  globalLimiter,
+  socketHandshakeAllowRequest,
+} from './middleware/rateLimit.js';
 
 // Socket handlers
 import { setupSocketHandlers } from './sockets/index.js';
@@ -38,6 +41,7 @@ const io = new SocketIOServer(httpServer, {
     credentials: true,
   },
   maxHttpBufferSize: 1e5,
+  allowRequest: socketHandshakeAllowRequest,
 });
 
 // Middleware
@@ -74,7 +78,8 @@ app.get('/health', async (_req, res) => {
   }
 });
 
-// Rate limit applies only to application routes.
+// Socket.IO handshakes are limited by allowRequest above; API traffic uses the
+// Express limiter below.
 app.use('/api', globalLimiter);
 
 // API Routes
