@@ -1876,6 +1876,60 @@
         "sourceUrl": "https://commons.wikimedia.org/wiki/File:Preikestolen_Norge.jpg"
       },
       "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "bran-castle",
+      "name": {
+        "en": "Bran Castle",
+        "es": "Castillo de Bran"
+      },
+      "country": "Romania",
+      "continent": "Europe",
+      "latitude": 45.5152,
+      "longitude": 25.3672,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Castelul_Bran2.jpg?width=400",
+      "attribution": {
+        "author": "Dobre Cezar",
+        "license": "CC BY-SA 3.0 ro",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Castelul_Bran2.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "trevi-fountain",
+      "name": {
+        "en": "Trevi Fountain",
+        "es": "Fontana di Trevi"
+      },
+      "country": "Italy",
+      "continent": "Europe",
+      "latitude": 41.9009,
+      "longitude": 12.4833,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Trevi_Fountain%2C_Rome%2C_Italy_2_-_May_2007.jpg?width=400",
+      "attribution": {
+        "author": "DAVID ILIFF (User:Diliff)",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Trevi_Fountain,_Rome,_Italy_2_-_May_2007.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "gateway-of-india",
+      "name": {
+        "en": "Gateway of India",
+        "es": "Puerta de la India"
+      },
+      "country": "India",
+      "continent": "Asia",
+      "latitude": 18.922,
+      "longitude": 72.8347,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Gateway_of_India_Mumbai.jpg?width=400",
+      "attribution": {
+        "author": "Pdpics (pdpics.com)",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Gateway_of_India_Mumbai.jpg"
+      },
+      "difficulty": "MEDIUM"
     }
   ]
 }

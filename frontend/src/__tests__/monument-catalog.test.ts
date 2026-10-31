@@ -10,7 +10,25 @@ import {
 
 describe('monuments catalog', () => {
   it('loads all monuments and contains newly added landmarks', () => {
-    expect(monuments.length).toBeGreaterThanOrEqual(104);
+    expect(monuments.length).toBeGreaterThanOrEqual(107);
+
+    const bran = getMonumentBySlug('bran-castle');
+    expect(bran).toBeDefined();
+    expect(bran?.country).toBe('Romania');
+    expect(bran?.continent).toBe('Europe');
+    expect(bran?.difficulty).toBe('MEDIUM');
+
+    const trevi = getMonumentBySlug('trevi-fountain');
+    expect(trevi).toBeDefined();
+    expect(trevi?.country).toBe('Italy');
+    expect(trevi?.continent).toBe('Europe');
+    expect(trevi?.difficulty).toBe('EASY');
+
+    const gateway = getMonumentBySlug('gateway-of-india');
+    expect(gateway).toBeDefined();
+    expect(gateway?.country).toBe('India');
+    expect(gateway?.continent).toBe('Asia');
+    expect(gateway?.difficulty).toBe('MEDIUM');
 
     const pena = getMonumentBySlug('pena-palace');
     expect(pena).toBeDefined();
