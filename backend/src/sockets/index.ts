@@ -16,8 +16,15 @@ declare module 'socket.io' {
 // Global matchmaking queue
 export const matchmakingQueue = new MatchmakingQueue();
 
-// Map of userId to socketId for notifications
+// Map of userId to socketId for notifications (mantenido por compatibilidad)
 export const userSockets = new Map<string, string>();
+
+/**
+ * Retorna el nombre de sala Socket.IO para un usuario específico.
+ */
+export function getUserRoom(userId: string): string {
+  return `user:${userId}`;
+}
 
 /**
  * Middleware para autenticar sockets
@@ -54,7 +61,10 @@ export function setupSocketHandlers(io: SocketIOServer) {
     const user = socket.user!;
     console.log(`🔌 Usuario conectado: ${user.username} (${socket.id})`);
 
-    // Registrar socket del usuario
+    // Unir socket a la sala del usuario (soporta multi-pestaña y reconexiones)
+    socket.join(getUserRoom(user.userId));
+
+    // Registrar socket del usuario (mapa en memoria para compatibilidad hacia atrás)
     userSockets.set(user.userId, socket.id);
 
     // Throttling de eventos a nivel de socket (OWASP API4:2023)
@@ -88,7 +98,9 @@ export function setupSocketHandlers(io: SocketIOServer) {
 }
 
 /**
- * Envía un evento a un usuario específico por su ID
+ * Envía un evento a un usuario específico por su ID.
+ * Emite a la sala `user:${userId}`, entregando el mensaje a todas las conexiones activas
+ * del usuario (soporta múltiples pestañas simultáneas y escalabilidad horizontal vía adapter).
  */
 export function emitToUser(
   io: SocketIOServer,
@@ -96,9 +108,13 @@ export function emitToUser(
   event: string,
   data: any
 ): boolean {
-  const socketId = userSockets.get(userId);
-  if (socketId) {
-    io.to(socketId).emit(event, data);
+  const room = getUserRoom(userId);
+  const rooms = io.sockets?.adapter?.rooms;
+  const hasRoomSockets = rooms ? Boolean(rooms.get(room)?.size) : false;
+  const hasUserSocket = userSockets.has(userId);
+
+  if (hasRoomSockets || hasUserSocket) {
+    io.to(room).emit(event, data);
     return true;
   }
   return false;
