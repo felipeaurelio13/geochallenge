@@ -5,9 +5,15 @@ on:
   push:
     branches: [master]
 
+# Mantiene solo la validación del commit más reciente por PR o rama.
+concurrency:
+  group: quality-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   backend-checks:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: backend
