@@ -42,6 +42,10 @@ const io = new SocketIOServer(httpServer, {
   },
   maxHttpBufferSize: 1e5,
   allowRequest: socketHandshakeAllowRequest,
+  connectionStateRecovery: {
+    maxDisconnectionDuration: 2 * 60 * 1000,
+    skipMiddlewares: true,
+  },
 });
 
 // Middleware

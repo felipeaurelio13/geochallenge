@@ -2164,6 +2164,60 @@
         "sourceUrl": "https://commons.wikimedia.org/wiki/File:Gateway_of_India_Mumbai.jpg"
       },
       "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "gyeongbokgung-palace",
+      "name": {
+        "en": "Gyeongbokgung Palace",
+        "es": "Palacio Gyeongbokgung"
+      },
+      "country": "South Korea",
+      "continent": "Asia",
+      "latitude": 37.5796,
+      "longitude": 126.977,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Korea-Gyeongbokgung-Gyeonghoeru-01.jpg?width=400",
+      "attribution": {
+        "author": "Craig Nagy",
+        "license": "CC BY-SA 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Korea-Gyeongbokgung-Gyeonghoeru-01.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "belem-tower",
+      "name": {
+        "en": "Belém Tower",
+        "es": "Torre de Belém"
+      },
+      "country": "Portugal",
+      "continent": "Europe",
+      "latitude": 38.6916,
+      "longitude": -9.216,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Torre_de_Bel%C3%A9m.jpg?width=400",
+      "attribution": {
+        "author": "Christiane Abele",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Torre_de_Bel%C3%A9m.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "wawel-castle",
+      "name": {
+        "en": "Wawel Castle",
+        "es": "Castillo de Wawel"
+      },
+      "country": "Poland",
+      "continent": "Europe",
+      "latitude": 50.054,
+      "longitude": 19.9354,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Krakow_-_Wawel_from_Vistula_-_4.jpg?width=400",
+      "attribution": {
+        "author": "Ingo Mehling",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Krakow_-_Wawel_from_Vistula_-_4.jpg"
+      },
+      "difficulty": "MEDIUM"
     }
   ]
 }

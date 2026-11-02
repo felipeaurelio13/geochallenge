@@ -98,6 +98,7 @@ class SocketService {
   public socket: Socket | null = null;
   private handlers: DuelEventHandlers = {};
   private connectionStateListeners: Set<(state: ConnectionState) => void> = new Set();
+  private listenersAttached = false;
 
   onConnectionStateChange(cb: (state: ConnectionState) => void): () => void {
     this.connectionStateListeners.add(cb);
@@ -131,7 +132,11 @@ class SocketService {
     });
 
     this.socket.on('connect', () => {
-      console.log('Socket connected');
+      if (this.socket?.recovered) {
+        console.log('Socket connected (session recovered)');
+      } else {
+        console.log('Socket connected');
+      }
       this.setupListeners();
       this.emitConnectionState('connected');
     });
@@ -151,6 +156,7 @@ class SocketService {
     if (this.socket) {
       this.socket.disconnect();
       this.socket = null;
+      this.listenersAttached = false;
     }
   }
 
@@ -163,7 +169,8 @@ class SocketService {
   }
 
   private setupListeners(): void {
-    if (!this.socket) return;
+    if (!this.socket || this.listenersAttached) return;
+    this.listenersAttached = true;
 
     // Duel events — backend emits duel:* prefix for all duel events
     this.socket.on('duel:queued', (data) => {

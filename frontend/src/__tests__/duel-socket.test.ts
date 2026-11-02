@@ -33,4 +33,35 @@ describe('SocketService duel payload', () => {
       coordinates: { lat: -34.6, lng: -58.3 },
     });
   });
+
+  it('evita registrar listeners duplicados al reconectar', () => {
+    const listeners: Record<string, ((...args: unknown[]) => void)[]> = {};
+    const mockSocket = {
+      emit: vi.fn(),
+      disconnect: vi.fn(),
+      on: vi.fn((event: string, fn: (...args: unknown[]) => void) => {
+        listeners[event] = listeners[event] || [];
+        listeners[event].push(fn);
+      }),
+      recovered: true,
+      connected: true,
+    };
+
+    (socketService as any).socket = mockSocket;
+    (socketService as any).listenersAttached = false;
+
+    // Simulate setupListeners
+    (socketService as any).setupListeners();
+    const countFirst = listeners['duel:queued']?.length || 0;
+    expect(countFirst).toBe(1);
+
+    // Call setupListeners again (as in reconnect)
+    (socketService as any).setupListeners();
+    const countSecond = listeners['duel:queued']?.length || 0;
+    expect(countSecond).toBe(1);
+
+    // After disconnect, listenersAttached resets
+    socketService.disconnect();
+    expect((socketService as any).listenersAttached).toBe(false);
+  });
 });

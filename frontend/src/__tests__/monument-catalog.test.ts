@@ -19,9 +19,30 @@ describe('monuments catalog', () => {
       'schonbrunn-palace',
       'prambanan',
       'mezquita-cordoba',
+      'gyeongbokgung-palace',
+      'belem-tower',
+      'wawel-castle',
     ]) {
       expect(getMonumentBySlug(slug), `${slug} should exist`).toBeDefined();
     }
+
+    const gyeongbokgung = getMonumentBySlug('gyeongbokgung-palace');
+    expect(gyeongbokgung).toBeDefined();
+    expect(gyeongbokgung?.country).toBe('South Korea');
+    expect(gyeongbokgung?.continent).toBe('Asia');
+    expect(gyeongbokgung?.difficulty).toBe('EASY');
+
+    const belem = getMonumentBySlug('belem-tower');
+    expect(belem).toBeDefined();
+    expect(belem?.country).toBe('Portugal');
+    expect(belem?.continent).toBe('Europe');
+    expect(belem?.difficulty).toBe('EASY');
+
+    const wawel = getMonumentBySlug('wawel-castle');
+    expect(wawel).toBeDefined();
+    expect(wawel?.country).toBe('Poland');
+    expect(wawel?.continent).toBe('Europe');
+    expect(wawel?.difficulty).toBe('MEDIUM');
 
     const bran = getMonumentBySlug('bran-castle');
     expect(bran).toBeDefined();
