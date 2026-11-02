@@ -20,7 +20,9 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('react-leaflet', () => ({
   MapContainer: ({ children, className }: any) => <div data-testid="leaflet-map" className={className}>{children}</div>,
-  TileLayer: () => null,
+  TileLayer: ({ attribution, url }: any) => (
+    <div data-testid="map-tile-layer" data-attribution={attribution} data-url={url} />
+  ),
   Marker: () => null,
   Circle: ({ radius }: any) => <div data-testid="map-result-circle" data-radius={radius} />,
   useMapEvents: () => null,
@@ -149,6 +151,29 @@ describe('MapInteractive neutral viewport reset', () => {
     expect(mapSurface).toBeInTheDocument();
     expect(mapSurface).toHaveClass('overflow-hidden');
     expect(screen.getByTestId('leaflet-map')).toBeInTheDocument();
+  });
+
+  it('uses the keyless OpenStreetMap tile service with the required attribution', () => {
+    render(
+      <MapInteractive
+        onLocationSelect={() => {}}
+        selectedLocation={null}
+        correctLocation={null}
+        showResult={false}
+        disabled={false}
+        questionId="q-map"
+      />
+    );
+
+    const tileLayer = screen.getByTestId('map-tile-layer');
+    expect(tileLayer).toHaveAttribute(
+      'data-url',
+      'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
+    );
+    expect(tileLayer).toHaveAttribute(
+      'data-attribution',
+      '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    );
   });
 });
 
