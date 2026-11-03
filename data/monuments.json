@@ -2164,6 +2164,60 @@
         "sourceUrl": "https://commons.wikimedia.org/wiki/File:Gateway_of_India_Mumbai.jpg"
       },
       "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "hungarian-parliament",
+      "name": {
+        "en": "Hungarian Parliament Building",
+        "es": "Parlamento de Budapest"
+      },
+      "country": "Hungary",
+      "continent": "Europe",
+      "latitude": 47.5071,
+      "longitude": 19.0456,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Budapest-Parliament-0001.jpg?width=400",
+      "attribution": {
+        "author": "Godot13 / MathKnight",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Budapest-Parliament-0001.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "hallgrimskirkja",
+      "name": {
+        "en": "Hallgrímskirkja",
+        "es": "Hallgrímskirkja"
+      },
+      "country": "Iceland",
+      "continent": "Europe",
+      "latitude": 64.1417,
+      "longitude": -21.9267,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Hallgr%C3%ADmskirkja.jpeg?width=400",
+      "attribution": {
+        "author": "Andreas Tille",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hallgr%C3%ADmskirkja.jpeg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "grand-place-brussels",
+      "name": {
+        "en": "Grand-Place",
+        "es": "Gran Plaza de Bruselas"
+      },
+      "country": "Belgium",
+      "continent": "Europe",
+      "latitude": 50.8467,
+      "longitude": 4.3524,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Grand_Place_Brussels.JPG?width=400",
+      "attribution": {
+        "author": "Savant-fou",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Grand_Place_Brussels.JPG"
+      },
+      "difficulty": "EASY"
     }
   ]
 }
