@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Category } from '@prisma/client';
-import { startGameSchema } from '../controllers/game.controller';
+import { finishGameSchema, startGameSchema } from '../controllers/game.controller';
 
 const { findManyMock, countMock } = vi.hoisted(() => ({
   findManyMock: vi.fn(),
@@ -50,6 +50,40 @@ describe('startGameSchema', () => {
     });
 
     expect(parsed.excludeQuestionKeys).toEqual(['flag|ar', 'flag|br', 'flag|cl']);
+  });
+
+  it('limita colecciones sobredimensionadas en excludeIds (mitigación Zod memory exhaustion)', () => {
+    const tooMany = Array.from({ length: 501 }, (_, i) => `q${i}`).join(',');
+    const parsed = startGameSchema.safeParse({
+      excludeIds: tooMany,
+    });
+    expect(parsed.success).toBe(false);
+  });
+});
+
+describe('finishGameSchema', () => {
+  it('acepta answers válidas con longitud estándar', () => {
+    const parsed = finishGameSchema.safeParse({
+      sessionId: 'session-123',
+      answers: [
+        { questionId: 'q1', answer: 'Chile', timeRemaining: 10 },
+        { questionId: 'q2', answer: 'Peru', timeRemaining: 8 },
+      ],
+    });
+    expect(parsed.success).toBe(true);
+  });
+
+  it('rechaza colecciones sobredimensionadas de answers (> 100) contra ataques de memory exhaustion', () => {
+    const oversizedAnswers = Array.from({ length: 101 }, (_, i) => ({
+      questionId: `q${i}`,
+      answer: `ans${i}`,
+      timeRemaining: 10,
+    }));
+    const parsed = finishGameSchema.safeParse({
+      sessionId: 'session-123',
+      answers: oversizedAnswers,
+    });
+    expect(parsed.success).toBe(false);
   });
 });
 
