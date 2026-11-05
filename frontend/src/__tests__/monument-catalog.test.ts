@@ -10,7 +10,7 @@ import {
 
 describe('monuments catalog', () => {
   it('loads all monuments and contains newly added landmarks', () => {
-    expect(monuments.length).toBeGreaterThanOrEqual(120);
+    expect(monuments.length).toBeGreaterThanOrEqual(123);
 
     for (const slug of [
       'himeji-castle',
@@ -19,6 +19,9 @@ describe('monuments catalog', () => {
       'schonbrunn-palace',
       'prambanan',
       'mezquita-cordoba',
+      'atomium',
+      'wawel-castle',
+      'el-capitolio',
     ]) {
       expect(getMonumentBySlug(slug), `${slug} should exist`).toBeDefined();
     }
@@ -58,6 +61,24 @@ describe('monuments catalog', () => {
     expect(preikestolen?.country).toBe('Norway');
     expect(preikestolen?.continent).toBe('Europe');
     expect(preikestolen?.difficulty).toBe('MEDIUM');
+
+    const atomium = getMonumentBySlug('atomium');
+    expect(atomium).toBeDefined();
+    expect(atomium?.country).toBe('Belgium');
+    expect(atomium?.continent).toBe('Europe');
+    expect(atomium?.difficulty).toBe('EASY');
+
+    const wawel = getMonumentBySlug('wawel-castle');
+    expect(wawel).toBeDefined();
+    expect(wawel?.country).toBe('Poland');
+    expect(wawel?.continent).toBe('Europe');
+    expect(wawel?.difficulty).toBe('MEDIUM');
+
+    const capitolio = getMonumentBySlug('el-capitolio');
+    expect(capitolio).toBeDefined();
+    expect(capitolio?.country).toBe('Cuba');
+    expect(capitolio?.continent).toBe('North America');
+    expect(capitolio?.difficulty).toBe('MEDIUM');
   });
 
   it('lookups by English name are case-insensitive', () => {
