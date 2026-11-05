@@ -2164,6 +2164,60 @@
         "sourceUrl": "https://commons.wikimedia.org/wiki/File:Gateway_of_India_Mumbai.jpg"
       },
       "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "atomium",
+      "name": {
+        "en": "Atomium",
+        "es": "Atomium"
+      },
+      "country": "Belgium",
+      "continent": "Europe",
+      "latitude": 50.8949,
+      "longitude": 4.3415,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Atomium%2C_Bruselas%2C_B%C3%A9lgica%2C_2021-12-15%2C_DD_148-150_HDR.jpg?width=400",
+      "attribution": {
+        "author": "Diego Delso",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Atomium,_Bruselas,_B%C3%A9lgica,_2021-12-15,_DD_148-150_HDR.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "wawel-castle",
+      "name": {
+        "en": "Wawel Royal Castle",
+        "es": "Castillo Real de Wawel"
+      },
+      "country": "Poland",
+      "continent": "Europe",
+      "latitude": 50.054,
+      "longitude": 19.9354,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Wawel_Castle_view_from_south._Krakow%2C_Poland.jpg?width=400",
+      "attribution": {
+        "author": "Ввласенко",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Wawel_Castle_view_from_south._Krakow,_Poland.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "el-capitolio",
+      "name": {
+        "en": "El Capitolio",
+        "es": "El Capitolio"
+      },
+      "country": "Cuba",
+      "continent": "North America",
+      "latitude": 23.1353,
+      "longitude": -82.3592,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/El_Capitolio%2C_Havana.jpg?width=400",
+      "attribution": {
+        "author": "DirkvdM",
+        "license": "CC BY-SA 2.5",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:El_Capitolio,_Havana.jpg"
+      },
+      "difficulty": "MEDIUM"
     }
   ]
 }
