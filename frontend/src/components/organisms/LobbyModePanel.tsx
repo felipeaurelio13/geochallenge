@@ -78,7 +78,7 @@ export function LobbyModePanel({
 
   return (
     <section
-      className="border-t border-app-border bg-app-surface px-0 py-4"
+      className="rounded-2xl border border-primary/25 bg-gradient-to-b from-app-surface to-primary/[0.03] p-4 sm:p-5 shadow-md"
       aria-label={isPractice ? t('menu.practice.title') : t('menu.compete.title')}
     >
       <div className="flex items-center justify-between">
@@ -328,7 +328,7 @@ function ModeButtonWithHelp({
 }) {
   if (disabled) {
     return (
-      <div className="relative rounded-md border border-app-border bg-app-muted px-4 py-3 opacity-60">
+      <div className="relative rounded-xl border border-app-border bg-app-muted px-4 py-3 opacity-60">
         <div className="flex items-center gap-3">
           <div className="min-w-0 flex-1">
             <div className="text-sm font-semibold text-app-text">{title}</div>
@@ -347,11 +347,11 @@ function ModeButtonWithHelp({
       <button
         type="button"
         onClick={onClick}
-        className="w-full rounded-md border border-app-border bg-app-surface px-4 py-3 text-left transition-colors hover:border-primary/60 hover:bg-primary/10 pressable"
+        className="w-full rounded-xl border border-app-border bg-app-surface px-4 py-3 pr-12 text-left shadow-xs transition-all hover:border-primary/50 hover:bg-primary/5 hover:translate-x-0.5 active:translate-x-0 active:scale-[0.99] pressable"
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between gap-3">
           <div className="min-w-0 flex-1">
-            <div className="text-sm font-semibold text-app-text">{title}</div>
+            <div className="text-sm font-bold text-app-text">{title}</div>
             <div className="text-xs text-app-subtle">{desc}</div>
           </div>
           <span aria-hidden="true" className="text-app-subtle">→</span>
@@ -364,7 +364,7 @@ function ModeButtonWithHelp({
           onOpenHelp();
         }}
         aria-label={helpAriaLabel}
-        className="pressable absolute right-1 top-1 flex min-h-8 min-w-8 items-center justify-center rounded-md border border-app-border bg-app-surface text-xs font-bold text-app-subtle transition-colors hover:border-primary/60 hover:text-primary"
+        className="pressable absolute right-2.5 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full border border-app-border bg-app-surface/90 text-xs font-bold text-app-subtle shadow-xs transition-all hover:border-primary/60 hover:text-primary hover:scale-105 active:scale-95"
       >
         ?
       </button>
@@ -385,11 +385,11 @@ function SpecialButton({
     <button
       type="button"
       onClick={onClick}
-      className="w-full rounded-md border border-app-border bg-app-surface px-4 py-3 text-left transition-colors hover:border-primary/60 hover:bg-primary/10 pressable"
+      className="w-full rounded-xl border border-app-border bg-app-surface px-4 py-3 text-left shadow-xs transition-all hover:border-primary/50 hover:bg-primary/5 hover:translate-x-0.5 active:translate-x-0 active:scale-[0.99] pressable"
     >
-      <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <div className="text-sm font-semibold text-app-text">{title}</div>
+          <div className="text-sm font-bold text-app-text">{title}</div>
           <div className="text-xs text-app-subtle">{desc}</div>
         </div>
         <span aria-hidden="true" className="text-app-subtle">→</span>

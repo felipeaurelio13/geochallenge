@@ -346,7 +346,7 @@ export function MenuPage() {
     >
       {/* Journey Hero */}
       {user && (
-        <div className="mb-3">
+        <div className="mb-4">
           <LobbyJourneyCard
             summary={masterySummary}
             loading={masteryLoading && !masterySummary}
@@ -358,129 +358,143 @@ export function MenuPage() {
 
       {/* Daily Challenge */}
       {user && (
-        <section className="mb-7 border-y border-app-border py-5">
+        <section className="mb-5 rounded-2xl border border-amber-500/25 bg-gradient-to-br from-app-surface via-amber-500/[0.04] to-app-surface p-4 sm:p-5 shadow-sm transition-all hover:border-amber-500/40">
           <div className="min-w-0">
+            <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <h2 className="text-sm font-semibold text-app-text">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/15 text-sm" aria-hidden="true">
+                  📅
+                </span>
+                <h2 className="text-sm font-bold text-app-text">
                   {t('menu.daily.title')}
                 </h2>
-                <span className={`rounded-full border px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide ${
-                  dailyStatus?.completed
-                    ? 'border-success/40 bg-success/15 text-success'
-                    : 'border-primary/40 bg-primary/10 text-primary'
-                }`}>
-                  {dailyLoading
-                    ? '...'
-                    : dailyStatus?.completed
-                      ? t('menu.daily.completed')
-                      : t('menu.daily.available')}
-                </span>
               </div>
-              <p className="mt-0.5 text-xs text-app-subtle">
-                {t('menu.daily.desc')}
-              </p>
-              {dailyStatus?.completed && dailyStatus.result && (
-                <p className="mt-1 text-xs text-app-secondary">
-                  {t('menu.daily.todayScore', {
-                    correct: dailyStatus.result.correctCount,
-                    total: dailyStatus.result.totalQuestions,
-                  })}
-                  {dailyStatus.dailyStreak > 0 && (
-                    <>
-                      {' · '}{dailyStatus.dailyStreak}
-                    </>
-                  )}
-                </p>
-              )}
+              <span className={`rounded-full border px-2.5 py-0.5 text-[0.65rem] font-bold uppercase tracking-wide ${
+                dailyStatus?.completed
+                  ? 'border-success/40 bg-success/15 text-success'
+                  : 'border-amber-500/40 bg-amber-500/15 text-amber-600 dark:text-amber-400'
+              }`}>
+                {dailyLoading
+                  ? '...'
+                  : dailyStatus?.completed
+                    ? t('menu.daily.completed')
+                    : t('menu.daily.available')}
+              </span>
             </div>
+            <p className="mt-2 text-xs text-app-subtle">
+              {t('menu.daily.desc')}
+            </p>
+            {dailyStatus?.completed && dailyStatus.result && (
+              <p className="mt-1.5 text-xs font-semibold text-app-secondary">
+                {t('menu.daily.todayScore', {
+                  correct: dailyStatus.result.correctCount,
+                  total: dailyStatus.result.totalQuestions,
+                })}
+                {dailyStatus.dailyStreak > 0 && (
+                  <>
+                    {' · 🔥 '}{dailyStatus.dailyStreak} {dailyStatus.dailyStreak === 1 ? 'día' : 'días'}
+                  </>
+                )}
+              </p>
+            )}
+          </div>
           <Button
             onClick={() => goTracked('/daily', 'daily')}
-            className="mt-4"
+            className={`mt-4 flex items-center justify-center gap-2 ${
+              !dailyStatus?.completed ? 'bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-white border-transparent shadow-md shadow-amber-500/20' : ''
+            }`}
             size="lg"
             fullWidth
           >
-            {dailyStatus?.completed
-              ? t('menu.daily.viewResult')
-              : t('menu.daily.play')}
+            <span aria-hidden="true">{dailyStatus?.completed ? '👁️' : '▶'}</span>
+            <span>{dailyStatus?.completed ? t('menu.daily.viewResult') : t('menu.daily.play')}</span>
           </Button>
         </section>
       )}
 
       {/* World Event */}
       {user && eventData && (
-        <section className="mb-7 border-y border-app-border py-5">
+        <section className="mb-5 rounded-2xl border border-primary/25 bg-gradient-to-br from-app-surface via-primary/[0.04] to-app-surface p-4 sm:p-5 shadow-sm transition-all hover:border-primary/40">
           <div className="min-w-0">
+            <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <h2 className="text-sm font-semibold text-app-text">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-sm" aria-hidden="true">
+                  🗺️
+                </span>
+                <h2 className="text-sm font-bold text-app-text">
                   {t('worldEvent.expedition', {
                     region: t(`worldEvent.region.${eventData.event.region}`),
                   })}
                 </h2>
-                <span className={`rounded-full border px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide ${
-                  eventData.boss.cleared
-                    ? 'border-success/40 bg-success/15 text-success'
-                    : eventData.boss.unlocked
-                    ? 'border-warning/40 bg-warning/15 text-warning'
-                    : 'border-primary/40 bg-primary/10 text-primary'
-                }`}>
-                  {eventLoading
-                    ? '...'
-                    : eventData.boss.cleared
-                      ? t('worldEvent.guardianDefeated')
-                      : eventData.boss.unlocked
-                      ? t('worldEvent.guardianAvailable')
-                      : t('worldEvent.preparation')}
-                </span>
               </div>
-              <p className="mt-0.5 text-xs text-app-subtle">
-                {t('worldEvent.endsIn', { time: formatTimeLeft(eventData.event.endsAt, t('worldEvent.finished')) })}
-              </p>
-              {!eventData.boss.unlocked && (
-                <div className="mt-2 space-y-1">
-                  <p className="text-xs text-app-subtle">
-                    {t('worldEvent.correctAnswers', {
-                      count: eventData.progress.correctInRegion,
-                      required: eventData.progress.correctRequired,
-                    })}
-                  </p>
-                  <p className="text-xs text-app-subtle">
-                    {t('worldEvent.challengeTypes', {
-                      count: eventData.progress.distinctCategories,
-                      required: eventData.progress.categoriesRequired,
-                    })}
-                  </p>
-                  <p className="text-xs text-app-subtle">
-                    {eventData.progress.dailyCompleted ? '✓' : '○'} {t('worldEvent.dailyCompleted')}
-                  </p>
-                </div>
-              )}
-              {eventData.boss.cleared && (
-                <p className="mt-1 text-xs text-app-secondary">
-                  {t('worldEvent.best', { correct: eventData.boss.bestCorrect })} ·{' '}
-                  {eventData.boss.attempts === 1
-                    ? t('worldEvent.attempts', { count: eventData.boss.attempts })
-                    : t('worldEvent.attemptsPlural', { count: eventData.boss.attempts })}
-                </p>
-              )}
+              <span className={`rounded-full border px-2.5 py-0.5 text-[0.65rem] font-bold uppercase tracking-wide ${
+                eventData.boss.cleared
+                  ? 'border-success/40 bg-success/15 text-success'
+                  : eventData.boss.unlocked
+                  ? 'border-warning/40 bg-warning/15 text-warning'
+                  : 'border-primary/40 bg-primary/10 text-primary'
+              }`}>
+                {eventLoading
+                  ? '...'
+                  : eventData.boss.cleared
+                    ? t('worldEvent.guardianDefeated')
+                    : eventData.boss.unlocked
+                    ? t('worldEvent.guardianAvailable')
+                    : t('worldEvent.preparation')}
+              </span>
             </div>
+            <p className="mt-1.5 text-xs text-app-subtle">
+              ⏳ {t('worldEvent.endsIn', { time: formatTimeLeft(eventData.event.endsAt, t('worldEvent.finished')) })}
+            </p>
+            {!eventData.boss.unlocked && (
+              <div className="mt-2.5 space-y-1 rounded-xl bg-app-surface/60 border border-app-border/40 p-2.5">
+                <p className="text-xs text-app-subtle">
+                  🎯 {t('worldEvent.correctAnswers', {
+                    count: eventData.progress.correctInRegion,
+                    required: eventData.progress.correctRequired,
+                  })}
+                </p>
+                <p className="text-xs text-app-subtle">
+                  📚 {t('worldEvent.challengeTypes', {
+                    count: eventData.progress.distinctCategories,
+                    required: eventData.progress.categoriesRequired,
+                  })}
+                </p>
+                <p className="text-xs text-app-subtle">
+                  {eventData.progress.dailyCompleted ? '✅' : '⚪'} {t('worldEvent.dailyCompleted')}
+                </p>
+              </div>
+            )}
+            {eventData.boss.cleared && (
+              <p className="mt-1 text-xs text-app-secondary">
+                {t('worldEvent.best', { correct: eventData.boss.bestCorrect })} ·{' '}
+                {eventData.boss.attempts === 1
+                  ? t('worldEvent.attempts', { count: eventData.boss.attempts })
+                  : t('worldEvent.attemptsPlural', { count: eventData.boss.attempts })}
+              </p>
+            )}
+          </div>
           <Button
             onClick={() => goTracked('/event', 'event_boss')}
-            className="mt-4"
+            className="mt-4 flex items-center justify-center gap-2"
             size="lg"
             fullWidth
           >
-            {eventData.boss.cleared
-              ? t('worldEvent.playAgain')
-              : eventData.boss.unlocked
-              ? t('worldEvent.faceBoss')
-              : t('worldEvent.viewExpedition')}
+            <span aria-hidden="true">⚔️</span>
+            <span>
+              {eventData.boss.cleared
+                ? t('worldEvent.playAgain')
+                : eventData.boss.unlocked
+                ? t('worldEvent.faceBoss')
+                : t('worldEvent.viewExpedition')}
+            </span>
           </Button>
         </section>
       )}
 
       {/* Choose: Practice / Compete */}
       <section className="mb-5">
-        <h2 className="text-base font-semibold text-app-text">
+        <h2 className="text-base font-bold text-app-text">
           {t('menu.choose.title')}
         </h2>
         <div className="mt-3 grid grid-cols-2 gap-3">
@@ -489,16 +503,26 @@ export function MenuPage() {
             onClick={() => togglePanel('practice')}
             aria-expanded={practicePanelOpen}
             aria-controls="panel-practice"
-            className={`min-h-24 rounded-md border px-4 py-3 text-left transition-colors pressable ${
+            className={`group min-h-24 rounded-2xl border p-4 text-left transition-all pressable ${
               practicePanelOpen
-                ? 'border-primary/60 bg-primary/10'
-                : 'border-app-border bg-app-surface hover:border-primary/40 hover:bg-primary/5'
+                ? 'border-emerald-500/70 bg-emerald-500/15 shadow-md shadow-emerald-500/10'
+                : 'border-app-border bg-app-surface hover:border-emerald-500/50 hover:bg-emerald-500/5 shadow-sm'
             }`}
           >
-            <div className="text-sm font-semibold text-app-text">
+            <div className="flex items-center justify-between">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/15 text-base" aria-hidden="true">
+                🎯
+              </span>
+              {practicePanelOpen && (
+                <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[0.65rem] font-bold text-emerald-700 dark:text-emerald-300">
+                  ▾ Abierto
+                </span>
+              )}
+            </div>
+            <div className="mt-2 text-sm font-bold text-app-text">
               {t('menu.choose.practice')}
             </div>
-            <div className="text-xs text-app-subtle">
+            <div className="mt-0.5 text-xs text-app-subtle">
               {t('menu.choose.practiceDesc')}
             </div>
           </button>
@@ -508,16 +532,26 @@ export function MenuPage() {
             onClick={() => togglePanel('compete')}
             aria-expanded={competePanelOpen}
             aria-controls="panel-compete"
-            className={`min-h-24 rounded-md border px-4 py-3 text-left transition-colors pressable ${
+            className={`group min-h-24 rounded-2xl border p-4 text-left transition-all pressable ${
               competePanelOpen
-                ? 'border-primary/60 bg-primary/10'
-                : 'border-app-border bg-app-surface hover:border-primary/40 hover:bg-primary/5'
+                ? 'border-primary/70 bg-primary/15 shadow-md shadow-primary/10'
+                : 'border-app-border bg-app-surface hover:border-primary/50 hover:bg-primary/5 shadow-sm'
             }`}
           >
-            <div className="text-sm font-semibold text-app-text">
+            <div className="flex items-center justify-between">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/15 text-base" aria-hidden="true">
+                ⚔️
+              </span>
+              {competePanelOpen && (
+                <span className="rounded-full bg-primary/20 px-2 py-0.5 text-[0.65rem] font-bold text-primary">
+                  ▾ Abierto
+                </span>
+              )}
+            </div>
+            <div className="mt-2 text-sm font-bold text-app-text">
               {t('menu.choose.compete')}
             </div>
-            <div className="text-xs text-app-subtle">
+            <div className="mt-0.5 text-xs text-app-subtle">
               {t('menu.choose.competeDesc')}
             </div>
           </button>
@@ -526,7 +560,7 @@ export function MenuPage() {
 
       {/* Practice Panel */}
       {practicePanelOpen && (
-        <div id="panel-practice" className="mb-3">
+        <div id="panel-practice" className="mb-4">
           <LobbyModePanel
             type="practice"
             selectedCategory={selectedCategory}
@@ -548,7 +582,7 @@ export function MenuPage() {
 
       {/* Compete Panel */}
       {competePanelOpen && (
-        <div id="panel-compete" className="mb-3">
+        <div id="panel-compete" className="mb-4">
           <LobbyModePanel
             type="compete"
             selectedCategory={selectedCategory}
@@ -570,25 +604,31 @@ export function MenuPage() {
 
       {/* More section */}
       <section className="mt-6 border-t border-app-border pt-5">
-        <h2 className="text-xs font-semibold uppercase tracking-[0.12em] text-app-subtle">
+        <h2 className="text-xs font-bold uppercase tracking-[0.12em] text-app-subtle">
           {t('menu.more.title')}
         </h2>
-        <div className="mt-2 grid grid-cols-2 gap-2">
+        <div className="mt-3 grid grid-cols-2 gap-3">
           <Link
             to="/rankings"
-            className="pressable flex items-center gap-3 rounded-md border border-app-border bg-app-surface px-4 py-3 text-app-secondary transition-colors hover:border-primary/60 hover:bg-primary/10"
+            className="pressable flex items-center gap-3 rounded-2xl border border-app-border bg-app-surface p-3.5 text-app-secondary shadow-sm transition-all hover:border-amber-500/50 hover:bg-amber-500/5"
           >
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-500/15 text-lg" aria-hidden="true">
+              🏆
+            </span>
             <div className="min-w-0 flex-1">
-              <div className="text-sm font-semibold text-app-text">{t('menu.more.rankings')}</div>
+              <div className="text-sm font-bold text-app-text">{t('menu.more.rankings')}</div>
               <div className="truncate text-xs text-app-subtle">{t('menu.more.rankingsDesc')}</div>
             </div>
           </Link>
           <Link
             to="/profile"
-            className="pressable flex items-center gap-3 rounded-md border border-app-border bg-app-surface px-4 py-3 text-app-secondary transition-colors hover:border-primary/60 hover:bg-primary/10"
+            className="pressable flex items-center gap-3 rounded-2xl border border-app-border bg-app-surface p-3.5 text-app-secondary shadow-sm transition-all hover:border-primary/50 hover:bg-primary/5"
           >
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-lg" aria-hidden="true">
+              📊
+            </span>
             <div className="min-w-0 flex-1">
-              <div className="text-sm font-semibold text-app-text">{t('menu.more.stats')}</div>
+              <div className="text-sm font-bold text-app-text">{t('menu.more.stats')}</div>
               <div className="truncate text-xs text-app-subtle">{t('menu.more.statsDesc')}</div>
             </div>
           </Link>
