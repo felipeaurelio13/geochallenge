@@ -16,7 +16,7 @@ export function HomePage() {
       </a>
 
       <section className="mx-auto my-auto w-full max-w-md shrink-0 px-2 py-3 text-center sm:px-8 sm:py-8">
-        <GeoMark className="mx-auto mb-3 h-12 w-12 text-primary" title="GeoChallenge" />
+        <GeoMark className="mx-auto mb-3 h-14 w-14 text-primary drop-shadow-[0_0_16px_rgba(24,123,104,0.35)] transition-transform hover:scale-105 duration-200" title="GeoChallenge" />
 
         <h1 className="text-4xl font-bold leading-tight tracking-tight sm:text-5xl">
           <span className="text-primary">Geo</span>Challenge
