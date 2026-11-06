@@ -424,7 +424,12 @@ export function GamePage({ isTrial = false }: { isTrial?: boolean }) {
       setPendingMechanicUsage(undefined);
 
       if (result.isCorrect) {
-        haptics.success();
+        const nextStreak = currentStreak + 1;
+        if (nextStreak === 3 || nextStreak === 5 || nextStreak === 10) {
+          haptics.celebrate();
+        } else {
+          haptics.success();
+        }
       } else {
         haptics.error();
       }

@@ -6,7 +6,7 @@ export type HapticPattern = 'tap' | 'success' | 'error' | 'celebrate' | 'urgency
 const PATTERNS: Record<HapticPattern, number | number[]> = {
   tap: 10,
   success: 30,
-  error: [50, 30, 50],
+  error: [35, 35, 20],
   celebrate: [20, 40, 20, 40, 80],
   urgency: [15, 100, 15],
 };

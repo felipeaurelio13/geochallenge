@@ -82,6 +82,9 @@ vi.mock('react-i18next', () => ({
         'game.difficulty.medium': 'Medio',
         'game.difficulty.hard': 'Difícil',
         'results.modeSingle': 'Un jugador',
+        'results.tierMaster': 'Maestro Geográfico',
+        'results.tierExpert': 'Explorador Experto',
+        'results.tierNovice': 'Navegante en Ruta',
         'results.modePractice': 'Práctica',
         'results.modeStreak': 'Racha',
         'results.modeTrial': 'Partida de prueba',
@@ -220,6 +223,7 @@ describe('ResultsPage', () => {
 
     expect(screen.getByText('8 / 10')).toBeInTheDocument();
     expect(screen.getByText('80%')).toBeInTheDocument();
+    expect(screen.getByText('Explorador Experto')).toBeInTheDocument();
     expect(screen.getByText('1,100')).toBeInTheDocument();
     expect(container.querySelectorAll('article.min-w-0').length).toBe(0);
     expect(screen.queryByText(/Tiempo medio por respuesta/)).not.toBeInTheDocument();

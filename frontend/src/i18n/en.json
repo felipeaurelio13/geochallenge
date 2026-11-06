@@ -445,6 +445,7 @@
     "timeUp": "Time's up",
     "correctAnswerWas": "The correct answer was",
     "correctLabel": "Correct",
+    "selectedBadge": "Selected",
     "incorrectLabel": "Incorrect",
     "next": "Next",
     "seeResults": "See Results",
@@ -492,6 +493,9 @@
     "keyboardInstructions": "Use the arrow keys to pan the map, + and - to zoom, and Enter to place your answer at the center"
   },
   "results": {
+    "tierMaster": "Geography Master",
+    "tierExpert": "Expert Explorer",
+    "tierNovice": "Navigator in Training",
     "trialLabel": "Trial game",
     "trialNotice": "This game is not saved. With an account, your next games count toward your passport and ranking.",
     "createAccount": "Create an account to track progress",

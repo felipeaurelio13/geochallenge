@@ -244,4 +244,48 @@ describe('OptionButton', () => {
     render(<OptionButton option="Chile" index={1} onClick={() => {}} disabled selected isCorrect showResult lockedResult />);
     expect(screen.getByRole('button')).toHaveAttribute('data-state', 'correct');
   });
+
+  it('muestra el badge de opción elegida bajo el pulgar y aplica micro-interacciones de feedback', () => {
+    const { rerender } = render(
+      <OptionButton
+        option="Chile"
+        index={0}
+        onClick={() => {}}
+        disabled={false}
+        selected
+        showResult={false}
+      />
+    );
+
+    const button = screen.getByRole('button');
+    expect(button).toHaveTextContent('game.selectedBadge');
+    expect(button.className).toContain('glow-primary-subtle');
+
+    rerender(
+      <OptionButton
+        option="Chile"
+        index={0}
+        onClick={() => {}}
+        disabled
+        selected
+        isCorrect
+        showResult
+      />
+    );
+    expect(button.className).toContain('animate-pop-success');
+    expect(button.className).toContain('glow-success');
+
+    rerender(
+      <OptionButton
+        option="Chile"
+        index={0}
+        onClick={() => {}}
+        disabled
+        selected
+        isCorrect={false}
+        showResult
+      />
+    );
+    expect(button.className).toContain('animate-shake-subtle');
+  });
 });

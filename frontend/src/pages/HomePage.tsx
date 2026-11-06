@@ -41,7 +41,7 @@ export function HomePage() {
         <div id="home-main-actions" className="mt-5 flex flex-col gap-3">
           {user ? (
             <>
-              <Link to="/menu" className={buttonVariants({ variant: 'primary', size: 'lg', fullWidth: true })}>
+              <Link to="/menu" className={buttonVariants({ variant: 'primary', size: 'lg', fullWidth: true, className: 'shadow-md shadow-primary/20 hover:shadow-primary/30' })}>
                 {t('home.play')}
               </Link>
               <Link to="/rankings" className={buttonVariants({ variant: 'ghost', size: 'md', fullWidth: true })}>
@@ -51,7 +51,7 @@ export function HomePage() {
           ) : (
             <>
               {featureFlags.guestTrial && (
-                <Link to="/play" className={buttonVariants({ variant: 'primary', size: 'lg', fullWidth: true })}>
+                <Link to="/play" className={buttonVariants({ variant: 'primary', size: 'lg', fullWidth: true, className: 'shadow-md shadow-primary/20 hover:shadow-primary/30' })}>
                   {t('home.tryGame')}
                 </Link>
               )}

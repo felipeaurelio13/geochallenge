@@ -445,6 +445,7 @@
     "timeUp": "Tiempo agotado",
     "correctAnswerWas": "La respuesta correcta era",
     "correctLabel": "Correcta",
+    "selectedBadge": "Elegida",
     "incorrectLabel": "Incorrecta",
     "next": "Siguiente",
     "seeResults": "Ver resultados",
@@ -492,6 +493,9 @@
     "keyboardInstructions": "Usa las flechas para mover el mapa, + y - para hacer zoom, Enter para marcar tu respuesta en el centro"
   },
   "results": {
+    "tierMaster": "Maestro Geográfico",
+    "tierExpert": "Explorador Experto",
+    "tierNovice": "Navegante en Ruta",
     "trialLabel": "Partida de prueba",
     "trialNotice": "Esta partida no se guarda. Con una cuenta, tus próximas partidas suman a tu pasaporte y al ranking.",
     "createAccount": "Crear cuenta para seguir mi progreso",

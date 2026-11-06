@@ -151,6 +151,13 @@ export function Timer({ duration, timeRemaining, onTick, onComplete, isActive, c
           strokeLinecap="round"
           strokeDasharray="283"
           strokeDashoffset={strokeDashoffset}
+          style={prefersReducedMotion ? undefined : {
+            filter: isUrgent
+              ? 'drop-shadow(0 0 6px var(--color-error-500))'
+              : percentage <= 30
+                ? 'drop-shadow(0 0 4px var(--color-warning-500))'
+                : 'drop-shadow(0 0 2px var(--color-primary-500))',
+          }}
           className={`shadow-glow-primary ${prefersReducedMotion ? '' : 'transition-all duration-1000 ease-linear'}`}
         />
       </svg>

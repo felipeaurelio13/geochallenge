@@ -54,11 +54,11 @@ export const OptionButton = React.memo(function OptionButton({
     'option-button-shell pressable w-full min-h-12 rounded-md text-left transition-[border-color,background-color,opacity,transform] duration-150 flex items-center gap-2.5 overflow-hidden border px-3 py-2 option-button-base sm:px-3.5 sm:py-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-1 focus-visible:ring-offset-[var(--color-bg-app)]';
 
   const defaultStateClasses =
-    'bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-primary)] hover:border-[var(--color-primary-400)] hover:bg-[var(--color-surface-muted)] cursor-pointer';
+    'bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-primary)] hover:border-[var(--color-primary-400)] hover:bg-[var(--color-surface-muted)] cursor-pointer shadow-sm hover:shadow';
   // Tailwind no genera modificadores de opacidad (`/10`) para colores definidos
   // como var(--token): se usan color-mix arbitrarios para el tinte y el ring.
   const selectedStateClasses =
-    'bg-[color-mix(in_srgb,var(--color-primary-500)_10%,transparent)] border-primary text-[var(--color-text-primary)] ring-1 ring-[color:color-mix(in_srgb,var(--color-primary-500)_25%,transparent)]';
+    'bg-[color-mix(in_srgb,var(--color-primary-500)_12%,transparent)] border-primary text-[var(--color-text-primary)] ring-1 ring-[color:color-mix(in_srgb,var(--color-primary-500)_25%,transparent)] shadow-sm glow-primary-subtle';
   const disabledStateClasses =
     'bg-[var(--color-surface-muted)] border-[var(--color-border)] text-[var(--color-text-muted)] cursor-not-allowed';
   const lockedStateClasses =
@@ -68,9 +68,9 @@ export const OptionButton = React.memo(function OptionButton({
   const eliminatedStateClasses =
     'bg-[var(--color-surface-muted)] border-[var(--color-border)] text-[var(--color-text-muted)] cursor-not-allowed opacity-50';
   const correctStateClasses =
-    'bg-[color-mix(in_srgb,var(--color-success-500)_10%,transparent)] border-success-500 text-[var(--color-text-primary)] cursor-not-allowed';
+    'bg-[color-mix(in_srgb,var(--color-success-500)_12%,transparent)] border-success-500 text-[var(--color-text-primary)] cursor-not-allowed animate-pop-success glow-success';
   const wrongStateClasses =
-    'bg-[color-mix(in_srgb,var(--color-error-500)_10%,transparent)] border-error-500 text-[var(--color-text-primary)] cursor-not-allowed';
+    'bg-[color-mix(in_srgb,var(--color-error-500)_12%,transparent)] border-error-500 text-[var(--color-text-primary)] cursor-not-allowed animate-shake-subtle';
 
   const getButtonClasses = () => {
     if (showResult) {
@@ -113,9 +113,9 @@ export const OptionButton = React.memo(function OptionButton({
       }
     >
       <span
-        className={`option-button-index flex h-7 w-7 shrink-0 rounded-full items-center justify-center self-center font-bold text-xs transition-colors sm:text-sm ${
+        className={`option-button-index flex h-7 w-7 shrink-0 rounded-full items-center justify-center self-center font-bold text-xs transition-all sm:text-sm ${
           showResult && isCorrect
-            ? 'bg-success-soft text-success'
+            ? 'bg-success-soft text-success scale-110 font-black shadow-sm'
             : isSubmittedUnrevealed
               ? 'bg-primary text-app-on-accent'
             : showResult && selected && !isCorrect
@@ -147,6 +147,11 @@ export const OptionButton = React.memo(function OptionButton({
           <span className="text-primary">{t('game.yourAnswer')}</span>
         ) : showResult && selected ? (
           <span className="text-error">{t('game.yourAnswer')}</span>
+        ) : selected && !showResult ? (
+          <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-1.5 py-0.5 text-[0.64rem] font-semibold text-primary">
+            <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" aria-hidden="true" />
+            {t('game.selectedBadge')}
+          </span>
         ) : null}
       </span>
     </button>

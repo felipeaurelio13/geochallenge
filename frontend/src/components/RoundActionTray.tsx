@@ -173,10 +173,10 @@ export function RoundActionTray({
             )}
 
             {!isCorrect && correctAnswer && (
-              <div className="flex items-start gap-2 w-full rounded-md border border-success/30 bg-success-soft px-3 py-2 text-left">
-                <span className="mt-0.5 shrink-0 text-success text-sm" aria-hidden>✓</span>
+              <div className="flex items-start gap-2.5 w-full rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 text-left">
+                <span className="mt-0.5 shrink-0 text-base" aria-hidden="true">💡</span>
                 <p className="text-sm leading-snug text-app-text min-w-0">
-                  <span className="block text-xs uppercase tracking-wide text-success mb-0.5">
+                  <span className="block text-xs uppercase tracking-wide font-bold text-primary mb-0.5">
                     {t('game.correctAnswerWas')}
                   </span>
                   <span className="font-semibold break-words">{correctAnswer}</span>

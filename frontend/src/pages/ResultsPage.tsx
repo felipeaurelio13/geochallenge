@@ -6,6 +6,7 @@ import { api } from '../services/api';
 import { LoadingSpinner, ShareButton } from '../components';
 import { Button } from '../components/atoms/Button';
 import { useStreakShareImage } from '../hooks/useStreakShareImage';
+import { triggerHaptic } from '../hooks/useHaptics';
 import { uiStoreActions, useUiStore } from '../store/useUiStore';
 import { getAchievementDisplay } from '../utils/achievements';
 import { getLocalizedQuestionText } from '../utils/questionText';
@@ -170,6 +171,12 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
     if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
     if (reviewCopyTimer.current) clearTimeout(reviewCopyTimer.current);
   }, []);
+
+  useEffect(() => {
+    if (percentage >= 80 || (unlockedAchievements.length > 0 && !isTrial)) {
+      triggerHaptic('celebrate');
+    }
+  }, [percentage, unlockedAchievements.length, isTrial]);
 
   useEffect(() => {
     if (hasToastedAchievements.current || unlockedAchievements.length === 0 || isTrial) return;
@@ -397,10 +404,28 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
     <div ref={scrollContainerRef} className="h-full min-h-0 overflow-y-auto bg-[var(--color-bg-app)] px-4 py-5 pt-[calc(env(safe-area-inset-top)+1.25rem)] pb-[calc(env(safe-area-inset-bottom)+1.25rem)] sm:px-6 sm:py-8">
       <main className={`mx-auto w-full max-w-xl ${prefersReducedMotion ? '' : 'animate-fade-in'}`} aria-labelledby="results-summary-title">
         <section className="text-center">
-          <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-app-secondary">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-app-secondary">
             {t(isTrial ? 'results.trialLabel' : isPracticeMode ? 'results.practiceTitle' : 'results.gameOver')}
           </p>
-          <div className="mx-auto flex h-36 w-36 flex-col items-center justify-center rounded-full border-4 border-primary/30 bg-primary/5 sm:h-40 sm:w-40">
+          <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-app-border bg-app-surface px-3 py-1 text-xs font-semibold shadow-sm transition-all animate-stamp-in">
+            {percentage >= 90 ? (
+              <span className="flex items-center gap-1.5 text-warning-500">
+                <span aria-hidden="true">🏆</span>
+                {t('results.tierMaster')}
+              </span>
+            ) : percentage >= 70 ? (
+              <span className="flex items-center gap-1.5 text-primary">
+                <span aria-hidden="true">🧭</span>
+                {t('results.tierExpert')}
+              </span>
+            ) : (
+              <span className="flex items-center gap-1.5 text-app-secondary">
+                <span aria-hidden="true">🗺️</span>
+                {t('results.tierNovice')}
+              </span>
+            )}
+          </div>
+          <div className="mx-auto flex h-36 w-36 flex-col items-center justify-center rounded-full border-4 border-primary/30 bg-primary/5 sm:h-40 sm:w-40 shadow-glow-primary">
             <span className="text-4xl font-bold tracking-tight tabular-nums text-primary sm:text-5xl">
               {isStreakMode ? correctAnswers : `${correctAnswers} / ${totalQuestions}`}
             </span>
@@ -458,7 +483,7 @@ export function ResultsPage({ isTrial = false }: { isTrial?: boolean }) {
         </section>
 
         <section className="mt-5 flex flex-col gap-2.5" data-testid="results-action-tray">
-          <Button onClick={() => handlePlayAgain()} variant="primary" size="lg" fullWidth>
+          <Button onClick={() => handlePlayAgain()} variant="primary" size="lg" fullWidth className="shadow-md shadow-primary/20 hover:shadow-primary/30">
             {t(isPracticeMode ? 'results.continuePractice' : isStreakMode ? 'results.playAgainStreak' : 'results.playAgain')}
           </Button>
           {isTrial ? (

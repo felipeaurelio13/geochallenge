@@ -47,4 +47,12 @@ describe('ProgressBar question status mapping', () => {
     expect(progressList).toHaveClass('flex-nowrap');
     expect(progressList).toHaveClass('overflow-hidden');
   });
+
+  it('aplica micro-interacciones visuales de acierto (stamp) y turno actual (focus ring)', () => {
+    const { container } = render(createElement(ProgressBar, { current: 2, total: 3, results: [{ isCorrect: true }] }));
+    const items = container.querySelectorAll('[role="listitem"]');
+
+    expect(items[0]).toHaveClass('animate-stamp-in');
+    expect(items[1]).toHaveClass('ring-2');
+  });
 });

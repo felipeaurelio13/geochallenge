@@ -63,11 +63,11 @@ export function ProgressBar({ current, total, results, showCurrentResult = false
               style={{ width: indicatorWidth }}
               className={`h-7 min-w-0 shrink-0 rounded-full border text-[0.66rem] font-semibold transition-all duration-300 flex items-center justify-center sm:h-8 sm:text-xs ${
                 status === 'correct'
-                  ? 'border-success bg-success text-app-on-accent'
+                  ? 'border-success bg-success text-app-on-accent animate-stamp-in shadow-[0_0_8px_rgba(35,129,75,0.35)]'
                   : status === 'incorrect'
                     ? 'border-error bg-error text-app-on-accent'
                     : status === 'current'
-                      ? 'border-primary/70 bg-primary/25 text-primary ring-1 ring-primary/50'
+                      ? 'border-primary/80 bg-primary/25 text-primary ring-2 ring-primary/60 ring-offset-1 ring-offset-[var(--color-bg-app)] font-bold'
                       : 'border-[var(--color-border)] bg-[var(--color-surface-muted)] text-[var(--color-text-muted)]'
               }`}
               aria-current={status === 'current' ? 'step' : undefined}

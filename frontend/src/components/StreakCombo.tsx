@@ -33,11 +33,14 @@ export function StreakCombo({
   }, [combo]);
 
   const isActive = combo > 0;
+  const isHeatingUp = combo >= 3;
   const tone = milestone
-    ? 'border-warning-500 bg-warning-500/10 text-warning-500'
-    : isActive
-      ? 'border-primary bg-primary/10 text-primary'
-      : 'border-app-border bg-app-muted text-app-subtle';
+    ? 'border-warning-500 bg-warning-500/15 text-warning-500 glow-warning'
+    : isHeatingUp
+      ? 'border-warning-500/80 bg-warning-500/10 text-warning-500 shadow-sm'
+      : isActive
+        ? 'border-primary bg-primary/10 text-primary glow-primary-subtle'
+        : 'border-app-border bg-app-muted text-app-subtle';
 
   return (
     <div
@@ -49,12 +52,17 @@ export function StreakCombo({
       aria-live="polite"
     >
       <span className="text-xs font-semibold uppercase tracking-wide opacity-90">{label}</span>
-      <span
-        key={popKey}
-        className={`text-lg font-black tabular-nums ${isActive ? 'combo-pop' : ''}`}
-      >
-        {combo}
-      </span>
+      <div className="flex items-center gap-1">
+        {isHeatingUp && !prefersReducedMotion && (
+          <span className="animate-bounce-subtle text-xs" aria-hidden="true">🔥</span>
+        )}
+        <span
+          key={popKey}
+          className={`text-lg font-black tabular-nums ${isActive ? 'combo-pop' : ''}`}
+        >
+          {combo}
+        </span>
+      </div>
       {typeof multiplier === 'number' && multiplier > 1 && (
         <span className="ml-1 rounded-md bg-black/30 px-1.5 py-0.5 text-xs font-bold">
           x{multiplier}
