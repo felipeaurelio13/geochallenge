@@ -25,4 +25,14 @@ describe('createChallengeSchema', () => {
       })
     ).toThrow();
   });
+
+  it('rechaza colecciones sobredimensionadas de categorías (mitigación DoS)', () => {
+    expect(() =>
+      createChallengeSchema.parse({
+        categories: Array(11).fill('flag'),
+        maxPlayers: '4',
+        answerTimeSeconds: '20',
+      })
+    ).toThrow();
+  });
 });

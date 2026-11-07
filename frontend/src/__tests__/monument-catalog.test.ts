@@ -10,7 +10,7 @@ import {
 
 describe('monuments catalog', () => {
   it('loads all monuments and contains newly added landmarks', () => {
-    expect(monuments.length).toBeGreaterThanOrEqual(120);
+    expect(monuments.length).toBeGreaterThanOrEqual(123);
 
     for (const slug of [
       'himeji-castle',
@@ -19,9 +19,30 @@ describe('monuments catalog', () => {
       'schonbrunn-palace',
       'prambanan',
       'mezquita-cordoba',
+      'hungarian-parliament',
+      'hallgrimskirkja',
+      'tikal-temple-1',
     ]) {
       expect(getMonumentBySlug(slug), `${slug} should exist`).toBeDefined();
     }
+
+    const parliament = getMonumentBySlug('hungarian-parliament');
+    expect(parliament).toBeDefined();
+    expect(parliament?.country).toBe('Hungary');
+    expect(parliament?.continent).toBe('Europe');
+    expect(parliament?.difficulty).toBe('EASY');
+
+    const hallgrimskirkja = getMonumentBySlug('hallgrimskirkja');
+    expect(hallgrimskirkja).toBeDefined();
+    expect(hallgrimskirkja?.country).toBe('Iceland');
+    expect(hallgrimskirkja?.continent).toBe('Europe');
+    expect(hallgrimskirkja?.difficulty).toBe('MEDIUM');
+
+    const tikal = getMonumentBySlug('tikal-temple-1');
+    expect(tikal).toBeDefined();
+    expect(tikal?.country).toBe('Guatemala');
+    expect(tikal?.continent).toBe('North America');
+    expect(tikal?.difficulty).toBe('MEDIUM');
 
     const bran = getMonumentBySlug('bran-castle');
     expect(bran).toBeDefined();

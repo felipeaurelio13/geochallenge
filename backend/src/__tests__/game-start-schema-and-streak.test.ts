@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Category } from '@prisma/client';
-import { startGameSchema } from '../controllers/game.controller';
+import { startGameSchema, finishGameSchema } from '../controllers/game.controller';
 
 const { findManyMock, countMock } = vi.hoisted(() => ({
   findManyMock: vi.fn(),
@@ -50,6 +50,47 @@ describe('startGameSchema', () => {
     });
 
     expect(parsed.excludeQuestionKeys).toEqual(['flag|ar', 'flag|br', 'flag|cl']);
+  });
+
+  it('rechaza colecciones sobredimensionadas en excludeIds (mitigación DoS)', () => {
+    const oversized = Array.from({ length: 501 }, (_, i) => `q_${i}`).join(',');
+    expect(() =>
+      startGameSchema.parse({
+        gameType: 'streak',
+        excludeIds: oversized,
+      })
+    ).toThrow();
+  });
+});
+
+describe('finishGameSchema', () => {
+  it('acepta sesión válida con respuestas dentro del límite', () => {
+    const parsed = finishGameSchema.parse({
+      sessionId: 'sess_123',
+      answers: [
+        {
+          questionId: 'q1',
+          answer: 'Chile',
+          timeRemaining: 10,
+        },
+      ],
+    });
+    expect(parsed.sessionId).toBe('sess_123');
+    expect(parsed.answers?.length).toBe(1);
+  });
+
+  it('rechaza colecciones de respuestas que excedan 100 elementos (mitigación DoS)', () => {
+    const oversizedAnswers = Array.from({ length: 101 }, (_, i) => ({
+      questionId: `q_${i}`,
+      answer: 'Chile',
+      timeRemaining: 10,
+    }));
+    expect(() =>
+      finishGameSchema.parse({
+        sessionId: 'sess_123',
+        answers: oversizedAnswers,
+      })
+    ).toThrow();
   });
 });
 
