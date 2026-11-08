@@ -10,7 +10,7 @@ import {
 
 describe('monuments catalog', () => {
   it('loads all monuments and contains newly added landmarks', () => {
-    expect(monuments.length).toBeGreaterThanOrEqual(120);
+    expect(monuments.length).toBeGreaterThanOrEqual(123);
 
     for (const slug of [
       'himeji-castle',
@@ -19,9 +19,30 @@ describe('monuments catalog', () => {
       'schonbrunn-palace',
       'prambanan',
       'mezquita-cordoba',
+      'gyeongbokgung-palace',
+      'grand-place-brussels',
+      'panama-canal-miraflores',
     ]) {
       expect(getMonumentBySlug(slug), `${slug} should exist`).toBeDefined();
     }
+
+    const gyeongbokgung = getMonumentBySlug('gyeongbokgung-palace');
+    expect(gyeongbokgung).toBeDefined();
+    expect(gyeongbokgung?.country).toBe('South Korea');
+    expect(gyeongbokgung?.continent).toBe('Asia');
+    expect(gyeongbokgung?.difficulty).toBe('MEDIUM');
+
+    const grandPlace = getMonumentBySlug('grand-place-brussels');
+    expect(grandPlace).toBeDefined();
+    expect(grandPlace?.country).toBe('Belgium');
+    expect(grandPlace?.continent).toBe('Europe');
+    expect(grandPlace?.difficulty).toBe('MEDIUM');
+
+    const panamaCanal = getMonumentBySlug('panama-canal-miraflores');
+    expect(panamaCanal).toBeDefined();
+    expect(panamaCanal?.country).toBe('Panama');
+    expect(panamaCanal?.continent).toBe('North America');
+    expect(panamaCanal?.difficulty).toBe('MEDIUM');
 
     const bran = getMonumentBySlug('bran-castle');
     expect(bran).toBeDefined();
