@@ -2164,6 +2164,60 @@
         "sourceUrl": "https://commons.wikimedia.org/wiki/File:Gateway_of_India_Mumbai.jpg"
       },
       "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "gyeongbokgung-palace",
+      "name": {
+        "en": "Gyeongbokgung Palace",
+        "es": "Palacio Gyeongbokgung"
+      },
+      "country": "South Korea",
+      "continent": "Asia",
+      "latitude": 37.5796,
+      "longitude": 126.977,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Gyeongbokgung-GeunJeongJeon.jpg?width=400",
+      "attribution": {
+        "author": "Blmtduddl",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Gyeongbokgung-GeunJeongJeon.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "grand-place-brussels",
+      "name": {
+        "en": "Grand-Place",
+        "es": "Grand-Place de Bruselas"
+      },
+      "country": "Belgium",
+      "continent": "Europe",
+      "latitude": 50.8467,
+      "longitude": 4.3525,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Grand_Place_Brussels.JPG?width=400",
+      "attribution": {
+        "author": "Savant-fou",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Grand_Place_Brussels.JPG"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "panama-canal-miraflores",
+      "name": {
+        "en": "Panama Canal (Miraflores Locks)",
+        "es": "Canal de Panamá (Esclusas de Miraflores)"
+      },
+      "country": "Panama",
+      "continent": "North America",
+      "latitude": 8.9972,
+      "longitude": -79.5919,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Miraflores_Locks_Panama_canal.jpg?width=400",
+      "attribution": {
+        "author": "GameOfLight",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Miraflores_Locks_Panama_canal.jpg"
+      },
+      "difficulty": "MEDIUM"
     }
   ]
 }
