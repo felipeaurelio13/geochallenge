@@ -2164,6 +2164,60 @@
         "sourceUrl": "https://commons.wikimedia.org/wiki/File:Gateway_of_India_Mumbai.jpg"
       },
       "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "petronas-twin-towers",
+      "name": {
+        "en": "Petronas Twin Towers",
+        "es": "Torres Petronas"
+      },
+      "country": "Malaysia",
+      "continent": "Asia",
+      "latitude": 3.1578,
+      "longitude": 101.7119,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/PETRONAS_Twin_Towers.jpg?width=400",
+      "attribution": {
+        "author": "Melissa Abdul Razak",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:PETRONAS_Twin_Towers.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "stari-most",
+      "name": {
+        "en": "Stari Most",
+        "es": "Stari Most"
+      },
+      "country": "Bosnia and Herzegovina",
+      "continent": "Europe",
+      "latitude": 43.3372,
+      "longitude": 17.815,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Stari_most_-_dont_forget.jpg?width=400",
+      "attribution": {
+        "author": "Louis-F. Stahl",
+        "license": "CC BY-SA 3.0 DE",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Stari_most_-_dont_forget.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "paro-taktsang",
+      "name": {
+        "en": "Paro Taktsang",
+        "es": "Paro Taktsang"
+      },
+      "country": "Bhutan",
+      "continent": "Asia",
+      "latitude": 27.4919,
+      "longitude": 89.3635,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Paro_Taktsang.jpg?width=400",
+      "attribution": {
+        "author": "Goyaldevender",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Paro_Taktsang.jpg"
+      },
+      "difficulty": "MEDIUM"
     }
   ]
 }
