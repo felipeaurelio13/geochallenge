@@ -25,4 +25,15 @@ describe('createChallengeSchema', () => {
       })
     ).toThrow();
   });
+
+  it('rechaza colecciones de categorías con más de 10 elementos para prevenir memory exhaustion', () => {
+    const oversizedCategories = Array(11).fill('FLAG');
+    expect(() =>
+      createChallengeSchema.parse({
+        categories: oversizedCategories,
+        maxPlayers: 4,
+        answerTimeSeconds: 20,
+      })
+    ).toThrow();
+  });
 });
