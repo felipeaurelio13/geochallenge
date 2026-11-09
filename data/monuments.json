@@ -2164,6 +2164,60 @@
         "sourceUrl": "https://commons.wikimedia.org/wiki/File:Gateway_of_India_Mumbai.jpg"
       },
       "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "atomium",
+      "name": {
+        "en": "Atomium",
+        "es": "Atomium"
+      },
+      "country": "Belgium",
+      "continent": "Europe",
+      "latitude": 50.8949,
+      "longitude": 4.3415,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Atomium.jpg?width=400",
+      "attribution": {
+        "author": "Dudva",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Atomium.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "petronas-twin-towers",
+      "name": {
+        "en": "Petronas Twin Towers",
+        "es": "Torres Petronas"
+      },
+      "country": "Malaysia",
+      "continent": "Asia",
+      "latitude": 3.1578,
+      "longitude": 101.7123,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/PETRONAS_Twin_Towers.jpg?width=400",
+      "attribution": {
+        "author": "Melissa Abdul Razak",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:PETRONAS_Twin_Towers.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "windmills-of-kinderdijk",
+      "name": {
+        "en": "Windmills of Kinderdijk",
+        "es": "Molinos de Kinderdijk"
+      },
+      "country": "Netherlands",
+      "continent": "Europe",
+      "latitude": 51.8883,
+      "longitude": 4.6311,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/KinderdijkWindmills.jpg?width=400",
+      "attribution": {
+        "author": "Willard84",
+        "license": "CC BY 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:KinderdijkWindmills.jpg"
+      },
+      "difficulty": "MEDIUM"
     }
   ]
 }
