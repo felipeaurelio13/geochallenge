@@ -84,7 +84,7 @@ const excludeIdsSchema = z.preprocess(
 
     return [];
   },
-  z.array(z.string())
+  z.array(z.string().max(100)).max(500)
 );
 
 const difficultySchema = z.enum(['EASY', 'MEDIUM', 'HARD']);
@@ -143,12 +143,12 @@ const answerSchema = z.object({
     .optional(),
 });
 
-const finishGameSchema = z.object({
+export const finishGameSchema = z.object({
   sessionId: z.string().min(1),
   answers: z.array(
     z.object({
-      questionId: z.string(),
-      answer: z.string(),
+      questionId: z.string().max(100),
+      answer: z.string().max(200),
       timeRemaining: z.number(),
       coordinates: z
         .object({
@@ -157,7 +157,7 @@ const finishGameSchema = z.object({
         })
         .optional(),
     })
-  ).optional(),
+  ).max(100).optional(),
   gameType: z.string().optional(),
   category: z.nativeEnum(Category).optional(),
 });

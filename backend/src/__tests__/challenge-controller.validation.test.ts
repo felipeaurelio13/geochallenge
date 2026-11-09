@@ -25,4 +25,14 @@ describe('createChallengeSchema', () => {
       })
     ).toThrow();
   });
+
+  it('rechaza colecciones excesivas de categorías (mitigación zod memory exhaustion)', () => {
+    expect(() =>
+      createChallengeSchema.parse({
+        categories: Array(11).fill('FLAG'),
+        maxPlayers: '3',
+        answerTimeSeconds: '20',
+      })
+    ).toThrow();
+  });
 });
