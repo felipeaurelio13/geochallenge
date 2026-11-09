@@ -58,6 +58,24 @@ describe('monuments catalog', () => {
     expect(preikestolen?.country).toBe('Norway');
     expect(preikestolen?.continent).toBe('Europe');
     expect(preikestolen?.difficulty).toBe('MEDIUM');
+
+    const parliament = getMonumentBySlug('hungarian-parliament-building');
+    expect(parliament).toBeDefined();
+    expect(parliament?.country).toBe('Hungary');
+    expect(parliament?.continent).toBe('Europe');
+    expect(parliament?.difficulty).toBe('EASY');
+
+    const hallgrimskirkja = getMonumentBySlug('hallgrimskirkja');
+    expect(hallgrimskirkja).toBeDefined();
+    expect(hallgrimskirkja?.country).toBe('Iceland');
+    expect(hallgrimskirkja?.continent).toBe('Europe');
+    expect(hallgrimskirkja?.difficulty).toBe('MEDIUM');
+
+    const kinderdijk = getMonumentBySlug('kinderdijk-windmills');
+    expect(kinderdijk).toBeDefined();
+    expect(kinderdijk?.country).toBe('Netherlands');
+    expect(kinderdijk?.continent).toBe('Europe');
+    expect(kinderdijk?.difficulty).toBe('MEDIUM');
   });
 
   it('lookups by English name are case-insensitive', () => {
