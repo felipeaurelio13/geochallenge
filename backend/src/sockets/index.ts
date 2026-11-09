@@ -52,7 +52,11 @@ export function setupSocketHandlers(io: SocketIOServer) {
 
   io.on('connection', (socket: Socket) => {
     const user = socket.user!;
-    console.log(`🔌 Usuario conectado: ${user.username} (${socket.id})`);
+    if (socket.recovered) {
+      console.log(`🔌 Sesión de socket recuperada: ${user.username} (${socket.id})`);
+    } else {
+      console.log(`🔌 Usuario conectado: ${user.username} (${socket.id})`);
+    }
 
     // Registrar socket del usuario
     userSockets.set(user.userId, socket.id);
