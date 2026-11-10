@@ -2164,6 +2164,60 @@
         "sourceUrl": "https://commons.wikimedia.org/wiki/File:Gateway_of_India_Mumbai.jpg"
       },
       "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "gyeongbokgung-palace",
+      "name": {
+        "en": "Gyeongbokgung Palace",
+        "es": "Palacio Gyeongbokgung"
+      },
+      "country": "South Korea",
+      "continent": "Asia",
+      "latitude": 37.582,
+      "longitude": 126.9772,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Korea_gyeongbokgung.jpg?width=400",
+      "attribution": {
+        "author": "Saperaud",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Korea_gyeongbokgung.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "wawel-castle",
+      "name": {
+        "en": "Wawel Castle",
+        "es": "Castillo de Wawel"
+      },
+      "country": "Poland",
+      "continent": "Europe",
+      "latitude": 50.054,
+      "longitude": 19.9354,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Wawel_castle.jpg?width=400",
+      "attribution": {
+        "author": "FotoCavallo",
+        "license": "CC BY 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Wawel_castle.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "stockholm-city-hall",
+      "name": {
+        "en": "Stockholm City Hall",
+        "es": "Ayuntamiento de Estocolmo"
+      },
+      "country": "Sweden",
+      "continent": "Europe",
+      "latitude": 59.3275,
+      "longitude": 18.0544,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Stockholm_city_hall.JPG?width=400",
+      "attribution": {
+        "author": "Christian Gidlöf",
+        "license": "Public domain",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Stockholm_city_hall.JPG"
+      },
+      "difficulty": "MEDIUM"
     }
   ]
 }

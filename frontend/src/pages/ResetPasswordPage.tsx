@@ -10,8 +10,8 @@ import { uiStoreActions } from '../store/useUiStore';
 
 const resetPasswordSchema = z
   .object({
-    newPassword: z.string().min(6, 'auth.passwordTooShort'),
-    confirmNewPassword: z.string().min(6, 'auth.passwordTooShort'),
+    newPassword: z.string().min(6, 'auth.passwordTooShort').max(100, 'Contraseña demasiado larga'),
+    confirmNewPassword: z.string().min(6, 'auth.passwordTooShort').max(100, 'Contraseña demasiado larga'),
   })
   .refine((data) => data.newPassword === data.confirmNewPassword, {
     path: ['confirmNewPassword'],

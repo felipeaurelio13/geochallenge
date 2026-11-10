@@ -9,8 +9,8 @@ import { Alert } from '../components/atoms/Alert';
 
 // Mensajes vienen del i18n en runtime — el schema sólo trae claves.
 const loginSchema = z.object({
-  email: z.string().trim().email('auth.invalidEmail'),
-  password: z.string().trim().min(1, 'auth.passwordRequired'),
+  email: z.string().trim().max(254, 'auth.invalidEmail').email('auth.invalidEmail'),
+  password: z.string().trim().min(1, 'auth.passwordRequired').max(128, 'auth.passwordRequired'),
 });
 
 export function LoginPage() {

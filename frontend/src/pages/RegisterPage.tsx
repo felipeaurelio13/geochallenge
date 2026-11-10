@@ -10,9 +10,9 @@ import { Alert } from '../components/atoms/Alert';
 const registerSchema = z
   .object({
     username: z.string().trim().min(3, 'Mínimo 3 caracteres').max(20, 'Máximo 20 caracteres'),
-    email: z.string().trim().email('Email inválido'),
-    password: z.string().min(6, 'Mínimo 6 caracteres'),
-    confirmPassword: z.string().min(6, 'Mínimo 6 caracteres'),
+    email: z.string().trim().max(254, 'Email inválido').email('Email inválido'),
+    password: z.string().min(6, 'Mínimo 6 caracteres').max(100, 'Máximo 100 caracteres'),
+    confirmPassword: z.string().min(6, 'Mínimo 6 caracteres').max(100, 'Máximo 100 caracteres'),
   })
   .refine((data) => data.password === data.confirmPassword, {
     path: ['confirmPassword'],

@@ -37,13 +37,13 @@ function hashToken(rawToken: string): string {
 }
 
 // Schemas de validación
-const registerSchema = z.object({
+export const registerSchema = z.object({
   username: z
     .string()
     .min(3, 'El nombre de usuario debe tener al menos 3 caracteres')
     .max(20, 'El nombre de usuario no puede exceder 20 caracteres')
     .regex(/^[a-zA-Z0-9_]+$/, 'Solo letras, números y guiones bajos'),
-  email: z.string().email('Email inválido'),
+  email: z.string().max(254, 'Email demasiado largo').email('Email inválido'),
   password: z
     .string()
     .min(6, 'La contraseña debe tener al menos 6 caracteres')
@@ -51,17 +51,17 @@ const registerSchema = z.object({
   preferredLanguage: z.enum(['es', 'en']).optional().default('es'),
 });
 
-const loginSchema = z.object({
-  email: z.string().email('Email inválido'),
-  password: z.string().min(1, 'Contraseña requerida'),
+export const loginSchema = z.object({
+  email: z.string().max(254, 'Email demasiado largo').email('Email inválido'),
+  password: z.string().min(1, 'Contraseña requerida').max(128, 'Contraseña demasiado larga'),
 });
 
-const forgotPasswordSchema = z.object({
-  email: z.string().email('Email inválido'),
+export const forgotPasswordSchema = z.object({
+  email: z.string().max(254, 'Email demasiado largo').email('Email inválido'),
 });
 
-const resetPasswordSchema = z.object({
-  token: z.string().min(1, 'Token requerido'),
+export const resetPasswordSchema = z.object({
+  token: z.string().min(1, 'Token requerido').max(256, 'Token demasiado largo'),
   newPassword: z
     .string()
     .min(6, 'La contraseña debe tener al menos 6 caracteres')

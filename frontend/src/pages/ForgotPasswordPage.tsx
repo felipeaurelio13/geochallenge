@@ -8,7 +8,7 @@ import { Alert } from '../components/atoms/Alert';
 import { api } from '../services/api';
 
 const forgotPasswordSchema = z.object({
-  email: z.string().trim().email('auth.invalidEmail'),
+  email: z.string().trim().max(254, 'auth.invalidEmail').email('auth.invalidEmail'),
 });
 
 export function ForgotPasswordPage() {
