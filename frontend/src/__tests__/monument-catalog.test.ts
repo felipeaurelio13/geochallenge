@@ -19,9 +19,30 @@ describe('monuments catalog', () => {
       'schonbrunn-palace',
       'prambanan',
       'mezquita-cordoba',
+      'hungarian-parliament',
+      'atomium',
+      'tikal-temple-i',
     ]) {
       expect(getMonumentBySlug(slug), `${slug} should exist`).toBeDefined();
     }
+
+    const parliament = getMonumentBySlug('hungarian-parliament');
+    expect(parliament).toBeDefined();
+    expect(parliament?.country).toBe('Hungary');
+    expect(parliament?.continent).toBe('Europe');
+    expect(parliament?.difficulty).toBe('EASY');
+
+    const atomium = getMonumentBySlug('atomium');
+    expect(atomium).toBeDefined();
+    expect(atomium?.country).toBe('Belgium');
+    expect(atomium?.continent).toBe('Europe');
+    expect(atomium?.difficulty).toBe('EASY');
+
+    const tikal = getMonumentBySlug('tikal-temple-i');
+    expect(tikal).toBeDefined();
+    expect(tikal?.country).toBe('Guatemala');
+    expect(tikal?.continent).toBe('North America');
+    expect(tikal?.difficulty).toBe('MEDIUM');
 
     const bran = getMonumentBySlug('bran-castle');
     expect(bran).toBeDefined();

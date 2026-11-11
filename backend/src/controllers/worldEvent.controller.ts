@@ -328,8 +328,8 @@ router.post('/boss/:attemptId/answer', authenticateJWT, async (req: AuthRequest,
     const userId = req.user!.userId;
 
     const answerSchema = z.object({
-      questionId: z.string().min(1),
-      answer: z.string(),
+      questionId: z.string().min(1).max(100),
+      answer: z.string().max(200),
     });
 
     const parsed = answerSchema.safeParse(req.body);

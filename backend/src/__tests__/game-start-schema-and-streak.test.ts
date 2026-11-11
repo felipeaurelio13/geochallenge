@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Category } from '@prisma/client';
-import { startGameSchema } from '../controllers/game.controller';
+import { startGameSchema, finishGameSchema } from '../controllers/game.controller';
 
 const { findManyMock, countMock } = vi.hoisted(() => ({
   findManyMock: vi.fn(),
@@ -50,6 +50,47 @@ describe('startGameSchema', () => {
     });
 
     expect(parsed.excludeQuestionKeys).toEqual(['flag|ar', 'flag|br', 'flag|cl']);
+  });
+
+  it('rechaza excludeIds con más de 500 elementos para mitigar agotamiento de memoria', () => {
+    const hugeExclude = Array.from({ length: 501 }, (_, i) => `id-${i}`);
+    expect(() =>
+      startGameSchema.parse({
+        gameType: 'streak',
+        excludeIds: hugeExclude,
+      })
+    ).toThrow();
+  });
+});
+
+describe('finishGameSchema', () => {
+  it('valida payload legítimo de finalización de juego', () => {
+    const valid = finishGameSchema.parse({
+      sessionId: 'session-123',
+      answers: [
+        {
+          questionId: 'q-1',
+          answer: 'Paris',
+          timeRemaining: 15,
+        },
+      ],
+    });
+    expect(valid.sessionId).toBe('session-123');
+    expect(valid.answers?.length).toBe(1);
+  });
+
+  it('rechaza colecciones sobredimensionadas de respuestas (más de 100 respuestas)', () => {
+    const hugeAnswers = Array.from({ length: 101 }, (_, i) => ({
+      questionId: `q-${i}`,
+      answer: 'test',
+      timeRemaining: 10,
+    }));
+    expect(() =>
+      finishGameSchema.parse({
+        sessionId: 'session-123',
+        answers: hugeAnswers,
+      })
+    ).toThrow();
   });
 });
 

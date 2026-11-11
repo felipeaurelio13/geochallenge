@@ -148,4 +148,24 @@ describe('GeoRetos HTTP contract', () => {
       });
     }
   });
+
+  it('rejects answers with oversized selectedOptionIds array', async () => {
+    const { server, baseUrl } = startServer();
+    try {
+      const response = await fetch(`${baseUrl}/api/game/geo-challenges/answer`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          sessionToken: 'some-token',
+          roundId: 'round-1',
+          selectedOptionIds: ['1', '2', '3', '4', '5'],
+        }),
+      });
+      expect(response.status).toBe(400);
+    } finally {
+      await new Promise<void>((resolve, reject) => {
+        server.close((error) => error ? reject(error) : resolve());
+      });
+    }
+  });
 });

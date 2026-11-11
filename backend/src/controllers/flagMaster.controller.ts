@@ -156,10 +156,10 @@ router.post('/start', authenticateJWT, async (req: AuthRequest, res: Response) =
   }
 });
 
-const answerSchema = z.object({
-  gameId: z.string().min(1),
-  questionId: z.string().min(1),
-  answer: z.string(),
+export const answerSchema = z.object({
+  gameId: z.string().min(1).max(100),
+  questionId: z.string().min(1).max(100),
+  answer: z.string().max(200),
   timeRemaining: z.number().min(0).max(config.game.timePerQuestion),
 });
 
@@ -170,7 +170,7 @@ const answerSchema = z.object({
  */
 router.post('/question-started', authenticateJWT, async (req: AuthRequest, res: Response) => {
   try {
-    const schema = z.object({ gameId: z.string().min(1), questionId: z.string().min(1) });
+    const schema = z.object({ gameId: z.string().min(1).max(100), questionId: z.string().min(1).max(100) });
     const parsed = schema.safeParse(req.body);
     if (!parsed.success) { res.status(400).json({ error: 'Datos inválidos' }); return; }
 
@@ -285,13 +285,13 @@ router.post('/answer', authenticateJWT, async (req: AuthRequest, res: Response) 
   }
 });
 
-const finishSchema = z.object({
-  gameId: z.string().min(1),
+export const finishSchema = z.object({
+  gameId: z.string().min(1).max(100),
   answers: z
     .array(
       z.object({
-        questionId: z.string().min(1),
-        answer: z.string(),
+        questionId: z.string().min(1).max(100),
+        answer: z.string().max(200),
         timeRemaining: z.number().min(0).max(config.game.timePerQuestion),
       })
     )

@@ -45,17 +45,17 @@ interface GeoChallengeSessionPayload {
   rounds: SessionRound[];
 }
 
-const answerSchema = z.object({
-  sessionToken: z.string().min(1),
-  roundId: z.string().min(1),
-  selectedOptionIds: z.array(z.string().min(1)).max(4),
+export const answerSchema = z.object({
+  sessionToken: z.string().min(1).max(32768),
+  roundId: z.string().min(1).max(100),
+  selectedOptionIds: z.array(z.string().min(1).max(100)).max(4),
 });
 
-const finishSchema = z.object({
-  sessionToken: z.string().min(1),
+export const finishSchema = z.object({
+  sessionToken: z.string().min(1).max(32768),
   answers: z.array(z.object({
-    roundId: z.string().min(1),
-    selectedOptionIds: z.array(z.string().min(1)).max(4),
+    roundId: z.string().min(1).max(100),
+    selectedOptionIds: z.array(z.string().min(1).max(100)).max(4),
   })).max(10).optional(),
 });
 
