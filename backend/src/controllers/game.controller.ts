@@ -84,13 +84,13 @@ const excludeIdsSchema = z.preprocess(
 
     return [];
   },
-  z.array(z.string())
+  z.array(z.string().max(100)).max(500)
 );
 
 const difficultySchema = z.enum(['EASY', 'MEDIUM', 'HARD']);
 
 const questionFiltersSchema = z.object({
-  continent: z.string().optional(),
+  continent: z.string().max(50).optional(),
   isInsular: z.preprocess((v) => v === 'true' || v === true, z.boolean()).optional(),
   isLandlocked: z.preprocess((v) => v === 'true' || v === true, z.boolean()).optional(),
   difficulty: difficultySchema.optional(),
@@ -112,17 +112,17 @@ export const startGameSchema = z.object({
   excludeIds: excludeIdsSchema.optional().default([]),
   excludeQuestionKeys: excludeIdsSchema.optional().default([]),
   // Filters
-  continent: z.string().optional(),
+  continent: z.string().max(50).optional(),
   isInsular: z.preprocess((v) => v === 'true' || v === true, z.boolean()).optional(),
   isLandlocked: z.preprocess((v) => v === 'true' || v === true, z.boolean()).optional(),
   difficulty: difficultySchema.optional(),
   acceptShortGame: z.preprocess((v) => v === 'true' || v === true, z.boolean()).optional(),
 });
 
-const answerSchema = z.object({
-  sessionId: z.string().optional(),
-  questionId: z.string(),
-  answer: z.string(),
+export const answerSchema = z.object({
+  sessionId: z.string().max(100).optional(),
+  questionId: z.string().min(1).max(100),
+  answer: z.string().max(200),
   timeRemaining: z.number().min(0).max(config.game.timePerQuestion),
   gameType: gameTypeSchema.optional().default('single'),
   combo: z.number().int().min(0).max(200).optional(),
@@ -143,12 +143,12 @@ const answerSchema = z.object({
     .optional(),
 });
 
-const finishGameSchema = z.object({
-  sessionId: z.string().min(1),
+export const finishGameSchema = z.object({
+  sessionId: z.string().min(1).max(100),
   answers: z.array(
     z.object({
-      questionId: z.string(),
-      answer: z.string(),
+      questionId: z.string().min(1).max(100),
+      answer: z.string().max(200),
       timeRemaining: z.number(),
       coordinates: z
         .object({
@@ -157,7 +157,7 @@ const finishGameSchema = z.object({
         })
         .optional(),
     })
-  ).optional(),
+  ).max(100).optional(),
   gameType: z.string().optional(),
   category: z.nativeEnum(Category).optional(),
 });
@@ -261,7 +261,7 @@ const flashStartSchema = z.object({
 const availabilitySchema = z.object({
   category: z.nativeEnum(Category).optional().default(Category.MIXED),
   questionCount: z.coerce.number().min(1).max(20).optional().default(config.game.questionsPerGame),
-  continent: z.string().optional(),
+  continent: z.string().max(50).optional(),
   isInsular: z.preprocess((v) => v === 'true' || v === true, z.boolean()).optional(),
   isLandlocked: z.preprocess((v) => v === 'true' || v === true, z.boolean()).optional(),
   difficulty: difficultySchema.optional(),
@@ -357,7 +357,7 @@ router.get('/flash/start', optionalAuth, async (req: AuthRequest, res: Response)
 router.post('/extend-session', optionalAuth, async (req: AuthRequest, res: Response) => {
   try {
     const schema = z.object({
-      sessionId: z.string().min(1),
+      sessionId: z.string().min(1).max(100),
     });
     const validation = schema.safeParse(req.body);
 
@@ -424,8 +424,8 @@ router.post('/extend-session', optionalAuth, async (req: AuthRequest, res: Respo
 router.post('/question-started', optionalAuth, async (req: AuthRequest, res: Response) => {
   try {
     const schema = z.object({
-      sessionId: z.string().min(1),
-      questionId: z.string().min(1),
+      sessionId: z.string().min(1).max(100),
+      questionId: z.string().min(1).max(100),
     });
     const validation = schema.safeParse(req.body);
 
@@ -583,8 +583,8 @@ router.post('/answer', optionalAuth, async (req: AuthRequest, res: Response) => 
 router.post('/mechanic', optionalAuth, async (req: AuthRequest, res: Response) => {
   try {
     const schema = z.object({
-      sessionId: z.string().min(1),
-      questionId: z.string().min(1),
+      sessionId: z.string().min(1).max(100),
+      questionId: z.string().min(1).max(100),
       mechanic: z.enum(['intel5050']),
     });
     const validation = schema.safeParse(req.body);
@@ -1220,10 +1220,10 @@ router.get('/daily', optionalAuth, async (req: AuthRequest, res: Response) => {
 router.post('/daily/answer', authenticateJWT, async (req: AuthRequest, res: Response) => {
   try {
     const schema = z.object({
-      questionId: z.string().min(1),
-      answer: z.string(),
-      dayKey: z.string().optional(),
-      clientDate: z.string().optional(),
+      questionId: z.string().min(1).max(100),
+      answer: z.string().max(200),
+      dayKey: z.string().max(20).optional(),
+      clientDate: z.string().max(20).optional(),
     });
     const parsed = schema.safeParse(req.body);
     if (!parsed.success) { res.status(400).json({ error: 'Datos inválidos' }); return; }
@@ -1322,9 +1322,9 @@ router.post('/daily/submit', authenticateJWT, async (req: AuthRequest, res: Resp
     }
 
     const parsed = z.object({
-      dayKey: z.string().optional(),
-      clientDate: z.string().optional(),
-      answers: z.array(z.object({ questionId: z.string(), answer: z.string() })).max(10).optional(),
+      dayKey: z.string().max(20).optional(),
+      clientDate: z.string().max(20).optional(),
+      answers: z.array(z.object({ questionId: z.string().min(1).max(100), answer: z.string().max(200) })).max(10).optional(),
     }).safeParse(req.body);
 
     if (!parsed.success) {

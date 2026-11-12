@@ -15,11 +15,11 @@ const normalizeCategory = (value: unknown) => {
 };
 
 export const createChallengeSchema = z.object({
-  categories: z.array(z.preprocess(normalizeCategory, z.nativeEnum(Category))).min(1),
+  categories: z.array(z.preprocess(normalizeCategory, z.nativeEnum(Category))).min(1).max(10),
   maxPlayers: z.coerce.number().int().min(2).max(8),
   answerTimeSeconds: z.coerce.number().int().refine((v) => [10, 20, 30].includes(v)),
   filters: z.object({
-    continent: z.string().optional(),
+    continent: z.string().max(50).optional(),
     isInsular: z.boolean().optional(),
     isLandlocked: z.boolean().optional(),
     difficulty: z.enum(['EASY', 'MEDIUM', 'HARD']).optional(),

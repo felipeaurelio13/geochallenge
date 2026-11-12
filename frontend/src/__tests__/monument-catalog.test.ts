@@ -19,9 +19,30 @@ describe('monuments catalog', () => {
       'schonbrunn-palace',
       'prambanan',
       'mezquita-cordoba',
+      'gyeongbokgung',
+      'hallgrimskirkja',
+      'windmills-of-kinderdijk',
     ]) {
       expect(getMonumentBySlug(slug), `${slug} should exist`).toBeDefined();
     }
+
+    const gyeongbok = getMonumentBySlug('gyeongbokgung');
+    expect(gyeongbok).toBeDefined();
+    expect(gyeongbok?.country).toBe('South Korea');
+    expect(gyeongbok?.continent).toBe('Asia');
+    expect(gyeongbok?.difficulty).toBe('EASY');
+
+    const hallgrim = getMonumentBySlug('hallgrimskirkja');
+    expect(hallgrim).toBeDefined();
+    expect(hallgrim?.country).toBe('Iceland');
+    expect(hallgrim?.continent).toBe('Europe');
+    expect(hallgrim?.difficulty).toBe('MEDIUM');
+
+    const windmills = getMonumentBySlug('windmills-of-kinderdijk');
+    expect(windmills).toBeDefined();
+    expect(windmills?.country).toBe('Netherlands');
+    expect(windmills?.continent).toBe('Europe');
+    expect(windmills?.difficulty).toBe('EASY');
 
     const bran = getMonumentBySlug('bran-castle');
     expect(bran).toBeDefined();
