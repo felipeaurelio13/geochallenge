@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { DailyTourDetails } from '../../types';
 import { getLocalizedCountryName } from '../../utils/countryNames';
 
@@ -8,6 +9,7 @@ interface DailyTourStripProps {
 }
 
 export function DailyTourStrip({ details, language, compact }: DailyTourStripProps) {
+  const { t } = useTranslation();
   if (!details || details.length === 0) return null;
 
   return (
@@ -15,6 +17,7 @@ export function DailyTourStrip({ details, language, compact }: DailyTourStripPro
       <div className="flex flex-wrap gap-1.5 justify-center">
         {details.map((d) => {
           const countryName = getLocalizedCountryName(d.countryCode, language, d.countryCode);
+          const status = d.isCorrect ? t('common.correct') : t('common.incorrect');
           return (
             <span
               key={d.questionId}
@@ -23,12 +26,12 @@ export function DailyTourStrip({ details, language, compact }: DailyTourStripPro
                   ? 'bg-success/15 text-success border border-success/30'
                   : 'bg-error/15 text-error border border-error/30'
               }`}
-              title={`${countryName} — ${d.isCorrect ? 'correcto' : 'incorrecto'}`}
+              title={`${countryName} — ${status}`}
             >
               <span aria-hidden="true">
                 {d.isCorrect ? '\u2713' : '\u2717'}
               </span>
-              <span className="sr-only">{countryName} — {d.isCorrect ? 'correcto' : 'incorrecto'}</span>
+              <span className="sr-only">{countryName} — {status}</span>
             </span>
           );
         })}

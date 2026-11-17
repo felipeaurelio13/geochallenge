@@ -2164,6 +2164,60 @@
         "sourceUrl": "https://commons.wikimedia.org/wiki/File:Gateway_of_India_Mumbai.jpg"
       },
       "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "golden-temple",
+      "name": {
+        "en": "Golden Temple",
+        "es": "Templo Dorado"
+      },
+      "country": "India",
+      "continent": "Asia",
+      "latitude": 31.62,
+      "longitude": 74.8765,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Golden_Temple%2C_Amritsar_01.jpg?width=400",
+      "attribution": {
+        "author": "Bernard Gagnon",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Golden_Temple,_Amritsar_01.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "grand-place-brussels",
+      "name": {
+        "en": "Grand-Place",
+        "es": "Grand-Place"
+      },
+      "country": "Belgium",
+      "continent": "Europe",
+      "latitude": 50.8467,
+      "longitude": 4.3525,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Grand-Place%2C_Brussels_-_panorama%2C_June_2018.jpg?width=400",
+      "attribution": {
+        "author": "Celuici",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Grand-Place,_Brussels_-_panorama,_June_2018.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "notre-dame-paris",
+      "name": {
+        "en": "Notre-Dame Cathedral",
+        "es": "Catedral de Notre-Dame"
+      },
+      "country": "France",
+      "continent": "Europe",
+      "latitude": 48.853,
+      "longitude": 2.3499,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Notre_Dame_Paris_front_facade_lower.jpg?width=400",
+      "attribution": {
+        "author": "Benh LIEU SONG",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Notre_Dame_Paris_front_facade_lower.jpg"
+      },
+      "difficulty": "EASY"
     }
   ]
 }

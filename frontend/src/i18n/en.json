@@ -937,7 +937,9 @@
     "clear": "Clear search",
     "skipToMainAction": "Skip to main actions",
     "skipToAnswerOptions": "Skip to answer options",
-    "search": "Search"
+    "search": "Search",
+    "correct": "Correct",
+    "incorrect": "Incorrect"
   },
   "geoChallenges": {
     "title": "Geo Challenges",
