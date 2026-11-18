@@ -2164,6 +2164,60 @@
         "sourceUrl": "https://commons.wikimedia.org/wiki/File:Gateway_of_India_Mumbai.jpg"
       },
       "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "wawel-castle",
+      "name": {
+        "en": "Wawel Castle",
+        "es": "Castillo de Wawel"
+      },
+      "country": "Poland",
+      "continent": "Europe",
+      "latitude": 50.054,
+      "longitude": 19.9354,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Krakow_-_Wawel_from_Vistula_-_4.jpg?width=400",
+      "attribution": {
+        "author": "Ingo Mehling",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Krakow_-_Wawel_from_Vistula_-_4.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "belem-tower",
+      "name": {
+        "en": "Belém Tower",
+        "es": "Torre de Belém"
+      },
+      "country": "Portugal",
+      "continent": "Europe",
+      "latitude": 38.6916,
+      "longitude": -9.216,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Torre_Bel%C3%A9m_April_2009-4a.jpg?width=400",
+      "attribution": {
+        "author": "Alvesgaspar",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Torre_Bel%C3%A9m_April_2009-4a.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "kinderdijk-windmills",
+      "name": {
+        "en": "Kinderdijk Windmills",
+        "es": "Molinos de Kinderdijk"
+      },
+      "country": "Netherlands",
+      "continent": "Europe",
+      "latitude": 51.8894,
+      "longitude": 4.6375,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Kinderdijk_windmills.jpg?width=400",
+      "attribution": {
+        "author": "Nachosan",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Kinderdijk_windmills.jpg"
+      },
+      "difficulty": "EASY"
     }
   ]
 }

@@ -10,7 +10,7 @@ import {
 
 describe('monuments catalog', () => {
   it('loads all monuments and contains newly added landmarks', () => {
-    expect(monuments.length).toBeGreaterThanOrEqual(120);
+    expect(monuments.length).toBeGreaterThanOrEqual(123);
 
     for (const slug of [
       'himeji-castle',
@@ -19,9 +19,30 @@ describe('monuments catalog', () => {
       'schonbrunn-palace',
       'prambanan',
       'mezquita-cordoba',
+      'wawel-castle',
+      'belem-tower',
+      'kinderdijk-windmills',
     ]) {
       expect(getMonumentBySlug(slug), `${slug} should exist`).toBeDefined();
     }
+
+    const wawel = getMonumentBySlug('wawel-castle');
+    expect(wawel).toBeDefined();
+    expect(wawel?.country).toBe('Poland');
+    expect(wawel?.continent).toBe('Europe');
+    expect(wawel?.difficulty).toBe('MEDIUM');
+
+    const belem = getMonumentBySlug('belem-tower');
+    expect(belem).toBeDefined();
+    expect(belem?.country).toBe('Portugal');
+    expect(belem?.continent).toBe('Europe');
+    expect(belem?.difficulty).toBe('EASY');
+
+    const kinderdijk = getMonumentBySlug('kinderdijk-windmills');
+    expect(kinderdijk).toBeDefined();
+    expect(kinderdijk?.country).toBe('Netherlands');
+    expect(kinderdijk?.continent).toBe('Europe');
+    expect(kinderdijk?.difficulty).toBe('EASY');
 
     const bran = getMonumentBySlug('bran-castle');
     expect(bran).toBeDefined();

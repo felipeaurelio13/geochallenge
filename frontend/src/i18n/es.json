@@ -937,7 +937,9 @@
     "clear": "Limpiar búsqueda",
     "skipToMainAction": "Ir a las acciones principales",
     "skipToAnswerOptions": "Saltar a las opciones de respuesta",
-    "search": "Buscar"
+    "search": "Buscar",
+    "correct": "Correcto",
+    "incorrect": "Incorrecto"
   },
   "geoChallenges": {
     "title": "GeoRetos",

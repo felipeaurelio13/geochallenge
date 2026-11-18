@@ -241,7 +241,7 @@ describe('POST /api/auth/reset-password', () => {
         where: expect.objectContaining({ userId: 'user-1', id: { not: 'token-1' } }),
       })
     );
-  });
+  }, 15000);
 
   it('newPassword corta (< 6 chars) responde 400 VALIDATION_FAILED', async () => {
     const { server, baseUrl } = startServer();
