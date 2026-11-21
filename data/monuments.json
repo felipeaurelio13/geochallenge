@@ -2164,6 +2164,60 @@
         "sourceUrl": "https://commons.wikimedia.org/wiki/File:Gateway_of_India_Mumbai.jpg"
       },
       "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "grand-place-brussels",
+      "name": {
+        "en": "Grand-Place",
+        "es": "Grand-Place de Bruselas"
+      },
+      "country": "Belgium",
+      "continent": "Europe",
+      "latitude": 50.8467,
+      "longitude": 4.3524,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Edificios%20en%20la%20Grand-Place%2C%20Bruselas%2C%20B%C3%A9lgica%2C%202021-12-15%2C%20DD%20184-186%20HDR.jpg?width=400",
+      "attribution": {
+        "author": "Diego Delso",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Edificios_en_la_Grand-Place,_Bruselas,_Bélgica,_2021-12-15,_DD_184-186_HDR.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "drottningholm-palace",
+      "name": {
+        "en": "Drottningholm Palace",
+        "es": "Palacio de Drottningholm"
+      },
+      "country": "Sweden",
+      "continent": "Europe",
+      "latitude": 59.3217,
+      "longitude": 17.8869,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Drottningholm%20Palace%20%28by%20Pudelek%29%201.jpg?width=400",
+      "attribution": {
+        "author": "Pudelek",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Drottningholm_Palace_(by_Pudelek)_1.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "kronborg-castle",
+      "name": {
+        "en": "Kronborg Castle",
+        "es": "Castillo de Kronborg"
+      },
+      "country": "Denmark",
+      "continent": "Europe",
+      "latitude": 56.039,
+      "longitude": 12.6219,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Kronborg_01.jpg?width=400",
+      "attribution": {
+        "author": "Holger Motzkau",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Kronborg_01.jpg"
+      },
+      "difficulty": "MEDIUM"
     }
   ]
 }
