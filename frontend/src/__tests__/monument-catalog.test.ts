@@ -10,7 +10,7 @@ import {
 
 describe('monuments catalog', () => {
   it('loads all monuments and contains newly added landmarks', () => {
-    expect(monuments.length).toBeGreaterThanOrEqual(120);
+    expect(monuments.length).toBeGreaterThanOrEqual(123);
 
     for (const slug of [
       'himeji-castle',
@@ -19,9 +19,30 @@ describe('monuments catalog', () => {
       'schonbrunn-palace',
       'prambanan',
       'mezquita-cordoba',
+      'kinderdijk-windmills',
+      'nyhavn-copenhagen',
+      'wawel-castle',
     ]) {
       expect(getMonumentBySlug(slug), `${slug} should exist`).toBeDefined();
     }
+
+    const kinderdijk = getMonumentBySlug('kinderdijk-windmills');
+    expect(kinderdijk).toBeDefined();
+    expect(kinderdijk?.country).toBe('Netherlands');
+    expect(kinderdijk?.continent).toBe('Europe');
+    expect(kinderdijk?.difficulty).toBe('EASY');
+
+    const nyhavn = getMonumentBySlug('nyhavn-copenhagen');
+    expect(nyhavn).toBeDefined();
+    expect(nyhavn?.country).toBe('Denmark');
+    expect(nyhavn?.continent).toBe('Europe');
+    expect(nyhavn?.difficulty).toBe('EASY');
+
+    const wawel = getMonumentBySlug('wawel-castle');
+    expect(wawel).toBeDefined();
+    expect(wawel?.country).toBe('Poland');
+    expect(wawel?.continent).toBe('Europe');
+    expect(wawel?.difficulty).toBe('MEDIUM');
 
     const bran = getMonumentBySlug('bran-castle');
     expect(bran).toBeDefined();
@@ -67,12 +88,22 @@ describe('monuments catalog', () => {
     const pamukkale = getMonumentByEnName('Pamukkale');
     expect(pamukkale?.slug).toBe('pamukkale');
 
+    const kinderdijk = getMonumentByEnName('kinderdijk windmills');
+    expect(kinderdijk?.slug).toBe('kinderdijk-windmills');
+
+    const wawel = getMonumentByEnName('wawel castle');
+    expect(wawel?.slug).toBe('wawel-castle');
+
     expect(getMonumentByEnName('')).toBeUndefined();
   });
 
   it('localizes monument names correctly with fallbacks', () => {
     expect(getLocalizedMonumentName('pena-palace', 'es')).toBe('Palacio da Pena');
     expect(getLocalizedMonumentName('pena-palace', 'en')).toBe('Pena Palace');
+    expect(getLocalizedMonumentName('kinderdijk-windmills', 'es')).toBe('Molinos de Kinderdijk');
+    expect(getLocalizedMonumentName('kinderdijk-windmills', 'en')).toBe('Kinderdijk Windmills');
+    expect(getLocalizedMonumentName('wawel-castle', 'es')).toBe('Castillo de Wawel');
+    expect(getLocalizedMonumentName('wawel-castle', 'en')).toBe('Wawel Castle');
     expect(getLocalizedMonumentName('unknown-slug', 'es')).toBeUndefined();
   });
 
