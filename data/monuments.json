@@ -2164,6 +2164,60 @@
         "sourceUrl": "https://commons.wikimedia.org/wiki/File:Gateway_of_India_Mumbai.jpg"
       },
       "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "gyeongbokgung-palace",
+      "name": {
+        "en": "Gyeongbokgung Palace",
+        "es": "Palacio Gyeongbokgung"
+      },
+      "country": "South Korea",
+      "continent": "Asia",
+      "latitude": 37.5796,
+      "longitude": 126.977,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Gyeonghoeru_%28Royal_Banquet_Hall%29_at_Gyeongbokgung_Palace%2C_Seoul.jpg?width=400",
+      "attribution": {
+        "author": "Frank Schulenburg",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Gyeonghoeru_(Royal_Banquet_Hall)_at_Gyeongbokgung_Palace,_Seoul.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "stockholm-city-hall",
+      "name": {
+        "en": "Stockholm City Hall",
+        "es": "Ayuntamiento de Estocolmo"
+      },
+      "country": "Sweden",
+      "continent": "Europe",
+      "latitude": 59.3275,
+      "longitude": 18.0544,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Stockholm_City_Hall_February_2014_02.jpg?width=400",
+      "attribution": {
+        "author": "Arild Vågen",
+        "license": "CC BY-SA 3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Stockholm_City_Hall_February_2014_02.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "suomenlinna",
+      "name": {
+        "en": "Suomenlinna Sea Fortress",
+        "es": "Fortaleza de Suomenlinna"
+      },
+      "country": "Finland",
+      "continent": "Europe",
+      "latitude": 60.1454,
+      "longitude": 24.9881,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Suomenlinna.jpg?width=400",
+      "attribution": {
+        "author": "Michal Pise",
+        "license": "CC BY 2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Suomenlinna.jpg"
+      },
+      "difficulty": "MEDIUM"
     }
   ]
 }

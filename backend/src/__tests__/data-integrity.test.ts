@@ -95,6 +95,13 @@ describe('data integrity', () => {
       expect(duplicates(monuments.map((m) => m.slug as string))).toEqual([]);
       expect(duplicates(monuments.map((m) => m.imageUrl as string))).toEqual([]);
     });
+
+    it('monuments.json includes newly added monuments (South Korea, Sweden, Finland)', () => {
+      const slugs = new Set(monuments.map((m) => m.slug as string));
+      expect(slugs.has('gyeongbokgung-palace')).toBe(true);
+      expect(slugs.has('stockholm-city-hall')).toBe(true);
+      expect(slugs.has('suomenlinna')).toBe(true);
+    });
   });
 
   describe('coordinate ranges', () => {

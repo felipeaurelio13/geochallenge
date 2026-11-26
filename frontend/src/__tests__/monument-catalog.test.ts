@@ -19,9 +19,30 @@ describe('monuments catalog', () => {
       'schonbrunn-palace',
       'prambanan',
       'mezquita-cordoba',
+      'gyeongbokgung-palace',
+      'stockholm-city-hall',
+      'suomenlinna',
     ]) {
       expect(getMonumentBySlug(slug), `${slug} should exist`).toBeDefined();
     }
+
+    const gyeong = getMonumentBySlug('gyeongbokgung-palace');
+    expect(gyeong).toBeDefined();
+    expect(gyeong?.country).toBe('South Korea');
+    expect(gyeong?.continent).toBe('Asia');
+    expect(gyeong?.difficulty).toBe('MEDIUM');
+
+    const stockholm = getMonumentBySlug('stockholm-city-hall');
+    expect(stockholm).toBeDefined();
+    expect(stockholm?.country).toBe('Sweden');
+    expect(stockholm?.continent).toBe('Europe');
+    expect(stockholm?.difficulty).toBe('MEDIUM');
+
+    const suomen = getMonumentBySlug('suomenlinna');
+    expect(suomen).toBeDefined();
+    expect(suomen?.country).toBe('Finland');
+    expect(suomen?.continent).toBe('Europe');
+    expect(suomen?.difficulty).toBe('MEDIUM');
 
     const bran = getMonumentBySlug('bran-castle');
     expect(bran).toBeDefined();
@@ -73,6 +94,12 @@ describe('monuments catalog', () => {
   it('localizes monument names correctly with fallbacks', () => {
     expect(getLocalizedMonumentName('pena-palace', 'es')).toBe('Palacio da Pena');
     expect(getLocalizedMonumentName('pena-palace', 'en')).toBe('Pena Palace');
+    expect(getLocalizedMonumentName('gyeongbokgung-palace', 'es')).toBe('Palacio Gyeongbokgung');
+    expect(getLocalizedMonumentName('gyeongbokgung-palace', 'en')).toBe('Gyeongbokgung Palace');
+    expect(getLocalizedMonumentName('stockholm-city-hall', 'es')).toBe('Ayuntamiento de Estocolmo');
+    expect(getLocalizedMonumentName('stockholm-city-hall', 'en')).toBe('Stockholm City Hall');
+    expect(getLocalizedMonumentName('suomenlinna', 'es')).toBe('Fortaleza de Suomenlinna');
+    expect(getLocalizedMonumentName('suomenlinna', 'en')).toBe('Suomenlinna Sea Fortress');
     expect(getLocalizedMonumentName('unknown-slug', 'es')).toBeUndefined();
   });
 
