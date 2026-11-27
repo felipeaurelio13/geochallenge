@@ -51,7 +51,7 @@ const cities = loadJson<{ cities: City[] }>('cities.json').cities;
 const monuments = loadJson<{ monuments: Monument[] }>('monuments.json').monuments;
 const catalog = loadJson<{ countries: CatalogCountry[] }>('country-catalog.v1.json').countries;
 const geoCatalog = loadJson<{ countries: GeoChallengeCountry[] }>(
-  'geo-challenge-catalog.v1.json'
+  'geo-challenge-catalog.v1.json',
 ).countries;
 
 const MAX_CAPITAL_DRIFT_KM = 50;
@@ -94,6 +94,13 @@ describe('data integrity', () => {
     it('monuments.json has no duplicate slugs or imageUrls', () => {
       expect(duplicates(monuments.map((m) => m.slug as string))).toEqual([]);
       expect(duplicates(monuments.map((m) => m.imageUrl as string))).toEqual([]);
+    });
+
+    it('monuments.json includes newly added landmarks (Malaysia, Belgium, South Korea)', () => {
+      const slugs = new Set(monuments.map((m) => m.slug));
+      expect(slugs.has('petronas-twin-towers')).toBe(true);
+      expect(slugs.has('atomium')).toBe(true);
+      expect(slugs.has('gyeongbokgung-palace')).toBe(true);
     });
   });
 

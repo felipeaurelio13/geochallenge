@@ -10,7 +10,7 @@ import {
 
 describe('monuments catalog', () => {
   it('loads all monuments and contains newly added landmarks', () => {
-    expect(monuments.length).toBeGreaterThanOrEqual(120);
+    expect(monuments.length).toBeGreaterThanOrEqual(123);
 
     for (const slug of [
       'himeji-castle',
@@ -19,9 +19,30 @@ describe('monuments catalog', () => {
       'schonbrunn-palace',
       'prambanan',
       'mezquita-cordoba',
+      'petronas-twin-towers',
+      'atomium',
+      'gyeongbokgung-palace',
     ]) {
       expect(getMonumentBySlug(slug), `${slug} should exist`).toBeDefined();
     }
+
+    const petronas = getMonumentBySlug('petronas-twin-towers');
+    expect(petronas).toBeDefined();
+    expect(petronas?.country).toBe('Malaysia');
+    expect(petronas?.continent).toBe('Asia');
+    expect(petronas?.difficulty).toBe('EASY');
+
+    const atomium = getMonumentBySlug('atomium');
+    expect(atomium).toBeDefined();
+    expect(atomium?.country).toBe('Belgium');
+    expect(atomium?.continent).toBe('Europe');
+    expect(atomium?.difficulty).toBe('MEDIUM');
+
+    const gyeongbokgung = getMonumentBySlug('gyeongbokgung-palace');
+    expect(gyeongbokgung).toBeDefined();
+    expect(gyeongbokgung?.country).toBe('South Korea');
+    expect(gyeongbokgung?.continent).toBe('Asia');
+    expect(gyeongbokgung?.difficulty).toBe('MEDIUM');
 
     const bran = getMonumentBySlug('bran-castle');
     expect(bran).toBeDefined();
@@ -73,6 +94,12 @@ describe('monuments catalog', () => {
   it('localizes monument names correctly with fallbacks', () => {
     expect(getLocalizedMonumentName('pena-palace', 'es')).toBe('Palacio da Pena');
     expect(getLocalizedMonumentName('pena-palace', 'en')).toBe('Pena Palace');
+    expect(getLocalizedMonumentName('petronas-twin-towers', 'es')).toBe('Torres Petronas');
+    expect(getLocalizedMonumentName('petronas-twin-towers', 'en')).toBe('Petronas Twin Towers');
+    expect(getLocalizedMonumentName('atomium', 'es')).toBe('Atomium');
+    expect(getLocalizedMonumentName('atomium', 'en')).toBe('Atomium');
+    expect(getLocalizedMonumentName('gyeongbokgung-palace', 'es')).toBe('Palacio Gyeongbokgung');
+    expect(getLocalizedMonumentName('gyeongbokgung-palace', 'en')).toBe('Gyeongbokgung Palace');
     expect(getLocalizedMonumentName('unknown-slug', 'es')).toBeUndefined();
   });
 
@@ -85,11 +112,15 @@ describe('monuments catalog', () => {
   });
 
   it('parses monument question data payload', () => {
-    expect(parseMonumentQuestionData(JSON.stringify({ slug: 'pena-palace', variant: 'identify' }))).toEqual({
+    expect(
+      parseMonumentQuestionData(JSON.stringify({ slug: 'pena-palace', variant: 'identify' })),
+    ).toEqual({
       slug: 'pena-palace',
       variant: 'identify',
     });
-    expect(parseMonumentQuestionData(JSON.stringify({ slug: 'preikestolen', variant: 'country' }))).toEqual({
+    expect(
+      parseMonumentQuestionData(JSON.stringify({ slug: 'preikestolen', variant: 'country' })),
+    ).toEqual({
       slug: 'preikestolen',
       variant: 'country',
     });

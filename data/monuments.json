@@ -2164,6 +2164,60 @@
         "sourceUrl": "https://commons.wikimedia.org/wiki/File:Gateway_of_India_Mumbai.jpg"
       },
       "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "petronas-twin-towers",
+      "name": {
+        "en": "Petronas Twin Towers",
+        "es": "Torres Petronas"
+      },
+      "country": "Malaysia",
+      "continent": "Asia",
+      "latitude": 3.1579,
+      "longitude": 101.7116,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Petronas%20Panorama%20II.jpg?width=400",
+      "attribution": {
+        "author": "Someformofhuman",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Petronas_Panorama_II.jpg"
+      },
+      "difficulty": "EASY"
+    },
+    {
+      "slug": "atomium",
+      "name": {
+        "en": "Atomium",
+        "es": "Atomium"
+      },
+      "country": "Belgium",
+      "continent": "Europe",
+      "latitude": 50.8949,
+      "longitude": 4.3415,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Atomium%2C%20Bruselas%2C%20B%C3%A9lgica%2C%202021-12-15%2C%20DD%20148-150%20HDR.jpg?width=400",
+      "attribution": {
+        "author": "Diego Delso",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Atomium,_Bruselas,_B%C3%A9lgica,_2021-12-15,_DD_148-150_HDR.jpg"
+      },
+      "difficulty": "MEDIUM"
+    },
+    {
+      "slug": "gyeongbokgung-palace",
+      "name": {
+        "en": "Gyeongbokgung Palace",
+        "es": "Palacio Gyeongbokgung"
+      },
+      "country": "South Korea",
+      "continent": "Asia",
+      "latitude": 37.5796,
+      "longitude": 126.977,
+      "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Gyeonghoeru_%28Royal_Banquet_Hall%29_at_Gyeongbokgung_Palace%2C_Seoul.jpg?width=400",
+      "attribution": {
+        "author": "Frank Schulenburg",
+        "license": "CC BY-SA 4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Gyeonghoeru_(Royal_Banquet_Hall)_at_Gyeongbokgung_Palace,_Seoul.jpg"
+      },
+      "difficulty": "MEDIUM"
     }
   ]
 }
